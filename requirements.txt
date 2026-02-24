@@ -1,0 +1,51 @@
+# ============================================================
+# Phase 1: Data - Ingestion, Preprocessing, and Chunking
+# ============================================================
+
+# Core
+pydantic>=2.0.0
+pyyaml>=6.0.0
+python-dotenv>=1.0.0
+
+# NLP
+tiktoken>=0.5.0
+nltk>=3.8.0
+sentence-transformers>=2.7.0
+
+# Web scraping / Parsing
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+markdownify>=0.12.0
+gitpython>=3.1.40
+
+# Utilities
+rich>=13.0.0
+tqdm>=4.66.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Jupyter + Visualization
+jupyterlab>=4.0.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Hashing for deduplication
+datasketch>=1.6.0
+
+# ============================================================
+# Phase 2: Embedding, Retrieval & Re-ranking
+# ============================================================
+
+# Vector search
+faiss-cpu>=1.7.4
+
+# Lexical search
+rank-bm25>=0.2.2
+
+# ML utilities
+scikit-learn>=1.3.0
+torch>=2.0.0
+
+# Optional: InstructorEmbedding (for instructor-large model)
+# InstructorEmbedding>=1.0.1

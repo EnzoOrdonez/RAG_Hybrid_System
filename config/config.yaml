@@ -1,0 +1,140 @@
+# ============================================================
+# MAIN CONFIGURATION - Hybrid RAG System
+# Tesis: Diseno y Validacion de un Modelo Semantico Hibrido
+# Universidad de Lima - Ingenieria de Sistemas
+# ============================================================
+
+project:
+  name: "hybrid-rag-system"
+  version: "0.1.0"
+  author: "Enzo Ordonez Flores"
+  random_seed: 42
+  log_level: "INFO"
+
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  chunks_data: "data/chunks"
+  indices_data: "data/indices"
+  embeddings_data: "data/embeddings"
+  evaluation_data: "data/evaluation"
+  figures: "output/figures"
+  tables: "output/tables"
+  reports: "output/reports"
+  logs: "logs"
+
+ingestion:
+  max_depth: 3
+  rate_limit_seconds: 2.0
+  request_timeout: 30
+  max_retries: 3
+  retry_backoff_factor: 2.0
+  user_agent: "Mozilla/5.0 (compatible; academic-research-bot)"
+  accept_language: "en-US,en;q=0.9"
+  github_clone_depth: 1
+
+preprocessing:
+  normalize_unicode: true
+  max_consecutive_newlines: 2
+  remove_navigation: true
+  remove_boilerplate: true
+  min_paragraph_length: 20
+
+chunking:
+  sizes_to_evaluate: [300, 500, 700]
+  overlap: 50
+  min_chunk_size: 50
+  max_chunk_size: 1000
+  tokenizer: "cl100k_base"
+
+  strategies:
+    fixed:
+      description: "Baseline - tamano fijo"
+    recursive:
+      separators: ["\n\n\n", "\n\n", "\n", ". ", " "]
+      description: "Recursivo por separadores jerarquicos"
+    semantic:
+      similarity_threshold: 0.5
+      embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+      description: "Corta donde la similitud semantica cae"
+    hierarchical:
+      respect_headings: true
+      max_depth: 4
+      description: "Respeta estructura de headings"
+    adaptive:
+      base_strategy: "hierarchical"
+      fallback_strategy: "semantic"
+      preserve_code_blocks: true
+      prepend_heading_path: true
+      description: "Propuesto en la tesis: jerarquico + semantico"
+
+embedding:
+  default_model: "bge-large"
+  batch_size: 256
+  cache_dir: "data/embeddings"
+  models:
+    all-MiniLM-L6-v2:
+      dimension: 384
+      description: "Lightweight baseline"
+    bge-large:
+      dimension: 1024
+      description: "State-of-the-art (primary)"
+    e5-large:
+      dimension: 1024
+      description: "Competitive alternative"
+    instructor-large:
+      dimension: 768
+      description: "Task-specific"
+
+retrieval:
+  bm25:
+    k1: 1.2
+    b: 0.75
+    top_k: 50
+
+  dense:
+    model: "bge-large"
+    top_k: 50
+    normalize: true
+
+  hybrid:
+    fusion_method: "rrf"
+    alpha: 0.5
+    rrf_k: 60
+    top_k_candidates: 50
+
+    # Grid search for experimentation
+    alpha_values: [0.3, 0.5, 0.7]
+    fusion_methods: ["linear", "rrf"]
+
+  query_expansion:
+    enabled: true
+    use_terminology_mapping: true
+    expand_cross_cloud: true
+
+  top_k_values_to_evaluate: [5, 10, 20]
+
+reranking:
+  default_model: "ms-marco-mini-6"
+  batch_size: 32
+  multidimensional:
+    weights:
+      cross_encoder: 0.6
+      recency: 0.1
+      source_quality: 0.1
+      diversity: 0.2
+    mmr_lambda: 0.7
+
+deduplication:
+  intra_document:
+    enabled: true
+    method: "exact_hash"
+  intra_provider:
+    enabled: true
+    method: "minhash"
+    similarity_threshold: 0.9
+    num_perm: 128
+  cross_provider:
+    enabled: true
+    mark_only: true
+    similarity_threshold: 0.85

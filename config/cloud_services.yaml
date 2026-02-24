@@ -1,0 +1,150 @@
+# ============================================================
+# CORPUS DEL SISTEMA RAG - 5 Fuentes Documentales
+# ============================================================
+# Segun diseno metodologico de la tesis:
+# "Documentacion publica de AWS, Azure, GCP, K8s y CNCF"
+# ============================================================
+
+aws:
+  source_type: "github_markdown"
+  base_url: "https://docs.aws.amazon.com"
+  github_org: "https://github.com/awsdocs"
+  services:
+    compute:
+      - name: "EC2"
+        github_repo: "amazon-ec2-user-guide"
+        docs_url: "https://docs.aws.amazon.com/ec2/"
+      - name: "Lambda"
+        github_repo: "aws-lambda-developer-guide"
+        docs_url: "https://docs.aws.amazon.com/lambda/"
+      - name: "ECS"
+        github_repo: "amazon-ecs-developer-guide"
+        docs_url: "https://docs.aws.amazon.com/ecs/"
+      - name: "EKS"
+        github_repo: "amazon-eks-user-guide"
+        docs_url: "https://docs.aws.amazon.com/eks/"
+    storage:
+      - name: "S3"
+        github_repo: "amazon-s3-userguide"
+        docs_url: "https://docs.aws.amazon.com/s3/"
+      - name: "DynamoDB"
+        github_repo: "amazon-dynamodb-developer-guide"
+        docs_url: "https://docs.aws.amazon.com/dynamodb/"
+      - name: "RDS"
+        github_repo: "amazon-rds-user-guide"
+        docs_url: "https://docs.aws.amazon.com/rds/"
+    networking:
+      - name: "VPC"
+        github_repo: "amazon-vpc-user-guide"
+        docs_url: "https://docs.aws.amazon.com/vpc/"
+      - name: "Route 53"
+        github_repo: "amazon-route53-docs"
+        docs_url: "https://docs.aws.amazon.com/route53/"
+    ai_ml:
+      - name: "SageMaker"
+        github_repo: "amazon-sagemaker-developer-guide"
+        docs_url: "https://docs.aws.amazon.com/sagemaker/"
+      - name: "Bedrock"
+        docs_url: "https://docs.aws.amazon.com/bedrock/"
+    security:
+      - name: "IAM"
+        github_repo: "iam-user-guide"
+        docs_url: "https://docs.aws.amazon.com/iam/"
+
+azure:
+  source_type: "github_markdown"
+  base_url: "https://learn.microsoft.com/en-us/azure/"
+  github_repo: "https://github.com/MicrosoftDocs/azure-docs"
+  services:
+    compute:
+      - name: "Virtual Machines"
+        github_path: "articles/virtual-machines/"
+        docs_url: "https://learn.microsoft.com/en-us/azure/virtual-machines/"
+      - name: "Azure Functions"
+        github_path: "articles/azure-functions/"
+        docs_url: "https://learn.microsoft.com/en-us/azure/azure-functions/"
+      - name: "AKS"
+        github_path: "articles/aks/"
+        docs_url: "https://learn.microsoft.com/en-us/azure/aks/"
+    storage:
+      - name: "Blob Storage"
+        github_path: "articles/storage/blobs/"
+        docs_url: "https://learn.microsoft.com/en-us/azure/storage/blobs/"
+      - name: "Cosmos DB"
+        github_path: "articles/cosmos-db/"
+        docs_url: "https://learn.microsoft.com/en-us/azure/cosmos-db/"
+      - name: "SQL Database"
+        github_path: "articles/azure-sql/"
+        docs_url: "https://learn.microsoft.com/en-us/azure/azure-sql/"
+    networking:
+      - name: "Virtual Network"
+        github_path: "articles/virtual-network/"
+        docs_url: "https://learn.microsoft.com/en-us/azure/virtual-network/"
+    ai_ml:
+      - name: "Azure OpenAI"
+        github_path: "articles/ai-services/openai/"
+        docs_url: "https://learn.microsoft.com/en-us/azure/ai-services/openai/"
+      - name: "Azure ML"
+        github_path: "articles/machine-learning/"
+        docs_url: "https://learn.microsoft.com/en-us/azure/machine-learning/"
+    security:
+      - name: "Entra ID"
+        github_path: "articles/active-directory/"
+        docs_url: "https://learn.microsoft.com/en-us/entra/identity/"
+
+gcp:
+  source_type: "web_scraping"
+  base_url: "https://cloud.google.com"
+  services:
+    compute:
+      - name: "Compute Engine"
+        docs_url: "https://cloud.google.com/compute/docs"
+      - name: "Cloud Functions"
+        docs_url: "https://cloud.google.com/functions/docs"
+      - name: "GKE"
+        docs_url: "https://cloud.google.com/kubernetes-engine/docs"
+      - name: "Cloud Run"
+        docs_url: "https://cloud.google.com/run/docs"
+    storage:
+      - name: "Cloud Storage"
+        docs_url: "https://cloud.google.com/storage/docs"
+      - name: "BigQuery"
+        docs_url: "https://cloud.google.com/bigquery/docs"
+      - name: "Firestore"
+        docs_url: "https://cloud.google.com/firestore/docs"
+    networking:
+      - name: "VPC"
+        docs_url: "https://cloud.google.com/vpc/docs"
+    ai_ml:
+      - name: "Vertex AI"
+        docs_url: "https://cloud.google.com/vertex-ai/docs"
+    security:
+      - name: "IAM"
+        docs_url: "https://cloud.google.com/iam/docs"
+
+kubernetes:
+  source_type: "github_markdown"
+  base_url: "https://kubernetes.io/docs"
+  github_repo: "https://github.com/kubernetes/website"
+  sections:
+    - name: "Concepts"
+      github_path: "content/en/docs/concepts/"
+      docs_url: "https://kubernetes.io/docs/concepts/"
+    - name: "Tasks"
+      github_path: "content/en/docs/tasks/"
+      docs_url: "https://kubernetes.io/docs/tasks/"
+    - name: "Reference"
+      github_path: "content/en/docs/reference/"
+      docs_url: "https://kubernetes.io/docs/reference/"
+    - name: "Tutorials"
+      github_path: "content/en/docs/tutorials/"
+      docs_url: "https://kubernetes.io/docs/tutorials/"
+
+cncf:
+  source_type: "github_markdown"
+  base_url: "https://glossary.cncf.io"
+  github_repo: "https://github.com/cncf/glossary"
+  sections:
+    - name: "Glossary Terms"
+      github_path: "content/en/"
+      docs_url: "https://glossary.cncf.io/"

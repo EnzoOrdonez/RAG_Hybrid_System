@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python -m pip:*)",
+      "Bash(python scripts/download_docs.py:*)",
+      "Bash(python run.py chunk --input data/processed --output data/chunks --strategy fixed recursive hierarchical --sizes 500)",
+      "Bash(python run.py:*)",
+      "Bash(python scripts/build_index.py:*)",
+      "Bash(python:*)",
+      "Bash(nvidia-smi:*)",
+      "Bash(HF_HUB_OFFLINE=1 python scripts/build_index.py:*)"
+    ]
+  }
+}

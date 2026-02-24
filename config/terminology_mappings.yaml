@@ -1,0 +1,175 @@
+# ============================================================
+# TERMINOLOGY MAPPINGS - Cross-Cloud Service Equivalences
+# ============================================================
+# Used by terminology_normalizer.py for query expansion
+# and cross-provider document linking.
+# ============================================================
+
+compute:
+  virtual_machines:
+    aws: ["EC2", "Elastic Compute Cloud", "Amazon EC2"]
+    azure: ["Virtual Machines", "Azure VM", "Azure Virtual Machines"]
+    gcp: ["Compute Engine", "GCE", "Google Compute Engine"]
+    generic: ["virtual machine", "VM", "instance", "server"]
+
+  serverless_functions:
+    aws: ["Lambda", "AWS Lambda"]
+    azure: ["Azure Functions"]
+    gcp: ["Cloud Functions", "Google Cloud Functions"]
+    generic: ["serverless", "FaaS", "function as a service"]
+
+  container_orchestration:
+    aws: ["ECS", "Elastic Container Service"]
+    azure: ["Container Apps", "Azure Container Apps"]
+    gcp: ["Cloud Run"]
+    generic: ["container orchestration", "container service"]
+
+  managed_kubernetes:
+    aws: ["EKS", "Elastic Kubernetes Service", "Amazon EKS"]
+    azure: ["AKS", "Azure Kubernetes Service"]
+    gcp: ["GKE", "Google Kubernetes Engine"]
+    generic: ["managed Kubernetes", "Kubernetes as a service"]
+
+  container_registry:
+    aws: ["ECR", "Elastic Container Registry"]
+    azure: ["ACR", "Azure Container Registry"]
+    gcp: ["Artifact Registry", "Container Registry"]
+    generic: ["container registry", "image registry"]
+
+  serverless_containers:
+    aws: ["Fargate", "ECS Fargate"]
+    azure: ["Container Instances", "ACI"]
+    gcp: ["Cloud Run"]
+    generic: ["serverless containers"]
+
+storage:
+  object_storage:
+    aws: ["S3", "Simple Storage Service", "Amazon S3"]
+    azure: ["Blob Storage", "Azure Blob Storage", "Azure Blob"]
+    gcp: ["Cloud Storage", "GCS", "Google Cloud Storage"]
+    generic: ["object storage", "blob storage", "bucket"]
+
+  nosql_database:
+    aws: ["DynamoDB", "Amazon DynamoDB"]
+    azure: ["Cosmos DB", "Azure Cosmos DB"]
+    gcp: ["Firestore", "Cloud Firestore", "Bigtable"]
+    generic: ["NoSQL", "document database", "key-value store"]
+
+  relational_database:
+    aws: ["RDS", "Amazon RDS", "Aurora", "Amazon Aurora"]
+    azure: ["SQL Database", "Azure SQL", "Azure SQL Database"]
+    gcp: ["Cloud SQL", "AlloyDB"]
+    generic: ["relational database", "SQL database", "RDBMS", "managed database"]
+
+  data_warehouse:
+    aws: ["Redshift", "Amazon Redshift"]
+    azure: ["Synapse Analytics", "Azure Synapse"]
+    gcp: ["BigQuery", "Google BigQuery"]
+    generic: ["data warehouse", "analytics database", "OLAP"]
+
+networking:
+  virtual_network:
+    aws: ["VPC", "Virtual Private Cloud", "Amazon VPC"]
+    azure: ["VNet", "Virtual Network", "Azure Virtual Network"]
+    gcp: ["VPC", "VPC Network", "Google VPC"]
+    generic: ["virtual network", "VPC", "private network"]
+
+  dns_service:
+    aws: ["Route 53", "Amazon Route 53"]
+    azure: ["Azure DNS"]
+    gcp: ["Cloud DNS"]
+    generic: ["DNS", "domain name service", "DNS management"]
+
+  load_balancer:
+    aws: ["ELB", "ALB", "NLB", "Elastic Load Balancer", "Application Load Balancer", "Network Load Balancer"]
+    azure: ["Azure Load Balancer", "Application Gateway"]
+    gcp: ["Cloud Load Balancing"]
+    generic: ["load balancer", "load balancing"]
+
+  cdn:
+    aws: ["CloudFront", "Amazon CloudFront"]
+    azure: ["Azure CDN", "Azure Front Door"]
+    gcp: ["Cloud CDN"]
+    generic: ["CDN", "content delivery network"]
+
+ai_ml:
+  ml_platform:
+    aws: ["SageMaker", "Amazon SageMaker"]
+    azure: ["Azure ML", "Azure Machine Learning"]
+    gcp: ["Vertex AI", "Google Vertex AI"]
+    generic: ["ML platform", "machine learning platform"]
+
+  llm_service:
+    aws: ["Bedrock", "Amazon Bedrock"]
+    azure: ["Azure OpenAI", "Azure OpenAI Service"]
+    gcp: ["Vertex AI", "Gemini API"]
+    generic: ["LLM service", "generative AI", "foundation model"]
+
+security:
+  identity_management:
+    aws: ["IAM", "AWS IAM", "Identity and Access Management"]
+    azure: ["Entra ID", "Azure AD", "Azure Active Directory", "Microsoft Entra ID"]
+    gcp: ["IAM", "Cloud IAM", "Google IAM"]
+    generic: ["IAM", "identity management", "access control", "authentication"]
+
+  secrets_management:
+    aws: ["Secrets Manager", "AWS Secrets Manager", "Parameter Store"]
+    azure: ["Key Vault", "Azure Key Vault"]
+    gcp: ["Secret Manager"]
+    generic: ["secrets management", "secret store", "vault"]
+
+  encryption:
+    aws: ["KMS", "AWS KMS", "Key Management Service"]
+    azure: ["Azure Key Vault"]
+    gcp: ["Cloud KMS"]
+    generic: ["KMS", "key management", "encryption"]
+
+monitoring:
+  monitoring:
+    aws: ["CloudWatch", "Amazon CloudWatch"]
+    azure: ["Azure Monitor", "Application Insights"]
+    gcp: ["Cloud Monitoring", "Stackdriver"]
+    generic: ["monitoring", "observability", "metrics"]
+
+  logging:
+    aws: ["CloudTrail", "CloudWatch Logs"]
+    azure: ["Azure Monitor Logs", "Log Analytics"]
+    gcp: ["Cloud Logging", "Stackdriver Logging"]
+    generic: ["logging", "audit logs", "log management"]
+
+# Acronym expansions for detection
+acronyms:
+  EC2: "Elastic Compute Cloud"
+  S3: "Simple Storage Service"
+  VPC: "Virtual Private Cloud"
+  IAM: "Identity and Access Management"
+  ECS: "Elastic Container Service"
+  EKS: "Elastic Kubernetes Service"
+  RDS: "Relational Database Service"
+  ALB: "Application Load Balancer"
+  NLB: "Network Load Balancer"
+  ELB: "Elastic Load Balancer"
+  ECR: "Elastic Container Registry"
+  KMS: "Key Management Service"
+  AKS: "Azure Kubernetes Service"
+  ACR: "Azure Container Registry"
+  ACI: "Azure Container Instances"
+  GKE: "Google Kubernetes Engine"
+  GCE: "Google Compute Engine"
+  GCS: "Google Cloud Storage"
+  CDN: "Content Delivery Network"
+  DNS: "Domain Name System"
+  VM: "Virtual Machine"
+  K8s: "Kubernetes"
+  CNCF: "Cloud Native Computing Foundation"
+  RBAC: "Role-Based Access Control"
+  CIDR: "Classless Inter-Domain Routing"
+  TLS: "Transport Layer Security"
+  SSL: "Secure Sockets Layer"
+  API: "Application Programming Interface"
+  SDK: "Software Development Kit"
+  CLI: "Command Line Interface"
+  YAML: "YAML Ain't Markup Language"
+  JSON: "JavaScript Object Notation"
+  REST: "Representational State Transfer"
+  gRPC: "gRPC Remote Procedure Call"

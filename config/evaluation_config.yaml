@@ -1,0 +1,95 @@
+# ============================================================
+# EVALUATION CONFIG - Experimental Design
+# ============================================================
+# Within-subjects design with 3 systems:
+#   Control 1: RAG puramente lexico (BM25)
+#   Control 2: RAG puramente semantico (embeddings densos)
+#   Experimental: RAG hibrido (lexico + semantico + reranking)
+# ============================================================
+
+experiment:
+  name: "hybrid_rag_evaluation"
+  design: "within_subjects"
+  random_seed: 42
+
+systems:
+  control_lexical:
+    name: "BM25 Baseline"
+    retriever: "bm25"
+    reranker: null
+    description: "RAG puramente lexico con BM25"
+
+  control_semantic:
+    name: "Semantic Baseline"
+    retriever: "dense"
+    reranker: null
+    description: "RAG puramente semantico con embeddings densos"
+
+  experimental:
+    name: "Hybrid RAG"
+    retriever: "hybrid"
+    reranker: "cross_encoder"
+    preprocessing: "adaptive"
+    description: "RAG hibrido con preprocesamiento y reranking"
+
+# Success criteria from thesis
+success_criteria:
+  retrieval:
+    recall_at_5:
+      vs_lexical: 0.15    # >= 15% improvement over BM25
+      vs_semantic: 0.10   # >= 10% improvement over dense
+    mrr:
+      vs_lexical: 0.20    # >= 20% improvement
+      vs_semantic: 0.20   # >= 20% improvement
+    ndcg_at_10:
+      vs_lexical: 0.12    # >= 12% improvement
+      vs_semantic: 0.12   # >= 12% improvement
+
+  generation:
+    exact_match:
+      improvement: 0.10   # >= 10% improvement
+    f1_score:
+      improvement: 0.15   # >= 15% improvement
+    hallucination_rate:
+      max_ratio: 0.50     # <= 50% of baselines
+
+  performance:
+    latency_p95:
+      max_ratio: 2.0      # <= 2x of fastest baseline
+
+  usability:
+    sus_score:
+      minimum: 70
+    likert_utility:
+      minimum: 4.0        # out of 5.0
+
+metrics:
+  retrieval:
+    - "recall@5"
+    - "recall@10"
+    - "mrr"
+    - "ndcg@5"
+    - "ndcg@10"
+    - "precision@5"
+    - "precision@10"
+    - "map"
+
+  generation:
+    - "exact_match"
+    - "f1_score"
+    - "bleu"
+    - "rouge_l"
+    - "hallucination_rate"
+    - "faithfulness"
+
+  performance:
+    - "latency_p50"
+    - "latency_p95"
+    - "latency_p99"
+    - "throughput"
+
+  usability:
+    - "sus_score"
+    - "likert_utility"
+    - "likert_relevance"
+    - "likert_completeness"

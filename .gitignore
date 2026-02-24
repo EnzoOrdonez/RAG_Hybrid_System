@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Data (too large for git)
+data/raw/
+data/processed/
+data/chunks/
+data/indices/
+data/embeddings/
+data/evaluation/results/
+
+# Logs
+logs/*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Output (regenerable)
+output/figures/*.png
+output/tables/*.csv
+
+# Repos cloned during crawling
+data/raw/*/_repo/
+data/raw/*/_zip/
