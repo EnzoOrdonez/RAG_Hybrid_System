@@ -1,3 +1,4 @@
+HEAD
 # Hybrid RAG System for Cloud Documentation
 
 **Thesis:** *Diseno y Validacion de un Modelo Semantico Hibrido para Optimizar Sistemas RAG sobre Documentacion Tecnica Cloud en AWS, Azure y GCP*
@@ -106,3 +107,6 @@ python scripts/download_docs.py --stats
 - Chunk sizes: 300, 500, 700 tokens
 - Overlap: 50 tokens
 - Random seed: 42
+
+# RAG_Hybrid_System
+636d642feb203874d00b9fa450461ff8989e7f95
