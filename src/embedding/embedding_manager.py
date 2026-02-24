@@ -174,11 +174,13 @@ class EmbeddingManager:
 
         for i in iterator:
             batch = prefixed[i : i + self.batch_size]
+            # Use smaller encode batch for GPU memory efficiency
+            encode_batch = 32 if self.device == "cuda" else self.batch_size
             batch_embeddings = self.model.encode(
                 batch,
                 normalize_embeddings=True,
                 show_progress_bar=False,
-                batch_size=min(len(batch), self.batch_size),
+                batch_size=min(len(batch), encode_batch),
             )
             all_embeddings.append(batch_embeddings)
 

@@ -159,9 +159,8 @@ def build_bm25_only(args, config):
     # Stats
     stats = bm25_index.get_stats()
     console.print(f"\n[bold]BM25 Stats:[/bold]")
-    console.print(f"  Documents: {stats['num_documents']}")
+    console.print(f"  Documents: {stats['total_documents']}")
     console.print(f"  Avg doc length: {stats['avg_doc_length']:.1f} tokens")
-    console.print(f"  Vocabulary size: {stats['vocabulary_size']}")
 
 
 def build_dense_only(args, config):
@@ -247,9 +246,8 @@ def show_index_stats(hybrid_index=None, embedding_manager=None, args=None):
         table = Table(title="BM25 (Lexical) Index")
         table.add_column("Property", style="cyan")
         table.add_column("Value", style="green")
-        table.add_row("Documents", str(bm25_stats.get("num_documents", "N/A")))
+        table.add_row("Documents", str(bm25_stats.get("total_documents", "N/A")))
         table.add_row("Avg doc length", f"{bm25_stats.get('avg_doc_length', 0):.1f} tokens")
-        table.add_row("Vocabulary size", str(bm25_stats.get("vocabulary_size", "N/A")))
         console.print(table)
 
         console.print(f"  Chunk map size: {stats.get('chunk_map_size', 0)}")
