@@ -1,35 +1,11 @@
 {
   "providers": {
-    "aws": {
-      "documents": 22,
-      "total_words": 8564,
-      "with_code": 1,
-      "with_tables": 0
-    },
     "azure": {
-      "documents": 355,
-      "total_words": 494867,
-      "with_code": 266,
-      "with_tables": 204
-    },
-    "gcp": {
-      "documents": 240,
-      "total_words": 635137,
-      "with_code": 110,
-      "with_tables": 122
-    },
-    "kubernetes": {
-      "documents": 1162,
-      "total_words": 996460,
-      "with_code": 571,
-      "with_tables": 44
-    },
-    "cncf": {
-      "documents": 3,
-      "total_words": 549,
-      "with_code": 0,
-      "with_tables": 0
+      "documents": 812,
+      "total_words": 1010676,
+      "with_code": 509,
+      "with_tables": 355
     }
   },
-  "total_documents": 1782
+  "total_documents": 812
 }
