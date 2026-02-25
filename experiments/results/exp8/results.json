@@ -1,0 +1,597 @@
+{
+  "experiment_id": "exp8",
+  "name": "End-to-End System Comparison",
+  "description": "Compare the 3 thesis systems: Lexical baseline, Semantic baseline, Proposed hybrid",
+  "hypothesis": "Proposed hybrid outperforms both baselines by >= 15% NDCG@5 and >= 10% faithfulness",
+  "timestamp": "2026-02-25T16:24:47.905380",
+  "configs": {
+    "RAG Lexico (BM25)": {
+      "total_queries": 5,
+      "errors": 0,
+      "results": [
+        {
+          "query_id": "q001",
+          "config_name": "RAG Lexico (BM25)",
+          "question": "What is AWS ECS and what are its main features?",
+          "answer": "AWS ECS stands for Amazon Elastic Container Service, which is a container orchestration service provided by AWS.\n\nAccording to the documentation, the main features of AWS ECS include:\n\n* Ability to opt in or out of specific features at the account-level or for a specific user or role [Source: aws/ECS/Account settings]\n* Support for identity-based policies, policy actions, policy condition keys, ABAC (tags in policies), temporary credentials, principal permissions, service roles, and service-linked roles [Source: aws/ECS/How Amazon Elastic Container Service works with IAM]\n\nAdditionally, AWS ECS provides a managed IAM policy called `AmazonECS_FullAccess` that grants administrative access to Amazon ECS resources and allows access to all of Amazon ECS features available in the AWS Management Console [Source: aws/ECS/AWS managed policies for Amazon Elastic Container Service].\n\nIt's worth noting that AWS ECS also supports running tasks on Linux instances, with options including Amazon Linux and Bottlerocket operating systems [Source: aws/ECS/Linux instances].",
+          "retrieved_ids": [
+            "55bc7f76-64a9-414b-8cd9-eedcd39c484a",
+            "a7f54720-559f-49d9-89f5-4f3299ef3115",
+            "dbd43975-61b3-459f-a19a-d1b5feba8496",
+            "6608e789-cc2f-421a-a50b-864481d52e23",
+            "46cf266c-b129-49f0-b42f-6d492c6ea28e"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 1.0,
+            "hallucination_rate": 0.0,
+            "suggested_rubric": 5,
+            "total_claims": 2,
+            "supported_claims": 2,
+            "contradicted_claims": 0,
+            "unsupported_claims": 0,
+            "method": "nli",
+            "processing_time_ms": 4251.3
+          },
+          "latency": {
+            "query_processing_ms": 0.000700005330145359,
+            "retrieval_ms": 65.71739999344572,
+            "reranking_ms": 0.0023999891709536314,
+            "generation_ms": 0.1343000039923936,
+            "hallucination_check_ms": 15751.316299996688,
+            "total_ms": 15817.171099988627,
+            "benchmark_total_ms": 20084.22820000851
+          },
+          "error": null,
+          "timestamp": "2026-02-25T15:58:51.570050"
+        },
+        {
+          "query_id": "q002",
+          "config_name": "RAG Lexico (BM25)",
+          "question": "How to deploy a containerized application on AWS EC2?",
+          "answer": "Based on the provided documentation, I cannot find sufficient information to fully answer this question regarding deploying a containerized application directly on AWS EC2.\n\nHowever, there is information about using AWS App2Container (A2C) to containerize applications hosted on premises or on Amazon EC2 instances. [Source: aws/ECS/Amazon ECS developer tools overview > AWS App2Container]\n\nAccording to the documentation, A2C analyzes and builds an inventory of all applications running in virtual machines, on premises or in the cloud, packages the application artifact and identified dependencies into container images, configures the network ports, generates the Amazon ECS task, and creates a CloudFormation template. [Source: aws/ECS/Amazon ECS developer tools overview > AWS App2Container]\n\nTo deploy a containerized application using A2C on EC2, you would need to follow these steps:\n\n1. Select the application you want to containerize.\n2. Package the application artifact and identified dependencies into container images.\n3. Configure the network ports.\n4. Generate the Amazon ECS task.\n5. Create a CloudFormation template.\n\nNote that this process is for modernizing applications hosted on premises or on EC2 instances, not directly deploying a containerized application on EC2.\n\nIf you are looking to deploy a containerized application using AWS services, it might be more relevant to use Amazon Elastic Container Service (ECS) with the AWS Cloud Development Kit (CDK). [Source: aws/ECS/Getting started with Amazon ECS using the AWS CDK]",
+          "retrieved_ids": [
+            "50b36671-08ee-4792-aeb5-6cc6a166aa4f",
+            "da4cc312-fc6d-4400-be43-e5359d92219c",
+            "0fefa6b8-6cec-40d2-989f-3284c5d33592",
+            "2fe2f797-1475-4a96-afc4-2e5cb357b12e",
+            "3d84c552-a0e3-4e92-bc58-de222f0d631e"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.1429,
+            "hallucination_rate": 0.8571,
+            "suggested_rubric": 1,
+            "total_claims": 7,
+            "supported_claims": 1,
+            "contradicted_claims": 3,
+            "unsupported_claims": 3,
+            "method": "nli",
+            "processing_time_ms": 557.7
+          },
+          "latency": {
+            "query_processing_ms": 0.001600012183189392,
+            "retrieval_ms": 156.22470001108013,
+            "reranking_ms": 0.005699999746866524,
+            "generation_ms": 1.7328000103589147,
+            "hallucination_check_ms": 859.5107000001008,
+            "total_ms": 1017.4755000334699,
+            "benchmark_total_ms": 1575.6488999904832
+          },
+          "error": null,
+          "timestamp": "2026-02-25T15:58:53.146153"
+        },
+        {
+          "query_id": "q003",
+          "config_name": "RAG Lexico (BM25)",
+          "question": "How to monitor AWS CloudWatch with CloudWatch?",
+          "answer": "To monitor AWS CloudWatch with CloudWatch, you can follow these steps:\n\n1. Open the CloudWatch console at [https://console.aws.amazon.com/cloudwatch/](https://console.aws.amazon.com/cloudwatch/) [Source: aws/EC2/Monitor your policies using Amazon CloudWatch > View CloudWatch metrics for your policies > [ CloudWatch console ]].\n2. In the navigation pane, choose **Metrics**.\n3. Select the namespace (e.g., EBS) and then select the metric you want to monitor.\n\nAdditionally, you can also use the AWS CLI or SDKs to monitor CloudWatch metrics programmatically. For more information, see [Source: aws/EC2/Monitor your policies using Amazon CloudWatch > View CloudWatch metrics for your policies > [ CloudWatch console ]].\n\nNote that this answer is specific to AWS and its own CloudWatch service.",
+          "retrieved_ids": [
+            "125cfa02-40d1-4241-a4a9-7127313fbb5b",
+            "dfee1d93-84ad-40e7-8b69-647563b3d29d",
+            "e80be949-c6b8-4427-8985-1a29d9eb309e",
+            "0582b41a-e353-43f2-bfd0-6a122a190563",
+            "0be538ee-9fec-4316-9b29-56f5a74dc854"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 1.0,
+            "hallucination_rate": 0.0,
+            "suggested_rubric": 5,
+            "total_claims": 4,
+            "supported_claims": 4,
+            "contradicted_claims": 0,
+            "unsupported_claims": 0,
+            "method": "nli",
+            "processing_time_ms": 302.2
+          },
+          "latency": {
+            "query_processing_ms": 0.0006999907782301307,
+            "retrieval_ms": 66.05330000456888,
+            "reranking_ms": 0.0024999899324029684,
+            "generation_ms": 0.11839999933727086,
+            "hallucination_check_ms": 302.5439000048209,
+            "total_ms": 368.7187999894377,
+            "benchmark_total_ms": 671.239900009823
+          },
+          "error": null,
+          "timestamp": "2026-02-25T15:58:53.817647"
+        },
+        {
+          "query_id": "q004",
+          "config_name": "RAG Lexico (BM25)",
+          "question": "What is the SLA for AWS Lambda?",
+          "answer": "Based on the available documentation, I cannot find sufficient information to determine the Service Level Agreement (SLA) for AWS Lambda. The provided context only covers creating EventBridge rules and IAM policies related to the AWS Lambda console, but does not mention any details about service level agreements or uptime guarantees.\n\nHowever, it's worth noting that AWS generally provides SLAs for its services through separate documentation. If you're looking for information on the SLA for a specific AWS service, I recommend checking the official AWS documentation for that service.",
+          "retrieved_ids": [
+            "cff3d48a-7942-4e98-8799-7c11116516bb",
+            "8f10d4bf-204e-4ff8-9b54-b0e1f9bc018b",
+            "6cb4f23c-d629-4bb3-b7c6-a0cd518c4900",
+            "dafbb5f8-bb21-4107-b0f9-184d583ee431",
+            "adb92f37-e616-4dea-99e3-18435149e78e"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.0,
+            "hallucination_rate": 1.0,
+            "suggested_rubric": 1,
+            "total_claims": 1,
+            "supported_claims": 0,
+            "contradicted_claims": 0,
+            "unsupported_claims": 1,
+            "method": "nli",
+            "processing_time_ms": 36.7
+          },
+          "latency": {
+            "query_processing_ms": 0.000800006091594696,
+            "retrieval_ms": 49.47270000411663,
+            "reranking_ms": 0.0018999999156221747,
+            "generation_ms": 0.39339999784715474,
+            "hallucination_check_ms": 37.89050001068972,
+            "total_ms": 87.75930001866072,
+            "benchmark_total_ms": 125.05319999763742
+          },
+          "error": null,
+          "timestamp": "2026-02-25T15:58:53.943300"
+        },
+        {
+          "query_id": "q005",
+          "config_name": "RAG Lexico (BM25)",
+          "question": "What instance types are available in AWS EKS?",
+          "answer": "Based on the provided context, I cannot find sufficient information to fully answer this question about the specific instance types available in AWS EKS.\n\nHowever, I can suggest that you refer to the official AWS documentation for more detailed information on supported instance types. You may want to check the [AWS > EKS > Amazon EKS User Guide] section or other relevant resources within the AWS documentation.\n\nIf you need help finding the correct resource or have further questions, feel free to ask!",
+          "retrieved_ids": [
+            "8ceebb50-7442-433c-9a3c-97a201453286",
+            "ad79b4ec-4fe5-4298-ad1a-9f37cc9bb3c1",
+            "6c56ee77-9fd6-4462-9218-6edf96e1396a",
+            "ce6e8d06-0178-4e6b-b885-0c92af8e1806",
+            "2e241d03-b9b3-4c27-93ad-4f18433f1ae0"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.0,
+            "hallucination_rate": 1.0,
+            "suggested_rubric": 1,
+            "total_claims": 2,
+            "supported_claims": 0,
+            "contradicted_claims": 0,
+            "unsupported_claims": 2,
+            "method": "nli",
+            "processing_time_ms": 67.7
+          },
+          "latency": {
+            "query_processing_ms": 0.000800006091594696,
+            "retrieval_ms": 83.8612999941688,
+            "reranking_ms": 0.0020000006770715117,
+            "generation_ms": 0.1534000039100647,
+            "hallucination_check_ms": 69.61719998798799,
+            "total_ms": 153.63469999283552,
+            "benchmark_total_ms": 221.62609999941196
+          },
+          "error": null,
+          "timestamp": "2026-02-25T15:58:54.165477"
+        }
+      ]
+    },
+    "RAG Semantico (Dense)": {
+      "total_queries": 5,
+      "errors": 0,
+      "results": [
+        {
+          "query_id": "q001",
+          "config_name": "RAG Semantico (Dense)",
+          "question": "What is AWS ECS and what are its main features?",
+          "answer": "AWS Elastic Container Service (ECS) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications [Source: aws/ECS/What is Amazon Elastic Container Service?<a name=\"Welcome\"></a>]. The main features of AWS ECS include:\n\n* A logical grouping of tasks or services called clusters, which can be used to isolate applications and prevent them from using the same underlying infrastructure [Source: aws/ECS/AWS services integrated with Amazon ECS<a name=\"ecs-integrations\"></a> > Clusters<a name=\"welcome-clusters\"></a>].\n* Flexible scheduling capabilities for tasks and containers, with each task having its own isolation boundary and not sharing underlying resources with other tasks [Source: aws/ECS/Scheduling Amazon ECS tasks<a name=\"scheduling_tasks\"></a>].\n\nNote that the provided context does not mention any specific features of AWS ECS beyond these two points.",
+          "retrieved_ids": [
+            "3cedff38-738f-4d0d-8d98-6427d53f7de9",
+            "82ec5773-4be8-4d85-9735-7adb02e4a557",
+            "bccf0d47-b26a-4c7d-8a1c-ab81dc4c8ffe",
+            "1d56ffca-096d-4ad7-a567-9c16a9a81ea7",
+            "33bb7448-c850-461a-8990-ecdad6b4c10d"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 1.0,
+            "hallucination_rate": 0.0,
+            "suggested_rubric": 5,
+            "total_claims": 3,
+            "supported_claims": 3,
+            "contradicted_claims": 0,
+            "unsupported_claims": 0,
+            "method": "nli",
+            "processing_time_ms": 16333.3
+          },
+          "latency": {
+            "query_processing_ms": 0.001800013706088066,
+            "retrieval_ms": 7298.612500002491,
+            "reranking_ms": 0.0028999929782003164,
+            "generation_ms": 47192.74330000917,
+            "hallucination_check_ms": 27982.76590000023,
+            "total_ms": 82474.12640001858,
+            "benchmark_total_ms": 98812.2510999965
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:00:33.000848"
+        },
+        {
+          "query_id": "q002",
+          "config_name": "RAG Semantico (Dense)",
+          "question": "How to deploy a containerized application on AWS EC2?",
+          "answer": "To deploy a containerized application on AWS EC2, you can use Docker Desktop or install Docker on an Amazon EC2 instance.\n\n**Option 1: Using Docker Desktop**\n\nYou can use Docker Desktop, which includes Docker Engine, the Docker CLI client, Docker Compose, and other tools that are helpful when using Docker with Amazon ECS. For more information about how to install Docker Desktop on your preferred operating system, see [Docker Desktop overview](https://docs.docker.com/desktop/).\n\n**Option 2: Installing Docker on an Amazon EC2 instance**\n\nYou can also install Docker on an Amazon EC2 instance by launching an instance with the Amazon Linux 2 AMI and installing Docker Engine and the Docker CLI. For more information, see [Installing Docker on Amazon Linux 2](https://docs.aws.amazon.com/ecs/latest/userguide/create-container-image.html#install-docker).\n\n[Source: aws/ECS/Creating a container image for use on Amazon ECS > Prerequisites > Installing Docker on Amazon Linux 2]\n\nAdditionally, you can also use AWS App2Container (A2C) to modernize your .NET and Java applications into containerized applications. A2C analyzes and builds an inventory of all applications running in virtual machines, on premises or in the cloud, packages the application artifact and identified dependencies into container images, configures the network ports, generates the Amazon ECS task, and creates a CloudFormation template that you can deploy or modify if needed.\n\n[Source: aws/ECS/Amazon ECS developer tools overview > AWS App2Container]\n\nPlease note that these options are based on the provided context and might not be an exhaustive list of all possible ways to deploy a containerized application on AWS EC2.",
+          "retrieved_ids": [
+            "0fefa6b8-6cec-40d2-989f-3284c5d33592",
+            "d2f6b973-d841-4f2b-860e-e56f7a7a539c",
+            "d55a5746-d017-4478-bb9f-20e042eeb3ba",
+            "11faf941-93bd-4e60-84bc-1b09e6dca717",
+            "0d5da26d-bb0b-4858-8a73-0b3b3f98f2c4"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 1.0,
+            "hallucination_rate": 0.0,
+            "suggested_rubric": 5,
+            "total_claims": 4,
+            "supported_claims": 4,
+            "contradicted_claims": 0,
+            "unsupported_claims": 0,
+            "method": "nli",
+            "processing_time_ms": 830111.3
+          },
+          "latency": {
+            "query_processing_ms": 0.000700005330145359,
+            "retrieval_ms": 97.02929999912158,
+            "reranking_ms": 0.0026999914553016424,
+            "generation_ms": 74621.93889998889,
+            "hallucination_check_ms": 36477.65780000191,
+            "total_ms": 111196.6293999867,
+            "benchmark_total_ms": 941320.0268000073
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:16:14.322535"
+        },
+        {
+          "query_id": "q003",
+          "config_name": "RAG Semantico (Dense)",
+          "question": "How to monitor AWS CloudWatch with CloudWatch?",
+          "answer": "Based on the available documentation, I cannot find sufficient information to fully answer this question.\n\nHowever, I can provide some related information:\n\n* You can use Amazon CloudWatch alarms to watch a single metric over a time period that you specify and perform one or more actions based on the value of the metric relative to a given threshold. [Source: aws/ECS/Logging and Monitoring in Amazon Elastic Container Service]\n* For clusters with tasks or services using the EC2 launch type, you can use CloudWatch alarms to scale in and scale out the container instances based on CloudWatch metrics, such as cluster memory reservation. [Source: aws/ECS/Logging and Monitoring in Amazon Elastic Container Service]\n\nIt seems that the question is asking how to monitor AWS CloudWatch with itself, which might be a bit confusing. If you could provide more context or clarify what you are trying to achieve, I would be happy to try and assist further.\n\nHowever, if you meant to ask about monitoring AWS resources using CloudWatch, here's an example:\n\n* You can use the `mon-put-instance-data.pl` script to collect system metrics on an Amazon EC2 instance and send them to Amazon CloudWatch. [Source: aws/EC2/Deprecated: Collect metrics using the CloudWatch monitoring scripts]\n\nPlease let me know if this is what you were looking for or if I can assist further!",
+          "retrieved_ids": [
+            "6d0b6c38-6eeb-4692-890e-9668b81760bb",
+            "cbe40b6e-4fb6-44c2-9fe4-b20d1111d71d",
+            "2d7a1ef8-b320-4116-9008-c6c17eb648a6",
+            "eda79473-85cb-4a74-b25d-eb0d7ccf7d82",
+            "4d893ba6-f282-4d8d-89fd-324ff6b6ae4a"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 1.0,
+            "hallucination_rate": 0.0,
+            "suggested_rubric": 5,
+            "total_claims": 4,
+            "supported_claims": 4,
+            "contradicted_claims": 0,
+            "unsupported_claims": 0,
+            "method": "nli",
+            "processing_time_ms": 583.4
+          },
+          "latency": {
+            "query_processing_ms": 0.0049000082071870565,
+            "retrieval_ms": 2826.337099992088,
+            "reranking_ms": 0.005599998985417187,
+            "generation_ms": 87524.91750000627,
+            "hallucination_check_ms": 878.0170000100043,
+            "total_ms": 91229.28210001555,
+            "benchmark_total_ms": 91822.88130000234
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:17:46.157382"
+        },
+        {
+          "query_id": "q004",
+          "config_name": "RAG Semantico (Dense)",
+          "question": "What is the SLA for AWS Lambda?",
+          "answer": "Based on the available documentation, I cannot find sufficient information to fully answer this question regarding the Service Level Agreement (SLA) for AWS Lambda.\n\nHowever, I can suggest that you refer to the official AWS documentation for more detailed information about AWS Lambda's SLA. [Source: aws/Lambda/Overview]\n\nIf you need further assistance or have any other questions, please let me know!",
+          "retrieved_ids": [
+            "92fbb5d5-c946-48c5-8490-65adfe35686f",
+            "584beffe-3fa3-4527-a0a1-aae91a3a798d",
+            "52c916bb-9456-4e0c-952b-d4d5b82dd667",
+            "cbad6473-67f4-4090-9883-2dbeb6e21f68",
+            "5ade9517-7f58-4555-a740-985afa86e36b"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.0,
+            "hallucination_rate": 1.0,
+            "suggested_rubric": 1,
+            "total_claims": 1,
+            "supported_claims": 0,
+            "contradicted_claims": 0,
+            "unsupported_claims": 1,
+            "method": "nli",
+            "processing_time_ms": 106.6
+          },
+          "latency": {
+            "query_processing_ms": 0.00100000761449337,
+            "retrieval_ms": 320.7708999980241,
+            "reranking_ms": 0.0024999899324029684,
+            "generation_ms": 18310.840299993288,
+            "hallucination_check_ms": 408.671700002742,
+            "total_ms": 19040.2863999916,
+            "benchmark_total_ms": 19148.9631000004
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:18:05.307531"
+        },
+        {
+          "query_id": "q005",
+          "config_name": "RAG Semantico (Dense)",
+          "question": "What instance types are available in AWS EKS?",
+          "answer": "Unfortunately, the provided text does not mention AWS EKS (Elastic Container Service for Kubernetes) or its supported instance types.\n\nHowever, based on the context, we can infer that the list of instance types is related to Amazon EC2. If you're looking for information on supported instance types in AWS EKS, I'd recommend checking the official AWS documentation for EKS [Source: aws/eks/docs].\n\nIn general, AWS EKS supports a wide range of instance types from various families (e.g., General Purpose, Compute Optimized, Memory Optimized). The specific instance types available to you will depend on your region and account configuration.\n\nIf you need more information or have further questions, feel free to ask!",
+          "retrieved_ids": [
+            "23f089ca-f01c-42ef-8c91-6b528400609e",
+            "aae28267-204f-4ad5-97f9-4a1d7797d170",
+            "25cf161a-ffd1-427f-ac83-96f5dfdb731c",
+            "5ff753da-4fd6-487f-999e-9336a354c70c",
+            "d8c0bb10-23ea-4687-97bf-97098af640e4"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.2,
+            "hallucination_rate": 0.8,
+            "suggested_rubric": 2,
+            "total_claims": 5,
+            "supported_claims": 1,
+            "contradicted_claims": 1,
+            "unsupported_claims": 3,
+            "method": "nli",
+            "processing_time_ms": 440.2
+          },
+          "latency": {
+            "query_processing_ms": 0.0007999915396794677,
+            "retrieval_ms": 141.99510001344606,
+            "reranking_ms": 0.0027999922167509794,
+            "generation_ms": 36280.40960000362,
+            "hallucination_check_ms": 817.6843999972334,
+            "total_ms": 37240.09269999806,
+            "benchmark_total_ms": 37687.69229999452
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:18:42.995938"
+        }
+      ]
+    },
+    "RAG Hibrido Propuesto": {
+      "total_queries": 5,
+      "errors": 0,
+      "results": [
+        {
+          "query_id": "q001",
+          "config_name": "RAG Hibrido Propuesto",
+          "question": "What is AWS ECS and what are its main features?",
+          "answer": "According to the provided documentation:\n\nAmazon Elastic Container Service (AWS ECS) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications. It provides flexible scheduling capabilities for your tasks and containers [Source: aws/ECS/Scheduling Amazon ECS tasks].\n\nThe main features of AWS ECS include:\n\n* Flexible scheduling capabilities\n* Isolation boundaries for tasks using the Fargate launch type\n* Clusters as a logical grouping of tasks or services to isolate applications [Source: aws/ECS/Amazon ECS components]\n* Integration with AWS and third-party tools, such as Amazon Elastic Container Registry and Docker\n* Ability to run and scale container workloads across AWS Regions in the cloud, and on-premises\n\nAdditionally, AWS ECS comes with AWS configuration and operational best practices built-in, making it easier for teams to focus on building applications rather than managing the environment [Source: aws/ECS/What is Amazon Elastic Container Service?].",
+          "retrieved_ids": [
+            "1d56ffca-096d-4ad7-a567-9c16a9a81ea7",
+            "82ec5773-4be8-4d85-9735-7adb02e4a557",
+            "3cedff38-738f-4d0d-8d98-6427d53f7de9",
+            "dbd43975-61b3-459f-a19a-d1b5feba8496",
+            "ace21fba-ba51-4b41-88fd-ad5fcda807f2"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.5,
+            "hallucination_rate": 0.5,
+            "suggested_rubric": 3,
+            "total_claims": 2,
+            "supported_claims": 1,
+            "contradicted_claims": 1,
+            "unsupported_claims": 0,
+            "method": "nli",
+            "processing_time_ms": 182.8
+          },
+          "latency": {
+            "query_processing_ms": 1.445000001695007,
+            "retrieval_ms": 1394.0218999923673,
+            "reranking_ms": 13050.363300004392,
+            "generation_ms": 37876.921600007336,
+            "hallucination_check_ms": 4851.756899995962,
+            "total_ms": 57174.50870000175,
+            "benchmark_total_ms": 57359.50819999562
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:19:40.445021"
+        },
+        {
+          "query_id": "q002",
+          "config_name": "RAG Hibrido Propuesto",
+          "question": "How to deploy a containerized application on AWS EC2?",
+          "answer": "Here are the step-by-step instructions to deploy a containerized application on AWS EC2:\n\n**Step 1: Launch an Amazon ECS Linux Container Instance**\n\n*   Open the Amazon EC2 console at [https://console.aws.amazon.com/ec2/](https://console.aws.amazon.com/ec2/).\n*   From the navigation bar, select the Region to use.\n*   From the **EC2 Dashboard**, choose **Launch instance**.\n\n[Source: aws/ECS/Launching an Amazon ECS Linux container instance<a name=\"launch_container_instance\"></a> > Old Amazon EC2 launch instance wizard<a name=\"existing-linux-ec2-instance-launch-wizard\"></a>]\n\n**Step 2: Choose an Amazon Machine Image (AMI)**\n\n*   On the **Choose an Amazon Machine Image \\(AMI\\)** page, complete the following steps:\n    *   Choose **AWS Marketplace**.\n    *   Choose an AMI for your container instance. You can search for one of the Amazon ECS-optimized AMIs, for example the **Amazon ECS-Optimized Amazon Linux 2 AMI**.\n\n[Source: aws/ECS/Launching an Amazon ECS Linux container instance<a name=\"launch_container_instance\"></a> > Old Amazon EC2 launch instance wizard<a name=\"existing-linux-ec2-instance-launch-wizard\"></a>]\n\n**Step 3: Connect to Your Container Instance**\n\n*   Open the Amazon ECS console at [https://console.aws.amazon.com/ecs/v2](https://console.aws.amazon.com/ecs/v2).\n*   Select the cluster that hosts your container instance.\n*   On the **Cluster** page, choose **Infrastructure**.\n*   Under **Container Instance** column, choose the container instance to connect to.\n*   On the **Container Instance** page, under **Networking**, record the **Public IP** or **Public DNS** for your instance.\n\n[Source: aws/ECS/Connect to your container instance using the classic console<a name=\"instance-connect\"></a>]\n\nThat's it! You have successfully deployed a containerized application on AWS EC2.",
+          "retrieved_ids": [
+            "22065538-acfd-4c82-9cff-511788ec008b",
+            "912ec510-475e-4f55-910b-50a8f9edd8c4",
+            "d55a5746-d017-4478-bb9f-20e042eeb3ba",
+            "3d84c552-a0e3-4e92-bc58-de222f0d631e",
+            "50b36671-08ee-4792-aeb5-6cc6a166aa4f"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.6,
+            "hallucination_rate": 0.4,
+            "suggested_rubric": 3,
+            "total_claims": 10,
+            "supported_claims": 6,
+            "contradicted_claims": 3,
+            "unsupported_claims": 1,
+            "method": "nli",
+            "processing_time_ms": 1708.5
+          },
+          "latency": {
+            "query_processing_ms": 8.339299994986504,
+            "retrieval_ms": 295.89779999514576,
+            "reranking_ms": 1236.7549000045983,
+            "generation_ms": 90532.40739999455,
+            "hallucination_check_ms": 10955.5102000013,
+            "total_ms": 103028.90959999058,
+            "benchmark_total_ms": 104739.32570000761
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:21:25.184567"
+        },
+        {
+          "query_id": "q003",
+          "config_name": "RAG Hibrido Propuesto",
+          "question": "How to monitor AWS CloudWatch with CloudWatch?",
+          "answer": "Here are the step-by-step instructions to monitor AWS CloudWatch with CloudWatch:\n\n**Step 1: Enable Detailed Monitoring on Your Instance**\n\nTo send metric data for your instance to CloudWatch in 1-minute periods, you need to enable detailed monitoring. You can do this by following these steps:\n\n* Go to the Amazon EC2 console at [https://console.aws.amazon.com/ec2/](https://console.aws.amazon.com/ec2/)\n* Select the instance for which you want to enable detailed monitoring\n* Click on \"Actions\" and then select \"Instance settings\"\n* Scroll down to the \"Monitoring\" section and click on \"Edit\"\n* Under \"Detailed Monitoring\", select \"Enabled\"\n* Click on \"Save changes\"\n\n[Source: aws/EC2/Monitor your instances using CloudWatch<a name=\"using-cloudwatch\"></a>]\n\n**Step 2: Create a CloudWatch Alarm**\n\nTo create a CloudWatch alarm, you can follow these steps:\n\n* Go to the Amazon EC2 console at [https://console.aws.amazon.com/ec2/](https://console.aws.amazon.com/ec2/)\n* Click on \"Monitoring\" and then select \"Manage CloudWatch alarms\"\n* Click on \"Add or edit alarm\" and then select \"Create an alarm\"\n* Choose the metric you want to monitor (e.g. CPUUtilization)\n* Set the threshold value for the alarm\n* Select the notification preferences (e.g. email, SNS topic)\n* Click on \"Create alarm\"\n\n[Source: aws/EC2/Create a CloudWatch alarm for an instance<a name=\"using-cloudwatch-createalarm\"></a>]\n\n**Step 3: Configure Status Check Alarms**\n\nTo create status check alarms, you can follow these steps:\n\n* Go to the Amazon EC2 console at [https://console.aws.amazon.com/ec2/](https://console.aws.amazon.com/ec2/)\n* Click on \"Monitoring\" and then select \"Manage CloudWatch alarms\"\n* Click on \"Add or edit alarm\" and then select \"Create a status check alarm\"\n* Choose the instance for which you want to create a status check alarm\n* Set the threshold value for the alarm\n* Select the notification preferences (e.g. email, SNS topic)\n* Click on \"Create alarm\"\n\n[Source: aws/EC2/Status checks for your instances<a name=\"monitoring-system-instance-status-check\"></a> > Create and edit status check alarms<a name=\"creating_status_check_alarms\"></a>]\n\n**Step 4: View CloudWatch Metrics**\n\nTo view CloudWatch metrics, you can follow these steps:\n\n* Go to the Amazon EC2 console at [https://console.aws.amazon.com/ec2/](https://console.aws.amazon.com/ec2/)\n* Click on \"Monitoring\" and then select \"CloudWatch metrics\"\n* Choose the metric you want to view (e.g. CPUUtilization)\n* Select the time range for which you want to view the metric\n* Click on \"View metric\"\n\n[Source: aws/EC2/Monitor Capacity Reservations using CloudWatch metrics<a name=\"capacity-reservation-cw-metrics\"></a>]\n\nNote: These steps are specific to AWS and may not be applicable to other cloud providers.",
+          "retrieved_ids": [
+            "6d0b6c38-6eeb-4692-890e-9668b81760bb",
+            "4ae1b75b-1391-4363-ac99-dcdae5c6c98c",
+            "604da48d-02fc-447f-bf7e-960b8a1cebac",
+            "1a48a0ec-a21e-45d0-9a89-814dae9bc596",
+            "0582b41a-e353-43f2-bfd0-6a122a190563"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.5,
+            "hallucination_rate": 0.5,
+            "suggested_rubric": 3,
+            "total_claims": 4,
+            "supported_claims": 2,
+            "contradicted_claims": 1,
+            "unsupported_claims": 1,
+            "method": "nli",
+            "processing_time_ms": 731.6
+          },
+          "latency": {
+            "query_processing_ms": 0.6234000029508024,
+            "retrieval_ms": 162.59100000024773,
+            "reranking_ms": 1487.720699995407,
+            "generation_ms": 132174.22960000113,
+            "hallucination_check_ms": 3876.3592000032077,
+            "total_ms": 137701.52390000294,
+            "benchmark_total_ms": 138435.85249999887
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:23:43.620669"
+        },
+        {
+          "query_id": "q004",
+          "config_name": "RAG Hibrido Propuesto",
+          "question": "What is the SLA for AWS Lambda?",
+          "answer": "Based on the available documentation, I cannot find sufficient information to determine the Service Level Agreement (SLA) for AWS Lambda. The provided context only discusses IAM policies related to the AWS Lambda console and does not mention any details about service level agreements or uptime guarantees.\n\nHowever, it's worth noting that AWS provides a 99.9% uptime guarantee for many of its services, including Lambda [Source: aws/Lambda/SLA]. But this information is not present in the provided context.",
+          "retrieved_ids": [
+            "41670bfd-f747-463a-8bbb-f704049d4cd6",
+            "9726d03c-7510-42e0-8b81-5a6c355934b6",
+            "aaf5f06d-8e7d-420d-ae39-d9288070a4f0",
+            "6cb4f23c-d629-4bb3-b7c6-a0cd518c4900",
+            "dafbb5f8-bb21-4107-b0f9-184d583ee431"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.0,
+            "hallucination_rate": 1.0,
+            "suggested_rubric": 1,
+            "total_claims": 1,
+            "supported_claims": 0,
+            "contradicted_claims": 1,
+            "unsupported_claims": 0,
+            "method": "nli",
+            "processing_time_ms": 113.4
+          },
+          "latency": {
+            "query_processing_ms": 0.5955000087851658,
+            "retrieval_ms": 131.46710000000894,
+            "reranking_ms": 1599.5406000001822,
+            "generation_ms": 18234.76569999184,
+            "hallucination_check_ms": 567.9725000081817,
+            "total_ms": 20534.341400008998,
+            "benchmark_total_ms": 20651.706400007242
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:24:04.272566"
+        },
+        {
+          "query_id": "q005",
+          "config_name": "RAG Hibrido Propuesto",
+          "question": "What instance types are available in AWS EKS?",
+          "answer": "Unfortunately, the provided text does not mention anything about AWS EKS (Elastic Container Service for Kubernetes) or its supported instance types.\n\nHowever, if we look at the provided sections, there is no information about EKS. The sections mentioned are:\n\n* [Source: aws/EC2/Instance types](https://docs.aws.amazon.com/en_us/AWSEC2/latest/UserGuide/instance-types.html): This section lists various instance types available in AWS EC2.\n* [Source: aws/ec2/instance-types](https://aws.amazon.com/ec2/instance-types/): This section also lists various instance types available in AWS EC2.\n\nSince there is no information about EKS, we cannot determine which instance types are supported by it.",
+          "retrieved_ids": [
+            "b1513dba-a046-4608-88d8-7b0467d1646d",
+            "799f89db-430f-4603-83c7-d0fa7e0b6912",
+            "5ff753da-4fd6-487f-999e-9336a354c70c",
+            "d8c0bb10-23ea-4687-97bf-97098af640e4",
+            "aae28267-204f-4ad5-97f9-4a1d7797d170"
+          ],
+          "relevant_ids": [],
+          "retrieval_metrics": {},
+          "generation_metrics": {},
+          "hallucination_metrics": {
+            "faithfulness": 0.5,
+            "hallucination_rate": 0.5,
+            "suggested_rubric": 3,
+            "total_claims": 4,
+            "supported_claims": 2,
+            "contradicted_claims": 2,
+            "unsupported_claims": 0,
+            "method": "nli",
+            "processing_time_ms": 742.3
+          },
+          "latency": {
+            "query_processing_ms": 0.4262000002199784,
+            "retrieval_ms": 138.7003999989247,
+            "reranking_ms": 1577.9560999944806,
+            "generation_ms": 36857.61659999844,
+            "hallucination_check_ms": 4308.102499999222,
+            "total_ms": 42882.801799991284,
+            "benchmark_total_ms": 43629.529300000286
+          },
+          "error": null,
+          "timestamp": "2026-02-25T16:24:47.902284"
+        }
+      ]
+    }
+  }
+}

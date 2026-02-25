@@ -513,6 +513,14 @@ def save_queries(queries: List[TestQuery], output_path: str):
 def load_queries(path: str) -> List[TestQuery]:
     """Load queries from JSON file."""
     data = json.loads(Path(path).read_text(encoding="utf-8"))
+    # Handle old placeholder format: {"version": ..., "queries": [...]}
+    if isinstance(data, dict):
+        data = data.get("queries", [])
+    if not data:
+        raise ValueError(
+            f"No queries found in {path}. "
+            "Generate with: python scripts/generate_test_queries.py"
+        )
     return [TestQuery(**d) for d in data]
 
 

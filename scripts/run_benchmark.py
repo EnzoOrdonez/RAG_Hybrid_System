@@ -23,9 +23,13 @@ Experiments:
 import argparse
 import json
 import logging
+import os
 import sys
 import time
 from pathlib import Path
+
+# Fix tqdm OSError on Python 3.14 + Windows (stderr flush issue)
+os.environ["TQDM_DISABLE"] = "1"
 
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
@@ -139,17 +143,21 @@ def main():
     queries_path = str(project_root / args.queries)
     queries_file = Path(queries_path)
 
-    if not queries_file.exists():
-        logger.info("Query file not found: %s", queries_path)
-        logger.info("Generating queries...")
-        from src.evaluation.test_queries import generate_all_queries, save_queries
+    from src.evaluation.test_queries import generate_all_queries, save_queries, load_queries
+
+    queries_list = None
+    if queries_file.exists():
+        try:
+            queries_list = load_queries(queries_path)
+            logger.info("Loaded %d queries from %s", len(queries_list), queries_path)
+        except (ValueError, Exception) as e:
+            logger.warning("Failed to load queries (%s), regenerating...", e)
+
+    if queries_list is None:
+        logger.info("Generating queries (seed=%d)...", args.seed)
         queries_list = generate_all_queries(count=200, seed=args.seed)
         save_queries(queries_list, queries_path)
-        logger.info("Generated %d queries", len(queries_list))
-    else:
-        from src.evaluation.test_queries import load_queries
-        queries_list = load_queries(queries_path)
-        logger.info("Loaded %d queries from %s", len(queries_list), queries_path)
+        logger.info("Generated and saved %d queries to %s", len(queries_list), queries_path)
 
     # Create benchmark runner
     from src.evaluation.benchmark_runner import BenchmarkRunner

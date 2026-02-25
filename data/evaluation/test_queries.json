@@ -1,5 +1,2455 @@
-{
-  "version": "0.1.0",
-  "description": "Test queries for RAG evaluation - will be generated in Phase 5",
-  "queries": []
-}
+[
+  {
+    "query_id": "q001",
+    "question": "What is AWS ECS and what are its main features?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q002",
+    "question": "How to deploy a containerized application on AWS EC2?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q003",
+    "question": "How to monitor AWS CloudWatch with CloudWatch?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "general"
+  },
+  {
+    "query_id": "q004",
+    "question": "What is the SLA for AWS Lambda?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q005",
+    "question": "What instance types are available in AWS EKS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q006",
+    "question": "What is the SLA for AWS VPC?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q007",
+    "question": "How to configure auto-scaling in AWS VPC?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "networking"
+  },
+  {
+    "query_id": "q008",
+    "question": "What is the SLA for AWS RDS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q009",
+    "question": "What are the pricing tiers for AWS ECS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q010",
+    "question": "What are the pricing tiers for AWS EC2?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q011",
+    "question": "How to deploy a containerized application on AWS EKS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q012",
+    "question": "What is AWS VPC and what are its main features?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "networking"
+  },
+  {
+    "query_id": "q013",
+    "question": "What is AWS DynamoDB and what are its main features?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q014",
+    "question": "How to deploy a containerized application on AWS ECS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q015",
+    "question": "What instance types are available in AWS DynamoDB?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q016",
+    "question": "What is AWS Lambda and what are its main features?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q017",
+    "question": "How to configure auto-scaling in AWS S3?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q018",
+    "question": "What is AWS DynamoDB and what are its main features?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q019",
+    "question": "How to set up AWS S3 for a production workload?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q020",
+    "question": "What are the limits and quotas for AWS VPC?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q021",
+    "question": "How to deploy a containerized application on AWS Lambda?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q022",
+    "question": "How to configure auto-scaling in AWS CloudWatch?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q023",
+    "question": "What are the limits and quotas for AWS IAM?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "security"
+  },
+  {
+    "query_id": "q024",
+    "question": "How to secure AWS CloudWatch using IAM policies?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "general"
+  },
+  {
+    "query_id": "q025",
+    "question": "How to set up AWS EKS for a production workload?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q026",
+    "question": "What are the pricing tiers for AWS RDS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q027",
+    "question": "How to configure auto-scaling in AWS DynamoDB?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q028",
+    "question": "How to deploy a containerized application on AWS Lambda?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q029",
+    "question": "How to monitor AWS VPC with CloudWatch?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "networking"
+  },
+  {
+    "query_id": "q030",
+    "question": "What are the pricing tiers for AWS IAM?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "security"
+  },
+  {
+    "query_id": "q031",
+    "question": "What are the limits and quotas for AWS EC2?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q032",
+    "question": "What is the SLA for AWS VPC?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q033",
+    "question": "How to configure auto-scaling in AWS EKS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q034",
+    "question": "What instance types are available in AWS IAM?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "security"
+  },
+  {
+    "query_id": "q035",
+    "question": "What are the limits and quotas for AWS EC2?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q036",
+    "question": "How to configure auto-scaling in AWS IAM?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "security"
+  },
+  {
+    "query_id": "q037",
+    "question": "How to secure AWS S3 using IAM policies?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q038",
+    "question": "How to monitor AWS ECS with CloudWatch?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q039",
+    "question": "How to configure auto-scaling in AWS S3?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q040",
+    "question": "How to set up AWS ECS for a production workload?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q041",
+    "question": "What instance types are available in AWS S3?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q042",
+    "question": "How to configure auto-scaling in AWS ECS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q043",
+    "question": "How to set up AWS CloudWatch for a production workload?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q044",
+    "question": "How to monitor AWS DynamoDB with CloudWatch?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q045",
+    "question": "How to set up AWS EC2 for a production workload?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q046",
+    "question": "What is the SLA for AWS EC2?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q047",
+    "question": "What are the limits and quotas for AWS IAM?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "security"
+  },
+  {
+    "query_id": "q048",
+    "question": "How to secure AWS EC2 using IAM policies?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q049",
+    "question": "How to monitor AWS EC2 with CloudWatch?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q050",
+    "question": "How to deploy a containerized application on AWS EKS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q051",
+    "question": "What regions support Azure Monitor?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q052",
+    "question": "How to deploy an application using Azure Entra ID?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "security"
+  },
+  {
+    "query_id": "q053",
+    "question": "How to deploy an application using Azure Monitor?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "general"
+  },
+  {
+    "query_id": "q054",
+    "question": "What are the service limits for Azure Entra ID?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "security"
+  },
+  {
+    "query_id": "q055",
+    "question": "How to implement backup and disaster recovery for Azure Container Instances?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q056",
+    "question": "How to set up monitoring and alerts for Azure Monitor?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q057",
+    "question": "How to implement backup and disaster recovery for Azure Blob Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q058",
+    "question": "What compliance certifications does Azure Functions have?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q059",
+    "question": "What compliance certifications does Azure Monitor have?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "general"
+  },
+  {
+    "query_id": "q060",
+    "question": "What are the available SKUs for Azure Entra ID?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "security"
+  },
+  {
+    "query_id": "q061",
+    "question": "How to set up monitoring and alerts for Azure Virtual Machines?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q062",
+    "question": "How to scale Azure AKS horizontally?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q063",
+    "question": "What is Azure App Service and what are its main capabilities?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q064",
+    "question": "How to set up monitoring and alerts for Azure Virtual Network?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q065",
+    "question": "How to configure networking for Azure Virtual Network?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q066",
+    "question": "What compliance certifications does Azure Virtual Machines have?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q067",
+    "question": "How to set up monitoring and alerts for Azure Blob Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q068",
+    "question": "What is Azure Entra ID and what are its main capabilities?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "security"
+  },
+  {
+    "query_id": "q069",
+    "question": "How to set up monitoring and alerts for Azure Virtual Machines?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q070",
+    "question": "What compliance certifications does Azure Functions have?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q071",
+    "question": "How to set up monitoring and alerts for Azure Container Instances?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q072",
+    "question": "What are the service limits for Azure AKS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q073",
+    "question": "What are the available SKUs for Azure AKS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q074",
+    "question": "What are the available SKUs for Azure Virtual Machines?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q075",
+    "question": "How to set up monitoring and alerts for Azure Entra ID?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "security"
+  },
+  {
+    "query_id": "q076",
+    "question": "How to configure networking for Azure Entra ID?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "security"
+  },
+  {
+    "query_id": "q077",
+    "question": "What is Azure Cosmos DB and what are its main capabilities?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "storage"
+  },
+  {
+    "query_id": "q078",
+    "question": "How to implement backup and disaster recovery for Azure Monitor?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q079",
+    "question": "How to configure networking for Azure Virtual Network?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "networking"
+  },
+  {
+    "query_id": "q080",
+    "question": "What are the available SKUs for Azure Cosmos DB?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q081",
+    "question": "What is Azure Container Instances and what are its main capabilities?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q082",
+    "question": "What are the available SKUs for Azure Monitor?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "general"
+  },
+  {
+    "query_id": "q083",
+    "question": "What is Azure App Service and what are its main capabilities?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q084",
+    "question": "What regions support Azure Blob Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q085",
+    "question": "What compliance certifications does Azure Virtual Network have?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q086",
+    "question": "What are the service limits for Azure Cosmos DB?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q087",
+    "question": "What regions support Azure Blob Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "storage"
+  },
+  {
+    "query_id": "q088",
+    "question": "What compliance certifications does Azure Virtual Machines have?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q089",
+    "question": "What are the service limits for Azure Monitor?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q090",
+    "question": "How to configure networking for Azure Virtual Machines?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q091",
+    "question": "How to configure networking for Azure Entra ID?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "security"
+  },
+  {
+    "query_id": "q092",
+    "question": "What are the available SKUs for Azure Container Instances?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q093",
+    "question": "How to scale Azure Virtual Network horizontally?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "networking"
+  },
+  {
+    "query_id": "q094",
+    "question": "How to deploy an application using Azure Virtual Machines?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q095",
+    "question": "How to configure networking for Azure Functions?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q096",
+    "question": "How to configure networking for Azure Cosmos DB?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q097",
+    "question": "What is Azure Blob Storage and what are its main capabilities?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q098",
+    "question": "What regions support Azure Functions?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q099",
+    "question": "What are the service limits for Azure Virtual Machines?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q100",
+    "question": "How to deploy an application using Azure Virtual Network?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "azure"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "networking"
+  },
+  {
+    "query_id": "q101",
+    "question": "How to configure IAM permissions for Google Cloud GKE?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q102",
+    "question": "What is Google Cloud Cloud SQL and what problems does it solve?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q103",
+    "question": "What is Google Cloud BigQuery and what problems does it solve?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q104",
+    "question": "What are the quotas for Google Cloud BigQuery?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q105",
+    "question": "What machine types are available in Google Cloud Cloud Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q106",
+    "question": "How to implement auto-scaling with Google Cloud Cloud Run?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q107",
+    "question": "How to deploy a workload on Google Cloud Cloud Functions?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q108",
+    "question": "How to deploy a workload on Google Cloud Cloud Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q109",
+    "question": "How to deploy a workload on Google Cloud Cloud SQL?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q110",
+    "question": "How to implement auto-scaling with Google Cloud BigQuery?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q111",
+    "question": "How to set up logging and monitoring for Google Cloud Cloud SQL?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q112",
+    "question": "How to set up logging and monitoring for Google Cloud BigQuery?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q113",
+    "question": "How to set up logging and monitoring for Google Cloud Cloud Run?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q114",
+    "question": "What is the pricing model for Google Cloud Cloud Build?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "general"
+  },
+  {
+    "query_id": "q115",
+    "question": "How to configure IAM permissions for Google Cloud Cloud Functions?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q116",
+    "question": "What is Google Cloud GKE and what problems does it solve?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q117",
+    "question": "How to configure IAM permissions for Google Cloud VPC?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "networking"
+  },
+  {
+    "query_id": "q118",
+    "question": "What are the quotas for Google Cloud BigQuery?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q119",
+    "question": "What is the pricing model for Google Cloud VPC?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q120",
+    "question": "What is Google Cloud Pub/Sub and what problems does it solve?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "general"
+  },
+  {
+    "query_id": "q121",
+    "question": "How to configure IAM permissions for Google Cloud Cloud SQL?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q122",
+    "question": "How to configure IAM permissions for Google Cloud BigQuery?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q123",
+    "question": "How to deploy a workload on Google Cloud Cloud Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q124",
+    "question": "How to deploy a workload on Google Cloud Cloud Functions?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q125",
+    "question": "What is the pricing model for Google Cloud Cloud SQL?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q126",
+    "question": "What are the best practices for Google Cloud BigQuery?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q127",
+    "question": "What are the best practices for Google Cloud BigQuery?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q128",
+    "question": "How to configure IAM permissions for Google Cloud Cloud SQL?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q129",
+    "question": "What are the best practices for Google Cloud Cloud Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "storage"
+  },
+  {
+    "query_id": "q130",
+    "question": "What machine types are available in Google Cloud BigQuery?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q131",
+    "question": "How to configure IAM permissions for Google Cloud Cloud Build?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "general"
+  },
+  {
+    "query_id": "q132",
+    "question": "How to migrate an on-premises application to Google Cloud Cloud Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q133",
+    "question": "What machine types are available in Google Cloud Cloud Build?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "general"
+  },
+  {
+    "query_id": "q134",
+    "question": "What are the quotas for Google Cloud BigQuery?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q135",
+    "question": "How to migrate an on-premises application to Google Cloud Pub/Sub?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q136",
+    "question": "What is Google Cloud Cloud Functions and what problems does it solve?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q137",
+    "question": "How to set up logging and monitoring for Google Cloud Cloud Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "storage"
+  },
+  {
+    "query_id": "q138",
+    "question": "How to configure IAM permissions for Google Cloud VPC?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "networking"
+  },
+  {
+    "query_id": "q139",
+    "question": "How to configure IAM permissions for Google Cloud Cloud Run?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q140",
+    "question": "What are the best practices for Google Cloud Cloud Storage?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q141",
+    "question": "What is Google Cloud Cloud Storage and what problems does it solve?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "storage"
+  },
+  {
+    "query_id": "q142",
+    "question": "What is Google Cloud Cloud SQL and what problems does it solve?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q143",
+    "question": "What are the best practices for Google Cloud Cloud SQL?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q144",
+    "question": "How to set up logging and monitoring for Google Cloud Cloud Functions?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q145",
+    "question": "How to deploy a workload on Google Cloud Compute Engine?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q146",
+    "question": "What machine types are available in Google Cloud Cloud Build?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "general"
+  },
+  {
+    "query_id": "q147",
+    "question": "What are the best practices for Google Cloud Pub/Sub?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q148",
+    "question": "How to implement auto-scaling with Google Cloud Compute Engine?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q149",
+    "question": "What is Google Cloud Cloud Run and what problems does it solve?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q150",
+    "question": "How to configure IAM permissions for Google Cloud GKE?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q151",
+    "question": "What are the resource limits for Kubernetes DaemonSets?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q152",
+    "question": "What is the lifecycle of a Kubernetes Secrets?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "security"
+  },
+  {
+    "query_id": "q153",
+    "question": "How to create and manage Kubernetes DaemonSets?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q154",
+    "question": "How to configure Kubernetes Secrets for high availability?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "security"
+  },
+  {
+    "query_id": "q155",
+    "question": "How to troubleshoot issues with Kubernetes RBAC?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "security"
+  },
+  {
+    "query_id": "q156",
+    "question": "How to update Kubernetes HPA without downtime?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q157",
+    "question": "How to troubleshoot issues with Kubernetes Pods?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q158",
+    "question": "How to update Kubernetes Ingress without downtime?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q159",
+    "question": "How to create and manage Kubernetes Deployments?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q160",
+    "question": "How to troubleshoot issues with Kubernetes ConfigMaps?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q161",
+    "question": "How to create and manage Kubernetes Deployments?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q162",
+    "question": "How to update Kubernetes Deployments without downtime?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q163",
+    "question": "What is the lifecycle of a Kubernetes Pods?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q164",
+    "question": "How to create and manage Kubernetes RBAC?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "security"
+  },
+  {
+    "query_id": "q165",
+    "question": "How to troubleshoot issues with Kubernetes Ingress?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q166",
+    "question": "How to troubleshoot issues with Kubernetes HPA?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q167",
+    "question": "How to update Kubernetes RBAC without downtime?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "security"
+  },
+  {
+    "query_id": "q168",
+    "question": "What are the resource limits for Kubernetes Services?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "networking"
+  },
+  {
+    "query_id": "q169",
+    "question": "How to update Kubernetes DaemonSets without downtime?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "easy",
+    "category": "compute"
+  },
+  {
+    "query_id": "q170",
+    "question": "How to troubleshoot issues with Kubernetes Deployments?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q171",
+    "question": "Compare the serverless compute offerings between AWS Lambda and Azure Functions",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q172",
+    "question": "What are the differences between AWS VPC and Azure Virtual Network?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q173",
+    "question": "How do managed Kubernetes services compare across AWS EKS, Azure AKS, and GKE?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q174",
+    "question": "Compare object storage services: AWS S3 vs Azure Blob Storage vs Google Cloud Storage",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q175",
+    "question": "What is the equivalent of AWS IAM in Azure and GCP?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "security"
+  },
+  {
+    "query_id": "q176",
+    "question": "Compare container orchestration options across AWS ECS, Azure Container Instances, and Google Cloud Run",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q177",
+    "question": "What are the differences between AWS Lambda cold starts and Azure Functions cold starts?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q178",
+    "question": "How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q179",
+    "question": "Compare the pricing models of AWS, Azure, and GCP for compute resources",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q180",
+    "question": "What are the main differences between AWS CloudFormation and Azure Resource Manager templates?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q181",
+    "question": "Compare monitoring solutions: AWS CloudWatch vs Azure Monitor vs Google Cloud Monitoring",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q182",
+    "question": "How do load balancing services differ across AWS ELB, Azure Load Balancer, and Google Cloud Load Balancing?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q183",
+    "question": "What are the differences between AWS DynamoDB and Azure Cosmos DB?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q184",
+    "question": "Compare the container registry services across AWS ECR, Azure Container Registry, and Google Artifact Registry",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q185",
+    "question": "How do serverless database offerings compare between AWS Aurora Serverless and Azure SQL Serverless?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "storage"
+  },
+  {
+    "query_id": "q186",
+    "question": "What is the CNCF equivalent or standard for service mesh across cloud providers?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp",
+      "cncf"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "networking"
+  },
+  {
+    "query_id": "q187",
+    "question": "Compare the machine learning platforms: AWS SageMaker vs Azure Machine Learning vs Google Vertex AI",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "ai_ml"
+  },
+  {
+    "query_id": "q188",
+    "question": "What CNCF projects are used for observability across cloud platforms?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "cncf",
+      "kubernetes"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q189",
+    "question": "How do the Kubernetes managed services handle cluster upgrades in EKS vs AKS vs GKE?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q190",
+    "question": "Compare DNS services: AWS Route 53 vs Azure DNS vs Google Cloud DNS",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q191",
+    "question": "What are the key differences between AWS S3 lifecycle policies and Azure Blob Storage tiering?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q192",
+    "question": "Compare identity federation approaches across AWS, Azure, and GCP",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "security"
+  },
+  {
+    "query_id": "q193",
+    "question": "How do encryption at rest implementations differ between AWS KMS, Azure Key Vault, and GCP Cloud KMS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "security"
+  },
+  {
+    "query_id": "q194",
+    "question": "What is the Kubernetes-native approach to secrets management vs cloud provider solutions?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes",
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "security"
+  },
+  {
+    "query_id": "q195",
+    "question": "Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q196",
+    "question": "What are the equivalent networking concepts across AWS, Azure, and GCP for VPCs, subnets, and security groups?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "networking"
+  },
+  {
+    "query_id": "q197",
+    "question": "Compare the event-driven architectures: AWS EventBridge vs Azure Event Grid vs Google Eventarc",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q198",
+    "question": "How does the concept of availability zones differ across AWS, Azure, and GCP?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "easy",
+    "category": "general"
+  },
+  {
+    "query_id": "q199",
+    "question": "What CNCF graduated projects are most commonly used in multi-cloud deployments?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "cncf"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q200",
+    "question": "Compare the Kubernetes ingress controller options across cloud providers and CNCF projects",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes",
+      "aws",
+      "azure",
+      "gcp",
+      "cncf"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "networking"
+  }
+]
