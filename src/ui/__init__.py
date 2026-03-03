@@ -1,1 +1,1 @@
-"""UI module - Phase 6."""
+"""UI module - Streamlit application with 5 pages."""
