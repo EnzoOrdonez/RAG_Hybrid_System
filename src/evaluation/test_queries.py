@@ -283,6 +283,13 @@ PROVIDER_TEMPLATES = {
             "How to secure AWS {service} using IAM policies?",
             "How to deploy a containerized application on AWS {service}?",
         ],
+        "comparative": [
+            "Compare AWS {service_a} and AWS {service_b} in terms of use cases and features",
+            "What are the differences between AWS {service_a} and AWS {service_b}?",
+            "When should you use AWS {service_a} instead of AWS {service_b}?",
+            "Compare the pricing models of AWS {service_a} vs AWS {service_b}",
+            "What are the trade-offs between AWS {service_a} and AWS {service_b} for production workloads?",
+        ],
     },
     "azure": {
         "services": ["Virtual Machines", "Functions", "AKS", "Blob Storage", "Virtual Network",
@@ -300,6 +307,13 @@ PROVIDER_TEMPLATES = {
             "How to set up monitoring and alerts for Azure {service}?",
             "How to implement backup and disaster recovery for Azure {service}?",
             "How to scale Azure {service} horizontally?",
+        ],
+        "comparative": [
+            "Compare Azure {service_a} and Azure {service_b} in terms of capabilities and pricing",
+            "What are the differences between Azure {service_a} and Azure {service_b}?",
+            "When should you choose Azure {service_a} over Azure {service_b}?",
+            "Compare the scaling options of Azure {service_a} vs Azure {service_b}",
+            "What are the trade-offs between Azure {service_a} and Azure {service_b}?",
         ],
     },
     "gcp": {
@@ -319,6 +333,13 @@ PROVIDER_TEMPLATES = {
             "How to implement auto-scaling with Google Cloud {service}?",
             "How to migrate an on-premises application to Google Cloud {service}?",
         ],
+        "comparative": [
+            "Compare Google Cloud {service_a} and Google Cloud {service_b} for common use cases",
+            "What are the differences between Google Cloud {service_a} and Google Cloud {service_b}?",
+            "When should you use Google Cloud {service_a} instead of Google Cloud {service_b}?",
+            "Compare the pricing of Google Cloud {service_a} vs Google Cloud {service_b}",
+            "What are the trade-offs between Google Cloud {service_a} and Google Cloud {service_b}?",
+        ],
     },
     "kubernetes": {
         "services": ["Pods", "Deployments", "Services", "Ingress", "ConfigMaps",
@@ -334,6 +355,12 @@ PROVIDER_TEMPLATES = {
             "How to troubleshoot issues with Kubernetes {service}?",
             "How to configure Kubernetes {service} for high availability?",
             "How to update Kubernetes {service} without downtime?",
+        ],
+        "comparative": [
+            "Compare Kubernetes {service_a} and Kubernetes {service_b} in terms of use cases",
+            "What are the differences between Kubernetes {service_a} and Kubernetes {service_b}?",
+            "When should you use Kubernetes {service_a} instead of Kubernetes {service_b}?",
+            "Compare the resource management of Kubernetes {service_a} vs Kubernetes {service_b}",
         ],
     },
 }
@@ -386,29 +413,52 @@ def generate_provider_queries(
     hybrid_index=None,
     seed: int = 42,
 ) -> List[TestQuery]:
-    """Generate queries for a single provider from templates."""
+    """Generate queries for a single provider from templates.
+
+    Balances ~33% factual, ~33% procedural, ~33% comparative.
+    """
     rng = random.Random(seed + hash(provider))
     config = PROVIDER_TEMPLATES.get(provider, {})
     services = config.get("services", [])
     factual_templates = config.get("factual", [])
     procedural_templates = config.get("procedural", [])
+    comparative_templates = config.get("comparative", [])
 
     queries = []
+    seen_questions = set()
     idx = 0
 
-    while len(queries) < count and idx < count * 3:
+    while len(queries) < count and idx < count * 5:
         idx += 1
-        service = rng.choice(services)
 
-        # Alternate between factual and procedural
-        if rng.random() < 0.5:
+        # Balanced 1/3 split across the three types
+        roll = rng.random()
+        if roll < 1 / 3:
             query_type = "factual"
+            service = rng.choice(services)
             template = rng.choice(factual_templates)
-        else:
+            question = template.format(service=service)
+            category = CATEGORY_MAP.get(service, "general")
+        elif roll < 2 / 3:
             query_type = "procedural"
+            service = rng.choice(services)
             template = rng.choice(procedural_templates)
+            question = template.format(service=service)
+            category = CATEGORY_MAP.get(service, "general")
+        else:
+            query_type = "comparative"
+            if not comparative_templates or len(services) < 2:
+                continue
+            # Pick two different services for comparison
+            pair = rng.sample(services, 2)
+            template = rng.choice(comparative_templates)
+            question = template.format(service_a=pair[0], service_b=pair[1])
+            category = CATEGORY_MAP.get(pair[0], "general")
 
-        question = template.format(service=service)
+        # Skip duplicates
+        if question in seen_questions:
+            continue
+        seen_questions.add(question)
 
         # Assign difficulty
         r = rng.random()
@@ -418,8 +468,6 @@ def generate_provider_queries(
             difficulty = "medium"
         else:
             difficulty = "hard"
-
-        category = CATEGORY_MAP.get(service, "general")
 
         # Find relevant chunks
         relevant_ids = _find_relevant_chunks(
@@ -468,11 +516,21 @@ def generate_all_queries(
     hybrid_index=None,
     seed: int = 42,
 ) -> List[TestQuery]:
-    """Generate the full test query dataset."""
-    all_queries = []
+    """Generate the full test query dataset.
 
-    # Distribution: AWS=50, Azure=50, GCP=50, K8s=20, cross-cloud=30
-    cross_cloud_count = min(30, len(CROSS_CLOUD_QUERIES))
+    Ensures ~33% factual, ~33% procedural, ~33% comparative overall
+    by compensating for the cross-cloud queries (mostly comparative).
+    """
+    # Step 1: Generate cross-cloud queries first to know their type breakdown
+    logger.info("Generating cross-cloud queries...")
+    cross_cloud = generate_cross_cloud_queries(hybrid_index)
+    cross_cloud_count = len(cross_cloud)
+
+    cross_types = {"factual": 0, "procedural": 0, "comparative": 0}
+    for q in cross_cloud:
+        cross_types[q.query_type] = cross_types.get(q.query_type, 0) + 1
+
+    # Step 2: Generate per-provider queries (overgenerate to allow filtering)
     remaining = count - cross_cloud_count
     provider_counts = {
         "aws": int(remaining * 50 / 170),
@@ -481,16 +539,48 @@ def generate_all_queries(
         "kubernetes": remaining - 3 * int(remaining * 50 / 170),
     }
 
-    # Generate per-provider queries
+    provider_queries = []
     for provider, cnt in provider_counts.items():
+        # Overgenerate by 50% so we have room to balance
         logger.info("Generating %d queries for %s...", cnt, provider)
-        pq = generate_provider_queries(provider, cnt, hybrid_index, seed)
-        all_queries.extend(pq)
+        pq = generate_provider_queries(
+            provider, int(cnt * 1.5), hybrid_index, seed
+        )
+        provider_queries.extend(pq)
 
-    # Generate cross-cloud queries
-    logger.info("Generating %d cross-cloud queries...", cross_cloud_count)
-    cq = generate_cross_cloud_queries(hybrid_index)
-    all_queries.extend(cq)
+    # Step 3: Balance to ~33% each type overall
+    target_per_type = count // 3  # ~66
+    needed = {
+        "factual": target_per_type - cross_types.get("factual", 0),
+        "procedural": target_per_type - cross_types.get("procedural", 0),
+        "comparative": target_per_type - cross_types.get("comparative", 0),
+    }
+    # Give any remainder to the smallest bucket
+    remainder = count - cross_cloud_count - sum(needed.values())
+    min_type = min(needed, key=needed.get)
+    needed[min_type] += remainder
+
+    # Select from provider queries to meet targets
+    by_type = {"factual": [], "procedural": [], "comparative": []}
+    for q in provider_queries:
+        by_type.setdefault(q.query_type, []).append(q)
+
+    selected = []
+    for qtype, need in needed.items():
+        available = by_type.get(qtype, [])
+        selected.extend(available[:need])
+
+    # If any bucket is short, fill from any remaining queries
+    if len(selected) < remaining:
+        selected_ids = {id(q) for q in selected}
+        for q in provider_queries:
+            if id(q) not in selected_ids:
+                selected.append(q)
+                selected_ids.add(id(q))
+                if len(selected) >= remaining:
+                    break
+
+    all_queries = selected[:remaining] + cross_cloud
 
     # Reassign sequential IDs
     for i, q in enumerate(all_queries):

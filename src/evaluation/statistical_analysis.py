@@ -43,6 +43,7 @@ class StatisticalResult:
         ci_upper: float,
         is_significant: bool,
         n_samples: int,
+        meets_thesis_threshold: bool = False,
     ):
         self.metric_name = metric_name
         self.system_a = system_a
@@ -63,6 +64,8 @@ class StatisticalResult:
         self.ci_upper = ci_upper
         self.is_significant = is_significant
         self.n_samples = n_samples
+        # Thesis requires at least medium effect size (|d| >= 0.5)
+        self.meets_thesis_threshold = meets_thesis_threshold
 
     def to_dict(self) -> Dict:
         return {
@@ -81,6 +84,7 @@ class StatisticalResult:
             "is_normal_b": self.is_normal_b,
             "effect_size": round(self.effect_size, 4),
             "effect_label": self.effect_size_label,
+            "meets_thesis_threshold": self.meets_thesis_threshold,
             "ci_95_lower": round(self.ci_lower, 4),
             "ci_95_upper": round(self.ci_upper, 4),
             "significant": self.is_significant,
@@ -90,13 +94,14 @@ class StatisticalResult:
     def summary(self) -> str:
         """Human-readable summary."""
         sig = "YES" if self.is_significant else "NO"
+        thesis = "MET" if self.meets_thesis_threshold else "NOT MET"
         return (
             f"{self.metric_name}: {self.system_b} vs {self.system_a} | "
             f"improvement={self.improvement_pct:+.1f}% | "
             f"p={self.p_value:.4f} ({self.test_name}) | "
             f"effect={self.effect_size:.3f} ({self.effect_size_label}) | "
             f"CI=[{self.ci_lower:.4f}, {self.ci_upper:.4f}] | "
-            f"significant={sig}"
+            f"significant={sig} | thesis_threshold={thesis}"
         )
 
 
@@ -361,6 +366,7 @@ def compare_systems(
         ci_upper=ci_upper,
         is_significant=test_result["is_significant"],
         n_samples=test_result["n"],
+        meets_thesis_threshold=abs(d_value) >= 0.5,
     )
 
 
