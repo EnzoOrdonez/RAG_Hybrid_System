@@ -1,5 +1,9 @@
 """Experiment Runner page for executing experiments from the UI."""
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+
 import json
 from pathlib import Path
 

@@ -1,7 +1,10 @@
 """Metrics Dashboard page with Plotly visualizations."""
 
-import json
+import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+
+import json
 from pathlib import Path
 
 import streamlit as st

@@ -5,6 +5,10 @@ Flow: Login -> Training -> Evaluate System A -> Break -> Evaluate System B ->
       Break -> Evaluate System C -> SUS Questionnaire -> Open Questions -> Done
 """
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+
 import time
 
 import streamlit as st
