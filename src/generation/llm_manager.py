@@ -155,9 +155,19 @@ class LLMManager:
             logger.warning("Failed to save cache: %s", e)
 
     @staticmethod
-    def _cache_key(prompt: str, system_prompt: str, temperature: float) -> str:
-        """Generate deterministic cache key."""
-        content = f"{prompt}||{system_prompt}||{temperature}"
+    def _cache_key(
+        prompt: str,
+        system_prompt: str,
+        temperature: float,
+        config_name: str = "",
+    ) -> str:
+        """Generate deterministic cache key.
+
+        Includes config_name to prevent cross-system cache contamination:
+        even if two pipeline configs produce the same prompt (identical
+        retrieved chunks), they will have different cache entries.
+        """
+        content = f"{config_name}||{prompt}||{system_prompt}||{temperature}"
         return hashlib.sha256(content.encode()).hexdigest()
 
     # ============================================================
@@ -170,17 +180,22 @@ class LLMManager:
         system_prompt: str = "",
         max_tokens: int = 1024,
         temperature: float = 0.1,
+        config_name: str = "",
     ) -> LLMResponse:
         """
         Generate response. Temperature=0.1 for experimental reproducibility.
         Uses cache if enabled. Retries 3 times with exponential backoff.
+
+        Args:
+            config_name: Pipeline config identifier (e.g. "RAG Lexico (BM25)").
+                         Included in cache key to prevent cross-system contamination.
         """
         # Check cache
         if self.cache_enabled:
-            key = self._cache_key(prompt, system_prompt, temperature)
+            key = self._cache_key(prompt, system_prompt, temperature, config_name)
             if key in self._cache:
                 cached = self._cache[key]
-                logger.info("Cache hit for %s (key=%s...)", self.model, key[:8])
+                logger.info("Cache hit for %s config=%s (key=%s...)", self.model, config_name or "default", key[:8])
                 return LLMResponse(
                     text=cached["text"],
                     model=self.model,
@@ -228,7 +243,7 @@ class LLMManager:
 
                 # Cache the response
                 if self.cache_enabled and not response.error:
-                    key = self._cache_key(prompt, system_prompt, temperature)
+                    key = self._cache_key(prompt, system_prompt, temperature, config_name)
                     self._cache[key] = {
                         "text": response.text,
                         "tokens_input": response.tokens_input,

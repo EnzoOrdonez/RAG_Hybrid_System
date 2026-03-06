@@ -276,6 +276,7 @@ class RAGPipeline:
                     prompt=full_prompt,
                     system_prompt=SYSTEM_PROMPT,
                     temperature=self.config.temperature,
+                    config_name=self.config.name,
                 )
 
             if llm_response.error:
