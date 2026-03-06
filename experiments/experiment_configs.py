@@ -550,6 +550,69 @@ EXP8_END_TO_END = ExperimentConfig(
 
 
 # ============================================================
+# Experiment 8b: End-to-End with Mistral LLM
+# ============================================================
+
+MISTRAL_MODEL = "mistral:7b-instruct"
+
+EXP8B_END_TO_END_MISTRAL = ExperimentConfig(
+    experiment_id="exp8b",
+    name="End-to-End System Comparison (Mistral)",
+    description="Compare the 3 thesis systems using Mistral 7B instead of Llama 3.1 8B",
+    hypothesis="System ranking is consistent across LLMs; Hybrid outperforms baselines regardless of LLM",
+    variable="system_config (LLM=mistral)",
+    pipeline_configs=[
+        PipelineConfig(
+            name="RAG Lexico (BM25)",
+            retrieval_method="bm25",
+            embedding_model=None,
+            reranker=None,
+            query_expansion=False,
+            terminology_normalization=False,
+            retrieval_top_k=50,
+            final_top_k=5,
+            llm_provider="ollama",
+            llm_model=MISTRAL_MODEL,
+            temperature=0.1,
+        ),
+        PipelineConfig(
+            name="RAG Semantico (Dense)",
+            retrieval_method="dense",
+            embedding_model="BAAI/bge-large-en-v1.5",
+            reranker=None,
+            query_expansion=False,
+            terminology_normalization=False,
+            retrieval_top_k=50,
+            final_top_k=5,
+            llm_provider="ollama",
+            llm_model=MISTRAL_MODEL,
+            temperature=0.1,
+        ),
+        PipelineConfig(
+            name="RAG Hibrido Propuesto",
+            retrieval_method="hybrid",
+            fusion_method="rrf",
+            alpha=0.5,
+            rrf_k=60,
+            embedding_model="BAAI/bge-large-en-v1.5",
+            reranker="cross-encoder/ms-marco-MiniLM-L-12-v2",
+            multidimensional_scoring=True,
+            query_expansion=True,
+            terminology_normalization=True,
+            retrieval_top_k=50,
+            reranker_top_k=20,
+            final_top_k=5,
+            llm_provider="ollama",
+            llm_model=MISTRAL_MODEL,
+            temperature=0.1,
+        ),
+    ],
+    max_queries=200,
+    metrics=["retrieval", "generation", "hallucination", "latency"],
+)
+
+
+# ============================================================
 # Registry
 # ============================================================
 
@@ -562,6 +625,7 @@ EXPERIMENT_CONFIGS = {
     "exp6": EXP6_ABLATION,
     "exp7": EXP7_CROSS_CLOUD,
     "exp8": EXP8_END_TO_END,
+    "exp8b": EXP8B_END_TO_END_MISTRAL,
 }
 
 

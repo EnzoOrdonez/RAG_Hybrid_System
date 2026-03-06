@@ -1,5 +1,5 @@
 """
-Cross-encoder based retrieval quality metrics for exp8.
+Cross-encoder based retrieval quality metrics.
 
 Since test queries lack ground-truth relevant_chunk_ids, we use the
 cross-encoder (ms-marco-MiniLM-L-12-v2) as a relevance oracle:
@@ -10,13 +10,12 @@ cross-encoder (ms-marco-MiniLM-L-12-v2) as a relevance oracle:
 4. Compute Recall@K, Precision@K, MRR, NDCG@K per system.
 5. Aggregate across queries and run Wilcoxon signed-rank tests.
 
-Outputs:
-  - output/tables/table_retrieval_metrics.tex
-  - output/figures/fig_retrieval_metrics.png
-  - output/csv/exp8_retrieval_metrics.csv
-  - experiments/results/exp8/retrieval_metrics.json
+Usage:
+  python scripts/compute_retrieval_metrics.py                  # default: exp8
+  python scripts/compute_retrieval_metrics.py --experiment exp8b
 """
 
+import argparse
 import json
 import logging
 import math
@@ -45,9 +44,7 @@ logger = logging.getLogger(__name__)
 RELEVANCE_THRESHOLD = 0.0  # ms-marco cross-encoders output logits; >0 = relevant
 CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 CHUNK_DIR = PROJECT_ROOT / "data" / "chunks" / "adaptive" / "size_500"
-RESULTS_PATH = PROJECT_ROOT / "experiments" / "results" / "exp8" / "results.json"
 OUTPUT_DIR = PROJECT_ROOT / "output"
-RESULTS_OUT = PROJECT_ROOT / "experiments" / "results" / "exp8"
 
 K_VALUES = [1, 3, 5]  # Practical K values given 5 retrieved chunks per system
 
@@ -354,13 +351,27 @@ def generate_figure(aggregated, output_path):
 # ============================================================
 
 def main():
+    parser = argparse.ArgumentParser(description="Cross-encoder retrieval metrics")
+    parser.add_argument(
+        "--experiment", default="exp8",
+        help="Experiment ID to process (default: exp8)",
+    )
+    args = parser.parse_args()
+    exp_id = args.experiment
+
+    results_path = PROJECT_ROOT / "experiments" / "results" / exp_id / "results.json"
+    results_out = PROJECT_ROOT / "experiments" / "results" / exp_id
+
     logger.info("=" * 60)
-    logger.info("Computing cross-encoder retrieval metrics for exp8")
+    logger.info("Computing cross-encoder retrieval metrics for %s", exp_id)
     logger.info("=" * 60)
 
     # 1. Load experiment results
-    logger.info("Loading exp8 results from %s", RESULTS_PATH)
-    data = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
+    logger.info("Loading %s results from %s", exp_id, results_path)
+    if not results_path.exists():
+        logger.error("Results file not found: %s", results_path)
+        sys.exit(1)
+    data = json.loads(results_path.read_text(encoding="utf-8"))
     configs = data["configs"]
     system_names = list(configs.keys())
 
@@ -477,7 +488,7 @@ def main():
 
     # 7. Print results
     print("\n" + "=" * 80)
-    print("CROSS-ENCODER RETRIEVAL METRICS (exp8, 200 queries)")
+    print(f"CROSS-ENCODER RETRIEVAL METRICS ({exp_id}, {len(query_questions)} queries)")
     print(f"Model: {CROSS_ENCODER_MODEL}")
     print(f"Relevance threshold: {RELEVANCE_THRESHOLD}")
     print("=" * 80)
@@ -524,20 +535,20 @@ def main():
     (OUTPUT_DIR / "tables").mkdir(parents=True, exist_ok=True)
     (OUTPUT_DIR / "figures").mkdir(parents=True, exist_ok=True)
     (OUTPUT_DIR / "csv").mkdir(parents=True, exist_ok=True)
-    RESULTS_OUT.mkdir(parents=True, exist_ok=True)
+    results_out.mkdir(parents=True, exist_ok=True)
 
     # LaTeX table
     latex = generate_latex_table(aggregated, all_stats.get("ndcg@5", {}))
-    latex_path = OUTPUT_DIR / "tables" / "table_retrieval_metrics.tex"
+    latex_path = OUTPUT_DIR / "tables" / f"table_retrieval_metrics_{exp_id}.tex"
     latex_path.write_text(latex, encoding="utf-8")
     logger.info("LaTeX table saved: %s", latex_path)
 
     # Figure
-    fig_path = OUTPUT_DIR / "figures" / "fig_retrieval_metrics.png"
+    fig_path = OUTPUT_DIR / "figures" / f"fig_retrieval_metrics_{exp_id}.png"
     generate_figure(aggregated, fig_path)
 
     # CSV
-    csv_path = OUTPUT_DIR / "csv" / "exp8_retrieval_metrics.csv"
+    csv_path = OUTPUT_DIR / "csv" / f"{exp_id}_retrieval_metrics.csv"
     csv_lines = ["system,precision@1,precision@3,precision@5,recall@5,mrr,ndcg@5,avg_score@5"]
     for sname in system_names:
         a = aggregated[sname]
@@ -556,7 +567,7 @@ def main():
 
     # JSON with full details (excluding internal per-query lists)
     json_output = {
-        "experiment": "exp8",
+        "experiment": exp_id,
         "model": CROSS_ENCODER_MODEL,
         "relevance_threshold": RELEVANCE_THRESHOLD,
         "total_queries": len(query_questions),
@@ -575,7 +586,7 @@ def main():
         a = {k: v for k, v in aggregated[sname].items() if not k.startswith("_")}
         json_output["systems"][sname] = a
 
-    json_path = RESULTS_OUT / "retrieval_metrics.json"
+    json_path = results_out / "retrieval_metrics.json"
     json_path.write_text(
         json.dumps(json_output, indent=2, ensure_ascii=False),
         encoding="utf-8",
