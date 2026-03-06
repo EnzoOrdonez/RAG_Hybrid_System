@@ -1,0 +1,1140 @@
+{
+  "experiment_id": "exp7",
+  "config_name": "cross_cloud_no_norm",
+  "completed_query_ids": [
+    "q177",
+    "q193",
+    "q190",
+    "q198",
+    "q181",
+    "q178",
+    "q189",
+    "q194",
+    "q180",
+    "q185",
+    "q184",
+    "q171",
+    "q191",
+    "q172",
+    "q196",
+    "q195",
+    "q176",
+    "q174",
+    "q192",
+    "q188",
+    "q173",
+    "q183",
+    "q200",
+    "q187",
+    "q175",
+    "q179",
+    "q182",
+    "q186",
+    "q197"
+  ],
+  "results": [
+    {
+      "query_id": "q171",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare the serverless compute offerings between AWS Lambda and Azure Functions",
+      "answer": "**Comparison of Serverless Compute Offerings**\n\nAWS Lambda and Azure Functions are both serverless compute services that enable developers to run code without provisioning or managing infrastructure. Here's a comparison based on the provided documentation:\n\n**Triggering Events**\n\n* AWS Lambda can be triggered by events such as HTTP requests, queue messages, timers, or changes in storage [Source: azure/Azure Functions/Migrate AWS Lambda workloads to Azure Functions]\n* Azure Functions also supports triggering by these same events, and is a serverless compute service that enables you to run event-driven code without provisioning or managing infrastructure [Source: azure/Azure Functions/What is Azure Functions?]\n\n**Scaling**\n\n* Both services scale automatically based on demand\n* No specific information is provided in the documentation about differences in scaling between AWS Lambda and Azure Functions\n\n**Programming Model**\n\n* Azure Functions has a Python programming model, which is explained in detail in the developer reference guide [Source: azure/Azure Functions/Azure Functions developer reference guide for Python apps]\n* The documentation does not provide information about the programming model used by AWS Lambda\n\n**Supported Languages**\n\n* Azure Functions supports multiple languages, including Python, and provides a list of supported languages in the \"What is Azure Functions?\" section [Source: azure/Azure Functions/What is Azure Functions?]\n* The documentation does not provide information about the supported languages for AWS Lambda\n\nIn summary, both AWS Lambda and Azure Functions are serverless compute services that support triggering by various events, scale automatically based on demand, and have a Python programming model. However, more detailed information about AWS Lambda's features and capabilities is not provided in the given documentation.\n\n**AWS Lambda >**\n* Supports multiple languages (not specified)\n* No specific information is provided about its programming model\n\n**Azure Functions >**\n* Supports multiple languages, including Python\n* Has a Python programming model [Source: azure/Azure Functions/Azure Functions developer reference guide for Python apps]",
+      "retrieved_ids": [
+        "1101d362-5102-4e65-bc62-36d62a464b1d",
+        "10e12269-9cb2-4d3a-a57a-e46b62867cd3",
+        "d9b9a092-0eea-48bb-baf7-cbb8d12de9c0",
+        "b99df4c9-f742-42b5-a36c-63303f1c6f50",
+        "3944c5bf-fb12-4914-b645-eb44df27794a"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 1.0,
+        "hallucination_rate": 0.0,
+        "suggested_rubric": 5,
+        "total_claims": 2,
+        "supported_claims": 2,
+        "contradicted_claims": 0,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 3257.9
+      },
+      "latency": {
+        "query_processing_ms": 0.0008999923011288047,
+        "retrieval_ms": 15994.55570000282,
+        "reranking_ms": 3991.556099994341,
+        "generation_ms": 0.2004000125452876,
+        "hallucination_check_ms": 4399.591900000814,
+        "total_ms": 24385.905000002822,
+        "benchmark_total_ms": 27646.112600006745
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:05:57.334249"
+    },
+    {
+      "query_id": "q172",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What are the differences between AWS VPC and Azure Virtual Network?",
+      "answer": "Based on the provided documentation context, I can only compare Azure Virtual Network with itself since there is no information about AWS VPC in the given context.\n\nHowever, I can provide a general overview of Azure Virtual Network's features and capabilities.\n\nAzure Virtual Network provides the fundamental building block for your private network in Azure [Source: azure/Virtual Network/What is Azure Virtual Network?]. It enables Azure resources to securely communicate with each other, the internet, and on-premises networks.\n\nTo connect on-premises computers and networks to a virtual network, you can use any of the following options:\n\n- **Point-to-site VPN**: Established between a virtual network and a single computer in your network [Source: azure/Virtual Network/What is Azure Virtual Network? > Why use an Azure virtual network? > Communicate with on-premises resources].\n- **Site-to-site VPN**: Established between your on-premises VPN device and an Azure VPN gateway deployed in a virtual network [Source: azure/Virtual Network/What is Azure Virtual Network? > Why use an Azure virtual network? > Communicate with on-premises resources].\n- **Azure ExpressRoute**: Established between your network and Azure, through an ExpressRoute partner [Source: azure/Virtual Network/What is Azure Virtual Network? > Why use an Azure virtual network? > Communicate with on-premises resources].\n\nSince there is no information about AWS VPC in the provided context, I cannot provide a comparison between AWS VPC and Azure Virtual Network.",
+      "retrieved_ids": [
+        "5150b915-d64b-4332-b130-54810b69d6b3",
+        "1a64f8e7-c2c2-47fb-a4a8-46f2a275b94a",
+        "2196dba5-1a9d-4dc0-85f6-650ff448cc46",
+        "9526590b-3f1b-4454-8389-f9a0d4fb68a2",
+        "fa730a27-2cee-4c2c-a0a7-5ba7814825ca"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.8333,
+        "hallucination_rate": 0.1667,
+        "suggested_rubric": 4,
+        "total_claims": 6,
+        "supported_claims": 5,
+        "contradicted_claims": 1,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 440.9
+      },
+      "latency": {
+        "query_processing_ms": 0.0011999945854768157,
+        "retrieval_ms": 135.90069999918342,
+        "reranking_ms": 61.862799993832596,
+        "generation_ms": 0.18000000272877514,
+        "hallucination_check_ms": 740.4920999979367,
+        "total_ms": 938.436799988267,
+        "benchmark_total_ms": 1379.6734000061406
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:05:58.714296"
+    },
+    {
+      "query_id": "q173",
+      "config_name": "cross_cloud_no_norm",
+      "question": "How do managed Kubernetes services compare across AWS EKS, Azure AKS, and GKE?",
+      "answer": "Based on the provided documentation, here's a comparison of managed Kubernetes services across AWS EKS, Azure AKS, and GCP GKE:\n\n**Managed Node Provisioning**\n\n* GKE provides fully-managed nodes with Autopilot mode [Source: gcp/GKE/GKE overview > Benefits of GKE].\n* AKS also offers node auto-provisioning in Standard mode [Source: azure/Virtual Network/Enable containers to use Azure Virtual Network capabilities > Use the plug-in].\n\n**Node Upgrade and Maintenance**\n\n* GKE provides flexible maintenance windows and exclusion with release channels for upgrades [Source: gcp/GKE/GKE overview > Benefits of GKE].\n* AKS offers node upgrade strategies in Standard mode, but it's not clear if they are as flexible as GKE's [Source: azure/Virtual Network/Enable containers to use Azure Virtual Network capabilities > Use the plug-in].\n\n**Security and Compliance**\n\n* GKE provides hardened node operating systems (Container-Optimized OS) and built-in security measures like Policy Controller [Source: gcp/GKE/GKE overview > Benefits of GKE].\n* AKS also offers a hardened node operating system, but it's not clear if the security features are as comprehensive as GKE's [Source: azure/Virtual Network/Enable containers to use Azure Virtual Network capabilities > Use the plug-in].\n\n**Cost Optimization**\n\n* GKE provides cost optimization with Autopilot mode, where you only pay for compute resources used by running Pods [Source: gcp/GKE/GKE overview > Benefits of GKE].\n* AKS does not have a similar feature mentioned in the provided documentation.\n\n**Reliability and Availability**\n\n* GKE guarantees >99% monthly uptime SLO with highly-available control plane and worker nodes in Autopilot mode and regional Standard clusters [Source: gcp/GKE/GKE overview > Benefits of GKE].\n* AKS also offers high availability, but it's not clear if the SLA is as strong as GKE's.\n\n**Comparison Summary**\n\n| Feature | AWS EKS | Azure AKS | GCP GKE |\n| --- | --- | --- | --- |\n| Managed Node Provisioning | Not mentioned | Auto-provisioning in Standard mode [Source: azure/Virtual Network/Enable containers to use Azure Virtual Network capabilities > Use the plug-in] | Fully-managed nodes with Autopilot mode [Source: gcp/GKE/GKE overview > Benefits of GKE] |\n| Node Upgrade and Maintenance | Not mentioned | Flexible maintenance windows and exclusion in Standard mode, but not as flexible as GKE's [Source: azure/Virtual Network/Enable containers to use Azure Virtual Network capabilities > Use the plug-in] | Flexible maintenance windows and exclusion with release channels for upgrades [Source: gcp/GKE/GKE overview > Benefits of GKE] |\n| Security and Compliance | Not mentioned | Hardened node operating system, but not as comprehensive as GKE's [Source: azure/Virtual Network/Enable containers to use Azure Virtual Network capabilities > Use the plug-in] | Hardened node operating system (Container-Optimized OS) and built-in security measures like Policy Controller [Source: gcp/GKE/GKE overview > Benefits of GKE] |\n| Cost Optimization | Not mentioned | No similar feature mentioned | Autopilot mode provides cost optimization, where you only pay for compute resources used by running Pods [Source: gcp/GKE/GKE overview > Benefits of GKE] |\n| Reliability and Availability | Not mentioned | High availability, but not as strong as GKE's SLA | >99% monthly uptime SLO with highly-available control plane and worker nodes in Autopilot mode and regional Standard clusters [Source: gcp/GKE/GKE overview > Benefits of GKE] |\n\nNote that this comparison is based on the provided documentation and might not be exhaustive.",
+      "retrieved_ids": [
+        "1b220c85-82b1-4fbb-b302-87e983e6a641",
+        "86ef72eb-f48f-4b40-9df7-7eb0cf1adc80",
+        "4bc8f366-e0a1-4c0f-93b5-55c24674621e",
+        "f43ab58d-eac2-4f36-8866-b902851f5512",
+        "520a1f6f-782d-4d8b-b656-94dc53dc621e"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.1,
+        "hallucination_rate": 0.9,
+        "suggested_rubric": 1,
+        "total_claims": 10,
+        "supported_claims": 1,
+        "contradicted_claims": 7,
+        "unsupported_claims": 2,
+        "method": "nli",
+        "processing_time_ms": 789.8
+      },
+      "latency": {
+        "query_processing_ms": 0.00100000761449337,
+        "retrieval_ms": 163.95630000624806,
+        "reranking_ms": 62.28680000640452,
+        "generation_ms": 0.42079998820554465,
+        "hallucination_check_ms": 788.0825999891385,
+        "total_ms": 1014.7474999976112,
+        "benchmark_total_ms": 1804.9811000091722
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:00.519536"
+    },
+    {
+      "query_id": "q174",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare object storage services: AWS S3 vs Azure Blob Storage vs Google Cloud Storage",
+      "answer": "Unfortunately, based on the provided documentation context, I cannot find sufficient information to compare object storage services across multiple providers (AWS S3, Azure Blob Storage, and Google Cloud Storage). The context only provides information about Azure Blob Storage.\n\nHowever, I can provide some general information about Azure Blob Storage:\n\nAzure Blob Storage is Microsoft's object storage solution for the cloud, optimized for storing massive amounts of unstructured data. [Source: azure/Blob Storage/Quickstart: Azure Blob Storage client library for .NET]\n\nIt supports hierarchical namespace, which allows organizing objects (files) into a hierarchy of directories and subdirectories in the same way that the file system on your computer is organized. This feature was introduced by Azure Data Lake Storage. [Source: azure/Blob Storage/NFS 3.0 and the hierarchical namespace]\n\nTo compare object storage services across multiple providers, I would need access to documentation from AWS and Google Cloud as well.\n\nIf you'd like to provide more context or specific questions about Azure Blob Storage, I'll be happy to help!",
+      "retrieved_ids": [
+        "690bf1e6-7302-4a5f-a8d3-be67ec1988a6",
+        "dca06f3b-13c0-473b-a159-ef2b5e6efb5b",
+        "d19902c2-a250-4503-8354-e6523d689275",
+        "7bce03c1-03f3-4580-8015-a4b071348a77",
+        "001bc2df-0fa3-4958-90aa-e317377c87c3"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.6,
+        "hallucination_rate": 0.4,
+        "suggested_rubric": 3,
+        "total_claims": 5,
+        "supported_claims": 3,
+        "contradicted_claims": 2,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 166.0
+      },
+      "latency": {
+        "query_processing_ms": 0.0005999900167807937,
+        "retrieval_ms": 211.30289998836815,
+        "reranking_ms": 57.66960000619292,
+        "generation_ms": 0.3054000117117539,
+        "hallucination_check_ms": 171.4168000034988,
+        "total_ms": 440.6952999997884,
+        "benchmark_total_ms": 606.9772000046214
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:01.126909"
+    },
+    {
+      "query_id": "q175",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What is the equivalent of AWS IAM in Azure and GCP?",
+      "answer": "Based on the provided documentation, the equivalent of AWS IAM in Azure and GCP are:\n\n* Azure: Identity and Access Management (IAM) is not explicitly mentioned in the context. However, based on general knowledge, Azure's equivalent to IAM is Azure Active Directory (Azure AD) [Source: Not provided, but generally known as Azure Active Directory].\n* GCP: Identity and Access Management (IAM) [Source: gcp/Cloud Functions/Authorize access with IAM]\n\nNote that while the context does not explicitly mention Azure's equivalent to IAM, based on general knowledge, it is widely recognized as Azure AD.",
+      "retrieved_ids": [
+        "994b4dd9-0833-470d-a154-4e81b7e8a02c",
+        "89dfc961-4d8e-4151-aa79-dc1b4da643e8",
+        "98fb2107-7cf4-4659-951a-49926129464f",
+        "e10fe075-f5d0-42e6-a177-581f6769d51a",
+        "f09cfce8-78cd-485c-9c91-e9c8c9c8edcd"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 1,
+        "supported_claims": 0,
+        "contradicted_claims": 0,
+        "unsupported_claims": 1,
+        "method": "nli",
+        "processing_time_ms": 77.3
+      },
+      "latency": {
+        "query_processing_ms": 0.001100008375942707,
+        "retrieval_ms": 101.5800000022864,
+        "reranking_ms": 60.300699988147244,
+        "generation_ms": 0.3141999914078042,
+        "hallucination_check_ms": 77.83919999201316,
+        "total_ms": 240.03519998223055,
+        "benchmark_total_ms": 317.6145000034012
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:01.444920"
+    },
+    {
+      "query_id": "q176",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare container orchestration options across AWS ECS, Azure Container Instances, and Google Cloud Run",
+      "answer": "**AWS ECS**\n\n*   A serverless option with AWS Fargate [Source: aws/ECS/What is Amazon Elastic Container Service?<a name=\"Welcome\"></a>]\n*   An external instance option with ECS Anywhere [Source: aws/ECS/What is Amazon Elastic Container Service?<a name=\"Welcome\"></a>]\n*   An Amazon EC2 option [Source: aws/ECS/What is Amazon Elastic Container Service?<a name=\"Welcome\"></a>]\n\n**Azure Container Instances**\n\nBased on the provided context, there is no information about Azure Container Instances. However, according to Microsoft documentation, Azure Container Instances is a managed container service that allows you to run containers without provisioning or managing underlying infrastructure.\n\n**Google Cloud Run**\n\nBased on the provided context, there is no information about Google Cloud Run. However, according to Google Cloud documentation, Google Cloud Run is a fully managed platform for deploying web services and serverless applications.\n\nIn summary, AWS ECS offers multiple container orchestration options, including Fargate, Anywhere, and EC2, while Azure Container Instances and Google Cloud Run are not mentioned in the provided context.",
+      "retrieved_ids": [
+        "3cedff38-738f-4d0d-8d98-6427d53f7de9",
+        "c6adf57c-09a4-42af-9621-7a70f7961a88",
+        "eff05736-5753-41b3-a4f2-1d1667db384b",
+        "d9cf86a3-7c51-4a46-a964-1d73f147c7e4",
+        "2a68ec83-2163-4210-9df2-a5c90b4a51e9"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.5,
+        "hallucination_rate": 0.5,
+        "suggested_rubric": 3,
+        "total_claims": 2,
+        "supported_claims": 1,
+        "contradicted_claims": 1,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 158.1
+      },
+      "latency": {
+        "query_processing_ms": 0.000700005330145359,
+        "retrieval_ms": 194.84159999410622,
+        "reranking_ms": 59.94559999089688,
+        "generation_ms": 0.2021000109380111,
+        "hallucination_check_ms": 161.47669999918435,
+        "total_ms": 416.4667000004556,
+        "benchmark_total_ms": 574.8871999967378
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:02.020164"
+    },
+    {
+      "query_id": "q177",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What are the differences between AWS Lambda cold starts and Azure Functions cold starts?",
+      "answer": "Based on the provided documentation, I can only compare Azure Functions cold starts since there is no information about AWS Lambda cold starts in the given context.\n\nAzure Functions cold starts occur when a function app gets shut down during periods of inactivity, particularly in the Consumption plan. This leads to increased latency at startup [Source: azure/Azure Functions/[PowerShell](#tab/powershell) > Considerations for PowerShell functions > Cold Start > Avoid using Install-Module].\n\nTo mitigate this issue, Azure Functions offers various hosting plans and optimizations:\n\n*   Flex Consumption plan: Improved cold start even when scaled to zero. Supports always ready instances [Source: azure/Azure Functions/Azure Functions hosting options > Cold start behavior].\n*   Premium plan: Supports always ready instances to avoid cold starts by letting you maintain one or more perpetually warm instances [Source: azure/Azure Functions/Azure Functions hosting options > Cold start behavior].\n*   Dedicated plan: The Functions host can run continuously on a prescribed number of instances, which means that cold start isn't really an issue [Source: azure/Azure Functions/Azure Functions hosting options > Cold start behavior].\n\nIn contrast, there is no information about AWS Lambda cold starts in the provided context.\n\nTherefore, I cannot provide a direct comparison between AWS Lambda and Azure Functions cold starts.",
+      "retrieved_ids": [
+        "ac30521a-d1f1-4368-be76-caf30af1f275",
+        "2aec318f-47f0-4b3f-b725-f1c77ce44138",
+        "74043765-45ea-4ed3-b9f5-83e550d31b75",
+        "00ca7815-663e-401d-a06b-f044a43848e0",
+        "97c4b5d5-0b9f-4a4d-aaa5-a86f1e13c9d0"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.25,
+        "hallucination_rate": 0.75,
+        "suggested_rubric": 2,
+        "total_claims": 8,
+        "supported_claims": 2,
+        "contradicted_claims": 4,
+        "unsupported_claims": 2,
+        "method": "nli",
+        "processing_time_ms": 420.3
+      },
+      "latency": {
+        "query_processing_ms": 0.0007999915396794677,
+        "retrieval_ms": 159.6127999946475,
+        "reranking_ms": 51.40150000806898,
+        "generation_ms": 0.24870000197552145,
+        "hallucination_check_ms": 420.6469000055222,
+        "total_ms": 631.9107000017539,
+        "benchmark_total_ms": 1052.5823999923887
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:03.073162"
+    },
+    {
+      "query_id": "q178",
+      "config_name": "cross_cloud_no_norm",
+      "question": "How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?",
+      "answer": "Based on the provided documentation, I can only provide information about AWS ECS and not directly compare it with Azure Virtual Machine Scale Sets. However, I can explain how auto-scaling works in AWS ECS.\n\nIn AWS ECS, auto-scaling is provided by Application Auto Scaling, which leverages the capacity providers to manage the scale-in and scale-out actions of the Auto Scaling group [Source: aws/ECS/Auto Scaling group capacity providers]. The process involves creating an Auto Scaling group, a capacity provider that uses this ASG, turning on managed scaling for the capacity provider, associating it with a cluster, and creating a capacity provider strategy [Source: aws/ECS/Amazon ECS cluster Auto Scaling > How cluster Auto Scaling works].\n\nFor Azure Virtual Machine Scale Sets, I would need additional documentation to provide an accurate comparison. However, based on general knowledge, Azure Virtual Machine Scale Sets use a similar concept of auto-scaling but with different configuration options and metrics.\n\nTo answer the question accurately, I would need more information about Azure Virtual Machine Scale Sets or access to their official documentation for a direct comparison.\n\nBased on the available documentation, I cannot find sufficient information to fully answer this question.",
+      "retrieved_ids": [
+        "4a7a6937-2d43-4fa0-a07b-1ee225993b2b",
+        "be4427f5-c7fb-4eeb-8525-d7d106c0e3e4",
+        "1b62565e-b5a9-4738-a5e4-2d6032df80c8",
+        "229faf55-25ff-4bfe-a01d-18f0ebb52438",
+        "c702c90a-d5c6-49bf-8316-baa5f1e8f0c5"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.5,
+        "hallucination_rate": 0.5,
+        "suggested_rubric": 3,
+        "total_claims": 4,
+        "supported_claims": 2,
+        "contradicted_claims": 2,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 318.7
+      },
+      "latency": {
+        "query_processing_ms": 0.000600004568696022,
+        "retrieval_ms": 167.67379999510013,
+        "reranking_ms": 52.18759999843314,
+        "generation_ms": 0.4344000044511631,
+        "hallucination_check_ms": 320.54000000061933,
+        "total_ms": 540.8364000031725,
+        "benchmark_total_ms": 859.8895999894012
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:03.933496"
+    },
+    {
+      "query_id": "q179",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare the pricing models of AWS, Azure, and GCP for compute resources",
+      "answer": "Based on the provided documentation context, I can only compare the pricing models of Google Cloud Platform (GCP) Compute Engine, as the other providers' information is not available in this context.\n\n**GCP Compute Engine Pricing**\n\nAccording to the documentation [Source: gcp/Compute Engine/ResourcesStay organized with collectionsSave and categorize content based on your preferences. > VM instances pricing], GCP Compute Engine offers various pricing models for compute resources, including:\n\n* On-demand pricing for VM instances\n* Spot pricing for VMs (available at a discounted rate)\n* Custom machine types (with varying prices depending on the configuration)\n\n**Comparison with Other Providers**\n\nUnfortunately, I cannot provide a comparison with AWS and Azure, as their pricing information is not available in this context. However, based on general knowledge, here's a brief overview of each provider's compute resource pricing:\n\n* **AWS**: Offers On-Demand, Reserved Instances (RI), and Spot Instance pricing for EC2 instances [Source: aws/ec2/pricing].\n* **Azure**: Provides On-Demand, Reserved VMs, and Spot Pricing for Virtual Machines [Source: azure/virtual-machines/pricing].\n\nPlease note that this comparison is incomplete, as I can only rely on the provided documentation context.\n\n**Conclusion**\n\nBased on the available documentation, I cannot provide a comprehensive comparison of AWS, Azure, and GCP compute resource pricing. For an accurate comparison, please refer to each provider's official documentation or pricing pages.",
+      "retrieved_ids": [
+        "69292058-284e-46aa-a636-6fc3ec823de9",
+        "b8326992-1000-4f60-b2ff-b9eeceee040a",
+        "d2292d26-ef61-428b-8c25-98ef81058656",
+        "7c302e0c-8387-4630-a346-ca91edffcb5f",
+        "d0dcf6e4-3a43-42bc-bfa6-c9449f862d7e"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 4,
+        "supported_claims": 0,
+        "contradicted_claims": 4,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 317.1
+      },
+      "latency": {
+        "query_processing_ms": 0.000600004568696022,
+        "retrieval_ms": 137.3431999963941,
+        "reranking_ms": 57.686999993165955,
+        "generation_ms": 0.27940000290982425,
+        "hallucination_check_ms": 319.1426999983378,
+        "total_ms": 514.4528999953764,
+        "benchmark_total_ms": 832.077399987611
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:04.765992"
+    },
+    {
+      "query_id": "q180",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What are the main differences between AWS CloudFormation and Azure Resource Manager templates?",
+      "answer": "Based on the provided documentation, I can identify some key differences between AWS CloudFormation and Azure Resource Manager (ARM) templates.\n\nAWS CloudFormation templates are used to describe resources that you want to provision in your AWS CloudFormation stacks. They are text files in JSON or YAML format [Source: aws/ECS/Creating Amazon ECS resources with AWS CloudFormation]. On the other hand, ARM templates are used to create and deploy Azure resources, such as function apps, storage accounts, and virtual networks [Source: azure/Azure Functions/Quickstart: Create and deploy Azure Functions resources from an ARM template].\n\nOne key difference is that AWS CloudFormation templates can be used to provision Amazon ECS resources, including clusters, task definitions, services, and task sets [Source: aws/ECS/Creating Amazon ECS resources with AWS CloudFormation]. In contrast, ARM templates are primarily used for creating Azure-specific resources.\n\nAnother difference is the format of the templates. AWS CloudFormation templates use JSON or YAML, while ARM templates use a custom template language that is similar to JSON [Source: azure/Azure Functions/Quickstart: Create and deploy Azure Functions resources from an ARM template].\n\nIn terms of deployment, AWS CloudFormation templates can be deployed using the AWS CLI or the AWS CloudFormation console [Source: aws/ECS/Creating Amazon ECS resources with AWS CloudFormation]. ARM templates can be deployed using the Azure portal or the Azure CLI.\n\nIt's worth noting that both AWS CloudFormation and ARM templates provide a way to create and manage infrastructure as code, but they are specific to their respective cloud providers.",
+      "retrieved_ids": [
+        "43e19450-9d9e-4a50-8730-812b99429840",
+        "6cca39e6-8dd8-44b5-b1b9-30cf9b5a1518",
+        "4f55e3ed-1654-45cd-bb17-0a99791a4e28",
+        "85196971-d7c5-4c9f-8e52-04a89cb04105",
+        "f19e6018-1da9-4500-bf3d-8bac13642c14"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 10,
+        "supported_claims": 0,
+        "contradicted_claims": 4,
+        "unsupported_claims": 6,
+        "method": "nli",
+        "processing_time_ms": 654.2
+      },
+      "latency": {
+        "query_processing_ms": 0.0018999999156221747,
+        "retrieval_ms": 138.1161999888718,
+        "reranking_ms": 55.99790000997018,
+        "generation_ms": 0.43879999429918826,
+        "hallucination_check_ms": 651.2156000098912,
+        "total_ms": 845.770400002948,
+        "benchmark_total_ms": 1500.3787000023294
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:06.266819"
+    },
+    {
+      "query_id": "q181",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare monitoring solutions: AWS CloudWatch vs Azure Monitor vs Google Cloud Monitoring",
+      "answer": "**Comparison of Monitoring Solutions**\n\nAWS CloudWatch, Azure Monitor, and Google Cloud Monitoring are all robust monitoring solutions that provide real-time insights into system performance. Here's a comparison based on the provided context:\n\n**Data Retention Period**\n- AWS CloudWatch: 15 months [Source: aws/EC2/Monitor your instances using CloudWatch]\n- Azure Monitor: Not specified in the provided context\n- Google Cloud Monitoring: Not specified in the provided context\n\n**Metric Collection Frequency**\n- AWS CloudWatch:\n  - Default: 5-minute periods [Source: aws/EC2/Monitor your instances using CloudWatch]\n  - Detailed monitoring: 1-minute periods [Source: aws/EC2/Monitor your instances using CloudWatch]\n- Azure Monitor: Not specified in the provided context\n- Google Cloud Monitoring: Not specified in the provided context\n\n**Automatic Metric Data Sending**\n- AWS CloudWatch:\n  - Yes, for Amazon ECS metric data [Source: aws/ECS/Monitoring Amazon ECS]\n  - Yes, for EC2 instances [Source: aws/EC2/Monitor your instances using CloudWatch]\n  - Yes, for Capacity Reservations [Source: aws/EC2/Monitor Capacity Reservations using CloudWatch metrics]\n- Azure Monitor: Not specified in the provided context\n- Google Cloud Monitoring: Not specified in the provided context\n\n**Based on the available documentation, I cannot find sufficient information to fully answer this question regarding Azure Monitor and Google Cloud Monitoring.**\n\nFor AWS CloudWatch, it is clear that it offers robust monitoring capabilities with customizable metric collection frequencies and automatic sending of metric data for various services. However, without more information from the provided context or specific documentation for Azure Monitor and Google Cloud Monitoring, a comprehensive comparison cannot be made.",
+      "retrieved_ids": [
+        "36a4cae0-e31e-44cd-9b66-29dd1a5a68d5",
+        "6d0b6c38-6eeb-4692-890e-9668b81760bb",
+        "bc1b1821-6d7f-44f3-b8b3-5fa07a617ffc",
+        "b31f4763-fb88-4716-b23d-eedf5273b680",
+        "0582b41a-e353-43f2-bfd0-6a122a190563"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 1,
+        "supported_claims": 0,
+        "contradicted_claims": 0,
+        "unsupported_claims": 1,
+        "method": "nli",
+        "processing_time_ms": 66.0
+      },
+      "latency": {
+        "query_processing_ms": 0.000600004568696022,
+        "retrieval_ms": 184.2315999965649,
+        "reranking_ms": 56.27180000010412,
+        "generation_ms": 0.24619999749120325,
+        "hallucination_check_ms": 66.13150000339374,
+        "total_ms": 306.88170000212267,
+        "benchmark_total_ms": 373.23209999885876
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:06.643262"
+    },
+    {
+      "query_id": "q182",
+      "config_name": "cross_cloud_no_norm",
+      "question": "How do load balancing services differ across AWS ELB, Azure Load Balancer, and Google Cloud Load Balancing?",
+      "answer": "**Load Balancing Services Comparison**\n\nBased on the provided documentation, here's a comparison of load balancing services across AWS ELB, Azure Load Balancer, and Google Cloud Load Balancing:\n\n* **AWS ELB**: Supports multiple load balancers per service, dynamic host port mapping, path-based routing, and priority rules. [Source: aws/ECS/Service load balancing]\n* **Azure Load Balancer**: Not explicitly mentioned in the provided context, but generally supports load balancing for Azure resources.\n* **Google Cloud Load Balancing (GCLB)**: Supports two types of load balancing: Ingress and External passthrough Network Load Balancer. GKE creates an external Application Load Balancer based on Ingress annotations and supporting workloads and Services. [Source: gcp/GKE/Set up an external Application Load Balancer with Ingress]\n\n**Key differences:**\n\n* **AWS ELB**: Supports multiple load balancers per service, whereas Azure Load Balancer's capabilities are not explicitly mentioned.\n* **GCLB (Ingress)**: Creates an external Application Load Balancer based on Ingress annotations and supporting workloads and Services.\n\nNote that the provided context does not contain detailed information about Azure Load Balancer. Therefore, any comparison involving Azure Load Balancer is limited to general statements.\n\n**AWS ELB vs GCLB (Ingress):**\n\n* **Load balancer creation**: AWS ELB requires explicit configuration for load balancing, whereas GKE creates an external Application Load Balancer based on Ingress annotations.\n* **Supporting workloads and Services**: Both support multiple workloads and Services, but GKE's Ingress-based approach is more automated.\n\n**Azure Load Balancer:**\n\nBased on the provided context, there is not enough information to compare Azure Load Balancer with AWS ELB or GCLB.",
+      "retrieved_ids": [
+        "2a56e732-873f-4bad-a458-393da53ebec6",
+        "ac1c3544-ee5c-4240-a755-dd0fedd4e316",
+        "b332e957-506b-404d-9665-d7fa8def22f0",
+        "18ddc87b-a376-4878-ad7e-3f687b5bee3c",
+        "7a635a07-214f-4460-b70d-cf3a7137d2b4"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.6,
+        "hallucination_rate": 0.4,
+        "suggested_rubric": 3,
+        "total_claims": 10,
+        "supported_claims": 6,
+        "contradicted_claims": 2,
+        "unsupported_claims": 2,
+        "method": "nli",
+        "processing_time_ms": 694.3
+      },
+      "latency": {
+        "query_processing_ms": 0.0006999907782301307,
+        "retrieval_ms": 214.86979999463074,
+        "reranking_ms": 65.92059999820776,
+        "generation_ms": 0.2730999985942617,
+        "hallucination_check_ms": 689.9639000039315,
+        "total_ms": 971.0280999861425,
+        "benchmark_total_ms": 1665.6528000021353
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:08.309396"
+    },
+    {
+      "query_id": "q183",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What are the differences between AWS DynamoDB and Azure Cosmos DB?",
+      "answer": "Based on the provided documentation, I can only find information about Azure Cosmos DB and its comparison with a specific AWS service, but not directly with DynamoDB. However, we can infer some information from the context.\n\nAzure Cosmos DB is mentioned as an alternative to relational databases for storing unstructured data [Source: azure/Azure Functions/Store unstructured data using Azure Functions and Azure Cosmos DB]. It's also mentioned that Azure Cosmos DB bindings for Azure Functions v1.x don't support Microsoft Entra authentication and managed identities, suggesting that it has some unique security features [Source: azure/Azure Functions/Azure Cosmos DB bindings for Azure Functions 1.x > Packages - Functions 1.x].\n\nHowever, I couldn't find any direct comparison between DynamoDB and Azure Cosmos DB in the provided context. The closest information is about writing to DynamoDB versus Azure Cosmos DB, but it's not a direct comparison [Source: azure/Azure Functions/Migrate AWS Lambda workloads to Azure Functions > Migration custom chat mode].\n\nTherefore, based on the available documentation, I cannot find sufficient information to fully answer this question.\n\nHowever, if you're looking for a general overview of Azure Cosmos DB and its features, here's what we can gather:\n\nAzure Cosmos DB is a great way to store unstructured and JSON data [Source: azure/Azure Functions/Store unstructured data using Azure Functions and Azure Cosmos DB]. It supports SQL API and Graph API accounts only [Source: azure/Azure Functions/Store unstructured data using Azure Functions and Azure Cosmos DB].\n\nIf you're looking for a comparison between AWS DynamoDB and Azure Cosmos DB, I would recommend checking the official documentation of both services or searching for external resources that provide a direct comparison.",
+      "retrieved_ids": [
+        "d5128127-c617-40c6-88ee-62787bfd37d3",
+        "97bfe14f-6ab8-4728-befe-2a45ee70d3ae",
+        "d3482ea0-88b6-484b-8f94-c870704f4276",
+        "58c482c4-cbec-486b-af0a-8f91ae55c3f0",
+        "b75e3eef-e035-41d4-8323-34fb6c21517d"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 6,
+        "supported_claims": 0,
+        "contradicted_claims": 2,
+        "unsupported_claims": 4,
+        "method": "nli",
+        "processing_time_ms": 224.4
+      },
+      "latency": {
+        "query_processing_ms": 0.001300009898841381,
+        "retrieval_ms": 101.96819998964202,
+        "reranking_ms": 56.3578999863239,
+        "generation_ms": 0.3460000007180497,
+        "hallucination_check_ms": 219.65879999333993,
+        "total_ms": 378.33219997992273,
+        "benchmark_total_ms": 603.0202000110876
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:08.912872"
+    },
+    {
+      "query_id": "q184",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare the container registry services across AWS ECR, Azure Container Registry, and Google Artifact Registry",
+      "answer": "**Comparison of Container Registry Services**\n\nThe provided documentation context only includes information about Google Cloud's Artifact Registry (GCP > GKE) and Amazon Web Services' Elastic Container Registry (AWS > ECS). There is no explicit information about Azure Container Registry.\n\nHowever, based on the available documentation, we can make some general observations:\n\n**Google Artifact Registry (GCP)**\n\n* Can be used to store container images\n* Images can be pushed from Docker using `docker push` command [Source: gcp/GKE/Introducing containersStay organized with collectionsSave and categorize content based on your preferences. > Containerize the application > Containerize theserver]\n* Kubernetes manifest can use correct container image paths from Artifact Registry [Source: gcp/GKE/Learning Path: Transform a monolith into a GKE app - Containerize the modular appStay organized with collectionsSave and categorize content based on your preferences.]\n\n**Amazon Elastic Container Registry (AWS)**\n\n* Can be used to store container images\n* Images can be pushed from Docker using `docker push` command, but requires proper IAM permissions [Source: aws/ECS/Using Amazon ECR with Amazon ECS<a name=\"ecr-repositories\"></a> > Using Amazon ECR Images with Amazon ECS<a name=\"ECR_on_ECS_ecs-dg\"></a>]\n* Task definitions must use the full `registry/repository:tag` naming for ECR images [Source: aws/ECS/Using Amazon ECR with Amazon ECS<a name=\"ecr-repositories\"></a> > Using Amazon ECR Images with Amazon ECS<a name=\"ECR_on_ECS_ecs-dg\"></a>]\n\n**Azure Container Registry (not explicitly mentioned in the provided context)**\n\nBased on the available documentation, we cannot make any direct comparisons between Azure Container Registry and the other two services.\n\nIn summary:\n\n* Google Artifact Registry allows pushing container images from Docker using `docker push` command.\n* Amazon Elastic Container Registry requires proper IAM permissions for pushing container images from Docker using `docker push` command.\n* The comparison with Azure Container Registry is not possible based on the provided context.",
+      "retrieved_ids": [
+        "ff81aa43-75d1-46ed-b4f5-7ac0adda49d7",
+        "efc84d7c-8d5a-493f-9327-61ab51df38b7",
+        "471ef531-bd3f-4dd0-8ecb-9a583b43201e",
+        "2709fd72-45ff-4db6-9642-309292c5a1cd",
+        "c47f1ef4-4725-4101-aff3-32374ee018fd"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.25,
+        "hallucination_rate": 0.75,
+        "suggested_rubric": 2,
+        "total_claims": 4,
+        "supported_claims": 1,
+        "contradicted_claims": 3,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 284.9
+      },
+      "latency": {
+        "query_processing_ms": 0.0006999907782301307,
+        "retrieval_ms": 195.5597000051057,
+        "reranking_ms": 58.513700001640245,
+        "generation_ms": 0.2535999956307933,
+        "hallucination_check_ms": 288.886199996341,
+        "total_ms": 543.213899989496,
+        "benchmark_total_ms": 828.5151000018232
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:09.741716"
+    },
+    {
+      "query_id": "q185",
+      "config_name": "cross_cloud_no_norm",
+      "question": "How do serverless database offerings compare between AWS Aurora Serverless and Azure SQL Serverless?",
+      "answer": "Based on the provided documentation, I can only provide a comparison of Azure's serverless database offering with Azure SQL Database, as there is no information about AWS Aurora Serverless in the context.\n\nHowever, I can mention that Azure SQL Database is a serverless database offering from Azure, which allows for flexible scaling and pricing [Source: azure/Azure Functions/Connect Azure Functions to Azure SQL Database using Visual Studio Code > Create your Azure SQL Database].\n\nTo compare with AWS Aurora Serverless, we would need additional information about its features and pricing. Unfortunately, the provided context does not include any details about AWS services.\n\nIf you'd like to know more about Azure's serverless database offering, I can provide more information based on the available documentation.",
+      "retrieved_ids": [
+        "e0920989-1366-42b8-ac21-1b53d22b0df9",
+        "e312249e-573f-4869-9b6e-81a100e8495b",
+        "a2a3ff9d-ebb0-42ed-836d-cdbbc9fe999a",
+        "6f8720d5-d3bf-4d83-92aa-c30c3fbbe61d",
+        "27e1dd33-3f10-4b70-b457-13a96629e41f"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.3333,
+        "hallucination_rate": 0.6667,
+        "suggested_rubric": 2,
+        "total_claims": 3,
+        "supported_claims": 1,
+        "contradicted_claims": 2,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 134.0
+      },
+      "latency": {
+        "query_processing_ms": 0.001100008375942707,
+        "retrieval_ms": 160.74390000721905,
+        "reranking_ms": 52.73339999257587,
+        "generation_ms": 0.37880000309087336,
+        "hallucination_check_ms": 135.64179999229964,
+        "total_ms": 349.4990000035614,
+        "benchmark_total_ms": 483.82649999985006
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:10.225864"
+    },
+    {
+      "query_id": "q186",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What is the CNCF equivalent or standard for service mesh across cloud providers?",
+      "answer": "Based on the provided documentation, I cannot find sufficient information to determine a specific \"equivalent\" or \"standard\" for service mesh across cloud providers. However, it does mention that Kubernetes is a project of the Cloud Native Computing Foundation (CNCF) and is used to orchestrate containers as part of a microservices architecture [Source: k8s/Reference].\n\nIt also mentions that building applications in a cloud native way requires infrastructure to be disposable and reproducible, which can be achieved through automated scaling and service discovery [Source: cncf/Glossary/Problem it addresses]. However, this does not directly imply the existence of a specific CNCF standard or equivalent for service mesh.\n\nIt's worth noting that Istio is often mentioned as a popular service mesh solution in Kubernetes environments, but this information is not present in the provided context.",
+      "retrieved_ids": [
+        "1576e004-ea35-4b64-9c60-9786415bfdc9",
+        "ef808e36-b364-4e22-a496-a30b5be1d08a",
+        "e6b76b2e-9b13-422c-9e92-4dcf4a989d92",
+        "a5f53511-cb9a-455a-9d7c-3fc90f62f630",
+        "17120d98-14cb-47af-9d60-8d2b5d376553"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 2,
+        "supported_claims": 0,
+        "contradicted_claims": 1,
+        "unsupported_claims": 1,
+        "method": "nli",
+        "processing_time_ms": 56.9
+      },
+      "latency": {
+        "query_processing_ms": 0.000700005330145359,
+        "retrieval_ms": 134.93119999475311,
+        "reranking_ms": 51.85699999856297,
+        "generation_ms": 0.32750000536907464,
+        "hallucination_check_ms": 56.96940000052564,
+        "total_ms": 244.08580000454094,
+        "benchmark_total_ms": 301.2668000010308
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:10.527542"
+    },
+    {
+      "query_id": "q187",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare the machine learning platforms: AWS SageMaker vs Azure Machine Learning vs Google Vertex AI",
+      "answer": "Based on the provided documentation context, I can only compare Azure Machine Learning and Google Vertex AI as there is no information about AWS SageMaker in the given context.\n\n**Azure Machine Learning**\n\n[Source: azure/Azure Functions/Azure Functions scenarios > Machine learning and AI > [Tools and MCP servers](#tab/mcp-tools)]\n\nAzure Machine Learning is not explicitly mentioned, but it can be inferred from the comparison with Azure Functions. However, there is no detailed information about Azure Machine Learning in this context.\n\n**Google Vertex AI**\n\n[Source: gcp/GKE/AI/ML orchestration on GKE documentation > Infrastructure for a RAG-capable generative AI application using GKE and Cloud SQL]\n\nVertex AI is mentioned as part of the infrastructure for a generative AI application, but there is no detailed comparison with other machine learning platforms.\n\nSince there is no information about AWS SageMaker in the provided context, I cannot compare it with Azure Machine Learning or Google Vertex AI.",
+      "retrieved_ids": [
+        "d53fd50f-d1bb-4ec4-983e-b57c90d5c120",
+        "b9c411fc-cce6-4735-ba1f-1d67070ed6d9",
+        "5abd9a5f-0278-4283-92a4-aceca335ea38",
+        "7d728b25-4724-401c-921b-709c904b7fcc",
+        "a2a3ff9d-ebb0-42ed-836d-cdbbc9fe999a"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 3,
+        "supported_claims": 0,
+        "contradicted_claims": 3,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 118.4
+      },
+      "latency": {
+        "query_processing_ms": 0.0005999900167807937,
+        "retrieval_ms": 200.10280000860803,
+        "reranking_ms": 59.32229998870753,
+        "generation_ms": 0.23920000239741057,
+        "hallucination_check_ms": 121.59360000805464,
+        "total_ms": 381.2584999977844,
+        "benchmark_total_ms": 500.044300002628
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:11.028101"
+    },
+    {
+      "query_id": "q188",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What CNCF projects are used for observability across cloud platforms?",
+      "answer": "Based on the provided context, I do not see any information about specific CNCF projects used for observability across cloud platforms.\n\nHowever, I can provide some general information that might be related to observability. The context mentions [cloud native applications](/cloud-native-apps/) and the need for infrastructure automation and declarative configuration management ([Source: cncf/Glossary/Problem it addresses]). This suggests that there may be CNCF projects focused on monitoring or logging, but I do not have enough information to provide a specific answer.\n\nIf you are looking for information about observability tools in cloud native environments, I would recommend checking the CNCF Cloud Native Landscape ([Source: cncf/Glossary/Problem it addresses]) or searching for relevant projects and technologies within the CNCF ecosystem.",
+      "retrieved_ids": [
+        "a5f53511-cb9a-455a-9d7c-3fc90f62f630",
+        "17120d98-14cb-47af-9d60-8d2b5d376553",
+        "42d383c6-ceb0-4e47-bf64-8acd05af80e6",
+        "f1d78a66-609b-4e75-a9f3-e6e38afad37b",
+        "56aa3568-d538-4f32-8547-b404761c9341"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.5,
+        "hallucination_rate": 0.5,
+        "suggested_rubric": 3,
+        "total_claims": 2,
+        "supported_claims": 1,
+        "contradicted_claims": 0,
+        "unsupported_claims": 1,
+        "method": "nli",
+        "processing_time_ms": 43.7
+      },
+      "latency": {
+        "query_processing_ms": 0.000800006091594696,
+        "retrieval_ms": 127.96979999984615,
+        "reranking_ms": 23.929799994220957,
+        "generation_ms": 0.22590000298805535,
+        "hallucination_check_ms": 48.71590000402648,
+        "total_ms": 200.84220000717323,
+        "benchmark_total_ms": 244.86349998915102
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:11.273319"
+    },
+    {
+      "query_id": "q189",
+      "config_name": "cross_cloud_no_norm",
+      "question": "How do the Kubernetes managed services handle cluster upgrades in EKS vs AKS vs GKE?",
+      "answer": "Based on the provided documentation context:\n\nGKE (Google Kubernetes Engine) automatically manages cluster upgrades and maintenance for both the control plane and worker nodes. [Source: gcp/GKE/GKE Autopilot overviewStay organized with collectionsSave and categorize content based on your preferences.]\n\nIn GKE, clusters are enrolled in a release channel, which balances between feature availability and version stability depending on the channel. By default, Autopilot clusters are enrolled in the Regular release channel, but you can select a different channel that meets your stability and functionality needs. [Source: gcp/GKE/GKE Autopilot overviewStay organized with collectionsSave and categorize content based on your preferences.]\n\nFor EKS (Elastic Kubernetes Service) and AKS (Azure Kubernetes Service), there is no information provided in the context about how they handle cluster upgrades.\n\nHowever, it's worth noting that GKE provides release channels to let you pick versions for your clusters with your chosen balance between feature availability and stability. [Source: gcp/GKE/Cluster lifecycleStay organized with collectionsSave and categorize content based on your preferences.]\n\n**GKE:** Automatically manages cluster upgrades and maintenance.\n\n**EKS/AKS:** No information provided in the context about how they handle cluster upgrades.\n\nPlease note that this answer is based solely on the provided documentation context, which does not contain sufficient information to compare EKS and AKS with GKE regarding cluster upgrade handling.",
+      "retrieved_ids": [
+        "3b28e705-8449-4b68-814a-aba47cdd74e1",
+        "1b220c85-82b1-4fbb-b302-87e983e6a641",
+        "b1dda21e-f9a3-4537-b08a-485f62ad99a0",
+        "2b33ad27-fb66-4e26-8446-e16a81705f0a",
+        "5780ecc7-f79f-49ed-bc80-03036181e0ff"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 5,
+        "supported_claims": 0,
+        "contradicted_claims": 2,
+        "unsupported_claims": 3,
+        "method": "nli",
+        "processing_time_ms": 404.0
+      },
+      "latency": {
+        "query_processing_ms": 0.0007999915396794677,
+        "retrieval_ms": 169.9602999869967,
+        "reranking_ms": 58.029799998621456,
+        "generation_ms": 0.24470000062137842,
+        "hallucination_check_ms": 400.5207999871345,
+        "total_ms": 628.7563999649137,
+        "benchmark_total_ms": 1033.138400001917
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:12.306855"
+    },
+    {
+      "query_id": "q190",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare DNS services: AWS Route 53 vs Azure DNS vs Google Cloud DNS",
+      "answer": "**DNS Services Comparison**\n\n### **Azure DNS**\n\n*   Supports up to 100 cloud services in a virtual network for cross-tenant name resolution through Azure-provided DNS [Source: azure/Virtual Network/Azure Virtual Network frequently asked questions (FAQ) > Name resolution (DNS) > Can I override my DNS settings for each VM or cloud service?]\n*   Limitation of 100 cloud services can be bypassed by using a custom DNS server [Source: azure/Virtual Network/Azure Virtual Network frequently asked questions (FAQ) > Name resolution (DNS) > Can I override my DNS settings for each VM or cloud service?]\n*   Cannot specify a custom DNS suffix for virtual networks [Source: azure/Virtual Network/Azure Virtual Network frequently asked questions (FAQ) > Name resolution (DNS) > Can I override my DNS settings for each VM or cloud service?]\n\n### **AWS Route 53**\n\n*   Supports setting up TLS on Amazon Linux using self-signed digital certificates [Source: aws/EC2/Configure SSL/TLS on Amazon Linux 2023<a name=\"SSL-on-amazon-linux-2023\"></a> > Step 1: Enable TLS on the server<a name=\"ssl_enable\"></a>]\n*   Supports setting up TLS on Amazon Linux using automation with AWS Systems Manager [Source: aws/EC2/Configure SSL/TLS on Amazon Linux<a name=\"SSL-on-amazon-linux-ami\"></a> > Step 1: Enable TLS on the server<a name=\"ssl-enable-alami\"></a>]\n\n### **Google Cloud DNS**\n\n*   Not mentioned in provided context\n\nBased on the available documentation, I cannot find sufficient information to compare Google Cloud DNS with Azure DNS and AWS Route 53.",
+      "retrieved_ids": [
+        "d249efdc-eea0-4b3b-bd4d-943e4ec21bb8",
+        "fa4339db-bbd7-464d-9e78-a8d20a1a60b8",
+        "106ca0c3-b12f-431e-a1c0-656dcddbf541",
+        "82796352-a9e4-4b53-8857-09212fe1dad6",
+        "ea401e56-eb29-4fd5-b6dc-559a97ac0f1b"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 1,
+        "supported_claims": 0,
+        "contradicted_claims": 1,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 55.7
+      },
+      "latency": {
+        "query_processing_ms": 0.000800006091594696,
+        "retrieval_ms": 189.7912999993423,
+        "reranking_ms": 62.82390000706073,
+        "generation_ms": 0.7217000093078241,
+        "hallucination_check_ms": 54.71369999577291,
+        "total_ms": 308.05140001757536,
+        "benchmark_total_ms": 364.06480000005104
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:12.671283"
+    },
+    {
+      "query_id": "q191",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What are the key differences between AWS S3 lifecycle policies and Azure Blob Storage tiering?",
+      "answer": "Based on the provided documentation context, I can identify some differences between AWS S3 lifecycle policies and Azure Blob Storage tiering.\n\n**AWS S3 Lifecycle Policies**: [Source: aws/S3/Lifecycle Configuration > Transitioning objects to a different storage class]\n\n* Can transition objects to a different storage class (e.g., STANDARD_IA, GLACIER) based on age or filter rules.\n* Supports transitioning of objects between different storage classes, but does not support deleting objects entirely.\n\n**Azure Blob Storage Tiering**: [Source: azure/Blob Storage/Azure Blob Storage lifecycle management policy structure]\n\n* Can transition blobs to cost-efficient access tiers (e.g., Cool, Archive) based on their use patterns.\n* Supports deleting blobs entirely at the end of their lifecycle.\n\nKey differences:\n\n1. **Deletion support**: Azure Blob Storage tiering supports deleting blobs entirely, whereas AWS S3 lifecycle policies do not.\n2. **Transitioning between storage classes**: Both services support transitioning objects/blobs to different storage classes or tiers based on age or filter rules.\n3. **Storage class/tier naming conventions**: AWS uses terms like STANDARD_IA and GLACIER for storage classes, while Azure uses Cool and Archive for access tiers.\n\nPlease note that these differences are based solely on the provided documentation context and might not be an exhaustive comparison of both services.",
+      "retrieved_ids": [
+        "be06cc48-a34a-482e-9d4c-f04624e41968",
+        "38486780-188b-4b13-a945-e020ff89b884",
+        "93157a66-6ec4-4191-9435-6984c5848991",
+        "589a4573-9d82-4fa0-a73e-83a5fa60a0fb",
+        "db23b37d-d431-4c0d-a7e8-64b7b44aa31f"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.2857,
+        "hallucination_rate": 0.7143,
+        "suggested_rubric": 2,
+        "total_claims": 7,
+        "supported_claims": 2,
+        "contradicted_claims": 0,
+        "unsupported_claims": 5,
+        "method": "nli",
+        "processing_time_ms": 271.0
+      },
+      "latency": {
+        "query_processing_ms": 0.000800006091594696,
+        "retrieval_ms": 160.08299999521114,
+        "reranking_ms": 56.85809999704361,
+        "generation_ms": 0.30079999123699963,
+        "hallucination_check_ms": 275.3078999958234,
+        "total_ms": 492.55059998540673,
+        "benchmark_total_ms": 763.8292000046931
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:13.437252"
+    },
+    {
+      "query_id": "q192",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare identity federation approaches across AWS, Azure, and GCP",
+      "answer": "Based on the provided documentation, I can only compare Google Cloud Platform (GCP) with its own services, as there is no information about AWS or Azure. However, I can provide a comparison of Workload Identity Federation for GKE in GCP with other identity federation approaches.\n\n**Workload Identity Federation for GKE in GCP**\n\n* Always enabled in Autopilot clusters [Source: gcp/GKE/GKE security overview > Network security]\n* Pods have access to instance metadata unless manually enabled [Source: gcp/GKE/GKE security overview > Network security]\n\n**Comparison with other identity federation approaches (not available in the provided context)**\n\nHowever, I can provide a general comparison of Workload Identity Federation for GKE with other identity federation approaches:\n\n* **AWS IAM Roles for Service Accounts**: AWS provides IAM roles for service accounts, which allows Kubernetes service accounts to assume IAM roles and access AWS resources. [Source: AWS documentation]\n* **Azure Active Directory (AAD) integration with AKS**: Azure provides AAD integration with AKS, allowing Kubernetes service accounts to use AAD identities and access Azure resources. [Source: Azure documentation]\n\nPlease note that this comparison is not based on the provided context, but rather on general knowledge of identity federation approaches in cloud platforms.\n\nIf you would like me to provide a more detailed comparison or answer specific questions about AWS or Azure, please let me know and I'll do my best to assist you.",
+      "retrieved_ids": [
+        "f46db923-80ad-4687-a7a4-1af9a7b59d3c",
+        "fe81682a-f58d-47f8-9c8b-7589ec630647",
+        "ee4b0915-1651-48ca-820f-ec5b6ac7f894",
+        "0ac7cfb4-c784-43cc-9a87-f41052c41818",
+        "fcdae2ef-b753-4f26-9115-9ecb32398a31"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.3333,
+        "hallucination_rate": 0.6667,
+        "suggested_rubric": 2,
+        "total_claims": 3,
+        "supported_claims": 1,
+        "contradicted_claims": 0,
+        "unsupported_claims": 2,
+        "method": "nli",
+        "processing_time_ms": 245.0
+      },
+      "latency": {
+        "query_processing_ms": 0.0006999907782301307,
+        "retrieval_ms": 136.2558000109857,
+        "reranking_ms": 55.86570000741631,
+        "generation_ms": 0.4420999903231859,
+        "hallucination_check_ms": 242.36740000196733,
+        "total_ms": 434.93170000147074,
+        "benchmark_total_ms": 680.2757999976166
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:14.117845"
+    },
+    {
+      "query_id": "q193",
+      "config_name": "cross_cloud_no_norm",
+      "question": "How do encryption at rest implementations differ between AWS KMS, Azure Key Vault, and GCP Cloud KMS?",
+      "answer": "Based on the provided documentation, I can only compare AWS KMS with Kubernetes' built-in encryption at rest implementation, as there is no information about Azure Key Vault or GCP Cloud KMS in the context.\n\n**AWS KMS**\n\nAccording to [Source: aws/EC2/Amazon EBS encryption], when creating an encrypted volume from an encrypted snapshot, Amazon EC2 works with AWS KMS to encrypt and decrypt the volume. The process involves generating a data key without plaintext using the `GenerateDataKeyWithoutPlaintext` API call, and then using that data key to encrypt the volume.\n\n**Kubernetes' built-in encryption at rest implementation**\n\nAccording to [Source: k8s/Reference], Kubernetes provides two APIs for encryption at rest: KMS v1 and KMS v2. The documentation does not provide detailed information about how these APIs work, but it mentions that they enable encryption at rest using a Key Management Service (KMS).\n\n**Comparison**\n\nBased on the provided context, I can only say that AWS KMS has a more detailed implementation of encryption at rest compared to Kubernetes' built-in implementation. The documentation for AWS KMS provides step-by-step information about how encryption works when creating an encrypted volume from an encrypted snapshot.\n\nTo provide a complete answer, additional information would be needed about Azure Key Vault and GCP Cloud KMS.\n\n**Note**: I cannot compare the three providers (AWS KMS, Azure Key Vault, and GCP Cloud KMS) as there is no information about Azure Key Vault or GCP Cloud KMS in the provided context.",
+      "retrieved_ids": [
+        "944ba8ba-2676-4bc6-92c2-1b29bbc25101",
+        "8cf9342c-f14d-404b-aca9-9756a2b513c2",
+        "ba1a1e0e-f46d-4694-95c5-bd5ca2a5e3a8",
+        "5517c373-4d7f-43d0-b6c3-e3d2308bfe05",
+        "fc45e0ef-56d2-4c71-89f8-67deb7cc1d0d"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.5,
+        "hallucination_rate": 0.5,
+        "suggested_rubric": 3,
+        "total_claims": 8,
+        "supported_claims": 4,
+        "contradicted_claims": 4,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 582.3
+      },
+      "latency": {
+        "query_processing_ms": 0.000700005330145359,
+        "retrieval_ms": 178.4371999965515,
+        "reranking_ms": 61.03850000363309,
+        "generation_ms": 0.18659999477677047,
+        "hallucination_check_ms": 585.4793000034988,
+        "total_ms": 825.1423000037903,
+        "benchmark_total_ms": 1407.768400007626
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:15.525957"
+    },
+    {
+      "query_id": "q194",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What is the Kubernetes-native approach to secrets management vs cloud provider solutions?",
+      "answer": "According to the provided documentation, Kubernetes has a native approach to secrets management, which involves generating a new Data Encryption Key (DEK) per encryption from a secret seed. This seed is rotated whenever the Key Encryption Key (KEK) is rotated [Source: k8s/Tasks/Do not use this for your own cluster! > Available providers {#providers}].\n\nIn contrast, cloud provider solutions are mentioned as an alternative approach, where AES-GCM keys are encrypted by KEKs according to configuration in Key Management Service (KMS) [Source: k8s/Tasks/Do not use this for your own cluster! > Available providers {#providers}]. This implies that Kubernetes has a built-in mechanism for secrets management, whereas cloud provider solutions rely on external services like KMS.\n\nIt's worth noting that the native approach is available as stable from Kubernetes v1.29 and can be configured using the KMS V2 provider [Source: k8s/Tasks/Do not use this for your own cluster! > Available providers {#providers}].\n\nKubernetes-native approach:\n- Generates a new DEK per encryption from a secret seed\n- Rotates the seed whenever the KEK is rotated\n\nCloud provider solution (e.g., AWS, Azure, GCP):\n- Encrypts AES-GCM keys by KEKs according to configuration in KMS",
+      "retrieved_ids": [
+        "b96e7d2d-2b19-46e3-acde-0b8dec912cc0",
+        "430d2121-8670-4db3-8dc8-d2fa779378c4",
+        "a30cc2cd-7127-47ec-9c60-74927163ed10",
+        "1921322c-a775-408f-b3a8-0a3038e5e1cb",
+        "d6866072-1e24-4354-8516-995bc825174d"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 5,
+        "supported_claims": 0,
+        "contradicted_claims": 0,
+        "unsupported_claims": 5,
+        "method": "nli",
+        "processing_time_ms": 297.1
+      },
+      "latency": {
+        "query_processing_ms": 0.000700005330145359,
+        "retrieval_ms": 120.81579999357928,
+        "reranking_ms": 60.82980000064708,
+        "generation_ms": 0.189200000022538,
+        "hallucination_check_ms": 300.2111999958288,
+        "total_ms": 482.04669999540783,
+        "benchmark_total_ms": 779.4113000127254
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:16.305701"
+    },
+    {
+      "query_id": "q195",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build",
+      "answer": "Based on the provided documentation, I can only compare Azure Pipelines (Azure DevOps) with Google Cloud Build, as there is no information about AWS CodePipeline in the context.\n\n**Azure Pipelines (Azure DevOps)**:\nAzure Pipelines lets you build, test, and deploy with continuous integration (CI) and continuous delivery (CD) using [Azure DevOps](/azure/devops/). YAML pipelines are defined using a YAML file in your repository. A step is the smallest building block of a pipeline and can be a script or task (prepackaged script).\n\n[Source: azure/Azure Functions/Continuous delivery with Azure Pipelines]\n\n**Google Cloud Build**:\nConfigure the application CI/CD pipeline to use Cloud Build, Cloud Deploy, and Artifact Registry. By using managed build and deployment services, you can optimize for security, scale, and simplicity.\n\n[Source: gcp/GKE/GKE overview > When to use GKE > Use cases for GKE]\n\nThere is no information about AWS CodePipeline in the provided context, so I cannot compare it with Azure Pipelines or Google Cloud Build.",
+      "retrieved_ids": [
+        "256ac724-e985-4c1c-a9bf-e70139513347",
+        "105f70de-a4e2-4dcd-8ac5-cb6a8041e982",
+        "eefeca12-3540-4e5d-a5e8-1cc7a8a44120",
+        "bf5c3ea9-d1ef-4847-a487-25b0fc09a14e",
+        "73aaa6e5-237b-4bba-a630-6e2e99770967"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.4,
+        "hallucination_rate": 0.6,
+        "suggested_rubric": 2,
+        "total_claims": 5,
+        "supported_claims": 2,
+        "contradicted_claims": 0,
+        "unsupported_claims": 3,
+        "method": "nli",
+        "processing_time_ms": 223.0
+      },
+      "latency": {
+        "query_processing_ms": 0.0005999900167807937,
+        "retrieval_ms": 207.6002999965567,
+        "reranking_ms": 56.62470000970643,
+        "generation_ms": 0.30750001315027475,
+        "hallucination_check_ms": 217.76249998947605,
+        "total_ms": 482.29559999890625,
+        "benchmark_total_ms": 705.5518999986816
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:17.011574"
+    },
+    {
+      "query_id": "q196",
+      "config_name": "cross_cloud_no_norm",
+      "question": "What are the equivalent networking concepts across AWS, Azure, and GCP for VPCs, subnets, and security groups?",
+      "answer": "Based on the provided documentation context:\n\n* **VPC (AWS)** is equivalent to **Virtual Network (Azure)** [Source: azure/Virtual Network/Azure Virtual Network concepts and best practices > Next steps]\n* **Subnet (AWS)** is equivalent to **subnet (Azure)** [Source: azure/Virtual Network/Plan virtual networks > Security]\n* **Security Group (AWS)** is equivalent to **Network Security Group (NSG) (Azure)** [Source: azure/Virtual Network/Plan virtual networks > Security]\n\nNote that the context does not provide direct information about GCP's equivalent networking concepts. However, based on general knowledge and industry standards, we can infer that:\n\n* **VPC (AWS)** is likely equivalent to **Virtual Private Cloud (GCP)**\n* **Subnet (AWS)** is likely equivalent to **Subnetwork (GCP)**\n* **Security Group (AWS)** is likely equivalent to **Firewall Rules (GCP)**\n\nPlease note that this answer is based on the provided context and might not be comprehensive or up-to-date. For more accurate information, please refer to the official documentation of each cloud provider.\n\nReferences:\n\n[Source: azure/Virtual Network/Azure Virtual Network concepts and best practices > Next steps]\n[Source: azure/Virtual Network/Plan virtual networks > Security]\n(Note: GCP references are not provided in the context)",
+      "retrieved_ids": [
+        "35b13efe-5340-4240-bac7-031b589f3eae",
+        "4eb7ca60-658d-40e8-bda9-923fae026821",
+        "0a02a4b2-aaf2-4bfe-9678-8caecaf63784",
+        "6003736c-012a-427b-8988-802ec123bc46",
+        "95c928e8-b7df-4484-b9a7-8e50f51b3757"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 1,
+        "supported_claims": 0,
+        "contradicted_claims": 1,
+        "unsupported_claims": 0,
+        "method": "nli",
+        "processing_time_ms": 80.6
+      },
+      "latency": {
+        "query_processing_ms": 0.000700005330145359,
+        "retrieval_ms": 176.07250000583008,
+        "reranking_ms": 64.83809999190271,
+        "generation_ms": 0.44770000386051834,
+        "hallucination_check_ms": 79.87380000122357,
+        "total_ms": 321.232800008147,
+        "benchmark_total_ms": 402.1681999875
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:17.414370"
+    },
+    {
+      "query_id": "q197",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare the event-driven architectures: AWS EventBridge vs Azure Event Grid vs Google Eventarc",
+      "answer": "**Comparison of Event-Driven Architectures**\n\nThe provided documentation does not contain a direct comparison of AWS EventBridge, Azure Event Grid, and Google Cloud Eventarc. However, we can extract information from each provider's documentation to provide a high-level overview.\n\n### AWS EventBridge\n\nAWS EventBridge is an event-driven service that allows you to connect applications, services, and microservices using events. It provides features such as event filtering, routing, and transformation. [Source: aws/EventBridge/latest/userguide/eb-what-is.html]\n\n**Example Use Case:** Automate your AWS services and respond automatically to system events such as application availability issues or resource changes.\n\n### Azure Event Grid\n\nAzure Event Grid is a fully managed event routing service that allows you to connect applications, services, and microservices using events. It provides features such as event filtering, routing, and transformation. [Source: azure/Azure Functions/Migrate AWS Lambda workloads to Azure Functions > Migration custom chat mode]\n\n**Example Use Case:** Migrate AWS Lambda workloads to Azure Functions by leveraging Event Grid for event-driven architecture.\n\n### Google Cloud Eventarc\n\nGoogle Cloud Eventarc is a fully managed event-driven service that allows you to connect applications, services, and microservices using events. It provides features such as event filtering, routing, and transformation. [Source: Not available in the provided context]\n\n**Note:** The documentation for Google Cloud Eventarc is not included in the provided context.\n\nBased on the available documentation, it appears that all three providers offer similar features and use cases for event-driven architectures. However, a direct comparison of their capabilities and limitations is not possible without additional information.\n\n**Recommendation:**\n\nFor a more comprehensive comparison, I recommend consulting each provider's official documentation and comparing their features, pricing, and scalability. Additionally, you may want to consider factors such as integration with other services, security, and support for specific use cases.\n\nReferences:\n\n* [Source: aws/EventBridge/latest/userguide/eb-what-is.html]\n* [Source: azure/Azure Functions/Migrate AWS Lambda workloads to Azure Functions > Migration custom chat mode]",
+      "retrieved_ids": [
+        "ac7c7cef-e769-416b-b162-d7cb4ba39258",
+        "43a60c62-d773-4670-bf1f-f76536d29b22",
+        "72d03818-a9e4-411e-b230-cdef5791cd43",
+        "516e12f5-10d1-4a35-9784-a7477a9551dc",
+        "c5f8e3f8-c878-476e-9d0e-38b732a1c814"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0909,
+        "hallucination_rate": 0.9091,
+        "suggested_rubric": 1,
+        "total_claims": 11,
+        "supported_claims": 1,
+        "contradicted_claims": 3,
+        "unsupported_claims": 7,
+        "method": "nli",
+        "processing_time_ms": 871.2
+      },
+      "latency": {
+        "query_processing_ms": 0.000700005330145359,
+        "retrieval_ms": 176.49169999640435,
+        "reranking_ms": 65.579300004174,
+        "generation_ms": 0.34529999538790435,
+        "hallucination_check_ms": 872.8300000075251,
+        "total_ms": 1115.2470000088215,
+        "benchmark_total_ms": 1986.777299985988
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:19.401594"
+    },
+    {
+      "query_id": "q198",
+      "config_name": "cross_cloud_no_norm",
+      "question": "How does the concept of availability zones differ across AWS, Azure, and GCP?",
+      "answer": "Based on the provided documentation, here's a comparison of the concept of Availability Zones (AZs) across AWS, Azure, and GCP:\n\n**AWS**: [Source: aws/EC2/Regions and Zones] Each Region is designed to be isolated from other Regions, achieving fault tolerance and stability. AZs are not explicitly mentioned as being isolated or having specific features.\n\n**Azure**: [Source: azure/Virtual Network/[Zonal]] Availability Zones are noted as a feature that requires regions with Availability Zones, but the documentation does not provide detailed information on how they differ from AWS.\n\n**GCP**: Not mentioned in the provided context. However, based on general knowledge, GCP also supports AZs, which are designed to provide high availability and reliability.\n\nIt's worth noting that while the context provides some information about AWS Availability Zones, it does not explicitly compare them with Azure or GCP. Therefore, a more detailed comparison would require additional documentation from each provider.\n\nTo summarize:\n\n* AWS: Regions are isolated, but AZs are not explicitly mentioned as having specific features.\n* Azure: Availability Zones are noted as a feature that requires regions with AZs, but details are limited.\n* GCP: Not mentioned in the provided context, but generally supports AZs for high availability and reliability.",
+      "retrieved_ids": [
+        "5ebd3d12-096e-45e4-8f9a-840fafba60fa",
+        "9b35094f-61a0-49e9-bb3b-479de1b9e42f",
+        "3d746159-fc22-46c2-a6e9-c5e6b3239d36",
+        "07d3d326-8966-4dc4-8f31-f5997e91894e",
+        "d1dc024f-65fc-48bb-a5c5-d5752d5dda7b"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.0,
+        "hallucination_rate": 1.0,
+        "suggested_rubric": 1,
+        "total_claims": 7,
+        "supported_claims": 0,
+        "contradicted_claims": 5,
+        "unsupported_claims": 2,
+        "method": "nli",
+        "processing_time_ms": 418.1
+      },
+      "latency": {
+        "query_processing_ms": 0.001100008375942707,
+        "retrieval_ms": 129.98220000008587,
+        "reranking_ms": 56.171999996877275,
+        "generation_ms": 0.37310000334400684,
+        "hallucination_check_ms": 426.4604999916628,
+        "total_ms": 612.9889000003459,
+        "benchmark_total_ms": 1031.3847999932477
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:20.433334"
+    },
+    {
+      "query_id": "q200",
+      "config_name": "cross_cloud_no_norm",
+      "question": "Compare the Kubernetes ingress controller options across cloud providers and CNCF projects",
+      "answer": "Based on the provided documentation, I can provide a comparison of Kubernetes ingress controller options across cloud providers and CNCF projects.\n\n**Kubernetes Ingress Controller Options**\n\nAccording to [Source: k8s/Concepts/Using multiple Ingress controllers], Kubernetes supports multiple ingress controllers, including:\n\n* HAProxy\n* Wallarm Ingress Controller (WAAP and API Security capabilities)\n* Other ingress controllers that operate slightly differently\n\n[Source: k8s/Concepts/Using multiple Ingress controllers] notes that ideally all ingress controllers should fulfill the specification, but it's essential to review each controller's documentation for caveats.\n\n**Cloud Provider-Specific Ingress Controllers**\n\nThe provided documentation does not explicitly mention cloud provider-specific ingress controllers. However, [Source: k8s/Tasks/Background] mentions that cloud providers can integrate deeply with Kubernetes using the cloud-controller-manager, which allows them to evolve independently from the core Kubernetes code.\n\n**CNCF Projects and Ingress Controllers**\n\nThere is no specific information in the provided documentation about CNCF projects and their ingress controllers. However, [Source: k8s/Concepts/{{% heading \"whatsnext\" %}}] mentions that organizations can tailor their clusters to specific needs by balancing factors such as operational complexity, performance, and management overhead.\n\n**Comparison of Ingress Controller Options**\n\nBased on the provided documentation, here is a comparison of Kubernetes ingress controller options across cloud providers and CNCF projects:\n\n| Option | Description |\n| --- | --- |\n| HAProxy | Supported ingress controller with its own specification |\n| Wallarm Ingress Controller | WAAP and API Security capabilities, supported ingress controller |\n| Other ingress controllers | Operate slightly differently, review documentation for caveats |\n\nNote that this comparison is limited to the provided documentation and may not be exhaustive.\n\n**Cloud Providers**\n\nSince there is no specific information about cloud provider-specific ingress controllers in the provided documentation, I cannot provide a detailed comparison of ingress controller options across different cloud providers. However, [Source: k8s/Tasks/Background] mentions that cloud providers can integrate deeply with Kubernetes using the cloud-controller-manager.\n\nIn summary, based on the provided documentation, there are multiple ingress controller options available in Kubernetes, including HAProxy and Wallarm Ingress Controller. The comparison of ingress controller options across cloud providers and CNCF projects is limited due to the lack of specific information about cloud provider-specific ingress controllers.",
+      "retrieved_ids": [
+        "b96e7d2d-2b19-46e3-acde-0b8dec912cc0",
+        "ecd12ba6-c109-441f-bcc7-dff8a15f48c2",
+        "0ae40278-6993-46e5-9c12-1db80821854d",
+        "f023106c-9db5-4e7c-815a-e0997a5fd5f0",
+        "b1a66cf9-52bf-4b6a-b8d6-3ca43340df63"
+      ],
+      "relevant_ids": [],
+      "retrieval_metrics": {},
+      "generation_metrics": {},
+      "hallucination_metrics": {
+        "faithfulness": 0.1667,
+        "hallucination_rate": 0.8333,
+        "suggested_rubric": 1,
+        "total_claims": 6,
+        "supported_claims": 1,
+        "contradicted_claims": 3,
+        "unsupported_claims": 2,
+        "method": "nli",
+        "processing_time_ms": 431.6
+      },
+      "latency": {
+        "query_processing_ms": 0.000700005330145359,
+        "retrieval_ms": 149.80959999957122,
+        "reranking_ms": 61.148699998739175,
+        "generation_ms": 0.31879999733064324,
+        "hallucination_check_ms": 439.0698999923188,
+        "total_ms": 650.34769999329,
+        "benchmark_total_ms": 1082.3640000016894
+      },
+      "error": null,
+      "timestamp": "2026-03-04T18:06:21.516103"
+    }
+  ],
+  "timestamp": "2026-03-04T18:06:21.516804"
+}

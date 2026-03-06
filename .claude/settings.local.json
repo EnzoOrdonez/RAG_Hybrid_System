@@ -9,7 +9,24 @@
       "Bash(python scripts/build_index.py:*)",
       "Bash(python:*)",
       "Bash(nvidia-smi:*)",
-      "Bash(HF_HUB_OFFLINE=1 python scripts/build_index.py:*)"
+      "Bash(HF_HUB_OFFLINE=1 python scripts/build_index.py:*)",
+      "Bash(find:*)",
+      "Bash(ls -la \"C:\\\\Users\\\\enziz\\\\Projects\\\\hybrid-rag-system\\\\data\"\" 2>/dev/null || echo \"data dir may be empty \")",
+      "Bash(xargs -I {} sh -c 'echo \"\"File: {}\"\"; head -50 \"\"{}\"\"')",
+      "Bash(git clone:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ollama list:*)",
+      "Bash(powershell.exe -Command \"Get-Command ollama -ErrorAction SilentlyContinue | Select-Object Source\")",
+      "Bash(curl:*)",
+      "Bash(echo:*)",
+      "Bash(git status:*)",
+      "Bash(wc -l /c/Users/enziz/Projects/hybrid-rag-system/data/evaluation/*.json)",
+      "Bash(wc -l /c/Users/enziz/Projects/hybrid-rag-system/src/**/*.py)",
+      "Bash(du -sh /c/Users/enziz/Projects/hybrid-rag-system/data/*)",
+      "Bash(powershell -Command \"Get-Process python -ErrorAction SilentlyContinue | Select-Object Id, CPU, StartTime, CommandLine | Format-List\")",
+      "Bash(powershell -Command \"Get-Process -Name python* -ErrorAction SilentlyContinue | Format-Table Id, ProcessName, StartTime -AutoSize\")"
     ]
   }
 }
