@@ -51,4 +51,23 @@ Durante 1.3, al renombrar la prosa "Cross-cloud terminology normalization contri
 
 Decisión documentada aquí por transparencia; si el usuario considera que fue fuera de alcance, revertir con `git revert` el commit `fix(flag-160,124)` o hacer patch puntual.
 
+### A4 — `scripts/compute_retrieval_metrics.py` tiene un pipeline estadístico paralelo sin BH-FDR
+
+Audit §3 Módulo 3 ya documentó la duplicación de sistemas de métricas entre `src/evaluation/retrieval_metrics.py` y `scripts/compute_retrieval_metrics.py`. Al aplicar Flag 103/108 noté que el impacto es más profundo:
+
+`scripts/compute_retrieval_metrics.py:182-215` implementa su propio `run_statistical_tests` que:
+- Calcula Cohen's d con pooled SD para muestras INDEPENDIENTES (fórmula de audit Flag 21), no d_z ni d_av. Los datos son pareados (mismas queries, distintos sistemas).
+- No aplica BH/Holm.
+- Emite la salida a `experiments/results/exp8/retrieval_metrics.json:statistical_tests` — que es exactamente el campo que el paper termina citando.
+
+Mi patch en `src/evaluation/statistical_analysis.py` agrega BH-FDR + Holm correctamente, pero la siguiente corrida de `compute_retrieval_metrics.py` **seguiría** produciendo `statistical_tests` sin corrección y con d-incorrecto.
+
+**Efecto práctico**: para cerrar Flag 108 a nivel de artefacto público del paper, hay que:
+(a) Deprecar `scripts/compute_retrieval_metrics.py:run_statistical_tests` y hacer que invoque `run_all_comparisons` + `apply_corrections_to_results` de `statistical_analysis.py`, o
+(b) Re-implementar BH/Holm + d_av dentro de `scripts/compute_retrieval_metrics.py`.
+
+Opción (a) es mejor arquitectura (elimina duplicación Módulo 3). Effort ~1-2h.
+
+**No lo aplico en Fase 1** porque el plan explícito del paso 1.4 indica únicamente `src/evaluation/statistical_analysis.py` como archivo objetivo. Flag 108 queda parcialmente cerrado: la infraestructura está lista, pero el script productor del JSON reportado no la usa todavía.
+
 ---

@@ -44,6 +44,11 @@ class StatisticalResult:
         is_significant: bool,
         n_samples: int,
         meets_thesis_threshold: bool = False,
+        p_bh: Optional[float] = None,
+        sig_bh: Optional[bool] = None,
+        p_holm: Optional[float] = None,
+        sig_holm: Optional[bool] = None,
+        correction_family_size: Optional[int] = None,
     ):
         self.metric_name = metric_name
         self.system_a = system_a
@@ -66,9 +71,16 @@ class StatisticalResult:
         self.n_samples = n_samples
         # Thesis requires at least medium effect size (|d| >= 0.5)
         self.meets_thesis_threshold = meets_thesis_threshold
+        # Multiple-comparison correction (populated by
+        # apply_corrections_to_results). None until then.
+        self.p_bh = p_bh
+        self.sig_bh = sig_bh
+        self.p_holm = p_holm
+        self.sig_holm = sig_holm
+        self.correction_family_size = correction_family_size
 
     def to_dict(self) -> Dict:
-        return {
+        d = {
             "metric": self.metric_name,
             "system_a": self.system_a,
             "system_b": self.system_b,
@@ -78,6 +90,7 @@ class StatisticalResult:
             "std_b": round(self.std_b, 4),
             "improvement": round(self.improvement, 4),
             "improvement_pct": round(self.improvement_pct, 2),
+            "p_raw": self.p_value,
             "p_value": round(self.p_value, 6),
             "test": self.test_name,
             "is_normal_a": self.is_normal_a,
@@ -90,6 +103,15 @@ class StatisticalResult:
             "significant": self.is_significant,
             "n": self.n_samples,
         }
+        if self.p_bh is not None:
+            d["p_bh"] = self.p_bh
+            d["sig_bh"] = bool(self.sig_bh)
+        if self.p_holm is not None:
+            d["p_holm"] = self.p_holm
+            d["sig_holm"] = bool(self.sig_holm)
+        if self.correction_family_size is not None:
+            d["correction_family_size"] = self.correction_family_size
+        return d
 
     def summary(self) -> str:
         """Human-readable summary."""
@@ -243,6 +265,86 @@ def cohens_d(scores_a: List[float], scores_b: List[float]) -> Tuple[float, str]:
         label = "large"
 
     return float(d), label
+
+
+def apply_multiple_comparison_correction(
+    pvalues: List[float],
+    method: str = "fdr_bh",
+    alpha: float = 0.05,
+) -> Tuple[List[float], List[bool]]:
+    """
+    Apply a multiple-comparison correction across a family of p-values.
+
+    Uses statsmodels.stats.multitest.multipletests. Intended to be applied
+    globally across ALL comparisons in a family (e.g., 3 systems x 4
+    metrics = 12 tests for the exp8 retrieval-metrics analysis), NOT
+    per-metric, per audit §15.2 Flag 108 and §16 Module 16 recompute.
+
+    Args:
+        pvalues: Raw two-sided p-values from pairwise tests, in any fixed
+            order. The order is preserved in the returned arrays, so the
+            caller can zip them back onto their originating comparisons.
+        method: "fdr_bh" (Benjamini-Hochberg, recommended) or "holm".
+        alpha: Significance threshold after correction.
+
+    Returns:
+        (p_adjusted, is_significant) as two lists the same length as
+        pvalues, in the same order.
+    """
+    from statsmodels.stats.multitest import multipletests
+
+    if not pvalues:
+        return [], []
+
+    reject, p_adjusted, _, _ = multipletests(
+        pvalues,
+        alpha=alpha,
+        method=method,
+    )
+    return list(p_adjusted), list(reject)
+
+
+def apply_corrections_to_results(
+    results: List["StatisticalResult"],
+    alpha: float = 0.05,
+) -> List["StatisticalResult"]:
+    """
+    In-place: annotate each StatisticalResult with BH and Holm corrected
+    p-values computed across the whole family of results passed in.
+
+    This is the integration point for audit §21.5 T0.8. Callers that
+    serialize `results` to JSON after this call will emit each comparison
+    with its `p_bh`, `sig_bh`, `p_holm`, `sig_holm` alongside its
+    `metric`, `system_a`, `system_b` identifiers — so downstream consumers
+    can identify each row without assuming array order.
+
+    Args:
+        results: List of StatisticalResult from `run_all_comparisons`
+            (or any equivalent pairwise run). Corrections are applied
+            across ALL entries in this list as a single family.
+        alpha: Post-correction significance threshold.
+
+    Returns:
+        The same list (mutated), for convenient chaining.
+    """
+    if not results:
+        return results
+
+    raw = [r.p_value for r in results]
+    p_bh, sig_bh = apply_multiple_comparison_correction(
+        raw, method="fdr_bh", alpha=alpha
+    )
+    p_holm, sig_holm = apply_multiple_comparison_correction(
+        raw, method="holm", alpha=alpha
+    )
+    family_size = len(results)
+    for r, pb, sb, ph, sh in zip(results, p_bh, sig_bh, p_holm, sig_holm):
+        r.p_bh = float(pb)
+        r.sig_bh = bool(sb)
+        r.p_holm = float(ph)
+        r.sig_holm = bool(sh)
+        r.correction_family_size = family_size
+    return results
 
 
 def bootstrap_ci(
@@ -423,6 +525,11 @@ def run_all_comparisons(
                 seed=seed,
             )
             all_results.append(result)
+
+    # Per audit §21.5 T0.8: apply Benjamini-Hochberg FDR correction across
+    # the whole family of comparisons before returning, so downstream
+    # reporting has both `p_raw` and `p_bh` per labeled comparison.
+    apply_corrections_to_results(all_results, alpha=alpha)
 
     return all_results
 
