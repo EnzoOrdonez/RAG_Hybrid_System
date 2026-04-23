@@ -186,3 +186,89 @@ Tras la revisión inicial del branch, el usuario aprobó cerrar 3 de las 5 adden
 
 ---
 
+## Fase 2 — Fix NLI + seeds + re-run script (camino crítico)
+
+- **Branch**: `fix/phase-2-nli-and-seeds`
+- **Base**: `main` @ `270ee58` (tras merge de Fase 1 preservando commits individuales)
+- **Commits**:
+  - `c4d6a55` fix(flag-135): apply softmax to NLI cross-encoder predictions
+  - `bf71a94` fix(flag-138): rewrite NLI aggregation to use max-per-class, no early exit
+  - `b29c3a2` fix(flag-137,140): exclude method="none" from faithfulness aggregates, add n_effective
+  - `793e7b0` feat(flag-152,153,155): global seed propagation + Ollama seed option
+  - `b1aff17` chore: add rerun_post_fixes.sh script for Phase 3 preparation
+
+### Flags procesados
+
+| Flag | Fuente | Archivo | Status |
+|------|--------|---------|--------|
+| 135 | audit §19.1 | `src/generation/hallucination_detector.py:275` | FIJADO: `apply_softmax=True` |
+| 138 | audit §19.4 | `src/generation/hallucination_detector.py:_nli_matching` | FIJADO: max-per-class Honovich 2022 rule; early-exit bug removido |
+| 137 | audit §19.3 | `src/evaluation/benchmark_runner.py:_save_aggregated_metrics` | FIJADO: filter `method in {none,error}` + `hall_n_effective` field |
+| 140 | audit §19.6 | idem | FIJADO (mismo fix que 137) |
+| 136 | audit §19.2 (lateral) | idem | INCLUIDO: claim counts absolutos (total/supported/contradicted/unsupported_claims) emitidos en aggregated_metrics.json |
+| 152 | audit §20.1 | `src/utils/reproducibility.py` + `benchmark_runner.py` | FIJADO: `set_all_seeds` aplicado en `__init__` y `run_experiment` |
+| 153 | audit §20.2 | `scripts/rerun_post_fixes.sh` | PARCIAL: script exporta `PYTHONHASHSEED=42`; in-process hash() randomization solo se puede fijar al startup del intérprete (documentado en `ensure_hashseed_at_startup`) |
+| 155 | audit §20.4 | `src/generation/llm_manager.py:_generate_ollama` | FIJADO: `"seed": self.seed` en options dict |
+| 156 | audit §20.5 (lateral) | `requirements.txt` | NO tocado en Fase 2 (Tier 2/Fase 6) |
+
+### Síntomas confirmados (zero-trust)
+
+| Síntoma esperado | Comando verificación | Resultado |
+|------------------|----------------------|-----------|
+| `hallucination_detector.py:275` sin `apply_softmax` | Read | ✓ pre-fix: `predict(pairs, batch_size=32, show_progress_bar=False,)` |
+| `hallucination_detector.py:291-299` tie-break con guard `!= "supported"` | Read | ✓ pre-fix: early exit confirmado |
+| `benchmark_runner.py:569-579` aggregate faith/hall_rate sobre todos los valid, sin filter method | Read | ✓ pre-fix: flat mean sin filter |
+| `benchmark_runner.py:120` sólo almacena `self.seed=seed`, sin `set_all_seeds` | Grep | ✓ pre-fix: 0 llamadas a random/numpy/torch seeding |
+| `llm_manager.py:306-313` options dict sin `"seed"` | Read | ✓ pre-fix: solo temperature + num_predict |
+| `sentence-transformers` versión soporta `apply_softmax` | Python inspect | ✓ 5.2.3, `predict` params incluye `apply_softmax` |
+
+### Discrepancias vs plan
+
+1. **Plan especificaba `sentence-transformers==5.4.1`** pero el env tiene `5.2.3`. `apply_softmax` parameter ya existe en 5.2.3 — el fix funciona. El pin exacto se resuelve en Fase 6.
+2. **Plan §2.5 mencionaba `.sh` o `.ps1`**; escrito `.sh` (shell disponible en el env del usuario). Si se necesita `.ps1` para PowerShell nativo, hacer traducción en Fase 6.
+3. **Plan paso 2.4 pedía verificar `bit-identidad del score` en smoke NLI**. Movido a smoke_test_nli.py (requiere red para bajar el modelo — correr manual). Smoke autónomo `smoke_nli_aggregation.py` cubre la lógica de agregación sin red.
+
+### Addenda (síntomas nuevos no documentados, NO corregidos sin aprobación)
+
+Archivo: `paper/audit_findings_cc_addenda.md`.
+
+_Sin addenda nuevas en Fase 2 — las 5 anteriores (A1-A5) ya cerradas/diferidas._
+
+### Tests post-fix
+
+| Test | Script | Resultado |
+|------|--------|-----------|
+| `set_all_seeds(42)` reproducible across random/numpy/torch, rechaza seed<0, escribe `PYTHONHASHSEED` | `scripts/audit/smoke_seeds.py` | ✅ 3/3 PASS |
+| `LLMManager(seed=N)` persiste `self.seed`; `_generate_ollama` pasa `seed` al dict de options | idem | ✅ 2/2 PASS |
+| `BenchmarkRunner(seed=99)` llama `set_all_seeds(99)` al `__init__` | idem | ✅ PASS |
+| `_nli_matching` agrega por max-per-class: 5 casos (mixed signal contradice, consistent support, ambos bajo threshold, ambos cross con contr>ent, ambos cross con ent>contr) | `scripts/audit/smoke_nli_aggregation.py` (mock NLI) | ✅ 5/5 PASS |
+| `_save_aggregated_metrics` filtra method=none/error, emite `hall_n_effective`, reproduce tabla audit §19.3 a 1e-3 | `scripts/audit/smoke_hall_n_effective.py` (200 QueryResult sintéticos por sistema) | ✅ 6/6 PASS (BM25/Semantic/Hibrido match targets 0.331/0.352/0.325; filter delta +4.35 a +4.54 pts per system) |
+| `smoke_test_nli.py` extendido con assertions post-softmax (entailment > 0.7 / contradiction > 0.7 / softmax sum ≈ 1.0) | `scripts/audit/smoke_test_nli.py` | ⏳ requiere red huggingface.co — correr manual |
+| Script `rerun_post_fixes.sh` sintaxis válida + incluye pre-flight checks de marcadores de fix | `bash -n scripts/rerun_post_fixes.sh` | ✅ PASS |
+
+### Guard de Fase 2 respetado (re-verificado contra scope explícito)
+
+- `src/evaluation/results_exporter.py` — intacto (Fase 1 work; no tocar)
+- `src/evaluation/statistical_analysis.py` — intacto (Fase 1 work)
+- `scripts/compute_retrieval_metrics.py` — intacto
+- `paper/overleaf_ready/main.tex` — intacto
+
+### Dependencias
+
+Sin nuevas dependencias en Fase 2. `statsmodels` ya agregado en Fase 1.
+
+### Comandos pendientes para el usuario
+
+1. **Revisión externa del branch `fix/phase-2-nli-and-seeds`** antes de merge a `main`.
+2. **NO ejecutar `scripts/rerun_post_fixes.sh` desde Claude Code** — el usuario lo corre manualmente en su GPU (RTX 3060 Laptop, 24-48h wall time).
+3. **Antes del re-run**: (a) merge de Fase 2 a `main`, (b) `export PYTHONHASHSEED=42` en la shell del re-run, (c) confirmar que `data/llm_cache/` y `experiments/results/exp{5,6,7,8,8b}/checkpoint_*.json` se pueden borrar sin perder trabajo único.
+4. **Correr `python scripts/audit/smoke_test_nli.py` manualmente** con red a huggingface.co disponible — valida apply_softmax + label order + obvious-pair thresholds post-fix antes del re-run largo.
+5. **Notificar a Claude Code** cuando los re-runs terminen para empezar Fase 3 (regenerar figuras y tablas desde los JSONs nuevos).
+
+### Total de commits en `fix/phase-2-nli-and-seeds`
+
+5 (4 fixes/features + 1 chore script). Pendiente de merge. NO mergear sin revisión externa.
+
+---
+
+
