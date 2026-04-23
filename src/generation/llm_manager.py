@@ -102,12 +102,19 @@ class LLMManager:
         cache_enabled: bool = True,
         max_retries: int = 3,
         timeout: int = 60,
+        seed: int = 42,
     ):
         self.provider = provider
         self.model = model
         self.cache_enabled = cache_enabled
         self.max_retries = max_retries
         self.timeout = timeout
+        # Audit §20.4 Flag 155: Ollama's `options.seed` makes sampling
+        # deterministic for a fixed (prompt, temperature, seed). Without
+        # this the LLM was non-deterministic even at temperature=0.1
+        # and the published faithfulness numbers depended on the local
+        # disk cache state.
+        self.seed = seed
 
         # Resolve from config shortnames
         if model in LLM_CONFIGS:
@@ -309,6 +316,11 @@ class LLMManager:
                 options={
                     "temperature": temperature,
                     "num_predict": max_tokens,
+                    # Audit §20.4 Flag 155. Without this seed the LLM
+                    # sampling was non-deterministic across runs and
+                    # the cache became a load-bearing part of the
+                    # "reproducibility" claim.
+                    "seed": self.seed,
                 },
             )
         except Exception as e:

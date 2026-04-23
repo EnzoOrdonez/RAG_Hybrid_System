@@ -251,15 +251,33 @@ class HallucinationDetector:
         chunk_texts: List[str],
         chunk_ids: List[str],
     ) -> List[ClaimDetail]:
-        """Match claims against evidence using NLI model."""
+        """
+        Match each claim against all retrieved chunks using NLI and
+        aggregate per the Honovich et al. 2022 *TRUE* rule:
+
+            max_ent   = max(entailment_prob  over all chunks)
+            max_contr = max(contradiction_prob over all chunks)
+
+            if max_ent   > ENTAILMENT_THRESHOLD and max_ent > max_contr:
+                supported   (evidence chunk = argmax_ent)
+            elif max_contr > CONTRADICTION_THRESHOLD:
+                contradicted (evidence chunk = argmax_contr)
+            else:
+                unsupported
+
+        Closes audit §19.4 Flag 138. The previous implementation
+        short-circuited on the first chunk whose entailment probability
+        crossed the threshold and then refused to reconsider contradictions
+        from later chunks (guarded by `best_status != "supported"`). With
+        five retrieved chunks and a mis-calibrated NLI (pre-Flag 135) the
+        probability that at least one chunk crossed the threshold by
+        noise was ~0.93, producing near-universal "supported" labels
+        that overstated faithfulness.
+        """
         results = []
 
         for claim in claims:
-            best_status = "unsupported"
-            best_score = 0.0
-            best_chunk_id = None
-
-            # Build pairs for batch prediction
+            # Build pairs for batch prediction.
             pairs = [(chunk_text, claim) for chunk_text in chunk_texts]
 
             if not pairs:
@@ -271,45 +289,82 @@ class HallucinationDetector:
                 continue
 
             try:
-                # NLI model returns [contradiction, entailment, neutral] scores
+                # [contradiction_prob, entailment_prob, neutral_prob] per pair,
+                # post-softmax (see Flag 135 fix in the previous commit).
                 scores = self.nli_model.predict(
                     pairs,
                     batch_size=32,
                     show_progress_bar=False,
+                    apply_softmax=True,
                 )
-
-                for i, score_set in enumerate(scores):
-                    # score_set: [contradiction, entailment, neutral]
-                    if hasattr(score_set, '__len__') and len(score_set) == 3:
-                        contradiction_score = float(score_set[0])
-                        entailment_score = float(score_set[1])
-                    else:
-                        # Single score (some models return just similarity)
-                        entailment_score = float(score_set)
-                        contradiction_score = 0.0
-
-                    if entailment_score > self.ENTAILMENT_THRESHOLD and entailment_score > best_score:
-                        best_status = "supported"
-                        best_score = entailment_score
-                        best_chunk_id = chunk_ids[i] if i < len(chunk_ids) else None
-                    elif contradiction_score > self.CONTRADICTION_THRESHOLD and best_status != "supported":
-                        if contradiction_score > best_score:
-                            best_status = "contradicted"
-                            best_score = contradiction_score
-                            best_chunk_id = chunk_ids[i] if i < len(chunk_ids) else None
-
             except Exception as e:
-                logger.warning("NLI prediction failed for claim, using keyword fallback: %s", e)
-                # Fallback to keyword for this claim
-                detail = self._keyword_match_single(claim, chunk_texts, chunk_ids)
-                results.append(detail)
+                logger.warning(
+                    "NLI prediction failed for claim, using keyword fallback: %s",
+                    e,
+                )
+                results.append(
+                    self._keyword_match_single(claim, chunk_texts, chunk_ids)
+                )
                 continue
+
+            best_ent = -1.0
+            best_ent_idx = -1
+            best_contr = -1.0
+            best_contr_idx = -1
+
+            for i, score_set in enumerate(scores):
+                # score_set: [contradiction, entailment, neutral]
+                if hasattr(score_set, "__len__") and len(score_set) == 3:
+                    contradiction_score = float(score_set[0])
+                    entailment_score = float(score_set[1])
+                else:
+                    # Single-score models (rare): treat as similarity =
+                    # entailment, no contradiction signal.
+                    entailment_score = float(score_set)
+                    contradiction_score = 0.0
+
+                if entailment_score > best_ent:
+                    best_ent = entailment_score
+                    best_ent_idx = i
+                if contradiction_score > best_contr:
+                    best_contr = contradiction_score
+                    best_contr_idx = i
+
+            # Honovich 2022 TRUE decision rule.
+            if (
+                best_ent > self.ENTAILMENT_THRESHOLD
+                and best_ent > best_contr
+            ):
+                status = "supported"
+                nli_score = best_ent
+                chunk_idx = best_ent_idx
+            elif best_contr > self.CONTRADICTION_THRESHOLD:
+                status = "contradicted"
+                nli_score = best_contr
+                chunk_idx = best_contr_idx
+            else:
+                status = "unsupported"
+                # For reporting, surface the strongest signal observed so
+                # that downstream analysis can see how close the claim
+                # came to either threshold.
+                if best_ent >= best_contr:
+                    nli_score = best_ent
+                    chunk_idx = best_ent_idx
+                else:
+                    nli_score = best_contr
+                    chunk_idx = best_contr_idx
+
+            best_chunk_id = (
+                chunk_ids[chunk_idx]
+                if 0 <= chunk_idx < len(chunk_ids)
+                else None
+            )
 
             results.append(ClaimDetail(
                 claim_text=claim,
-                status=best_status,
+                status=status,
                 evidence_chunk_id=best_chunk_id,
-                nli_score=round(best_score, 4),
+                nli_score=round(nli_score, 4),
             ))
 
         return results

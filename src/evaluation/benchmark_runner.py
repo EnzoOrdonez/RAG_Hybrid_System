@@ -119,6 +119,13 @@ class BenchmarkRunner:
         self.query_timeout = query_timeout
         self.seed = seed
 
+        # Audit §20.1 Flag 152: propagate seed to random/numpy/torch/cuDNN
+        # at construction. Previously self.seed was stored but never
+        # applied — the "reproducible" claim in experiment_configs.py
+        # line 5 was operationally false.
+        from src.utils.reproducibility import set_all_seeds
+        set_all_seeds(self.seed)
+
         # Shared resources (loaded once)
         self._hybrid_indices = {}
         self._llm_manager = None
@@ -158,7 +165,11 @@ class BenchmarkRunner:
         if self._llm_manager is None or self._llm_manager.model != model:
             try:
                 from src.generation.llm_manager import LLMManager
-                self._llm_manager = LLMManager(provider=provider, model=model)
+                # Audit §20.4 Flag 155: propagate seed to Ollama so
+                # sampling is deterministic for a given (prompt, seed).
+                self._llm_manager = LLMManager(
+                    provider=provider, model=model, seed=self.seed,
+                )
             except Exception as e:
                 logger.warning("LLM manager unavailable: %s", e)
                 self._llm_manager = None
@@ -338,10 +349,17 @@ class BenchmarkRunner:
         max_q = max_queries or experiment_config.max_queries
         queries = queries[:max_q]
 
+        # Audit §20.1 Flag 152: re-seed at the start of every experiment
+        # so that running multiple experiments in one process does not
+        # let RNG state drift between them.
+        from src.utils.reproducibility import set_all_seeds
+        exp_seed = getattr(experiment_config, "seed", self.seed)
+        set_all_seeds(exp_seed)
+
         logger.info(
-            "=" * 60 + "\nStarting experiment: %s (%s)\nConfigs: %d | Queries: %d\n" + "=" * 60,
+            "=" * 60 + "\nStarting experiment: %s (%s)\nConfigs: %d | Queries: %d | seed=%d\n" + "=" * 60,
             exp_id, experiment_config.name,
-            len(experiment_config.pipeline_configs), len(queries),
+            len(experiment_config.pipeline_configs), len(queries), exp_seed,
         )
 
         all_results = {}
@@ -566,17 +584,75 @@ class BenchmarkRunner:
                     agg[f"gen_{key}_mean"] = float(np.mean(values))
                     agg[f"gen_{key}_std"] = float(np.std(values))
 
-            # Aggregate hallucination metrics
+            # Aggregate hallucination metrics.
+            # Audit §19.3 Flag 137 + §19.6 Flag 140: queries whose
+            # hallucination detector returned method="none" (no claims
+            # extracted, empty response, or no retrieved chunks) or
+            # method="error" (NLI crashed) carry a synthetic
+            # faithfulness=1.0 or 0.0 that is NOT a measurement. Those
+            # rows must be excluded before averaging — their inclusion
+            # inflates or deflates the mean by ~4-5 points depending on
+            # distribution (see audit §19.3 table).
+            EXCLUDED_METHODS = {"none", "error"}
+
+            effective_hall = [
+                r for r in valid
+                if r.hallucination_metrics
+                and r.hallucination_metrics.get("method") not in EXCLUDED_METHODS
+            ]
+            n_total_hall = sum(1 for r in valid if r.hallucination_metrics)
+            n_effective_hall = len(effective_hall)
+            n_excluded_hall = n_total_hall - n_effective_hall
+
+            # Method-mix diagnostic: count each method in `valid`, so the
+            # reader of aggregated_metrics.json can see how many queries
+            # went through real NLI vs keyword fallback vs none/error.
+            method_counts: Dict[str, int] = {}
+            for r in valid:
+                if not r.hallucination_metrics:
+                    continue
+                m = r.hallucination_metrics.get("method", "unknown")
+                method_counts[m] = method_counts.get(m, 0) + 1
+
+            agg["hall_n_total"] = n_total_hall
+            agg["hall_n_effective"] = n_effective_hall
+            agg["hall_n_excluded_none_error"] = n_excluded_hall
+            agg["hall_method_counts"] = method_counts
+
+            # faithfulness / hallucination_rate over EFFECTIVE results only.
             hall_keys = ["faithfulness", "hallucination_rate"]
             for key in hall_keys:
                 values = [
-                    r.hallucination_metrics.get(key, 0)
-                    for r in valid
-                    if r.hallucination_metrics and key in r.hallucination_metrics
+                    r.hallucination_metrics[key]
+                    for r in effective_hall
+                    if key in r.hallucination_metrics
                 ]
                 if values:
                     agg[f"hall_{key}_mean"] = float(np.mean(values))
                     agg[f"hall_{key}_std"] = float(np.std(values))
+                    agg[f"hall_{key}_n"] = len(values)
+
+            # Claim-count aggregates (audit §19.2 Flag 136: report
+            # absolute claim counts, not just ratios, so the asymmetry
+            # between systems is visible). Kept unfiltered — a query
+            # with method="none" has total_claims=0 which is legitimate
+            # count data, not synthetic.
+            count_keys = [
+                "total_claims",
+                "supported_claims",
+                "contradicted_claims",
+                "unsupported_claims",
+            ]
+            for key in count_keys:
+                values = [
+                    r.hallucination_metrics[key]
+                    for r in valid
+                    if r.hallucination_metrics
+                    and key in r.hallucination_metrics
+                ]
+                if values:
+                    agg[f"hall_{key}_mean"] = float(np.mean(values))
+                    agg[f"hall_{key}_sum"] = int(sum(values))
 
             # Aggregate latency
             latency_records = [r.latency for r in valid if r.latency]
