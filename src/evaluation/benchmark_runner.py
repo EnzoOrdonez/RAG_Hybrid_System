@@ -119,6 +119,13 @@ class BenchmarkRunner:
         self.query_timeout = query_timeout
         self.seed = seed
 
+        # Audit §20.1 Flag 152: propagate seed to random/numpy/torch/cuDNN
+        # at construction. Previously self.seed was stored but never
+        # applied — the "reproducible" claim in experiment_configs.py
+        # line 5 was operationally false.
+        from src.utils.reproducibility import set_all_seeds
+        set_all_seeds(self.seed)
+
         # Shared resources (loaded once)
         self._hybrid_indices = {}
         self._llm_manager = None
@@ -158,7 +165,11 @@ class BenchmarkRunner:
         if self._llm_manager is None or self._llm_manager.model != model:
             try:
                 from src.generation.llm_manager import LLMManager
-                self._llm_manager = LLMManager(provider=provider, model=model)
+                # Audit §20.4 Flag 155: propagate seed to Ollama so
+                # sampling is deterministic for a given (prompt, seed).
+                self._llm_manager = LLMManager(
+                    provider=provider, model=model, seed=self.seed,
+                )
             except Exception as e:
                 logger.warning("LLM manager unavailable: %s", e)
                 self._llm_manager = None
@@ -338,10 +349,17 @@ class BenchmarkRunner:
         max_q = max_queries or experiment_config.max_queries
         queries = queries[:max_q]
 
+        # Audit §20.1 Flag 152: re-seed at the start of every experiment
+        # so that running multiple experiments in one process does not
+        # let RNG state drift between them.
+        from src.utils.reproducibility import set_all_seeds
+        exp_seed = getattr(experiment_config, "seed", self.seed)
+        set_all_seeds(exp_seed)
+
         logger.info(
-            "=" * 60 + "\nStarting experiment: %s (%s)\nConfigs: %d | Queries: %d\n" + "=" * 60,
+            "=" * 60 + "\nStarting experiment: %s (%s)\nConfigs: %d | Queries: %d | seed=%d\n" + "=" * 60,
             exp_id, experiment_config.name,
-            len(experiment_config.pipeline_configs), len(queries),
+            len(experiment_config.pipeline_configs), len(queries), exp_seed,
         )
 
         all_results = {}
