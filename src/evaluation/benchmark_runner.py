@@ -566,17 +566,75 @@ class BenchmarkRunner:
                     agg[f"gen_{key}_mean"] = float(np.mean(values))
                     agg[f"gen_{key}_std"] = float(np.std(values))
 
-            # Aggregate hallucination metrics
+            # Aggregate hallucination metrics.
+            # Audit §19.3 Flag 137 + §19.6 Flag 140: queries whose
+            # hallucination detector returned method="none" (no claims
+            # extracted, empty response, or no retrieved chunks) or
+            # method="error" (NLI crashed) carry a synthetic
+            # faithfulness=1.0 or 0.0 that is NOT a measurement. Those
+            # rows must be excluded before averaging — their inclusion
+            # inflates or deflates the mean by ~4-5 points depending on
+            # distribution (see audit §19.3 table).
+            EXCLUDED_METHODS = {"none", "error"}
+
+            effective_hall = [
+                r for r in valid
+                if r.hallucination_metrics
+                and r.hallucination_metrics.get("method") not in EXCLUDED_METHODS
+            ]
+            n_total_hall = sum(1 for r in valid if r.hallucination_metrics)
+            n_effective_hall = len(effective_hall)
+            n_excluded_hall = n_total_hall - n_effective_hall
+
+            # Method-mix diagnostic: count each method in `valid`, so the
+            # reader of aggregated_metrics.json can see how many queries
+            # went through real NLI vs keyword fallback vs none/error.
+            method_counts: Dict[str, int] = {}
+            for r in valid:
+                if not r.hallucination_metrics:
+                    continue
+                m = r.hallucination_metrics.get("method", "unknown")
+                method_counts[m] = method_counts.get(m, 0) + 1
+
+            agg["hall_n_total"] = n_total_hall
+            agg["hall_n_effective"] = n_effective_hall
+            agg["hall_n_excluded_none_error"] = n_excluded_hall
+            agg["hall_method_counts"] = method_counts
+
+            # faithfulness / hallucination_rate over EFFECTIVE results only.
             hall_keys = ["faithfulness", "hallucination_rate"]
             for key in hall_keys:
                 values = [
-                    r.hallucination_metrics.get(key, 0)
-                    for r in valid
-                    if r.hallucination_metrics and key in r.hallucination_metrics
+                    r.hallucination_metrics[key]
+                    for r in effective_hall
+                    if key in r.hallucination_metrics
                 ]
                 if values:
                     agg[f"hall_{key}_mean"] = float(np.mean(values))
                     agg[f"hall_{key}_std"] = float(np.std(values))
+                    agg[f"hall_{key}_n"] = len(values)
+
+            # Claim-count aggregates (audit §19.2 Flag 136: report
+            # absolute claim counts, not just ratios, so the asymmetry
+            # between systems is visible). Kept unfiltered — a query
+            # with method="none" has total_claims=0 which is legitimate
+            # count data, not synthetic.
+            count_keys = [
+                "total_claims",
+                "supported_claims",
+                "contradicted_claims",
+                "unsupported_claims",
+            ]
+            for key in count_keys:
+                values = [
+                    r.hallucination_metrics[key]
+                    for r in valid
+                    if r.hallucination_metrics
+                    and key in r.hallucination_metrics
+                ]
+                if values:
+                    agg[f"hall_{key}_mean"] = float(np.mean(values))
+                    agg[f"hall_{key}_sum"] = int(sum(values))
 
             # Aggregate latency
             latency_records = [r.latency for r in valid if r.latency]
