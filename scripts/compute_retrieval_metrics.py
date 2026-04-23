@@ -179,40 +179,104 @@ def avg_relevance_score(retrieved_ids, relevance_scores, k):
 # Statistical tests
 # ============================================================
 
+def run_pairwise_tests_with_corrections(
+    all_per_query,
+    system_names,
+    metric_names,
+):
+    """
+    Run all-pairwise paired tests across every (metric, system-pair) and
+    apply Benjamini-Hochberg FDR + Holm-Bonferroni corrections GLOBALLY
+    across the whole family of comparisons.
+
+    Delegates the actual statistics (Wilcoxon / Cohen's d_z / bootstrap CI)
+    to src.evaluation.statistical_analysis.compare_systems, closing audit
+    §15.2 Flag 108 (no multiple-comparison correction anywhere) and §3.5
+    Flag 21 (wrong Cohen's d formula: the previous implementation here
+    used pooled-SD for independent samples while the data is paired).
+
+    Args:
+        all_per_query: {system_name: {metric_name: [per-query scores]}}
+        system_names: ordered list of system names; pairs are generated
+            with i<j to avoid duplicates.
+        metric_names: metrics to compare (e.g., ndcg@5, mrr, precision@5,
+            avg_score@5).
+
+    Returns:
+        Nested dict {metric -> {"systemA vs systemB" -> test_result_dict}}
+        where each test_result_dict contains both the legacy keys
+        (p_value, cohens_d, mean_1, mean_2, diff, significant,
+        meets_thesis_threshold) kept for backward compatibility with
+        generate_latex_table and the CLI print loop, AND the new
+        correction keys (p_raw, p_bh, sig_bh, p_holm, sig_holm,
+        correction_family_size).
+    """
+    from src.evaluation.statistical_analysis import (
+        apply_corrections_to_results,
+        compare_systems,
+    )
+
+    flat_results = []
+    index_keys = []  # parallel to flat_results: (metric, pair_str)
+
+    for metric in metric_names:
+        for i, s1 in enumerate(system_names):
+            for s2 in system_names[i + 1:]:
+                scores_a = all_per_query[s1][metric]
+                scores_b = all_per_query[s2][metric]
+                sr = compare_systems(
+                    metric_name=metric,
+                    system_a_name=s1,
+                    system_b_name=s2,
+                    scores_a=scores_a,
+                    scores_b=scores_b,
+                )
+                flat_results.append(sr)
+                index_keys.append((metric, f"{s1} vs {s2}"))
+
+    # Apply BH-FDR and Holm-Bonferroni globally across ALL comparisons in
+    # the family (not per-metric), matching the m16 recompute in
+    # paper/audit_outputs/exp8_stats_corrected.csv.
+    apply_corrections_to_results(flat_results)
+
+    nested = {}
+    for sr, (metric, pair_str) in zip(flat_results, index_keys):
+        d = sr.to_dict()
+        # Backward-compatible aliases for existing downstream consumers
+        # (generate_latex_table reads cohens_d and significant; the CLI
+        # print loop at the bottom of main() reads cohens_d, p_value,
+        # meets_thesis_threshold).
+        d["cohens_d"] = d.get("effect_size", 0.0)
+        d["mean_1"] = d["mean_a"]
+        d["mean_2"] = d["mean_b"]
+        d["diff"] = float(d["mean_a"] - d["mean_b"])
+        nested.setdefault(metric, {})[pair_str] = d
+
+    return nested
+
+
 def run_statistical_tests(per_query_metrics, system_names, metric_name):
-    """Run Wilcoxon signed-rank test between all system pairs."""
-    from scipy.stats import wilcoxon
+    """
+    DEPRECATED: retained only for callers that invoke one metric at a
+    time. Internally delegates to run_pairwise_tests_with_corrections;
+    the returned dict for a single metric is missing the BH/Holm
+    correction because corrections require the full family of tests to
+    be known in advance.
 
-    results = {}
-    for i, s1 in enumerate(system_names):
-        for s2 in system_names[i + 1:]:
-            vals1 = per_query_metrics[s1]
-            vals2 = per_query_metrics[s2]
-            diff = np.array(vals1) - np.array(vals2)
-
-            # Cohen's d
-            pooled_std = np.sqrt((np.std(vals1) ** 2 + np.std(vals2) ** 2) / 2)
-            cohens_d = (np.mean(vals1) - np.mean(vals2)) / pooled_std if pooled_std > 0 else 0.0
-
-            # Wilcoxon (requires non-zero differences)
-            nonzero = diff[diff != 0]
-            if len(nonzero) >= 10:
-                stat, p_value = wilcoxon(nonzero)
-            else:
-                stat, p_value = 0.0, 1.0
-
-            results[f"{s1} vs {s2}"] = {
-                "metric": metric_name,
-                "mean_1": float(np.mean(vals1)),
-                "mean_2": float(np.mean(vals2)),
-                "diff": float(np.mean(diff)),
-                "cohens_d": float(cohens_d),
-                "wilcoxon_stat": float(stat),
-                "p_value": float(p_value),
-                "significant": bool(p_value < 0.05),
-                "meets_thesis_threshold": bool(abs(cohens_d) >= 0.5),
-            }
-    return results
+    New callers should use run_pairwise_tests_with_corrections with the
+    complete list of metrics. Audit §15.2 Flag 108 + Addenda A4.
+    """
+    logger.warning(
+        "run_statistical_tests is deprecated; per-metric invocation cannot "
+        "apply family-wide BH/Holm corrections. Use "
+        "run_pairwise_tests_with_corrections with all metrics at once."
+    )
+    nested = run_pairwise_tests_with_corrections(
+        {s: {metric_name: per_query_metrics[s]} for s in system_names},
+        system_names,
+        [metric_name],
+    )
+    return nested.get(metric_name, {})
 
 
 # ============================================================
@@ -515,19 +579,26 @@ def main():
     print("STATISTICAL TESTS (Wilcoxon signed-rank)")
     print("-" * 80)
 
-    all_stats = {}
-    for metric in ["ndcg@5", "avg_score@5", "precision@5", "mrr"]:
-        per_q = {s: all_per_query[s][metric] for s in system_names}
-        stats = run_statistical_tests(per_q, system_names, metric)
-        all_stats[metric] = stats
+    # Single call across the whole family (4 metrics x 3 pairs = 12 tests)
+    # so Benjamini-Hochberg FDR + Holm corrections are applied globally.
+    metric_family = ["ndcg@5", "avg_score@5", "precision@5", "mrr"]
+    all_stats = run_pairwise_tests_with_corrections(
+        all_per_query, system_names, metric_family
+    )
 
-        for pair, result in stats.items():
-            sig = "***" if result["p_value"] < 0.001 else "**" if result["p_value"] < 0.01 else "*" if result["p_value"] < 0.05 else "n.s."
+    for metric in metric_family:
+        for pair, result in all_stats[metric].items():
+            p_raw = result["p_value"]
+            p_bh = result.get("p_bh", p_raw)
+            sig = "***" if p_raw < 0.001 else "**" if p_raw < 0.01 else "*" if p_raw < 0.05 else "n.s."
+            sig_bh_marker = "+" if result.get("sig_bh") else " "
             effect = "large" if abs(result["cohens_d"]) >= 0.8 else "medium" if abs(result["cohens_d"]) >= 0.5 else "small"
             thesis = "MET" if result["meets_thesis_threshold"] else "NOT MET"
             print(
                 f"  {metric:<15} {pair:<50} "
-                f"d={result['cohens_d']:+.3f} ({effect}) p={result['p_value']:.4f} {sig} | thesis={thesis}"
+                f"d={result['cohens_d']:+.3f} ({effect}) "
+                f"p={p_raw:.4f} {sig}  "
+                f"p_bh={p_bh:.4f} [{sig_bh_marker}]  | thesis={thesis}"
             )
 
     # 9. Save outputs
