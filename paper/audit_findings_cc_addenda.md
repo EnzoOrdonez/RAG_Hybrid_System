@@ -70,4 +70,20 @@ Opción (a) es mejor arquitectura (elimina duplicación Módulo 3). Effort ~1-2h
 
 **No lo aplico en Fase 1** porque el plan explícito del paso 1.4 indica únicamente `src/evaluation/statistical_analysis.py` como archivo objetivo. Flag 108 queda parcialmente cerrado: la infraestructura está lista, pero el script productor del JSON reportado no la usa todavía.
 
+### A5 — Menciones residuales de "Docker" en main.tex fuera del abstract
+
+El plan Fase 1 paso 1.5 especificó renombrar únicamente la mención del abstract L70-71. Tras el fix, un `grep -n -i 'docker' paper/overleaf_ready/main.tex` muestra 2 menciones restantes:
+
+```
+101: \item An open-source reference implementation (code, data, Docker) for one-command replication.
+173: [PLACEHOLDER: Hardware (CPU/GPU/RAM). Software: Python 3.11, sentence-transformers, faiss-cpu, Ollama. Docker image + Zenodo DOI + GitHub URL. Fixed random seeds.]
+```
+
+- **L101**: contribution bullet con el mismo claim falso que el abstract. Flag 159 aplica igual — no existe Dockerfile en el repo.
+- **L173**: placeholder del §IV.D "Implementation and Reproducibility" que se reescribe en Fase 5.
+
+**No se corrigen en Fase 1** porque la instrucción explícita del usuario fue "remueve el claim 'Docker artifacts' del abstract en Fase 1" (condición (d) de la aprobación). L101 es contribución, no abstract; L173 es placeholder para Fase 5.
+
+Pendiente de decisión: aplicar el mismo rename en L101 como parte de Fase 5 (reescritura de contribuciones), o como patch puntual si el usuario lo pide antes.
+
 ---
