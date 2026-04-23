@@ -536,11 +536,26 @@ class ResultsExporter:
 
             for c_idx, config_name in enumerate(config_names):
                 query_results = configs[config_name].get("results", [])
-                values = [
-                    r.get("retrieval_metrics", {}).get(metric_key, 0)
-                    for r in query_results
-                    if not r.get("error")
-                ]
+                values = []
+                for r in query_results:
+                    if r.get("error"):
+                        continue
+                    if "retrieval_metrics" not in r:
+                        raise KeyError(
+                            f"fig_end_to_end[{experiment_id}]: query result for "
+                            f"config '{config_name}' is missing 'retrieval_metrics'. "
+                            f"Upstream results.json was written without retrieval "
+                            f"evaluation — re-run benchmark with retrieval metrics "
+                            f"enabled before regenerating this figure."
+                        )
+                    rm = r["retrieval_metrics"]
+                    if metric_key not in rm:
+                        raise KeyError(
+                            f"fig_end_to_end[{experiment_id}]: metric '{metric_key}' "
+                            f"missing from retrieval_metrics for config "
+                            f"'{config_name}'. Available: {sorted(rm.keys())}"
+                        )
+                    values.append(rm[metric_key])
                 if values:
                     mean = np.mean(values)
                     std = np.std(values, ddof=1) if len(values) > 1 else 0
@@ -652,7 +667,16 @@ class ResultsExporter:
         for config in configs:
             row = {"config_name": config}
             for col in columns[1:]:
-                row[col] = data[config].get(col, 0)
+                if col not in data[config]:
+                    raise KeyError(
+                        f"_export_experiment_latex[{experiment_id}]: required "
+                        f"metric '{col}' missing from aggregated_metrics.json for "
+                        f"config '{config}'. This aggregate was produced without "
+                        f"retrieval metrics — regenerate by re-running the "
+                        f"experiment with retrieval evaluation enabled. "
+                        f"Available keys: {sorted(data[config].keys())}"
+                    )
+                row[col] = data[config][col]
             table_data.append(row)
 
         self.export_latex_table(
