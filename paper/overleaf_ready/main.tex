@@ -60,14 +60,14 @@ for technical documentation spanning Amazon Web Services, Microsoft Azure,
 and Google Cloud Platform. CloudRAG combines sparse lexical retrieval (BM25)
 with dense semantic retrieval (BGE-large-en-v1.5) fused through Reciprocal
 Rank Fusion, a cross-encoder reranking stage (ms-marco-MiniLM-L-12-v2), a
-cross-cloud terminology normalization module, and a Natural Language
-Inference based faithfulness filter. On a 200-query expert-curated test
+dictionary-based cross-provider query expansion module, and a Natural
+Language Inference based faithfulness filter. On a 200-query expert-curated test
 set, the hybrid pipeline achieves P@1 = 0.930, MRR = 0.942, and
 NDCG@5 = 0.736, outperforming BM25 (P@1 = 0.785) and dense retrieval alone
 (P@1 = 0.860) with statistical significance (Wilcoxon signed-rank test,
-p < 0.0001; Cohen's d = 0.626). Cross-cloud terminology normalization
-contributes a 16.8 percent gain in answer faithfulness over an unnormalized
-baseline. We release the dataset, code, evaluation harness, and Docker
+p < 0.0001; Cohen's d = 0.626). Dictionary-based cross-provider query
+expansion contributes a 16.8 percent gain in answer faithfulness over an
+unexpanded baseline. We release the dataset, code, evaluation harness, and Docker
 artifacts to enable direct replication.
 \end{abstract}
 
@@ -94,8 +94,8 @@ in an external corpus retrieved at inference time~\cite{lewis2020rag,gao2024rags
 
 Our contributions are:
 \begin{itemize}
-  \item A reproducible multi-cloud QA benchmark covering AWS, Azure, and GCP (200 expert queries with normalized gold evidence, plus 30 additional cross-cloud queries used in the normalization ablation).
-  \item A cross-cloud terminology normalization module operating at both index and query time.
+  \item A reproducible multi-cloud QA benchmark covering AWS, Azure, and GCP (200 expert queries with gold evidence, plus 30 additional cross-cloud queries used in the query-expansion ablation).
+  \item A curated cross-provider terminology dictionary used to expand the lexical (BM25) side of hybrid retrieval at query time; the same dictionary annotates chunks with metadata at index time (this metadata is currently reserved for downstream analysis and is not consumed by the retrieval stack).
   \item A systematic ablation isolating the contribution of BM25, dense retrieval, RRF fusion, cross-encoder reranking, and NLI-based faithfulness filtering.
   \item An empirical trade-off study across three open-weight LLMs (Llama 3.1 8B, Mistral 7B, Qwen 2.5 7B) deployed locally via Ollama.
   \item An open-source reference implementation (code, data, Docker) for one-command replication.
@@ -142,8 +142,8 @@ Our contributions are:
 \subsection{Corpus Construction and Preprocessing}
 \textcolor{blue}{[PLACEHOLDER: Data sources: official AWS, Azure, GCP documentation. Crawler spec, deduplication, language filter. Corpus size, token counts, per-provider distribution. Crawl timestamp for reproducibility.]}
 
-\subsection{Cross-Cloud Terminology Normalization}
-\textcolor{blue}{[PLACEHOLDER: Curated alias table (e.g., \{VPC, Virtual Network, VPC Network\} $\to$ canonical token). Applied symmetrically at ingest and query time. Include Table of representative mappings.]}
+\subsection{Cross-Cloud Terminology Dictionary and Query Expansion}
+\textcolor{blue}{[PLACEHOLDER: Describe the curated YAML dictionary (e.g., \{VPC, Virtual Network, VPC Network\} mapped to the same cross-provider concept). At query time the dictionary is used to expand the BM25 side of the hybrid retriever only; the dense (BGE) side receives the raw query, by design, so expansion does not degrade semantic matching. At index time the dictionary tags each chunk with cross-provider metadata, but neither BM25 nor FAISS consume these tags for scoring — they are retained for downstream analysis. Include a Table of representative mappings.]}
 
 \subsection{Chunking Strategy}
 \textcolor{blue}{[PLACEHOLDER: Adaptive 500-token chunks respecting section boundaries, code blocks, and tables; compare against fixed-size. Cite~\cite{mahmood2025azureiq,mahr2025shap,rahman2025techpdfs}.]}
@@ -196,12 +196,12 @@ Our contributions are:
 \label{fig:ablation}
 \end{figure}
 
-\subsection{Cross-Cloud Normalization Impact}
-\textcolor{blue}{[PLACEHOLDER: Insert Fig.~\ref{fig:crosscloud} (fig\_cross\_cloud\_improvement.png). Report +16.8\% faithfulness gain.]}
+\subsection{Cross-Provider Query Expansion Impact}
+\textcolor{blue}{[PLACEHOLDER: Insert Fig.~\ref{fig:crosscloud} (fig\_cross\_cloud\_improvement.png). Report +16.8\% faithfulness gain (subject to re-evaluation in Phase 4 with the calibrated NLI detector and Wilcoxon test).]}
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{fig_cross_cloud_improvement.png}}
-\caption{Impact of cross-cloud terminology normalization.}
+\caption{Impact of cross-provider query expansion.}
 \label{fig:crosscloud}
 \end{figure}
 

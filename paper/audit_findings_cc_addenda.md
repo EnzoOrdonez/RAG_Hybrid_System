@@ -28,4 +28,27 @@ Cada una está en una figura distinta (`fig_statistical_heatmap`, `fig_method_co
 
 **Recomendación (pendiente de aprobación)**: extender el fix a las 9 líneas adicionales, con mismo formato de `KeyError` diagnóstico. Effort estimado: 30-45 min. Ideal de aplicar en Fase 1 (mismo commit o commit separado `fix(flag-76-extended): raise on missing keys across all exporter figures`). **No lo aplico hasta que el usuario apruebe.**
 
+### A2 — Menciones residuales de "normalization" en placeholders de main.tex
+
+El plan Fase 1 paso 1.3 lista estos 6 puntos para renombrar a "query expansion": L68-69, L98, L145, L146, L199, L204. Todos aplicados en el commit `fix(flag-160,124)`.
+
+Tras aplicar, un `grep -n -i 'normaliz' paper/overleaf_ready/main.tex` muestra 3 menciones residuales, todas dentro de `[PLACEHOLDER: ...]` que serán reescritos en Fase 5:
+
+```
+93 : ...benchmarks... do not evaluate cross-cloud terminology normalization.
+122: ...Position the gap: none address cross-cloud terminology normalization.
+134: Describe 5 stages: (1) ingestion + normalization, (2) hybrid retrieval...
+```
+
+- L93 y L122 son **afirmaciones de gap de literatura** (Related Work). Si el framing del paper cambia de "terminology normalization" a "cross-provider query expansion", el gap-statement debería reformularse en Fase 5 o bien declararse que el gap es sobre ambos conceptos.
+- L134 es el **label del primer stage del pipeline** en el §III.A overview. Con la nueva narrativa (metadata tagging a nivel de índice, BM25 expansion a nivel query), el stage 1 debería llamarse "ingestion + dictionary-based tagging" o similar.
+
+No se modifican en esta fase — son prose nueva que corresponde a Fase 5. **Pendiente de redacción por el usuario en Fase 5; yo solo flagging.**
+
+### A3 — Abstract L63 también mencionaba "cross-cloud terminology normalization module"
+
+Durante 1.3, al renombrar la prosa "Cross-cloud terminology normalization contributes..." (L68-69) observé que la misma oración en el abstract (L62-64) describía el módulo con el mismo compound: *"a cross-cloud terminology normalization module"*. Esa línea específica no estaba en la enumeración de 6 puntos del plan. La renombré igualmente a *"a dictionary-based cross-provider query expansion module"* porque es el mismo claim arquitectónico en la misma oración del abstract; dejar solo 5 renombres y uno coherente hubiera dejado el abstract internamente inconsistente.
+
+Decisión documentada aquí por transparencia; si el usuario considera que fue fuera de alcance, revertir con `git revert` el commit `fix(flag-160,124)` o hacer patch puntual.
+
 ---
