@@ -1,7 +1,8 @@
 """
-Smoke test for Flags 25 and 26 from audit_findings.md.
+Smoke test for Flags 25, 26, and 135 from audit_findings.md.
 
-Resolves two questions about the NLI pipeline in hallucination_detector.py:
+Resolves three questions about the NLI pipeline in
+hallucination_detector.py:
 
   FLAG 25: Does sentence-transformers CrossEncoder.predict() return
            softmaxed probabilities or raw logits for nli-deberta-v3-small?
@@ -12,13 +13,15 @@ Resolves two questions about the NLI pipeline in hallucination_detector.py:
            order differs (e.g. [entailment, neutral, contradiction] in
            BART-MNLI style), the faithfulness metric is INVERTED.
 
+  FLAG 135: Post-fix validation — with apply_softmax=True, the obvious
+           entailment pair must give entailment > 0.7 (probability) and
+           the obvious contradiction pair must give contradiction > 0.7.
+
 Run with:
     python scripts/audit/smoke_test_nli.py
 
-Expected output: prints the label order from the model config and the
-raw outputs for three obviously entailed/neutral/contradicted pairs.
-Reads the 3 scores per pair; compare with your expectations to confirm
-the assumption at line 282 of hallucination_detector.py.
+Requires network access to huggingface.co for the first run (downloads
+~200MB nli-deberta-v3-small). Proxied sandboxes may fail to fetch.
 """
 
 from sentence_transformers import CrossEncoder
@@ -91,6 +94,76 @@ def main() -> None:
     print("Verify those indices match the 'MODEL CONFIG id2label' block "
           "above. If not, patch the indices before trusting any "
           "hallucination number in the paper.")
+
+    # -----------------------------------------------------------------
+    # FLAG 135 post-fix assertions: with apply_softmax=True, the threshold
+    # 0.7 is a probability threshold and obvious cases must cross it.
+    # -----------------------------------------------------------------
+    print("\n=== FLAG 135 POST-FIX ASSERTIONS (apply_softmax=True) ===")
+    POST_FIX_PAIRS = [
+        ("The capital of France is Paris.",
+         "Paris is the capital of France."),          # expect entailment > 0.7
+        ("The capital of France is Paris.",
+         "Paris is in Japan."),                        # expect contradiction > 0.7
+    ]
+    post_scores = model.predict(POST_FIX_PAIRS, apply_softmax=True)
+
+    # Resolve indices from the config (do not hard-code).
+    if not label_order:
+        print("  SKIP: cannot resolve id2label; run the sections above first.")
+        return
+    try:
+        contradiction_idx = label_order.index("contradiction")
+        entailment_idx = label_order.index("entailment")
+    except ValueError:
+        print(f"  SKIP: unexpected label_order {label_order}")
+        return
+
+    failures = []
+
+    pair_a, pair_b = POST_FIX_PAIRS
+    scores_a, scores_b = post_scores
+    ent_a = float(scores_a[entailment_idx])
+    contr_b = float(scores_b[contradiction_idx])
+    sum_a = float(sum(scores_a))
+    sum_b = float(sum(scores_b))
+
+    print(f"  pair A (entailment): entailment_prob={ent_a:.4f} "
+          f"(sum={sum_a:.4f})")
+    if ent_a <= 0.7:
+        failures.append(
+            f"FAIL: pair A entailment_prob={ent_a:.4f} <= 0.7. "
+            f"Expected > 0.7 after softmax."
+        )
+    else:
+        print(f"  PASS: pair A entailment_prob > 0.7 (post-softmax)")
+
+    print(f"  pair B (contradiction): contradiction_prob={contr_b:.4f} "
+          f"(sum={sum_b:.4f})")
+    if contr_b <= 0.7:
+        failures.append(
+            f"FAIL: pair B contradiction_prob={contr_b:.4f} <= 0.7. "
+            f"Expected > 0.7 after softmax."
+        )
+    else:
+        print(f"  PASS: pair B contradiction_prob > 0.7 (post-softmax)")
+
+    # Also verify the softmax sums to ~1.
+    for name, s in (("A", sum_a), ("B", sum_b)):
+        if abs(s - 1.0) > 1e-4:
+            failures.append(
+                f"FAIL: pair {name} softmax sum = {s:.6f} (expected ≈ 1.0)"
+            )
+        else:
+            print(f"  PASS: pair {name} softmax sum ≈ 1.0 ({s:.6f})")
+
+    if failures:
+        print("\n".join(failures))
+        raise AssertionError(
+            f"Flag 135 post-fix smoke failed: {len(failures)} assertion(s). "
+            "Do NOT trust faithfulness numbers in the next re-run."
+        )
+    print("\nFlag 135 post-fix smoke: ALL PASS.")
 
 
 if __name__ == "__main__":

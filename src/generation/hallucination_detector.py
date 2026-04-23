@@ -271,11 +271,18 @@ class HallucinationDetector:
                 continue
 
             try:
-                # NLI model returns [contradiction, entailment, neutral] scores
+                # NLI model returns [contradiction, entailment, neutral]
+                # probabilities (post-softmax). Audit §19.1 Flag 135:
+                # without apply_softmax=True the default activation for
+                # num_labels=3 cross-encoders in sentence-transformers >=2.3
+                # is Identity, so predict() would return raw logits and the
+                # 0.7 threshold below would be a logit threshold (roughly
+                # "lightly positive") instead of a probability threshold.
                 scores = self.nli_model.predict(
                     pairs,
                     batch_size=32,
                     show_progress_bar=False,
+                    apply_softmax=True,
                 )
 
                 for i, score_set in enumerate(scores):
