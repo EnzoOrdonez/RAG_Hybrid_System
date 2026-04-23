@@ -135,3 +135,54 @@ Verificado con `git diff main..HEAD --stat`: ninguno de esos archivos aparece.
 4. **Para Fase 2**: el usuario ejecutará manualmente el re-run de experimentos en su GPU (24-48h post-fix) cuando Fase 2 esté lista.
 
 ---
+
+## Addenda resueltos en Fase 1 (revisión intermedia)
+
+Tras la revisión inicial del branch, el usuario aprobó cerrar 3 de las 5 addenda antes del merge. Commits adicionales sobre el mismo branch `fix/phase-1-no-rerun`:
+
+| # | Addendum | Commit | Flags cerrados |
+|---|----------|--------|----------------|
+| 8 | **A1** — 9 instancias adicionales de `.get(..., 0)` silent zero en `results_exporter.py` | `06ab376` fix(flag-76-extended): raise on missing keys across all exporter figures | Flag 76 completo (cero `.get(..., 0)` restantes), Flag 94 (radar colapsando por silent skip) |
+| 9 | **A4** — pipeline estadístico paralelo en `scripts/compute_retrieval_metrics.py:182` sin BH ni d_av | `44af679` refactor(flag-108-full): delegate compute_retrieval_metrics stats to statistical_analysis | Flag 108 en artefacto público (`experiments/results/exp*/retrieval_metrics.json:statistical_tests`), Flag 21 (Cohen's d con pooled SD independiente vs datos pareados), Flag 22 (cutoff 10 arbitrario para Wilcoxon — delegación elimina el camino) |
+| 10 | **A5** — Docker claim fuera del abstract: L101 (contribución) | `d202f5f` fix(flag-159-extended): remove Docker claim from contributions bullet | Flag 159 en L101. L173 diferido a Fase 5 (placeholder). |
+
+### Addenda aprobados retroactivamente
+
+- **A3** — el rename de L63 "cross-cloud terminology normalization module" en el mismo commit que L68-69 es aceptado como scope correcto para coherencia del abstract.
+
+### Addenda diferidos a Fase 5
+
+- **A2** — 3 menciones residuales de "normalization" en placeholders `[PLACEHOLDER: ...]` de main.tex (L93 Related Work, L122 Domain RAG, L134 pipeline overview). Esos placeholders se reescriben como prosa técnica en Fase 5; los cambios pertenecen a esa fase.
+
+### Tests post-fix adicionales
+
+| Test | Script | Resultado |
+|------|--------|-----------|
+| Las 7 figuras restantes de ResultsExporter rechazan métricas faltantes con KeyError diagnóstico | `scripts/audit/smoke_fix_flag76.py` (9 cases) | ✅ 9/9 PASS |
+| `run_pairwise_tests_with_corrections` emite shape nested + p_bh/sig_bh/p_holm/sig_holm + labels por comparación | `scripts/audit/smoke_compute_retrieval_stats.py` | ✅ 6/6 PASS (shape 12 labeled; leaf keys completos; labels consistentes con nested path; family_size=12 global; BH monotónico; sig flags booleanos) |
+| Grep final: cero `.get(..., 0)` en `src/evaluation/results_exporter.py` | bash | ✅ 0 matches |
+| Grep final: una sola mención "Docker" en main.tex (L173 placeholder) | bash | ✅ |
+
+### Guard de Fase 2 — sin violaciones (re-verificado)
+
+- `src/generation/hallucination_detector.py` — intacto
+- `src/generation/llm_manager.py` — intacto
+- `src/evaluation/benchmark_runner.py` — intacto
+- `src/utils/reproducibility.py` — no creado
+
+### Estado final de addenda
+
+| # | Estado | Fase de resolución |
+|---|--------|---------------------|
+| A1 | CERRADO | Fase 1 commit 06ab376 |
+| A2 | DIFERIDO | Fase 5 (placeholders) |
+| A3 | APROBADO retroactivamente | Fase 1 commit 444fe62 |
+| A4 | CERRADO | Fase 1 commit 44af679 |
+| A5 | PARCIAL (L101 cerrado, L173 diferido) | Fase 1 commit d202f5f + Fase 5 para L173 |
+
+### Total de commits en `fix/phase-1-no-rerun`
+
+10 (1 chore + 9 fixes/features/refactors + 1 docs). Aún pendiente de merge. Esperar revisión externa completa antes de mergear a `main`.
+
+---
+
