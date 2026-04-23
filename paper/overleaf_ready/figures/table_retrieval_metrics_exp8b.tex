@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\caption{Cross-encoder based retrieval quality metrics (exp8, 200 queries)}
+\label{tab:retrieval-metrics}
+\begin{tabular}{lcccccc}
+\toprule
+Sistema & Prec@1 & Prec@3 & Prec@5 & MRR & NDCG@5 & Avg.~Score \\
+\midrule
+RAG Lexico & 0.785 & 0.732 & 0.718 & 0.828 & 0.554 & 1.903 \\
+RAG Semantico & 0.860 & 0.808 & 0.782 & 0.894 & 0.661 & 2.400 \\
+RAG Hibrido Propuesto & 0.930 & 0.888 & 0.851 & 0.942 & 0.736 & 2.879 \\
+\midrule
+\multicolumn{7}{l}{\footnotesize RAG Lexico (BM25) vs RAG Semantico (Dense): $d=-0.353$ (small), $p<0.05$} \\
+\multicolumn{7}{l}{\footnotesize RAG Lexico (BM25) vs RAG Hibrido Propuesto: $d=-0.626$ (medium), $p<0.05$} \\
+\multicolumn{7}{l}{\footnotesize RAG Semantico (Dense) vs RAG Hibrido Propuesto: $d=-0.282$ (small), $p<0.05$} \\
+\bottomrule
+\end{tabular}
+\end{table}
