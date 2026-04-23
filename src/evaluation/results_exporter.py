@@ -238,7 +238,16 @@ class ResultsExporter:
             for j, size in enumerate(sizes):
                 key = f"chunk_{strategy}_{size}"
                 if key in data:
-                    matrix[i][j] = data[key].get("ret_ndcg@5_mean", 0)
+                    if "ret_ndcg@5_mean" not in data[key]:
+                        raise KeyError(
+                            f"fig_chunking_heatmap[{experiment_id}]: config "
+                            f"'{key}' present in aggregated_metrics.json but "
+                            f"missing 'ret_ndcg@5_mean'. This experiment was "
+                            f"run without retrieval evaluation — re-run with "
+                            f"retrieval metrics enabled. "
+                            f"Available keys: {sorted(data[key].keys())}"
+                        )
+                    matrix[i][j] = data[key]["ret_ndcg@5_mean"]
 
         fig, ax = plt.subplots(figsize=FIGSIZE_SMALL)
         im = ax.imshow(matrix, cmap="YlOrRd", aspect="auto")
@@ -284,7 +293,16 @@ class ResultsExporter:
         colors = [COLORS["lexical"], COLORS["semantic"], COLORS["hybrid"], COLORS["accent"]]
 
         for i, method in enumerate(methods):
-            values = [data[method].get(m, 0) for m in metrics]
+            values = []
+            for m in metrics:
+                if m not in data[method]:
+                    raise KeyError(
+                        f"fig_retrieval_comparison[{experiment_id}]: metric "
+                        f"'{m}' missing from aggregated_metrics.json for "
+                        f"method '{method}'. "
+                        f"Available keys: {sorted(data[method].keys())}"
+                    )
+                values.append(data[method][m])
             offset = (i - len(methods) / 2 + 0.5) * width
             ax.bar(x + offset, values, width, label=method, color=colors[i % len(colors)])
 
@@ -310,8 +328,21 @@ class ResultsExporter:
             return
 
         configs = list(data.keys())
-        ndcg5 = [data[c].get("ret_ndcg@5_mean", 0) for c in configs]
-        recall5 = [data[c].get("ret_recall@5_mean", 0) for c in configs]
+        ndcg5 = []
+        recall5 = []
+        for c in configs:
+            for key in ("ret_ndcg@5_mean", "ret_recall@5_mean"):
+                if key not in data[c]:
+                    raise KeyError(
+                        f"fig_reranker_impact[{experiment_id}]: metric "
+                        f"'{key}' missing from aggregated_metrics.json for "
+                        f"config '{c}'. Audit §10 Flag 69 — exp4 currently "
+                        f"has no retrieval_metrics; re-run with retrieval "
+                        f"evaluation enabled before regenerating this figure. "
+                        f"Available keys: {sorted(data[c].keys())}"
+                    )
+            ndcg5.append(data[c]["ret_ndcg@5_mean"])
+            recall5.append(data[c]["ret_recall@5_mean"])
 
         x = np.arange(len(configs))
         width = 0.35
@@ -350,7 +381,25 @@ class ResultsExporter:
         ]
         labels = ["BM25", "+Dense", "+Reranker", "+Expansion", "+Normalization"]
 
-        values = [data.get(s, {}).get("ret_ndcg@5_mean", 0) for s in stages]
+        values = []
+        for s in stages:
+            if s not in data:
+                raise KeyError(
+                    f"fig_ablation_waterfall[{experiment_id}]: ablation stage "
+                    f"'{s}' missing from aggregated_metrics.json. All five "
+                    f"stages (bm25_only, +dense, +reranker, +expansion, "
+                    f"+normalization) must be present to draw the waterfall. "
+                    f"Available configs: {sorted(data.keys())}"
+                )
+            if "ret_ndcg@5_mean" not in data[s]:
+                raise KeyError(
+                    f"fig_ablation_waterfall[{experiment_id}]: stage '{s}' "
+                    f"present but missing 'ret_ndcg@5_mean'. Audit §10 Flag 69 "
+                    f"— exp6 currently has no retrieval_metrics; re-run with "
+                    f"retrieval evaluation enabled. "
+                    f"Available keys: {sorted(data[s].keys())}"
+                )
+            values.append(data[s]["ret_ndcg@5_mean"])
         deltas = [values[0]] + [values[i] - values[i-1] for i in range(1, len(values))]
 
         fig, ax = plt.subplots(figsize=FIGSIZE_WIDE)
@@ -404,15 +453,22 @@ class ResultsExporter:
             ("gen_rouge_l_mean", "ROUGE-L"),
         ]
 
-        # Only use metrics that have data
-        available_metrics = []
+        # Require every metric to be present in every model (no silent skip).
+        # Audit §13.5 Flag 94: the radar was collapsing to a single dimension
+        # because missing metrics were silently excluded. Now: if any model
+        # is missing any listed metric, raise — the caller must either
+        # re-run with the missing metric computed, or edit the metrics list.
         for key, label in metrics:
-            if any(data[m].get(key, 0) > 0 for m in models):
-                available_metrics.append((key, label))
-
-        if not available_metrics:
-            logger.warning("No metrics data available for LLM comparison radar")
-            return
+            for m in models:
+                if key not in data[m]:
+                    raise KeyError(
+                        f"fig_llm_comparison[{experiment_id}]: metric "
+                        f"'{key}' missing for model '{m}'. Either re-run "
+                        f"exp5 with this metric computed, or remove it from "
+                        f"the metrics list in fig_llm_comparison. "
+                        f"Available keys for '{m}': {sorted(data[m].keys())}"
+                    )
+        available_metrics = list(metrics)
 
         N = len(available_metrics)
         angles = np.linspace(0, 2 * np.pi, N, endpoint=False).tolist()
@@ -422,7 +478,7 @@ class ResultsExporter:
         colors = [COLORS["primary"], COLORS["secondary"], COLORS["accent"]]
 
         for i, model in enumerate(models):
-            values = [data[model].get(m[0], 0) for m in available_metrics]
+            values = [data[model][m[0]] for m in available_metrics]
             values += values[:1]
             ax.plot(angles, values, "o-", linewidth=2, label=model, color=colors[i % len(colors)])
             ax.fill(angles, values, alpha=0.15, color=colors[i % len(colors)])
@@ -460,7 +516,18 @@ class ResultsExporter:
                        COLORS["danger"], COLORS["neutral"]]
 
         for i, (key, label) in enumerate(stages):
-            values = np.array([data[c].get(key, 0) for c in configs])
+            stage_values = []
+            for c in configs:
+                if key not in data[c]:
+                    raise KeyError(
+                        f"fig_latency_breakdown[{experiment_id}]: latency "
+                        f"stage '{key}' missing from aggregated_metrics.json "
+                        f"for config '{c}'. A zero value is legitimate (stage "
+                        f"executed in 0ms); a missing key is not. "
+                        f"Available keys: {sorted(data[c].keys())}"
+                    )
+                stage_values.append(data[c][key])
+            values = np.array(stage_values)
             ax.bar(configs, values, bottom=bottom, label=label, color=stage_colors[i])
             bottom += values
 
@@ -492,7 +559,18 @@ class ResultsExporter:
         width = 0.35
 
         for i, config in enumerate(configs):
-            values = [data[config].get(m, 0) for m in metrics]
+            values = []
+            for m in metrics:
+                if m not in data[config]:
+                    raise KeyError(
+                        f"fig_cross_cloud_improvement[{experiment_id}]: "
+                        f"metric '{m}' missing from aggregated_metrics.json "
+                        f"for config '{config}'. Audit §14.8 Flag 105 — exp7 "
+                        f"currently has no retrieval_metrics; re-run with "
+                        f"retrieval evaluation enabled before regenerating. "
+                        f"Available keys: {sorted(data[config].keys())}"
+                    )
+                values.append(data[config][m])
             offset = (i - 0.5) * width
             color = COLORS["danger"] if "no_norm" in config else COLORS["secondary"]
             label = "Without Normalization" if "no_norm" in config else "With Normalization"

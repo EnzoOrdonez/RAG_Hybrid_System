@@ -86,7 +86,121 @@ def test_fig_end_to_end_raises_on_missing_metric() -> None:
         )
 
 
+def test_extended_figures_raise_on_missing_metric() -> None:
+    """
+    Flag 76-extended: all aggregated-data figures must raise KeyError, not
+    silently fabricate 0, when their required metrics are missing. Covers
+    the 9 additional call-sites listed in paper/audit_findings_cc_addenda.md
+    §A1 (lines 241, 287, 313, 314, 353, 410, 425, 463, 495).
+    """
+    exporter = ResultsExporter(
+        results_dir=str(REPO_ROOT / "experiments" / "results"),
+        output_dir=str(REPO_ROOT / "paper" / "overleaf_ready"),
+    )
+
+    # fig_chunking_heatmap: config present but missing ret_ndcg@5_mean.
+    # Patch _load_aggregated to return the poisoned payload.
+    original_loader = exporter._load_aggregated
+
+    try:
+        exporter._load_aggregated = lambda _: {
+            "chunk_fixed_300": {"config_name": "chunk_fixed_300"},
+        }
+        try:
+            exporter.fig_chunking_heatmap("smoke_exp")
+        except KeyError as exc:
+            assert "ret_ndcg@5_mean" in str(exc)
+            assert "chunk_fixed_300" in str(exc)
+            print("PASS: fig_chunking_heatmap raised on missing ret_ndcg@5_mean")
+        else:
+            raise AssertionError("FAIL: fig_chunking_heatmap did not raise")
+
+        # fig_retrieval_comparison: method present but missing metric.
+        exporter._load_aggregated = lambda _: {
+            "bm25": {"config_name": "bm25"},
+        }
+        try:
+            exporter.fig_retrieval_comparison("smoke_exp")
+        except KeyError as exc:
+            assert "ret_recall@5_mean" in str(exc) or "ret_precision" in str(exc) or "ret_ndcg@5_mean" in str(exc)
+            assert "bm25" in str(exc)
+            print("PASS: fig_retrieval_comparison raised on missing metric")
+        else:
+            raise AssertionError("FAIL: fig_retrieval_comparison did not raise")
+
+        # fig_reranker_impact: config missing ret_ndcg@5_mean / ret_recall@5_mean.
+        exporter._load_aggregated = lambda _: {
+            "rerank_mini12": {"config_name": "rerank_mini12"},
+        }
+        try:
+            exporter.fig_reranker_impact("smoke_exp")
+        except KeyError as exc:
+            assert "rerank_mini12" in str(exc)
+            assert "Flag 69" in str(exc) or "retrieval" in str(exc).lower()
+            print("PASS: fig_reranker_impact raised with audit cross-reference")
+        else:
+            raise AssertionError("FAIL: fig_reranker_impact did not raise")
+
+        # fig_ablation_waterfall: missing stage.
+        exporter._load_aggregated = lambda _: {
+            "ablation_bm25_only": {"ret_ndcg@5_mean": 0.5},
+            # Missing +dense, +reranker, +expansion, +normalization
+        }
+        try:
+            exporter.fig_ablation_waterfall("smoke_exp")
+        except KeyError as exc:
+            assert "ablation_+dense" in str(exc)
+            print("PASS: fig_ablation_waterfall raised on missing ablation stage")
+        else:
+            raise AssertionError("FAIL: fig_ablation_waterfall did not raise")
+
+        # fig_llm_comparison: model missing a declared metric.
+        exporter._load_aggregated = lambda _: {
+            "llama3.1": {"hall_faithfulness_mean": 0.4},
+            "mistral": {"hall_faithfulness_mean": 0.5},
+            # missing ret_ndcg@5_mean, gen_f1_token_mean, gen_rouge_l_mean
+        }
+        try:
+            exporter.fig_llm_comparison("smoke_exp")
+        except KeyError as exc:
+            assert "llama3.1" in str(exc) or "mistral" in str(exc)
+            print("PASS: fig_llm_comparison raised on any missing metric (no silent skip)")
+        else:
+            raise AssertionError("FAIL: fig_llm_comparison did not raise")
+
+        # fig_latency_breakdown: config missing a latency stage.
+        exporter._load_aggregated = lambda _: {
+            "cfg_a": {"lat_query_processing_ms_mean": 1.0},
+        }
+        try:
+            exporter.fig_latency_breakdown("smoke_exp")
+        except KeyError as exc:
+            assert "cfg_a" in str(exc)
+            assert "lat_" in str(exc)
+            print("PASS: fig_latency_breakdown raised on missing latency stage")
+        else:
+            raise AssertionError("FAIL: fig_latency_breakdown did not raise")
+
+        # fig_cross_cloud_improvement: config missing retrieval metric.
+        exporter._load_aggregated = lambda _: {
+            "cross_cloud_no_norm": {"config_name": "cross_cloud_no_norm"},
+            "cross_cloud_with_norm": {"config_name": "cross_cloud_with_norm"},
+        }
+        try:
+            exporter.fig_cross_cloud_improvement("smoke_exp")
+        except KeyError as exc:
+            assert "cross_cloud_no_norm" in str(exc) or "cross_cloud_with_norm" in str(exc)
+            print("PASS: fig_cross_cloud_improvement raised on missing metric")
+        else:
+            raise AssertionError(
+                "FAIL: fig_cross_cloud_improvement did not raise"
+            )
+    finally:
+        exporter._load_aggregated = original_loader
+
+
 if __name__ == "__main__":
     test_export_experiment_latex_raises_on_missing_key()
     test_fig_end_to_end_raises_on_missing_metric()
+    test_extended_figures_raise_on_missing_metric()
     print("\nAll smoke tests passed.")
