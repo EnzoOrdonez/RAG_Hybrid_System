@@ -400,5 +400,105 @@ Post-merge continuation en `main`: 1 merge commit + 3 commits (CSV replacement +
 
 ---
 
+## Fase 3 — Regenerar figuras y tablas desde datos post-fix
+
+- **Branch**: `fase-3-regenerate-figures`
+- **Base**: `main` @ 27eee1f (post Fase 2.5 continuation)
+- **Scope**: exp5, exp6, exp8, exp8b. exp3/exp4/exp7 fuera de alcance.
+- **Commits**:
+  - `d6171fa` feat(phase-3): add generate_phase3_artifacts.py + smoke_phase3_artifacts.py
+  - `bf4e5ba` data(phase-3): regenerate 10 artefacts with _phase3 suffix, 6 _pre_phase3 backups
+  - `<docs commit>` docs(phase-3): phase3_diff_report.md + correction_log Fase 3 entry
+
+### 10 artefactos regenerados
+
+| # | Output | Fuente JSON | Cambio clave |
+|---|--------|-------------|--------------|
+| 1 | `fig_llm_comparison_phase3.png` | exp5/aggregated_metrics.json (post-rerun) | Radar colapsado → bar chart 2 dims con n_effective/total anotado; llama3.1 0.188 (n=190/200), qwen 0.198 (189/200), mistral 0.216 (190/200) |
+| 2 | `fig_latency_breakdown_phase3.png` | exp8/aggregated_metrics.json | Stacked bars por pipeline stage (lat_* ortogonal al fix NLI) |
+| 3 | `fig_retrieval_metrics_phase3.png` | exp8/retrieval_metrics.json (Phase 2.5) | Bar chart post d_z + BH/Holm (box plot omitido — per-query no preservado) |
+| 4 | `fig_retrieval_metrics_exp8b_phase3.png` | exp8b/retrieval_metrics.json | idem |
+| 5 | `table_retrieval_metrics_phase3.tex` | exp8/retrieval_metrics.json | Caption cita `d_z` (Phase 2.5 paired) y `p_bh` BH-FDR family=12; cero `0.626` en el archivo |
+| 6 | `table_retrieval_metrics_exp8b_phase3.tex` | exp8b/retrieval_metrics.json | idem |
+| 7 | `table_exp5_faithfulness_phase3.tex` | exp5/aggregated_metrics.json | Columnas: config, hall_faithfulness ± std, hall_n_effective/total, lat (s). Único con n_effective populated |
+| 8 | `table_exp6_faithfulness_phase3.tex` | exp6/aggregated_metrics.json | Pre-fix intact; n_effective emite `--`; caption declara pre-Phase-2 NLI |
+| 9 | `table_exp8_faithfulness_phase3.tex` | exp8/aggregated_metrics.json | Pre-fix faithfulness; n_effective `--` (benchmark no re-run post Phase 2) |
+| 10 | `table_exp8b_faithfulness_phase3.tex` | exp8b/aggregated_metrics.json | idem |
+
+### Backups preservados (6, baselines pre-Phase-3)
+
+`fig_llm_comparison_pre_phase3.png`, `fig_latency_breakdown_pre_phase3.png`,
+`fig_retrieval_metrics_pre_phase3.png`, `fig_retrieval_metrics_exp8b_pre_phase3.png`,
+`table_retrieval_metrics_pre_phase3.tex`, `table_retrieval_metrics_exp8b_pre_phase3.tex`.
+
+Los 4 `table_expN_faithfulness` son net-new (no existían antes de Fase 3) — sin backup necesario.
+
+### Diferido a Fase 5 (inventariado, NO tocado)
+
+- `fig_ablation_waterfall.png` (exp6) — requiere reescritura narrativa sobre Δ-faithfulness (no hay retrieval_metrics.json para exp6).
+
+### Fuera de scope (no tocado)
+
+- `fig_end_to_end.png` (diagrama manual)
+- `fig_retrieval_comparison.png` (exp3)
+- `fig_reranker_impact.png` (exp4)
+- `fig_cross_cloud_improvement.png` (exp7 — Fase 4 decision)
+
+### Guard de whitelist — verificado
+
+`git diff --stat main..HEAD` (post Phase 3) muestra ÚNICAMENTE:
+- `scripts/generate_phase3_artifacts.py` (+)
+- `scripts/audit/smoke_phase3_artifacts.py` (+)
+- `paper/overleaf_ready/figures/*_phase3.{png,tex}` (+10)
+- `paper/overleaf_ready/figures/*_pre_phase3.{png,tex}` (+6)
+- `paper/phase3_diff_report.md` (+)
+- `paper/correction_log.md` (modified, append only)
+
+Cero cambios en: `main.tex`, `audit_findings.md`, `audit_outputs/`, `src/`, `experiments/results/`, `requirements.txt`, `setup.py`.
+
+### Hardcode inventory (read-only grep)
+
+- `paper/overleaf_ready/main.tex:68` — `Cohen's d = 0.626`. **NO TOCAR**. Se reescribe en Fase 5.
+- `paper/overleaf_ready/figures/table_retrieval_metrics.tex:14` — `$d=-0.626$`. Baseline legacy. Su reemplazo `table_retrieval_metrics_phase3.tex` no contiene `0.626`.
+- `paper/overleaf_ready/figures/table_retrieval_metrics_exp8b.tex:14` — idem.
+
+Ningún hardcode en scripts Python; los números en tablas/figuras regeneradas se derivan de los JSONs post-fix.
+
+### Tests post-fix
+
+| Test (# | Script | Resultado |
+|---|--------|-----------|
+| 1. 10 _phase3 files exist + size > 0 | `scripts/audit/smoke_phase3_artifacts.py` | ✅ PASS |
+| 2. 6 _pre_phase3 backups exist | idem | ✅ PASS |
+| 3. md5(fig_retrieval_metrics_phase3) ≠ md5(fig_retrieval_metrics_exp8b_phase3) | idem | ✅ PASS (Flag 92 closed) |
+| 4. `grep '0\.626'` on table_retrieval_metrics_phase3.tex → 0 | idem | ✅ PASS |
+| 5. `grep '0\.626'` on table_retrieval_metrics_exp8b_phase3.tex → 0 | idem | ✅ PASS |
+| 6. table_exp5_faithfulness_phase3.tex contains '190' AND '200' | idem | ✅ PASS |
+| 7. fig_llm_comparison_phase3.png size > 5 KB | idem | ✅ PASS (167027 B) |
+| 8. Every _phase3.tex has balanced \begin{table}/\end{table} | idem | ✅ PASS (6/6) |
+| 9. table_retrieval_metrics_phase3.tex contains 'd_z' or 'cohens_d_z' | idem | ✅ PASS |
+| 10. No _phase3 artefact contains '"hall_faithfulness_mean": 0' | idem | ✅ PASS |
+
+### Computación respetada
+
+- NO se corrió `compute_retrieval_metrics.py` pipeline completo.
+- NO se ejecutó cross-encoder scoring.
+- Solo se leyeron los 6 JSONs autoritativos ya existentes.
+
+### Comandos pendientes para el usuario
+
+1. **Revisión externa** del branch `fase-3-regenerate-figures`.
+2. **Decisión**: merge a `main` autorizado por el usuario (con `merge --no-ff` preservando los 3 commits individuales).
+3. **Fase 4**: autorización separada pendiente; decide destino de +16.8% sobre exp7 y declaración de Flag 17.
+4. **Fase 5**: reescritura de `main.tex` (incluye actualizar el `0.626` a `d_z=0.502` y referencias a los `_phase3` en lugar de los base names).
+
+### Total de commits en `fase-3-regenerate-figures`
+
+3 (feat + data + docs). Pendiente de merge; esperar review.
+
+---
+
+---
+
 
 
