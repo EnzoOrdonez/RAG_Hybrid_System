@@ -1,12 +1,12 @@
 """
-Query Processor - Preprocessing, classification, and expansion of user queries.
+Query Processor - Preprocessing, classification, and selective expansion.
 Detects provider, expands acronyms, and classifies query type.
 """
 
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set
 
 import yaml
 
@@ -84,9 +84,9 @@ class QueryProcessor:
         else:
             self.mappings = {}
 
-        # Build service -> concept mapping
         self.service_to_concept: Dict[str, str] = {}
         self.concept_to_terms: Dict[str, Dict[str, List[str]]] = {}
+        self.term_to_providers: Dict[str, Set[str]] = {}
         self.acronym_expansions: Dict[str, str] = self.mappings.get("acronyms", {})
         self._build_lookups()
 
@@ -99,31 +99,37 @@ class QueryProcessor:
                     continue
                 self.concept_to_terms[concept_name] = providers
                 for provider, terms in providers.items():
-                    if isinstance(terms, list):
-                        for term in terms:
-                            self.service_to_concept[term.lower()] = concept_name
+                    if not isinstance(terms, list):
+                        continue
+                    for term in terms:
+                        lower_term = term.lower()
+                        self.service_to_concept[lower_term] = concept_name
+                        if provider != "generic":
+                            self.term_to_providers.setdefault(lower_term, set()).add(provider)
 
-    def process(self, query: str) -> ProcessedQuery:
+    def process(
+        self,
+        query: str,
+        enable_query_expansion: bool = True,
+        enable_terminology_normalization: bool = True,
+    ) -> ProcessedQuery:
         """Full query processing pipeline."""
-        # 1. Detect providers
-        providers = self._detect_providers(query)
-
-        # 2. Detect services / acronyms
+        keyword_providers = self._detect_providers(query)
         services = self._detect_services(query)
-
-        # 3. Classify query type
+        service_providers = self._detect_service_providers(services)
+        providers = self._merge_providers(keyword_providers, service_providers)
         query_type = self._classify_query(query, providers)
 
-        # 4. Expand terms for BM25
-        expanded = self._expand_terms(query, services)
+        expanded = self._expand_terms(
+            query=query,
+            detected_services=services,
+            query_type=query_type,
+            enable_query_expansion=enable_query_expansion,
+            enable_terminology_normalization=enable_terminology_normalization,
+        )
 
-        # 5. Build BM25 query (expanded)
         bm25_query = self._build_bm25_query(query, expanded)
-
-        # 6. Semantic query stays as-is (embedding captures semantics)
         semantic_query = query
-
-        # 7. Determine provider filter
         provider_filter = self._get_provider_filter(query_type, providers)
 
         return ProcessedQuery(
@@ -141,8 +147,8 @@ class QueryProcessor:
         q = query.lower()
         found = []
         for provider, keywords in self.PROVIDER_KEYWORDS.items():
-            for kw in keywords:
-                if kw in q:
+            for keyword in keywords:
+                if keyword in q:
                     found.append(provider)
                     break
         return found
@@ -151,52 +157,79 @@ class QueryProcessor:
         q = query.lower()
         found = []
         for term in self.service_to_concept:
-            # Match whole word
-            pattern = r'\b' + re.escape(term) + r'\b'
+            pattern = r"\b" + re.escape(term) + r"\b"
             if re.search(pattern, q):
                 found.append(term)
-        # Also check acronyms
+
         for acronym in self.acronym_expansions:
-            pattern = r'\b' + re.escape(acronym) + r'\b'
+            pattern = r"\b" + re.escape(acronym) + r"\b"
             if re.search(pattern, query, re.IGNORECASE):
-                if acronym.lower() not in [f.lower() for f in found]:
+                if acronym.lower() not in [service.lower() for service in found]:
                     found.append(acronym)
         return found
 
+    def _detect_service_providers(self, detected_services: List[str]) -> List[str]:
+        providers = []
+        for service in detected_services:
+            service_providers = sorted(self.term_to_providers.get(service.lower(), set()))
+            if len(service_providers) == 1:
+                providers.append(service_providers[0])
+        return providers
+
+    def _merge_providers(self, keyword_providers: List[str], service_providers: List[str]) -> List[str]:
+        merged = []
+        for provider in keyword_providers + service_providers:
+            if provider not in merged:
+                merged.append(provider)
+        return merged
+
     def _classify_query(self, query: str, providers: List[str]) -> str:
-        # Check cross-cloud patterns
         for pattern in self.CROSS_CLOUD_PATTERNS:
             if pattern.search(query):
                 return QueryType.CROSS_CLOUD
 
-        # Multiple providers mentioned
         if len(providers) >= 2:
             return QueryType.CROSS_CLOUD
 
-        # Check procedural
         for pattern in self.PROCEDURAL_PATTERNS:
             if pattern.search(query):
                 return QueryType.PROCEDURAL
 
-        # Single provider
         if len(providers) == 1:
             return QueryType.SINGLE_PROVIDER
 
         return QueryType.CONCEPTUAL
 
-    def _expand_terms(self, query: str, detected_services: List[str]) -> List[str]:
-        expanded = []
-        for service in detected_services:
-            concept = self.service_to_concept.get(service.lower())
-            if concept and concept in self.concept_to_terms:
-                for provider, terms in self.concept_to_terms[concept].items():
-                    for term in terms:
-                        if term.lower() != service.lower() and term not in expanded:
-                            expanded.append(term)
+    def _expand_terms(
+        self,
+        query: str,
+        detected_services: List[str],
+        query_type: str,
+        enable_query_expansion: bool,
+        enable_terminology_normalization: bool,
+    ) -> List[str]:
+        if not enable_query_expansion:
+            return []
 
-        # Expand acronyms
+        expanded = []
+        allow_cross_provider_terms = (
+            enable_terminology_normalization
+            and query_type in (QueryType.CROSS_CLOUD, QueryType.CONCEPTUAL)
+        )
+
+        if allow_cross_provider_terms:
+            for service in detected_services:
+                concept = self.service_to_concept.get(service.lower())
+                if concept and concept in self.concept_to_terms:
+                    for terms in self.concept_to_terms[concept].values():
+                        if not isinstance(terms, list):
+                            continue
+                        for term in terms:
+                            if term.lower() != service.lower() and term not in expanded:
+                                expanded.append(term)
+
         for acronym, expansion in self.acronym_expansions.items():
-            if re.search(r'\b' + re.escape(acronym) + r'\b', query, re.IGNORECASE):
+            if re.search(r"\b" + re.escape(acronym) + r"\b", query, re.IGNORECASE):
                 if expansion not in expanded:
                     expanded.append(expansion)
 
@@ -208,13 +241,11 @@ class QueryProcessor:
             parts.append(" ".join(expanded_terms))
         return " ".join(parts)
 
-    def _get_provider_filter(
-        self, query_type: str, providers: List[str]
-    ) -> Optional[List[str]]:
+    def _get_provider_filter(self, query_type: str, providers: List[str]) -> Optional[List[str]]:
         if query_type == QueryType.SINGLE_PROVIDER and providers:
             return providers
         if query_type == QueryType.CROSS_CLOUD:
-            return None  # Search all
+            return None
         if query_type == QueryType.CONCEPTUAL:
-            return None  # Search all + CNCF
-        return None  # No filter
+            return None
+        return None

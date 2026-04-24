@@ -23,6 +23,13 @@ class RetrievalResult(BaseModel):
     service_name: str = ""
     doc_type: str = ""
     heading_path: str = ""
+    last_updated: str = ""
+
+
+def _normalize_last_updated(value) -> str:
+    if value is None:
+        return ""
+    return str(value)
 
 
 class BM25Retriever:
@@ -36,32 +43,35 @@ class BM25Retriever:
         self,
         query: str,
         top_k: int = 5,
-        use_expansion: bool = True,
+        use_expansion: Optional[bool] = None,
+        enable_query_expansion: bool = True,
+        enable_terminology_normalization: bool = True,
     ) -> List[RetrievalResult]:
         """Search using BM25 only."""
         start = time.time()
 
-        # Process query
-        processed = self.query_processor.process(query)
+        processed = self.query_processor.process(
+            query,
+            enable_query_expansion=enable_query_expansion,
+            enable_terminology_normalization=enable_terminology_normalization,
+        )
+        if use_expansion is None:
+            use_expansion = enable_query_expansion
         search_query = processed.bm25_query if use_expansion else query
 
-        # Search BM25
         results_raw = self.index.search_bm25(search_query, top_k=top_k * 2)
 
-        # Apply provider filter
         if processed.provider_filter:
             results_raw = [
                 (cid, score) for cid, score in results_raw
                 if self._get_provider(cid) in processed.provider_filter
             ]
 
-        # Normalize scores to [0, 1]
         results_raw = results_raw[:top_k]
         if results_raw:
             max_score = max(s for _, s in results_raw) or 1.0
             results_raw = [(cid, s / max_score) for cid, s in results_raw]
 
-        # Build results
         results = []
         for chunk_id, score in results_raw:
             chunk_data = self.index.get_chunk(chunk_id) or {}
@@ -69,11 +79,12 @@ class BM25Retriever:
                 chunk_id=chunk_id,
                 score=score,
                 retrieval_method="bm25",
-                chunk_text=chunk_data.get("text", "")[:200],
+                chunk_text=chunk_data.get("text", ""),
                 cloud_provider=chunk_data.get("cloud_provider", ""),
                 service_name=chunk_data.get("service_name", ""),
                 doc_type=chunk_data.get("doc_type", ""),
                 heading_path=chunk_data.get("heading_path", ""),
+                last_updated=_normalize_last_updated(chunk_data.get("last_updated")),
             ))
 
         elapsed = time.time() - start
@@ -83,3 +94,4 @@ class BM25Retriever:
     def _get_provider(self, chunk_id: str) -> str:
         chunk = self.index.get_chunk(chunk_id)
         return chunk.get("cloud_provider", "") if chunk else ""
+

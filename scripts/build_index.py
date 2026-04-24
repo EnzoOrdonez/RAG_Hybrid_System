@@ -50,17 +50,22 @@ def load_chunks(chunks_dir: str, strategy: str, size: int) -> list:
         return []
 
     chunks = []
-    json_files = sorted(chunk_path.glob("*.json"))
+    json_files = sorted(chunk_path.rglob("*.json"))
     console.print(f"Loading {len(json_files)} chunk files from {chunk_path}...")
 
     for jf in json_files:
         try:
             data = json.loads(jf.read_text(encoding="utf-8"))
-            chunks.append(data)
+            if isinstance(data, list):
+                chunks.extend(data)
+            elif isinstance(data, dict):
+                chunks.append(data)
+            else:
+                logger.warning("Unexpected chunk payload in %s: %s", jf, type(data).__name__)
         except (json.JSONDecodeError, UnicodeDecodeError) as e:
             logger.warning("Failed to load %s: %s", jf, e)
 
-    console.print(f"[green]Loaded {len(chunks)} chunks[/green]")
+    console.print(f"[green]Loaded {len(chunks)} chunks from {len(json_files)} files[/green]")
     return chunks
 
 
@@ -452,3 +457,4 @@ Examples:
 
 if __name__ == "__main__":
     main()
+

@@ -6,7 +6,7 @@ import logging
 import time
 from typing import Dict, List, Optional
 
-from src.retrieval.bm25_retriever import RetrievalResult
+from src.retrieval.bm25_retriever import RetrievalResult, _normalize_last_updated
 from src.retrieval.query_processor import QueryProcessor
 
 logger = logging.getLogger(__name__)
@@ -39,17 +39,24 @@ class HybridRetriever:
         fusion: Optional[str] = None,
         alpha: Optional[float] = None,
         use_reranker: bool = True,
+        enable_query_expansion: bool = True,
+        enable_terminology_normalization: bool = True,
     ) -> List[RetrievalResult]:
         """Search with hybrid fusion and optional reranking."""
         start = time.time()
 
         fusion = fusion or self.fusion_method
         alpha = alpha if alpha is not None else self.alpha
-        processed = self.query_processor.process(query)
+        processed = self.query_processor.process(
+            query,
+            enable_query_expansion=enable_query_expansion,
+            enable_terminology_normalization=enable_terminology_normalization,
+        )
 
-        # Hybrid search with fusion
         results_raw = self.index.search_hybrid(
-            query=processed.bm25_query if fusion == "linear" else query,
+            query=query,
+            bm25_query=processed.bm25_query,
+            dense_query=processed.semantic_query,
             top_k=top_k_candidates,
             fusion=fusion,
             alpha=alpha,
@@ -57,14 +64,12 @@ class HybridRetriever:
             rrf_k=self.rrf_k,
         )
 
-        # Apply provider filter
         if processed.provider_filter:
             results_raw = [
                 (cid, score) for cid, score in results_raw
                 if self._get_provider(cid) in processed.provider_filter
             ]
 
-        # Build RetrievalResult objects
         candidates = []
         for chunk_id, score in results_raw:
             chunk_data = self.index.get_chunk(chunk_id) or {}
@@ -77,17 +82,14 @@ class HybridRetriever:
                 service_name=chunk_data.get("service_name", ""),
                 doc_type=chunk_data.get("doc_type", ""),
                 heading_path=chunk_data.get("heading_path", ""),
+                last_updated=_normalize_last_updated(chunk_data.get("last_updated")),
             ))
 
-        # Optional reranking
         if use_reranker and self.reranker is not None:
             candidates = self.reranker.rerank(query, candidates, top_k=top_k)
         else:
             candidates = candidates[:top_k]
 
-        # Truncate chunk_text for display
-        for c in candidates:
-            c.chunk_text = c.chunk_text[:200]
 
         elapsed = time.time() - start
         logger.info(
@@ -113,17 +115,22 @@ class HybridRetriever:
             for alpha in alpha_values:
                 key = f"{fusion}_alpha_{alpha}"
                 res = self.search(
-                    query, top_k=top_k, top_k_candidates=top_k_candidates,
-                    fusion=fusion, alpha=alpha, use_reranker=False,
+                    query,
+                    top_k=top_k,
+                    top_k_candidates=top_k_candidates,
+                    fusion=fusion,
+                    alpha=alpha,
+                    use_reranker=False,
                 )
                 results[key] = {
                     "fusion": fusion,
                     "alpha": alpha,
                     "results": res,
-                    "top_ids": [r.chunk_id for r in res],
+                    "top_ids": [result.chunk_id for result in res],
                 }
         return results
 
     def _get_provider(self, chunk_id: str) -> str:
         chunk = self.index.get_chunk(chunk_id)
         return chunk.get("cloud_provider", "") if chunk else ""
+
