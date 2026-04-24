@@ -1,0 +1,218 @@
+{
+  "experiment": "exp8",
+  "model": "cross-encoder/ms-marco-MiniLM-L-12-v2",
+  "relevance_threshold": 0.0,
+  "total_queries": 200,
+  "total_chunks_scored": 2494,
+  "score_distribution": {
+    "min": -10.920791625976562,
+    "max": 9.155733108520508,
+    "mean": 2.1761318248791475,
+    "median": 2.415889024734497,
+    "std": 3.1210697787957544
+  },
+  "systems": {
+    "RAG Lexico (BM25)": {
+      "precision@1_mean": 0.785,
+      "precision@1_std": 0.41082234603292944,
+      "recall@1_mean": 0.08581131368631369,
+      "recall@1_std": 0.08659009950093809,
+      "precision@3_mean": 0.7316666666666667,
+      "precision@3_std": 0.3707312593600203,
+      "recall@3_mean": 0.22850434287934288,
+      "recall@3_std": 0.14521762825005308,
+      "precision@5_mean": 0.7180000000000001,
+      "precision@5_std": 0.3436218852168761,
+      "recall@5_mean": 0.3675168165168165,
+      "recall@5_std": 0.17986158340840658,
+      "mrr_mean": 0.82825,
+      "mrr_std": 0.33863368236685104,
+      "ndcg@5_mean": 0.5544578770193516,
+      "ndcg@5_std": 0.32031027334492407,
+      "avg_score@5_mean": 1.9026058872304856,
+      "avg_score@5_std": 2.7163213489257747
+    },
+    "RAG Semantico (Dense)": {
+      "precision@1_mean": 0.86,
+      "precision@1_std": 0.34698703145794946,
+      "recall@1_mean": 0.09934636197136197,
+      "recall@1_std": 0.0779608409572219,
+      "precision@3_mean": 0.8083333333333332,
+      "precision@3_std": 0.3099058996964509,
+      "recall@3_mean": 0.2642614885114885,
+      "recall@3_std": 0.14182610936384052,
+      "precision@5_mean": 0.782,
+      "precision@5_std": 0.30278044851013747,
+      "recall@5_mean": 0.4237129953379953,
+      "recall@5_std": 0.19263090570778663,
+      "mrr_mean": 0.8936666666666667,
+      "mrr_std": 0.27542169687791684,
+      "ndcg@5_mean": 0.6605658665333911,
+      "ndcg@5_std": 0.27875098301040097,
+      "avg_score@5_mean": 2.4002960911765694,
+      "avg_score@5_std": 2.799017597478912
+    },
+    "RAG Hibrido Propuesto": {
+      "precision@1_mean": 0.93,
+      "precision@1_std": 0.25514701644346144,
+      "recall@1_mean": 0.11629711954711955,
+      "recall@1_std": 0.11465531811845572,
+      "precision@3_mean": 0.8883333333333334,
+      "precision@3_std": 0.26093315448810084,
+      "recall@3_mean": 0.3047026862026862,
+      "recall@3_std": 0.16477057208275805,
+      "precision@5_mean": 0.851,
+      "precision@5_std": 0.26832629390352336,
+      "recall@5_mean": 0.4717787074037074,
+      "recall@5_std": 0.1770462568344875,
+      "mrr_mean": 0.9424166666666668,
+      "mrr_std": 0.21649222144096641,
+      "ndcg@5_mean": 0.7361851284503412,
+      "ndcg@5_std": 0.25689829418476423,
+      "avg_score@5_mean": 2.8785045030917975,
+      "avg_score@5_std": 2.512640431959211
+    }
+  },
+  "statistical_tests": {
+    "ndcg@5": {
+      "RAG Lexico (BM25) vs RAG Semantico (Dense)": {
+        "metric": "ndcg@5",
+        "mean_1": 0.5544578770193516,
+        "mean_2": 0.6605658665333911,
+        "diff": -0.10610798951403964,
+        "cohens_d": -0.35339815575841066,
+        "wilcoxon_stat": 6565.0,
+        "p_value": 0.0003209903143022831,
+        "significant": true,
+        "meets_thesis_threshold": false
+      },
+      "RAG Lexico (BM25) vs RAG Hibrido Propuesto": {
+        "metric": "ndcg@5",
+        "mean_1": 0.5544578770193516,
+        "mean_2": 0.7361851284503412,
+        "diff": -0.18172725143098944,
+        "cohens_d": -0.6259104309480324,
+        "wilcoxon_stat": 4140.0,
+        "p_value": 1.8340134184249823e-11,
+        "significant": true,
+        "meets_thesis_threshold": true
+      },
+      "RAG Semantico (Dense) vs RAG Hibrido Propuesto": {
+        "metric": "ndcg@5",
+        "mean_1": 0.6605658665333911,
+        "mean_2": 0.7361851284503412,
+        "diff": -0.07561926191694984,
+        "cohens_d": -0.2821115029201338,
+        "wilcoxon_stat": 7006.5,
+        "p_value": 0.0008738227979004291,
+        "significant": true,
+        "meets_thesis_threshold": false
+      }
+    },
+    "avg_score@5": {
+      "RAG Lexico (BM25) vs RAG Semantico (Dense)": {
+        "metric": "avg_score@5",
+        "mean_1": 1.9026058872304856,
+        "mean_2": 2.4002960911765694,
+        "diff": -0.4976902039460839,
+        "cohens_d": -0.1804546461620214,
+        "wilcoxon_stat": 8123.0,
+        "p_value": 0.018709555764484465,
+        "significant": true,
+        "meets_thesis_threshold": false
+      },
+      "RAG Lexico (BM25) vs RAG Hibrido Propuesto": {
+        "metric": "avg_score@5",
+        "mean_1": 1.9026058872304856,
+        "mean_2": 2.8785045030917975,
+        "diff": -0.9758986158613115,
+        "cohens_d": -0.37298382952540576,
+        "wilcoxon_stat": 4426.0,
+        "p_value": 1.1138818567750779e-11,
+        "significant": true,
+        "meets_thesis_threshold": false
+      },
+      "RAG Semantico (Dense) vs RAG Hibrido Propuesto": {
+        "metric": "avg_score@5",
+        "mean_1": 2.4002960911765694,
+        "mean_2": 2.8785045030917975,
+        "diff": -0.4782084119152279,
+        "cohens_d": -0.17979880876755694,
+        "wilcoxon_stat": 5871.0,
+        "p_value": 3.412881064008461e-07,
+        "significant": true,
+        "meets_thesis_threshold": false
+      }
+    },
+    "precision@5": {
+      "RAG Lexico (BM25) vs RAG Semantico (Dense)": {
+        "metric": "precision@5",
+        "mean_1": 0.7180000000000001,
+        "mean_2": 0.782,
+        "diff": -0.064,
+        "cohens_d": -0.19762501529018658,
+        "wilcoxon_stat": 1775.5,
+        "p_value": 0.0028392795787627926,
+        "significant": true,
+        "meets_thesis_threshold": false
+      },
+      "RAG Lexico (BM25) vs RAG Hibrido Propuesto": {
+        "metric": "precision@5",
+        "mean_1": 0.7180000000000001,
+        "mean_2": 0.851,
+        "diff": -0.13300000000000003,
+        "cohens_d": -0.43142383916713456,
+        "wilcoxon_stat": 622.5,
+        "p_value": 1.00779161178404e-09,
+        "significant": true,
+        "meets_thesis_threshold": false
+      },
+      "RAG Semantico (Dense) vs RAG Hibrido Propuesto": {
+        "metric": "precision@5",
+        "mean_1": 0.782,
+        "mean_2": 0.851,
+        "diff": -0.069,
+        "cohens_d": -0.24119756204754908,
+        "wilcoxon_stat": 757.5,
+        "p_value": 3.067782406940059e-05,
+        "significant": true,
+        "meets_thesis_threshold": false
+      }
+    },
+    "mrr": {
+      "RAG Lexico (BM25) vs RAG Semantico (Dense)": {
+        "metric": "mrr",
+        "mean_1": 0.82825,
+        "mean_2": 0.8936666666666667,
+        "diff": -0.06541666666666666,
+        "cohens_d": -0.21194435765532502,
+        "wilcoxon_stat": 306.0,
+        "p_value": 0.00615919260607964,
+        "significant": true,
+        "meets_thesis_threshold": false
+      },
+      "RAG Lexico (BM25) vs RAG Hibrido Propuesto": {
+        "metric": "mrr",
+        "mean_1": 0.82825,
+        "mean_2": 0.9424166666666668,
+        "diff": -0.11416666666666667,
+        "cohens_d": -0.40170945884768644,
+        "wilcoxon_stat": 55.5,
+        "p_value": 4.54641486082214e-06,
+        "significant": true,
+        "meets_thesis_threshold": false
+      },
+      "RAG Semantico (Dense) vs RAG Hibrido Propuesto": {
+        "metric": "mrr",
+        "mean_1": 0.8936666666666667,
+        "mean_2": 0.9424166666666668,
+        "diff": -0.04875,
+        "cohens_d": -0.19679829902248946,
+        "wilcoxon_stat": 97.0,
+        "p_value": 0.01514669696165789,
+        "significant": true,
+        "meets_thesis_threshold": false
+      }
+    }
+  }
+}
