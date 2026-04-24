@@ -1,0 +1,294 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-24T12:34:58Z",
+    "source": "data/evaluation/gold_queries_50.json",
+    "random_seed": 123,
+    "purpose": "Minimal Mode: shared subset for inter-annotator agreement (Cohen kappa / Krippendorff alpha). Enzo labels all 50 queries; advisor and classmate each label only these 25, identical set.",
+    "targets_per_stratum": {
+      "aws": 8,
+      "azure": 7,
+      "gcp": 5,
+      "kubernetes": 2,
+      "cncf": 3
+    },
+    "final_per_stratum": {
+      "aws": 8,
+      "azure": 7,
+      "gcp": 5,
+      "kubernetes": 2,
+      "cncf": 3
+    },
+    "n_queries": 25
+  },
+  "query_ids": [
+    "q006",
+    "q012",
+    "q020",
+    "q030",
+    "q049",
+    "q053",
+    "q076",
+    "q087",
+    "q101",
+    "q103",
+    "q126",
+    "q138",
+    "q148",
+    "q167",
+    "q174",
+    "q175",
+    "q184",
+    "q186",
+    "q188",
+    "q191",
+    "q192",
+    "q197",
+    "q198",
+    "q203",
+    "q204"
+  ],
+  "queries": [
+    {
+      "query_id": "q006",
+      "question": "What are the pricing tiers for AWS S3?",
+      "cloud_providers": [
+        "aws"
+      ],
+      "sampling_stratum": "aws",
+      "effective_stratum": "aws"
+    },
+    {
+      "query_id": "q012",
+      "question": "What is the SLA for AWS RDS?",
+      "cloud_providers": [
+        "aws"
+      ],
+      "sampling_stratum": "aws",
+      "effective_stratum": "aws"
+    },
+    {
+      "query_id": "q020",
+      "question": "What instance types are available in AWS DynamoDB?",
+      "cloud_providers": [
+        "aws"
+      ],
+      "sampling_stratum": "aws_redistributed",
+      "effective_stratum": "aws"
+    },
+    {
+      "query_id": "q030",
+      "question": "What is Azure Blob Storage and what are its main capabilities?",
+      "cloud_providers": [
+        "azure"
+      ],
+      "sampling_stratum": "azure",
+      "effective_stratum": "azure"
+    },
+    {
+      "query_id": "q049",
+      "question": "What compliance certifications does Azure Container Instances have?",
+      "cloud_providers": [
+        "azure"
+      ],
+      "sampling_stratum": "azure",
+      "effective_stratum": "azure"
+    },
+    {
+      "query_id": "q053",
+      "question": "What are the best practices for Google Cloud Cloud Build?",
+      "cloud_providers": [
+        "gcp"
+      ],
+      "sampling_stratum": "gcp",
+      "effective_stratum": "gcp"
+    },
+    {
+      "query_id": "q076",
+      "question": "How to configure auto-scaling in AWS EC2?",
+      "cloud_providers": [
+        "aws"
+      ],
+      "sampling_stratum": "aws",
+      "effective_stratum": "aws"
+    },
+    {
+      "query_id": "q087",
+      "question": "How to deploy an application using Azure Container Instances?",
+      "cloud_providers": [
+        "azure"
+      ],
+      "sampling_stratum": "azure",
+      "effective_stratum": "azure"
+    },
+    {
+      "query_id": "q101",
+      "question": "How to migrate an on-premises application to Google Cloud Cloud Run?",
+      "cloud_providers": [
+        "gcp"
+      ],
+      "sampling_stratum": "gcp",
+      "effective_stratum": "gcp"
+    },
+    {
+      "query_id": "q103",
+      "question": "How to deploy a workload on Google Cloud Compute Engine?",
+      "cloud_providers": [
+        "gcp"
+      ],
+      "sampling_stratum": "gcp",
+      "effective_stratum": "gcp"
+    },
+    {
+      "query_id": "q126",
+      "question": "How to update Kubernetes Pods without downtime?",
+      "cloud_providers": [
+        "kubernetes"
+      ],
+      "sampling_stratum": "kubernetes",
+      "effective_stratum": "kubernetes"
+    },
+    {
+      "query_id": "q138",
+      "question": "Compare AWS EC2 and AWS EKS in terms of use cases and features",
+      "cloud_providers": [
+        "aws"
+      ],
+      "sampling_stratum": "aws",
+      "effective_stratum": "aws"
+    },
+    {
+      "query_id": "q148",
+      "question": "Compare AWS VPC and AWS ECS in terms of use cases and features",
+      "cloud_providers": [
+        "aws"
+      ],
+      "sampling_stratum": "aws",
+      "effective_stratum": "aws"
+    },
+    {
+      "query_id": "q167",
+      "question": "Compare the scaling options of Azure Virtual Machines vs Azure Blob Storage",
+      "cloud_providers": [
+        "azure"
+      ],
+      "sampling_stratum": "azure",
+      "effective_stratum": "azure"
+    },
+    {
+      "query_id": "q174",
+      "question": "Compare object storage services: AWS S3 vs Azure Blob Storage vs Google Cloud Storage",
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "sampling_stratum": "gcp",
+      "effective_stratum": "gcp"
+    },
+    {
+      "query_id": "q175",
+      "question": "What is the equivalent of AWS IAM in Azure and GCP?",
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "sampling_stratum": "aws",
+      "effective_stratum": "aws"
+    },
+    {
+      "query_id": "q184",
+      "question": "Compare the container registry services across AWS ECR, Azure Container Registry, and Google Artifact Registry",
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "sampling_stratum": "azure",
+      "effective_stratum": "azure"
+    },
+    {
+      "query_id": "q186",
+      "question": "What is the CNCF equivalent or standard for service mesh across cloud providers?",
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp",
+        "cncf"
+      ],
+      "sampling_stratum": "cncf",
+      "effective_stratum": "cncf"
+    },
+    {
+      "query_id": "q188",
+      "question": "What CNCF projects are used for observability across cloud platforms?",
+      "cloud_providers": [
+        "cncf",
+        "kubernetes"
+      ],
+      "sampling_stratum": "kubernetes",
+      "effective_stratum": "kubernetes"
+    },
+    {
+      "query_id": "q191",
+      "question": "What are the key differences between AWS S3 lifecycle policies and Azure Blob Storage tiering?",
+      "cloud_providers": [
+        "aws",
+        "azure"
+      ],
+      "sampling_stratum": "azure",
+      "effective_stratum": "azure"
+    },
+    {
+      "query_id": "q192",
+      "question": "Compare identity federation approaches across AWS, Azure, and GCP",
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "sampling_stratum": "azure",
+      "effective_stratum": "azure"
+    },
+    {
+      "query_id": "q197",
+      "question": "Compare the event-driven architectures: AWS EventBridge vs Azure Event Grid vs Google Eventarc",
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "sampling_stratum": "gcp",
+      "effective_stratum": "gcp"
+    },
+    {
+      "query_id": "q198",
+      "question": "How does the concept of availability zones differ across AWS, Azure, and GCP?",
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "sampling_stratum": "aws",
+      "effective_stratum": "aws"
+    },
+    {
+      "query_id": "q203",
+      "question": "What are the main components of a Fluentd log aggregation architecture?",
+      "cloud_providers": [
+        "cncf"
+      ],
+      "sampling_stratum": "cncf",
+      "effective_stratum": "cncf"
+    },
+    {
+      "query_id": "q204",
+      "question": "How do I configure Argo Workflows to run parallel task execution?",
+      "cloud_providers": [
+        "cncf"
+      ],
+      "sampling_stratum": "cncf",
+      "effective_stratum": "cncf"
+    }
+  ]
+}

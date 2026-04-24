@@ -41,8 +41,19 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ============================================================
 
-RELEVANCE_THRESHOLD = 0.0  # ms-marco cross-encoders output logits; >0 = relevant
-CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
+# Oracle model must be architecturally independent from the Hybrid pipeline's
+# reranker to avoid Flag-17 circularity. PROPOSED_HYBRID reranks with
+# cross-encoder/ms-marco-MiniLM-L-12-v2 in src/pipeline/pipeline_config.py:71
+# and experiments/experiment_configs.py:{91,135,415,433}; using the same model
+# here would systematically bias the retrieval metrics in favor of Hybrid.
+# BAAI/bge-reranker-large is a stronger, independently-trained scorer from a
+# different architecture family (XLM-RoBERTa), so it does not share the
+# reranker's decision boundary.
+CROSS_ENCODER_MODEL = "BAAI/bge-reranker-large"
+# BGE-reranker-large outputs logits on a different scale than ms-marco. Leave
+# threshold at 0.0 for now; calibrate on gold truth once human judgments land
+# (TODO 2026-05, post-annotation).
+RELEVANCE_THRESHOLD = 0.0
 CHUNK_DIR = PROJECT_ROOT / "data" / "chunks" / "adaptive" / "size_500"
 OUTPUT_DIR = PROJECT_ROOT / "output"
 

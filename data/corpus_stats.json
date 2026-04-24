@@ -1,11 +1,79 @@
 {
-  "providers": {
-    "azure": {
-      "documents": 812,
-      "total_words": 1010676,
-      "with_code": 509,
-      "with_tables": 355
+  "generated_at": "2026-04-24T12:12:39Z",
+  "generator": "regenerated after Flag-17/Flag-142 audit (2026-04-24)",
+  "source": "data/processed (documents) + data/chunks/adaptive (chunks)",
+  "documents": {
+    "providers": {
+      "aws": {
+        "documents": 996,
+        "total_words": 1007709,
+        "with_code": 463,
+        "with_tables": 0
+      },
+      "azure": {
+        "documents": 1461,
+        "total_words": 2044472,
+        "with_code": 918,
+        "with_tables": 701
+      },
+      "cncf": {
+        "documents": 92,
+        "total_words": 18705,
+        "with_code": 0,
+        "with_tables": 0
+      },
+      "gcp": {
+        "documents": 240,
+        "total_words": 635137,
+        "with_code": 110,
+        "with_tables": 122
+      },
+      "kubernetes": {
+        "documents": 1162,
+        "total_words": 996460,
+        "with_code": 571,
+        "with_tables": 44
+      }
+    },
+    "total_documents": 3951,
+    "total_words": 4702483
+  },
+  "documents_raw_reference": {
+    "providers": {
+      "aws": 996,
+      "azure": 1167,
+      "cncf": 92,
+      "gcp": 240,
+      "k8s": 1162
+    },
+    "total_documents": 3657,
+    "note": "Recursive file count under data/raw/<provider>/. data/processed/azure has 1461 docs vs data/raw/azure with 1167 — 294 extra post-processing artifacts (investigate separately)."
+  },
+  "chunks_adaptive": {
+    "size_300": {
+      "aws": 10647,
+      "azure": 21580,
+      "cncf": 167,
+      "gcp": 7544,
+      "k8s": 14835,
+      "total": 54773
+    },
+    "size_500": {
+      "aws": 8616,
+      "azure": 18290,
+      "cncf": 167,
+      "gcp": 7003,
+      "k8s": 12242,
+      "total": 46318
+    },
+    "size_700": {
+      "aws": 7577,
+      "azure": 16955,
+      "cncf": 167,
+      "gcp": 6732,
+      "k8s": 11402,
+      "total": 42833
     }
   },
-  "total_documents": 812
+  "provider_naming_inconsistency": "data/raw/ and chunk metadata use 'k8s'; data/processed/ and test_queries.json use 'kubernetes'. Keys above preserved as stored. Follow-up: reconcile naming across the repo."
 }

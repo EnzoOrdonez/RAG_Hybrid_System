@@ -65,8 +65,8 @@ Language Inference based faithfulness filter. On a 200-query expert-curated test
 set, the hybrid pipeline achieves P@1 = 0.930, MRR = 0.942, and
 NDCG@5 = 0.736, outperforming BM25 (P@1 = 0.785) and dense retrieval alone
 (P@1 = 0.860) with statistical significance (Wilcoxon signed-rank test,
-p < 0.0001; Cohen's d = 0.626). Dictionary-based cross-provider query
-expansion contributes a 16.8 percent gain in answer faithfulness over an
+p < 0.0001; Cohen's d = 0.626)~\textcolor{red}{\textbf{[PENDING REVALIDATION --- Flag 17 audit: retrieval oracle was identical to the pipeline reranker (ms-marco-MiniLM-L-12-v2), inducing circularity; oracle swapped to BAAI/bge-reranker-large, metrics to be recomputed on a human-annotated 50-query gold set, May 2026]}}. Dictionary-based cross-provider query
+expansion contributes a \textcolor{red}{\textbf{[DISPUTED --- Flag 142 audit: n{=}29--30, broken NLI detector (DeBERTa-v3-small, threshold 0.7, raw scores 0.19--0.25); pending recomputation May 2026]}} gain in answer faithfulness over an
 unexpanded baseline. We release the dataset, code, evaluation harness, and
 installation instructions to enable direct replication.
 \end{abstract}
@@ -197,7 +197,7 @@ Our contributions are:
 \end{figure}
 
 \subsection{Cross-Provider Query Expansion Impact}
-\textcolor{blue}{[PLACEHOLDER: Insert Fig.~\ref{fig:crosscloud} (fig\_cross\_cloud\_improvement.png). Report +16.8\% faithfulness gain (subject to re-evaluation in Phase 4 with the calibrated NLI detector and Wilcoxon test).]}
+\textcolor{red}{\textbf{[DISPUTED --- Flag 142 audit: the +16.8\% faithfulness claim rests on n{=}29--30 queries and a broken NLI detector (DeBERTa-v3-small, threshold 0.7, raw scores 0.19--0.25). Figure and numerical gain are withheld until recomputation with the calibrated NLI detector on the human-annotated 50-query gold set (Wilcoxon signed-rank test, May 2026).]}} \textcolor{blue}{[PLACEHOLDER: Insert Fig.~\ref{fig:crosscloud} (fig\_cross\_cloud\_improvement.png) after revalidation.]}
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{fig_cross_cloud_improvement.png}}

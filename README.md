@@ -37,7 +37,7 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 
 ## Performance
 
-Evaluated on 200 queries across 5 cloud documentation sources:
+Evaluated on 200 queries across 5 cloud documentation sources. The primary thesis table below corresponds to exp8b (Mistral 7B); exp8 with Llama 3.1 is kept as a comparison baseline:
 
 | System | Precision@1 | Recall@5 | MRR | NDCG@5 | Faithfulness |
 |--------|------------|----------|-----|--------|-------------|
@@ -45,7 +45,9 @@ Evaluated on 200 queries across 5 cloud documentation sources:
 | Dense (semantic) | 0.860 | 0.424 | 0.894 | 0.661 | 0.509 |
 | **Hybrid (ours)** | **0.930** | **0.472** | **0.942** | **0.736** | **0.514** |
 
-Hybrid outperforms both baselines with statistical significance (p < 0.0001, Cohen's d = 0.626).
+**[PENDING REVALIDATION — Flag 17 audit: retrieval metrics (Precision@1, Recall@5, MRR, NDCG@5) were computed with a cross-encoder oracle identical to the Hybrid pipeline's reranker (`cross-encoder/ms-marco-MiniLM-L-12-v2`), which is circular and biases scores toward Hybrid. Oracle swapped to `BAAI/bge-reranker-large` in `scripts/compute_retrieval_metrics.py`; metrics will be recomputed on the human-annotated gold set (50 stratified queries, May 2026). Faithfulness column (0.496 / 0.509 / 0.514) is separately [DISPUTED — Flag 142: broken NLI detector, see note below].]**
+
+Hybrid outperforms both baselines with statistical significance (p < 0.0001, Cohen's d = 0.626). **[PENDING REVALIDATION — see note above; p-values and effect sizes depend on the circular-oracle metrics.]**
 
 ---
 
@@ -122,7 +124,7 @@ python run.py --compare "What is the difference between Lambda and Azure Functio
 python -m streamlit run src/ui/app.py
 
 # Run benchmarks
-python scripts/run_benchmark.py --experiment exp8 --quick
+python scripts/run_benchmark.py --experiment exp8b --quick
 ```
 
 ---
@@ -161,8 +163,8 @@ cloudrag/
 | exp4 | Re-ranking impact | Cross-encoder improves precision |
 | exp5 | LLM comparison (Llama, Qwen, Mistral) | Mistral best faithfulness (0.504) |
 | exp6 | Ablation (remove each component) | Re-ranker most impactful (+3.4 pts) |
-| exp7 | Cross-cloud normalization | +16.8% faithfulness with normalization |
-| exp8/8b | End-to-end (Llama / Mistral) | Hybrid > Dense > BM25 consistently |
+| exp7 | Cross-cloud normalization | **[DISPUTED — Flag 142 audit: n=29–30, NLI model broken (DeBERTa-v3-small, threshold 0.7, outputs 0.19–0.25). Pending recomputation with gold truth May 2026]** |
+| exp8b / exp8 | End-to-end (official Mistral / Llama comparison) | Hybrid > Dense > BM25 consistently **[PENDING REVALIDATION — Flag 17: circular retrieval oracle; see Performance section]** |
 
 All comparisons validated with Wilcoxon signed-rank test (p < 0.0001) and Cohen's d effect sizes.
 
@@ -202,3 +204,4 @@ python -m streamlit run src/ui/app.py
 <p align="center">
   Built by <a href="https://github.com/EnzoOrdonez">Enzo Ordoñez</a> · Universidad de Lima · 2026
 </p>
+

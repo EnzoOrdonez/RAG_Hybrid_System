@@ -1,0 +1,743 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-24T12:32:43Z",
+    "source": "data/evaluation/test_queries.json",
+    "random_seed": 42,
+    "n_queries_source": 205,
+    "n_queries_selected": 50,
+    "targets": {
+      "aws": 13,
+      "azure": 13,
+      "gcp": 10,
+      "kubernetes": 8,
+      "cncf": 6
+    },
+    "pool_sizes_per_provider": {
+      "aws": 103,
+      "azure": 85,
+      "gcp": 57,
+      "kubernetes": 4,
+      "cncf": 9
+    },
+    "manually_added_queries": [
+      "q201",
+      "q202",
+      "q203",
+      "q204",
+      "q205"
+    ],
+    "manually_added_note": "Five CNCF queries (q201-q205) added to test_queries.json on 2026-04-24 PM to address cncf under-representation observed in the first-pass sampling (initial pure-cncf queries=1). See paper/code_fixes_2026-04-24.md \"CNCF augmentation + Minimal Mode\" section for full rationale.",
+    "strategy": "Scarcity-first stratified sampling with deterministic seed=42. Multi-cloud queries counted toward every provider they mention. Sampling order: kubernetes -> cncf -> gcp -> azure -> aws, excluding already-picked ids. Deficit from low-resource strata redistributed to aws:azure:gcp proportional to original targets (13:13:10) via largest-remainder method.",
+    "first_pass_selected": {
+      "aws": 13,
+      "azure": 13,
+      "gcp": 10,
+      "kubernetes": 4,
+      "cncf": 6
+    },
+    "first_pass_deficit": {
+      "aws": 0,
+      "azure": 0,
+      "gcp": 0,
+      "kubernetes": 4,
+      "cncf": 0
+    },
+    "redistribution_allocation": {
+      "aws": 2,
+      "azure": 1,
+      "gcp": 1
+    },
+    "redistribution_selected": {
+      "aws": 2,
+      "azure": 1,
+      "gcp": 1
+    },
+    "final_per_stratum": {
+      "aws": 15,
+      "azure": 14,
+      "gcp": 11,
+      "kubernetes": 4,
+      "cncf": 6
+    },
+    "multi_cloud_coverage_in_selection": 13
+  },
+  "queries": [
+    {
+      "query_id": "q006",
+      "question": "What are the pricing tiers for AWS S3?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "storage",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q012",
+      "question": "What is the SLA for AWS RDS?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "storage",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q013",
+      "question": "What is the SLA for AWS IAM?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "factual",
+      "difficulty": "easy",
+      "category": "security",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q014",
+      "question": "What are the limits and quotas for AWS IAM?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "factual",
+      "difficulty": "hard",
+      "category": "security",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q020",
+      "question": "What instance types are available in AWS DynamoDB?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "factual",
+      "difficulty": "hard",
+      "category": "storage",
+      "sampling_stratum": "aws_redistributed"
+    },
+    {
+      "query_id": "q030",
+      "question": "What is Azure Blob Storage and what are its main capabilities?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "storage",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q041",
+      "question": "What regions support Azure Virtual Network?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "networking",
+      "sampling_stratum": "azure_redistributed"
+    },
+    {
+      "query_id": "q049",
+      "question": "What compliance certifications does Azure Container Instances have?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "factual",
+      "difficulty": "easy",
+      "category": "compute",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q050",
+      "question": "What are the available SKUs for Azure Entra ID?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "security",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q052",
+      "question": "What are the quotas for Google Cloud Cloud Functions?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "gcp"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q053",
+      "question": "What are the best practices for Google Cloud Cloud Build?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "gcp"
+      ],
+      "query_type": "factual",
+      "difficulty": "easy",
+      "category": "general",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q056",
+      "question": "What machine types are available in Google Cloud Cloud Functions?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "gcp"
+      ],
+      "query_type": "factual",
+      "difficulty": "easy",
+      "category": "compute",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q066",
+      "question": "How to configure auto-scaling in AWS S3?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "procedural",
+      "difficulty": "medium",
+      "category": "storage",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q076",
+      "question": "How to configure auto-scaling in AWS EC2?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "procedural",
+      "difficulty": "easy",
+      "category": "compute",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q077",
+      "question": "How to monitor AWS Lambda with CloudWatch?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "procedural",
+      "difficulty": "easy",
+      "category": "compute",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q078",
+      "question": "How to set up AWS CloudWatch for a production workload?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "procedural",
+      "difficulty": "easy",
+      "category": "general",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q086",
+      "question": "How to set up monitoring and alerts for Azure Cosmos DB?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "procedural",
+      "difficulty": "easy",
+      "category": "storage",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q087",
+      "question": "How to deploy an application using Azure Container Instances?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "procedural",
+      "difficulty": "easy",
+      "category": "compute",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q094",
+      "question": "How to configure networking for Azure Container Instances?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "procedural",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q101",
+      "question": "How to migrate an on-premises application to Google Cloud Cloud Run?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "gcp"
+      ],
+      "query_type": "procedural",
+      "difficulty": "easy",
+      "category": "compute",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q102",
+      "question": "How to set up logging and monitoring for Google Cloud Cloud SQL?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "gcp"
+      ],
+      "query_type": "procedural",
+      "difficulty": "hard",
+      "category": "storage",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q103",
+      "question": "How to deploy a workload on Google Cloud Compute Engine?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "gcp"
+      ],
+      "query_type": "procedural",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q121",
+      "question": "How to deploy a workload on Google Cloud Cloud Storage?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "gcp"
+      ],
+      "query_type": "procedural",
+      "difficulty": "medium",
+      "category": "storage",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q124",
+      "question": "How to deploy a workload on Google Cloud Cloud Build?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "gcp"
+      ],
+      "query_type": "procedural",
+      "difficulty": "hard",
+      "category": "general",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q126",
+      "question": "How to update Kubernetes Pods without downtime?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "kubernetes"
+      ],
+      "query_type": "procedural",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "kubernetes"
+    },
+    {
+      "query_id": "q128",
+      "question": "When should you use AWS VPC instead of AWS RDS?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "comparative",
+      "difficulty": "hard",
+      "category": "networking",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q137",
+      "question": "What are the trade-offs between AWS Lambda and AWS EC2 for production workloads?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "aws_redistributed"
+    },
+    {
+      "query_id": "q138",
+      "question": "Compare AWS EC2 and AWS EKS in terms of use cases and features",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q148",
+      "question": "Compare AWS VPC and AWS ECS in terms of use cases and features",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "networking",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q157",
+      "question": "Compare the scaling options of Azure Cosmos DB vs Azure Container Instances",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "comparative",
+      "difficulty": "easy",
+      "category": "storage",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q167",
+      "question": "Compare the scaling options of Azure Virtual Machines vs Azure Blob Storage",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q168",
+      "question": "What are the trade-offs between Azure Container Instances and Azure Entra ID?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "azure"
+      ],
+      "query_type": "comparative",
+      "difficulty": "easy",
+      "category": "compute",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q171",
+      "question": "Compare the serverless compute offerings between AWS Lambda and Azure Functions",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q174",
+      "question": "Compare object storage services: AWS S3 vs Azure Blob Storage vs Google Cloud Storage",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "storage",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q175",
+      "question": "What is the equivalent of AWS IAM in Azure and GCP?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "query_type": "factual",
+      "difficulty": "easy",
+      "category": "security",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q184",
+      "question": "Compare the container registry services across AWS ECR, Azure Container Registry, and Google Artifact Registry",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q186",
+      "question": "What is the CNCF equivalent or standard for service mesh across cloud providers?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp",
+        "cncf"
+      ],
+      "query_type": "factual",
+      "difficulty": "hard",
+      "category": "networking",
+      "sampling_stratum": "cncf"
+    },
+    {
+      "query_id": "q188",
+      "question": "What CNCF projects are used for observability across cloud platforms?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "cncf",
+        "kubernetes"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "general",
+      "sampling_stratum": "kubernetes"
+    },
+    {
+      "query_id": "q189",
+      "question": "How do the Kubernetes managed services handle cluster upgrades in EKS vs AKS vs GKE?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "query_type": "procedural",
+      "difficulty": "hard",
+      "category": "compute",
+      "sampling_stratum": "gcp_redistributed"
+    },
+    {
+      "query_id": "q191",
+      "question": "What are the key differences between AWS S3 lifecycle policies and Azure Blob Storage tiering?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "storage",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q192",
+      "question": "Compare identity federation approaches across AWS, Azure, and GCP",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "query_type": "comparative",
+      "difficulty": "hard",
+      "category": "security",
+      "sampling_stratum": "azure"
+    },
+    {
+      "query_id": "q194",
+      "question": "What is the Kubernetes-native approach to secrets management vs cloud provider solutions?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "kubernetes",
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "query_type": "comparative",
+      "difficulty": "hard",
+      "category": "security",
+      "sampling_stratum": "kubernetes"
+    },
+    {
+      "query_id": "q197",
+      "question": "Compare the event-driven architectures: AWS EventBridge vs Azure Event Grid vs Google Eventarc",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "compute",
+      "sampling_stratum": "gcp"
+    },
+    {
+      "query_id": "q198",
+      "question": "How does the concept of availability zones differ across AWS, Azure, and GCP?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "query_type": "comparative",
+      "difficulty": "easy",
+      "category": "general",
+      "sampling_stratum": "aws"
+    },
+    {
+      "query_id": "q199",
+      "question": "What CNCF graduated projects are most commonly used in multi-cloud deployments?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "cncf"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "general",
+      "sampling_stratum": "cncf"
+    },
+    {
+      "query_id": "q200",
+      "question": "Compare the Kubernetes ingress controller options across cloud providers and CNCF projects",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "kubernetes",
+        "aws",
+        "azure",
+        "gcp",
+        "cncf"
+      ],
+      "query_type": "comparative",
+      "difficulty": "hard",
+      "category": "networking",
+      "sampling_stratum": "kubernetes"
+    },
+    {
+      "query_id": "q201",
+      "question": "What are OpenTelemetry Collectors and how do they differ from OpenTelemetry Agents?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "cncf"
+      ],
+      "query_type": "comparative",
+      "difficulty": "medium",
+      "category": "observability",
+      "sampling_stratum": "cncf"
+    },
+    {
+      "query_id": "q203",
+      "question": "What are the main components of a Fluentd log aggregation architecture?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "cncf"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "logging",
+      "sampling_stratum": "cncf"
+    },
+    {
+      "query_id": "q204",
+      "question": "How do I configure Argo Workflows to run parallel task execution?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "cncf"
+      ],
+      "query_type": "procedural",
+      "difficulty": "medium",
+      "category": "workflow",
+      "sampling_stratum": "cncf"
+    },
+    {
+      "query_id": "q205",
+      "question": "What security features does Falco provide for runtime threat detection in containerized environments?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "cncf"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "security",
+      "sampling_stratum": "cncf"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-04-24T12:32:43Z",
+  "source": "data/evaluation/test_queries.json",
+  "random_seed": 42,
+  "n_queries_source": 205,
+  "n_queries_selected": 50,
+  "targets": {
+    "aws": 13,
+    "azure": 13,
+    "gcp": 10,
+    "kubernetes": 8,
+    "cncf": 6
+  },
+  "pool_sizes_per_provider": {
+    "aws": 103,
+    "azure": 85,
+    "gcp": 57,
+    "kubernetes": 4,
+    "cncf": 9
+  },
+  "manually_added_queries": [
+    "q201",
+    "q202",
+    "q203",
+    "q204",
+    "q205"
+  ],
+  "manually_added_note": "Five CNCF queries (q201-q205) added to test_queries.json on 2026-04-24 PM to address cncf under-representation observed in the first-pass sampling (initial pure-cncf queries=1). See paper/code_fixes_2026-04-24.md \"CNCF augmentation + Minimal Mode\" section for full rationale.",
+  "strategy": "Scarcity-first stratified sampling with deterministic seed=42. Multi-cloud queries counted toward every provider they mention. Sampling order: kubernetes -> cncf -> gcp -> azure -> aws, excluding already-picked ids. Deficit from low-resource strata redistributed to aws:azure:gcp proportional to original targets (13:13:10) via largest-remainder method.",
+  "first_pass_selected": {
+    "aws": 13,
+    "azure": 13,
+    "gcp": 10,
+    "kubernetes": 4,
+    "cncf": 6
+  },
+  "first_pass_deficit": {
+    "aws": 0,
+    "azure": 0,
+    "gcp": 0,
+    "kubernetes": 4,
+    "cncf": 0
+  },
+  "redistribution_allocation": {
+    "aws": 2,
+    "azure": 1,
+    "gcp": 1
+  },
+  "redistribution_selected": {
+    "aws": 2,
+    "azure": 1,
+    "gcp": 1
+  },
+  "final_per_stratum": {
+    "aws": 15,
+    "azure": 14,
+    "gcp": 11,
+    "kubernetes": 4,
+    "cncf": 6
+  },
+  "multi_cloud_coverage_in_selection": 13
+}
