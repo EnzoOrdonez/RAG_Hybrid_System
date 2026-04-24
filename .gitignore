@@ -22,6 +22,7 @@ data/evaluation/results/
 
 # Logs
 logs/*.log
+*.log
 
 # IDE
 .idea/
@@ -46,3 +47,13 @@ output/tables/*.csv
 # Repos cloned during crawling
 data/raw/*/_repo/
 data/raw/*/_zip/
+
+# LLM response caches (regenerable from saved answers)
+data/llm_cache/*.json
+
+# Local audit / backup snapshots
+*.bak
+*.bak_*
+
+# Private advisor correspondence, unrelated to codebase
+titulacion/
