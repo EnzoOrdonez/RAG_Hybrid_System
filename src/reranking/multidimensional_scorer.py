@@ -11,7 +11,6 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-# Source quality scores by doc_type
 SOURCE_QUALITY = {
     "guide": 1.0,
     "api_reference": 1.0,
@@ -56,71 +55,54 @@ class MultidimensionalScorer:
         if not candidates:
             return candidates
 
-        w = self.weights
+        weights = self.weights
 
-        # Step 1: Cross-encoder scores
         if self.cross_encoder:
             candidates = self.cross_encoder.rerank(query, candidates, top_k=len(candidates))
 
-        # Normalize cross-encoder scores to [0, 1]
-        ce_scores = [c.score for c in candidates]
+        ce_scores = [candidate.score for candidate in candidates]
         ce_min, ce_max = min(ce_scores), max(ce_scores)
         ce_range = ce_max - ce_min if ce_max != ce_min else 1.0
 
-        for c in candidates:
-            norm_ce = (c.score - ce_min) / ce_range
-
-            # Step 2: Recency score
-            recency = self._recency_score(c)
-
-            # Step 3: Source quality
-            quality = SOURCE_QUALITY.get(getattr(c, "doc_type", "guide"), 0.5)
-
-            # Combined score (without diversity for now)
-            c.score = (
-                w["cross_encoder"] * norm_ce
-                + w["recency"] * recency
-                + w["source_quality"] * quality
+        for candidate in candidates:
+            norm_ce = (candidate.score - ce_min) / ce_range
+            recency = self._recency_score(candidate)
+            quality = SOURCE_QUALITY.get(getattr(candidate, "doc_type", "guide"), 0.5)
+            candidate.score = (
+                weights["cross_encoder"] * norm_ce
+                + weights["recency"] * recency
+                + weights["source_quality"] * quality
             )
 
-        # Step 4: MMR diversity re-ranking
-        if w.get("diversity", 0) > 0:
-            candidates = self._mmr_rerank(query, candidates, top_k)
-        else:
-            candidates.sort(key=lambda x: x.score, reverse=True)
-            candidates = candidates[:top_k]
+        if weights.get("diversity", 0) > 0:
+            return self._mmr_rerank(query, candidates, top_k)
 
-        return candidates
+        candidates.sort(key=lambda candidate: candidate.score, reverse=True)
+        return candidates[:top_k]
 
     def _recency_score(self, candidate) -> float:
         """Score based on document recency. More recent = higher score."""
-        # Try to get last_updated from chunk data
-        chunk_data = getattr(candidate, "_chunk_data", None)
-        if chunk_data and chunk_data.get("last_updated"):
-            try:
-                dt = datetime.fromisoformat(str(chunk_data["last_updated"]))
-                age_days = (datetime.now() - dt).days
-                # Decay: 1.0 for today, 0.5 for 1 year old, 0.25 for 2 years
-                return max(0.1, 1.0 / (1 + age_days / 365))
-            except (ValueError, TypeError):
-                pass
-        return 0.5  # Default: neutral
+        last_updated = getattr(candidate, "last_updated", "")
+        if not last_updated:
+            return 0.5
 
-    def _mmr_rerank(
-        self, query: str, candidates: List, top_k: int
-    ) -> List:
-        """Maximal Marginal Relevance for result diversity.
-        MMR = lambda * sim(query, doc) - (1-lambda) * max(sim(doc, selected))
-        """
+        try:
+            normalized = str(last_updated).replace("Z", "+00:00")
+            updated_at = datetime.fromisoformat(normalized)
+            age_days = (datetime.now(updated_at.tzinfo) - updated_at).days
+            return max(0.1, 1.0 / (1 + age_days / 365))
+        except (ValueError, TypeError):
+            return 0.5
+
+    def _mmr_rerank(self, query: str, candidates: List, top_k: int) -> List:
+        """Maximal Marginal Relevance for result diversity."""
         if not self.embedding_manager or len(candidates) <= 1:
-            candidates.sort(key=lambda x: x.score, reverse=True)
+            candidates.sort(key=lambda candidate: candidate.score, reverse=True)
             return candidates[:top_k]
 
         try:
-            # Get embeddings for diversity computation
-            query_emb = np.array(self.embedding_manager.embed_query(query))
-            doc_texts = [c.chunk_text for c in candidates]
-            doc_embs = self.embedding_manager.embed_documents(doc_texts, show_progress=False)
+            doc_texts = [candidate.chunk_text for candidate in candidates]
+            doc_embeddings = self.embedding_manager.embed_documents(doc_texts, show_progress=False)
 
             selected = []
             remaining = list(range(len(candidates)))
@@ -130,28 +112,25 @@ class MultidimensionalScorer:
                 best_mmr = -float("inf")
 
                 for idx in remaining:
-                    # Relevance to query
                     relevance = candidates[idx].score
-
-                    # Max similarity to already selected
-                    max_sim = 0.0
+                    max_similarity = 0.0
                     if selected:
-                        for sel_idx in selected:
-                            sim = float(np.dot(doc_embs[idx], doc_embs[sel_idx]))
-                            max_sim = max(max_sim, sim)
+                        for selected_idx in selected:
+                            similarity = float(np.dot(doc_embeddings[idx], doc_embeddings[selected_idx]))
+                            max_similarity = max(max_similarity, similarity)
 
-                    mmr = self.mmr_lambda * relevance - (1 - self.mmr_lambda) * max_sim
-                    if mmr > best_mmr:
-                        best_mmr = mmr
+                    mmr_score = self.mmr_lambda * relevance - (1 - self.mmr_lambda) * max_similarity
+                    if mmr_score > best_mmr:
+                        best_mmr = mmr_score
                         best_idx = idx
 
                 if best_idx is not None:
                     selected.append(best_idx)
                     remaining.remove(best_idx)
 
-            return [candidates[i] for i in selected]
+            return [candidates[idx] for idx in selected]
 
-        except Exception as e:
-            logger.warning("MMR failed, falling back to score sort: %s", e)
-            candidates.sort(key=lambda x: x.score, reverse=True)
+        except Exception as exc:
+            logger.warning("MMR failed, falling back to score sort: %s", exc)
+            candidates.sort(key=lambda candidate: candidate.score, reverse=True)
             return candidates[:top_k]

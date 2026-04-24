@@ -1,29 +1,18 @@
 """Chat interface page with RAG pipeline integration."""
 
-import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-
-import time
+import sys
 
 import streamlit as st
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+
+from src.ui.components.index_loader import check_ollama, get_ollama_models
 from src.ui.components.provider_colors import (
-    PROVIDER_COLORS,
-    SYSTEM_COLORS,
     faithfulness_color,
     faithfulness_label,
     get_provider_badge,
 )
-from src.ui.components.index_loader import check_ollama, get_ollama_models
-
-
-def _format_answer_with_citations(answer: str, sources: list) -> str:
-    """Add colored provider badges inline in the answer."""
-    # Build a simple markdown version with source list
-    if not sources:
-        return answer
-    return answer
 
 
 def _render_latency_breakdown(latency):
@@ -44,11 +33,23 @@ def _render_latency_breakdown(latency):
                 col.metric(name, f"{ms:.0f}ms")
 
 
+def _get_default_model_index(models: list[str]) -> int:
+    preferred_models = [
+        "mistral:7b-instruct",
+        "mistral:7b-instruct-v0.3-q4_K_M",
+        "llama3.1:8b-instruct-q4_K_M",
+    ]
+    for preferred in preferred_models:
+        for idx, model in enumerate(models):
+            if preferred in model or model in preferred:
+                return idx
+    return 0
+
+
 def render():
     """Render the Chat Interface page."""
     st.header("Chat Interface")
 
-    # Sidebar controls
     with st.sidebar:
         st.subheader("Configuration")
 
@@ -57,24 +58,14 @@ def render():
             "RAG Lexico (BM25)": "lexical",
             "RAG Semantico (Dense)": "semantic",
         }
-        selected_system = st.selectbox(
-            "System",
-            list(system_options.keys()),
-            index=0,
-        )
+        selected_system = st.selectbox("System", list(system_options.keys()), index=0)
         config_key = system_options[selected_system]
 
-        # LLM model selection
         ollama_ok = check_ollama()
         if ollama_ok:
             models = get_ollama_models()
             if models:
-                default_model = "llama3.1:8b-instruct-q4_K_M"
-                model_idx = 0
-                for i, m in enumerate(models):
-                    if default_model in m or m in default_model:
-                        model_idx = i
-                        break
+                model_idx = _get_default_model_index(models)
                 selected_model = st.selectbox("LLM Model", models, index=model_idx)
             else:
                 selected_model = None
@@ -85,7 +76,6 @@ def render():
 
         st.divider()
 
-        # Advanced settings
         with st.expander("Advanced Settings"):
             top_k = st.slider("Retrieved chunks (K)", 1, 20, 5)
             enable_reranking = st.checkbox(
@@ -102,17 +92,15 @@ def render():
             st.session_state.pop("chat_messages", None)
             st.rerun()
 
-    # Initialize chat history
     if "chat_messages" not in st.session_state:
         st.session_state.chat_messages = []
 
-    # Display chat history
     for msg in st.session_state.chat_messages:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"], unsafe_allow_html=True)
             if msg.get("chunks"):
                 with st.expander(f"Retrieved Chunks ({len(msg['chunks'])})"):
-                    for i, chunk in enumerate(msg["chunks"]):
+                    for idx, chunk in enumerate(msg["chunks"]):
                         provider = chunk.get("cloud_provider", "unknown")
                         badge = get_provider_badge(provider)
                         heading = chunk.get("heading_path", "")
@@ -121,36 +109,34 @@ def render():
                             f"{badge} **{heading}**\n\n{text_preview}...",
                             unsafe_allow_html=True,
                         )
-                        if i < len(msg["chunks"]) - 1:
+                        if idx < len(msg["chunks"]) - 1:
                             st.divider()
 
-    # Chat input
     user_input = st.chat_input("Ask about cloud documentation...")
 
     if user_input:
-        # Display user message
         st.session_state.chat_messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
             st.markdown(user_input)
 
-        # Process query
         with st.chat_message("assistant"):
             with st.spinner("Searching documentation..."):
                 try:
                     from src.ui.components.index_loader import load_hybrid_index, load_pipeline
 
                     hybrid_index = load_hybrid_index()
-                    pipeline = load_pipeline(config_key, _hybrid_index=hybrid_index)
-
-                    # Override config dynamically
-                    pipeline.config.final_top_k = top_k
-                    if not enable_reranking:
-                        pipeline.reranker = None
-                    pipeline.config.query_expansion = enable_expansion
+                    pipeline = load_pipeline(
+                        config_key,
+                        llm_model=selected_model,
+                        enable_reranking=enable_reranking,
+                        enable_query_expansion=enable_expansion,
+                        alpha=alpha,
+                        final_top_k=top_k,
+                        _hybrid_index=hybrid_index,
+                    )
 
                     response = pipeline.query(user_input)
 
-                    # Display answer
                     if response.error and not response.answer:
                         st.error(f"Error: {response.error}")
                         answer_text = f"Error: {response.error}"
@@ -158,34 +144,30 @@ def render():
                         answer_text = response.answer or "No response generated."
                         st.markdown(answer_text)
 
-                        # Faithfulness score
                         if response.hallucination_report:
                             faith = response.hallucination_report.faithfulness_score
                             color = faithfulness_color(faith)
                             label = faithfulness_label(faith)
                             st.markdown(
-                                f"**Faithfulness:** "
-                                f'<span style="color:{color};font-weight:bold;">'
-                                f"{faith:.2f} ({label})</span>",
+                                f"**Faithfulness:** <span style=\"color:{color};font-weight:bold;\">{faith:.2f} ({label})</span>",
                                 unsafe_allow_html=True,
                             )
                             st.progress(faith)
 
-                        # Confidence
                         if response.confidence and response.confidence != "UNKNOWN":
                             st.caption(f"Confidence: {response.confidence}")
+                        if selected_model:
+                            st.caption(f"Model: {selected_model}")
 
-                        # Latency breakdown
                         if response.latency and response.latency.total_ms > 0:
                             with st.expander("Latency Breakdown"):
                                 _render_latency_breakdown(response.latency)
                                 st.caption(f"Total: {response.latency.total_ms/1000:.2f}s")
 
-                    # Retrieved chunks in expander
                     chunks = response.retrieved_chunks or []
                     if chunks:
                         with st.expander(f"Retrieved Chunks ({len(chunks)})"):
-                            for i, chunk in enumerate(chunks):
+                            for idx, chunk in enumerate(chunks):
                                 provider = chunk.get("cloud_provider", "unknown")
                                 badge = get_provider_badge(provider)
                                 heading = chunk.get("heading_path", "")
@@ -194,18 +176,17 @@ def render():
                                     f"{badge} **{heading}**\n\n{text_preview}...",
                                     unsafe_allow_html=True,
                                 )
-                                if i < len(chunks) - 1:
+                                if idx < len(chunks) - 1:
                                     st.divider()
 
-                    # Save to history
                     st.session_state.chat_messages.append({
                         "role": "assistant",
                         "content": answer_text,
                         "chunks": chunks,
                     })
 
-                except Exception as e:
-                    error_msg = f"Pipeline error: {str(e)}"
+                except Exception as exc:
+                    error_msg = f"Pipeline error: {str(exc)}"
                     st.error(error_msg)
                     st.session_state.chat_messages.append({
                         "role": "assistant",

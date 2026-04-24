@@ -8,39 +8,31 @@ import logging
 import re
 import unicodedata
 from pathlib import Path
-from typing import List
 
 from src.ingestion.doc_parser import Document
 
 logger = logging.getLogger(__name__)
 
-# Patterns for boilerplate removal
 BOILERPLATE_PATTERNS = [
-    # Feedback prompts
     re.compile(r"Was this (page|helpful|article).*?(Yes|No).*?$", re.MULTILINE | re.IGNORECASE),
     re.compile(r"Did this page help you\?.*$", re.MULTILINE | re.IGNORECASE),
     re.compile(r"Feedback.*?(thumbs up|thumbs down|helpful)", re.IGNORECASE),
-    # Edit on GitHub
+    re.compile(r"^\s*Send feedback\s*$", re.MULTILINE | re.IGNORECASE),
+    re.compile(r"^\s*Stay organized with collections\s*$", re.MULTILINE | re.IGNORECASE),
+    re.compile(r"^\s*Save and categorize content based on your preferences\.?\s*$", re.MULTILINE | re.IGNORECASE),
     re.compile(r"Edit this page on GitHub\.?", re.IGNORECASE),
     re.compile(r"View.*?on GitHub\.?", re.IGNORECASE),
     re.compile(r"Suggest an edit.*$", re.MULTILINE | re.IGNORECASE),
-    # Breadcrumb-like patterns
-    re.compile(r"^(Home|Docs)\s*[>\/]\s*(.*?[>\/]\s*){2,}.*$", re.MULTILINE),
-    # Last updated
+    re.compile(r"^(Home|Docs)\s*[>/]\s*(.*?[>/]\s*){2,}.*$", re.MULTILINE),
     re.compile(r"^Last (updated|modified|reviewed):\s*.*$", re.MULTILINE | re.IGNORECASE),
     re.compile(r"^Article\s*\|\s*\d{2}/\d{2}/\d{4}.*$", re.MULTILINE),
-    # Navigation remnants
     re.compile(r"^(Previous|Next|Back to top)\s*$", re.MULTILINE | re.IGNORECASE),
     re.compile(r"^\s*On this page:?\s*$", re.MULTILINE | re.IGNORECASE),
     re.compile(r"^In this (article|section|topic):?\s*$", re.MULTILINE | re.IGNORECASE),
-    # Cookie/consent remnants
     re.compile(r"(Accept|Reject)\s*(all\s*)?(cookies|tracking)", re.IGNORECASE),
-    # AWS-specific
     re.compile(r"^Javascript is disabled.*$", re.MULTILINE),
     re.compile(r"^Please refer to your browser.*$", re.MULTILINE),
-    # Azure-specific
     re.compile(r"^Choose a different version.*$", re.MULTILINE),
-    # Generic
     re.compile(r"^\s*Share\s*(this\s*)?(page|article|post)?\s*$", re.MULTILINE | re.IGNORECASE),
     re.compile(r"^\s*(Twitter|Facebook|LinkedIn|Copy link)\s*$", re.MULTILINE | re.IGNORECASE),
 ]
@@ -59,10 +51,8 @@ class TextCleaner:
     def clean_document(self, doc: Document) -> Document:
         """Clean a document's content in place."""
         doc.content = self.clean_text(doc.content)
-        # Recompute stats
         doc.word_count = len(doc.content.split())
         doc.char_count = len(doc.content)
-        # Clean section contents recursively
         self._clean_sections(doc.sections)
         return doc
 
@@ -71,23 +61,25 @@ class TextCleaner:
         if not text:
             return text
 
-        # 1. Remove boilerplate patterns
         text = self._remove_boilerplate(text)
-
-        # 2. Normalize Unicode (preserving domain-relevant chars)
         if self.normalize_unicode:
             text = self._normalize_unicode(text)
-
-        # 3. Normalize whitespace
         text = self._normalize_whitespace(text)
-
-        # 4. Remove excessive empty lines
         text = self._limit_newlines(text)
-
-        # 5. Remove internal duplicated paragraphs
         text = self._remove_duplicate_paragraphs(text)
-
         return text.strip()
+
+    def _clean_heading(self, heading: str) -> str:
+        """Clean section titles without applying paragraph-level cleanup."""
+        if not heading:
+            return heading
+        heading = self._remove_boilerplate(heading)
+        if self.normalize_unicode:
+            heading = self._normalize_unicode(heading)
+        heading = self._normalize_whitespace(heading)
+        heading = heading.replace("\n", " ")
+        heading = re.sub(r"\s+", " ", heading)
+        return heading.strip()
 
     def _remove_boilerplate(self, text: str) -> str:
         for pattern in BOILERPLATE_PATTERNS:
@@ -96,17 +88,18 @@ class TextCleaner:
 
     def _normalize_unicode(self, text: str) -> str:
         """Normalize Unicode, preserving technical symbols."""
-        # NFKC normalization (compatible decomposition + canonical composition)
         text = unicodedata.normalize("NFKC", text)
-        # Replace common Unicode chars with ASCII equivalents
         replacements = {
-            "\u2018": "'", "\u2019": "'",  # smart quotes
-            "\u201c": '"', "\u201d": '"',
-            "\u2013": "-", "\u2014": "-",  # dashes
-            "\u2026": "...",  # ellipsis
-            "\u00a0": " ",   # non-breaking space
-            "\u200b": "",    # zero-width space
-            "\ufeff": "",    # BOM
+            "\u2018": "'",
+            "\u2019": "'",
+            "\u201c": '"',
+            "\u201d": '"',
+            "\u2013": "-",
+            "\u2014": "-",
+            "\u2026": "...",
+            "\u00a0": " ",
+            "\u200b": "",
+            "\ufeff": "",
         }
         for old, new in replacements.items():
             text = text.replace(old, new)
@@ -114,12 +107,8 @@ class TextCleaner:
 
     def _normalize_whitespace(self, text: str) -> str:
         """Normalize spaces and tabs, preserve newlines."""
-        # Replace tabs with spaces
         text = text.replace("\t", "    ")
-        # Remove trailing whitespace per line
-        lines = text.split("\n")
-        lines = [line.rstrip() for line in lines]
-        # Collapse multiple spaces (not within code blocks)
+        lines = [line.rstrip() for line in text.split("\n")]
         result = []
         in_code = False
         for line in lines:
@@ -131,7 +120,6 @@ class TextCleaner:
         return "\n".join(result)
 
     def _limit_newlines(self, text: str) -> str:
-        """Limit consecutive newlines."""
         pattern = r"\n{" + str(self.max_newlines + 1) + r",}"
         replacement = "\n" * self.max_newlines
         return re.sub(pattern, replacement, text)
@@ -141,23 +129,24 @@ class TextCleaner:
         paragraphs = text.split("\n\n")
         seen = set()
         unique = []
-        for para in paragraphs:
-            stripped = para.strip()
+        for paragraph in paragraphs:
+            stripped = paragraph.strip()
             if not stripped:
-                unique.append(para)
+                unique.append(paragraph)
                 continue
             if len(stripped) < self.min_para_length:
-                unique.append(para)
+                unique.append(paragraph)
                 continue
             if stripped in seen:
                 continue
             seen.add(stripped)
-            unique.append(para)
+            unique.append(paragraph)
         return "\n\n".join(unique)
 
     def _clean_sections(self, sections):
-        """Recursively clean section contents."""
+        """Recursively clean section contents and headings."""
         for section in sections:
+            section.title = self._clean_heading(section.title)
             section.content = self.clean_text(section.content)
             self._clean_sections(section.subsections)
 
@@ -168,17 +157,17 @@ class TextCleaner:
 
         json_files = list(input_dir.rglob("*.json"))
         cleaned = 0
-        for jf in json_files:
+        for json_file in json_files:
             try:
-                data = json.loads(jf.read_text(encoding="utf-8"))
+                data = json.loads(json_file.read_text(encoding="utf-8"))
                 doc = Document(**data)
                 doc = self.clean_document(doc)
-                out_path = output_dir / jf.relative_to(input_dir)
+                out_path = output_dir / json_file.relative_to(input_dir)
                 out_path.parent.mkdir(parents=True, exist_ok=True)
                 out_path.write_text(doc.model_dump_json(indent=2), encoding="utf-8")
                 cleaned += 1
-            except Exception as e:
-                logger.warning("Failed to clean %s: %s", jf, e)
+            except Exception as exc:
+                logger.warning("Failed to clean %s: %s", json_file, exc)
 
         logger.info("Cleaned %d/%d documents", cleaned, len(json_files))
         return cleaned
@@ -196,14 +185,11 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
     project_root = Path(__file__).parent.parent.parent
-    with open(project_root / "config/config.yaml", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    with open(project_root / "config/config.yaml", encoding="utf-8") as file:
+        config = yaml.safe_load(file)
 
     cleaner = TextCleaner(config)
-    cleaner.process_directory(
-        Path(args.input),
-        Path(args.output) if args.output else None,
-    )
+    cleaner.process_directory(Path(args.input), Path(args.output) if args.output else None)
 
 
 if __name__ == "__main__":

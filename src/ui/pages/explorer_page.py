@@ -55,7 +55,7 @@ def _get_corpus_stats(chunks: list) -> dict:
         doc_type = chunk.get("doc_type", "unknown")
         stats["by_doc_type"][doc_type] = stats["by_doc_type"].get(doc_type, 0) + 1
 
-        tokens = chunk.get("tokens", 0)
+        tokens = chunk.get("token_count", 0)
         if tokens:
             stats["token_sizes"].append(tokens)
 
@@ -107,7 +107,7 @@ def render():
                 heading = chunk.get("heading_path", "N/A")
                 service = chunk.get("service_name", "")
                 text_preview = chunk.get("text", "")[:400]
-                tokens = chunk.get("tokens", "?")
+                tokens = chunk.get("token_count", "?")
 
                 with st.expander(f"{provider.upper()} | {service} - {heading[:80]}", expanded=(i < 3)):
                     st.markdown(badge, unsafe_allow_html=True)
@@ -207,7 +207,7 @@ def render():
         for i, chunk in enumerate(display_chunks[:30]):
             heading = chunk.get("heading_path", "N/A")
             text = chunk.get("text", "")[:300]
-            tokens = chunk.get("tokens", "?")
+            tokens = chunk.get("token_count", "?")
 
             with st.expander(f"[{i+1}] {heading[:80]}", expanded=False):
                 st.caption(f"Tokens: {tokens} | Doc Type: {chunk.get('doc_type', 'N/A')}")
@@ -215,3 +215,4 @@ def render():
 
         if len(display_chunks) > 30:
             st.info(f"Showing 30 of {len(display_chunks)} chunks. Use Search tab for specific content.")
+

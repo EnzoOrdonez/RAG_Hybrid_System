@@ -22,12 +22,34 @@ def load_hybrid_index():
 
 
 @st.cache_resource(show_spinner="Building pipeline...")
-def load_pipeline(config_name: str, _hybrid_index=None):
-    """Build a RAGPipeline with a given config."""
+def load_pipeline(
+    config_name: str,
+    llm_model: str = None,
+    enable_reranking: bool = None,
+    enable_query_expansion: bool = None,
+    alpha: float = None,
+    final_top_k: int = None,
+    _hybrid_index=None,
+):
+    """Build a RAGPipeline with UI overrides encoded in the cache key."""
     from src.pipeline.pipeline_config import get_config
     from src.pipeline.rag_pipeline import RAGPipeline
 
     config = get_config(config_name)
+
+    if llm_model:
+        config.llm_model = llm_model
+    if enable_reranking is False:
+        config.reranker = None
+        config.multidimensional_scoring = False
+    if enable_query_expansion is not None:
+        config.query_expansion = enable_query_expansion
+        if not enable_query_expansion:
+            config.terminology_normalization = False
+    if alpha is not None:
+        config.alpha = alpha
+    if final_top_k is not None:
+        config.final_top_k = final_top_k
 
     if _hybrid_index is None:
         _hybrid_index = load_hybrid_index()
@@ -54,6 +76,6 @@ def get_ollama_models() -> list:
         req = urllib.request.Request("http://localhost:11434/api/tags", method="GET")
         with urllib.request.urlopen(req, timeout=3) as resp:
             data = json.loads(resp.read())
-            return [m["name"] for m in data.get("models", [])]
+            return [model["name"] for model in data.get("models", [])]
     except Exception:
         return []

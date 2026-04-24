@@ -14,9 +14,9 @@ from pydantic import BaseModel
 class PipelineConfig(BaseModel):
     """Configuration for a complete RAG pipeline."""
     name: str
-    retrieval_method: str  # "bm25", "dense", "hybrid"
+    retrieval_method: str
     embedding_model: Optional[str] = None
-    fusion_method: Optional[str] = None  # "linear", "rrf"
+    fusion_method: Optional[str] = None
     alpha: float = 0.5
     rrf_k: int = 60
     reranker: Optional[str] = None
@@ -32,10 +32,6 @@ class PipelineConfig(BaseModel):
     chunking_strategy: str = "adaptive"
     chunk_size: int = 500
 
-
-# ============================================================
-# The 3 thesis systems
-# ============================================================
 
 BASELINE_LEXICAL = PipelineConfig(
     name="RAG Lexico (BM25)",
@@ -84,11 +80,6 @@ PROPOSED_HYBRID = PipelineConfig(
     temperature=0.1,
 )
 
-
-# ============================================================
-# Config registry
-# ============================================================
-
 PIPELINE_CONFIGS = {
     "lexical": BASELINE_LEXICAL,
     "semantic": BASELINE_SEMANTIC,
@@ -101,4 +92,4 @@ def get_config(name: str) -> PipelineConfig:
     if name not in PIPELINE_CONFIGS:
         available = ", ".join(PIPELINE_CONFIGS.keys())
         raise ValueError(f"Unknown config '{name}'. Available: {available}")
-    return PIPELINE_CONFIGS[name]
+    return PIPELINE_CONFIGS[name].model_copy(deep=True)
