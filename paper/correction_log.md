@@ -271,4 +271,111 @@ Sin nuevas dependencias en Fase 2. `statsmodels` ya agregado en Fase 1.
 
 ---
 
+## Fase 2.5 — Recompute retrieval stats sin re-run
+
+- **Branch**: `fase-2.5-recompute-retrieval-stats`
+- **Base**: `main` @ `533e535` (merge de Fase 2 — NLI softmax, aggregation, n_effective, global seeds)
+- **Motivación**: Fase 1 introdujo BH-FDR + Holm + Cohen's d_z paired en `src/evaluation/statistical_analysis.py` y en el refactor de `scripts/compute_retrieval_metrics.py`. El re-run de Fase 2 completó solo exp5 (NLI). exp8 y exp8b quedaron con `retrieval_metrics.json` de marzo (pre-fix) porque la fase 2 rerun_post_fixes.sh no llegó a esos experimentos. Retrieval es determinístico bajo seed fijo (BGE-large FlatIP + rank_bm25, sin dropout) y el cross-encoder oracle (`ms-marco-MiniLM-L-12-v2`) también lo es sobre inputs fijos, así que los per-query metrics se pueden regenerar sin re-correr el benchmark.
+
+### Commits
+
+| # | Commit | Descripción |
+|---|--------|-------------|
+| 1 | `<hash>` | feat(phase-2.5): add scripts/recompute_retrieval_stats.py |
+| 2 | `<hash>` | test(phase-2.5): add scripts/audit/smoke_recompute_retrieval_stats.py |
+| 3 | `<hash>` | data(phase-2.5): regenerated exp8/exp8b retrieval_metrics.json with BH/Holm/d_z |
+| 4 | `<hash>` | docs(phase-2.5): correction_log Phase 2.5 entry |
+
+(Hashes fill at commit time; see `git log`.)
+
+### Flags cerrados numéricamente
+
+| Flag | Fuente | Dato pre-fix | Dato post-recompute |
+|------|--------|--------------|---------------------|
+| 108 (artefacto público) | §15.2 / §21.5 T0.8 | `statistical_tests` sin `p_bh`/`p_holm` | cada leaf lleva `p_raw`, `p_bh`, `sig_bh`, `p_holm`, `sig_holm`, `correction_family_size=12` |
+| 21 (Cohen's d) | §3.5 | `cohens_d` calculado con pooled SD para muestras independientes | `cohens_d_z` paired computado de per-query diffs (ddof=1); `cohens_d` alias = `d_z` |
+
+### Síntomas confirmados (zero-trust)
+
+| Síntoma | Verificación | Resultado |
+|---------|--------------|-----------|
+| `experiments/results/exp8/retrieval_metrics.json` sin `p_bh` | `jq '.statistical_tests["ndcg@5"]["RAG Lexico (BM25) vs RAG Hibrido Propuesto"]'` | ✓ pre-fix dict tenía `cohens_d`, `p_value`, `significant` solo |
+| Score distribution del cross-encoder idéntica pre vs post | Diff de `score_distribution` (min/max/mean/median/std) | ✓ bit-identical |
+| `precision@5_mean` por sistema idéntico pre vs post | Diff de systems dict | ✓ bit-identical (binary relevance @threshold=0 sin cambios) |
+| `ndcg@5_mean` por sistema idéntico pre vs post | idem | ✓ bit-identical (pooled IDCG normalizer usado en compute_retrieval_metrics preservado en el recompute) |
+| Cross-encoder cache presente, chunks intactos | `find data/chunks/adaptive/size_500 | wc -l` | ✓ 46,318 chunk JSONs |
+
+### Discrepancias vs audit §16 Módulo 16 (m16 recompute)
+
+Durante la verificación numérica surgió un hallazgo significativo sobre la tabla m16 en `paper/audit_outputs/exp8_stats_corrected.csv`:
+
+El audit §16 reporta para BM25 vs Hibrido en NDCG@5:
+- `d_z_reported = -0.6259`
+- `d_av = -0.6297`
+- `r_inferred = 0.5122`
+
+Mi recompute directo sobre per-query diffs da:
+- `d_z = 0.5023` (signo invertido por convención `b-a` vs m16 `a-b`, magnitud 0.50 vs 0.63)
+- Correlación paired real `r(bm, hy) = 0.2332` (no 0.51)
+
+Causa de la discrepancia: el `cohens_d = -0.6259` que m16 leyó del pre-fix `retrieval_metrics.json` NO era `d_z` — era el `d_pooled` independent-samples fórmula (audit Flag 21) que el código bugueado de `compute_retrieval_metrics.py:194-195` estaba escribiendo bajo la etiqueta `cohens_d`. El audit m16 consumió esa etiqueta literal sin re-verificar la fórmula del productor y back-infirió `r_inferred = 0.51` de los valores mis-labelados.
+
+Numéricamente:
+- `d_pooled = (mean_a - mean_b) / pooled_sd = (0.5545 - 0.7362) / 0.2903 = -0.6259` ✓ coincide con pre-fix JSON
+- `d_z (paired) = mean_diff / std_diff = 0.1817 / 0.3618 = 0.5023` ✓ coincide con mi recompute
+
+**Implicación para el paper**: el claim del abstract *"Cohen's d = 0.626"* venía de la fórmula incorrecta. El valor correcto (`d_z = 0.502`) aún supera el threshold |d|≥0.5 para "medium effect", pero apenas (±0.002 sobre el umbral). Todas las otras comparaciones pair-wise en exp8 caen a "small" con d_z.
+
+Comparación por métrica para BM25 vs Hibrido (la celda más favorable al paper):
+
+| Métrica | d_pooled pre-fix | d_z post-recompute | p_raw | p_bh | sig_bh |
+|---------|------------------|--------------------|---|---|--------|
+| NDCG@5 | −0.626 | **+0.502** (medium) | 1.83e-11 | 1.10e-10 | True |
+| MRR | −0.402 | **+0.384** (small) | 4.55e-06 | 1.09e-05 | True |
+| Precision@5 | −0.431 | **+0.474** (small) | 1.01e-09 | 4.03e-09 | True |
+| Avg Score@5 | −0.373 | **+0.501** (medium) | 1.11e-11 | 1.10e-10 | True |
+
+Sólo 2 de 12 comparaciones (`BM25 vs Hibrido en NDCG@5` y `BM25 vs Hibrido en Avg Score@5`) alcanzan |d_z| ≥ 0.5 post-fix. Todas las 12 sobreviven BH-FDR con alpha=0.05.
+
+### Addenda (no corregidos sin aprobación)
+
+**A6 — m16 CSV etiqueta `d_z_reported` lo que en realidad es `d_pooled`**. El CSV en `paper/audit_outputs/exp8_stats_corrected.csv` mis-etiqueta los valores de la columna `d_z_reported` — se parecen a los `d_pooled` mal-computados por el pre-fix `compute_retrieval_metrics.py:194-195`. El audit §16 consumió esa etiqueta literal sin verificar la fórmula del productor. El `r_inferred` también está contaminado por el mismo error (∼0.51 inferido vs 0.23 observado).
+
+Recomendación (pendiente de aprobación): regenerar `paper/audit_outputs/exp8_stats_corrected.csv` usando los per-query diffs reales y actualizar §16 del audit para reflejar `d_z` verdadero. Sin esta corrección, cualquier referencia futura a §16 tabla propaga el mis-etiquetado. **No lo aplico en Fase 2.5** porque `audit_findings.md` es inmutable por mandato de la mission spec.
+
+### Tests post-fix
+
+| Test | Script | Resultado |
+|------|--------|-----------|
+| exp8 y exp8b: todos los 12 leaves llevan p_raw/p_bh/sig_bh/p_holm/sig_holm/correction_family_size/cohens_d_z/metric/system_a/system_b | `scripts/audit/smoke_recompute_retrieval_stats.py` | ✅ 10/10 PASS (5 asserts × 2 exps) |
+| `correction_family_size == 12` top-level y per-leaf | idem | ✅ PASS |
+| `p_bh >= p_raw` cada leaf (BH nunca baja p crudo) | idem | ✅ PASS |
+| `sig_holm ⇒ sig_bh` cada leaf (Holm más estricto que BH) | idem | ✅ PASS |
+| Ordenamiento Hibrido > Dense > BM25 preservado en 6 métricas medias | idem | ✅ PASS |
+| Score distribution del cross-encoder idéntica pre vs post | manual diff vs backup | ✅ bit-identical |
+| Smoke ejecutable con `SMOKE_SKIP_RECOMPUTE=1` para CI rápido | `SMOKE_SKIP_RECOMPUTE=1 python scripts/audit/smoke_recompute_retrieval_stats.py` | ✅ PASS sin re-scoring |
+
+### Scope guard (NO tocado)
+
+- `exp6`: ablation cost/latency sin NLI — sin fix de Fase 1/2 aplicable.
+- `exp7`: decisión Fase 4 (Opción A = remover +16.8%) pendiente — no regenerar.
+- `exp3`, `exp4`: sin `retrieval_metrics.json` en el repo (audit Flag 69) — fuera de alcance Fase 3 export.
+- `scripts/compute_retrieval_metrics.py`: intacto (Fase 1 lo dejó con BH/Holm correctos).
+- `src/evaluation/statistical_analysis.py`: intacto.
+- `paper/overleaf_ready/main.tex`: intacto.
+
+### Comandos pendientes para el usuario
+
+1. **Revisión externa** del branch `fase-2.5-recompute-retrieval-stats` antes de merge a `main`.
+2. **Decidir sobre A6**: regenerar o no `paper/audit_outputs/exp8_stats_corrected.csv` con los valores de `d_z` correctos.
+3. **Actualizar el abstract** antes de submission: el Cohen's d = 0.626 citado es en realidad `d_pooled`. Usar `d_z ≈ 0.50` o reformular a `d_pooled = 0.63` con disclaimer. Afecta §V.A y abstract.
+4. **Fase 3** ya puede arrancar cuando el usuario mergee esta fase — las figuras y tablas pueden regenerarse desde los JSONs post-recompute.
+
+### Total de commits en `fase-2.5-recompute-retrieval-stats`
+
+4 (1 script + 1 smoke + 1 data + 1 docs).
+
+---
+
+
 
