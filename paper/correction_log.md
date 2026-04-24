@@ -402,3 +402,86 @@ Post-merge continuation en `main`: 1 merge commit + 3 commits (CSV replacement +
 
 
 
+
+## Fase 3.5 — Recompute NLI sobre saved answers (sin LLM re-run)
+
+- **Branch**: `fase-3.5-nli-recompute-saved-answers`
+- **Base**: `main` @ `27eee1f` (NO sobre `fase-3-regenerate-figures` — branch separada)
+- **Motivación**: asimetría post/pre-fix entre exp5 (post-Fase-2, Honovich + n_effective) y exp6/exp8/exp8b (pre-Fase-2, aggregates sin n_effective). exp6 `ablation_+expansion` y `ablation_+normalization` ambos 0.344 idénticos confirmaba empíricamente Flag 124/126. exp8 Hibrido 0.369 pre-fix vs exp5 Mistral 0.216 post-fix incoherente. Solución: re-aplicar NLI detector (código post-Fase-2) a los `(answer, chunks)` ya guardados en `results.json`. No re-correr LLM.
+
+### Commits
+
+| # | Commit | Descripción |
+|---|--------|-------------|
+| 1 | `35107db` | feat(phase-3.5): recompute script + smoke |
+| 2 | `24888f5` | data(phase-3.5): 6 aggregated_metrics.json (3 post + 3 backups) |
+| 3 | `<docs>` | docs(phase-3.5): correction_log Fase 3.5 entry |
+
+### Tabla pre/post — hall_faithfulness_mean (11 configs, todos Δ negativos)
+
+| Experimento | Config | Pre-fix | Post-fix | Δ | n_eff / n_total |
+|-------------|--------|---------|----------|---|-----------------|
+| exp6 | ablation_bm25_only | 0.3648 | **0.2146** | −0.1502 | 190/200 |
+| exp6 | ablation_+dense | 0.3708 | **0.2011** | −0.1697 | 186/200 |
+| exp6 | ablation_+reranker | 0.3985 | **0.1921** | −0.2064 | 185/200 |
+| exp6 | ablation_+expansion | 0.3442 | **0.1876** | −0.1566 | 188/200 |
+| exp6 | ablation_+normalization | 0.3442 | **0.1876** | −0.1566 | 188/200 |
+| exp8 | RAG Lexico (BM25) | 0.3739 | **0.2103** | −0.1636 | 187/200 |
+| exp8 | RAG Semantico (Dense) | 0.3976 | **0.2288** | −0.1688 | 186/200 |
+| exp8 | RAG Hibrido Propuesto | 0.3687 | **0.1928** | −0.1758 | 187/200 |
+| exp8b | RAG Lexico (BM25) | 0.4964 | **0.2388** | −0.2576 | 156/200 |
+| exp8b | RAG Semantico (Dense) | 0.5089 | **0.2520** | −0.2568 | 167/200 |
+| exp8b | RAG Hibrido Propuesto | 0.5141 | **0.2525** | −0.2616 | 169/200 |
+
+### Hallazgos
+
+1. **Flag 124/126 empíricamente confirmado**: `exp6/ablation_+expansion` y `exp6/ablation_+normalization` producen mean idénticos pre-fix (ambos 0.3442) y post-fix (ambos 0.1876). Los dos stages del ablation estuvieron ejecutando la MISMA configuración — consistente con audit §20.9 Flag 160 (TerminologyNormalizer es código muerto en retrieval) y §18.3 Flag 126 (terminology_normalization requiere query_expansion). El stage de "normalization" en exp6 no agregaba nada sobre "expansion".
+
+2. **Coherencia cross-experimento restaurada**: exp8 Hibrido (Llama) post-fix 0.1928 ≈ exp5 Llama 0.1884. exp8b Hibrido (Mistral) post-fix 0.2525 ≈ exp5 Mistral 0.2159.
+
+3. **Deltas sistemáticos**: todos los configs bajan ~15-26 puntos. Consistente con audit §19.3 tabla que predecía ~-4.4 pts del filter + más del Honovich fix.
+
+### Método
+
+- **Input**: `experiments/results/{exp}/results.json` (answers + retrieved_ids preservados).
+- **Chunks**: `scripts.compute_retrieval_metrics.load_chunk_texts` sobre union de retrieved_ids por experimento.
+- **NLI**: `HallucinationDetector.check(answer, chunks)` — código Fase 2 post-fix.
+- **Aggregate**: filter `method in {none,error}`, emit `hall_n_effective` + `hall_method_counts`.
+- **Preservado**: retrieval/generation/latency aggregates del JSON pre-fix. Solo el bloque `hall_*` fue reemplazado.
+- **NO tocado**: `results.json` (per-query hallucination_metrics rows preserved pre-fix para traceability).
+- **Device**: CUDA. 3 experimentos × ~800 NLI batches ≈ 10 min total.
+
+### Scope respetado
+
+- **Procesado**: exp6, exp8, exp8b.
+- **NO procesado** (verificado por smoke #5, #6): exp5 (ya post-fix), exp7 (Fase 4 decisión pendiente).
+- **NO tocado** fuera de `experiments/results/exp{6,8,8b}/`: main.tex, audit_findings.md, audit_outputs/, src/, requirements.txt.
+
+### Tests post-fix
+
+| # | Assert | Resultado |
+|---|--------|-----------|
+| 1 | Backups `*_pre_nli_fix.json` existen en exp6/exp8/exp8b | ✅ PASS |
+| 2 | Cada config tiene hall_n_effective, n_total, n_excluded, method_counts | ✅ PASS |
+| 3 | hall_n_effective ≤ hall_n_total | ✅ PASS |
+| 4 | Direction post ≤ pre (warn-only) | ✅ PASS 11/11 configs, 0 anomalies |
+| 5 | exp5 sin backup (NO procesado) | ✅ PASS |
+| 6 | exp7 sin backup (NO procesado) | ✅ PASS |
+| 7 | hall_method_counts sum == hall_n_total | ✅ PASS |
+
+### Consecuencia para Fase 3
+
+Las tablas `table_exp6_faithfulness_phase3.tex`, `table_exp8_faithfulness_phase3.tex`, `table_exp8b_faithfulness_phase3.tex` (generadas en Fase 3) quedan desactualizadas — usaron los aggregated_metrics.json pre-fix. Post merge de Fase 3.5 a `main`, re-correr `scripts/generate_phase3_artifacts.py` regenerará esas 3 tablas con los nuevos números.
+
+### Comandos pendientes para el usuario
+
+1. Revisión externa del branch `fase-3.5-nli-recompute-saved-answers`.
+2. Merge a `main` (sugerido: `git merge --no-ff` preservando 3 commits individuales).
+3. Post-merge: re-correr `scripts/generate_phase3_artifacts.py` en un nuevo branch para actualizar las 3 tablas faithfulness con los números Fase 3.5. Alternativa: cherry-pick la data commit sobre fase-3 y re-generar.
+4. Fase 4 (decisión +16.8%) y Fase 5 (reescritura main.tex) siguen pendientes de autorización separada.
+
+### Total de commits Fase 3.5
+
+3 (feat + smoke / data / docs). Pendiente de merge.
+
+---
