@@ -1,0 +1,14 @@
+\begin{table}[htbp]
+\centering
+\caption{Faithfulness for exp5. Post-Phase-2 NLI aggregation (Honovich 2022 max-per-class, apply\_softmax=True, excluding method=none/error).}
+\label{tab:exp5-faithfulness-phase3}
+\begin{tabular}{lccc}
+\toprule
+Configuration & Faithfulness ($\mu \pm \sigma$) & n eff / total & Latency (s) \\
+\midrule
+llm\_llama3.1 & $0.188 \pm 0.252$ & 190 / 200 & 88.63 \\
+llm\_qwen2.5 & $0.198 \pm 0.259$ & 179 / 200 & 110.09 \\
+llm\_mistral & $0.216 \pm 0.267$ & 171 / 200 & 131.06 \\
+\bottomrule
+\end{tabular}
+\end{table}

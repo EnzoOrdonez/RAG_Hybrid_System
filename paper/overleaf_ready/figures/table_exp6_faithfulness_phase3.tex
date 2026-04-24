@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\caption{Faithfulness for exp6. Pre-Phase-2 NLI aggregation; n\_effective unavailable for this experiment (benchmark not re-run post Phase 2 fixes).}
+\label{tab:exp6-faithfulness-phase3}
+\begin{tabular}{lccc}
+\toprule
+Configuration & Faithfulness ($\mu \pm \sigma$) & n eff / total & Latency (s) \\
+\midrule
+ablation\_bm25\_only & $0.365 \pm 0.385$ & -- & 0.28 \\
+ablation\_+dense & $0.371 \pm 0.374$ & -- & 0.36 \\
+ablation\_+reranker & $0.398 \pm 0.387$ & -- & 0.38 \\
+ablation\_+expansion & $0.344 \pm 0.347$ & -- & 48.08 \\
+ablation\_+normalization & $0.344 \pm 0.347$ & -- & 3.03 \\
+\bottomrule
+\end{tabular}
+\end{table}

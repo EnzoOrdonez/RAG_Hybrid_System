@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\caption{Cross-encoder based retrieval quality metrics (exp8, 200 queries). Phase 2.5: paired Cohen's $d_z$ (Lakens 2013) and Benjamini-Hochberg FDR over 12-test family.}}
+\label{tab:retrieval-metrics-exp8-phase3}
+\begin{tabular}{lcccccc}
+\toprule
+System & Prec@1 & Prec@3 & Prec@5 & MRR & NDCG@5 & Avg.~Score \\
+\midrule
+RAG Lexico & 0.785 & 0.732 & 0.718 & 0.828 & 0.554 & 1.903 \\
+RAG Semantico & 0.860 & 0.808 & 0.782 & 0.894 & 0.661 & 2.400 \\
+RAG Hibrido Propuesto & 0.930 & 0.888 & 0.851 & 0.942 & 0.736 & 2.879 \\
+\midrule
+\multicolumn{7}{l}{\footnotesize RAG Lexico (BM25) vs RAG Semantico (Dense) [ndcg@5]: $d_z=+0.274$ (small), $p_{BH} < 10^{-4}$, sig. (BH-FDR, family=12)} \\
+\multicolumn{7}{l}{\footnotesize RAG Lexico (BM25) vs RAG Hibrido Propuesto [ndcg@5]: $d_z=+0.502$ (medium), $p_{BH} < 10^{-10}$, sig. (BH-FDR, family=12)} \\
+\multicolumn{7}{l}{\footnotesize RAG Semantico (Dense) vs RAG Hibrido Propuesto [ndcg@5]: $d_z=+0.234$ (small), $p_{BH} < 10^{-3}$, sig. (BH-FDR, family=12)} \\
+\bottomrule
+\end{tabular}
+\end{table}
