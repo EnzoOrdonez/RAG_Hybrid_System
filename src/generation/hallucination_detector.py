@@ -211,8 +211,34 @@ class HallucinationDetector:
     # Step 1: Claim Extraction
     # ============================================================
 
+    # Bullet-line detector used by _extract_claims to parse list-format
+    # responses (q196-style) that the pre-2026-05 splitter collapsed
+    # into a single unsplittable block. Matches leading whitespace +
+    # bullet marker (`*`, `-`, `+`, `1.`, `2)`) + space.
+    _BULLET_LINE_RE = re.compile(
+        r'^(\s*)(?:[\*\-\+]|\d+[\.\)])\s+(.+)$'
+    )
+
     def _extract_claims(self, text: str) -> List[str]:
-        """Extract verifiable factual claims from the response."""
+        """Extract verifiable factual claims from the response.
+
+        Supports both prose and bullet-list formats. For bullet lists,
+        header bullets (lines ending in ``:``) are recorded as context
+        and attached to their sub-bullets so the resulting claims carry
+        semantic grounding instead of becoming bare labels.
+
+        Pre-2026-05 the splitter used only ``re.split(r'(?<=[.!?])\\s+', ...)``,
+        which never segmented bullet lists because bullets typically do
+        not end in ``.!?``. q196 (the only ``total_claims=0`` row in
+        exp9_llm_only_no_rag) is the canonical example: its substantive
+        list of VPC/Subnet/Security-Group mappings produced ``claims=[]``
+        and a vacuous ``faithfulness_score=1.0``.
+
+        Fix (this method): preprocess the text by walking lines,
+        recording header bullets, and emitting each leaf bullet as a
+        ``"<header>: <content>."`` sentence. Empty lines reset the
+        header. Prose passes through unchanged.
+        """
         # Remove code blocks (not claims)
         text_clean = re.sub(r'```[\s\S]*?```', '', text)
         # Remove inline code
@@ -220,7 +246,56 @@ class HallucinationDetector:
         # Remove citations
         text_clean = re.sub(r'\[Source:[^\]]*\]', '', text_clean)
 
-        # Split into sentences
+        # Bullet-list normalization
+        lines = text_clean.split('\n')
+        result_lines: List[str] = []
+        current_header: Optional[str] = None
+        prev_was_bullet = False
+        for line in lines:
+            m = self._BULLET_LINE_RE.match(line)
+            if m:
+                # Transitioning from prose to a bullet block — terminate
+                # the last non-empty pre-bullet line with "." if it does
+                # not already end in .!?, so the splitter does not merge
+                # the intro paragraph with the first bullet content
+                # (canonical bug: q196's "...across AWS, Azure, and GCP:"
+                # was concatenated with the first VPC bullet, swallowed
+                # by SKIP_PATTERNS r"^based on", and the bullet was lost).
+                if not prev_was_bullet:
+                    for i in range(len(result_lines) - 1, -1, -1):
+                        if result_lines[i].strip():
+                            if not result_lines[i].rstrip().endswith(('.', '!', '?')):
+                                result_lines[i] = (
+                                    result_lines[i].rstrip() + '.'
+                                )
+                            break
+                indent, content = m.group(1), m.group(2).strip()
+                # Strip surrounding markdown bold/italic for cleaner claims
+                content_clean = re.sub(r'\*\*([^\*]+)\*\*', r'\1', content)
+                content_clean = re.sub(r'__([^_]+)__', r'\1', content_clean)
+                if content_clean.endswith(':'):
+                    # Header bullet — record as context, do not emit
+                    current_header = content_clean.rstrip(':').strip()
+                else:
+                    # Leaf bullet — attach header context if indented
+                    if current_header and len(indent) > 0:
+                        result_lines.append(
+                            f"{current_header}: {content_clean}."
+                        )
+                    else:
+                        result_lines.append(f"{content_clean}.")
+                prev_was_bullet = True
+            else:
+                stripped = line.strip()
+                if not stripped:
+                    # Empty line resets header (new section)
+                    current_header = None
+                result_lines.append(line)
+                prev_was_bullet = False
+        text_clean = '\n'.join(result_lines)
+
+        # Split into sentences (bullets now act as sentence boundaries
+        # because each was rewritten to terminate in ".")
         sentences = re.split(r'(?<=[.!?])\s+', text_clean)
 
         claims = []

@@ -34,16 +34,37 @@ class FormattedResponse(BaseModel):
     was_truncated: bool
 
 
-# Patterns for honest declines
+# Patterns for honest declines.
+#
+# Pre-2026-05 BUG: 4 of the original 8 patterns started with capital
+# `I` (`r"I cannot find enough information"`, `r"I don't have.*information"`,
+# etc.). `_is_honest_decline` lowercases the input text via `text.lower()`
+# BEFORE applying these patterns with `re.search` WITHOUT
+# `re.IGNORECASE`, so those capital-I patterns were UNREACHABLE — they
+# could never match the lowercased input. The bug caused
+# `honest_decline_rate=0/200` on exp9_llm_only_no_rag and similarly
+# unmeasured-but-zero values for exp1-exp8.
+#
+# Fix (this list): all 8 originals rewritten lowercase + 6 additional
+# patterns covering knowledge-side declines ("i'm not familiar with",
+# "i don't have specific information", etc.). Validated against the
+# 200 saved responses of exp9_llm_only_no_rag — yields 4 matches
+# (q081, q097, q106, q117) where the prior list yielded 0.
 DECLINE_PATTERNS = [
     r"cannot find sufficient information",
-    r"I cannot find enough information",
+    r"i cannot find enough information",
     r"not enough information in the.*context",
     r"the.*context does not.*contain",
     r"no relevant.*information.*found",
-    r"I don't have.*information",
+    r"i don't have.*information",
     r"based on the available documentation.*cannot",
     r"the provided context does not",
+    r"i'm not familiar with",
+    r"unfortunately, i don't",
+    r"my knowledge.*is limited",
+    r"i'm unable to (provide|answer)",
+    r"i don't have access to",
+    r"i don't have specific information",
 ]
 
 # Citation pattern: [Source: provider/service/section]
