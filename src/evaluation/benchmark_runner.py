@@ -282,14 +282,26 @@ class BenchmarkRunner:
                     use_bert_score=False,  # Skip to save time
                 )
 
-            # Compute hallucination metrics
+            # Compute hallucination metrics.
+            # NOTE: The guard intentionally allows empty
+            # response.retrieved_chunks so the LLM-only (no-RAG)
+            # baseline is scored. The detector routes empty-chunks
+            # queries through its _no_evidence_report path
+            # (method="no_evidence", faithfulness=0.0).
             hall_metrics = {}
-            if compute_hallucination and response.answer and response.retrieved_chunks:
+            if compute_hallucination and response.answer:
                 detector = self._get_hallucination_detector()
                 hall_metrics = compute_hallucination_metrics(
                     response_text=response.answer,
-                    retrieved_chunks=response.retrieved_chunks,
+                    retrieved_chunks=response.retrieved_chunks or [],
                     detector=detector,
+                )
+
+            # Surface HONEST_DECLINE flag from ResponseFormatter so
+            # honest_decline_rate is aggregable across all systems.
+            if hall_metrics is not None:
+                hall_metrics["is_honest_decline"] = bool(
+                    getattr(response, "confidence", "") == "HONEST_DECLINE"
                 )
 
             # Latency from pipeline
@@ -386,17 +398,25 @@ class BenchmarkRunner:
                 all_results[config_name] = results
                 continue
 
-            # Load index for this config
-            hybrid_index = self._get_hybrid_index(
-                pipeline_config.chunking_strategy,
-                pipeline_config.chunk_size,
-                pipeline_config.embedding_model,
-            )
+            # Load index for this config — skip entirely for LLM-only
+            # (retrieval_method="none") since no retrieval is performed.
+            if pipeline_config.retrieval_method == "none":
+                hybrid_index = None
+                logger.info(
+                    "Skipping index load for %s (retrieval_method=none)",
+                    config_name,
+                )
+            else:
+                hybrid_index = self._get_hybrid_index(
+                    pipeline_config.chunking_strategy,
+                    pipeline_config.chunk_size,
+                    pipeline_config.embedding_model,
+                )
 
-            if hybrid_index is None:
-                logger.error("Cannot load index for %s, skipping", config_name)
-                all_results[config_name] = results
-                continue
+                if hybrid_index is None:
+                    logger.error("Cannot load index for %s, skipping", config_name)
+                    all_results[config_name] = results
+                    continue
 
             # Create pipeline
             try:
@@ -653,6 +673,19 @@ class BenchmarkRunner:
                 if values:
                     agg[f"hall_{key}_mean"] = float(np.mean(values))
                     agg[f"hall_{key}_sum"] = int(sum(values))
+
+            # Honest-decline rate (LLM-only baseline addition; also
+            # applies to RAG configs that decline). is_honest_decline
+            # is a bool surfaced from ResponseFormatter in
+            # _run_single_query. Computed over all valid queries.
+            decline_values = [
+                int(bool(r.hallucination_metrics.get("is_honest_decline", False)))
+                for r in valid
+                if r.hallucination_metrics
+            ]
+            if decline_values:
+                agg["hall_honest_decline_rate_mean"] = float(np.mean(decline_values))
+                agg["hall_honest_decline_n"] = len(decline_values)
 
             # Aggregate latency
             latency_records = [r.latency for r in valid if r.latency]

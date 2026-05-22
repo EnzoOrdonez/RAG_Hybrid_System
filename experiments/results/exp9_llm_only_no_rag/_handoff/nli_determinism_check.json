@@ -1,0 +1,35 @@
+[
+  {
+    "run": 1,
+    "total_claims": 12,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli",
+    "retrieved_ids_count": 5,
+    "answer_len": 2589
+  },
+  {
+    "run": 2,
+    "total_claims": 12,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli",
+    "retrieved_ids_count": 5,
+    "answer_len": 2589
+  },
+  {
+    "run": 3,
+    "total_claims": 12,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli",
+    "retrieved_ids_count": 5,
+    "answer_len": 2589
+  }
+]

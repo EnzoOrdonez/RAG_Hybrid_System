@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class ClaimDetail(BaseModel):
     """Detail for a single extracted claim."""
     claim_text: str
-    status: str  # "supported", "contradicted", "unsupported"
+    status: str  # "supported", "contradicted", "unsupported", "unsupported_no_evidence"
     evidence_chunk_id: Optional[str] = None
     nli_score: float = 0.0
 
@@ -125,9 +125,14 @@ class HallucinationDetector:
             return self._empty_report(0.0)
 
         if not retrieved_chunks:
-            return self._empty_report(
+            # Operational definition under the RAG paradigm: without
+            # evidence, no claim can be verified. Segments the response
+            # so total_claims is comparable to RAG configs and tags
+            # method="no_evidence" — distinct from method="none"
+            # (empty response) so aggregators can identify this path.
+            return self._no_evidence_report(
+                response,
                 (time.perf_counter() - start) * 1000,
-                hallucination_rate=1.0,
             )
 
         # Step 1: Extract claims
@@ -440,7 +445,7 @@ class HallucinationDetector:
     # ============================================================
 
     def _empty_report(self, elapsed_ms: float, hallucination_rate: float = 0.0) -> HallucinationReport:
-        """Return an empty report for edge cases."""
+        """Return an empty report for edge cases (empty response)."""
         return HallucinationReport(
             total_claims=0,
             supported_claims=0,
@@ -452,4 +457,63 @@ class HallucinationDetector:
             claim_details=[],
             processing_time_ms=elapsed_ms,
             method="none",
+        )
+
+    def _no_evidence_report(
+        self,
+        response: str,
+        elapsed_ms: float,
+    ) -> HallucinationReport:
+        """Report for the LLM-only (no retrieval) case.
+
+        Two sub-cases, both tagged method="no_evidence" so aggregators
+        can identify this path (distinct from "none" / "error"):
+
+        1. Response makes verifiable claims → each tagged
+           "unsupported_no_evidence", faithfulness=0.0,
+           hallucination_rate=1.0. Operational definition under the
+           RAG paradigm: without evidence, no claim is verified.
+
+        2. Response is an honest decline (claims extraction returns []
+           because skip-patterns filter out "I cannot...", "Based on...",
+           etc.) → faithfulness=1.0, hallucination_rate=0.0 vacuously,
+           consistent with `check()` line 136-149 for the non-empty-
+           chunks / no-claims case. The honest_decline signal is
+           captured separately via ResponseFormatter.
+        """
+        claims = self._extract_claims(response)
+        if not claims:
+            return HallucinationReport(
+                total_claims=0,
+                supported_claims=0,
+                contradicted_claims=0,
+                unsupported_claims=0,
+                faithfulness_score=1.0,
+                hallucination_rate=0.0,
+                suggested_rubric=5,
+                claim_details=[],
+                processing_time_ms=round(elapsed_ms, 1),
+                method="no_evidence",
+            )
+        details = [
+            ClaimDetail(
+                claim_text=c,
+                status="unsupported_no_evidence",
+                evidence_chunk_id=None,
+                nli_score=0.0,
+            )
+            for c in claims
+        ]
+        total = len(details)
+        return HallucinationReport(
+            total_claims=total,
+            supported_claims=0,
+            contradicted_claims=0,
+            unsupported_claims=total,
+            faithfulness_score=0.0,
+            hallucination_rate=1.0,
+            suggested_rubric=1,
+            claim_details=details,
+            processing_time_ms=round(elapsed_ms, 1),
+            method="no_evidence",
         )

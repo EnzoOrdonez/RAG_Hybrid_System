@@ -20,6 +20,8 @@ from pydantic import BaseModel
 from src.generation.hallucination_detector import HallucinationDetector, HallucinationReport
 from src.generation.llm_manager import LLMManager, LLMResponse
 from src.generation.prompt_templates import (
+    NO_RAG_PROMPT,
+    NO_RAG_SYSTEM_PROMPT,
     SYSTEM_PROMPT,
     build_context,
     get_template,
@@ -140,6 +142,10 @@ class RAGPipeline:
 
     def _build_retriever(self):
         """Create the appropriate retriever."""
+        # LLM-only (no RAG): no retriever, no index access.
+        if self.config.retrieval_method == "none":
+            return None
+
         from src.retrieval.query_processor import QueryProcessor
 
         qp = self.query_processor or QueryProcessor()
@@ -188,6 +194,10 @@ class RAGPipeline:
     def query(self, question: str) -> RAGResponse:
         """Run the full RAG pipeline for a question."""
         latency = LatencyTracker()
+
+        # LLM-only (no RAG) path — skip retrieval/reranking entirely.
+        if self.config.retrieval_method == "none":
+            return self._query_no_rag(question, latency)
 
         try:
             # 1. Query Processing
@@ -314,6 +324,70 @@ class RAGPipeline:
 
         except Exception as e:
             logger.exception("Pipeline error: %s", e)
+            return RAGResponse(
+                answer=f"Pipeline error: {str(e)}",
+                latency=latency.get_breakdown(),
+                config_name=self.config.name,
+                error=str(e),
+            )
+
+    # ============================================================
+    # LLM-only (no RAG) path
+    # ============================================================
+
+    def _query_no_rag(self, question: str, latency: LatencyTracker) -> RAGResponse:
+        """Run the LLM-only pipeline path: generation only, no retrieval.
+
+        Stages that don't apply (query_processing, retrieval, reranking)
+        report latency=0.0 so the breakdown is comparable to RAG configs.
+        Hallucination check uses the detector's `_no_evidence_report`
+        path; response formatting still flags HONEST_DECLINE via the
+        existing `_is_honest_decline` patterns.
+        """
+        try:
+            full_prompt = NO_RAG_PROMPT.format(question=question)
+
+            with latency.measure("generation"):
+                llm_response = self.llm.generate(
+                    prompt=full_prompt,
+                    system_prompt=NO_RAG_SYSTEM_PROMPT,
+                    temperature=self.config.temperature,
+                    config_name=self.config.name,
+                )
+
+            if llm_response.error:
+                return RAGResponse(
+                    answer=f"Error generating response: {llm_response.error}",
+                    retrieved_chunks=[],
+                    latency=latency.get_breakdown(),
+                    llm_response=llm_response,
+                    config_name=self.config.name,
+                    error=llm_response.error,
+                )
+
+            with latency.measure("hallucination_check"):
+                hall_report = self.hallucination_detector.check(
+                    response=llm_response.text,
+                    retrieved_chunks=[],
+                )
+
+            formatted = self.response_formatter.format(
+                llm_response.text, [], hall_report
+            )
+
+            return RAGResponse(
+                answer=formatted.text,
+                sources=formatted.sources,
+                confidence=formatted.confidence,
+                retrieved_chunks=[],
+                hallucination_report=hall_report,
+                latency=latency.get_breakdown(),
+                llm_response=llm_response,
+                config_name=self.config.name,
+            )
+
+        except Exception as e:
+            logger.exception("Pipeline error (LLM-only): %s", e)
             return RAGResponse(
                 answer=f"Pipeline error: {str(e)}",
                 latency=latency.get_breakdown(),

@@ -1,9 +1,11 @@
 """
-Pipeline configurations for the 3 systems evaluated in the thesis.
+Pipeline configurations for the 4 systems evaluated in the thesis.
 
 1. BASELINE_LEXICAL (Control 1): BM25 only, no reranking, no expansion
 2. BASELINE_SEMANTIC (Control 2): Dense only, no reranking, no expansion
 3. PROPOSED_HYBRID (Experimental): Hybrid + reranking + expansion + normalization
+4. LLM_ONLY_NO_RAG (Control 0): No retrieval, no reranking. Pure LLM baseline
+   used to quantify the value RAG adds over a vanilla LLM.
 """
 
 from typing import Optional
@@ -14,7 +16,7 @@ from pydantic import BaseModel
 class PipelineConfig(BaseModel):
     """Configuration for a complete RAG pipeline."""
     name: str
-    retrieval_method: str  # "bm25", "dense", "hybrid"
+    retrieval_method: str  # "bm25", "dense", "hybrid", "none"
     embedding_model: Optional[str] = None
     fusion_method: Optional[str] = None  # "linear", "rrf"
     alpha: float = 0.5
@@ -89,10 +91,26 @@ PROPOSED_HYBRID = PipelineConfig(
 # Config registry
 # ============================================================
 
+LLM_ONLY_NO_RAG = PipelineConfig(
+    name="LLM Only (No RAG)",
+    retrieval_method="none",
+    embedding_model=None,
+    reranker=None,
+    query_expansion=False,
+    terminology_normalization=False,
+    retrieval_top_k=0,
+    final_top_k=0,
+    llm_provider="ollama",
+    llm_model="llama3.1:8b-instruct-q4_K_M",
+    temperature=0.1,
+)
+
+
 PIPELINE_CONFIGS = {
     "lexical": BASELINE_LEXICAL,
     "semantic": BASELINE_SEMANTIC,
     "hybrid": PROPOSED_HYBRID,
+    "llm_only": LLM_ONLY_NO_RAG,
 }
 
 

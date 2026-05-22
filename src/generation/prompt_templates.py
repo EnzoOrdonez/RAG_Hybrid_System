@@ -75,6 +75,23 @@ Question: {question}
 Step-by-step Answer:"""
 
 # ============================================================
+# No-RAG (LLM-only) prompts — used by LLM_ONLY_NO_RAG config (Control 0).
+# No retrieved context: the LLM answers from its own knowledge.
+# ============================================================
+
+NO_RAG_SYSTEM_PROMPT = """You are a cloud computing documentation assistant \
+specialized in AWS, Azure, GCP and Kubernetes. Answer the following question \
+based on your own knowledge. If you are not sure about a fact, say so explicitly \
+rather than guessing. Do not invent commands, parameter names or values."""
+
+NO_RAG_PROMPT = """Answer the following question based on your knowledge. \
+If you are not sure, say so explicitly.
+
+Question: {question}
+
+Answer:"""
+
+# ============================================================
 # Template selector
 # ============================================================
 

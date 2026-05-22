@@ -41,11 +41,14 @@ Evaluated on 200 queries across 5 cloud documentation sources:
 
 | System | Precision@1 | Recall@5 | MRR | NDCG@5 | Faithfulness |
 |--------|------------|----------|-----|--------|-------------|
+| LLM-only (no RAG, control) | N/A | N/A | N/A | N/A | 0.005† |
 | BM25 (lexical) | 0.785 | 0.368 | 0.828 | 0.554 | 0.496 |
 | Dense (semantic) | 0.860 | 0.424 | 0.894 | 0.661 | 0.509 |
 | **Hybrid (ours)** | **0.930** | **0.472** | **0.942** | **0.736** | **0.514** |
 
 Hybrid outperforms both baselines with statistical significance (p < 0.0001, Cohen's d = 0.626).
+
+† LLM-only (Control 0, `exp9_llm_only_no_rag`): vanilla Llama 3.1 8B Q4, no retrieval. Faithfulness is computed under an operational no-evidence definition (every claim is `unsupported_no_evidence` because no retrieved chunks exist to verify against), giving an upper bound of hallucination_rate=0.995. Honest-decline rate was 0/200 — the model confidently asserted specific facts (commands, quotas, pricing tiers) in every query, including fabrications such as a non-existent "Lightly Used Reserved Instances" EC2 tier. This quantifies the absolute value RAG adds over a no-retrieval baseline.
 
 ---
 

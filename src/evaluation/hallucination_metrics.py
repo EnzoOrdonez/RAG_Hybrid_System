@@ -29,7 +29,7 @@ def compute_hallucination_metrics(
     Returns:
         Dict with faithfulness, hallucination_rate, rubric, etc.
     """
-    if not response_text or not retrieved_chunks:
+    if not response_text:
         return {
             "faithfulness": 0.0,
             "hallucination_rate": 1.0,
@@ -38,6 +38,9 @@ def compute_hallucination_metrics(
             "supported_claims": 0,
             "method": "none",
         }
+    # Empty retrieved_chunks (LLM-only / no-RAG) is routed through the
+    # detector, which segments claims and returns method="no_evidence".
+    retrieved_chunks = retrieved_chunks or []
 
     try:
         if detector is None:

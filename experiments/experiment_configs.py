@@ -1,5 +1,5 @@
 """
-8 Experiment Configurations for thesis evaluation.
+9 Experiment Configurations for thesis evaluation.
 
 Each experiment tests a specific hypothesis about the RAG system.
 All experiments use seed=42 for reproducibility.
@@ -13,6 +13,7 @@ Experiments:
   6. Ablation study (component-by-component addition)
   7. Cross-cloud terminology normalization
   8. End-to-end system comparison (3 pipelines)
+  9. LLM-only no-RAG control (Control 0): vanilla LLM, no retrieval
 """
 
 from typing import Any, Dict, List
@@ -20,6 +21,7 @@ from typing import Any, Dict, List
 from src.pipeline.pipeline_config import (
     BASELINE_LEXICAL,
     BASELINE_SEMANTIC,
+    LLM_ONLY_NO_RAG,
     PROPOSED_HYBRID,
     PipelineConfig,
 )
@@ -613,6 +615,31 @@ EXP8B_END_TO_END_MISTRAL = ExperimentConfig(
 
 
 # ============================================================
+# Experiment 9: LLM-only (no RAG) Control Baseline
+# ============================================================
+
+EXP9_LLM_ONLY_NO_RAG = ExperimentConfig(
+    experiment_id="exp9_llm_only_no_rag",
+    name="LLM-only Control (No RAG)",
+    description=(
+        "Run the vanilla LLM (Llama 3.1 8B Q4) over the 200-query "
+        "benchmark without retrieval. Quantifies the absolute value "
+        "that RAG adds over a no-retrieval baseline."
+    ),
+    hypothesis=(
+        "RAG systems outperform vanilla LLM on faithfulness and "
+        "honest_decline rate. faithfulness=0 under the operational "
+        "no-evidence definition; honest_decline_rate is the proxy for "
+        "responsible behaviour without evidence."
+    ),
+    variable="retrieval_method (none vs bm25/dense/hybrid)",
+    pipeline_configs=[LLM_ONLY_NO_RAG],
+    max_queries=200,
+    metrics=["hallucination", "latency"],
+)
+
+
+# ============================================================
 # Registry
 # ============================================================
 
@@ -626,6 +653,7 @@ EXPERIMENT_CONFIGS = {
     "exp7": EXP7_CROSS_CLOUD,
     "exp8": EXP8_END_TO_END,
     "exp8b": EXP8B_END_TO_END_MISTRAL,
+    "exp9_llm_only_no_rag": EXP9_LLM_ONLY_NO_RAG,
 }
 
 
