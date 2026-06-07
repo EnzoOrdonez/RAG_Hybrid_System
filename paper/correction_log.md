@@ -400,5 +400,26 @@ Post-merge continuation en `main`: 1 merge commit + 3 commits (CSV replacement +
 
 ---
 
+## Nota 3 — corridas definitivas (2026-06-07)
+
+Branch `pre-corpus-rebuild-2026-05-21`. Corpus reconstruido (2697/24481), test set depurado n=194. Fases 1-2 ejecutadas con commits atómicos (cada fix verificado antes/después). Las cifras de fidelidad previas (exp5/6/8/8b/9) quedan **supersedidas** por exp12 (pendiente; gate de smoke antes de la matriz).
+
+| Commit | Fix | Verificación |
+|--------|-----|--------------|
+| `2cacc22` | np.bool_ serialization en `compute_retrieval_metrics.py` (cierra Addenda A4 pendiente) | `json.dumps` serializa numpy scalars; sin cambio de valores |
+| `37ba362` | **D12** reranker sobre texto completo (antes cortaba a 200 chars ≈ 40 tok) | `hybrid_retriever.py:88-90` ya no muta `chunk_text`; reranker ve texto completo, cap 512 tok |
+| `9dd7c76` | exp11 runner registra el sistema **pre-rerank RRF** | 4 sistemas en `results.json`; orden pre ≠ post por query |
+| `e4a5d80` | Determinismo: `temperature=0` (greedy), cache key con seed+max_tokens, `ensure_hashseed_at_startup` re-exec real | 5 temps=0.0 en `pipeline_config.py`; test 3× queda para el smoke |
+| `4b4dfd3` | **Multi-oráculo** + umbral por percentil (p50/p75) en métricas de retrieval | exp11 medido con ms-marco (circular) y bge-reranker-large (independiente) |
+| `de4e44e` | Test unitario NLI (Flag 135) | `pytest tests/test_nli_calibration.py` → 3 passed |
+
+D11 (expansión real en RRF, default OFF) implementado en `hybrid_index.py` / `hybrid_retriever.py` / `rag_pipeline.py` (incluido en el rango de commits arriba); se evalúa en exp13 (pendiente).
+
+Veredictos clave: ver `audit_findings_cc_addenda.md` §"Nota 3 addenda" (N1 exp7 +16,8 % retirado; N2 circularidad del oráculo cuantificada — híbrido vs denso real d_z=+0,45 con oráculo independiente).
+
+Pendiente (gate): Fase 3 (modelos Ollama) + Fase 4 (smoke). **DETENER y confirmar con el usuario antes de Fase 5 (matriz exp12).**
+
+---
+
 
 

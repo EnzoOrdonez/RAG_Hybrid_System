@@ -87,3 +87,47 @@ El plan Fase 1 paso 1.5 especificó renombrar únicamente la mención del abstra
 Pendiente de decisión: aplicar el mismo rename en L101 como parte de Fase 5 (reescritura de contribuciones), o como patch puntual si el usuario lo pide antes.
 
 ---
+
+## Nota 3 addenda (2026-06-07)
+
+### N1 — exp7 "+16,8 %" NO es atribuible a la expansión: ambos brazos corrieron retrieval idéntico
+
+Veredicto definitivo (supera la hipótesis de Flag 5 / "BM25 recall" en `audit_findings.md` L2030). Prueba por código:
+
+- exp7 tiene 2 configs, ambos `fusion_method="rrf"` (`experiments/experiment_configs.py`).
+- En RRF, `HybridRetriever.search` pasaba la query **cruda** a ambas piernas: `hybrid_retriever.py:52` (`query=processed.bm25_query if fusion=="linear" else query`). La expansión (`processed.bm25_query`) **nunca** llegaba a BM25 en el camino RRF (bug D11).
+- `terminology_normalization` no se lee en ningún punto del retrieval (código muerto en runtime, consistente con Flag 40 / §6.4).
+- ⇒ Los dos brazos (`cross_cloud_no_norm`, `cross_cloud_with_norm`) recuperaron **los mismos chunks en el mismo orden**. El delta 0,2916 − 0,2498 = +16,75 % es ruido de generación + NLI descalibrado (Flag 135) sobre n=29; **no** es una ganancia de retrieval ni de "normalization".
+- **Corrección de L2030**: la explicación "lo que mejora es el recall de BM25 por la expansión" es **incorrecta** para el híbrido RRF — la expansión no alcanzaba BM25.
+
+Resolución: D11 ahora aplica la expansión real en RRF (flag de config, default OFF); se evalúa limpiamente en **exp13** (expansión ON vs OFF, 30 queries cross-cloud, generación determinista). Hasta exp13, el claim +16,8 % queda **retirado** (refuerza Flag 142: candidato #1 a remover del abstract).
+
+### N2 — Circularidad del oráculo cuantificada (exp11, 194 q, reranker D12)
+
+El reranker del pipeline (`ms-marco-MiniLM-L-12-v2`) era también el oráculo de relevancia de `compute_retrieval_metrics.py`. Tras D12 (reranker ve texto completo, igual que el oráculo) el híbrido post-rerank alcanza **NDCG@5 = 0,995 por construcción** (tautológico). Medido además con oráculo **independiente** (`BAAI/bge-reranker-large`, ya cacheado — sin descarga):
+
+| Sistema | NDCG@5 ms-marco (circular) | NDCG@5 bge (indep) |
+|---|---|---|
+| Léxico (BM25) | 0,552 | 0,442 |
+| Denso (BGE) | 0,649 | 0,624 |
+| Híbrido pre-rerank (RRF) | 0,668 | 0,603 |
+| Híbrido post-rerank | **0,995** | **0,740** |
+
+- Híbrido(post) vs Denso: d_z circular +1,38 → **indep +0,45, p_BH < 0,001** (real y significativo, pero la magnitud estaba inflada por la circularidad).
+- Híbrido(pre, solo fusión RRF) vs Denso: **n.s.** en ambos oráculos (d = +0,07 / −0,08). La ventaja del híbrido proviene de la etapa de **reranking**, no de la fusión RRF.
+- El orden Híbrido > Denso > Léxico se mantiene entre oráculos (mitigación de circularidad satisfecha).
+
+Tablas: `output/tables/nota3/oracle_stability__exp11_retrieval194_fullrerank.{md,csv}`.
+
+### N3 — "Sin RAG": la fidelidad NLI es 0 por construcción (tratamiento para la Tabla 6)
+
+En el escenario sin recuperación (`retrieval_method="none"`), `HallucinationDetector.check(retrieved_chunks=[])` toma el path `_no_evidence_report`: sin contexto, ningún claim puede verificarse, así que todo claim se marca `unsupported_no_evidence` y `faithfulness=0` (salvo declinación honesta → 1,0 vacuo). Por tanto la fidelidad "sin RAG" ≈ tasa de declinación; **no** mide corrección de la respuesta.
+
+Consecuencia: en la Tabla 6 (4 escenarios × 4 modelos) la columna "sin RAG" **no es comparable** con los escenarios RAG como si fuera una fidelidad equivalente. Mide "¿se abstuvo de afirmar sin contexto?", no "¿acertó?". Sin respuestas gold (`answer` vacío en `test_queries.json`) no hay medida de corrección para sin-RAG.
+
+Decisión (a implementar en el esquema exp12 y el export Nota 3):
+- Reportar "sin RAG" con `answered_rate` y `decline_rate`, no solo `faithfulness`.
+- Anotar explícitamente en la Tabla 6 que la fidelidad de "sin RAG" es 0-por-construcción.
+- El valor del control sin-RAG es evidenciar que RAG **reduce** la afirmación sin evidencia, no una comparación numérica directa de fidelidad.
+
+---

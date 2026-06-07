@@ -112,6 +112,34 @@ ollama pull mistral:7b-instruct
 python run.py --health-check
 ```
 
+### Environment & reproducibility (required for experiments)
+
+All experiment/benchmark runs must set these environment variables **before**
+launching Python, so they are read at interpreter startup:
+
+```bash
+# Linux / macOS / Git-Bash
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42
+python scripts/run_retrieval_only.py --exp-id exp11_retrieval194_fullrerank
+```
+
+```powershell
+# Windows PowerShell
+$env:HF_HUB_OFFLINE=1; $env:TRANSFORMERS_OFFLINE=1; $env:PYTHONHASHSEED=42
+python scripts/run_retrieval_only.py --exp-id exp11_retrieval194_fullrerank
+```
+
+- `HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1` — the embedding/reranker/NLI
+  models are already cached; offline mode avoids a known Hugging Face client bug
+  when several models are loaded consecutively. (One-time exception: downloading
+  a new relevance-oracle model.)
+- `PYTHONHASHSEED=42` — fixes `hash()` of strings so set/dict iteration in the
+  RRF fusion is bit-reproducible. Runners also call
+  `reproducibility.ensure_hashseed_at_startup(42)`, which re-execs once if the
+  var is unset, but setting it explicitly is preferred.
+- `seed=42` everywhere; generation uses `temperature=0` (greedy decoding) so LLM
+  output is reproducible independent of sampling seed.
+
 ### Run
 
 ```bash
