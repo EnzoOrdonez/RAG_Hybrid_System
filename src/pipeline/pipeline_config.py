@@ -30,7 +30,7 @@ class PipelineConfig(BaseModel):
     final_top_k: int = 5
     llm_provider: str = "ollama"
     llm_model: str = "llama3.1:8b-instruct-q4_K_M"
-    temperature: float = 0.1
+    temperature: float = 0.0  # greedy decoding for determinism (Nota 3, see llm_manager)
     chunking_strategy: str = "adaptive"
     chunk_size: int = 500
 
@@ -50,7 +50,7 @@ BASELINE_LEXICAL = PipelineConfig(
     final_top_k=5,
     llm_provider="ollama",
     llm_model="llama3.1:8b-instruct-q4_K_M",
-    temperature=0.1,
+    temperature=0.0,
 )
 
 BASELINE_SEMANTIC = PipelineConfig(
@@ -64,7 +64,7 @@ BASELINE_SEMANTIC = PipelineConfig(
     final_top_k=5,
     llm_provider="ollama",
     llm_model="llama3.1:8b-instruct-q4_K_M",
-    temperature=0.1,
+    temperature=0.0,
 )
 
 PROPOSED_HYBRID = PipelineConfig(
@@ -83,7 +83,7 @@ PROPOSED_HYBRID = PipelineConfig(
     final_top_k=5,
     llm_provider="ollama",
     llm_model="llama3.1:8b-instruct-q4_K_M",
-    temperature=0.1,
+    temperature=0.0,
 )
 
 
@@ -102,7 +102,7 @@ LLM_ONLY_NO_RAG = PipelineConfig(
     final_top_k=0,
     llm_provider="ollama",
     llm_model="llama3.1:8b-instruct-q4_K_M",
-    temperature=0.1,
+    temperature=0.0,
 )
 
 

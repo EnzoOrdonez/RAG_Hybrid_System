@@ -36,6 +36,7 @@ from __future__ import annotations
 import logging
 import os
 import random
+import sys
 import warnings
 from typing import Optional
 
@@ -125,15 +126,23 @@ def ensure_hashseed_at_startup(seed: int = _DEFAULT_SEED) -> None:
             RuntimeWarning,
         )
         return
-    # Env var not set; we cannot fix in-process hash() at this point.
-    # Log a warning; the caller may decide to re-exec.
-    logger.warning(
-        "PYTHONHASHSEED not set in env at interpreter startup. "
-        "String hash() will be randomized per process — set "
-        "PYTHONHASHSEED=%d before launching Python for bit-identical "
-        "query-set generation (audit §20.2 Flag 153).",
+    # Env var not set: PYTHONHASHSEED must exist BEFORE the interpreter starts
+    # for in-process str hash() to be deterministic, so set it and re-exec this
+    # same process once. A sentinel env var guards against an exec loop.
+    if os.environ.get("_CLOUDRAG_HASHSEED_REEXEC") == "1":
+        logger.warning(
+            "PYTHONHASHSEED still unset after a re-exec attempt; continuing "
+            "without the in-process hash() fix (audit §20.2 Flag 153)."
+        )
+        return
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    os.environ["_CLOUDRAG_HASHSEED_REEXEC"] = "1"
+    logger.info(
+        "Re-exec with PYTHONHASHSEED=%d for deterministic in-process hash() "
+        "(audit §20.2 Flag 153).",
         seed,
     )
+    os.execv(sys.executable, [sys.executable] + sys.argv)
 
 
 def get_default_seed() -> int:

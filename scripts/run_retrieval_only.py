@@ -48,7 +48,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.utils.reproducibility import set_all_seeds
+from src.utils.reproducibility import ensure_hashseed_at_startup, set_all_seeds
 from src.pipeline.pipeline_config import (
     BASELINE_LEXICAL,
     BASELINE_SEMANTIC,
@@ -104,6 +104,8 @@ def build_systems(index):
 
 
 def main():
+    # Fix PYTHONHASHSEED before any hashing (re-execs once if env not set).
+    ensure_hashseed_at_startup(SEED)
     parser = argparse.ArgumentParser(description="Retrieval-only benchmark (no LLM/NLI)")
     parser.add_argument("--max-queries", type=int, default=None,
                         help="Limit number of queries (smoke test). Default: all.")
