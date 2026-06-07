@@ -659,7 +659,14 @@ def main():
 
     json_path = results_out / "retrieval_metrics.json"
     json_path.write_text(
-        json.dumps(json_output, indent=2, ensure_ascii=False),
+        # numpy-aware default: compare_systems emits numpy scalars (e.g.
+        # is_normal_a as np.bool_) that the stdlib encoder rejects under
+        # newer numpy. Convert to native types; serialization-only, no
+        # computed value changes.
+        json.dumps(
+            json_output, indent=2, ensure_ascii=False,
+            default=lambda o: o.item() if isinstance(o, np.generic) else str(o),
+        ),
         encoding="utf-8",
     )
     logger.info("JSON saved: %s", json_path)
