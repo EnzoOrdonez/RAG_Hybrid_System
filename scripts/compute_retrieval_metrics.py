@@ -48,6 +48,14 @@ OUTPUT_DIR = PROJECT_ROOT / "output"
 
 K_VALUES = [1, 3, 5]  # Practical K values given 5 retrieved chunks per system
 
+# Binary relevance is computed at POOL-SCORE PERCENTILES (per oracle), not a
+# fixed logit threshold — different oracles have different score scales, and the
+# old fixed 0.0 marked ~most of the pool as relevant (inflating precision).
+# Graded NDCG@5 and avg_score@5 are threshold-free and remain the headline.
+THRESHOLD_PERCENTILES = [50, 75]
+LEGACY_THRESHOLD = 0.0          # kept as a sensitivity reference column ("t0")
+PRIMARY_THRESHOLD_KEY = "p50"   # canonical {metric}_mean aliases use this
+
 
 # ============================================================
 # Chunk loader
@@ -420,8 +428,23 @@ def main():
         "--experiment", default="exp8",
         help="Experiment ID to process (default: exp8)",
     )
+    parser.add_argument(
+        "--oracle-model", default=CROSS_ENCODER_MODEL,
+        help="Cross-encoder used as the relevance oracle. Default ms-marco "
+             "(== the hybrid's pipeline reranker => CIRCULAR; pass an "
+             "independent model such as BAAI/bge-reranker-large to break it).",
+    )
+    parser.add_argument(
+        "--oracle-label", default=None,
+        help="Short label for output filenames (default derived from model).",
+    )
     args = parser.parse_args()
     exp_id = args.experiment
+    oracle_model = args.oracle_model
+    oracle_label = args.oracle_label or oracle_model.split("/")[-1].replace(":", "_")
+    # The pipeline reranker is ms-marco-MiniLM-L-12-v2; an oracle == that model
+    # is circular (it both ranks the hybrid AND judges relevance). Flag it.
+    oracle_is_circular = oracle_model == CROSS_ENCODER_MODEL
 
     results_path = PROJECT_ROOT / "experiments" / "results" / exp_id / "results.json"
     results_out = PROJECT_ROOT / "experiments" / "results" / exp_id
@@ -481,8 +504,9 @@ def main():
     logger.info("Total (query, chunk) pairs to score: %d", len(pairs_to_score))
     logger.info("  Avg chunks per query: %.1f", len(pairs_to_score) / len(query_questions))
 
-    # 5. Score with cross-encoder
-    relevance_scores = score_chunks_with_cross_encoder(pairs_to_score)
+    # 5. Score with the (parametrized) cross-encoder oracle
+    logger.info("Oracle model: %s (circular=%s)", oracle_model, oracle_is_circular)
+    relevance_scores = score_chunks_with_cross_encoder(pairs_to_score, model_name=oracle_model)
 
     # Log score distribution
     all_scores = list(relevance_scores.values())
@@ -492,11 +516,19 @@ def main():
         np.mean(all_scores), np.median(all_scores),
     )
     logger.info(
-        "Chunks above threshold (%.1f): %d / %d (%.1f%%)",
+        "Chunks above legacy threshold (%.1f): %d / %d (%.1f%%)",
         RELEVANCE_THRESHOLD,
         sum(1 for s in all_scores if s >= RELEVANCE_THRESHOLD),
         len(all_scores),
         100 * sum(1 for s in all_scores if s >= RELEVANCE_THRESHOLD) / len(all_scores),
+    )
+
+    # Pool-score percentile thresholds for binary relevance (per oracle).
+    thresholds = {f"p{p}": float(np.percentile(all_scores, p)) for p in THRESHOLD_PERCENTILES}
+    thresholds["t0"] = float(LEGACY_THRESHOLD)
+    logger.info(
+        "Binary-relevance thresholds (oracle=%s): %s",
+        oracle_label, {k: round(v, 3) for k, v in thresholds.items()},
     )
 
     # 6. Compute per-query metrics for each system
@@ -510,31 +542,42 @@ def main():
             qid = result["query_id"]
             retrieved_ids = result.get("retrieved_ids", [])
 
-            # Build relevance set for this query (chunks above threshold from pool)
-            relevant_set = set()
-            query_rel_scores = {}
-            for cid in query_chunks_map[qid]:
-                score = relevance_scores.get((qid, cid), 0.0)
-                query_rel_scores[cid] = score
-                if score >= RELEVANCE_THRESHOLD:
-                    relevant_set.add(cid)
+            # Graded relevance scores for this query's pool (threshold-free).
+            query_rel_scores = {
+                cid: relevance_scores.get((qid, cid), 0.0)
+                for cid in query_chunks_map[qid]
+            }
 
-            # Compute metrics
-            for k in K_VALUES:
-                per_query[f"precision@{k}"].append(
-                    precision_at_k(retrieved_ids, relevant_set, k)
-                )
-                per_query[f"recall@{k}"].append(
-                    recall_at_k(retrieved_ids, relevant_set, k)
-                )
-
-            per_query["mrr"].append(mrr_score(retrieved_ids, relevant_set))
+            # Threshold-free headline metrics.
             per_query["ndcg@5"].append(
                 ndcg_at_k_graded(retrieved_ids, query_rel_scores, k=5)
             )
             per_query["avg_score@5"].append(
                 avg_relevance_score(retrieved_ids, query_rel_scores, k=5)
             )
+
+            # Binary metrics at each pool-score percentile threshold.
+            for thr_key, thr_val in thresholds.items():
+                relevant_set = {
+                    cid for cid, sc in query_rel_scores.items() if sc >= thr_val
+                }
+                for k in K_VALUES:
+                    per_query[f"precision@{k}__{thr_key}"].append(
+                        precision_at_k(retrieved_ids, relevant_set, k)
+                    )
+                    per_query[f"recall@{k}__{thr_key}"].append(
+                        recall_at_k(retrieved_ids, relevant_set, k)
+                    )
+                per_query[f"mrr__{thr_key}"].append(
+                    mrr_score(retrieved_ids, relevant_set)
+                )
+
+        # Canonical aliases bind threshold-dependent metrics to the primary
+        # threshold (p50) so downstream tables/figures/stats keep working.
+        for k in K_VALUES:
+            per_query[f"precision@{k}"] = per_query[f"precision@{k}__{PRIMARY_THRESHOLD_KEY}"]
+            per_query[f"recall@{k}"] = per_query[f"recall@{k}__{PRIMARY_THRESHOLD_KEY}"]
+        per_query["mrr"] = per_query[f"mrr__{PRIMARY_THRESHOLD_KEY}"]
 
         # Aggregate
         agg = {}
@@ -579,8 +622,10 @@ def main():
     print("STATISTICAL TESTS (Wilcoxon signed-rank)")
     print("-" * 80)
 
-    # Single call across the whole family (4 metrics x 3 pairs = 12 tests)
-    # so Benjamini-Hochberg FDR + Holm corrections are applied globally.
+    # Retrieval stats family (declared): all system-pairs x these metrics, with
+    # Benjamini-Hochberg FDR + Holm applied globally across the family. ndcg@5
+    # and avg_score@5 are threshold-free; precision@5 and mrr use the primary
+    # (p50) threshold. With S systems the family has len(metrics)*C(S,2) tests.
     metric_family = ["ndcg@5", "avg_score@5", "precision@5", "mrr"]
     all_stats = run_pairwise_tests_with_corrections(
         all_per_query, system_names, metric_family
@@ -610,16 +655,16 @@ def main():
 
     # LaTeX table
     latex = generate_latex_table(aggregated, all_stats.get("ndcg@5", {}))
-    latex_path = OUTPUT_DIR / "tables" / f"table_retrieval_metrics_{exp_id}.tex"
+    latex_path = OUTPUT_DIR / "tables" / f"table_retrieval_metrics_{exp_id}__{oracle_label}.tex"
     latex_path.write_text(latex, encoding="utf-8")
     logger.info("LaTeX table saved: %s", latex_path)
 
     # Figure
-    fig_path = OUTPUT_DIR / "figures" / f"fig_retrieval_metrics_{exp_id}.png"
+    fig_path = OUTPUT_DIR / "figures" / f"fig_retrieval_metrics_{exp_id}__{oracle_label}.png"
     generate_figure(aggregated, fig_path)
 
     # CSV
-    csv_path = OUTPUT_DIR / "csv" / f"{exp_id}_retrieval_metrics.csv"
+    csv_path = OUTPUT_DIR / "csv" / f"{exp_id}__{oracle_label}_retrieval_metrics.csv"
     csv_lines = ["system,precision@1,precision@3,precision@5,recall@5,mrr,ndcg@5,avg_score@5"]
     for sname in system_names:
         a = aggregated[sname]
@@ -639,8 +684,13 @@ def main():
     # JSON with full details (excluding internal per-query lists)
     json_output = {
         "experiment": exp_id,
-        "model": CROSS_ENCODER_MODEL,
-        "relevance_threshold": RELEVANCE_THRESHOLD,
+        "oracle_model": oracle_model,
+        "oracle_label": oracle_label,
+        "oracle_is_circular": oracle_is_circular,
+        "model": oracle_model,  # back-compat alias
+        "thresholds": thresholds,
+        "primary_threshold": PRIMARY_THRESHOLD_KEY,
+        "relevance_threshold": thresholds[PRIMARY_THRESHOLD_KEY],  # back-compat (now p50)
         "total_queries": len(query_questions),
         "total_chunks_scored": len(relevance_scores),
         "score_distribution": {
@@ -657,7 +707,7 @@ def main():
         a = {k: v for k, v in aggregated[sname].items() if not k.startswith("_")}
         json_output["systems"][sname] = a
 
-    json_path = results_out / "retrieval_metrics.json"
+    json_path = results_out / f"retrieval_metrics__{oracle_label}.json"
     json_path.write_text(
         # numpy-aware default: compare_systems emits numpy scalars (e.g.
         # is_normal_a as np.bool_) that the stdlib encoder rejects under

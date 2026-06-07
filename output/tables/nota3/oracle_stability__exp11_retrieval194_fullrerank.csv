@@ -1,0 +1,15 @@
+# Tabla A: NDCG@5 por sistema y oraculo (coma decimal)
+Sistema;ms-marco-circular (circular);bge-reranker-indep (independiente)
+Léxico (BM25);0,552;0,442
+Denso (BGE);0,649;0,624
+Híbrido (pre-rerank RRF);0,668;0,603
+Híbrido (post-rerank);0,995;0,740
+
+# Tabla B: contrastes NDCG@5 (d_z, p_BH)
+Contraste (NDCG@5);Oráculo;d_z;p_BH;sig_BH
+Híbrido (post-rerank) vs Denso (BGE);ms-marco-circular (circular);+1,38;<0,001;sí
+Híbrido (post-rerank) vs Denso (BGE);bge-reranker-indep (independiente);+0,45;<0,001;sí
+Híbrido (pre-rerank RRF) vs Denso (BGE);ms-marco-circular (circular);+0,07;0,344;no
+Híbrido (pre-rerank RRF) vs Denso (BGE);bge-reranker-indep (independiente);-0,08;0,240;no
+Híbrido (post-rerank) vs Híbrido (pre-rerank RRF);ms-marco-circular (circular);+1,24;<0,001;sí
+Híbrido (post-rerank) vs Híbrido (pre-rerank RRF);bge-reranker-indep (independiente);+0,52;<0,001;sí
