@@ -49,3 +49,35 @@ VRAM** + **tokens/s** (smoke) + params (total/effective) + cost-proxy per query.
 Qwen3.5 — ollama.com/library/qwen3.5:9b; Gemma 4 — blog.google / ollama.com/library/gemma4:e4b ;
 Granite 4.1 — ollama.com/library/granite4.1:8b , huggingface.co/ibm-granite/granite-4.1-8b ;
 Mistral/Ministral 3 — mistral.ai/news/mistral-3 (Ministral 3 8B, 2025-12-02).
+
+---
+
+## Phase 4 smoke results (2026-06-07; 3 q × 4 scenarios, determinism 3×)
+
+**Pull outcome:** `granite4.1:8b` ✅ (5.3 GB), `gemma4:e4b` ✅ (9.6 GB), `qwen3.5:9b` ✅ (6.6 GB);
+`gemma4:12b` ✗ (pull failed — moot, would not fit 6 GB); `mistral3:8b` / Ministral-3-8B ✗
+(no Ollama library tag yet → **fallback `mistral:7b-instruct`**, documented per §3.6 as the
+last small dense Mistral available on Ollama).
+
+| Model (tag) | VRAM used | tok/s (warm, greedy) | determ. 3× @ temp=0 | Verdict |
+|---|---|---|---|---|
+| `granite4.1:8b` (IBM) | 5351 MB ✅ | 7.1 | **YES** | **primary** — RAG-tuned, deterministic, fits |
+| `qwen3.5:9b` (Alibaba) | 5443 MB ✅ | 5.2 | **YES** | fits (disk 6.6 GB, VRAM OK); slow + verbose → ETA bottleneck |
+| `gemma4:e4b` (Google) | 5487 MB ✅ | 22.7 | **NO** | fast, fits, but non-deterministic at temp=0 |
+| `mistral:7b-instruct` (Mistral) | 5189 MB ✅ | 8.0 | **NO** | fallback; non-deterministic at temp=0 |
+
+All four **fit in 6 GB** (qwen3.5:9b VRAM concern resolved). Gemma 12B excluded.
+
+**Determinism (Phase 1d):** granite4.1 and qwen3.5 are bit-identical across 3 runs at
+temp=0; gemma4:e4b and mistral:7b are NOT (Ollama/llama.cpp kernel-level non-determinism on
+this GPU). The LLM cache freezes one sample per query, so a single matrix run is
+reproducible-from-cache, but re-generation of gemma/mistral may differ → documented
+limitation; the deterministic **granite4.1** is the recommended headline model.
+
+**ETA (full matrix 4×4×194 ≈ 3104 generations):** ≈ **50–58 h**, dominated by qwen3.5
+(~26 h alone: 5.2 tok/s + ~900-token answers). Above the 28–52 h estimate. Levers:
+reduce `num_predict` (1024→512) for verbose models, drop qwen3.5, or stage with resume.
+
+**Latency-measurement note:** cached generations report `latency_ms=0` (→ spurious tok/s);
+the Phase 6 latency aggregator must exclude `from_cache=True` rows, or clear the LLM cache
+before the timed matrix run.
