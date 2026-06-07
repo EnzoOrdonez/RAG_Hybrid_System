@@ -85,10 +85,14 @@ class HybridRetriever:
         else:
             candidates = candidates[:top_k]
 
-        # Truncate chunk_text for display
-        for c in candidates:
-            c.chunk_text = c.chunk_text[:200]
-
+        # D12 fix: do NOT truncate chunk_text here. When reranking is applied
+        # externally (the pipeline calls search(use_reranker=False) and then
+        # reranks separately), the cross-encoder scores c.chunk_text; the old
+        # [:200] truncation starved it to ~40 tokens. Keep the full text — the
+        # cross-encoder caps the query+passage pair at its own max_length (512).
+        # Downstream context is re-fetched from the index (rag_pipeline) and the
+        # benchmark output only persists chunk_id, so nothing relies on a short
+        # chunk_text.
         elapsed = time.time() - start
         logger.info(
             "Hybrid search (%s, alpha=%.2f): query='%s', results=%d, time=%.3fs",

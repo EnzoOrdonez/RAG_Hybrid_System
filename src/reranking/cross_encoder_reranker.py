@@ -35,6 +35,7 @@ class CrossEncoderReranker:
         model_name: str = "ms-marco-mini-6",
         device: Optional[str] = None,
         batch_size: int = 32,
+        max_length: int = 512,
     ):
         if model_name not in CROSS_ENCODER_MODELS:
             raise ValueError(
@@ -43,6 +44,9 @@ class CrossEncoderReranker:
         self.model_name = model_name
         self.config = CROSS_ENCODER_MODELS[model_name]
         self.batch_size = batch_size
+        # D12: cap the query+passage pair at the model's real limit (512 tokens
+        # for ms-marco-MiniLM / bge-reranker-large), not the old 200 chars.
+        self.max_length = max_length
 
         if device:
             self.device = device
@@ -65,7 +69,7 @@ class CrossEncoderReranker:
         full_name = self.config["full_name"]
         logger.info("Loading cross-encoder: %s on %s", full_name, self.device)
         start = time.time()
-        model = CrossEncoder(full_name, device=self.device)
+        model = CrossEncoder(full_name, max_length=self.max_length, device=self.device)
         elapsed = time.time() - start
         logger.info("Cross-encoder loaded in %.1fs", elapsed)
         return model
@@ -91,8 +95,8 @@ class CrossEncoderReranker:
 
         start = time.time()
 
-        # Create query-passage pairs
-        # Use full chunk text (not truncated) for reranking
+        # Create query-passage pairs from the FULL chunk text (D12: upstream no
+        # longer truncates to 200 chars; the model caps the pair at max_length).
         pairs = []
         for c in candidates:
             text = c.chunk_text if c.chunk_text else ""

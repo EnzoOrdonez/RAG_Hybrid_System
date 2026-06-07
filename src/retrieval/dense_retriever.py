@@ -49,7 +49,7 @@ class DenseRetriever:
                 chunk_id=chunk_id,
                 score=score,
                 retrieval_method="dense",
-                chunk_text=chunk_data.get("text", "")[:200],
+                chunk_text=chunk_data.get("text", ""),  # D12: full text (no 200-char cut)
                 cloud_provider=chunk_data.get("cloud_provider", ""),
                 service_name=chunk_data.get("service_name", ""),
                 doc_type=chunk_data.get("doc_type", ""),
