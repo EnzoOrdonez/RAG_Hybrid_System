@@ -134,6 +134,11 @@ def run_family(per_config, pairs, label):
         if len(a) < 3:
             logger.warning("  [%s] %s vs %s: n=%d too small, skipped", label, ca, cb, len(a))
             continue
+        if all(abs(x - y) < 1e-12 for x, y in zip(a, b)):
+            # All paired diffs zero (e.g. sin_rag faithfulness 0-vs-0) -> Wilcoxon
+            # returns NaN and would poison the family-wide BH correction. Skip.
+            logger.warning("  [%s] %s vs %s: degenerate (all paired diffs 0), skipped", label, ca, cb)
+            continue
         sr = compare_systems("faithfulness", ca, cb, a, b)
         results.append(sr)
         keys.append((ca, cb))
@@ -200,6 +205,8 @@ def main():
     # ---- Family C: between-model, per scenario ----
     fam_c_pairs = []
     for s in scenarios:
+        if s == "sin_rag":
+            continue  # faithfulness 0-by-construction for no-RAG (N3): no meaningful between-model contrast
         cfgs_s = [c for c in configs if parsed[c][0] == s]
         model_to_cfg = {parsed[c][1]: c for c in cfgs_s}
         for m1, m2 in itertools.combinations(sorted(model_to_cfg), 2):
