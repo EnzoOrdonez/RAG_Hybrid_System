@@ -1,0 +1,129 @@
+"""
+Paper tables for Nota 3 — faithfulness matrix (Tabla 6) + primary-model detail
+(Tabla 5), from exp12 faithfulness_metrics.json.
+
+Reads experiments/results/<exp>/faithfulness_metrics.json and emits, into
+output/tables/nota3/ (.csv + .md, comma decimals "0,923"):
+  - tabla6_fidelidad__<exp>.{md,csv}     faithfulness mean, scenario x model
+  - tabla6_declinacion__<exp>.{md,csv}   honest-decline rate, scenario x model
+  - tabla5_modelo_principal__<exp>.{md,csv}  granite per-scenario detail
+
+Robust to which models are present, so re-running after qwen3.5 completes simply
+adds its column. "Sin RAG" faithfulness is 0-by-construction (N3) and is
+annotated; read it together with the decline table, not as a comparable score.
+
+Usage: python scripts/_export_paper_tables_nota3.py [exp12_matrix] [primary_model_label]
+"""
+import json
+import os
+import sys
+
+exp = sys.argv[1] if len(sys.argv) > 1 else "exp12_matrix"
+primary = sys.argv[2] if len(sys.argv) > 2 else "granite4.1-8b"
+base = os.path.join("experiments", "results", exp)
+out_dir = os.path.join("output", "tables", "nota3")
+os.makedirs(out_dir, exist_ok=True)
+
+fm = json.loads(open(os.path.join(base, "faithfulness_metrics.json"), encoding="utf-8").read())
+systems = fm["systems"]
+
+SCEN_ORDER = ["sin_rag", "lexico", "denso", "hibrido"]
+SCEN_DISP = {"sin_rag": "Sin RAG", "lexico": "RAG léxico (BM25)",
+             "denso": "RAG denso (BGE)", "hibrido": "RAG híbrido"}
+MODEL_DISP = {"granite4.1-8b": "Granite 4.1 8B", "gemma4-e4b": "Gemma 4 E4B",
+              "mistral-7b-instruct": "Mistral 7B", "qwen3.5-9b": "Qwen 3.5 9B"}
+
+
+def fmt(x, nd=3):
+    return f"{x:.{nd}f}".replace(".", ",")
+
+
+# Discover models present, ordered.
+models = []
+for c in systems:
+    m = systems[c]["model"]
+    if m not in models:
+        models.append(m)
+order = ["granite4.1-8b", "gemma4-e4b", "mistral-7b-instruct", "qwen3.5-9b"]
+models = [m for m in order if m in models] + [m for m in models if m not in order]
+
+# cell lookup: (scenario, model) -> system dict
+cell = {(s["scenario"], s["model"]): s for s in systems.values()}
+
+
+def matrix_table(value_fn, title, note):
+    cols = ["Escenario"] + [MODEL_DISP.get(m, m) for m in models]
+    rows = []
+    for sc in SCEN_ORDER:
+        if not any((sc, m) in cell for m in models):
+            continue
+        row = [SCEN_DISP.get(sc, sc)]
+        for m in models:
+            s = cell.get((sc, m))
+            row.append(value_fn(s) if s else "—")
+        rows.append(row)
+    md = [f"# {title} — {exp}\n", note, "",
+          "| " + " | ".join(cols) + " |",
+          "|" + "|".join(["---"] * len(cols)) + "|"]
+    for r in rows:
+        md.append("| " + " | ".join(r) + " |")
+    csv = [";".join(cols)] + [";".join(r) for r in rows]
+    return "\n".join(md), "\n".join(csv)
+
+
+def w(name, md, csv):
+    open(os.path.join(out_dir, f"{name}__{exp}.md"), "w", encoding="utf-8").write(md)
+    open(os.path.join(out_dir, f"{name}__{exp}.csv"), "w", encoding="utf-8").write(csv)
+
+
+# Tabla 6a — faithfulness (sin_rag annotated 0-by-construction)
+def faith_cell(s):
+    v = fmt(s["faithfulness_mean"])
+    if s["scenario"] == "sin_rag":
+        v += "*"
+    return v
+md, csv = matrix_table(
+    faith_cell, "Tabla 6 — Fidelidad (faithfulness NLI) por escenario y modelo",
+    "Media sobre respuestas con claims verificables (excluye method none/error). "
+    "`*` Sin RAG = 0 por construcción (sin contexto no hay claim verificable, N3): "
+    "léase junto a la tabla de declinación, no como fidelidad comparable.")
+w("tabla6_fidelidad", md, csv)
+
+# Tabla 6b — honest-decline rate
+def decl_cell(s):
+    dr = s.get("honest_decline_rate")
+    return fmt(100 * dr, 1) + "%" if dr is not None else "—"
+md, csv = matrix_table(
+    decl_cell, "Tabla 6b — Tasa de declinación honesta por escenario y modelo",
+    "Fracción de respuestas marcadas como declinación honesta "
+    '("no hay información suficiente"). Confunde la comparación de fidelidad entre '
+    "modelos: granite declina mucho más que mistral.")
+w("tabla6_declinacion", md, csv)
+
+# Tabla 5 — primary model per-scenario detail
+pcols = ["Escenario", "Fidelidad", "Alucinación (1−fid)", "Declinación %", "No-evidencia %", "n_efectivo"]
+prows = []
+for sc in SCEN_ORDER:
+    s = cell.get((sc, primary))
+    if not s:
+        continue
+    dr = s.get("honest_decline_rate")
+    prows.append([
+        SCEN_DISP.get(sc, sc),
+        fmt(s["faithfulness_mean"]) + ("*" if sc == "sin_rag" else ""),
+        fmt(1 - s["faithfulness_mean"]),
+        (fmt(100 * dr, 1) + "%") if dr is not None else "—",
+        fmt(100 * s["no_evidence_rate"], 1) + "%",
+        str(s["n_effective"]),
+    ])
+pmd = [f"# Tabla 5 — Modelo principal ({MODEL_DISP.get(primary, primary)}) por escenario — {exp}\n",
+       "`*` Sin RAG fidelidad = 0 por construcción (N3).", "",
+       "| " + " | ".join(pcols) + " |", "|" + "|".join(["---"] * len(pcols)) + "|"]
+for r in prows:
+    pmd.append("| " + " | ".join(r) + " |")
+pcsv = [";".join(pcols)] + [";".join(r) for r in prows]
+w("tabla5_modelo_principal", "\n".join(pmd), "\n".join(pcsv))
+
+print(f"Models in matrix: {models}")
+print(f"Wrote tabla6_fidelidad, tabla6_declinacion, tabla5_modelo_principal (__{exp}) to {out_dir}")
+print(f"  (primary model = {primary})")
