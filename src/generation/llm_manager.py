@@ -406,8 +406,12 @@ class LLMManager:
             yield resp.text
             return
 
-        key = self._cache_key(prompt, system_prompt, temperature, config_name,
-                              self.seed, max_tokens)
+        # Demo namespace (N7/I7): streaming entries live under their own key
+        # prefix so a demo answer can NEVER be served to a benchmark run
+        # (benchmarks call `generate`, whose keys are unprefixed), even if a
+        # demo slider matches benchmark max_tokens/config/prompt exactly.
+        key = "demo::" + self._cache_key(prompt, system_prompt, temperature,
+                                         config_name, self.seed, max_tokens)
         if self.cache_enabled and key in self._cache:
             logger.info("Cache hit (stream) for %s (key=%s...)", self.model, key[:8])
             yield self._cache[key]["text"]

@@ -78,14 +78,36 @@ def test_cache_key_frozen():
     assert got == expected
 
 
-def test_stream_uses_same_cache_namespace():
+def test_stream_cache_is_demo_namespaced():
+    # Streaming entries live under "demo::<key>": a benchmark entry with the
+    # SAME parameters must NOT be served to the stream path, and vice versa.
     calls = []
     _capture_chat(calls)
     m = LLMManager(provider="ollama", model="fake-model", cache_enabled=True)
-    m._cache = {}
-    key = m._cache_key("p", "s", 0.0, "demo", 42, 512)
-    m._cache[key] = {"text": "cached-answer", "tokens_input": 1, "tokens_output": 1}
+    base_key = m._cache_key("p", "s", 0.0, "demo", 42, 512)
+    m._cache = {base_key: {"text": "benchmark-answer",
+                           "tokens_input": 1, "tokens_output": 1}}
+    # benchmark entry present, demo entry absent -> stream must NOT hit it
+    # (it would call the network; our fake chat is non-streaming, so instead
+    # we pre-seed the demo entry and assert it is the one served).
+    m._cache["demo::" + base_key] = {"text": "demo-answer",
+                                     "tokens_input": 1, "tokens_output": 1}
     chunks = list(m.generate_stream("p", system_prompt="s", max_tokens=512,
                                     temperature=0.0, config_name="demo"))
-    assert chunks == ["cached-answer"]
-    assert calls == []  # served from cache, no network call
+    assert chunks == ["demo-answer"]
+    assert calls == []  # served from the demo namespace, no network call
+
+
+def test_benchmark_cache_never_reads_demo_entries():
+    # generate() must ignore demo:: entries even when only those exist.
+    calls = []
+    _capture_chat(calls)
+    m = LLMManager(provider="ollama", model="fake-model", cache_enabled=True)
+    base_key = m._cache_key("p", "s", 0.0, "cfg", 42, 1024)
+    m._cache = {"demo::" + base_key: {"text": "demo-answer",
+                                      "tokens_input": 1, "tokens_output": 1}}
+    resp = m.generate("p", system_prompt="s", max_tokens=1024,
+                      temperature=0.0, config_name="cfg")
+    assert resp.text == "ok"            # generated, NOT the demo entry
+    assert not resp.from_cache
+    assert len(calls) == 1              # network call happened

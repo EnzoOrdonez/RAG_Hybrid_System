@@ -41,7 +41,11 @@ def load_pipeline(config_name: str, _hybrid_index=None, llm_model: str = ""):
     llm = None
     if llm_model:
         from src.generation.llm_manager import LLMManager
-        llm = LLMManager(provider="ollama", model=llm_model)
+        # cache_enabled=False (N7/I7): SUS/B.4 sessions need perceptually
+        # consistent latency — a repeated question answered instantly from
+        # cache biases the user's latency perception. Cost: re-asking the
+        # same question regenerates (~40 s), acceptable for demo use.
+        llm = LLMManager(provider="ollama", model=llm_model, cache_enabled=False)
     return RAGPipeline(config=config, hybrid_index=_hybrid_index, llm_manager=llm)
 
 
