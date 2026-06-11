@@ -1,0 +1,344 @@
+[
+  {
+    "query_id": "q171",
+    "question": "Compare the serverless compute offerings between AWS Lambda and Azure Functions",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q172",
+    "question": "What are the differences between AWS VPC and Azure Virtual Network?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q173",
+    "question": "How do managed Kubernetes services compare across AWS EKS, Azure AKS, and GKE?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q174",
+    "question": "Compare object storage services: AWS S3 vs Azure Blob Storage vs Google Cloud Storage",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q175",
+    "question": "What is the equivalent of AWS IAM in Azure and GCP?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "security"
+  },
+  {
+    "query_id": "q176",
+    "question": "Compare container orchestration options across AWS ECS, Azure Container Instances, and Google Cloud Run",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q177",
+    "question": "What are the differences between AWS Lambda cold starts and Azure Functions cold starts?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q178",
+    "question": "How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q179",
+    "question": "Compare the pricing models of AWS, Azure, and GCP for compute resources",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q180",
+    "question": "What are the main differences between AWS CloudFormation and Azure Resource Manager templates?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q181",
+    "question": "Compare monitoring solutions: AWS CloudWatch vs Azure Monitor vs Google Cloud Monitoring",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q182",
+    "question": "How do load balancing services differ across AWS ELB, Azure Load Balancer, and Google Cloud Load Balancing?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q183",
+    "question": "What are the differences between AWS DynamoDB and Azure Cosmos DB?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q184",
+    "question": "Compare the container registry services across AWS ECR, Azure Container Registry, and Google Artifact Registry",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q185",
+    "question": "How do serverless database offerings compare between AWS Aurora Serverless and Azure SQL Serverless?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "storage"
+  },
+  {
+    "query_id": "q187",
+    "question": "Compare the machine learning platforms: AWS SageMaker vs Azure Machine Learning vs Google Vertex AI",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "ai_ml"
+  },
+  {
+    "query_id": "q189",
+    "question": "How do the Kubernetes managed services handle cluster upgrades in EKS vs AKS vs GKE?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "procedural",
+    "difficulty": "hard",
+    "category": "compute"
+  },
+  {
+    "query_id": "q190",
+    "question": "Compare DNS services: AWS Route 53 vs Azure DNS vs Google Cloud DNS",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "networking"
+  },
+  {
+    "query_id": "q191",
+    "question": "What are the key differences between AWS S3 lifecycle policies and Azure Blob Storage tiering?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "storage"
+  },
+  {
+    "query_id": "q192",
+    "question": "Compare identity federation approaches across AWS, Azure, and GCP",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "security"
+  },
+  {
+    "query_id": "q193",
+    "question": "How do encryption at rest implementations differ between AWS KMS, Azure Key Vault, and GCP Cloud KMS?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "security"
+  },
+  {
+    "query_id": "q195",
+    "question": "Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q196",
+    "question": "What are the equivalent networking concepts across AWS, Azure, and GCP for VPCs, subnets, and security groups?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "factual",
+    "difficulty": "easy",
+    "category": "networking"
+  },
+  {
+    "query_id": "q197",
+    "question": "Compare the event-driven architectures: AWS EventBridge vs Azure Event Grid vs Google Eventarc",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
+    "query_id": "q198",
+    "question": "How does the concept of availability zones differ across AWS, Azure, and GCP?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "easy",
+    "category": "general"
+  }
+]

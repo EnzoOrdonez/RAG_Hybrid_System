@@ -131,3 +131,17 @@ Decisión (a implementar en el esquema exp12 y el export Nota 3):
 - El valor del control sin-RAG es evidenciar que RAG **reduce** la afirmación sin evidencia, no una comparación numérica directa de fidelidad.
 
 ---
+
+## Nota 3 addenda — exp13 (2026-06-11)
+
+### N4 — exp13 cierra el caso de la expansión cross-cloud: no aporta
+
+Con el fix D11 (expansión real en el camino RRF, default OFF) se corrió exp13: 25 q cross-cloud (>1 provider), brazos OFF vs ON, reranker corregido (D12), generación granite4.1 determinista (temp=0).
+
+- **D11 funciona:** la expansión ahora llega a BM25 → el retrieval cambió en **7/25** consultas (exp7: 0; sus brazos eran idénticos). El mecanismo que el paper afirmaba ahora sí opera.
+- **Pero no ayuda:** bajo oráculo independiente (bge-reranker-large), ON es direccionalmente **peor** (NDCG@5 0,852→0,820; recall@5 0,863→0,789; avg_score 0,287→0,269), **n.s. tras BH** (d_z≈−0,4, p_BH=0,13). Fidelidad OFF 0,175 ≈ ON 0,174 (n.s.).
+- **Conclusión:** el claim "+16,8 % por normalización/expansión" queda retirado **definitivamente** — era un no-op (N1) y, bien implementado, la expansión cross-cloud no mejora retrieval ni fidelidad en el corpus reconstruido. Consistente con la literatura (la expansión ayuda al BM25 aislado, pero el híbrido RRF+rerank ya recupera lo relevante; añadir términos solo introduce ruido).
+
+Artefactos: `experiments/results/exp13_expansion/{results.json, faithfulness_metrics.json, retrieval_metrics__bge-indep.json}`; `data/evaluation/cross_cloud_subset.json`.
+
+---

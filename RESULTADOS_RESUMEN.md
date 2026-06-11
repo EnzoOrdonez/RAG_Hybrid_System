@@ -1,8 +1,8 @@
 # RESULTADOS_RESUMEN — Nota 3 (2026-06-11)
 
 **Estado:** retrieval (exp11) COMPLETO; matriz de fidelidad (exp12) **COMPLETA**
-(4 modelos × 4 escenarios × 194 q, temp=0); **exp13 (expansión) pendiente** (requiere GPU
-libre). Insumo para A.3/A.1.
+(4 modelos × 4 escenarios × 194 q, temp=0); **exp13 (expansión cross-cloud) COMPLETO**.
+Insumo para A.3/A.1.
 
 ---
 
@@ -38,8 +38,19 @@ Probado por código: los dos brazos de exp7 corrieron RRF con la query **cruda**
 piernas (`hybrid_retriever.py:52`); la expansión nunca llegó a BM25 y `terminology_normalization`
 no se lee en retrieval. **Ambos brazos recuperaron lo mismo** → el +16,75 % (0,2916 vs 0,2498)
 es ruido de generación + NLI descalibrado sobre n=29, **no** una ganancia de
-expansión/normalización. Refuerza Flag 142 (candidato a remover del abstract). La expansión
-real (fix D11) se evaluará limpiamente en exp13.
+expansión/normalización. Refuerza Flag 142 (candidato a remover del abstract).
+
+**exp13 (expansión real, fix D11, 25 q cross-cloud, granite determinista) — CONFIRMA que la
+expansión no aporta:**
+- Con D11 la expansión **sí** llega a BM25: cambió el retrieval en **7/25** consultas
+  (exp7 cambiaba 0 — era un no-op).
+- Bajo oráculo independiente (bge), ON es **direccionalmente PEOR**: NDCG@5 0,852→0,820,
+  recall@5 0,863→0,789, avg_score 0,287→0,269 — **no significativo tras BH** (d_z≈−0,4,
+  p_BH=0,13). La expansión añade términos a BM25 que perturban sin mejorar.
+- Fidelidad: OFF 0,175 ≈ ON 0,174 (d_z≈0, n.s.).
+- **Veredicto doble y definitivo:** el "+16,8 %" no solo era un no-op (exp7); con la
+  implementación correcta, la expansión cross-cloud **no mejora el retrieval (tiende a
+  perjudicarlo levemente) ni la fidelidad**. El claim queda **retirado**.
 
 ## 3. Fidelidad (exp12, COMPLETO — 4 modelos)
 
@@ -104,9 +115,8 @@ gemma ~38 s (26 tok/s) · mistral ~34–45 s (10–14 tok/s) · granite ~65–89
 | Fidelidad ≠ corrección | NLI mide groundedness en el contexto, no veracidad factual; explícito |
 
 ## 7. Pendiente
-- **exp13**: expansión ON vs OFF (30 q cross-cloud, fix D11) con generación determinista
-  (modelo determinista: granite o qwen3.5). Requiere GPU libre.
-- Figuras finales; reescritura A.3/A.1.
+- Figuras finales; reescritura A.3/A.1 a partir de este resumen.
+  (exp11/exp12/exp13 completos; toda la evidencia experimental de la ronda está cerrada.)
 
 Artefactos: `output/tables/nota3/` (oracle_stability, tabla6_fidelidad, tabla6_declinacion,
 tabla5_modelo_principal, latency); `experiments/results/exp{11,12}_*`;

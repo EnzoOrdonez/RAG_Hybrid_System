@@ -1,0 +1,73 @@
+{
+  "experiment": "exp13_expansion",
+  "metric": "faithfulness",
+  "excluded_methods": [
+    "error",
+    "none"
+  ],
+  "bh_families": {
+    "between_scenario_per_model": 1,
+    "between_model_per_scenario": 0
+  },
+  "systems": {
+    "exp_off | granite4.1-8b": {
+      "scenario": "exp_off",
+      "model": "granite4.1-8b",
+      "faithfulness_mean": 0.17455600000000002,
+      "faithfulness_std": 0.22583986782674134,
+      "n_effective": 25,
+      "n_total": 25,
+      "no_evidence_rate": 0.0,
+      "honest_decline_rate": null,
+      "method_counts": {
+        "nli": 25
+      }
+    },
+    "exp_on | granite4.1-8b": {
+      "scenario": "exp_on",
+      "model": "granite4.1-8b",
+      "faithfulness_mean": 0.17435600000000004,
+      "faithfulness_std": 0.25085429549175886,
+      "n_effective": 25,
+      "n_total": 25,
+      "no_evidence_rate": 0.0,
+      "honest_decline_rate": null,
+      "method_counts": {
+        "nli": 25
+      }
+    }
+  },
+  "statistical_tests": {
+    "faithfulness__between_scenario": {
+      "exp_off | granite4.1-8b vs exp_on | granite4.1-8b": {
+        "metric": "faithfulness",
+        "system_a": "exp_off | granite4.1-8b",
+        "system_b": "exp_on | granite4.1-8b",
+        "mean_a": 0.1746,
+        "mean_b": 0.1744,
+        "std_a": 0.2258,
+        "std_b": 0.2509,
+        "improvement": -0.0002,
+        "improvement_pct": -0.11,
+        "p_raw": 0.6725975739784472,
+        "p_value": 0.672598,
+        "test": "wilcoxon_signed_rank",
+        "is_normal_a": false,
+        "is_normal_b": false,
+        "effect_size": -0.0016,
+        "effect_label": "negligible",
+        "meets_thesis_threshold": false,
+        "ci_95_lower": -0.0511,
+        "ci_95_upper": 0.0443,
+        "significant": false,
+        "n": 25,
+        "p_bh": 0.6725975739784472,
+        "sig_bh": false,
+        "p_holm": 0.6725975739784472,
+        "sig_holm": false,
+        "correction_family_size": 1
+      }
+    },
+    "faithfulness__between_model": {}
+  }
+}
