@@ -144,6 +144,77 @@ Con el fix D11 (expansión real en el camino RRF, default OFF) se corrió exp13:
 
 Artefactos: `experiments/results/exp13_expansion/{results.json, faithfulness_metrics.json, retrieval_metrics__bge-indep.json}`; `data/evaluation/cross_cloud_subset.json`.
 
+### N5 — Fidelidad: denominador contaminado por declinaciones + instrumento NLI cuestionado (2026-06-11)
+
+Auditoría externa del 06-11 (verificada íntegramente desde checkpoints/results.json antes de
+tocar código; las 11 celdas reproducidas exactas) + hallazgo propio adicional.
+
+**(a) Denominador contaminado (A1, confirmado).** `compute_faithfulness_metrics.py` promediaba
+toda query con claims sin excluir declinaciones; los textos de declinación generan claims que
+el NLI evalúa (granite-híbrido: 116/120 declines con claims, fidelidad media de declinadas
+0,129). Sesgo asimétrico por modelo — antes → después (excluyendo el flag v1):
+
+| celda | publicada | answered-only (flag v1) |
+|---|---|---|
+| granite léxico/denso/híbrido | 0,170 / 0,193 / 0,202 | 0,243 / 0,267 / 0,316 |
+| gemma léxico/denso/híbrido | 0,331 / 0,322 / 0,268 | 0,400 / 0,331 / 0,285 |
+| mistral léxico/denso/híbrido | 0,222 / 0,258 / 0,256 | 0,231 / 0,266 / 0,274 |
+| qwen léxico/denso/híbrido | 0,306 / 0,254 / 0,278 | 0,268 / 0,238 / 0,257 |
+
+Hunde a granite y INFLA a qwen → indefendible como métrica única.
+
+**(b) Flag de decline roto en ambas direcciones (hallazgo propio).** FN: rechazos no marcados
+en apertura — mistral ~18 % de sus "contestadas", gemma ~10-13 %, qwen ~11-15 %, granite ~3-5 %
+(variantes "there is no information regarding X" fuera de los 14 patrones). FP: ~60 % de los
+"declines" de granite/qwen son textos >150 tokens con citas y ≥8 claims (respuestas parciales
+con hedge). Por eso el fix v2 NO reutiliza el flag: clasificador de análisis a 3 clases
+(`pure_decline` = marcador en primeros 300c / `hedged_partial` / `answered`), métrica PRIMARIA
+= excluir solo pure_decline (decisión de Enzo 06-11), con 3 sensibilidades (flag v1; estricta
+marcador-en-cualquier-parte; publicada v1). Artefactos: `faithfulness_metrics_v2.json`,
+`tabla6_fidelidad_v2`, `tabla6_sensibilidad_denominador`, `tabla6c_clasificacion_v2`.
+
+**(c) Re-stats (A2, confirmado y corregido).** Las familias B/C corrían sobre la métrica
+contaminada (p. ej. granite denso-vs-híbrido n=187 incluía ~120 declinaciones). v2 re-testea
+sobre la intersección de no-excluidas por par (n documentado, nota de potencia si n<60).
+Veredicto: **"método de retrieval n.s. en fidelidad" SE SOSTIENE**; granite/mistral monótonos
+hacia el híbrido pero p_BH≥0,11; la excepción v1 (denso>léxico en qwen) no sobrevive; entre
+modelos todo n.s. bajo v2 (los "sig" v1 eran artefacto del denominador); RAG≫sin-RAG se
+sostiene salvo qwen (no testeable, N6.4).
+
+**(d) Instrumento NLI (A3, confirmado y agravado).** Banda de % contradicted 27–39 % casi
+insensible a modelo Y escenario; donde varía, sube con MEJOR contexto (gemma léxico→híbrido
+26,8→34,5 %). q085 granite-híbrido reproducido bit-exacto: 28/28 claims procedurales
+fundamentados = "contradicted" a prob ~0,99 ("Open your web browser and go to the Azure
+portal" = 0,986). Mecánica: lado contradicted toma max sobre 5 chunks, umbral 0,7, sin guarda
+simétrica (`hallucination_detector.py:413-424`) — la inflación que Flag 138 corrigió del lado
+supported sigue activa del lado contradicted, y el modelo small emite contradicción ~0,99 en
+hipótesis imperativas (los claims sintetizados "Header: contenido." pueden amplificar).
+Mitigación ejecutada (3b, 2026-06-11): muestra de 50 claims para juicio humano
+(`output/audit/claim_audit_sample`, pendiente de revisión de Enzo) + re-score íntegro con
+segundo verificador (nli-deberta-v3-base, fp16, mismo procedimiento; 0 mismatches de claims)
++ ablación de formato (small sin prefijo "Header:"). Resultados:
+
+- **Ablación de formato: negativa limpia.** kappa 0,87, Spearman 0,944, órdenes por modelo
+  idénticos, q085 idéntico → el formato sintetizado de claims no es la causa.
+- **Acuerdo entre verificadores: débil a nivel claim, inestable a nivel orden fino.**
+  kappa 0,411 en la muestra de 50 (las contradicciones de small migran a unsupported bajo
+  base); Spearman de medias por config 0,825 (métrica publicada) pero **0,559 n.s. en la
+  primaria v2**; el orden léxico/denso/híbrido cambia en 3/4 modelos. Niveles absolutos
+  sistemáticamente más bajos bajo base.
+- **q085: 28/28 contradicted TAMBIÉN bajo el verificador base** → el artefacto es del
+  PROCEDIMIENTO (max sobre 5 chunks largos + umbral 0,7 sin guarda simétrica + dominio
+  técnico), no del tamaño del verificador ni del formato del claim.
+- **Espejo estadístico: familia B (RAG-vs-RAG) bajo verificador base, denominador primario,
+  pareado por intersección: TODO n.s. tras BH** (mejor |d_z|=0,38). Junto con v1 y v2-small:
+  el hallazgo "el método de retrieval no mueve la fidelidad" se sostiene bajo 2 verificadores
+  × 4 denominadores.
+
+**Implicación para el paper:** la fidelidad NLI absoluta NO es interpretable como tasa real
+de alucinación (los dos instrumentos discrepan en nivel y en orden fino); solo se reportan
+contrastes que sobreviven a ambos verificadores, con la auditoría del instrumento declarada.
+Artefactos: `faithfulness_rescore__{nli-base,small-noheader}.json`,
+`output/audit/rescore_v2_summary.md`, `output/audit/claim_audit_sample_scores_v2.json`.
+
 ### N6 — Consistencia documental para la reescritura del A.3 (2026-06-11)
 
 Cuatro correcciones/precisiones que la reescritura de §4.5/§6.3 debe incorporar:

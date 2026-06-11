@@ -52,42 +52,78 @@ expansión no aporta:**
   implementación correcta, la expansión cross-cloud **no mejora el retrieval (tiende a
   perjudicarlo levemente) ni la fidelidad**. El claim queda **retirado**.
 
-## 3. Fidelidad (exp12, COMPLETO — 4 modelos)
+## 3. Fidelidad (exp12, COMPLETO — 4 modelos) — **métrica v2 (N5, 2026-06-11)**
 
-Fidelidad NLI media en respuestas con claims verificables (% de declinación honesta):
+**Corrección de medición (N5):** la métrica publicada hasta 06-11 promediaba TODA respuesta
+con claims, mezclando declinaciones honestas (cuyos textos explicativos también generan
+claims) con respuestas reales, con sesgo asimétrico por modelo (hundía a granite, inflaba a
+qwen). Además el flag `is_honest_decline` mislabelea en ambas direcciones (mistral ~18 % de
+rechazos no marcados entre "contestadas"; ~60 % de los "declines" de granite/qwen son
+respuestas parciales largas). v2 reclasifica a nivel análisis: `pure_decline` (rechazo en
+los primeros 300c) / `hedged_partial` (hedge tardío) / `answered`.
+
+**Tabla 6 v2 — `faithfulness_answered` PRIMARIA** (excluye solo pure_decline; n entre paréntesis):
 
 | Escenario | Granite 4.1 | Gemma 4 E4B | Mistral 7B | Qwen 3.5 9B |
 |---|---|---|---|---|
-| Sin RAG | 0,000* | 0,000* | 0,000* | 0,000* |
-| RAG léxico | 0,170 (66 %) | 0,331 (55 %) | 0,222 (25 %) | 0,306 (44 %) |
-| RAG denso | 0,193 (62 %) | 0,322 (51 %) | 0,258 (21 %) | 0,254 (48 %) |
-| RAG híbrido | 0,202 (62 %) | 0,268 (53 %) | 0,256 (24 %) | 0,278 (46 %) |
+| Sin RAG | 0,000* (189) | 0,000* (191) | 0,000* (193) | 0,000* (17†) |
+| RAG léxico | 0,234 (75) | 0,381 (60) | 0,245 (114) | 0,246 (42) |
+| RAG denso | 0,255 (85) | 0,356 (65) | 0,275 (132) | 0,246 (51) |
+| RAG híbrido | 0,293 (87) | 0,312 (60) | 0,282 (122) | 0,293 (47) |
 
-`*` Sin RAG = 0 por construcción (N3). n_efectivo varía mucho: granite ~189, mistral ~170,
-qwen ~140, **gemma ~100** (sesgo de extracción de claims, §4).
+`*` Sin RAG = 0 por construcción (N3). `†` qwen sin_rag: 177/194 respuestas VACÍAS (N6).
+Sensibilidad bajo 4 denominadores: `output/tables/nota3/tabla6_sensibilidad_denominador`.
+La métrica v1 se conserva solo como sensibilidad etiquetada (sens_c).
 
-Estadística pareada (familias BH por RQ; Wilcoxon+d_z+bootstrap; McNemar para binarias):
-- **RAG ≫ Sin RAG** en fidelidad: TODOS los modelos, d_z 0,67–1,46, p_BH<0,05 (mayoría
-  <0,001). RAG aporta groundedness frente al LLM solo.
-- **Entre métodos de RAG (léxico/denso/híbrido): mayormente n.s.** dentro de cada modelo
-  (única excepción: denso > léxico en qwen, d_z=+0,24, p_BH=0,03). **El método de retrieval
-  NO se traduce en mayor fidelidad de generación** — la ventaja del híbrido vive en la
-  *calidad de retrieval* (§1), no aguas abajo.
-- **Entre modelos:** gemma ≈ qwen ≥ mistral ≥ granite en fidelidad de respuestas contestadas
-  (varios sig tras BH), pero **McNemar de declinación es altamente significativo** en casi
-  todos los pares — la comparación está dominada por el comportamiento de declinación.
+Re-stats v2 (pareado por INTERSECCIÓN de no-excluidas en ambos brazos; n por par; familias BH):
+- **"El método de retrieval NO mueve la fidelidad" SE SOSTIENE bajo la métrica corregida:**
+  ningún par RAG-vs-RAG significativo tras BH en ningún modelo. PERO ahora con matiz honesto:
+  granite es monótono léxico→denso→híbrido (0,234→0,255→0,293; mejor par híbrido-vs-léxico
+  d_z=+0,29, p_BH=0,11, n=53) y mistral también (0,245→0,275→0,282, n.s.); gemma tiende al
+  REVÉS (0,381→0,312). Potencia limitada: n pareado 20–63 en granite/gemma/qwen ([n<60] en
+  el JSON). La excepción v1 (denso>léxico en qwen) NO sobrevive a la métrica corregida.
+- **RAG ≫ Sin RAG se sostiene** para granite/gemma/mistral (d_z 0,86–1,09, p_BH<0,001).
+  Para **qwen es NO testeable** bajo v2 (n pareado 5–7 por las vacías de sin_rag, N6).
+- **Entre modelos: TODO n.s. tras BH bajo v2** (la métrica v1 mostraba varios "sig" que eran
+  artefacto del denominador). Lo que SÍ es altamente significativo es el **comportamiento de
+  declinación** (McNemar v2: mistral declina mucho menos que el resto, p≈0,000 en casi todos
+  sus pares). **El trade-off declinación ↔ fidelidad es el hallazgo**, no un ranking.
 
-**Modelo con mejor fidelidad — sin ganador limpio:** en respuestas contestadas, **gemma4:e4b
-(0,27–0,33)** y **qwen3.5 (0,25–0,31)** lideran, pero gemma extrae ~la mitad de claims
-(n_eff~100) y ambos declinan ~45–55 %. **mistral:7b** declina menos (~22 %) → más respuestas
-sustantivas a fidelidad media. **granite** (headline determinista, RAG-tuned) es el más
-conservador (declina 62–66 %) con la fidelidad más baja entre contestados. **El trade-off
-declinación ↔ fidelidad es el hallazgo**, no un ranking único.
+**Desglose de claims (instrumento, `tabla_claims_desglose`):** % contradicted casi insensible
+al escenario y al modelo (27–39 %), y donde varía, sube con MEJOR contexto (gemma léxico→híbrido
+26,8→34,5 %) — evidencia de contradicciones espurias del verificador (ver Instrumento, abajo).
+
+**Auditoría del instrumento (N5):**
+- q085 (granite-híbrido): 28/28 claims "contradicted" a prob ~0,99 en una respuesta procedural
+  citada y fundamentada ("Open your web browser and go to the Azure portal" = contradicted
+  0,986). Reproducido bit-exacto. El lado contradicted usa max sobre 5 chunks con umbral 0,7
+  SIN guarda simétrica (`hallucination_detector.py:413-424`).
+- Muestra de 50 claims para juicio humano: `output/audit/claim_audit_sample.{csv,md}`
+  (20 contradicted incl. q085, 20 unsupported, 10 supported; pendiente de revisión manual).
+- **Segundo verificador (nli-deberta-v3-base, fp16) — COMPLETADO** (re-score íntegro de los 12
+  configs RAG, 0 mismatches de claims; `faithfulness_rescore__nli-base.json`):
+  - Ablación de formato (small sin prefijo "Header:"): **negativa limpia** — kappa 0,87,
+    Spearman 0,944, mismos órdenes por modelo, q085 idéntico. El formato sintetizado de claims
+    NO es el artefacto.
+  - Verificador base vs small: kappa claim-level **0,411** (las contradicciones de small migran
+    a unsupported bajo base); Spearman de medias por config 0,825 (publicada) pero **0,559
+    (n.s.) en la primaria**; el orden léxico/denso/híbrido **cambia en 3 de 4 modelos**.
+    Niveles absolutos más bajos bajo base (granite primaria 0,29→0,21).
+  - **q085 sigue 28/28 contradicted bajo base** → el artefacto vive en el PROCEDIMIENTO
+    (max-contradicción sobre 5 chunks largos, umbral 0,7, sin guarda simétrica) + desajuste de
+    dominio, no en la capacidad del modelo ni el formato.
+  - **Espejo de la familia B bajo verificador base (primaria, pareado, BH): TODO n.s.**
+    (mejor |d_z|=0,38). El veredicto "método de retrieval n.s." queda apoyado bajo
+    2 verificadores × 4 denominadores.
+  - Implicación para el paper: la fidelidad NLI se reporta como **instrumento-relativa**
+    (contrastes, no niveles); detalle en `output/audit/rescore_v2_summary.md`.
 
 ## 4. Sorpresas
 
 1. **La superioridad del híbrido NO propaga a la fidelidad** (métodos de RAG n.s.). Hallazgo
    honesto y central: el aporte del híbrido es de ranking, no de fidelidad de respuesta.
+   **Re-confirmado bajo la métrica corregida v2 (N5)** — con el matiz de monotonía no
+   significativa de granite/mistral hacia el híbrido (§3).
 2. **Circularidad del oráculo infla masivamente** el retrieval del híbrido (0,995 → 0,740).
 3. **Determinismo desigual a temp=0:** granite y qwen3.5 deterministas; **gemma y mistral NO**
    (no-determinismo de kernel Ollama). Headline = granite (determinista + RAG-tuned).
@@ -118,6 +154,7 @@ gemma ~38 s (26 tok/s) · mistral ~34–45 s (10–14 tok/s) · granite ~65–89
 - Figuras finales; reescritura A.3/A.1 a partir de este resumen.
   (exp11/exp12/exp13 completos; toda la evidencia experimental de la ronda está cerrada.)
 
-Artefactos: `output/tables/nota3/` (oracle_stability, tabla6_fidelidad, tabla6_declinacion,
-tabla5_modelo_principal, latency); `experiments/results/exp{11,12}_*`;
-`paper/audit_findings_cc_addenda.md` (N1/N2/N3).
+Artefactos: `output/tables/nota3/` (oracle_stability, tabla6_fidelidad_v2 + sensibilidad +
+clasificación v2 + claims_desglose, tabla5 v2, latency); `experiments/results/exp{11,12,13}_*`
+(+ `faithfulness_metrics_v2.json`, `faithfulness_rescore__*.json`); `output/audit/`
+(muestra de 50 claims); `paper/audit_findings_cc_addenda.md` (N1–N6).
