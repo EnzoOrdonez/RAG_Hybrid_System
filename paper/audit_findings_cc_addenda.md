@@ -241,4 +241,46 @@ Cuatro correcciones/precisiones que la reescritura de §4.5/§6.3 debe incorpora
    métrica v2 (n pareado 5-7). Documentar como limitación del control para ese modelo
    (probable interacción del template sin contexto con qwen3.5; no se regenera).
 
+### N7 — Cierre operativo de la ronda (2026-06-11, segunda pasada de auditoría)
+
+Auditoría externa de cierre (7 ítems) verificada íntegramente + auditoría integral propia.
+Acciones ejecutadas (commits atómicos de esta fecha):
+
+1. **Reproducibilidad reparada (lo grave):** la implementación D11 (`hybrid_retriever.py`
+   routing bm25_query + `hybrid_index.py` plumbing) estaba SIN versionar — exp13 corrió con
+   código que el repo no contenía. Y `test_queries.json` trackeado seguía en 200: el set
+   canónico 194 + la bitácora de remoción (`test_queries_removed_log.json`) + backup quedan
+   versionados. El claim del A.3 ("bitácora versionada junto al código") ahora es verdadero.
+2. **Sweep del commit F6 resuelto:** `6f4819b` arrastró 1 línea pre-existente que cableaba
+   `config.query_expansion` al branch híbrido de `query()`; con `PROPOSED_HYBRID.
+   query_expansion=True` la config canónica expandía — incoherente con N4 y con cómo corrió
+   exp12. Decisión (Enzo): **`query_expansion=False`** en PROPOSED_HYBRID (comentario citando
+   N4); el mecanismo D11 queda disponible vía flag/runner. Demo checkbox default off.
+3. **exp13 bajo métrica v2:** `faithfulness_metrics_v2.json` nuevo — "OFF≈ON" SE SOSTIENE
+   (primaria 0,285 vs 0,324, n pareado=10, d_z=+0,21, p_bh=0,53, n.s.). Nota: el runner de
+   exp13 no persistió el flag v1 → sens_a==publicada; el clasificador v2 por marcadores
+   detecta 56-60 % de declinaciones puras.
+4. **README público corregido:** mostraba P@1 0,930 (oráculo circular, corpus pre-rebuild,
+   200 queries) y el "+16,8 %" retirado como hallazgo vigente. Reescrito sobre Tabla 4
+   (oráculo independiente, NDCG@5 0,740 titular / 0,995 anotado circular, 194 q) y la tabla
+   de experimentos exp9-13 con el retiro explícito. Históricos (titulacion/, exp9/_handoff)
+   intactos a propósito.
+5. **Tabla 4 + figuras finales** generadas por script (`tabla4_retrieval__exp11`,
+   `_make_figures_nota3.py` → f1-f4 en `output/figures/nota3/`).
+6. **Higiene:** index.lock huérfano; .gitignore con política (data/models/ 700 MB,
+   *.log raíz, settings.local de Claude); benchmark.log (3,7 MB) y rerun_phase2.log
+   destrackeados; checkpoints crudos exp12 (16) + exp10 versionados (decisión: evidencia);
+   caches LLM del set final versionados; script phase3 movido fuera de pytest
+   (suite verde: 5+3 passed, 0 errors).
+7. **Demo (I7):** namespace de caché `demo::` en el path streaming + caché desactivado en el
+   LLMManager de la demo (consistencia perceptual para SUS); tests de paridad extendidos.
+8. **Publicación:** push de `pre-corpus-rebuild-2026-05-21` + tag anotado
+   **`nota3-evidencia-2026-06-11`** a origin (pre-aprobado por Enzo tras checklist de
+   secretos/.env/tamaños). Pendiente de decisión de Enzo (reportado, no ejecutado):
+   renombrar la rama (el nombre ya no describe su contenido) o fusionar a main.
+
+**Queda FUERA del repo (handoff humano):** revisión de los 50 claims
+(`output/audit/claim_audit_sample`), reescritura A.3 v7 / A.1, Figuras 1-2 draw.io,
+instrumento SUS/Likert + guía B.4, video de sustentación, actas/rúbricas.
+
 ---

@@ -151,8 +151,16 @@ gemma ~38 s (26 tok/s) · mistral ~34–45 s (10–14 tok/s) · granite ~65–89
 | Fidelidad ≠ corrección | NLI mide groundedness en el contexto, no veracidad factual; explícito |
 
 ## 7. Pendiente
-- Figuras finales; reescritura A.3/A.1 a partir de este resumen.
-  (exp11/exp12/exp13 completos; toda la evidencia experimental de la ronda está cerrada.)
+- Reescritura A.3/A.1 a partir de este resumen (figuras f1-f4 ya generadas:
+  `output/figures/nota3/`; Tabla 4 en `output/tables/nota3/`).
+
+## 8. Cierre operativo (2026-06-11, N7)
+- exp13 re-medido bajo métrica v2: **"expansión OFF≈ON" SE SOSTIENE** (0,285 vs 0,324,
+  n=10, n.s.) — veredicto N4 intacto.
+- Repo publicado: rama + tag **`nota3-evidencia-2026-06-11`** en origin; suite pytest verde;
+  D11 y set 194 + bitácora versionados; README sin números huérfanos; checkpoints crudos
+  versionados; demo con caché segregado. Detalle completo: ledger **N7**.
+- Fuera del repo (humano): 50 claims, A.3 v7/A.1, figuras draw.io, SUS/B.4, video, actas.
 
 Artefactos: `output/tables/nota3/` (oracle_stability, tabla6_fidelidad_v2 + sensibilidad +
 clasificación v2 + claims_desglose, tabla5 v2, latency); `experiments/results/exp{11,12,13}_*`
