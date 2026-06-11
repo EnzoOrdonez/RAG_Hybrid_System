@@ -1,0 +1,5 @@
+system,precision@1,precision@3,precision@5,recall@5,mrr,ndcg@5,avg_score@5
+RAG Lexico (BM25),0.5412,0.4880,0.4433,0.2584,0.5864,0.5516,2.2091
+RAG Semantico (Dense),0.6031,0.5258,0.4897,0.3023,0.6477,0.6494,2.5993
+RAG Hibrido Propuesto,0.8093,0.7612,0.7196,0.5364,0.8093,0.9948,4.2858
+RAG Hibrido (pre-rerank RRF),0.5722,0.5584,0.5361,0.3497,0.6389,0.6681,2.9668

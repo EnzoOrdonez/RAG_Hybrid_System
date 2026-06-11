@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering
+\caption{Cross-encoder based retrieval quality metrics (exp8, 200 queries)}
+\label{tab:retrieval-metrics}
+\begin{tabular}{lcccccc}
+\toprule
+Sistema & Prec@1 & Prec@3 & Prec@5 & MRR & NDCG@5 & Avg.~Score \\
+\midrule
+RAG Lexico & 0.531 & 0.474 & 0.443 & 0.603 & 0.442 & 0.255 \\
+RAG Semantico & 0.686 & 0.588 & 0.546 & 0.742 & 0.624 & 0.359 \\
+RAG Hibrido Propuesto & 0.716 & 0.677 & 0.637 & 0.770 & 0.740 & 0.423 \\
+RAG Hibrido & 0.613 & 0.586 & 0.543 & 0.699 & 0.603 & 0.348 \\
+\midrule
+\multicolumn{7}{l}{\footnotesize RAG Lexico (BM25) vs RAG Semantico (Dense): $d=0.500$ (medium), $p<0.05$} \\
+\multicolumn{7}{l}{\footnotesize RAG Lexico (BM25) vs RAG Hibrido Propuesto: $d=0.941$ (large), $p<0.05$} \\
+\multicolumn{7}{l}{\footnotesize RAG Lexico (BM25) vs RAG Hibrido (pre-rerank RRF): $d=0.621$ (medium), $p<0.05$} \\
+\multicolumn{7}{l}{\footnotesize RAG Semantico (Dense) vs RAG Hibrido Propuesto: $d=0.445$ (small), $p<0.05$} \\
+\multicolumn{7}{l}{\footnotesize RAG Semantico (Dense) vs RAG Hibrido (pre-rerank RRF): $d=-0.076$ (small), $p\geq0.05$} \\
+\multicolumn{7}{l}{\footnotesize RAG Hibrido Propuesto vs RAG Hibrido (pre-rerank RRF): $d=-0.522$ (medium), $p<0.05$} \\
+\bottomrule
+\end{tabular}
+\end{table}

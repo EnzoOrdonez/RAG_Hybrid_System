@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\caption{Cross-encoder based retrieval quality metrics (exp8, 200 queries)}
+\label{tab:retrieval-metrics}
+\begin{tabular}{lcccccc}
+\toprule
+Sistema & Prec@1 & Prec@3 & Prec@5 & MRR & NDCG@5 & Avg.~Score \\
+\midrule
+exp_off | granite4.1-8b & 0.680 & 0.560 & 0.528 & 0.761 & 0.852 & 0.287 \\
+exp_on | granite4.1-8b & 0.680 & 0.573 & 0.496 & 0.753 & 0.820 & 0.269 \\
+\midrule
+\multicolumn{7}{l}{\footnotesize exp_off | granite4.1-8b vs exp_on | granite4.1-8b: $d=-0.417$ (small), $p\geq0.05$} \\
+\bottomrule
+\end{tabular}
+\end{table}
