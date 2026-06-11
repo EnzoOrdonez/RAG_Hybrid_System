@@ -102,19 +102,27 @@ class HybridIndex:
         alpha: float = 0.5,
         top_k_candidates: int = 50,
         rrf_k: int = 60,
+        bm25_query: Optional[str] = None,
     ) -> List[Tuple[str, float]]:
         """Search using hybrid fusion of BM25 + dense.
 
         Args:
-            query: Search query
+            query: Search query (used for the dense leg)
             top_k: Number of final results
             fusion: Fusion method ('linear', 'rrf')
             alpha: Weight for BM25 in linear fusion (1-alpha for dense)
             top_k_candidates: Candidates to retrieve from each system
             rrf_k: Constant for RRF formula
+            bm25_query: Optional separate query for the BM25 (lexical) leg. When
+                None the BM25 leg reuses ``query``. D11: this lets the lexical
+                leg use a term-expanded query while dense keeps the raw query;
+                previously the RRF path used the raw query for BOTH legs, so
+                query expansion never reached BM25 in the hybrid pipeline.
         """
         # Get candidates from both systems
-        bm25_results = self.search_bm25(query, top_k=top_k_candidates)
+        bm25_results = self.search_bm25(
+            bm25_query if bm25_query is not None else query, top_k=top_k_candidates
+        )
         dense_results = self.search_dense(query, top_k=top_k_candidates)
 
         if fusion == "linear":

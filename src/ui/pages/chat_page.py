@@ -103,7 +103,7 @@ def render():
             )
             enable_expansion = st.checkbox(
                 "Query Expansion",
-                value=(config_key == "hybrid"),
+                value=False,  # OFF por defecto: N4 — la expansión no aporta (exp13)
             )
             alpha = st.slider("Hybrid Alpha", 0.0, 1.0, 0.5, 0.1)
             max_tokens = st.slider("Max tokens (demo)", 128, 1024, 512, 64)

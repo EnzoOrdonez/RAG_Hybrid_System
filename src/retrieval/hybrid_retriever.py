@@ -39,22 +39,43 @@ class HybridRetriever:
         fusion: Optional[str] = None,
         alpha: Optional[float] = None,
         use_reranker: bool = True,
+        use_expansion: bool = False,
     ) -> List[RetrievalResult]:
-        """Search with hybrid fusion and optional reranking."""
+        """Search with hybrid fusion and optional reranking.
+
+        use_expansion (D11): when True and fusion='rrf', the BM25 leg uses the
+        term-expanded query (processed.bm25_query) while the dense leg keeps the
+        raw query. Default False so the main experiments (paper §4.4) are
+        unchanged; expansion is evaluated only in the cross-cloud experiment.
+        """
         start = time.time()
 
         fusion = fusion or self.fusion_method
         alpha = alpha if alpha is not None else self.alpha
         processed = self.query_processor.process(query)
 
+        # D11: route the (optionally) expanded query to the BM25 leg only.
+        if fusion == "linear":
+            hybrid_query = processed.bm25_query  # backward-compatible behavior
+            bm25_query = None  # bm25 leg reuses hybrid_query
+        else:  # rrf (default)
+            hybrid_query = query
+            bm25_query = processed.bm25_query if use_expansion else None
+
+        if use_expansion and bm25_query is not None and bm25_query != query:
+            logger.info(
+                "D11 expansion ON (%s): bm25_query='%s'", fusion, bm25_query[:160]
+            )
+
         # Hybrid search with fusion
         results_raw = self.index.search_hybrid(
-            query=processed.bm25_query if fusion == "linear" else query,
+            query=hybrid_query,
             top_k=top_k_candidates,
             fusion=fusion,
             alpha=alpha,
             top_k_candidates=top_k_candidates,
             rrf_k=self.rrf_k,
+            bm25_query=bm25_query,
         )
 
         # Apply provider filter

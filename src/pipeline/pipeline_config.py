@@ -76,7 +76,12 @@ PROPOSED_HYBRID = PipelineConfig(
     embedding_model="BAAI/bge-large-en-v1.5",
     reranker="cross-encoder/ms-marco-MiniLM-L-12-v2",
     multidimensional_scoring=True,
-    query_expansion=True,
+    # OFF per ledger N4 (exp13): with D11 correctly wired, cross-cloud
+    # expansion does not improve retrieval (trends slightly worse) nor
+    # faithfulness — the "+16.8%" claim is retired. exp11/exp12 also ran
+    # without expansion. The D11 mechanism stays implemented and testable
+    # via this flag / the exp13 runner.
+    query_expansion=False,
     terminology_normalization=True,
     retrieval_top_k=50,
     reranker_top_k=20,
