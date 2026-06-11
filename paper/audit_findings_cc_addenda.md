@@ -144,4 +144,30 @@ Con el fix D11 (expansión real en el camino RRF, default OFF) se corrió exp13:
 
 Artefactos: `experiments/results/exp13_expansion/{results.json, faithfulness_metrics.json, retrieval_metrics__bge-indep.json}`; `data/evaluation/cross_cloud_subset.json`.
 
+### N6 — Consistencia documental para la reescritura del A.3 (2026-06-11)
+
+Cuatro correcciones/precisiones que la reescritura de §4.5/§6.3 debe incorporar:
+
+1. **"30 consultas entre nubes" → 25.** El A.3 v6.1 dice 30; exp13 usó las **25**
+   consultas cross-provider (>1 proveedor) del set depurado de 194
+   (`data/evaluation/cross_cloud_subset.json`, len=25, verificado). La cifra "30"
+   aparece también en la resolución de N1 (línea "se evalúa… 30 queries cross-cloud",
+   escrita antes de construir el subset) — léase 25 ahí también. Procedencia del
+   subset: filtrado automático de las 194 por `providers>1`, no una selección manual.
+2. **Latencias de qwen3.5 = cota superior.** Sus corridas de exp12 (06-09 → 06-11)
+   compartieron GPU con un segundo proceso en parte de la ventana. Decisión: NO
+   re-muestrear (qwen3.5 es el más lento con o sin contención; mayor precisión no
+   cambia ninguna conclusión); la tabla `latency__exp12_matrix.md` lleva la nota.
+3. **D8 confirmado: índice denso = búsqueda exacta.** El índice construido
+   (`data/indices/faiss_bge-large_adaptive_500.index`) es `faiss.IndexFlatIP`
+   (inner product, 24 481 vectores), verificado por inspección del artefacto;
+   `faiss_index.py:59` es el camino por defecto. **NO** es IVF-PQ: el texto del A.3
+   que mencione índices aproximados debe corregirse — no hay error de cuantización
+   ni parámetro nprobe que reportar.
+4. **qwen3.5 sin_rag: 177/194 respuestas vacías** (len=0, sin error marcado) →
+   `method="none"`, n_eff=17. La celda "Sin RAG" de qwen en la Tabla 6 descansa en
+   17 consultas y el contraste "RAG ≫ sin RAG" es **no testeable** para qwen bajo la
+   métrica v2 (n pareado 5-7). Documentar como limitación del control para ese modelo
+   (probable interacción del template sin contexto con qwen3.5; no se regenera).
+
 ---

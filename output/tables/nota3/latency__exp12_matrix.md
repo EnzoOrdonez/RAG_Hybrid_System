@@ -2,6 +2,8 @@
 
 Excluye respuestas cacheadas (`from_cache=True`, latency=0) y errores. Generación y total en segundos; verificación NLI en ms.
 
+**Nota qwen3.5 (N6):** sus corridas (06-09 → 06-11) compartieron GPU con un segundo proceso durante parte de la ventana; sus latencias se reportan como **cota superior**. No se re-muestrea: qwen3.5 es el modelo más lento con o sin contención y mayor precisión no cambia ninguna conclusión (decisión N6).
+
 | Config (escenario | modelo) | n | gen p50 (s) | gen p95 (s) | NLI p50 (ms) | NLI p95 (ms) | total p50 (s) | total p95 (s) | tok/s p50 |
 |---|---|---|---|---|---|---|---|---|
 | denso | gemma4-e4b | 194 | 38,9 | 39,9 | 86,5 | 724,0 | 39,1 | 40,4 | 25,8 |

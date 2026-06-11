@@ -63,6 +63,10 @@ open(os.path.join(out_dir, f"latency__{exp}.csv"), "w", encoding="utf-8").write(
 md = [f"# Latencias por etapa (p50/p95) — {exp}\n",
       "Excluye respuestas cacheadas (`from_cache=True`, latency=0) y errores. "
       "Generación y total en segundos; verificación NLI en ms.\n",
+      "**Nota qwen3.5 (N6):** sus corridas (06-09 → 06-11) compartieron GPU con un "
+      "segundo proceso durante parte de la ventana; sus latencias se reportan como "
+      "**cota superior**. No se re-muestrea: qwen3.5 es el modelo más lento con o sin "
+      "contención y mayor precisión no cambia ninguna conclusión (decisión N6).\n",
       "| " + " | ".join(cols) + " |",
       "|" + "|".join(["---"] * len(cols)) + "|"]
 for r in rows:
