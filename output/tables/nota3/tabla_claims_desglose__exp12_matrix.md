@@ -1,0 +1,18 @@
+# Tabla — Desglose de claims NLI por config — exp12_matrix
+
+Vista a nivel instrumento (todas las respuestas con claims, método nli). La banda de % contradicted ~27-39 % casi insensible al escenario es evidencia del artefacto del verificador (N5/A3).
+
+| Config | % supported | % contradicted | % unsupported | claims/resp | claims tot | n resp |
+|---|---|---|---|---|---|---|
+| RAG léxico (BM25) — Granite 4.1 8B | 20,2 | 34,2 | 45,5 | 10,3 | 1952 | 189 |
+| RAG léxico (BM25) — Gemma 4 E4B | 35,7 | 26,8 | 37,6 | 4,6 | 474 | 104 |
+| RAG léxico (BM25) — Mistral 7B | 23,4 | 31,7 | 44,9 | 8,5 | 1426 | 168 |
+| RAG léxico (BM25) — Qwen 3.5 9B | 29,4 | 37,0 | 33,6 | 10,0 | 1294 | 130 |
+| RAG denso (BGE) — Granite 4.1 8B | 21,7 | 33,6 | 44,7 | 11,4 | 2157 | 189 |
+| RAG denso (BGE) — Gemma 4 E4B | 32,6 | 29,2 | 38,3 | 4,3 | 439 | 101 |
+| RAG denso (BGE) — Mistral 7B | 25,7 | 28,8 | 45,5 | 8,8 | 1508 | 172 |
+| RAG denso (BGE) — Qwen 3.5 9B | 27,1 | 36,3 | 36,6 | 9,5 | 1343 | 141 |
+| RAG híbrido — Granite 4.1 8B | 23,0 | 32,5 | 44,5 | 11,3 | 2156 | 190 |
+| RAG híbrido — Gemma 4 E4B | 30,3 | 34,5 | 35,2 | 4,4 | 429 | 98 |
+| RAG híbrido — Mistral 7B | 25,2 | 29,2 | 45,6 | 9,0 | 1568 | 174 |
+| RAG híbrido — Qwen 3.5 9B | 27,1 | 39,0 | 33,9 | 10,1 | 1430 | 142 |

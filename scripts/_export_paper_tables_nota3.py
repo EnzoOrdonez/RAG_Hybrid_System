@@ -8,6 +8,13 @@ output/tables/nota3/ (.csv + .md, comma decimals "0,923"):
   - tabla6_declinacion__<exp>.{md,csv}   honest-decline rate, scenario x model
   - tabla5_modelo_principal__<exp>.{md,csv}  granite per-scenario detail
 
+v2 (ledger N5): if faithfulness_metrics_v2.json exists, also emits:
+  - tabla6_fidelidad_v2__<exp>            PRIMARY faithfulness_answered (+n)
+  - tabla6_sensibilidad_denominador__<exp> 4 denominators side by side
+  - tabla6c_clasificacion_v2__<exp>        pure/hedged/answered census
+  - tabla5_modelo_principal_v2__<exp>      primary-model v2 detail
+  - tabla_claims_desglose__<exp>           %supp/%contr/%unsup, claims/resp
+
 Robust to which models are present, so re-running after qwen3.5 completes simply
 adds its column. "Sin RAG" faithfulness is 0-by-construction (N3) and is
 annotated; read it together with the decline table, not as a comparable score.
@@ -127,3 +134,137 @@ w("tabla5_modelo_principal", "\n".join(pmd), "\n".join(pcsv))
 print(f"Models in matrix: {models}")
 print(f"Wrote tabla6_fidelidad, tabla6_declinacion, tabla5_modelo_principal (__{exp}) to {out_dir}")
 print(f"  (primary model = {primary})")
+
+# ===========================================================================
+# v2 tables (ledger N5) — only when faithfulness_metrics_v2.json exists
+# ===========================================================================
+v2_path = os.path.join(base, "faithfulness_metrics_v2.json")
+if not os.path.exists(v2_path):
+    print("No faithfulness_metrics_v2.json; skipping v2 tables.")
+    sys.exit(0)
+
+fm2 = json.loads(open(v2_path, encoding="utf-8").read())
+sys2 = fm2["systems_v2"]
+cell2 = {(s["scenario"], s["model"]): s for s in sys2.values()}
+cfg_by_cell = {(s["scenario"], s["model"]): name for name, s in sys2.items()}
+
+NOTE_V2 = ("Métrica primaria v2 (N5): media de fidelidad NLI sobre respuestas NO "
+           "declinadas (excluye pure_decline = marcador de rechazo en los primeros "
+           "300 caracteres; incluye respuestas con hedge tardío). n_answered entre "
+           "paréntesis. `*` Sin RAG = 0 por construcción (N3).")
+
+
+def faith_v2_cell(s):
+    p = s["primary_answered"]
+    v = fmt(p["mean"]) + ("*" if s["scenario"] == "sin_rag" else "")
+    return f"{v} ({p['n']})"
+md, csv = matrix_table(
+    lambda s: faith_v2_cell(cell2[(s["scenario"], s["model"])]),
+    "Tabla 6 v2 — Fidelidad en respuestas contestadas (faithfulness_answered)",
+    NOTE_V2)
+w("tabla6_fidelidad_v2", md, csv)
+
+# Sensibilidad: 4 denominadores lado a lado (tabla larga por config)
+DEN_COLS = [("primary_answered", "Primaria (sin pure_decline)"),
+            ("sens_a_v1flag", "Sens. A (flag v1)"),
+            ("sens_b_strict", "Sens. B (estricta)"),
+            ("sens_c_published", "Sens. C (publicada v1)")]
+hdr = ["Config"] + [f"{d[1]}" for d in DEN_COLS] + ["n primaria", "n publicada"]
+rows_s = []
+for sc in SCEN_ORDER:
+    for m in models:
+        s = cell2.get((sc, m))
+        if not s:
+            continue
+        rows_s.append([f"{SCEN_DISP.get(sc, sc)} — {MODEL_DISP.get(m, m)}"]
+                      + [fmt(s[d[0]]["mean"]) for d in DEN_COLS]
+                      + [str(s["primary_answered"]["n"]), str(s["sens_c_published"]["n"])])
+md_s = ["# Tabla — Sensibilidad del denominador (4 definiciones) — " + exp, "",
+        "Las conclusiones deben leerse bajo las 4 definiciones (espejo del multi-oráculo).", "",
+        "| " + " | ".join(hdr) + " |", "|" + "|".join(["---"] * len(hdr)) + "|"]
+for r in rows_s:
+    md_s.append("| " + " | ".join(r) + " |")
+csv_s = [";".join(hdr)] + [";".join(r) for r in rows_s]
+w("tabla6_sensibilidad_denominador", "\n".join(md_s), "\n".join(csv_s))
+
+# Census v2: % pure / hedged / answered por config
+hdr_c = ["Config", "% pure_decline", "% hedged_partial", "% answered", "% vacías", "n"]
+rows_c = []
+for sc in SCEN_ORDER:
+    for m in models:
+        s = cell2.get((sc, m))
+        if not s:
+            continue
+        cen = s["decline_census_v2"]
+        n_cls = max(1, s["n_total"] - cen["(empty)"])
+        rows_c.append([f"{SCEN_DISP.get(sc, sc)} — {MODEL_DISP.get(m, m)}",
+                       fmt(100 * cen["pure_decline"] / n_cls, 1),
+                       fmt(100 * cen["hedged_partial"] / n_cls, 1),
+                       fmt(100 * cen["answered"] / n_cls, 1),
+                       fmt(100 * cen["(empty)"] / s["n_total"], 1),
+                       str(s["n_total"])])
+md_c = ["# Tabla 6c — Clasificación v2 de respuestas (census) — " + exp, "",
+        "pure_decline: rechazo en apertura (300c). hedged_partial: marcador de rechazo "
+        "tardío con contenido sustantivo. answered: sin marcador. % vacías sobre n total "
+        "(qwen sin_rag: 91,2 % vacías).", "",
+        "| " + " | ".join(hdr_c) + " |", "|" + "|".join(["---"] * len(hdr_c)) + "|"]
+for r in rows_c:
+    md_c.append("| " + " | ".join(r) + " |")
+csv_c = [";".join(hdr_c)] + [";".join(r) for r in rows_c]
+w("tabla6c_clasificacion_v2", "\n".join(md_c), "\n".join(csv_c))
+
+# Tabla 5 v2 — primary model detail
+pcols2 = ["Escenario", "Fidelidad (primaria)", "n_answered", "Sens. A", "Sens. B",
+          "Publicada v1", "% pure_decline", "% hedged"]
+prows2 = []
+for sc in SCEN_ORDER:
+    s = cell2.get((sc, primary))
+    if not s:
+        continue
+    cen = s["decline_census_v2"]
+    n_cls = max(1, s["n_total"] - cen["(empty)"])
+    prows2.append([
+        SCEN_DISP.get(sc, sc),
+        fmt(s["primary_answered"]["mean"]) + ("*" if sc == "sin_rag" else ""),
+        str(s["primary_answered"]["n"]),
+        fmt(s["sens_a_v1flag"]["mean"]),
+        fmt(s["sens_b_strict"]["mean"]),
+        fmt(s["sens_c_published"]["mean"]),
+        fmt(100 * cen["pure_decline"] / n_cls, 1),
+        fmt(100 * cen["hedged_partial"] / n_cls, 1),
+    ])
+pmd2 = [f"# Tabla 5 v2 — Modelo principal ({MODEL_DISP.get(primary, primary)}) — {exp}\n",
+        NOTE_V2, "",
+        "| " + " | ".join(pcols2) + " |", "|" + "|".join(["---"] * len(pcols2)) + "|"]
+for r in prows2:
+    pmd2.append("| " + " | ".join(r) + " |")
+pcsv2 = [";".join(pcols2)] + [";".join(r) for r in prows2]
+w("tabla5_modelo_principal_v2", "\n".join(pmd2), "\n".join(pcsv2))
+
+# Desglose de claims por config (f3)
+cb = fm2.get("claims_breakdown", {})
+hdr_k = ["Config", "% supported", "% contradicted", "% unsupported",
+         "claims/resp", "claims tot", "n resp"]
+rows_k = []
+for sc in SCEN_ORDER:
+    for m in models:
+        name = cfg_by_cell.get((sc, m))
+        k = cb.get(name) if name else None
+        if not k:
+            continue
+        rows_k.append([f"{SCEN_DISP.get(sc, sc)} — {MODEL_DISP.get(m, m)}",
+                       fmt(k["supported_pct"], 1), fmt(k["contradicted_pct"], 1),
+                       fmt(k["unsupported_pct"], 1), fmt(k["claims_per_response"], 1),
+                       str(k["total_claims"]), str(k["n_responses"])])
+md_k = ["# Tabla — Desglose de claims NLI por config — " + exp, "",
+        "Vista a nivel instrumento (todas las respuestas con claims, método nli). "
+        "La banda de % contradicted ~27-39 % casi insensible al escenario es evidencia "
+        "del artefacto del verificador (N5/A3).", "",
+        "| " + " | ".join(hdr_k) + " |", "|" + "|".join(["---"] * len(hdr_k)) + "|"]
+for r in rows_k:
+    md_k.append("| " + " | ".join(r) + " |")
+csv_k = [";".join(hdr_k)] + [";".join(r) for r in rows_k]
+w("tabla_claims_desglose", "\n".join(md_k), "\n".join(csv_k))
+
+print(f"Wrote v2 tables: tabla6_fidelidad_v2, tabla6_sensibilidad_denominador, "
+      f"tabla6c_clasificacion_v2, tabla5_modelo_principal_v2, tabla_claims_desglose (__{exp})")
