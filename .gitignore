@@ -20,8 +20,18 @@ data/indices/
 data/embeddings/
 data/evaluation/results/
 
+# Downloaded model snapshots (~700 MB, re-obtainable; provenance in MODELS.md.
+# nli-deberta-v3-base was fetched via `curl --ssl-no-revoke` because HF
+# downloads are blocked by TLS interception on this machine.)
+data/models/
+
 # Logs
 logs/*.log
+# Root-level run logs are regenerable noise (benchmark.log reached 3.7 MB tracked)
+*.log
+
+# Claude Code local permission state (machine-specific, not project config)
+.claude/settings.local.json
 
 # IDE
 .idea/
@@ -39,9 +49,12 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
-# Output (regenerable)
+# Output (regenerable) — top-level only; paper deliverables under
+# output/{figures,tables}/nota3/ ARE versioned (these globs do not recurse).
 output/figures/*.png
 output/tables/*.csv
+!output/figures/nota3/
+!output/figures/nota3/*.png
 
 # Repos cloned during crawling
 data/raw/*/_repo/
