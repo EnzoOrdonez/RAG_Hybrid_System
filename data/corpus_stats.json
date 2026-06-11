@@ -1,11 +1,80 @@
 {
+  "rebuild_date": "2026-05-22",
+  "subsample_date": "2026-05-26",
+  "rebuild_note": "Corpus rebuilt removing k8s/cncf; Phase 2.5 stratified sub-sample of Azure Functions (10681->2500) and Blob Storage (3841->1500) for vendor balance. Sampling by section_hierarchy[0] with seed=42.",
   "providers": {
+    "aws": {
+      "processed_documents": 996,
+      "chunks": 6366,
+      "services_count": 11,
+      "services": {
+        "EC2": 4215,
+        "ECS": 1740,
+        "Lambda": 283,
+        "EKS": 26,
+        "S3": 16,
+        "VPC": 16,
+        "RDS": 14,
+        "IAM": 14,
+        "DynamoDB": 14,
+        "Route 53": 14,
+        "SageMaker": 14
+      }
+    },
     "azure": {
-      "documents": 812,
-      "total_words": 1010676,
-      "with_code": 509,
-      "with_tables": 355
+      "processed_documents": 1461,
+      "chunks": 9606,
+      "services_count": 8,
+      "services": {
+        "Azure Functions": 2500,
+        "Virtual Network": 1502,
+        "Blob Storage": 1500,
+        "AKS": 1423,
+        "Cosmos DB": 1068,
+        "Entra ID": 989,
+        "Virtual Machines": 616,
+        "Azure OpenAI": 8
+      }
+    },
+    "gcp": {
+      "processed_documents": 240,
+      "chunks": 8509,
+      "services_count": 3,
+      "services": {
+        "GKE": 4729,
+        "Compute Engine": 3181,
+        "Cloud Functions": 599
+      }
     }
   },
-  "total_documents": 812
+  "total_documents": 2697,
+  "total_chunks": 24481,
+  "chunking_config": {
+    "strategy": "adaptive",
+    "size": 500,
+    "overlap": 50
+  },
+  "embedding": {
+    "model": "BAAI/bge-large-en-v1.5",
+    "dimension": 1024
+  },
+  "index_files": {
+    "faiss": "data/indices/faiss_bge-large_adaptive_500.index",
+    "bm25": "data/indices/bm25_adaptive_500.pkl",
+    "chunk_map": "data/indices/chunk_map_bge-large_adaptive_500.json"
+  },
+  "subsample_diversity": {
+    "Azure Functions": {
+      "pre_sections": 497,
+      "post_sections": 497,
+      "post_chunks": 2500,
+      "dropped": 8181
+    },
+    "Blob Storage": {
+      "pre_sections": 369,
+      "post_sections": 369,
+      "post_chunks": 1500,
+      "dropped": 2341
+    }
+  }
 }

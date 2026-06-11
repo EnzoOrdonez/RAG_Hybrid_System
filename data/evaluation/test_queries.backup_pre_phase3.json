@@ -1500,6 +1500,18 @@
     "category": "storage"
   },
   {
+    "query_id": "q126",
+    "question": "How to update Kubernetes Pods without downtime?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes"
+    ],
+    "query_type": "procedural",
+    "difficulty": "medium",
+    "category": "compute"
+  },
+  {
     "query_id": "q127",
     "question": "When should you use AWS IAM instead of AWS EKS?",
     "answer": "",
@@ -2231,6 +2243,21 @@
     "category": "storage"
   },
   {
+    "query_id": "q186",
+    "question": "What is the CNCF equivalent or standard for service mesh across cloud providers?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp",
+      "cncf"
+    ],
+    "query_type": "factual",
+    "difficulty": "hard",
+    "category": "networking"
+  },
+  {
     "query_id": "q187",
     "question": "Compare the machine learning platforms: AWS SageMaker vs Azure Machine Learning vs Google Vertex AI",
     "answer": "",
@@ -2243,6 +2270,19 @@
     "query_type": "comparative",
     "difficulty": "hard",
     "category": "ai_ml"
+  },
+  {
+    "query_id": "q188",
+    "question": "What CNCF projects are used for observability across cloud platforms?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "cncf",
+      "kubernetes"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "general"
   },
   {
     "query_id": "q189",
@@ -2314,6 +2354,21 @@
     "category": "security"
   },
   {
+    "query_id": "q194",
+    "question": "What is the Kubernetes-native approach to secrets management vs cloud provider solutions?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes",
+      "aws",
+      "azure",
+      "gcp"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "security"
+  },
+  {
     "query_id": "q195",
     "question": "Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build",
     "answer": "",
@@ -2368,5 +2423,33 @@
     "query_type": "comparative",
     "difficulty": "easy",
     "category": "general"
+  },
+  {
+    "query_id": "q199",
+    "question": "What CNCF graduated projects are most commonly used in multi-cloud deployments?",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "cncf"
+    ],
+    "query_type": "factual",
+    "difficulty": "medium",
+    "category": "general"
+  },
+  {
+    "query_id": "q200",
+    "question": "Compare the Kubernetes ingress controller options across cloud providers and CNCF projects",
+    "answer": "",
+    "relevant_chunk_ids": [],
+    "cloud_providers": [
+      "kubernetes",
+      "aws",
+      "azure",
+      "gcp",
+      "cncf"
+    ],
+    "query_type": "comparative",
+    "difficulty": "hard",
+    "category": "networking"
   }
 ]

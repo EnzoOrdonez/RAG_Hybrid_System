@@ -1,0 +1,93 @@
+{
+  "phase": "Phase 3 - Query scope reduction post corpus rebuild (2026-05-22) and Azure subsample (2026-05-26)",
+  "log_date": "2026-05-26",
+  "justification": "Scope reduction post-corpus rebuild (Fase 2). Las 6 queries referenciaban Kubernetes upstream o CNCF projects cuyo corpus se eliminó en este rebuild. Eliminadas para mantener coherencia entre queries y corpus indexable. Las queries multi-cloud que también incluían AWS/Azure/GCP (q186, q194, q200) se eliminan completas en lugar de re-taggearse para evitar ambigüedad de evaluación: el sujeto principal de esas queries es Kubernetes-native o CNCF-specific, no AWS/Azure/GCP, por lo que re-tagging crearía mismatch question vs corpus.",
+  "count": 6,
+  "pre_total": 200,
+  "post_total": 194,
+  "queries": [
+    {
+      "query_id": "q126",
+      "question": "How to update Kubernetes Pods without downtime?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "kubernetes"
+      ],
+      "query_type": "procedural",
+      "difficulty": "medium",
+      "category": "compute"
+    },
+    {
+      "query_id": "q186",
+      "question": "What is the CNCF equivalent or standard for service mesh across cloud providers?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "aws",
+        "azure",
+        "gcp",
+        "cncf"
+      ],
+      "query_type": "factual",
+      "difficulty": "hard",
+      "category": "networking"
+    },
+    {
+      "query_id": "q188",
+      "question": "What CNCF projects are used for observability across cloud platforms?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "cncf",
+        "kubernetes"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "general"
+    },
+    {
+      "query_id": "q194",
+      "question": "What is the Kubernetes-native approach to secrets management vs cloud provider solutions?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "kubernetes",
+        "aws",
+        "azure",
+        "gcp"
+      ],
+      "query_type": "comparative",
+      "difficulty": "hard",
+      "category": "security"
+    },
+    {
+      "query_id": "q199",
+      "question": "What CNCF graduated projects are most commonly used in multi-cloud deployments?",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "cncf"
+      ],
+      "query_type": "factual",
+      "difficulty": "medium",
+      "category": "general"
+    },
+    {
+      "query_id": "q200",
+      "question": "Compare the Kubernetes ingress controller options across cloud providers and CNCF projects",
+      "answer": "",
+      "relevant_chunk_ids": [],
+      "cloud_providers": [
+        "kubernetes",
+        "aws",
+        "azure",
+        "gcp",
+        "cncf"
+      ],
+      "query_type": "comparative",
+      "difficulty": "hard",
+      "category": "networking"
+    }
+  ]
+}
