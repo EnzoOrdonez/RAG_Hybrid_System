@@ -1,9 +1,8 @@
-# RESULTADOS_RESUMEN — Nota 3 (PRELIMINAR, 2026-06-09)
+# RESULTADOS_RESUMEN — Nota 3 (2026-06-11)
 
-**Estado:** retrieval (exp11) COMPLETO; matriz de fidelidad (exp12) con 3 de 4 modelos
-completos (granite4.1, gemma4:e4b, mistral:7b); **qwen3.5:9b en curso** (~25-40 h restantes);
-**exp13 (expansión) pendiente** (requiere GPU libre tras qwen). Refrescar al completar qwen.
-Insumo para A.3/A.1.
+**Estado:** retrieval (exp11) COMPLETO; matriz de fidelidad (exp12) **COMPLETA**
+(4 modelos × 4 escenarios × 194 q, temp=0); **exp13 (expansión) pendiente** (requiere GPU
+libre). Insumo para A.3/A.1.
 
 ---
 
@@ -42,27 +41,37 @@ es ruido de generación + NLI descalibrado sobre n=29, **no** una ganancia de
 expansión/normalización. Refuerza Flag 142 (candidato a remover del abstract). La expansión
 real (fix D11) se evaluará limpiamente en exp13.
 
-## 3. Fidelidad (exp12, PRELIMINAR — 3 modelos)
+## 3. Fidelidad (exp12, COMPLETO — 4 modelos)
 
-Fidelidad NLI media (respuestas con claims verificables) y declinación honesta:
+Fidelidad NLI media en respuestas con claims verificables (% de declinación honesta):
 
-| Escenario | Granite 4.1 | Gemma 4 E4B | Mistral 7B |
-|---|---|---|---|
-| Sin RAG | 0,000* | 0,000* | 0,000* |
-| RAG léxico | 0,170 (decl 66 %) | 0,331 (55 %) | 0,222 (25 %) |
-| RAG denso | 0,193 (62 %) | 0,322 (51 %) | 0,258 (21 %) |
-| RAG híbrido | 0,202 (62 %) | 0,268 (53 %) | 0,256 (24 %) |
+| Escenario | Granite 4.1 | Gemma 4 E4B | Mistral 7B | Qwen 3.5 9B |
+|---|---|---|---|---|
+| Sin RAG | 0,000* | 0,000* | 0,000* | 0,000* |
+| RAG léxico | 0,170 (66 %) | 0,331 (55 %) | 0,222 (25 %) | 0,306 (44 %) |
+| RAG denso | 0,193 (62 %) | 0,322 (51 %) | 0,258 (21 %) | 0,254 (48 %) |
+| RAG híbrido | 0,202 (62 %) | 0,268 (53 %) | 0,256 (24 %) | 0,278 (46 %) |
 
-`*` Sin RAG = 0 por construcción (sin contexto no hay claim que verificar; N3).
+`*` Sin RAG = 0 por construcción (N3). n_efectivo varía mucho: granite ~189, mistral ~170,
+qwen ~140, **gemma ~100** (sesgo de extracción de claims, §4).
 
 Estadística pareada (familias BH por RQ; Wilcoxon+d_z+bootstrap; McNemar para binarias):
-- **RAG ≫ Sin RAG** en fidelidad: TODOS los modelos, d_z 0,67–0,95, p_BH<0,001. RAG aporta
-  groundedness frente al LLM solo.
-- **Entre métodos de RAG (léxico/denso/híbrido): n.s.** dentro de cada modelo (d_z ~0,02–0,23).
-  **El método de retrieval NO se traduce en mayor fidelidad de generación** — la ventaja del
-  híbrido vive en la *calidad de retrieval* (§1), no aguas abajo.
-- **Entre modelos:** gemma ≥ mistral ≥ granite en fidelidad de respuestas contestadas (varios
-  sig tras BH), pero **McNemar de declinación es altamente significativo** en todos los pares.
+- **RAG ≫ Sin RAG** en fidelidad: TODOS los modelos, d_z 0,67–1,46, p_BH<0,05 (mayoría
+  <0,001). RAG aporta groundedness frente al LLM solo.
+- **Entre métodos de RAG (léxico/denso/híbrido): mayormente n.s.** dentro de cada modelo
+  (única excepción: denso > léxico en qwen, d_z=+0,24, p_BH=0,03). **El método de retrieval
+  NO se traduce en mayor fidelidad de generación** — la ventaja del híbrido vive en la
+  *calidad de retrieval* (§1), no aguas abajo.
+- **Entre modelos:** gemma ≈ qwen ≥ mistral ≥ granite en fidelidad de respuestas contestadas
+  (varios sig tras BH), pero **McNemar de declinación es altamente significativo** en casi
+  todos los pares — la comparación está dominada por el comportamiento de declinación.
+
+**Modelo con mejor fidelidad — sin ganador limpio:** en respuestas contestadas, **gemma4:e4b
+(0,27–0,33)** y **qwen3.5 (0,25–0,31)** lideran, pero gemma extrae ~la mitad de claims
+(n_eff~100) y ambos declinan ~45–55 %. **mistral:7b** declina menos (~22 %) → más respuestas
+sustantivas a fidelidad media. **granite** (headline determinista, RAG-tuned) es el más
+conservador (declina 62–66 %) con la fidelidad más baja entre contestados. **El trade-off
+declinación ↔ fidelidad es el hallazgo**, no un ranking único.
 
 ## 4. Sorpresas
 
@@ -95,9 +104,9 @@ gemma ~38 s (26 tok/s) · mistral ~34–45 s (10–14 tok/s) · granite ~65–89
 | Fidelidad ≠ corrección | NLI mide groundedness en el contexto, no veracidad factual; explícito |
 
 ## 7. Pendiente
-- Completar qwen3.5:9b (exp12) → refrescar §3/§5 y Tablas 5/6 (la columna Qwen ya está en las tablas).
-- exp13: expansión ON vs OFF (30 q cross-cloud, fix D11) con generación determinista (GPU libre tras qwen).
-- Export final + figuras; reescritura A.3/A.1.
+- **exp13**: expansión ON vs OFF (30 q cross-cloud, fix D11) con generación determinista
+  (modelo determinista: granite o qwen3.5). Requiere GPU libre.
+- Figuras finales; reescritura A.3/A.1.
 
 Artefactos: `output/tables/nota3/` (oracle_stability, tabla6_fidelidad, tabla6_declinacion,
 tabla5_modelo_principal, latency); `experiments/results/exp{11,12}_*`;

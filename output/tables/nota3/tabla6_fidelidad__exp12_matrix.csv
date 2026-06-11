@@ -1,5 +1,5 @@
 Escenario;Granite 4.1 8B;Gemma 4 E4B;Mistral 7B;Qwen 3.5 9B
 Sin RAG;0,000*;0,000*;0,000*;0,000*
-RAG léxico (BM25);0,170;0,331;0,222;—
-RAG denso (BGE);0,193;0,322;0,258;—
-RAG híbrido;0,202;0,268;0,256;—
+RAG léxico (BM25);0,170;0,331;0,222;0,306
+RAG denso (BGE);0,193;0,322;0,258;0,254
+RAG híbrido;0,202;0,268;0,256;0,278
