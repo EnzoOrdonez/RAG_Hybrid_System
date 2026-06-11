@@ -1,0 +1,398 @@
+{
+ "base": {
+  "23": {
+   "label": "unsupported",
+   "score": 0.0042
+  },
+  "25": {
+   "label": "unsupported",
+   "score": 0.3804
+  },
+  "42": {
+   "label": "unsupported",
+   "score": 0.0399
+  },
+  "5": {
+   "label": "unsupported",
+   "score": 0.0042
+  },
+  "22": {
+   "label": "unsupported",
+   "score": 0.205
+  },
+  "41": {
+   "label": "supported",
+   "score": 0.9282
+  },
+  "24": {
+   "label": "unsupported",
+   "score": 0.0641
+  },
+  "1": {
+   "label": "contradicted",
+   "score": 0.9946
+  },
+  "3": {
+   "label": "contradicted",
+   "score": 0.9937
+  },
+  "2": {
+   "label": "contradicted",
+   "score": 0.9966
+  },
+  "21": {
+   "label": "unsupported",
+   "score": 0.0065
+  },
+  "4": {
+   "label": "contradicted",
+   "score": 0.9966
+  },
+  "26": {
+   "label": "unsupported",
+   "score": 0.0198
+  },
+  "29": {
+   "label": "contradicted",
+   "score": 0.9946
+  },
+  "27": {
+   "label": "unsupported",
+   "score": 0.3882
+  },
+  "28": {
+   "label": "unsupported",
+   "score": 0.3484
+  },
+  "43": {
+   "label": "unsupported",
+   "score": 0.5815
+  },
+  "30": {
+   "label": "supported",
+   "score": 0.9912
+  },
+  "7": {
+   "label": "unsupported",
+   "score": 0.1968
+  },
+  "8": {
+   "label": "supported",
+   "score": 0.9946
+  },
+  "10": {
+   "label": "unsupported",
+   "score": 0.0032
+  },
+  "50": {
+   "label": "contradicted",
+   "score": 0.9937
+  },
+  "9": {
+   "label": "unsupported",
+   "score": 0.17
+  },
+  "44": {
+   "label": "supported",
+   "score": 0.9956
+  },
+  "6": {
+   "label": "contradicted",
+   "score": 0.9863
+  },
+  "46": {
+   "label": "contradicted",
+   "score": 0.9893
+  },
+  "33": {
+   "label": "unsupported",
+   "score": 0.0067
+  },
+  "12": {
+   "label": "contradicted",
+   "score": 0.998
+  },
+  "13": {
+   "label": "unsupported",
+   "score": 0.0091
+  },
+  "34": {
+   "label": "contradicted",
+   "score": 0.9966
+  },
+  "32": {
+   "label": "supported",
+   "score": 0.9014
+  },
+  "11": {
+   "label": "contradicted",
+   "score": 0.9995
+  },
+  "45": {
+   "label": "contradicted",
+   "score": 0.998
+  },
+  "14": {
+   "label": "contradicted",
+   "score": 0.999
+  },
+  "35": {
+   "label": "unsupported",
+   "score": 0.2822
+  },
+  "31": {
+   "label": "unsupported",
+   "score": 0.0977
+  },
+  "15": {
+   "label": "supported",
+   "score": 0.9902
+  },
+  "36": {
+   "label": "unsupported",
+   "score": 0.1119
+  },
+  "16": {
+   "label": "unsupported",
+   "score": 0.5645
+  },
+  "37": {
+   "label": "unsupported",
+   "score": 0.0266
+  },
+  "17": {
+   "label": "contradicted",
+   "score": 1.0
+  },
+  "20": {
+   "label": "contradicted",
+   "score": 0.9995
+  },
+  "47": {
+   "label": "unsupported",
+   "score": 0.1271
+  },
+  "39": {
+   "label": "unsupported",
+   "score": 0.0041
+  },
+  "48": {
+   "label": "supported",
+   "score": 0.9937
+  },
+  "40": {
+   "label": "unsupported",
+   "score": 0.1442
+  },
+  "18": {
+   "label": "contradicted",
+   "score": 0.9399
+  },
+  "38": {
+   "label": "unsupported",
+   "score": 0.2065
+  },
+  "19": {
+   "label": "contradicted",
+   "score": 0.9971
+  }
+ },
+ "small_noheader": {
+  "23": {
+   "label": "unsupported",
+   "score": 0.0038
+  },
+  "25": {
+   "label": "contradicted",
+   "score": 0.7017
+  },
+  "42": {
+   "label": "supported",
+   "score": 0.8794
+  },
+  "5": {
+   "label": "contradicted",
+   "score": 0.9897
+  },
+  "22": {
+   "label": "unsupported",
+   "score": 0.0129
+  },
+  "41": {
+   "label": "supported",
+   "score": 0.9619
+  },
+  "24": {
+   "label": "unsupported",
+   "score": 0.0348
+  },
+  "1": {
+   "label": "contradicted",
+   "score": 0.9863
+  },
+  "3": {
+   "label": "contradicted",
+   "score": 0.9829
+  },
+  "2": {
+   "label": "contradicted",
+   "score": 0.9951
+  },
+  "21": {
+   "label": "unsupported",
+   "score": 0.0041
+  },
+  "4": {
+   "label": "contradicted",
+   "score": 0.9722
+  },
+  "26": {
+   "label": "unsupported",
+   "score": 0.0295
+  },
+  "29": {
+   "label": "unsupported",
+   "score": 0.4155
+  },
+  "27": {
+   "label": "unsupported",
+   "score": 0.087
+  },
+  "28": {
+   "label": "unsupported",
+   "score": 0.2319
+  },
+  "43": {
+   "label": "supported",
+   "score": 0.9741
+  },
+  "30": {
+   "label": "unsupported",
+   "score": 0.2649
+  },
+  "7": {
+   "label": "contradicted",
+   "score": 0.9917
+  },
+  "8": {
+   "label": "contradicted",
+   "score": 0.9907
+  },
+  "10": {
+   "label": "contradicted",
+   "score": 0.9912
+  },
+  "50": {
+   "label": "supported",
+   "score": 0.9624
+  },
+  "9": {
+   "label": "contradicted",
+   "score": 0.7998
+  },
+  "44": {
+   "label": "supported",
+   "score": 0.9727
+  },
+  "6": {
+   "label": "contradicted",
+   "score": 0.998
+  },
+  "46": {
+   "label": "supported",
+   "score": 0.9316
+  },
+  "33": {
+   "label": "unsupported",
+   "score": 0.0073
+  },
+  "12": {
+   "label": "contradicted",
+   "score": 0.9785
+  },
+  "13": {
+   "label": "unsupported",
+   "score": 0.5645
+  },
+  "34": {
+   "label": "unsupported",
+   "score": 0.1091
+  },
+  "32": {
+   "label": "unsupported",
+   "score": 0.562
+  },
+  "11": {
+   "label": "contradicted",
+   "score": 0.9995
+  },
+  "45": {
+   "label": "contradicted",
+   "score": 0.8164
+  },
+  "14": {
+   "label": "contradicted",
+   "score": 0.9956
+  },
+  "35": {
+   "label": "unsupported",
+   "score": 0.5073
+  },
+  "31": {
+   "label": "unsupported",
+   "score": 0.5869
+  },
+  "15": {
+   "label": "contradicted",
+   "score": 0.9824
+  },
+  "36": {
+   "label": "unsupported",
+   "score": 0.2756
+  },
+  "16": {
+   "label": "contradicted",
+   "score": 0.9062
+  },
+  "37": {
+   "label": "unsupported",
+   "score": 0.3547
+  },
+  "17": {
+   "label": "contradicted",
+   "score": 0.9995
+  },
+  "20": {
+   "label": "contradicted",
+   "score": 0.9888
+  },
+  "47": {
+   "label": "supported",
+   "score": 0.874
+  },
+  "39": {
+   "label": "unsupported",
+   "score": 0.6172
+  },
+  "48": {
+   "label": "supported",
+   "score": 0.9844
+  },
+  "40": {
+   "label": "unsupported",
+   "score": 0.2388
+  },
+  "18": {
+   "label": "contradicted",
+   "score": 0.9888
+  },
+  "38": {
+   "label": "unsupported",
+   "score": 0.688
+  },
+  "19": {
+   "label": "unsupported",
+   "score": 0.1814
+  }
+ }
+}
