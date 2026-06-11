@@ -78,12 +78,13 @@ def test_cache_key_frozen():
     assert got == expected
 
 
-def test_stream_cache_is_demo_namespaced():
+def test_stream_cache_is_demo_namespaced(tmp_path):
     # Streaming entries live under "demo::<key>": a benchmark entry with the
     # SAME parameters must NOT be served to the stream path, and vice versa.
     calls = []
     _capture_chat(calls)
     m = LLMManager(provider="ollama", model="fake-model", cache_enabled=True)
+    m.cache_path = tmp_path / "cache.json"  # keep test writes out of data/llm_cache
     base_key = m._cache_key("p", "s", 0.0, "demo", 42, 512)
     m._cache = {base_key: {"text": "benchmark-answer",
                            "tokens_input": 1, "tokens_output": 1}}
@@ -98,11 +99,12 @@ def test_stream_cache_is_demo_namespaced():
     assert calls == []  # served from the demo namespace, no network call
 
 
-def test_benchmark_cache_never_reads_demo_entries():
+def test_benchmark_cache_never_reads_demo_entries(tmp_path):
     # generate() must ignore demo:: entries even when only those exist.
     calls = []
     _capture_chat(calls)
     m = LLMManager(provider="ollama", model="fake-model", cache_enabled=True)
+    m.cache_path = tmp_path / "cache.json"  # keep test writes out of data/llm_cache
     base_key = m._cache_key("p", "s", 0.0, "cfg", 42, 1024)
     m._cache = {"demo::" + base_key: {"text": "demo-answer",
                                       "tokens_input": 1, "tokens_output": 1}}
