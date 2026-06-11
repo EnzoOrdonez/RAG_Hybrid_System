@@ -81,3 +81,24 @@ reduce `num_predict` (1024→512) for verbose models, drop qwen3.5, or stage wit
 **Latency-measurement note:** cached generations report `latency_ms=0` (→ spurious tok/s);
 the Phase 6 latency aggregator must exclude `from_cache=True` rows, or clear the LLM cache
 before the timed matrix run.
+
+## NLI verifiers (faithfulness instrument, ledger N5 — added 2026-06-11)
+
+| Role | Model | Notes |
+|---|---|---|
+| Runtime verifier (exp1-13) | `cross-encoder/nli-deberta-v3-small` | HF cache; softmax + TRUE rule, ENT/CONTR thresholds 0.7, max over 5 chunks |
+| Second verifier (F3b audit) | `cross-encoder/nli-deberta-v3-base` | **fp16** (max prob drift 1.8e-4 vs fp32); local snapshot `data/models/nli-deberta-v3-base/` (gitignored, ~700 MB) because HF downloads are blocked by TLS interception on this machine — re-download with `curl --ssl-no-revoke` |
+
+Agreement (N5): claim-level kappa **0.411** on the 50-claim human sample; config-mean
+Spearman 0.825 (published metric) / 0.559 n.s. (v2 primary); per-model scenario ordering
+flips in 3/4 models → NLI faithfulness is reported as instrument-relative (contrasts only).
+The claim-format ablation (small verifier, no "Header:" prefix) was cleanly negative
+(kappa 0.87). Details: `output/audit/rescore_v2_summary.md`.
+
+## Demo model (UI, not benchmarks — F6, 2026-06-11)
+
+Demo default = `llama3.1:8b-instruct-q4_K_M`: the only model that fits the 6 GB GPU
+whole once the UI frees CUDA for Ollama (`CUDA_VISIBLE_DEVICES=""` for aux models).
+gemma4:e4b (9.6 GB on disk) always partially offloads to CPU on this machine and is
+SLOWER in the demo despite its exp12 throughput (exp12 did no live retrieval, so
+Ollama had the GPU nearly to itself). See README "Cómo lanzar la demo".

@@ -31,24 +31,34 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 - **Hallucination detection**: NLI-based faithfulness scoring with DeBERTa v3
 - **Local LLMs**: Runs entirely on your machine with Ollama (Llama 3.1, Mistral, Qwen)
 - **Streamlit UI**: 5-page web interface with chat, metrics dashboard, and evaluation tools
-- **Benchmarking suite**: 9 experiments with statistical analysis (Wilcoxon, Cohen's d, Bootstrap CI)
+- **Benchmarking suite**: 13 experiments with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
 
 ---
 
 ## Performance
 
-Evaluated on 200 queries across 5 cloud documentation sources:
+Evaluated on the curated **194-query** set (depuration 200→194 logged in
+`data/evaluation/test_queries_removed_log.json`) over the rebuilt corpus, under an
+**independent relevance oracle** (bge-reranker-large — the pipeline's own reranker is
+ms-marco, so scoring with it is circular; both reported in
+`output/tables/nota3/tabla4_retrieval__exp11_retrieval194_fullrerank.md`):
 
-| System | Precision@1 | Recall@5 | MRR | NDCG@5 | Faithfulness |
-|--------|------------|----------|-----|--------|-------------|
-| LLM-only (no RAG, control) | N/A | N/A | N/A | N/A | 0.005† |
-| BM25 (lexical) | 0.785 | 0.368 | 0.828 | 0.554 | 0.496 |
-| Dense (semantic) | 0.860 | 0.424 | 0.894 | 0.661 | 0.509 |
-| **Hybrid (ours)** | **0.930** | **0.472** | **0.942** | **0.736** | **0.514** |
+| System | P@1 | P@5 | R@5 | MRR | NDCG@5 |
+|--------|-----|-----|-----|-----|--------|
+| BM25 (lexical) | 0.531 | 0.443 | 0.299 | 0.603 | 0.442 |
+| Dense (BGE) | 0.686 | 0.546 | 0.390 | 0.742 | 0.624 |
+| Hybrid pre-rerank (RRF) | 0.613 | 0.543 | 0.377 | 0.699 | 0.603 |
+| **Hybrid post-rerank (ours)** | **0.716** | **0.637** | **0.468** | **0.770** | **0.740** |
 
-Hybrid outperforms both baselines with statistical significance (p < 0.0001, Cohen's d = 0.626).
+Hybrid(post) > Dense is significant under the independent oracle (d_z = +0.45,
+p_BH < 0.001); the advantage comes from the **reranking stage**, not the RRF fusion
+(pre-rerank ≈ Dense, n.s.). Under the circular oracle the hybrid scores NDCG@5 = 0.995
+by construction — reported only as a circularity reference (ledger N2).
 
-† LLM-only (Control 0, `exp9_llm_only_no_rag`): vanilla Llama 3.1 8B Q4, no retrieval. Faithfulness is computed under an operational no-evidence definition (every claim is `unsupported_no_evidence` because no retrieved chunks exist to verify against), giving an upper bound of hallucination_rate=0.995. Honest-decline rate was 0/200 — the model confidently asserted specific facts (commands, quotas, pricing tiers) in every query, including fabrications such as a non-existent "Lightly Used Reserved Instances" EC2 tier. This quantifies the absolute value RAG adds over a no-retrieval baseline.
+Generation faithfulness (4 LLMs × 4 scenarios × 194, NLI verifier): RAG ≫ no-RAG for
+every testable model, but the **retrieval method does not significantly move generation
+faithfulness** (n.s. under 2 NLI verifiers × 4 denominators; ledger N5). Decline-aware
+v2 metric and instrument audit: `output/tables/nota3/` + `RESULTADOS_RESUMEN.md`.
 
 ---
 
@@ -113,6 +123,10 @@ python run.py --health-check
 ```
 
 ### Environment & reproducibility (required for experiments)
+
+The evidence snapshot for the Nota 3 round (exp9-13, v2 faithfulness metric,
+ledger N1-N7) is published as the annotated tag **`nota3-evidencia-2026-06-11`**
+on this repository — check it out to reproduce the paper's numbers exactly.
 
 All experiment/benchmark runs must set these environment variables **before**
 launching Python, so they are read at interpreter startup:
@@ -213,18 +227,20 @@ cloudrag/
 
 ## Experiments
 
-9 experiments covering retrieval strategies, re-ranking, LLM comparison, ablation, and cross-cloud evaluation:
+13 experiments covering retrieval strategies, re-ranking, LLM comparison, ablation, and
+cross-cloud evaluation. exp1-8 ran on the pre-rebuild corpus/oracle and are kept as
+history; the paper's evidence is the final round (exp9-13, curated 194-query set,
+multi-oracle):
 
 | Experiment | What it tests | Key finding |
 |------------|--------------|-------------|
-| exp3 | Retrieval strategies (BM25, Dense, Hybrid, alpha grid) | RRF outperforms linear fusion |
-| exp4 | Re-ranking impact | Cross-encoder improves precision |
-| exp5 | LLM comparison (Llama, Qwen, Mistral) | Mistral best faithfulness (0.504) |
-| exp6 | Ablation (remove each component) | Re-ranker most impactful (+3.4 pts) |
-| exp7 | Cross-cloud normalization | +16.8% faithfulness with normalization |
-| exp8/8b | End-to-end (Llama / Mistral) | Hybrid > Dense > BM25 consistently |
+| exp9 | LLM-only control (no RAG) | Fabricates in 195/200; RAG's floor baseline |
+| exp10-11 | Retrieval, multi-oracle (D12 fix) | Hybrid>Dense real (d_z +0.45) but inflated under circular oracle (0.995 vs 0.740); edge lives in the rerank stage |
+| exp12 | Faithfulness matrix (4 LLMs × 4 scenarios × 194) | RAG ≫ no-RAG; retrieval method n.s. on faithfulness (N5, 2 verifiers × 4 denominators) |
+| exp13 | Cross-cloud expansion ON vs OFF (D11 fix) | Expansion does NOT help; the earlier exp7 "+16.8%" claim is **retired** (its arms ran identical retrieval — N1/N4) |
 
-All comparisons validated with Wilcoxon signed-rank test (p < 0.0001) and Cohen's d effect sizes.
+Paired stats throughout: Wilcoxon signed-rank + Cohen's d_z + bootstrap CI, BH/Holm
+corrected per research-question family.
 
 ---
 
