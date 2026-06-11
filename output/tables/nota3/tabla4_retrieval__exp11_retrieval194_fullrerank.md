@@ -1,0 +1,21 @@
+# Tabla 4 — Métricas de retrieval por sistema y oráculo — exp11 (194 q)
+
+Oráculo titular: **bge-reranker-large (independiente)**; ms-marco se reporta solo como referencia porque es el reranker del propio pipeline (circularidad cuantificada en N2: NDCG@5 0,995 por construcción). P/R/MRR con umbral de relevancia p50 del oráculo; NDCG@5 graded sin umbral. Coma decimal.
+
+## Oráculo: bge-reranker-large (independiente)
+
+| Sistema | P@1 | P@3 | P@5 | R@5 | MRR | NDCG@5 |
+|---|---|---|---|---|---|---|
+| Léxico (BM25) | 0,531 | 0,474 | 0,443 | 0,299 | 0,603 | 0,442 |
+| Denso (BGE) | 0,686 | 0,588 | 0,546 | 0,390 | 0,742 | 0,624 |
+| Híbrido pre-rerank (RRF) | 0,613 | 0,586 | 0,543 | 0,377 | 0,699 | 0,603 |
+| Híbrido post-rerank | 0,716 | 0,677 | 0,637 | 0,468 | 0,770 | 0,740 |
+
+## Oráculo: ms-marco (circular — referencia)
+
+| Sistema | P@1 | P@3 | P@5 | R@5 | MRR | NDCG@5 |
+|---|---|---|---|---|---|---|
+| Léxico (BM25) | 0,541 | 0,488 | 0,443 | 0,258 | 0,586 | 0,552 |
+| Denso (BGE) | 0,603 | 0,526 | 0,490 | 0,302 | 0,648 | 0,649 |
+| Híbrido pre-rerank (RRF) | 0,572 | 0,558 | 0,536 | 0,350 | 0,639 | 0,668 |
+| Híbrido post-rerank | 0,809 | 0,761 | 0,720 | 0,536 | 0,809 | 0,995 |

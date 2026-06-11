@@ -268,3 +268,43 @@ w("tabla_claims_desglose", "\n".join(md_k), "\n".join(csv_k))
 
 print(f"Wrote v2 tables: tabla6_fidelidad_v2, tabla6_sensibilidad_denominador, "
       f"tabla6c_clasificacion_v2, tabla5_modelo_principal_v2, tabla_claims_desglose (__{exp})")
+
+# ===========================================================================
+# Tabla 4 — retrieval (exp11, multi-oráculo) — I5/N7
+# ===========================================================================
+EXP11 = os.path.join("experiments", "results", "exp11_retrieval194_fullrerank")
+ORACLES = [("bge-reranker-indep", "bge-reranker-large (independiente)"),
+           ("ms-marco-circular", "ms-marco (circular — referencia)")]
+if all(os.path.exists(os.path.join(EXP11, f"retrieval_metrics__{o}.json")) for o, _ in ORACLES):
+    SYS_ORDER = [("RAG Lexico (BM25)", "Léxico (BM25)"),
+                 ("RAG Semantico (Dense)", "Denso (BGE)"),
+                 ("RAG Hibrido (pre-rerank RRF)", "Híbrido pre-rerank (RRF)"),
+                 ("RAG Hibrido Propuesto", "Híbrido post-rerank")]
+    METRICS4 = [("precision@1__p50_mean", "P@1"), ("precision@3__p50_mean", "P@3"),
+                ("precision@5__p50_mean", "P@5"), ("recall@5__p50_mean", "R@5"),
+                ("mrr__p50_mean", "MRR"), ("ndcg@5_mean", "NDCG@5")]
+    md4 = ["# Tabla 4 — Métricas de retrieval por sistema y oráculo — exp11 (194 q)\n",
+           "Oráculo titular: **bge-reranker-large (independiente)**; ms-marco se reporta "
+           "solo como referencia porque es el reranker del propio pipeline (circularidad "
+           "cuantificada en N2: NDCG@5 0,995 por construcción). P/R/MRR con umbral de "
+           "relevancia p50 del oráculo; NDCG@5 graded sin umbral. Coma decimal.", ""]
+    csv4 = []
+    for okey, olabel in ORACLES:
+        d4 = json.loads(open(os.path.join(EXP11, f"retrieval_metrics__{okey}.json"),
+                             encoding="utf-8").read())
+        s4 = d4["systems"]
+        hdr4 = ["Sistema"] + [m[1] for m in METRICS4]
+        md4 += [f"## Oráculo: {olabel}", "",
+                "| " + " | ".join(hdr4) + " |",
+                "|" + "|".join(["---"] * len(hdr4)) + "|"]
+        csv4.append(f"# {olabel}")
+        csv4.append(";".join(hdr4))
+        for skey, slabel in SYS_ORDER:
+            row = [slabel] + [fmt(s4[skey][mk]) for mk, _ in METRICS4]
+            md4.append("| " + " | ".join(row) + " |")
+            csv4.append(";".join(row))
+        md4.append("")
+    w_exp = "exp11_retrieval194_fullrerank"
+    open(os.path.join(out_dir, f"tabla4_retrieval__{w_exp}.md"), "w", encoding="utf-8").write("\n".join(md4))
+    open(os.path.join(out_dir, f"tabla4_retrieval__{w_exp}.csv"), "w", encoding="utf-8").write("\n".join(csv4))
+    print(f"Wrote tabla4_retrieval__{w_exp} (2 oráculos)")
