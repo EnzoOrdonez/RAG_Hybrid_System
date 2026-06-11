@@ -1,6 +1,10 @@
 # Nota 3 — estado y próximos pasos (2026-06-07)
 
-## exp12 matrix — EN CURSO (background)
+> **ACTUALIZADO 2026-06-11: RONDA COMPLETA.** exp11 + exp12 (4 modelos × 4 escenarios × 194)
+> + exp13 (expansión) terminados; Phase 6 generada. Resumen autoritativo: **`RESULTADOS_RESUMEN.md`**.
+> Lo de abajo es el runbook original (histórico); solo queda figuras + reescritura A.3/A.1.
+
+## exp12 matrix — COMPLETO (histórico: instrucciones de resume/run)
 
 ```bash
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42 \
