@@ -22,8 +22,14 @@ def load_hybrid_index():
 
 
 @st.cache_resource(show_spinner="Building pipeline...")
-def load_pipeline(config_name: str, _hybrid_index=None):
-    """Build a RAGPipeline with a given config."""
+def load_pipeline(config_name: str, _hybrid_index=None, llm_model: str = ""):
+    """Build a RAGPipeline with a given config.
+
+    `llm_model` (demo): overrides the LLM via an injected LLMManager so the
+    sidebar model selector actually takes effect. Part of the cache key, so
+    each (config, model) pair gets its own pipeline and cached pipelines are
+    never mutated across sessions. Empty string = config default.
+    """
     from src.pipeline.pipeline_config import get_config
     from src.pipeline.rag_pipeline import RAGPipeline
 
@@ -32,7 +38,31 @@ def load_pipeline(config_name: str, _hybrid_index=None):
     if _hybrid_index is None:
         _hybrid_index = load_hybrid_index()
 
-    return RAGPipeline(config=config, hybrid_index=_hybrid_index)
+    llm = None
+    if llm_model:
+        from src.generation.llm_manager import LLMManager
+        llm = LLMManager(provider="ollama", model=llm_model)
+    return RAGPipeline(config=config, hybrid_index=_hybrid_index, llm_manager=llm)
+
+
+def warm_model(model: str, keep_alive: str = "30m") -> bool:
+    """Load `model` into Ollama memory with a long keep_alive (demo warm-up).
+
+    POST /api/generate with no prompt just loads the model; returns fast.
+    Prevents the first query of a session (and queries after long pauses)
+    from paying the 10-30 s cold load inside the user-visible request.
+    """
+    import json
+    import urllib.request
+    try:
+        body = json.dumps({"model": model, "keep_alive": keep_alive}).encode()
+        req = urllib.request.Request(
+            "http://localhost:11434/api/generate", data=body,
+            headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            return resp.status == 200
+    except Exception:
+        return False
 
 
 def check_ollama() -> bool:

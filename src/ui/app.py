@@ -9,6 +9,17 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+# DEMO DEVICE POLICY (N5 demo fix, 2026-06-11): keep the in-process torch
+# models (BGE embedder, reranker, NLI) on CPU so Ollama gets the whole GPU.
+# Measured on the RTX 3060 6GB: with these models on CUDA, Ollama runs the
+# LLM at 38% GPU (~6 tok/s, 90-120 s per answer); with the GPU freed it runs
+# at 75%+ GPU (15-35 tok/s). Per-query CPU cost of the aux models is ~1-3 s.
+# Applies ONLY to this Streamlit process — benchmark scripts never import
+# this module and keep their own device selection. Set CLOUDRAG_DEMO_GPU=1
+# to opt out (e.g. when running the UI on a >=12 GB GPU).
+if os.environ.get("CLOUDRAG_DEMO_GPU") != "1":
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 import streamlit as st
 
 st.set_page_config(

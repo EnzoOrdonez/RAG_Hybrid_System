@@ -228,6 +228,7 @@ class RAGPipeline:
                         top_k=self.config.retrieval_top_k,
                         top_k_candidates=self.config.retrieval_top_k,
                         use_reranker=False,  # We handle reranking separately
+                        use_expansion=self.config.query_expansion,  # D11 (default OFF)
                     )
                 else:
                     candidates = []
@@ -330,6 +331,101 @@ class RAGPipeline:
                 config_name=self.config.name,
                 error=str(e),
             )
+
+    # ============================================================
+    # Streaming path (demo/UI only)
+    # ============================================================
+
+    def query_stream(self, question: str, max_tokens: int = 512,
+                     keep_alive: Optional[str] = "30m"):
+        """Generator for the UI: stage events, token chunks, final payload.
+
+        Yields ("stage", <name>) before each phase, ("token", <text>) during
+        generation, then ("done", {answer, retrieved_chunks, latency}).
+        The NLI check is intentionally NOT run here — the UI calls
+        `verify_answer` after displaying the answer (deferred verification).
+
+        Retrieval stages are duplicated from `query()` on purpose: the
+        benchmark path must stay byte-identical, so no shared refactor.
+        """
+        latency = LatencyTracker()
+        if self.config.retrieval_method == "none":
+            raise ValueError("query_stream is for RAG configs (demo)")
+
+        with latency.measure("query_processing"):
+            if self.query_processor:
+                processed = self.query_processor.process(question)
+                query_type = processed.query_type
+            else:
+                query_type = "default"
+
+        yield ("stage", "retrieval")
+        with latency.measure("retrieval"):
+            if self.config.retrieval_method == "bm25":
+                candidates = self.retriever.search(
+                    question, top_k=self.config.retrieval_top_k,
+                    use_expansion=self.config.query_expansion)
+            elif self.config.retrieval_method == "dense":
+                candidates = self.retriever.search(
+                    question, top_k=self.config.retrieval_top_k)
+            else:
+                candidates = self.retriever.search(
+                    question, top_k=self.config.retrieval_top_k,
+                    top_k_candidates=self.config.retrieval_top_k,
+                    use_reranker=False,
+                    use_expansion=self.config.query_expansion)
+        if not candidates:
+            yield ("done", {"answer": "No relevant documentation found for this query.",
+                            "retrieved_chunks": [], "latency": latency.get_breakdown(),
+                            "error": "No chunks retrieved"})
+            return
+
+        yield ("stage", "reranking")
+        with latency.measure("reranking"):
+            if self.reranker is not None:
+                reranked = self.reranker.rerank(
+                    question, candidates, top_k=self.config.final_top_k)
+            else:
+                reranked = candidates[: self.config.final_top_k]
+
+        chunk_dicts = []
+        for r in reranked:
+            chunk_data = self.hybrid_index.get_chunk(r.chunk_id) if self.hybrid_index else {}
+            chunk_dicts.append(chunk_data or {
+                "chunk_id": r.chunk_id, "text": r.chunk_text,
+                "cloud_provider": r.cloud_provider,
+                "service_name": r.service_name,
+                "heading_path": r.heading_path,
+            })
+
+        context = build_context(chunk_dicts, query_type)
+        template = get_template(query_type)
+        if query_type == "cross_cloud":
+            full_prompt = template.format(context_by_provider=context, question=question)
+        else:
+            full_prompt = template.format(context=context, question=question)
+
+        yield ("stage", "generation")
+        with latency.measure("generation"):
+            for piece in self.llm.generate_stream(
+                    prompt=full_prompt, system_prompt=SYSTEM_PROMPT,
+                    max_tokens=max_tokens,
+                    temperature=self.config.temperature,
+                    config_name=self.config.name,
+                    keep_alive=keep_alive):
+                yield ("token", piece)
+
+        yield ("done", {"retrieved_chunks": chunk_dicts,
+                        "latency": latency.get_breakdown(), "error": None})
+
+    def verify_answer(self, answer_text: str, chunk_dicts: List[dict]):
+        """Deferred NLI verification + formatting for the UI path."""
+        t0 = time.perf_counter()
+        report = self.hallucination_detector.check(
+            response=answer_text, retrieved_chunks=chunk_dicts)
+        formatted = self.response_formatter.format(answer_text, chunk_dicts, report)
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        return report, formatted, elapsed_ms
 
     # ============================================================
     # LLM-only (no RAG) path

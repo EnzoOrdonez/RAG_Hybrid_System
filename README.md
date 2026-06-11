@@ -156,6 +156,35 @@ python -m streamlit run src/ui/app.py
 python scripts/run_benchmark.py --experiment exp8 --quick
 ```
 
+### Cómo lanzar la demo (video de sustentación / sesiones B.4)
+
+```bash
+# 1) Ollama corriendo y modelo de demo descargado
+ollama serve            # si no está ya corriendo
+ollama pull llama3.1:8b-instruct-q4_K_M
+
+# 2) Lanzar la UI (recomendado para el video y las sesiones SUS)
+python -m streamlit run src/ui/app.py
+# abre http://localhost:8501 → página "Chat"
+```
+
+Notas operativas (fixes 2026-06-11, ver commits F6):
+
+- **Modelo de demo:** `llama3.1:8b-instruct-q4_K_M` (default del selector). Es el único
+  que cabe entero en la GPU de 6 GB; gemma4:e4b (9,6 GB) cae a CPU y es más lento aquí.
+- **GPU para Ollama:** la UI fija `CUDA_VISIBLE_DEVICES=""` para sus propios modelos
+  (embedder/reranker/NLI van a CPU) y deja la GPU completa al LLM. Con GPU ≥12 GB:
+  `CLOUDRAG_DEMO_GPU=1` para revertir.
+- **keep_alive:** la UI envía `keep_alive=30m` y precalienta el modelo al primer uso de
+  la sesión → sin carga fría entre consultas ni tras pausas (sesiones de ~30 min).
+- **Streaming:** primeros tokens ~4-5 s tras enviar la consulta; respuesta completa
+  ~40-50 s (512 tokens). La verificación NLI corre DESPUÉS de mostrar la respuesta
+  (toggle en el sidebar).
+- **Primera consulta del proceso:** paga ~25 s extra de cargas perezosas (reranker en
+  CPU). Para el video: hacer una consulta de calentamiento antes de grabar.
+- Los benchmarks NO usan este camino (paridad cubierta por
+  `tests/test_benchmark_parity.py`).
+
 ---
 
 ## Project Structure

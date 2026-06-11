@@ -197,6 +197,7 @@ class LLMManager:
         max_tokens: int = 1024,
         temperature: float = 0.0,
         config_name: str = "",
+        keep_alive: Optional[str] = None,
     ) -> LLMResponse:
         """
         Generate response. Temperature=0.0 (greedy) for determinism: at temp=0
@@ -206,6 +207,11 @@ class LLMManager:
         Args:
             config_name: Pipeline config identifier (e.g. "RAG Lexico (BM25)").
                          Included in cache key to prevent cross-system contamination.
+            keep_alive: Optional Ollama keep_alive (e.g. "30m"), demo/UI only.
+                        None (the default, used by every benchmark path) means the
+                        parameter is NOT sent, so the request Ollama sees is
+                        byte-identical to pre-keep_alive builds. Not part of the
+                        cache key: it cannot change the generated text.
         """
         # Check cache
         if self.cache_enabled:
@@ -231,7 +237,8 @@ class LLMManager:
 
                 if self.provider == "ollama":
                     response = self._generate_ollama(
-                        prompt, system_prompt, max_tokens, temperature
+                        prompt, system_prompt, max_tokens, temperature,
+                        keep_alive=keep_alive,
                     )
                 elif self.provider == "openai":
                     response = self._generate_openai(
@@ -304,9 +311,15 @@ class LLMManager:
     # ============================================================
 
     def _generate_ollama(
-        self, prompt: str, system_prompt: str, max_tokens: int, temperature: float
+        self, prompt: str, system_prompt: str, max_tokens: int, temperature: float,
+        keep_alive: Optional[str] = None,
     ) -> LLMResponse:
-        """Generate via Ollama (local)."""
+        """Generate via Ollama (local).
+
+        keep_alive=None (every benchmark path) sends a request identical to
+        pre-keep_alive builds; a value (demo/UI) is forwarded as ollama.chat's
+        top-level keep_alive argument.
+        """
         try:
             import ollama
         except ImportError:
@@ -319,6 +332,7 @@ class LLMManager:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
+        extra = {} if keep_alive is None else {"keep_alive": keep_alive}
         try:
             response = ollama.chat(
                 model=self.model,
@@ -332,6 +346,7 @@ class LLMManager:
                     # "reproducibility" claim.
                     "seed": self.seed,
                 },
+                **extra,
             )
         except Exception as e:
             error_str = str(e)
@@ -359,6 +374,86 @@ class LLMManager:
             latency_ms=0.0,
             from_cache=False,
         )
+
+    # ============================================================
+    # Streaming generation (demo/UI only)
+    # ============================================================
+
+    def generate_stream(
+        self,
+        prompt: str,
+        system_prompt: str = "",
+        max_tokens: int = 512,
+        temperature: float = 0.0,
+        config_name: str = "",
+        keep_alive: Optional[str] = "30m",
+    ):
+        """Yield response text chunks via Ollama streaming (UI path only).
+
+        The benchmark path (`generate`) is untouched: this method exists for
+        the Streamlit demo, where perceived latency matters (first tokens in
+        seconds instead of a 90-120 s blocking spinner) and the long-lived
+        websocket must see activity. Single attempt, no retry/backoff — the
+        UI surfaces errors immediately. Uses the same cache (read and write)
+        as `generate`, so demo and benchmark stay consistent per cache key.
+        """
+        if self.provider != "ollama":
+            # Non-local providers: fall back to blocking generate.
+            resp = self.generate(prompt, system_prompt, max_tokens,
+                                 temperature, config_name)
+            if resp.error:
+                raise LLMError(resp.error)
+            yield resp.text
+            return
+
+        key = self._cache_key(prompt, system_prompt, temperature, config_name,
+                              self.seed, max_tokens)
+        if self.cache_enabled and key in self._cache:
+            logger.info("Cache hit (stream) for %s (key=%s...)", self.model, key[:8])
+            yield self._cache[key]["text"]
+            return
+
+        try:
+            import ollama
+        except ImportError:
+            raise LLMError("ollama package not installed. Run: pip install ollama")
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        extra = {} if keep_alive is None else {"keep_alive": keep_alive}
+        parts = []
+        tokens_in = tokens_out = 0
+        stream = ollama.chat(
+            model=self.model,
+            messages=messages,
+            options={
+                "temperature": temperature,
+                "num_predict": max_tokens,
+                "seed": self.seed,
+            },
+            stream=True,
+            **extra,
+        )
+        for chunk in stream:
+            piece = (chunk.get("message", {}) or {}).get("content", "")
+            if piece:
+                parts.append(piece)
+                yield piece
+            if chunk.get("done"):
+                tokens_in = chunk.get("prompt_eval_count", 0) or 0
+                tokens_out = chunk.get("eval_count", 0) or 0
+
+        text = "".join(parts)
+        if self.cache_enabled and text:
+            self._cache[key] = {
+                "text": text,
+                "tokens_input": tokens_in,
+                "tokens_output": tokens_out,
+            }
+            self._save_cache()
 
     def _generate_openai(
         self, prompt: str, system_prompt: str, max_tokens: int, temperature: float
