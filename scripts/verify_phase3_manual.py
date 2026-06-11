@@ -1,6 +1,10 @@
 """
 BLOQUE D - Phase 3 Verification Tests (7 tests)
 
+MANUAL SCRIPT — not a pytest module. Moved out of tests/ (2026-06-11, N7):
+its functions take positional arguments (hybrid_index, ...) that pytest
+reads as missing fixtures, yielding 4 collection ERRORs. Run directly.
+
 Test 1: Health check (corpus, indices, models)
 Test 2: Compare 3 systems with same query (retrieval only if no LLM)
 Test 3: Cross-cloud query
@@ -10,8 +14,8 @@ Test 6: Latency breakdown table
 Test 7: LLM cache verification
 
 Usage:
-    python tests/test_phase3_verification.py
-    python tests/test_phase3_verification.py --with-llm   # Only if Ollama/API available
+    python scripts/verify_phase3_manual.py
+    python scripts/verify_phase3_manual.py --with-llm   # Only if Ollama/API available
 """
 
 import json
