@@ -421,5 +421,33 @@ Pendiente (gate): Fase 3 (modelos Ollama) + Fase 4 (smoke). **DETENER y confirma
 
 ---
 
+## N8 — Auditoría del instrumento NLI + trazabilidad (2026-06-30)
+
+Rama `pre-corpus-rebuild-2026-05-21` (== `main`). Fase 1 (auditoría read-only) confirmó H1-H7;
+detalle y veredictos en `paper/audit_findings_cc_addenda.md §N8`. El veredicto central
+("retrieval n.s. en fidelidad") NO cambia; lo que se mueve son niveles absolutos + banda
+contradicted. **Restricción:** el entorno de ejecución no tiene stack científico → el re-score NLI
+v3 + re-stats corren en la máquina de Enzo; aquí se entregó código + scripts `_v3` + docs (puro
+Python, verificado).
+
+| Commit | Cambio | Verificación |
+|--------|--------|--------------|
+| `144875a` | fix extractor: artefactos `not_a_claim` fuera del denominador (H1) | `smoke_extractor_artifacts.py` verde; pytest 5✓/3 skip |
+| `67adc07` | `decide_nli_status` compartido con variantes H2 (v0/va/vb) | `smoke_nli_aggregation.py` 5/5 (v0 byte-idéntico) |
+| `667da22` | scaffolding v3: `_h2_variant_eval`, `rescore_nli_v3`, `--faithfulness-source`, `--out-suffix` | `py_compile` OK (corren en GPU) |
+| `2da5df4` | Parte 3: caption param + latency silent-zero + UI 200→194 | `py_compile` OK |
+| `104fad4` | Parte 2: README demo-vs-evaluado + corpus + `docs/TRACEABILITY_nota3.md` | links resueltos |
+
+**Reglas respetadas:** evidencia firmada exp1-13 intacta; recálculos → archivos `_v3`;
+`audit_findings.md`/`exp8_stats_corrected.csv` inmutables; sin generación nueva de LLM.
+
+**Sub-gate abierto:** Enzo corre `_h2_variant_eval.py` y elige la variante H2 antes del re-score
+v3 definitivo. **GATE de push:** pendiente de confirmación explícita (nada pusheado).
+
+**Flageado, no tocado:** `paper/overleaf_ready/main.tex` aún con P@1 0,930 / 200-query / 16,8%
+(prosa del paper, se corrige aparte).
+
+---
+
 
 

@@ -284,3 +284,110 @@ Acciones ejecutadas (commits atómicos de esta fecha):
 instrumento SUS/Likert + guía B.4, video de sustentación, actas/rúbricas.
 
 ---
+
+## N8 — Auditoría crítica del instrumento de fidelidad (NLI) + trazabilidad (2026-06-30)
+
+Auditoría de hipótesis (Fase 1 read-only, evidencia propia reproducida) sobre si el verificador
+NLI es lo bastante confiable para defender los contrastes finos de fidelidad. **El veredicto
+central de la ronda — "el método de retrieval no mueve la fidelidad" — NO cambia:** los artefactos
+del instrumento son planos entre escenarios y el contraste entre-modelos ya era n.s. en el v2
+publicado (0 pares sig_bh). Lo que el instrumento mueve son los **niveles absolutos** (Tabla 6 v2
+0,23–0,38) y la **banda contradicted**, que es lo que A.3 V7.2 / LACCI citan.
+
+### Restricción de entorno (importante)
+El entorno de Claude Code que ejecutó esta ronda **no tiene stack científico** (sin
+torch/sentence-transformers/numpy/scipy). Por tanto: el fix de extracción (puro Python) y todas las
+correcciones de doc/scripts se hicieron y verificaron aquí; **el re-score NLI v3 y las re-stats
+deben correrse en la máquina de Enzo** (GPU/Ollama). Esta ronda entrega código corregido + scripts
+`_v3` + recetas; las cifras `_v3` las produce Enzo.
+
+### H1 — el extractor deja pasar artefactos de formato (CONFIRMADO, cuantificado)
+Sobre los 16k claims de exp12: **10,8% son artefactos** (headers ATX, filas de tabla, spans rotos
+por `**` sin balancear, meta-comentario de cobertura). Asimétrico por modelo: **mistral 2,3% ·
+granite 8,0% · qwen3.5 20,3% · gemma 23,0%** → **confound no documentado** para la comparación
+ENTRE modelos (gemma/qwen formatean más en markdown). Plano entre escenarios (lex 11,1 / den 10,5 /
+hib 10,7) → NO amenaza el hallazgo central. En la muestra etiquetada, **6/8 artefactos → contradicted**
+(inflan alucinación, deflan fidelidad). **Fix (Q2=ambos):** `classify_artifact()` etiqueta los
+artefactos `not_a_claim`; quedan en `claim_details`/`total_claims` para trazabilidad pero **fuera del
+denominador** (`supported/(total−not_a_claim)`). Runtime corregido para el futuro + re-score `_v3`
+para los datos firmados. Mecanismo: Wanner et al. 2024 (filtrar subclaims incoherentes sube la
+fidelidad medida).
+
+### H2 — agregación NLI sin guarda simétrica (CONFIRMADO en código)
+El lado contradicted carece de la guarda que Flag 138 dio al supported (max sobre 5 chunks, umbral
+0,7, sin margen ni acuerdo). **Decisión Q3=añadir corrección + re-score v3.** Extraída la lógica a
+`decide_nli_status()` (compartida runtime/offline) con variantes: `v0` (legado), `va_margin`
+(contr>ent+δ), `vb_agree` (≥2 chunks). **SUB-GATE:** `scripts/_h2_variant_eval.py` (base-rate
+sintético + re-score de muestra + q085) produce el trade-off; **Enzo elige la variante** antes del
+re-score definitivo. Base-rate de falso-contradicted aún por medir (su máquina).
+
+### H2b — q085 es también un fallo de RELEVANCIA (CONFIRMADO, matiza H2)
+Pregunta "configurar networking de Azure VNet" → mejor chunk recuperado = "Azure **Functions**
+private site access". Las 28 "contradicciones" son en parte retrieval irrelevante para preguntas
+procedimentales multi-paso (modelo respondió de memoria; chunk no cubre los pasos) + etiqueta
+inflada (debió ser `unsupported`). Corpus congelado → limitación documentada; la corrección H2
+(unsupported vs contradicted) la mitiga parcialmente.
+
+### H3 — auditoría humana sin completar (CONFIRMADO)
+`output/audit/claim_audit_sample.csv`: `juicio_humano` 0/50. Pendiente de Enzo. Se regenera limpia
+con `build_claim_audit_sample.py --out-suffix _v3` (la corrección excluye artefactos de los estratos)
++ columna `pre_clasificacion`.
+
+### H4 — discrepancia entre verificadores (CONFIRMADO, re-chequear post-fix)
+`rescore_v2_summary.md`: kappa 0,411 (base vs small), orden léx/den/híb cambia 3/4 modelos,
+Spearman primaria 0,559 n.s. El re-score v3 corre AMBOS verificadores para ver si el fix H1/H2
+reduce la discrepancia. Migración a verificador de premisa larga (MiniCheck/AlignScore;
+Tang 2024 / Zha 2023; cf. Schuster 2022 sobre premisas largas) = trabajo futuro.
+
+### H5 — varianza multi-seed de gemma/mistral NO cuantificada (CONFIRMADO → limitación)
+Solo existe `nli_determinism_check.json` (determinismo del NLI, no del LLM). **Decisión Q4=documentar**
+como limitación esta ronda; headline = granite (determinista). Sin generación nueva.
+
+### H6 — boilerplate de scraping en el texto indexado (CONFIRMADO, más grave de lo creído → limitación)
+`"Stay organized with collections…"` (UI de docs de GCP) en **8.144/24.481 chunks (33%)**, todo GCP,
+y **en el campo `text`** (no solo metadata) → contamina BM25 + denso + el contexto que ve el LLM
+(ej. claim citando `[Source: gcp/GKE/GKE and Cloud RunStay…]`). Corpus congelado (rebuild invalidaría
+exp10-13) → **limitación de curación documentada**; filtro propuesto para trabajo futuro (no ejecutado).
+
+### Parte 2 (asesor) — trazabilidad
+README cableaba modelos viejos (llama3.1/mistral/qwen2.5) sin nota demo-vs-evaluado en 3 lugares
+(Architecture, Configuration, Quick Start); MODELS.md ya era correcto. Corregido + nota de corpus
+experimental (2.697/24.481) + nuevo `docs/TRACEABILITY_nota3.md` (matriz verificada + recetas).
+
+### Parte 3 — orfandad / silent-zero
+- `compute_retrieval_metrics.py` hardcodeaba el caption "exp8, 200 queries" → parametrizado.
+- `_latency_p50p95.py` inyectaba 0,0 ms ante claves faltantes (deflaba el p50/p95) → solo claves presentes.
+- `experiments_page.py` "Full (200 queries)" → 194.
+- **D11/D12/expansion-OFF verificados intactos** (no se revirtieron desde el 06-11).
+- **`paper/overleaf_ready/main.tex` SIGUE con cifras retiradas** (P@1 0,930, "200-query", "16,8%" en
+  L64-69,200,250) + tablas `0.930` viejas en `output/tables/` y `paper/overleaf_ready/figures/`.
+  **FLAGEADO, NO reescrito** — es prosa del paper (se corrige aparte, fuera de esta ronda de repo).
+
+### Impacto en cifras (predicción; confirmar con el re-score v3 de Enzo)
+- **Se sostiene:** RAG ≫ sin-RAG (sig); retrieval n.s. en fidelidad; entre-modelos n.s.
+- **Cambia magnitud, no dirección (esperado):** niveles absolutos de fidelidad **suben** al excluir
+  artefactos, **más en gemma/qwen** (artefacto-pesados) → la comparación entre-modelos puede
+  estrecharse pero se predice que sigue n.s.
+- **Postura (Q1=ambas):** `_v3` corregido como headline futuro + publicado conservado como
+  superseded documentado; decisión de cuál citar al recibir LACCI (26/07).
+
+### Código/artefactos de esta ronda (commits 2026-06-30)
+- `src/generation/hallucination_detector.py`: `classify_artifact`, `decide_nli_status`,
+  denominador `not_a_claim`, campo `not_a_claim_claims`.
+- `scripts/`: `_h2_variant_eval.py`, `rescore_nli_v3.py`, `compute_faithfulness_metrics.py`
+  (`--faithfulness-source`), `build_claim_audit_sample.py` (`--out-suffix`, `pre_clasificacion`),
+  `audit/smoke_extractor_artifacts.py`; fixes Parte 3.
+- Docs: README (Parte 2), `docs/TRACEABILITY_nota3.md`.
+- **Sin tocar** evidencia firmada exp1-13; nuevos resultados → archivos `_v3`.
+- Nota CRLF: el árbol estaba limpio (la premisa de "231 archivos" no reprodujo); `autocrlf=true`
+  sin `.gitattributes` → recurrencia posible (decisión de política pendiente de Enzo).
+
+### Pendiente de Enzo (su máquina / decisión)
+1. Correr `_h2_variant_eval.py` → **elegir variante H2** (sub-gate).
+2. `rescore_nli_v3.py` (2 verificadores) + `compute_faithfulness_metrics.py --faithfulness-source`
+   → `faithfulness_metrics_v3.json`; comparar deltas vs publicado.
+3. Revisar los 50 claims (`--out-suffix _v3`).
+4. Decisiones: variante H2; política `.gitattributes`; nombre/fusión de rama (H7); reescritura de
+   `main.tex`/A.3 con las cifras `_v3` (cuándo).
+
+---
