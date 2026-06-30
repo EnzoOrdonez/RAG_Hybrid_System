@@ -23,7 +23,9 @@ logger = logging.getLogger(__name__)
 class ClaimDetail(BaseModel):
     """Detail for a single extracted claim."""
     claim_text: str
-    status: str  # "supported", "contradicted", "unsupported", "unsupported_no_evidence"
+    # "supported", "contradicted", "unsupported", "unsupported_no_evidence",
+    # "not_a_claim" (format artifact; counted but excluded from denominator, N8/H1)
+    status: str
     evidence_chunk_id: Optional[str] = None
     nli_score: float = 0.0
 
@@ -34,6 +36,7 @@ class HallucinationReport(BaseModel):
     supported_claims: int
     contradicted_claims: int
     unsupported_claims: int
+    not_a_claim_claims: int = 0  # format artifacts (N8/H1); excluded from denominator
     faithfulness_score: float  # 0.0 - 1.0
     hallucination_rate: float  # 0.0 - 1.0
     suggested_rubric: int      # 1-5
@@ -71,6 +74,60 @@ SKIP_PATTERNS = [
     r"^below",
     r"^above",
 ]
+
+
+# ============================================================
+# Format-artifact detection (ledger N8 / hypothesis H1, 2026-06-30).
+#
+# The sentence splitter in _extract_claims emits, alongside genuine
+# factual claims, non-claim fragments that the NLI verifier then scores
+# with high confidence: markdown ATX headers ("### Networking."),
+# table-row fragments ("AWS IAM | Feature | VPC"), spans broken across an
+# unbalanced ** marker, and documentation-coverage meta-comments ("the
+# context does not mention X"). These are not verifiable assertions about
+# the cloud services; counting them inflates the contradicted/unsupported
+# tallies — in the 50-claim audit sample 6/8 artifact-shaped claims were
+# labelled "contradicted". They are tagged status="not_a_claim": kept in
+# claim_details for traceability but excluded from the faithfulness
+# denominator. Filtering incoherent subclaims is the documented FActScore
+# behaviour (Wanner et al. 2024). Prevalence (exp12_matrix): 10.8% of all
+# extracted claims, model-asymmetric (mistral 2.3% .. gemma 23.0%).
+# ============================================================
+_ATX_HEADER_RE = re.compile(r'^\s*#{1,6}\s')
+_META_COVERAGE_RE = re.compile(
+    r'(?:'
+    r'(?:the )?(?:context|documentation|provided (?:context|text|documentation)|passage) '
+    r'(?:does not|doesn.t|do not)'
+    r'|does not (?:mention|provide|specify|describe|address|state|contain|cover)'
+    r'|is not (?:mentioned|provided|specified|described|addressed|stated|covered) in'
+    r'|there is no (?:information|mention)\b'
+    r'|no (?:information|mention) (?:about|on|regarding|for)\b'
+    r'|insufficient (?:information|context|detail)'
+    r'|not enough (?:information|detail|context)'
+    r')',
+    re.IGNORECASE,
+)
+
+
+def classify_artifact(claim: str) -> Optional[str]:
+    """Return the format-artifact type of a claim, or None if it is a
+    genuine candidate claim. Tagged claims are scored status="not_a_claim".
+
+    Types: "atx_header", "table_row", "unbalanced_emph", "meta_coverage".
+    Module-level so the offline v3 re-score reuses the identical rule.
+    """
+    s = (claim or "").strip()
+    if not s:
+        return None
+    if _ATX_HEADER_RE.match(s):
+        return "atx_header"
+    if s.count('|') >= 2:
+        return "table_row"
+    if s.count('**') % 2 == 1 or s.count('__') % 2 == 1:
+        return "unbalanced_emph"
+    if _META_COVERAGE_RE.search(s):
+        return "meta_coverage"
+    return None
 
 
 class HallucinationDetector:
@@ -171,13 +228,16 @@ class HallucinationDetector:
             claim_details = self._keyword_matching(claims, chunk_texts, chunk_ids)
             method = "keyword_fallback"
 
-        # Step 3: Scoring
+        # Step 3: Scoring. not_a_claim (format artifacts, N8/H1) stay in
+        # total/claim_details for traceability but leave the denominator.
         supported = sum(1 for c in claim_details if c.status == "supported")
         contradicted = sum(1 for c in claim_details if c.status == "contradicted")
         unsupported = sum(1 for c in claim_details if c.status == "unsupported")
+        not_a_claim = sum(1 for c in claim_details if c.status == "not_a_claim")
         total = len(claim_details)
+        effective = total - not_a_claim
 
-        faithfulness = supported / total if total > 0 else 0.0
+        faithfulness = supported / effective if effective > 0 else 1.0
         hallucination_rate = 1.0 - faithfulness
 
         # Rubric 1-5
@@ -199,6 +259,7 @@ class HallucinationDetector:
             supported_claims=supported,
             contradicted_claims=contradicted,
             unsupported_claims=unsupported,
+            not_a_claim_claims=not_a_claim,
             faithfulness_score=round(faithfulness, 4),
             hallucination_rate=round(hallucination_rate, 4),
             suggested_rubric=rubric,
@@ -303,6 +364,11 @@ class HallucinationDetector:
             sent = sent.strip()
             if not sent:
                 continue
+            # Strip balanced markdown emphasis so genuine claims read
+            # cleanly; an UNbalanced marker that survives is a broken
+            # fragment, flagged later by classify_artifact (N8/H1).
+            sent = re.sub(r'\*\*([^*]+)\*\*', r'\1', sent)
+            sent = re.sub(r'__([^_]+)__', r'\1', sent)
             # Skip short sentences
             if len(sent.split()) < 4:
                 continue
@@ -357,6 +423,14 @@ class HallucinationDetector:
         results = []
 
         for claim in claims:
+            # Format artifacts never reach the verifier (N8/H1): tag and skip.
+            art = classify_artifact(claim)
+            if art:
+                results.append(ClaimDetail(
+                    claim_text=claim, status="not_a_claim",
+                    evidence_chunk_id=None, nli_score=0.0,
+                ))
+                continue
             # Build pairs for batch prediction.
             pairs = [(chunk_text, claim) for chunk_text in chunk_texts]
 
@@ -472,6 +546,11 @@ class HallucinationDetector:
         chunk_ids: List[str],
     ) -> ClaimDetail:
         """Match a single claim via keyword overlap."""
+        if classify_artifact(claim):
+            return ClaimDetail(
+                claim_text=claim, status="not_a_claim",
+                evidence_chunk_id=None, nli_score=0.0,
+            )
         claim_words = set(
             w.lower() for w in re.findall(r'\b\w+\b', claim)
             if len(w) > 2
@@ -570,24 +649,30 @@ class HallucinationDetector:
                 processing_time_ms=round(elapsed_ms, 1),
                 method="no_evidence",
             )
-        details = [
-            ClaimDetail(
-                claim_text=c,
-                status="unsupported_no_evidence",
-                evidence_chunk_id=None,
-                nli_score=0.0,
-            )
-            for c in claims
-        ]
+        details = []
+        for c in claims:
+            if classify_artifact(c):
+                details.append(ClaimDetail(
+                    claim_text=c, status="not_a_claim",
+                    evidence_chunk_id=None, nli_score=0.0,
+                ))
+            else:
+                details.append(ClaimDetail(
+                    claim_text=c, status="unsupported_no_evidence",
+                    evidence_chunk_id=None, nli_score=0.0,
+                ))
         total = len(details)
+        not_a_claim = sum(1 for d in details if d.status == "not_a_claim")
+        effective = total - not_a_claim
         return HallucinationReport(
             total_claims=total,
             supported_claims=0,
             contradicted_claims=0,
-            unsupported_claims=total,
-            faithfulness_score=0.0,
-            hallucination_rate=1.0,
-            suggested_rubric=1,
+            unsupported_claims=total - not_a_claim,
+            not_a_claim_claims=not_a_claim,
+            faithfulness_score=0.0 if effective > 0 else 1.0,
+            hallucination_rate=1.0 if effective > 0 else 0.0,
+            suggested_rubric=1 if effective > 0 else 5,
             claim_details=details,
             processing_time_ms=round(elapsed_ms, 1),
             method="no_evidence",
