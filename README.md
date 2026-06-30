@@ -80,8 +80,9 @@ Query → Normalization + Expansion
 | Vector DB | FAISS IndexFlatIP |
 | Lexical | BM25 (rank_bm25) |
 | Re-ranker | cross-encoder/ms-marco-MiniLM-L-12-v2 |
-| LLMs | Llama 3.1 8B, Mistral 7B, Qwen 2.5 7B |
-| NLI | cross-encoder/nli-deberta-v3-small |
+| LLMs (evaluated, Nota 3) | Granite 4.1 8B · Gemma 4 E4B · Mistral 7B · Qwen 3.5 9B |
+| LLM (demo / UI only) | Llama 3.1 8B q4 — see [MODELS.md](MODELS.md) |
+| NLI | cross-encoder/nli-deberta-v3-small (runtime) + nli-deberta-v3-base (2nd verifier) |
 | UI | Streamlit + Plotly |
 
 ---
@@ -89,6 +90,10 @@ Query → Normalization + Expansion
 ## Corpus
 
 3,951 documents, 46,318 indexed chunks (adaptive chunking, 500 tokens):
+
+> **Experimental corpus (Nota 3, exp9-13):** the AWS/Azure/GCP subset only —
+> **2,697 documents / 24,481 chunks**. Kubernetes + CNCF are indexed in the repo
+> but were not part of the report's experimental runs.
 
 | Source | Documents | Description |
 |--------|-----------|-------------|
@@ -114,9 +119,11 @@ git clone https://github.com/EnzoOrdonez/RAG_Hybrid_System.git
 cd RAG_Hybrid_System
 pip install -r requirements.txt
 
-# Download LLM models
+# Download the DEMO model (UI / sustentación).
+# The 4 models EVALUATED in the Nota 3 report (granite4.1:8b, gemma4:e4b,
+# mistral:7b-instruct, qwen3.5:9b) are documented in MODELS.md — pull those
+# to reproduce exp12.
 ollama pull llama3.1:8b-instruct-q4_K_M
-ollama pull mistral:7b-instruct
 
 # Verify
 python run.py --health-check
@@ -127,6 +134,10 @@ python run.py --health-check
 The evidence snapshot for the Nota 3 round (exp9-13, v2 faithfulness metric,
 ledger N1-N7) is published as the annotated tag **`nota3-evidencia-2026-06-11`**
 on this repository — check it out to reproduce the paper's numbers exactly.
+
+**Traceability + minimal repro recipes:** [docs/TRACEABILITY_nota3.md](docs/TRACEABILITY_nota3.md)
+maps every cited table/figure to its experiment → script → output path, and lists the commands
+to regenerate only the report's artifacts (without re-running all 13 experiments).
 
 All experiment/benchmark runs must set these environment variables **before**
 launching Python, so they are read at interpreter startup:
@@ -264,7 +275,7 @@ python -m streamlit run src/ui/app.py
 | Chunk strategy | adaptive | fixed, recursive, semantic, hierarchical, adaptive |
 | Fusion method | RRF (k=60) | RRF, Linear (alpha 0.0-1.0) |
 | Re-ranker | ms-marco-L-12 | ms-marco-L-6, ms-marco-L-12, bge-reranker |
-| LLM | llama3.1:8b | llama3.1, mistral, qwen2.5 |
+| LLM (demo/UI) | llama3.1:8b (demo) | evaluated set in MODELS.md: granite4.1, gemma4:e4b, mistral, qwen3.5 |
 | Top-K | 5 | 1-20 |
 
 ---
