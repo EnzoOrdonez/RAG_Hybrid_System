@@ -33,7 +33,10 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.generation.hallucination_detector import HallucinationDetector  # noqa: E402
+from src.generation.hallucination_detector import (  # noqa: E402
+    HallucinationDetector,
+    classify_artifact,
+)
 
 SEED = 42
 MODELS = ["granite4.1-8b", "gemma4-e4b", "mistral-7b-instruct", "qwen3.5-9b"]
@@ -46,6 +49,14 @@ OUT_DIR = PROJECT_ROOT / "output" / "audit"
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out-suffix", default="",
+                    help="Filename suffix (e.g. _v3) so a re-run does not overwrite the "
+                         "signed 2026-06-11 sample. With the N8 fix the detector tags "
+                         "format artifacts not_a_claim, so the regenerated strata exclude "
+                         "them automatically.")
+    args = ap.parse_args()
     rng = random.Random(SEED)
     results = json.loads(
         (PROJECT_ROOT / "experiments/results/exp12_matrix/results.json")
@@ -171,9 +182,14 @@ def main():
         print(f"stratum {st}: {have}/{target}")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    # N8/H1: surface whether each sampled claim is a format artifact. With the
+    # fix in place artifacts are status="not_a_claim" and never enter the
+    # strata, so this should read "genuine" throughout the v3 sample.
+    for s in sample:
+        s["pre_clasificacion"] = classify_artifact(s["claim"]) or "genuine"
     cols = ["idx", "stratum", "config", "query_id", "question", "claim",
-            "nli_label", "nli_score", "best_chunk_id", "best_chunk_source",
-            "best_chunk_text", "juicio_humano", "comentario"]
+            "nli_label", "nli_score", "pre_clasificacion", "best_chunk_id",
+            "best_chunk_source", "best_chunk_text", "juicio_humano", "comentario"]
 
     def csv_escape(v):
         v = str(v).replace("\r", " ").replace("\n", " ⏎ ")
@@ -183,7 +199,7 @@ def main():
     for i, s in enumerate(sample, 1):
         csv_lines.append(";".join(csv_escape(x) for x in
                                   [i] + [s[c] for c in cols[1:]]))
-    (OUT_DIR / "claim_audit_sample.csv").write_text(
+    (OUT_DIR / f"claim_audit_sample{args.out_suffix}.csv").write_text(
         "\n".join(csv_lines), encoding="utf-8-sig")
 
     md = ["# Muestra de auditoría del verificador NLI — exp12_matrix (Fase 3a, N5)",
@@ -207,7 +223,7 @@ def main():
                f"**Etiqueta NLI:** `{s['nli_label']}`  |  **Juicio humano:** ______  |  "
                f"**Comentario:** ______",
                ""]
-    (OUT_DIR / "claim_audit_sample.md").write_text("\n".join(md), encoding="utf-8")
+    (OUT_DIR / f"claim_audit_sample{args.out_suffix}.md").write_text("\n".join(md), encoding="utf-8")
 
     print(f"\nSample: {len(sample)} claims -> {OUT_DIR}")
     print(f"Rescore guard: {len(rescore_cache) - len(mismatches)}/{len(rescore_cache)} "

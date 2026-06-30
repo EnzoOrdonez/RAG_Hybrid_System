@@ -156,18 +156,28 @@ def mcnemar(b: int, c: int):
     return float(stat), float(_chi2.sf(stat, df=1))
 
 
-def load_per_config(results_path: Path):
-    """config_name -> query_id -> per-query record (v1 fields + v2 class/claims)."""
+def load_per_config(results_path: Path, faith_override: dict = None):
+    """config_name -> query_id -> per-query record (v1 fields + v2 class/claims).
+
+    faith_override (ledger N8 / v3): optional
+    {config_name: {query_id: {faithfulness, supported, contradicted,
+    unsupported, total_claims}}} from a v3 re-score. When present it REPLACES
+    the per-query NLI faithfulness and claim counts; the answer text — hence
+    the decline classification — is untouched. Configs/queries absent from the
+    override fall back to the signed results.json values (e.g. sin_rag).
+    """
     data = json.loads(results_path.read_text(encoding="utf-8"))
     configs = data["configs"]
     out = {}
     for cname, cdata in configs.items():
+        ov = (faith_override or {}).get(cname, {})
         per_q = {}
         for r in cdata["results"]:
             hm = r.get("hallucination_metrics", {}) or {}
             method = hm.get("method", "none")
+            o = ov.get(r["query_id"])
             per_q[r["query_id"]] = {
-                "faithfulness": faithfulness_of(hm),
+                "faithfulness": (float(o["faithfulness"]) if o else faithfulness_of(hm)),
                 "method": method,
                 "honest_decline": r.get("is_honest_decline",
                                         hm.get("is_honest_decline")),
@@ -176,10 +186,10 @@ def load_per_config(results_path: Path):
                 "class_v2": classify_response(r.get("answer")),
                 "pure_decline": (classify_response(r.get("answer")) == "pure_decline"
                                  if (r.get("answer") or "").strip() else None),
-                "total_claims": hm.get("total_claims") or 0,
-                "supported_claims": hm.get("supported_claims") or 0,
-                "contradicted_claims": hm.get("contradicted_claims") or 0,
-                "unsupported_claims": hm.get("unsupported_claims") or 0,
+                "total_claims": (o["total_claims"] if o else (hm.get("total_claims") or 0)),
+                "supported_claims": (o["supported"] if o else (hm.get("supported_claims") or 0)),
+                "contradicted_claims": (o["contradicted"] if o else (hm.get("contradicted_claims") or 0)),
+                "unsupported_claims": (o["unsupported"] if o else (hm.get("unsupported_claims") or 0)),
             }
         out[cname] = per_q
     return out
@@ -301,6 +311,10 @@ def main():
     ap.add_argument("--write-v1", action="store_true",
                     help="Also (re)write the legacy faithfulness_metrics.json. "
                          "Default off so the published v1 artifact stays untouched.")
+    ap.add_argument("--faithfulness-source", default=None,
+                    help="v3 re-score JSON (faithfulness_rescore_v3__*.json). When set, "
+                         "overrides per-query NLI faithfulness/counts and writes "
+                         "faithfulness_metrics_v3.json (ledger N8). v1/v2 artifacts untouched.")
     args = ap.parse_args()
 
     exp_dir = PROJECT_ROOT / "experiments" / "results" / args.experiment
@@ -308,7 +322,14 @@ def main():
     if not results_path.exists():
         raise SystemExit(f"Not found: {results_path}")
 
-    per_config = load_per_config(results_path)
+    faith_override = None
+    out_tag = "v2"
+    if args.faithfulness_source:
+        src = json.loads(Path(args.faithfulness_source).read_text(encoding="utf-8"))
+        faith_override = src.get("configs", src)
+        out_tag = "v3"
+
+    per_config = load_per_config(results_path, faith_override)
     configs = list(per_config.keys())
     parsed = {c: parse_config(c) for c in configs}
     scenarios = sorted({parsed[c][0] for c in configs})
@@ -439,8 +460,9 @@ def main():
         _canon = []
     out_v2 = {
         "experiment": args.experiment,
-        "metric": "faithfulness_answered (v2, ledger N5)",
+        "metric": f"faithfulness_answered ({out_tag}, ledger {'N8' if out_tag == 'v3' else 'N5'})",
         "generated": "2026-06-11",
+        "faithfulness_source": args.faithfulness_source,
         "excluded_methods": sorted(EXCLUDED_METHODS),
         "decline_classifier_v2": {
             "opening_window_chars": OPENING_WINDOW,
@@ -472,7 +494,7 @@ def main():
             "faithfulness_answered__between_model": between_model_v2,
         },
     }
-    out_path_v2 = exp_dir / "faithfulness_metrics_v2.json"
+    out_path_v2 = exp_dir / f"faithfulness_metrics_{out_tag}.json"
     out_path_v2.write_text(
         json.dumps(out_v2, indent=2, ensure_ascii=False,
                    default=lambda o: o.item() if isinstance(o, np.generic) else str(o)),
@@ -481,7 +503,7 @@ def main():
 
     # ---- Console summary (ascii-safe) ----
     print("\n" + "=" * 96)
-    print(f"FAITHFULNESS METRICS v2 — {args.experiment}")
+    print(f"FAITHFULNESS METRICS {out_tag} — {args.experiment}")
     print("=" * 96)
     print(f"{'Config':<34} {'PRIMARY':>8} {'n':>4} {'sensA':>7} {'sensB':>7} "
           f"{'pub':>6} {'n_pub':>6} {'pure%':>6} {'hedg%':>6}")
