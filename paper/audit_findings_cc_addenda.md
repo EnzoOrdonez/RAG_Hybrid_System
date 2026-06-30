@@ -363,13 +363,52 @@ experimental (2.697/24.481) + nuevo `docs/TRACEABILITY_nota3.md` (matriz verific
   L64-69,200,250) + tablas `0.930` viejas en `output/tables/` y `paper/overleaf_ready/figures/`.
   **FLAGEADO, NO reescrito** — es prosa del paper (se corrige aparte, fuera de esta ronda de repo).
 
-### Impacto en cifras (predicción; confirmar con el re-score v3 de Enzo)
-- **Se sostiene:** RAG ≫ sin-RAG (sig); retrieval n.s. en fidelidad; entre-modelos n.s.
-- **Cambia magnitud, no dirección (esperado):** niveles absolutos de fidelidad **suben** al excluir
-  artefactos, **más en gemma/qwen** (artefacto-pesados) → la comparación entre-modelos puede
-  estrecharse pero se predice que sigue n.s.
-- **Postura (Q1=ambas):** `_v3` corregido como headline futuro + publicado conservado como
-  superseded documentado; decisión de cuál citar al recibir LACCI (26/07).
+### Impacto en cifras (Fase 3 REAL ejecutada, 2026-06-30 GPU)
+
+Re-score v3 corrido en `py -V:3.14` (torch+cu126, RTX 3060). **Verificador = base**
+(`nli-deberta-v3-base` local); el small del runtime NO está disponible offline (TLS bloqueado,
+N5) → las cifras absolutas v3 NO son directamente comparables a la Tabla 6 publicada (que usó
+small). Comparación controlada de 3 vías (`faithfulness_answered` primaria, BH por familia):
+
+| | verificador | artefactos | retrieval RAG-vs-RAG | entre-modelos sig_bh |
+|---|---|---|---|---|
+| (A) **v3** | base | **excluidos** | n.s. (0) | **6/18** |
+| (B) publicado v2 | small | incluidos | n.s. (0) | 0/18 |
+| (C) N5-base | base | incluidos | n.s. (0) | 0/18 |
+
+- (B)vs(C): mismo artefactos, distinto verificador → ambos 0/18 ⇒ el cambio small→base **NO**
+  crea significancia entre-modelos.
+- (C)vs(A): mismo verificador base, artefactos in→out → 0→6/18 ⇒ **la exclusión de artefactos (H1)
+  es lo que vuelve significativas las diferencias entre-modelos.** Confound H1 CONFIRMADO con
+  comparación controlada.
+
+**Veredictos (números, no predicción):**
+1. **"El método de retrieval no mueve la fidelidad" = ROBUSTO.** Ningún par RAG-vs-RAG significativo
+   bajo los 3 instrumentos (small-publicado, base-con-artefactos, base-v3-sin-artefactos). La
+   contribución central de la tesis se sostiene.
+2. **"Entre-modelos TODO n.s." (afirmado en N5) NO sobrevive a la corrección H1.** Bajo v3 hay
+   **6/18 pares significativos** (mayormente qwen/gemma, los artefacto-pesados): denso granite-vs-qwen
+   d_z=+0,60 p_bh=0,008; léxico gemma-vs-granite −0,61 / gemma-vs-mistral −0,53 / granite-vs-qwen +0,49
+   / mistral-vs-qwen +0,50. El contaminante asimétrico (gemma 23% / qwen 20% / mistral 2%) **enmascaraba**
+   diferencias reales de fidelidad entre modelos. **Esto corrige un claim publicado (N5).**
+3. **Niveles absolutos v3 (base):** granite lex/den/hib 0,192/0,204/0,210 · gemma 0,440/0,320/0,328 ·
+   mistral 0,179/0,198/0,174 · qwen 0,359/0,374/0,333. Los artefacto-pesados (qwen/gemma) **suben**
+   respecto a N5-base (qwen lex 0,192→0,359; gemma lex 0,367→0,440) al sacar los artefactos
+   (que caían a contradicted/unsupported). H2 (vb_agree) NO mueve estos números (fidelidad
+   H2-invariante: solo reordena contradicted↔unsupported); H2 corrige la **banda contradicted**
+   (eval: 62%→17,5% falso-contradicted vs chunks aleatorios) y **q085** (26→5 contradicted).
+
+**Pendiente para cifras comparables a la Tabla 6 publicada:** restaurar el verificador small offline
+(curl --ssl-no-revoke, workaround N5) y re-correr `rescore_nli_v3.py --verifier small --variant vb_agree`.
+El mecanismo (exclusión de artefactos) es verificador-independiente, así que se espera el mismo flip
+entre-modelos bajo small; falta confirmarlo con números.
+
+**Postura (Q1=ambas):** `_v3` corregido (base) como evidencia de la corrección; publicado v2 (small)
+conservado como superseded documentado. La reescritura de A.3/`main.tex` con cifras v3 queda gated
+tras el reporte a Enzo (con la decisión small-vs-base para las cifras citables).
+
+Artefactos v3: `experiments/results/exp12_matrix/faithfulness_rescore_v3__base__vb_agree.json`,
+`faithfulness_metrics_v3.json`, `output/audit/h2_variant_eval.json`.
 
 ### Código/artefactos de esta ronda (commits 2026-06-30)
 - `src/generation/hallucination_detector.py`: `classify_artifact`, `decide_nli_status`,
