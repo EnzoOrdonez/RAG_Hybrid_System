@@ -186,7 +186,7 @@ def main():
     print(f"H2 VARIANT TRADE-OFF  (verifier={args.verifier}, {n_claims} genuine claims, "
           f"{n_artifacts} artifacts excluded)")
     print("=" * 80)
-    print(f"{'variant':<24}{'contr%':>8}{'supp%':>8}{'unsup%':>8}{'flips(v0→)':>12}")
+    print(f"{'variant':<24}{'contr%':>8}{'supp%':>8}{'unsup%':>8}{'flips(v0->)':>12}")
     for lbl, _, _ in VARIANTS:
         c = per_variant[lbl]
         tot = sum(c.values()) or 1
@@ -198,7 +198,7 @@ def main():
     for lbl, _, _ in VARIANTS:
         print(f"  {lbl:<24} {dict(q085[lbl])}")
         out["q085"][lbl] = dict(q085[lbl])
-    print(f"\nSYNTHETIC BASE-RATE — false 'contradicted' vs 5 RANDOM chunks "
+    print(f"\nSYNTHETIC BASE-RATE -- false 'contradicted' vs 5 RANDOM chunks "
           f"(n={base_n}; lower is better):")
     for lbl, _, _ in VARIANTS:
         print(f"  {lbl:<24} {100*base[lbl]/(base_n or 1):>5.1f}%")

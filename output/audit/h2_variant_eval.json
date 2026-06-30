@@ -1,0 +1,55 @@
+{
+  "verifier": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\data\\models\\nli-deberta-v3-base",
+  "n_claims_sample": 1690,
+  "n_artifacts_excluded": 195,
+  "n_baserate": 200,
+  "variants": {
+    "v0 (legacy)": {
+      "contradicted": 391,
+      "supported": 383,
+      "unsupported": 916,
+      "flips_from_v0_contradicted": 0
+    },
+    "va_margin d=0.05": {
+      "contradicted": 351,
+      "supported": 383,
+      "unsupported": 956,
+      "flips_from_v0_contradicted": 40
+    },
+    "va_margin d=0.10": {
+      "contradicted": 339,
+      "supported": 383,
+      "unsupported": 968,
+      "flips_from_v0_contradicted": 52
+    },
+    "vb_agree (>=2 chunks)": {
+      "contradicted": 133,
+      "supported": 383,
+      "unsupported": 1174,
+      "flips_from_v0_contradicted": 258
+    }
+  },
+  "q085": {
+    "v0 (legacy)": {
+      "contradicted": 26
+    },
+    "va_margin d=0.05": {
+      "contradicted": 19,
+      "unsupported": 7
+    },
+    "va_margin d=0.10": {
+      "contradicted": 18,
+      "unsupported": 8
+    },
+    "vb_agree (>=2 chunks)": {
+      "unsupported": 21,
+      "contradicted": 5
+    }
+  },
+  "base_rate_false_contradicted": {
+    "v0 (legacy)": 0.62,
+    "va_margin d=0.05": 0.59,
+    "va_margin d=0.10": 0.575,
+    "vb_agree (>=2 chunks)": 0.175
+  }
+}
