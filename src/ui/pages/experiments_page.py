@@ -118,11 +118,11 @@ def render():
 
     col1, col2 = st.columns(2)
     with col1:
-        mode = st.radio("Mode", ["Quick (20 queries)", "Full (200 queries)"], horizontal=True)
+        mode = st.radio("Mode", ["Quick (20 queries)", "Full (194 queries)"], horizontal=True)
     with col2:
         resume = st.checkbox("Resume from checkpoint", value=True)
 
-    max_queries = 20 if "Quick" in mode else 200
+    max_queries = 20 if "Quick" in mode else 194
 
     # Check for running experiment
     if "experiment_running" not in st.session_state:

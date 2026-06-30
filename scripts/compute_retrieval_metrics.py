@@ -291,12 +291,14 @@ def run_statistical_tests(per_query_metrics, system_names, metric_name):
 # LaTeX table generation
 # ============================================================
 
-def generate_latex_table(aggregated, stats):
+def generate_latex_table(aggregated, stats, exp_id="exp", n_queries=0):
     """Generate LaTeX table for retrieval metrics."""
     lines = [
         r"\begin{table}[htbp]",
         r"\centering",
-        r"\caption{Cross-encoder based retrieval quality metrics (exp8, 200 queries)}",
+        # N8: caption was hardcoded "exp8, 200 queries" -> mislabelled every fresh
+        # 194-query exp10/11/13 table. Now reflects the real experiment + count.
+        r"\caption{Cross-encoder based retrieval quality metrics (" + f"{exp_id}, {n_queries} queries" + r")}",
         r"\label{tab:retrieval-metrics}",
         r"\begin{tabular}{l" + "c" * 6 + "}",
         r"\toprule",
@@ -654,7 +656,7 @@ def main():
     results_out.mkdir(parents=True, exist_ok=True)
 
     # LaTeX table
-    latex = generate_latex_table(aggregated, all_stats.get("ndcg@5", {}))
+    latex = generate_latex_table(aggregated, all_stats.get("ndcg@5", {}), exp_id, len(query_questions))
     latex_path = OUTPUT_DIR / "tables" / f"table_retrieval_metrics_{exp_id}__{oracle_label}.tex"
     latex_path.write_text(latex, encoding="utf-8")
     logger.info("LaTeX table saved: %s", latex_path)

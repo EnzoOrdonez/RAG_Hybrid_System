@@ -32,9 +32,14 @@ for cname, c in data["configs"].items():
         if r.get("from_cache") or r.get("error"):
             continue
         lat = r.get("latency", {})
-        gen.append(lat.get("generation_ms", 0.0))
-        nli.append(lat.get("hallucination_check_ms", 0.0))
-        tot.append(lat.get("total_ms", 0.0))
+        # N8: only record latencies that are actually present; a missing key must
+        # NOT inject a phantom 0 ms that deflates the reported p50/p95 table.
+        if lat.get("generation_ms") is not None:
+            gen.append(lat["generation_ms"])
+        if lat.get("hallucination_check_ms") is not None:
+            nli.append(lat["hallucination_check_ms"])
+        if lat.get("total_ms") is not None:
+            tot.append(lat["total_ms"])
         tps = r.get("cost_proxy", {}).get("tok_per_s")
         if tps:
             toks.append(tps)
