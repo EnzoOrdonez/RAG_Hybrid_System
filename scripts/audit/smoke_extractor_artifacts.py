@@ -23,7 +23,34 @@ sys.path.insert(0, str(REPO_ROOT))
 from src.generation.hallucination_detector import (  # noqa: E402
     HallucinationDetector,
     classify_artifact,
+    decide_nli_status,
 )
+
+
+def test_decide_nli_status_v0_and_variants():
+    """v0 reproduces the 5 canonical aggregation cases (smoke_nli_aggregation);
+    va_margin / vb_agree flip the contradiction gate as designed (H2/N8).
+    Inputs are per-chunk (contr, ent) arrays; no model needed."""
+    # (contr_scores, ent_scores, expected_v0_status)
+    canon = [
+        ([0.10, 0.90], [0.80, 0.05], "contradicted"),   # mixed: B contradicts
+        ([0.05, 0.05], [0.80, 0.30], "supported"),       # consistent support
+        ([0.20, 0.50], [0.60, 0.10], "unsupported"),     # both below threshold
+        ([0.20, 0.80], [0.72, 0.10], "contradicted"),    # both cross, contr higher
+        ([0.71, 0.10], [0.10, 0.85], "supported"),       # both cross, ent higher
+    ]
+    for contr, ent, exp in canon:
+        st, _, _ = decide_nli_status(contr, ent)
+        assert st == exp, f"v0 {contr},{ent} -> {st} != {exp}"
+    # va_margin: contr just above threshold but within margin of ent -> unsupported.
+    st_v0, _, _ = decide_nli_status([0.75], [0.72])
+    st_va, _, _ = decide_nli_status([0.75], [0.72], variant="va_margin", margin=0.10)
+    assert st_v0 == "contradicted" and st_va == "unsupported", (st_v0, st_va)
+    # vb_agree: 1 chunk over -> unsupported; 2 chunks over -> contradicted.
+    st_1, _, _ = decide_nli_status([0.80, 0.20], [0.10, 0.10], variant="vb_agree")
+    st_2, _, _ = decide_nli_status([0.80, 0.75], [0.10, 0.10], variant="vb_agree")
+    assert st_1 == "unsupported" and st_2 == "contradicted", (st_1, st_2)
+    print("PASS: decide_nli_status v0 (5 canonical) + va_margin + vb_agree")
 
 
 def test_classify_artifact_unit():
@@ -102,6 +129,7 @@ def test_q196_bullets_not_regressed():
 
 if __name__ == "__main__":
     test_classify_artifact_unit()
+    test_decide_nli_status_v0_and_variants()
     test_check_excludes_artifacts_from_denominator()
     test_q196_bullets_not_regressed()
-    print("\nAll smoke cases passed for the N8/H1 artifact fix.")
+    print("\nAll smoke cases passed for the N8/H1+H2 fixes.")

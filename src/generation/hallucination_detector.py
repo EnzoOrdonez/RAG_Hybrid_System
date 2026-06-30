@@ -130,6 +130,57 @@ def classify_artifact(claim: str) -> Optional[str]:
     return None
 
 
+def decide_nli_status(
+    contr_scores: List[float],
+    ent_scores: List[float],
+    ent_threshold: float = 0.7,
+    contr_threshold: float = 0.7,
+    variant: str = "v0",
+    margin: float = 0.0,
+):
+    """Decide a claim's NLI status from the per-chunk contradiction and
+    entailment probability arrays. Shared by the runtime detector and the
+    offline v3 re-score so the decision rule is byte-identical.
+
+    Honovich 2022 TRUE base rule (the supported side already carries the
+    asymmetric guard ``max_ent > max_contr``). H2 (ledger N8): the
+    contradicted side has NO symmetric guard — ``max_contr`` over 5 chunks
+    crossing 0.7 is enough. Variants add one:
+      * ``v0``        legacy: contradicted iff max_contr > contr_threshold.
+      * ``va_margin`` contradicted iff max_contr > max_ent + margin.
+      * ``vb_agree``  contradicted iff >=2 chunks exceed contr_threshold.
+    Returns ``(status, score, idx)`` where idx indexes the arrays.
+    """
+    n = len(contr_scores)
+    if n == 0:
+        return "unsupported", 0.0, -1
+    best_ent = max(ent_scores)
+    bei = ent_scores.index(best_ent)
+    best_contr = max(contr_scores)
+    bci = contr_scores.index(best_contr)
+
+    # Supported (unchanged across variants).
+    if best_ent > ent_threshold and best_ent > best_contr:
+        return "supported", best_ent, bei
+
+    # Contradiction gate (variant-dependent).
+    if variant == "va_margin":
+        contr_fires = best_contr > contr_threshold and best_contr > best_ent + margin
+    elif variant == "vb_agree":
+        n_over = sum(1 for c in contr_scores if c > contr_threshold)
+        contr_fires = best_contr > contr_threshold and n_over >= 2
+    else:  # v0 (legacy)
+        contr_fires = best_contr > contr_threshold
+
+    if contr_fires:
+        return "contradicted", best_contr, bci
+
+    # Unsupported: surface the strongest signal for reporting.
+    if best_ent >= best_contr:
+        return "unsupported", best_ent, bei
+    return "unsupported", best_contr, bci
+
+
 class HallucinationDetector:
     """Detects hallucinations in LLM responses using NLI."""
 
@@ -142,6 +193,10 @@ class HallucinationDetector:
         self._nli_model = None
         self._use_nli = use_nli
         self._nli_available = None
+        # H2 guard variant (ledger N8). v0 = legacy rule, unchanged until the
+        # 2b sub-gate selects a variant; the offline v3 re-score overrides these.
+        self.nli_variant = "v0"
+        self.nli_margin = 0.0
 
     @property
     def nli_model(self):
@@ -461,52 +516,24 @@ class HallucinationDetector:
                 )
                 continue
 
-            best_ent = -1.0
-            best_ent_idx = -1
-            best_contr = -1.0
-            best_contr_idx = -1
-
-            for i, score_set in enumerate(scores):
+            contr_scores, ent_scores = [], []
+            for score_set in scores:
                 # score_set: [contradiction, entailment, neutral]
                 if hasattr(score_set, "__len__") and len(score_set) == 3:
-                    contradiction_score = float(score_set[0])
-                    entailment_score = float(score_set[1])
+                    contr_scores.append(float(score_set[0]))
+                    ent_scores.append(float(score_set[1]))
                 else:
-                    # Single-score models (rare): treat as similarity =
-                    # entailment, no contradiction signal.
-                    entailment_score = float(score_set)
-                    contradiction_score = 0.0
+                    # Single-score models (rare): similarity == entailment.
+                    ent_scores.append(float(score_set))
+                    contr_scores.append(0.0)
 
-                if entailment_score > best_ent:
-                    best_ent = entailment_score
-                    best_ent_idx = i
-                if contradiction_score > best_contr:
-                    best_contr = contradiction_score
-                    best_contr_idx = i
-
-            # Honovich 2022 TRUE decision rule.
-            if (
-                best_ent > self.ENTAILMENT_THRESHOLD
-                and best_ent > best_contr
-            ):
-                status = "supported"
-                nli_score = best_ent
-                chunk_idx = best_ent_idx
-            elif best_contr > self.CONTRADICTION_THRESHOLD:
-                status = "contradicted"
-                nli_score = best_contr
-                chunk_idx = best_contr_idx
-            else:
-                status = "unsupported"
-                # For reporting, surface the strongest signal observed so
-                # that downstream analysis can see how close the claim
-                # came to either threshold.
-                if best_ent >= best_contr:
-                    nli_score = best_ent
-                    chunk_idx = best_ent_idx
-                else:
-                    nli_score = best_contr
-                    chunk_idx = best_contr_idx
+            # Honovich 2022 TRUE rule + H2 guard variant (ledger N8).
+            status, nli_score, chunk_idx = decide_nli_status(
+                contr_scores, ent_scores,
+                ent_threshold=self.ENTAILMENT_THRESHOLD,
+                contr_threshold=self.CONTRADICTION_THRESHOLD,
+                variant=self.nli_variant, margin=self.nli_margin,
+            )
 
             best_chunk_id = (
                 chunk_ids[chunk_idx]
