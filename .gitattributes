@@ -1,0 +1,15 @@
+# Normalize line endings: store LF in the repo, check out LF.
+# Prevents the CRLF<->LF churn that produced a phantom "231 modified files"
+# working tree on Windows (autocrlf=true) without a normalization policy.
+* text=auto eol=lf
+
+# Binary artifacts — never apply EOL conversion.
+*.png binary
+*.jpg binary
+*.pdf binary
+*.index binary
+*.pkl binary
+*.npy binary
+*.safetensors binary
+*.spm binary
+*.model binary
