@@ -81,4 +81,10 @@ python scripts/compute_faithfulness_metrics.py --experiment exp12_matrix \
 python scripts/build_claim_audit_sample.py --out-suffix _v3
 ```
 
-Veredictos y deltas vs lo publicado: ledger **N8** en `paper/audit_findings_cc_addenda.md`.
+Tablas v3: `python scripts/_export_tabla6_v3.py exp12_matrix faithfulness_metrics_v3_small.json`
+→ `output/tables/nota3/tabla6_fidelidad_v3__exp12_matrix.{md,csv}`.
+
+**Resultado v3 (small, comparable con la Tabla 6 publicada):** retrieval n.s. en fidelidad (0/12,
+robusto bajo AMBOS verificadores base+small); entre-modelos **2/18 sig bajo small** (6/18 base) —
+corrige el "todo n.s." de N5; gemma/qwen **suben +0,05..0,11** al excluir artefactos. Veredictos y
+deltas: ledger **N8** en `paper/audit_findings_cc_addenda.md`; cifras en `RESULTADOS_RESUMEN.md` §3.

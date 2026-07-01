@@ -75,6 +75,20 @@ los primeros 300c) / `hedged_partial` (hedge tardío) / `answered`.
 Sensibilidad bajo 4 denominadores: `output/tables/nota3/tabla6_sensibilidad_denominador`.
 La métrica v1 se conserva solo como sensibilidad etiquetada (sens_c).
 
+**Tabla 6 v3 — `faithfulness_answered` corregida (small, N8: artefactos de formato excluidos del
+denominador + guarda de contradicción vb_agree):**
+
+| Escenario | Granite 4.1 | Gemma 4 E4B | Mistral 7B | Qwen 3.5 9B |
+|---|---|---|---|---|
+| RAG léxico | 0,235 (75) | **0,443** (60) | 0,246 (114) | **0,361** (42) |
+| RAG denso | 0,247 (85) | **0,425** (65) | 0,281 (132) | **0,351** (51) |
+| RAG híbrido | 0,299 (87) | **0,363** (60) | 0,288 (122) | **0,354** (47) |
+
+v2 (arriba) queda como *superseded documentado* (postura N8: ambas). Delta = exclusión de artefactos
+(H1): granite/mistral ~igual (±0,01); **gemma/qwen suben +0,05..0,11** (tenían 20-23 % de artefactos
+de formato que inflaban su denominador con contradicciones-basura). Fuente:
+`faithfulness_metrics_v3_small.json`; tabla `output/tables/nota3/tabla6_fidelidad_v3`.
+
 Re-stats v2 (pareado por INTERSECCIÓN de no-excluidas en ambos brazos; n por par; familias BH):
 - **"El método de retrieval NO mueve la fidelidad" SE SOSTIENE bajo la métrica corregida:**
   ningún par RAG-vs-RAG significativo tras BH en ningún modelo. PERO ahora con matiz honesto:
@@ -84,14 +98,21 @@ Re-stats v2 (pareado por INTERSECCIÓN de no-excluidas en ambos brazos; n por pa
   el JSON). La excepción v1 (denso>léxico en qwen) NO sobrevive a la métrica corregida.
 - **RAG ≫ Sin RAG se sostiene** para granite/gemma/mistral (d_z 0,86–1,09, p_BH<0,001).
   Para **qwen es NO testeable** bajo v2 (n pareado 5–7 por las vacías de sin_rag, N6).
-- **Entre modelos: TODO n.s. tras BH bajo v2** (la métrica v1 mostraba varios "sig" que eran
-  artefacto del denominador). Lo que SÍ es altamente significativo es el **comportamiento de
-  declinación** (McNemar v2: mistral declina mucho menos que el resto, p≈0,000 en casi todos
-  sus pares). **El trade-off declinación ↔ fidelidad es el hallazgo**, no un ranking.
+- **Entre modelos:** bajo v2 (small, artefactos incluidos) todo n.s. — pero eso era **artefacto del
+  contaminante de formato**. Corrigiendo el instrumento (v3, artefactos excluidos + vb_agree), bajo el
+  **mismo verificador small hay 2/18 pares significativos** (denso granite-vs-mistral d_z=+0,42
+  p_BH=0,014 n=75; léxico gemma-vs-mistral d_z=−0,45 p_BH=0,044 n=49); bajo base, 6/18. Las diferencias
+  entre modelos estaban **enmascaradas** por el sesgo asimétrico de artefactos (gemma 23 % / qwen 20 %
+  / mistral 2 %). **Esto corrige el "todo n.s." de N5.** Lo que además es altamente significativo es el
+  **comportamiento de declinación** (McNemar v2: mistral declina mucho menos que el resto, p≈0,000). El
+  trade-off declinación ↔ fidelidad sigue siendo un hallazgo, ahora junto a diferencias entre-modelos reales.
 
 **Desglose de claims (instrumento, `tabla_claims_desglose`):** % contradicted casi insensible
 al escenario y al modelo (27–39 %), y donde varía, sube con MEJOR contexto (gemma léxico→híbrido
 26,8→34,5 %) — evidencia de contradicciones espurias del verificador (ver Instrumento, abajo).
+**N8:** con la guarda `vb_agree` (≥2 chunks deben cruzar el umbral) la banda se desploma —
+base-rate sintético de falso-contradicted 62 %→17,5 % vs chunks aleatorios; q085 26→5 contradicted —
+confirmando que gran parte de esa banda era ruido de `max` sobre 5 chunks sin guarda simétrica.
 
 **Auditoría del instrumento (N5):**
 - q085 (granite-híbrido): 28/28 claims "contradicted" a prob ~0,99 en una respuesta procedural
@@ -122,14 +143,18 @@ al escenario y al modelo (27–39 %), y donde varía, sube con MEJOR contexto (g
 
 1. **La superioridad del híbrido NO propaga a la fidelidad** (métodos de RAG n.s.). Hallazgo
    honesto y central: el aporte del híbrido es de ranking, no de fidelidad de respuesta.
-   **Re-confirmado bajo la métrica corregida v2 (N5)** — con el matiz de monotonía no
+   **Re-confirmado bajo la métrica corregida v2 (N5) y bajo v3 (N8): retrieval n.s. en fidelidad
+   con LOS DOS verificadores (base 0/12, small 0/12)** — con el matiz de monotonía no
    significativa de granite/mistral hacia el híbrido (§3).
 2. **Circularidad del oráculo infla masivamente** el retrieval del híbrido (0,995 → 0,740).
 3. **Determinismo desigual a temp=0:** granite y qwen3.5 deterministas; **gemma y mistral NO**
    (no-determinismo de kernel Ollama). Headline = granite (determinista + RAG-tuned).
-4. **Sesgo de extracción de claims entre modelos:** gemma produce ~la mitad de claims
-   extraíbles (n_eff≈100) que granite (≈189) → la fidelidad entre modelos está confundida por
-   estilo de salida.
+4. **Sesgo de extracción de claims entre modelos — cuantificado (N8):** además del volumen (gemma
+   produce ~la mitad de claims extraíbles, n_eff≈100, que granite ≈189), **10,8 % de los claims son
+   artefactos de formato** (headers `###` / filas de tabla / negrita rota / meta-comentario), y el
+   sesgo es asimétrico: gemma 23 % · qwen 20 % · granite 8 % · mistral 2 %. No solo confunde niveles:
+   **enmascaró diferencias reales entre modelos** (v3 las revela, §3). Corregido excluyéndolos del
+   denominador (`not_a_claim`).
 5. **granite declina 62–66 %** vs mistral 20–25 %: el comportamiento de declinación domina la
    varianza de fidelidad.
 
