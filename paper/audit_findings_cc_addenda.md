@@ -410,6 +410,33 @@ tras el reporte a Enzo (con la decisión small-vs-base para las cifras citables)
 Artefactos v3: `experiments/results/exp12_matrix/faithfulness_rescore_v3__base__vb_agree.json`,
 `faithfulness_metrics_v3.json`, `output/audit/h2_variant_eval.json`.
 
+### v3-small — verificador del PAPER (small restaurado offline), DEFINITIVO para citar
+
+small restaurado vía `curl --ssl-no-revoke` a `data/models/nli-deberta-v3-small/` (loads offline,
+id2label={0:contradiction,1:entailment,2:neutral} = base). rescore v3-small (vb_agree,
+contradicted=1696 ⇒ NLI real) → `faithfulness_metrics_v3_small.json`. Comparación con el MISMO
+verificador (small) que usó la Tabla 6 publicada:
+
+| | retrieval RAG-vs-RAG | entre-modelos sig_bh |
+|---|---|---|
+| publicado v2-small (artefactos IN) | 0/12 | 0/18 |
+| **v3-small (artefactos OUT)** | **0/12** | **2/18** |
+
+**Veredictos comparables al paper (verificador small):**
+1. **"El retrieval no mueve la fidelidad" = ROBUSTO** bajo el verificador del propio paper (0/12 en
+   v2 y v3). Confirmado ahora bajo **los dos verificadores** (base 0/12 y small 0/12). La contribución
+   central de la tesis se sostiene — resultado, no predicción.
+2. **"Entre-modelos todo n.s." (afirmado en N5) NO se sostiene** ni bajo small: **2/18** pares
+   significativos (denso granite-vs-mistral d_z=+0,42 p_bh=0,014 n=75; léxico gemma-vs-mistral
+   d_z=−0,45 p_bh=0,044 n=49). Menos que bajo base (6/18) pero >0 en ambos. **Corrige el claim
+   publicado N5.**
+3. **Niveles absolutos (v2-small → v3-small):** granite/mistral casi no cambian (~±0,01);
+   **gemma +0,05..+0,07 · qwen +0,06..+0,11** — los artefacto-pesados **suben** al sacar el 20-23%
+   de artefactos que inflaban su denominador con contradicciones-basura. La Tabla 6 publicada
+   **subestimaba** la fidelidad de gemma y qwen.
+
+Artefactos small: `faithfulness_rescore_v3__small__vb_agree.json`, `faithfulness_metrics_v3_small.json`.
+
 ### Código/artefactos de esta ronda (commits 2026-06-30)
 - `src/generation/hallucination_detector.py`: `classify_artifact`, `decide_nli_status`,
   denominador `not_a_claim`, campo `not_a_claim_claims`.
