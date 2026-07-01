@@ -193,9 +193,14 @@ class HallucinationDetector:
         self._nli_model = None
         self._use_nli = use_nli
         self._nli_available = None
-        # H2 guard variant (ledger N8). v0 = legacy rule, unchanged until the
-        # 2b sub-gate selects a variant; the offline v3 re-score overrides these.
-        self.nli_variant = "v0"
+        # H2 guard variant (ledger N8). Enzo confirmed **vb_agree** at the 2b
+        # sub-gate (a single chunk crossing 0.7 marked 62% of claims
+        # "contradicted" vs random chunks; >=2-chunk agreement cuts it to
+        # 17.5%). Symmetric with H1 (not_a_claim) already being live. Note:
+        # vb_agree needs >=2 chunks to fire contradiction — with the real RAG
+        # top-5 contexts this is meaningful; single-chunk edge cases can never
+        # be "contradicted".
+        self.nli_variant = "vb_agree"
         self.nli_margin = 0.0
 
     @property
@@ -211,8 +216,22 @@ class HallucinationDetector:
                 self._nli_available = True
                 logger.info("NLI model loaded: %s", self.NLI_MODEL)
             except Exception as e:
-                logger.warning("NLI model unavailable, using keyword fallback: %s", e)
-                self._nli_available = False
+                # Offline fallback (N8): the HF tag may not be cached, but the
+                # snapshot restored under data/models/nli-deberta-v3-small/
+                # (curl --ssl-no-revoke; HF client TLS-blocked on this box) does
+                # load. Try it before dropping to the keyword fallback.
+                from pathlib import Path
+                local = (Path(__file__).resolve().parent.parent.parent
+                         / "data" / "models" / "nli-deberta-v3-small")
+                try:
+                    from sentence_transformers import CrossEncoder
+                    self._nli_model = CrossEncoder(str(local), max_length=512)
+                    self._nli_available = True
+                    logger.info("NLI model loaded from local snapshot: %s", local)
+                except Exception as e2:
+                    logger.warning(
+                        "NLI model unavailable, using keyword fallback: %s / %s", e, e2)
+                    self._nli_available = False
         return self._nli_model
 
     def check(
