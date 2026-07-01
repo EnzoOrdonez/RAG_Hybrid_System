@@ -448,12 +448,19 @@ Artefactos small: `faithfulness_rescore_v3__small__vb_agree.json`, `faithfulness
 - Nota CRLF: el árbol estaba limpio (la premisa de "231 archivos" no reprodujo); `autocrlf=true`
   sin `.gitattributes` → recurrencia posible (decisión de política pendiente de Enzo).
 
-### Pendiente de Enzo (su máquina / decisión)
-1. Correr `_h2_variant_eval.py` → **elegir variante H2** (sub-gate).
-2. `rescore_nli_v3.py` (2 verificadores) + `compute_faithfulness_metrics.py --faithfulness-source`
-   → `faithfulness_metrics_v3.json`; comparar deltas vs publicado.
-3. Revisar los 50 claims (`--out-suffix _v3`).
-4. Decisiones: variante H2; política `.gitattributes`; nombre/fusión de rama (H7); reescritura de
-   `main.tex`/A.3 con las cifras `_v3` (cuándo).
+### Estado de decisiones de Enzo (2026-06-30/07-01)
+**Resueltas:**
+- Variante H2 = **vb_agree** (elegida tras el trade-off del sub-gate `_h2_variant_eval.py`).
+- Re-score corrido con base **y** small: `faithfulness_metrics_v3.json` (base) y
+  `faithfulness_metrics_v3_small.json` (small, comparable con la Tabla 6 publicada).
+- `.gitattributes` = **aplicado** (`* text=auto eol=lf`).
+- Rama (H7) = **seguir en `main`**; `pre-corpus-rebuild-2026-05-21` congelada (sin renombrar ni fusionar).
+- Timing reescritura A.3/`main.tex` = **hay margen, proceder** (cifras v3 confirmadas); la prosa del
+  paper sigue gated hasta OK explícito frase-por-frase.
+
+**Genuinamente pendiente (lado Enzo):**
+- Revisar a mano `output/audit/claim_audit_sample_v3.csv` (`juicio_humano` 0/50) — único ítem abierto.
+
+**Gated (espera OK explícito, no es trabajo de Enzo):** `git push` de los commits N8 (nada pusheado).
 
 ---
