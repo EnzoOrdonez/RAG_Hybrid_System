@@ -196,8 +196,14 @@ def main():
             "best_chunk_source", "best_chunk_text", "juicio_humano", "comentario"]
 
     def csv_escape(v):
+        # RFC4180: quote fields containing the delimiter/quote/newline AND
+        # double internal quotes. The old code wrapped in quotes but did NOT
+        # double internal `"`, producing malformed rows that shifted columns
+        # on parse (N8: ~1/50 rows of the v3 sample).
         v = str(v).replace("\r", " ").replace("\n", " ⏎ ")
-        return f'"{v}"' if ";" in v or '"' in v else v
+        if '"' in v or ";" in v:
+            return '"' + v.replace('"', '""') + '"'
+        return v
 
     csv_lines = [";".join(cols)]
     for i, s in enumerate(sample, 1):
