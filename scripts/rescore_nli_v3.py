@@ -41,13 +41,14 @@ SCENARIOS = ["lexico", "denso", "hibrido"]
 ENT_T = 0.7
 CONTR_T = 0.7
 BASE_LOCAL = PROJECT_ROOT / "data" / "models" / "nli-deberta-v3-base"
+SMALL_LOCAL = PROJECT_ROOT / "data" / "models" / "nli-deberta-v3-small"
 EXP_DIR = PROJECT_ROOT / "experiments/results/exp12_matrix"
 
 
 def model_path(verifier):
     if verifier == "base":
         return str(BASE_LOCAL) if BASE_LOCAL.exists() else "cross-encoder/nli-deberta-v3-base"
-    return "cross-encoder/nli-deberta-v3-small"
+    return str(SMALL_LOCAL) if SMALL_LOCAL.exists() else "cross-encoder/nli-deberta-v3-small"
 
 
 def main():

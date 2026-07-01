@@ -315,6 +315,10 @@ def main():
                     help="v3 re-score JSON (faithfulness_rescore_v3__*.json). When set, "
                          "overrides per-query NLI faithfulness/counts and writes "
                          "faithfulness_metrics_v3.json (ledger N8). v1/v2 artifacts untouched.")
+    ap.add_argument("--out-tag", default=None,
+                    help="Override the output suffix, e.g. v3_small -> "
+                         "faithfulness_metrics_v3_small.json (default: v3 when "
+                         "--faithfulness-source is set, else v2).")
     args = ap.parse_args()
 
     exp_dir = PROJECT_ROOT / "experiments" / "results" / args.experiment
@@ -328,6 +332,8 @@ def main():
         src = json.loads(Path(args.faithfulness_source).read_text(encoding="utf-8"))
         faith_override = src.get("configs", src)
         out_tag = "v3"
+    if args.out_tag:
+        out_tag = args.out_tag
 
     per_config = load_per_config(results_path, faith_override)
     configs = list(per_config.keys())
