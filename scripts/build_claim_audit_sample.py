@@ -116,7 +116,11 @@ def main():
             mismatches.append((cname, qid, agg,
                                {k: hm.get(f"{k}_claims" if k != "total" else "total_claims")
                                 for k in agg}))
-        rescore_cache[key] = details if ok else None
+        # v3 mode (--out-suffix): the corrected detector (artifacts excluded +
+        # vb_agree) INTENTIONALLY diverges from the persisted v1 aggregates, so
+        # the reproduce-persisted guard would reject everything. Keep the
+        # regenerated details; mismatches are still counted for the report.
+        rescore_cache[key] = details if (ok or args.out_suffix) else None
         return rescore_cache[key]
 
     sample = []
