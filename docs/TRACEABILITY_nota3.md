@@ -88,3 +88,30 @@ Tablas v3: `python scripts/_export_tabla6_v3.py exp12_matrix faithfulness_metric
 robusto bajo AMBOS verificadores base+small); entre-modelos **2/18 sig bajo small** (6/18 base) —
 corrige el "todo n.s." de N5; gemma/qwen **suben +0,05..0,11** al excluir artefactos. Veredictos y
 deltas: ledger **N8** en `paper/audit_findings_cc_addenda.md`; cifras en `RESULTADOS_RESUMEN.md` §3.
+
+### v4 (N9, 2026-07-02): exclusión de filas vacuas — TABLA CITABLE
+
+Las respuestas cuyos claims extraídos son TODOS artefactos (`genuine==0`; 59/1798, concentradas
+en gemma/qwen) entraban al denominador v3 como faithfulness=1,0 vacuo. v4 las excluye (mismo
+trato que method='none', Flag 137; decisión de Enzo 01/07, ledger N9):
+
+```bash
+python scripts/compute_faithfulness_metrics.py --experiment exp12_matrix \
+    --faithfulness-source experiments/results/exp12_matrix/faithfulness_rescore_v3__base__vb_agree.json \
+    --out-tag v4 --exclude-vacuous
+python scripts/compute_faithfulness_metrics.py --experiment exp12_matrix \
+    --faithfulness-source experiments/results/exp12_matrix/faithfulness_rescore_v3__small__vb_agree.json \
+    --out-tag v4_small --exclude-vacuous
+python scripts/_export_tabla6_v4.py exp12_matrix faithfulness_metrics_v4_small.json
+```
+
+**Tabla citable = `output/tables/nota3/tabla6_fidelidad_v4__exp12_matrix.md`.** Veredictos v4:
+retrieval n.s. 0/12 (robusto bajo ambos verificadores); entre-modelos 1/18 (small) y 1/18 (base),
+con pares supervivientes DISTINTOS entre verificadores — frágil. Ledger **N9**.
+
+Notas de reproducibilidad (N9): (a) la receta de Tabla 4 sobrescribe `retrieval_metrics__*.json`
+in-place en exp11, y sus oráculos (bge-reranker-large, ms-marco) pueden no estar en la caché local
+(re-descarga necesaria); (b) el veredicto de exp13 (expansión OFF≈ON) permanece bajo métrica v2 —
+comparación intra-modelo con el mismo confound en ambos brazos; si el paper lo cita junto a cifras
+v4, añadir nota de instrumento; (c) los rescores NLI usan `data/models/nli-deberta-v3-{base,small}`
+locales, no el hub de HF.

@@ -464,3 +464,121 @@ Artefactos small: `faithfulness_rescore_v3__small__vb_agree.json`, `faithfulness
 **Gated (espera OK explícito, no es trabajo de Enzo):** `git push` de los commits N8 (nada pusheado).
 
 ---
+
+
+## N9 — Auditoría integral pre-documentación + fidelidad v4 (2026-07-01/02)
+
+Ronda pedida como gate final antes de reescribir A.3/A.1/paper LACCI: auditoría de TODO el
+repositorio (código, datos, docs, tests, reproducibilidad, higiene), no solo la capa de fidelidad.
+Método: 15 agentes de auditoría en paralelo + verificación adversarial de hallazgos que afectan
+cifras + verificación directa de los números críticos; 7 áreas se cerraron inline tras un corte
+por límite de gasto. Reporte completo: `output/audit/N9_auditoria_integral_fase1_2026-07-01.md`.
+Veredicto global: el hallazgo central ("mejor retrieval no mejora significativamente la fidelidad")
+se sostiene bajo TODOS los análisis de la ronda; se encontró 1 P0 que movía cifras secundarias.
+
+### P0 — Filas "vacuas" (faithfulness=1,0 con 0 claims genuinos) en el denominador primario v3
+
+- **Hallazgo:** 59/1798 respuestas elegibles tienen `genuine==0` en los rescores v3 (todos los
+  claims extraídos son artefactos de formato) y entraban al denominador primario con
+  `faithfulness=1.0` vacuo (`rescore_nli_v3.py:104-107`; misma convención runtime en
+  `hallucination_detector.py:314`). Distribución: gemma 29, qwen 24, granite 5, mistral 1.
+  Bajo el v2 firmado esas filas promediaban 0,136 (44/59 ceros). Inconsistente con Flag 137
+  (method 'none'/'error' se excluye por fidelidad sintética). El sesgo favorece a los modelos
+  artefacto-pesados (gemma/qwen) — la misma dirección del confound H1 que N8 corrigió. La
+  atribución de N8 ("gemma/qwen suben +0,05..0,11 al limpiar el denominador") era incompleta:
+  parte sustancial del alza venía de estos 59 flips 0→1,0.
+- **Decisión de Enzo (01/07): excluir** las filas vacuas del denominador (mismo trato que
+  method='none'). Implementado como flag `--exclude-vacuous` en `compute_faithfulness_metrics.py`
+  (ruta única: la fila se marca `method="vacuous"` y entra a `EXCLUDED_METHODS`); artefactos
+  nuevos `faithfulness_metrics_v4{,_small}.json` + `tabla6_fidelidad_v4__exp12_matrix.{md,csv}`
+  vía `scripts/_export_tabla6_v4.py`. Nada firmado se tocó; v1/v2/v3 quedan como superseded.
+- **Impacto en cifras (v3 → v4, verificador small, primary_answered):** gemma léxico 0,443→0,413,
+  denso 0,425→0,377, híbrido 0,363→0,317; qwen léxico 0,361→0,255, denso 0,351→0,265, híbrido
+  0,354→0,294; granite y mistral SIN cambio (sus vacuas eran declinaciones ya excluidas).
+- **Veredictos corregidos:** entre-modelos **"2/18" → "1/18" bajo small** (sobrevive denso
+  granite-vs-mistral d_z=+0,415 p_bh=0,0136 n=75; cae léxico gemma-vs-mistral p_bh=0,214) y
+  **"6/18" → "1/18" bajo base** (sobrevive léxico gemma-vs-granite d_z=−0,531 p_bh=0,0383 n=42)
+  — el grueso de los pares "significativos" de N8 estaba sostenido por filas vacuas. Nótese que
+  el par superviviente difiere entre verificadores: el claim entre-modelos es FRÁGIL y debe
+  redactarse como tal. **"Retrieval n.s." ROBUSTO: 0/12 pares RAG-vs-RAG bajo ambos
+  verificadores, con y sin vacuas.**
+- Corrección de metadata en el mismo commit: `generated` era una fecha hardcodeada (2026-06-11)
+  y v3_small quedaba etiquetado "ledger N5"; ahora fecha real y mapeo v3→N8, v4→N9.
+
+### H5 — cerrado como decisión: réplicas dirigidas pendientes de ETA
+
+Memo cuantificado (solo lectura): a temp=0 el seed de Ollama es inoperante (greedy); el riesgo es
+varianza run-a-run por no-determinismo de kernels → corresponde hablar de RÉPLICAS, no seeds.
+Latencias reales exp12: gemma p50 38,8 s / p95 40,3 s; mistral p50 34,7 s / p95 93,0 s. Diseño
+mínimo dirigido ≈300 generaciones ≈3,3 h. **Decisión de Enzo (01/07): correr la variante dirigida**,
+DESPUÉS del recálculo v4 y con gate de ETA propio; objetivo: los pares supervivientes de v4
+(denso granite/mistral bajo small; léxico gemma/granite bajo base).
+
+### H6 — cerrado cuantitativamente (antes: "presente en una muestra, sin prevalencia")
+
+"Stay organized with collections…" en **8 144 chunks / 24 428 ocurrencias / 100 % GCP (95,7 % de
+8 509)**. Por campo: text 8 144, heading_path 8 142, section_hierarchy 8 142 (8 142×3+2=24 428 ✓).
+El índice SÍ está contaminado (BM25 y denso indexan solo `text`, `build_index.py:147-149,188-193`;
+el scraping concatenó sin espacio → tokens fusionados tipo 'resourcesstay'). Respuestas: 160/3 104
+RAG de exp12 (5,2 %) y 15/50 de exp13 reproducen el boilerplate (85 % dentro de `[Source: …]`).
+Impacto: SIN sesgo direccional (33,3 % del corpus pero solo ~15-17 % de slots top-5; 0/194 queries
+matchean; footprint ±1,8 pp entre escenarios) → comparaciones simétricas, se sostienen. Residual
+NUEVO: 62/14 469 claims-cita (0,43 %) con boilerplate sobreviven el filtro N8 y entran al NLI;
+cota ≤0,8 pp por config, no voltea veredictos. **Decisión de Enzo (01/07): documentar como
+limitación de curación** (párrafo listo en el reporte N9), sin recálculo por boilerplate.
+
+### Otros hallazgos de la auditoría integral (selección; lista completa en el reporte)
+
+- **Corrección al ledger histórico:** `paper/audit_findings.md:370` (Módulo 9) afirma que
+  `MultidimensionalScorer` estaba "Usado en rag_pipeline.py:159 y activado por
+  experiment_configs.py:599" — **falso**: cero call-sites en todo el git history (verificado en
+  las 4 versiones históricas de rag_pipeline.py); los Flags 61-68 auditan un módulo que nunca
+  corrió. El flag `multidimensional_scoring=True` es no-op (nadie lo lee), igual que
+  `terminology_normalization` y `reranker_top_k=20` (el funnel real es 50→5). Ninguna prosa
+  entregable menciona el scorer. Como `audit_findings.md` es inmutable, esta entrada es la
+  corrección de registro.
+- La enumeración N8 de pares base (6/18) omitía "denso mistral-vs-qwen (d_z=+0,50, p_bh=0,021,
+  n=46)" — irrelevante tras v4 (esa familia colapsó a 1/18), se registra por exactitud.
+- `smoke_nli_aggregation.py` FALLA desde el flip del default a vb_agree (espera semántica v0);
+  el correction_log lo registraba como "5/5 PASS". Fix en esta ronda.
+- Corpus: `corpus_stats.json` declara 2 697 documentos (procesados) pero el índice representa
+  2 644 doc_id únicos (−53, todos Azure, efecto del subsample Fase 2.5; chunks cuadran exactos
+  24 481). Redacción sugerida para A.3/paper: "2 697 documentos procesados, de los cuales 2 644
+  quedan representados en el índice tras el subsample estratificado".
+- Datos LIMPIOS: 194 queries (únicas), 25 cross-cloud (subset exacto), 24 481 chunks
+  (per-provider exacto, chunk_id=filename únicos), backup 200 = 194+6 removidas, chunk_map/FAISS
+  mapean los 24 481, bm25.pkl sin clases externas (pickletools).
+- Reproducibilidad: recetas verificadas flag-por-flag contra argparse (todas coinciden); los
+  rescores NLI corren offline (`data/models/nli-deberta-v3-{base,small}` locales); los oráculos de
+  la receta de Tabla 4 (bge-reranker-large, ms-marco) NO están hoy en caché local (requerirían
+  re-descarga); `smoke_test_nli`/`smoke_recompute_retrieval_stats` hardcodean nombres del hub
+  (fix: resolver local-first). La receta de Tabla 4 sobrescribe `retrieval_metrics__*.json`
+  in-place en exp11 — anotado como caución en TRACEABILITY.
+- UI: el botón Run Experiment de `experiments_page.py` podía sobrescribir `experiments/results/**`
+  y correr generación nueva sin guard (fix en esta ronda); dashboard presenta métricas v1 de
+  exp8b como "Official thesis baseline". Estudio B.4 (pendiente): 3 defectos pre-estudio
+  (break auto-continúa; reading_time_ms mide latencia del sistema, no lectura; checkpoint
+  corrupto se sobrescribe en silencio) — fixes en esta ronda.
+- 10 puntos del asesor (20/06) verificados uno por uno contra
+  `Feedback_Asesor_20_06_2026.docx`: 5 RESUELTOS, 3 PARCIALES (sección README dedicada; Key
+  Features con modelos viejos — 4º lugar que N8 no cubrió; tiempos estimados), 2 NO RESUELTOS
+  (README de data/evaluation para 200→194; capturas de demo). Tabla completa en el reporte N9.
+- pytest: 7 passed + 1 SKIPPED (la suite se describía como "8 verde"). Higiene: sin secretos,
+  único trackeado >5 MB = exp12 results.json (aceptado), 0 TODO/FIXME, GPL-3.0 consistente.
+
+### Artefactos de esta ronda
+
+- `experiments/results/exp12_matrix/faithfulness_metrics_v4.json`, `faithfulness_metrics_v4_small.json`
+- `output/tables/nota3/tabla6_fidelidad_v4__exp12_matrix.{md,csv}` (+ `scripts/_export_tabla6_v4.py`)
+- `scripts/compute_faithfulness_metrics.py` — flag `--exclude-vacuous` + metadata fix
+- `output/audit/N9_auditoria_integral_fase1_2026-07-01.md` — reporte completo de la auditoría
+- Fixes de código de la ronda: ver commits N9 en el historial
+
+### Cifras citables tras N9 (para la reescritura de A.3/A.1/paper)
+
+- Tabla 6 **v4_small** = la citable (`tabla6_fidelidad_v4__exp12_matrix.md`).
+- "Mejor retrieval no mejora significativamente la fidelidad": 0/12 pares RAG-vs-RAG n.s.,
+  robusto bajo ambos verificadores y bajo v3/v4 — el hallazgo central queda MÁS blindado.
+- Entre-modelos: "1/18 significativo bajo el verificador primario (small); el par superviviente
+  difiere entre verificadores y los modelos implicados no son deterministas a temp=0" — redactar
+  como resultado frágil/sugerente, no como hallazgo fuerte; réplicas dirigidas encoladas (H5).

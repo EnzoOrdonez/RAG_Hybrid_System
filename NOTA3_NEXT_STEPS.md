@@ -2,7 +2,11 @@
 
 > **ACTUALIZADO 2026-06-11: RONDA COMPLETA.** exp11 + exp12 (4 modelos × 4 escenarios × 194)
 > + exp13 (expansión) terminados; Phase 6 generada. Resumen autoritativo: **`RESULTADOS_RESUMEN.md`**.
-> Lo de abajo es el runbook original (histórico); solo queda figuras + reescritura A.3/A.1.
+> Lo de abajo es el runbook original (histórico).
+> **ACTUALIZADO 2026-07-02 (N9):** figuras f1-f4 ya generadas (f2/f3 en métrica v2; regenerar con
+> v4 antes del A.3). Queda: reescritura A.3/A.1/paper con cifras **v4** (Tabla 6 v4, "1/18",
+> ledger N9), revisión humana de `claim_audit_sample_v3.csv` (0/50) y réplicas H5 dirigidas
+> (~3,3 h, gate de ETA). Nota: exp13 usó 25 q cross-cloud (no 30, N6).
 
 ## exp12 matrix — COMPLETO (histórico: instrucciones de resume/run)
 

@@ -89,6 +89,20 @@ v2 (arriba) queda como *superseded documentado* (postura N8: ambas). Delta = exc
 de formato que inflaban su denominador con contradicciones-basura). Fuente:
 `faithfulness_metrics_v3_small.json`; tabla `output/tables/nota3/tabla6_fidelidad_v3`.
 
+**Tabla 6 v4 — CITABLE (small, N9): v3 + exclusión de respuestas 100%-artefactos** (`genuine==0`,
+59/1798, que en v3 entraban como faithfulness=1,0 vacuo; mismo trato que method='none', Flag 137):
+
+| Escenario | Granite 4.1 | Gemma 4 E4B | Mistral 7B | Qwen 3.5 9B |
+|---|---|---|---|---|
+| RAG léxico | 0,235 (75) | 0,413 (57) | 0,246 (114) | 0,255 (36) |
+| RAG denso | 0,247 (85) | 0,377 (60) | 0,281 (132) | 0,265 (45) |
+| RAG híbrido | 0,299 (87) | 0,317 (56) | 0,288 (122) | 0,294 (43) |
+
+Granite/mistral idénticos a v3 (sus vacuas eran declinaciones ya excluidas); gemma baja −0,03..−0,05
+y qwen −0,06..−0,11 respecto de v3 — parte del alza v2→v3 de gemma/qwen venía de los flips 0→1,0
+vacuos, no solo de limpiar el denominador. Fuente: `faithfulness_metrics_v4_small.json`; tabla
+`output/tables/nota3/tabla6_fidelidad_v4`. Detalle y decisión: ledger **N9**.
+
 Re-stats v2 (pareado por INTERSECCIÓN de no-excluidas en ambos brazos; n por par; familias BH):
 - **"El método de retrieval NO mueve la fidelidad" SE SOSTIENE bajo la métrica corregida:**
   ningún par RAG-vs-RAG significativo tras BH en ningún modelo. PERO ahora con matiz honesto:
@@ -105,7 +119,12 @@ Re-stats v2 (pareado por INTERSECCIÓN de no-excluidas en ambos brazos; n por pa
   entre modelos estaban **enmascaradas** por el sesgo asimétrico de artefactos (gemma 23 % / qwen 20 %
   / mistral 2 %). **Esto corrige el "todo n.s." de N5.** Lo que además es altamente significativo es el
   **comportamiento de declinación** (McNemar v2: mistral declina mucho menos que el resto, p≈0,000). El
-  trade-off declinación ↔ fidelidad sigue siendo un hallazgo, ahora junto a diferencias entre-modelos reales.
+  trade-off declinación ↔ fidelidad sigue siendo un hallazgo. **[Corregido en N9:** las filas vacuas
+  sostenían parte de esos pares; excluyéndolas (v4) quedan **1/18 bajo small** (denso
+  granite-vs-mistral d_z=+0,42 p_BH=0,014 n=75) y **1/18 bajo base** (léxico gemma-vs-granite
+  d_z=−0,53 p_BH=0,038 n=42). El par superviviente DIFIERE entre verificadores y los modelos
+  implicados no son deterministas a temp=0 → redactar como resultado frágil/sugerente, no como
+  hallazgo fuerte; réplicas dirigidas encoladas (H5/N9). El 0/12 RAG-vs-RAG se mantiene bajo v3 y v4.**]**
 
 **Desglose de claims (instrumento, `tabla_claims_desglose`):** % contradicted casi insensible
 al escenario y al modelo (27–39 %), y donde varía, sube con MEJOR contexto (gemma léxico→híbrido
@@ -187,7 +206,7 @@ gemma ~38 s (26 tok/s) · mistral ~34–45 s (10–14 tok/s) · granite ~65–89
   versionados; demo con caché segregado. Detalle completo: ledger **N7**.
 - Fuera del repo (humano): 50 claims, A.3 v7/A.1, figuras draw.io, SUS/B.4, video, actas.
 
-Artefactos: `output/tables/nota3/` (oracle_stability, tabla6_fidelidad_v2 + sensibilidad +
+Artefactos: `output/tables/nota3/` (oracle_stability, tabla6_fidelidad_v2/v3/v4 + sensibilidad +
 clasificación v2 + claims_desglose, tabla5 v2, latency); `experiments/results/exp{11,12,13}_*`
-(+ `faithfulness_metrics_v2.json`, `faithfulness_rescore__*.json`); `output/audit/`
-(muestra de 50 claims); `paper/audit_findings_cc_addenda.md` (N1–N6).
+(+ `faithfulness_metrics_v2.json`, `_v3*.json`, `_v4*.json`, `faithfulness_rescore*`); `output/audit/`
+(muestra de 50 claims); `paper/audit_findings_cc_addenda.md` (N1–N9).
