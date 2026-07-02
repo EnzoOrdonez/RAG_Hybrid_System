@@ -57,6 +57,7 @@ import json
 import logging
 import sys
 from collections import defaultdict
+from datetime import date
 from pathlib import Path
 
 import numpy as np
@@ -156,7 +157,8 @@ def mcnemar(b: int, c: int):
     return float(stat), float(_chi2.sf(stat, df=1))
 
 
-def load_per_config(results_path: Path, faith_override: dict = None):
+def load_per_config(results_path: Path, faith_override: dict = None,
+                    exclude_vacuous: bool = False):
     """config_name -> query_id -> per-query record (v1 fields + v2 class/claims).
 
     faith_override (ledger N8 / v3): optional
@@ -176,6 +178,12 @@ def load_per_config(results_path: Path, faith_override: dict = None):
             hm = r.get("hallucination_metrics", {}) or {}
             method = hm.get("method", "none")
             o = ov.get(r["query_id"])
+            if exclude_vacuous and o and o.get("genuine") == 0:
+                # N9: every extracted claim in the re-score is a format artifact
+                # (genuine==0), so the row carries no NLI signal and its
+                # faithfulness=1.0 is vacuous. Route it through the same
+                # exclusion path as method none/error (Flag 137).
+                method = "vacuous"
             per_q[r["query_id"]] = {
                 "faithfulness": (float(o["faithfulness"]) if o else faithfulness_of(hm)),
                 "method": method,
@@ -305,6 +313,16 @@ def run_family(per_config, pairs, label, include=None, metric_label="faithfulnes
     return nested
 
 
+def _ledger_for(tag: str) -> str:
+    """Ledger round that defines each metric lineage (N9: was hardcoded to
+    2026-06-11/N5 and mislabelled v3_small)."""
+    if tag.startswith("v4"):
+        return "N9"
+    if tag.startswith("v3"):
+        return "N8"
+    return "N5"
+
+
 def main():
     ap = argparse.ArgumentParser(description="Paired faithfulness statistics")
     ap.add_argument("--experiment", default="exp12_matrix")
@@ -319,6 +337,11 @@ def main():
                     help="Override the output suffix, e.g. v3_small -> "
                          "faithfulness_metrics_v3_small.json (default: v3 when "
                          "--faithfulness-source is set, else v2).")
+    ap.add_argument("--exclude-vacuous", action="store_true",
+                    help="N9: exclude responses whose re-scored claims are ALL "
+                         "format artifacts (genuine==0 -> vacuous faithfulness=1.0) "
+                         "from every denominator, mirroring the Flag 137 exclusion "
+                         "of method none/error. Requires --faithfulness-source.")
     args = ap.parse_args()
 
     exp_dir = PROJECT_ROOT / "experiments" / "results" / args.experiment
@@ -334,8 +357,14 @@ def main():
         out_tag = "v3"
     if args.out_tag:
         out_tag = args.out_tag
+    if args.exclude_vacuous:
+        if not args.faithfulness_source:
+            raise SystemExit("--exclude-vacuous requires --faithfulness-source "
+                             "(the per-row genuine counts live in the re-score)")
+        EXCLUDED_METHODS.add("vacuous")
 
-    per_config = load_per_config(results_path, faith_override)
+    per_config = load_per_config(results_path, faith_override,
+                                 exclude_vacuous=args.exclude_vacuous)
     configs = list(per_config.keys())
     parsed = {c: parse_config(c) for c in configs}
     scenarios = sorted({parsed[c][0] for c in configs})
@@ -466,10 +495,11 @@ def main():
         _canon = []
     out_v2 = {
         "experiment": args.experiment,
-        "metric": f"faithfulness_answered ({out_tag}, ledger {'N8' if out_tag == 'v3' else 'N5'})",
-        "generated": "2026-06-11",
+        "metric": f"faithfulness_answered ({out_tag}, ledger {_ledger_for(out_tag)})",
+        "generated": date.today().isoformat(),
         "faithfulness_source": args.faithfulness_source,
         "excluded_methods": sorted(EXCLUDED_METHODS),
+        "vacuous_exclusion": bool(args.exclude_vacuous),
         "decline_classifier_v2": {
             "opening_window_chars": OPENING_WINDOW,
             "canonical_patterns": list(_canon),
