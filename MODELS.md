@@ -86,7 +86,7 @@ before the timed matrix run.
 
 | Role | Model | Notes |
 |---|---|---|
-| Runtime verifier (exp1-13) | `cross-encoder/nli-deberta-v3-small` | HF cache; softmax + TRUE rule, ENT/CONTR thresholds 0.7, max over 5 chunks |
+| Runtime verifier (exp3-13) | `cross-encoder/nli-deberta-v3-small` | HF cache; softmax + TRUE rule, ENT/CONTR thresholds 0.7, max over 5 chunks |
 | Second verifier (F3b audit) | `cross-encoder/nli-deberta-v3-base` | **fp16** (max prob drift 1.8e-4 vs fp32); local snapshot `data/models/nli-deberta-v3-base/` (gitignored, ~700 MB) because HF downloads are blocked by TLS interception on this machine — re-download with `curl --ssl-no-revoke` |
 
 Agreement (N5): claim-level kappa **0.411** on the 50-claim human sample; config-mean

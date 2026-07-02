@@ -1,4 +1,8 @@
 """
+HISTORICO (N5) — superseded por rescore_nli_v3.py. NO re-ejecutar: sobrescribiria los
+artefactos firmados faithfulness_rescore__*.json con claims re-extraidos post-N8
+(el extractor actual excluye artefactos y los agregados divergirian).
+
 Second-verifier re-score of exp12 faithfulness + claim-format ablation (F3b, N5).
 
 Mirror of the retrieval multi-oracle (N2): if the faithfulness ordering holds

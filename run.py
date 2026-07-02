@@ -153,7 +153,7 @@ def cmd_query(args):
 
 
 def cmd_compare(args):
-    """Compare the 3 systems with the same query."""
+    """Compare ALL pipeline configs with the same query (4 since exp9: lexical, semantic, hybrid, llm_only control)."""
     from src.pipeline.rag_pipeline import RAGPipeline
     from src.pipeline.pipeline_config import PIPELINE_CONFIGS
 
@@ -342,7 +342,7 @@ def _print_response(response, compact=False):
 
 
 def _print_comparison_table(responses: dict):
-    """Print comparison table across the 3 systems."""
+    """Print comparison table across the compared systems."""
     console.print("\n[bold]═══ Latency Comparison ═══[/bold]")
 
     table = Table()
@@ -415,7 +415,7 @@ Examples:
     )
     parser.add_argument(
         "--compare", type=str,
-        help="Compare all 3 systems with the same query",
+        help="Compare all pipeline configs with the same query (4: lexical/semantic/hybrid/llm_only)",
     )
     parser.add_argument(
         "--health-check", action="store_true",

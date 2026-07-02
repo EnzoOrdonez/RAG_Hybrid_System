@@ -16,7 +16,7 @@
 
 ## What is CloudRAG?
 
-A hybrid Retrieval-Augmented Generation system that answers questions about cloud documentation from **AWS, Azure, GCP, Kubernetes, and CNCF**. It combines lexical search (BM25) with semantic search (dense embeddings) using Reciprocal Rank Fusion, cross-encoder re-ranking, and local LLMs via Ollama.
+A hybrid Retrieval-Augmented Generation system that answers questions about cloud documentation from **AWS, Azure, and GCP** (the experimental corpus; the crawler also supports Kubernetes/CNCF sources, which are excluded from the Nota 3 evidence). It combines lexical search (BM25) with semantic search (dense embeddings) using Reciprocal Rank Fusion, cross-encoder re-ranking, and local LLMs via Ollama.
 
 **Why hybrid?** Pure keyword search misses semantically related content. Pure embedding search misses exact technical terms. CloudRAG fuses both to get the best of each approach — then re-ranks with a cross-encoder for precision.
 
@@ -29,9 +29,9 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 - **Adaptive chunking**: Preserves code blocks and tables as atomic units
 - **Cross-encoder re-ranking**: ms-marco-MiniLM-L-12-v2 for precision refinement
 - **Hallucination detection**: NLI-based faithfulness scoring with DeBERTa v3
-- **Local LLMs**: Runs entirely on your machine with Ollama (Llama 3.1, Mistral, Qwen)
+- **Local LLMs**: Runs entirely on your machine with Ollama (demo: Llama 3.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see MODELS.md)
 - **Streamlit UI**: 5-page web interface with chat, metrics dashboard, and evaluation tools
-- **Benchmarking suite**: 13 experiments with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
+- **Benchmarking suite**: 12 versioned experiments (exp3-exp13 + exp8b) with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
 
 ---
 
@@ -131,13 +131,31 @@ python run.py --health-check
 
 ### Environment & reproducibility (required for experiments)
 
-The evidence snapshot for the Nota 3 round (exp9-13, v2 faithfulness metric,
-ledger N1-N7) is published as the annotated tag **`nota3-evidencia-2026-06-11`**
-on this repository — check it out to reproduce the paper's numbers exactly.
+The raw-evidence snapshot for the Nota 3 round (exp9-13) is published as the annotated
+tag **`nota3-evidencia-2026-06-11`** (v2-era faithfulness metric, ledger N1-N7). The
+citable faithfulness figures were since corrected **offline** — v3 (N8: format-artifact
+exclusion) and **v4 (N9: vacuous-row exclusion; the citable Tabla 6)** — without touching
+the signed raw outputs. See `RESULTADOS_RESUMEN.md` and ledger entries N8/N9; a post-N9
+tag will mark the documentation-ready state.
 
 **Traceability + minimal repro recipes:** [docs/TRACEABILITY_nota3.md](docs/TRACEABILITY_nota3.md)
 maps every cited table/figure to its experiment → script → output path, and lists the commands
-to regenerate only the report's artifacts (without re-running all 13 experiments).
+to regenerate only the report's artifacts (without re-running the full experiment suite).
+
+### Reproducing the Nota 3 report (evidence -> tables)
+
+The raw outputs (`experiments/results/exp9..13`) are versioned; every cited number is
+re-derivable offline from them. Citable artifacts and estimated runtimes:
+
+| What | Command (see TRACEABILITY for flags) | Est. time / hardware |
+|---|---|---|
+| Tabla 6 **v4** (faithfulness, citable) | `compute_faithfulness_metrics.py --exclude-vacuous` + `_export_tabla6_v4.py` | ~1 min CPU (re-aggregation only) |
+| Tabla 4 (retrieval, both oracles) | `compute_retrieval_metrics.py --oracle-model ...` | ~10-20 min (GPU helps; downloads oracle models if not cached; **overwrites** `retrieval_metrics__*.json` in place) |
+| NLI re-score v3 (base+small) | `rescore_nli_v3.py --verifier base|small` | ~1-2 h GPU 6 GB (models in `data/models/`, ~3.3 GB, gitignored) |
+| Figures f1-f4 (+f2 v4) | `_make_figures_nota3.py` | ~1 min CPU |
+| Full exp12 matrix (NOT needed to verify the report) | `run_generation_matrix.py` | ~30 h GPU + Ollama, new LLM generation |
+
+Query-set curation (200 -> 194) is documented in `data/evaluation/README.md`.
 
 All experiment/benchmark runs must set these environment variables **before**
 launching Python, so they are read at interpreter startup:
@@ -238,16 +256,16 @@ cloudrag/
 
 ## Experiments
 
-13 experiments covering retrieval strategies, re-ranking, LLM comparison, ablation, and
-cross-cloud evaluation. exp1-8 ran on the pre-rebuild corpus/oracle and are kept as
-history; the paper's evidence is the final round (exp9-13, curated 194-query set,
-multi-oracle):
+12 versioned experiments (exp3-exp13 + exp8b) covering retrieval strategies, re-ranking,
+LLM comparison, ablation, and cross-cloud evaluation. exp3-8/8b ran on the pre-rebuild
+corpus/oracle and are kept as history; the paper's evidence is the final round (exp10-13
+on the curated 194-query set + exp9 control on the pre-curation 200-query set):
 
 | Experiment | What it tests | Key finding |
 |------------|--------------|-------------|
-| exp9 | LLM-only control (no RAG) | Fabricates in 195/200; RAG's floor baseline |
+| exp9 | LLM-only control (no RAG), pre-curation 200-query set | Fabricates in 195/200; RAG's floor baseline |
 | exp10-11 | Retrieval, multi-oracle (D12 fix) | Hybrid>Dense real (d_z +0.45) but inflated under circular oracle (0.995 vs 0.740); edge lives in the rerank stage |
-| exp12 | Faithfulness matrix (4 LLMs × 4 scenarios × 194) | RAG ≫ no-RAG; retrieval method n.s. on faithfulness (N5, 2 verifiers × 4 denominators) |
+| exp12 | Faithfulness matrix (4 LLMs × 4 scenarios × 194) | RAG ≫ no-RAG; retrieval method n.s. on faithfulness — robust under metrics v2/v3/v4 (ledgers N5/N8/N9), 2 verifiers × 4 denominators |
 | exp13 | Cross-cloud expansion ON vs OFF (D11 fix) | Expansion does NOT help; the earlier exp7 "+16.8%" claim is **retired** (its arms ran identical retrieval — N1/N4) |
 
 Paired stats throughout: Wilcoxon signed-rank + Cohen's d_z + bootstrap CI, BH/Holm

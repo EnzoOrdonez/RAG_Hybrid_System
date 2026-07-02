@@ -7,6 +7,7 @@ el caption va en el documento, no en la figura).
 
   f1_retrieval_ndcg_oraculos.png   NDCG@5 por sistema × oráculo (N2)
   f2_fidelidad_v2.png              faithfulness_answered escenario × modelo (+n)
+  f2_fidelidad_v4.png              ídem con la métrica v4 (N9, sin filas vacuas) — CITABLE
   f3_census_declinacion_v2.png     % pure/hedged/answered apilado por config
   f4_latencia_gen_p50.png          gen p50 (s) por modelo, híbrido (qwen = cota sup.)
 
@@ -74,8 +75,14 @@ def _load_v2():
                       .read_text(encoding="utf-8"))["systems_v2"]
 
 
-def f2_fidelidad():
-    sys2 = _load_v2()
+def _load_v4():
+    return json.loads((ROOT / "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json")
+                      .read_text(encoding="utf-8"))["systems_v2"]
+
+
+def f2_fidelidad(sys2=None, tag="v2"):
+    if sys2 is None:
+        sys2 = _load_v2()
     colors = {"lexico": "#a0aec0", "denso": "#4a8fd4", "hibrido": "#2b6cb0"}
     x = range(len(MODELS))
     w = 0.26
@@ -94,11 +101,11 @@ def f2_fidelidad():
                         va="bottom", fontsize=7.5)
     ax.set_xticks(list(x))
     ax.set_xticklabels([MODEL_DISP[m] for m in MODELS])
-    ax.set_ylabel("Fidelidad NLI en contestadas (primaria v2)")
+    ax.set_ylabel(f"Fidelidad NLI en contestadas (primaria {tag})")
     ax.set_ylim(0, 0.52)
     ax.legend(frameon=False, ncols=3, loc="upper center")
     fig.tight_layout()
-    fig.savefig(OUT / "f2_fidelidad_v2.png", dpi=300)
+    fig.savefig(OUT / f"f2_fidelidad_{tag}.png", dpi=300)
     plt.close(fig)
 
 
@@ -159,6 +166,7 @@ def f4_latencia():
 if __name__ == "__main__":
     f1_retrieval()
     f2_fidelidad()
+    f2_fidelidad(_load_v4(), tag="v4")
     f3_census()
     f4_latencia()
     print("Figuras escritas en", OUT)

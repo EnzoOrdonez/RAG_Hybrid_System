@@ -17,8 +17,9 @@ Se carga automáticamente cada sesión; estas reglas no hace falta repetirlas.
 
 ## Restricciones inviolables (evidencia de la tesis)
 
-- **NO modificar/borrar** `experiments/results/exp1..exp13` (evidencia firmada, tag
-  `nota3-evidencia-2026-06-11`). Todo recálculo = archivos **`_v3` nuevos**.
+- **NO modificar/borrar** `experiments/results/exp3..exp13` (+`exp8b`; no existen exp1/exp2)
+  — evidencia firmada, tag `nota3-evidencia-2026-06-11`. Todo recálculo = archivos
+  **`_vN` nuevos** (v3=N8, v4=N9, ...).
 - **NO generación LLM nueva**; solo re-análisis offline de respuestas guardadas.
 - Entorno: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42`, seed=42. Intérprete con
   stack ML = `py 3.14` (`...\pythoncore-3.14-64\python.exe`), no el `python` del PATH (3.11).
