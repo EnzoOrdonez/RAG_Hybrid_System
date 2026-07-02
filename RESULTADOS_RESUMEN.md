@@ -119,12 +119,15 @@ Re-stats v2 (pareado por INTERSECCIÓN de no-excluidas en ambos brazos; n por pa
   entre modelos estaban **enmascaradas** por el sesgo asimétrico de artefactos (gemma 23 % / qwen 20 %
   / mistral 2 %). **Esto corrige el "todo n.s." de N5.** Lo que además es altamente significativo es el
   **comportamiento de declinación** (McNemar v2: mistral declina mucho menos que el resto, p≈0,000). El
-  trade-off declinación ↔ fidelidad sigue siendo un hallazgo. **[Corregido en N9:** las filas vacuas
-  sostenían parte de esos pares; excluyéndolas (v4) quedan **1/18 bajo small** (denso
-  granite-vs-mistral d_z=+0,42 p_BH=0,014 n=75) y **1/18 bajo base** (léxico gemma-vs-granite
-  d_z=−0,53 p_BH=0,038 n=42). El par superviviente DIFIERE entre verificadores y los modelos
-  implicados no son deterministas a temp=0 → redactar como resultado frágil/sugerente, no como
-  hallazgo fuerte; réplicas dirigidas encoladas (H5/N9). El 0/12 RAG-vs-RAG se mantiene bajo v3 y v4.**]**
+  trade-off declinación ↔ fidelidad sigue siendo un hallazgo. **[Corregido en N9 — framing B
+  (decisión de Enzo, 02/07):** las filas vacuas sostenían parte de esos pares. Excluyéndolas (v4)
+  y aplicando el MISMO estándar de doble verificador con el que se defiende el hallazgo central,
+  **0/18 pares entre-modelos significativos bajo los dos verificadores**: cada verificador marca
+  1/18 par —distinto— (small: denso granite-vs-mistral d_z=+0,42 p_BH=0,014 n=75; base: léxico
+  gemma-vs-granite d_z=−0,53 p_BH=0,038 n=42) que NO se sostiene al cruzar verificadores —
+  resultado frágil atribuible al instrumento (cf. TRUE, arXiv:2204.04991; Verifying the
+  Verifiers, arXiv:2506.13342), no hallazgo. El 0/12 RAG-vs-RAG se mantiene bajo v3 y v4;
+  réplicas H5 en curso solo como nota de refuerzo.**]**
 
 **Desglose de claims (instrumento, `tabla_claims_desglose`):** % contradicted casi insensible
 al escenario y al modelo (27–39 %), y donde varía, sube con MEJOR contexto (gemma léxico→híbrido

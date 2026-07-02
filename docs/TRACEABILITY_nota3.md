@@ -106,8 +106,10 @@ python scripts/_export_tabla6_v4.py exp12_matrix faithfulness_metrics_v4_small.j
 ```
 
 **Tabla citable = `output/tables/nota3/tabla6_fidelidad_v4__exp12_matrix.md`.** Veredictos v4:
-retrieval n.s. 0/12 (robusto bajo ambos verificadores); entre-modelos 1/18 (small) y 1/18 (base),
-con pares supervivientes DISTINTOS entre verificadores — frágil. Ledger **N9**.
+retrieval n.s. 0/12 (robusto bajo ambos verificadores); entre-modelos **0/18 significativos bajo
+los dos verificadores** (mismo estándar dual del hallazgo central; cada verificador marca 1 par
+distinto que no se sostiene al cruzarlos — frágil, atribuible al instrumento). Ledger **N9** +
+cierre N9.
 
 Notas de reproducibilidad (N9): (a) la receta de Tabla 4 sobrescribe `retrieval_metrics__*.json`
 in-place en exp11, y sus oráculos (bge-reranker-large, ms-marco) pueden no estar en la caché local
