@@ -125,4 +125,6 @@ locales, no el hub de HF; (d) el camino CANÓNICO de los prompts de exp12 es
 `scripts/run_generation_matrix.py` (ruteo por query_type: 115/194 no-default vía QueryProcessor +
 build_prompt); `RAGPipeline.query()` con la config evaluada (query_expansion=OFF post-N4) NO lo
 replica — clasifica todo como default (`rag_pipeline.py:120-123,204-210`). Reproducir prompts =
-usar el runner, no el pipeline de la demo (hallazgo N9 #6).
+usar el runner, no el pipeline de la demo (hallazgo N9 #6); (e) figuras: f2 tiene variante v4
+(`f2_fidelidad_v4.png`, CITABLE); f3_census_declinacion_v2 sigue VIGENTE bajo v4 — el censo de
+declinación es idéntico entre v2 y v4 (verificado 16/16 configs, cierre N9) y no se regenera.

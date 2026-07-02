@@ -6,6 +6,11 @@ Fase 2 ejecutó fixes en 4 commits (`e671f67`, `3d1e2a6`, `61ad8e8`, `5d4ff2c`, 
 `nota3-N9-v4-2026-07-02`). Este documento da el estado REAL por ítem, con evidencia verificada
 HOY contra disco/commits — no lo que los commits dicen que hicieron. Réplicas H5 corriendo aparte.
 
+> **ADDENDUM (mismo día, commit `14dda9e`):** tras el snapshot de esta tabla se cerraron dos ítems:
+> **#6 → FIXED-BY-DOC** (nota (d) en TRACEABILITY: el camino canónico de prompts de exp12 es el runner)
+> y **#4b → FIXED** (headers de `tabla5/tabla6 v2` con nota SUPERSEDED → v4 citable). La tabla de abajo
+> conserva el estado del snapshot para trazabilidad.
+
 ## Convenciones de estado
 
 - **FIXED** — corregido en código/datos y verificado (comando o archivo citado).
@@ -86,12 +91,38 @@ n=42). Ningún par es significativo bajo AMBOS.
 - Contra: renuncia al matiz "N8 corrigió el 'todo n.s.'" (vuelve, en la práctica, a un n.s.
   entre-modelos, ahora con mejor justificación); pierde el único resultado positivo entre-modelos.
 
-**Dato adicional en camino:** las réplicas H5 (corriendo, ~2 h restantes) miden si el par del
-primario (denso granite-vs-mistral) es siquiera estable run-a-run. Si sale SENSIBLE, el framing B
-se refuerza solo; si sale ESTABLE, el framing A gana defensa. **Puedes decidir ahora o esperar
-las réplicas.**
+**Dato adicional (réplicas H5):** el run fue DETENIDO en **140/300** (2026-07-02 ~11:13;
+origen del stop no confirmado). Checkpoint intacto en
+`experiments/results/exp14_h5_replicas/replicas_checkpoint.json`: gemma 75/75 (brazo B),
+granite 65/75 (par A); mistral y granite-léxico sin empezar → **ningún par tiene ambos brazos:
+contrastes aún no computables**. Ritmo real 94 s/gen (granite 160-200 s/gen, ~4-5× el p50 de
+exp12 — contención GPU con el NLI residente) → **restante ≈4,2 h**, no las ~1,5 estimadas.
+
+Para RESUMIR (resume automático desde 140):
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42 \
+python scripts/run_h5_replicas.py            # intérprete py3.14 con stack ML
+```
+
+Luego: `python scripts/_analyze_h5_replicas.py` → veredicto ESTABLE/SENSIBLE por par.
+Si sale SENSIBLE, el framing B se refuerza; si ESTABLE, el framing A gana defensa.
+**Puedes decidir el framing ahora (A/B) o tras completar las réplicas.**
 
 ---
 *Generado en la sesión N9 Fase 2/3. Fuentes verificables: commits `e671f67..5d4ff2c`, tag
 `nota3-N9-v4-2026-07-02`, `paper/audit_findings_cc_addenda.md` (N9),
 `output/audit/N9_auditoria_integral_fase1_2026-07-01.md`.*
+
+## Cierre de sesión (fases 1-6, mismo día — verificación ítem por ítem)
+
+| Fase | Resultado | Evidencia |
+|---|---|---|
+| F1 PRE | ✅ | pytest 7+1skip; `git diff --diff-filter=M` vs tag 2026-06-11 → 0 modificados en evidencia; v4 reproducido desde JSON (1/18 small + 1/18 base, pares distintos; 0/12; 16/16 celdas CSV==JSON) |
+| F2 framing B | ✅ commit `1c66f33` | 4 docs + exporter; tabla v4 regenerada con 0 celdas cambiadas (diff = solo nota); reportes de output/audit intactos (histórico) |
+| F3 corpus | ✅ commit `5a85468` | Reconteo independiente: 2 644 doc_id únicos / 24 481 chunks en chunk_map; README + campo aditivo en corpus_stats + TRACEABILITY |
+| F4.1 diagnóstico stop | ✅ (causa: kill de sesión/harness) | wevtutil System 10:45-11:30: solo IDs 18/10016, cero eventos de energía → el SO no durmió; el proceso murió justo tras el checkpoint 140. Get-WinEvent roto en esta máquina (EventLogException) — incidencia de entorno anotada |
+| F4.2 contención | ⛔ **STOP activado** | Test offline (0 generación nueva): gemma 3/25 réplicas idénticas (0/25 vs exp12); granite 1/22 (0/22 vs exp12). Medias por celda estables (Δ≤0,017). Run NO reanudado; re-decisión de Enzo pendiente |
+| F4.3 plan nocturno | ⏸ suspendido por F4.2 | Comando de resume sigue documentado arriba; solo aplica si Enzo elige repetir bajo régimen controlado |
+| F5 figuras | ✅ | f2_v4 == tabla v4 (redondeo); censo v2==v4 en 16/16 → f3_v2 vigente, no se regenera (nota en TRACEABILITY) |
+| F6 POST | ✅ | pytest 7+1skip; evidencia intacta 2ª pasada; entrada "Cierre N9" en ledger; este cuadro |

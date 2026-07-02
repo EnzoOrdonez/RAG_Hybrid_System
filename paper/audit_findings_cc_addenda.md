@@ -582,3 +582,55 @@ limitación de curación** (párrafo listo en el reporte N9), sin recálculo por
 - Entre-modelos: "1/18 significativo bajo el verificador primario (small); el par superviviente
   difiere entre verificadores y los modelos implicados no son deterministas a temp=0" — redactar
   como resultado frágil/sugerente, no como hallazgo fuerte; réplicas dirigidas encoladas (H5).
+
+### Cierre N9 (2026-07-02) — decisiones de Enzo aplicadas + hallazgo de entorno en H5
+
+**Decisión 1 — framing entre-modelos = Opción B.** Redacción final: **"0/18 pares entre-modelos
+significativos bajo los dos verificadores"** — el mismo estándar de doble verificador con el que se
+defiende el hallazgo central. Los pares que aparecen bajo UN solo verificador (small: denso
+granite-vs-mistral d_z=+0,415 p_bh=0,0136 n=75; base: léxico gemma-vs-granite d_z=−0,531
+p_bh=0,0383 n=42) se reportan como resultado frágil que no se sostiene al cruzar verificadores,
+atribuible al instrumento — consistente con la meta-evaluación de verificadores NLI (TRUE,
+arXiv:2204.04991; Verifying the Verifiers, arXiv:2506.13342). **SUPERSEDE la línea "1/18 bajo el
+verificador primario" de la sección "Cifras citables tras N9" de esta misma entrada.** Aplicado en
+RESULTADOS_RESUMEN §3, TRACEABILITY §v4, NOTA3_NEXT_STEPS y la nota de tabla6_fidelidad_v4
+(regenerada: 0 celdas cambiadas, solo la nota). Los reportes de output/audit/ quedan como registro
+histórico pre-decisión.
+
+**Decisión 2 — corpus.** "2 697 documentos procesados, 2 644 representados en el índice" aplicado
+en README, `data/corpus_stats.json` (campo aditivo `documents_represented_in_index`;
+`total_documents` intacto) y TRACEABILITY, con reconteo independiente contra chunk_map antes de
+escribir (24 481 chunks; delta = 53 docs Azure del subsample Fase 2.5).
+
+**Decisión 3 — H5: STOP por evidencia (gate del test de contención).** El run de réplicas se
+detuvo en 140/300 (~11:12). Diagnóstico del stop: `wevtutil` System 10:45-11:30 muestra SOLO
+eventos ID 18/10016 — **cero eventos de energía/suspensión/apagado** → kill externo a nivel de
+sesión/harness, no del SO (Get-WinEvent está roto en esta máquina: EventLogException en toda
+consulta — anotado como incidencia de entorno). Test de contención OFFLINE (cero generación
+nueva; 140 muestras vs checkpoints exp12 + auto-consistencia de réplicas): **NO bit-idéntico** —
+gemma 3/25 queries con réplicas idénticas (0/25 vs exp12) y **granite 1/22 (0/22 vs exp12), pese
+a su probe determinista de exp12**. El entorno de generación ACTUAL no es determinista ni para
+granite (hipótesis: presión de VRAM con NLI+embedder residentes → offload parcial, coherente con
+160-200 s/gen vs p50 35-40 s; posible cambio de versión de Ollama desde mayo). Matiz cuantificado:
+las MEDIAS por celda entre réplicas son ESTABLES (gemma 0,327/0,344/0,344; granite
+0,294/0,296/0,287; Δ≤0,017 con n≈20-25; similitud textual media 0,73-0,75; spread de faithfulness
+por query hasta 0,67) — ruido por-generación, no por-agregado. Conforme al gate: **el run NO se
+reanuda**; los 140 parciales quedan en disco sin commitear como evidencia del ruido de entorno;
+la decisión de continuación (abortar y documentar / repetir bajo régimen controlado con
+NLI/embedder en CPU y re-probe de determinismo) es de Enzo. Este hallazgo **NO afecta las cifras
+firmadas** de exp12/exp13 (medidas sobre salidas registradas; el probe de exp12 pasó en su entorno
+y momento), pero añade una precisión obligatoria para la reescritura: **"granite determinista a
+temp=0" es una propiedad dependiente del entorno, no del modelo.**
+
+**Figuras (Fase 5).** f2_fidelidad_v4.png verificada contra la tabla v4 (valores coinciden al
+redondeo de figura). `decline_census_v2` idéntico entre v2 y v4 en 16/16 configs →
+**f3_census_declinacion_v2.png sigue vigente bajo v4** (la exclusión de vacuas no toca la
+clasificación de declinación); no se regenera.
+
+**Verificación de la sesión de cierre:** pytest 7 passed + 1 skipped (PRE y POST); evidencia
+exp3..13 intacta contra el tag `nota3-evidencia-2026-06-11` en dos pasadas (0 archivos
+modificados; solo los `_v3`/`_v4` nuevos); cifras v4 reproducidas desde JSON antes de redactar
+(1/18+1/18 pares distintos, 0/12, 16/16 celdas CSV==JSON).
+
+**Condicionados:** continuación de H5 (decisión de Enzo); revisión humana de
+`claim_audit_sample_v3.csv` sigue 0/50 (de Enzo).
