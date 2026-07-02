@@ -6,6 +6,11 @@ trazabilidad del asesor (20/06/2026).
 
 ## Corpus experimental vs corpus del repo
 
+> **Precision N9 (2026-07-02):** los 2 697 documentos son los *procesados*; el indice
+> experimental representa **2 644** doc_id unicos (el subsample de Fase 2.5 elimino todos
+> los chunks de 53 docs de Azure). Los 24 481 chunks cuadran exactos y ninguna metrica usa
+> el conteo de documentos. Ver `data/corpus_stats.json::documents_represented_in_index`.
+
 - **Corpus experimental (exp9-13, lo que cita el informe):** subconjunto AWS/Azure/GCP =
   **2.697 documentos / 24.481 chunks** (`data/chunks/adaptive/size_500/*.json`).
 - El README reporta el corpus **general** del repo (3.951 docs / 46.318 chunks, incluye

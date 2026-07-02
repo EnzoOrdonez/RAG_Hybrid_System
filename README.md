@@ -92,7 +92,9 @@ Query → Normalization + Expansion
 3,951 documents, 46,318 indexed chunks (adaptive chunking, 500 tokens):
 
 > **Experimental corpus (Nota 3, exp9-13):** the AWS/Azure/GCP subset only —
-> **2,697 documents / 24,481 chunks**. Kubernetes + CNCF are indexed in the repo
+> **2,697 processed documents (2,644 represented in the index after the stratified
+> subsampling; the delta is 53 Azure docs whose chunks were all removed) / 24,481
+> chunks**. Kubernetes + CNCF are indexed in the repo
 > but were not part of the report's experimental runs.
 
 | Source | Documents | Description |

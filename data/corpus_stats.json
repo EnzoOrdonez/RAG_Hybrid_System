@@ -48,6 +48,8 @@
     }
   },
   "total_documents": 2697,
+  "documents_represented_in_index": 2644,
+  "documents_represented_note": "total_documents = documentos fuente procesados; el subsample estratificado (Fase 2.5, 2026-05-26) elimino todos los chunks de 53 documentos de Azure, dejando 2644 doc_id unicos en el indice de 24481 chunks. Reconteo verificado contra chunk_map (cierre N9, 2026-07-02).",
   "total_chunks": 24481,
   "chunking_config": {
     "strategy": "adaptive",
