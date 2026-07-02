@@ -1,0 +1,85 @@
+{
+  "experiment_id": "exp14_h5_replicas",
+  "purpose": "H5 (N9): varianza run-a-run de los pares entre-modelos post-v4",
+  "seed": 42,
+  "temperature": 0.0,
+  "cache_enabled": false,
+  "n_replicas": 3,
+  "n_queries_per_pair": 25,
+  "pairs": {
+    "A_denso_granite_vs_mistral": {
+      "scenario": "denso",
+      "models": [
+        "granite4.1:8b",
+        "mistral:7b-instruct"
+      ],
+      "verifier": "small",
+      "eligible": 75,
+      "sampled": [
+        "q005",
+        "q016",
+        "q018",
+        "q034",
+        "q035",
+        "q036",
+        "q038",
+        "q043",
+        "q070",
+        "q075",
+        "q078",
+        "q080",
+        "q083",
+        "q085",
+        "q090",
+        "q093",
+        "q100",
+        "q103",
+        "q121",
+        "q148",
+        "q172",
+        "q173",
+        "q187",
+        "q189",
+        "q195"
+      ]
+    },
+    "B_lexico_gemma_vs_granite": {
+      "scenario": "lexico",
+      "models": [
+        "gemma4:e4b",
+        "granite4.1:8b"
+      ],
+      "verifier": "base",
+      "eligible": 42,
+      "sampled": [
+        "q001",
+        "q002",
+        "q011",
+        "q022",
+        "q026",
+        "q029",
+        "q030",
+        "q039",
+        "q041",
+        "q044",
+        "q046",
+        "q051",
+        "q054",
+        "q057",
+        "q070",
+        "q083",
+        "q085",
+        "q095",
+        "q100",
+        "q110",
+        "q116",
+        "q121",
+        "q162",
+        "q180",
+        "q195"
+      ]
+    }
+  },
+  "created": "2026-07-02T07:32:25.165174",
+  "instrument": "HallucinationDetector runtime post-N8 (artefactos excluidos, vb_agree); análisis oficial offline bajo convención v4"
+}
