@@ -1,5 +1,7 @@
 # Tabla 6 v2 — Fidelidad en respuestas contestadas (faithfulness_answered) — exp12_matrix
 
+> **SUPERSEDED (N9):** métrica v2 conservada como histórico/sensibilidad. La tabla CITABLE es `tabla6_fidelidad_v4__exp12_matrix.md` (v4 = artefactos excluidos + sin filas vacuas; ledger N8/N9).
+
 Métrica primaria v2 (N5): media de fidelidad NLI sobre respuestas NO declinadas (excluye pure_decline = marcador de rechazo en los primeros 300 caracteres; incluye respuestas con hedge tardío). n_answered entre paréntesis. `*` Sin RAG = 0 por construcción (N3).
 
 | Escenario | Granite 4.1 8B | Gemma 4 E4B | Mistral 7B | Qwen 3.5 9B |

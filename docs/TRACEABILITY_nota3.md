@@ -114,4 +114,8 @@ in-place en exp11, y sus oráculos (bge-reranker-large, ms-marco) pueden no esta
 (re-descarga necesaria); (b) el veredicto de exp13 (expansión OFF≈ON) permanece bajo métrica v2 —
 comparación intra-modelo con el mismo confound en ambos brazos; si el paper lo cita junto a cifras
 v4, añadir nota de instrumento; (c) los rescores NLI usan `data/models/nli-deberta-v3-{base,small}`
-locales, no el hub de HF.
+locales, no el hub de HF; (d) el camino CANÓNICO de los prompts de exp12 es
+`scripts/run_generation_matrix.py` (ruteo por query_type: 115/194 no-default vía QueryProcessor +
+build_prompt); `RAGPipeline.query()` con la config evaluada (query_expansion=OFF post-N4) NO lo
+replica — clasifica todo como default (`rag_pipeline.py:120-123,204-210`). Reproducir prompts =
+usar el runner, no el pipeline de la demo (hallazgo N9 #6).
