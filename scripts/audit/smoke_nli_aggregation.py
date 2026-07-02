@@ -56,6 +56,10 @@ def _run_case(name, scored_chunks, expected_status, expected_chunk_id):
     scores = [row for _, row in scored_chunks]
 
     det = HallucinationDetector(use_nli=True)
+    # N9: este smoke documenta la semántica v0 de Flag 138 (max por clase, sin
+    # guarda). El default runtime es vb_agree desde N8; se fija v0 explícito
+    # para que el caso "mixed signal -> contradicted" siga siendo el contrato.
+    det.nli_variant = "v0"
     # Bypass lazy loader with the scripted stub.
     det._nli_model = _ScriptedNLI(scores)
     det._nli_available = True

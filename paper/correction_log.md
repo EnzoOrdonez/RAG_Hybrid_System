@@ -449,5 +449,13 @@ v3 definitivo. **GATE de push:** pendiente de confirmación explícita (nada pus
 
 ---
 
+## N9 (2026-07-02) — correcciones de la ronda de auditoría integral
 
-
+- **smoke_nli_aggregation.py**: tras el flip del default runtime a vb_agree (N8) el smoke
+  fallaba (esperaba la semántica v0 de Flag 138) pese a estar registrado arriba como 5/5 PASS.
+  Fix: fija nli_variant='v0' explícito (el smoke documenta el contrato v0). Verificado: exit 0.
+- **smoke_test_nli.py**: hardcodeaba el nombre del hub; ahora resuelve local-first contra
+  data/models/nli-deberta-v3-small (mismo criterio que rescore_nli_v3). Verificado: exit 0.
+- **compute_faithfulness_metrics.py**: metadata generated hardcodeada (2026-06-11) y etiqueta
+  de ledger errónea en v3_small (decía N5); corregido junto con el flag --exclude-vacuous (N9).
+- Detalle completo de la ronda: paper/audit_findings_cc_addenda.md entrada N9.

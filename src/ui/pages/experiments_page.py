@@ -10,7 +10,9 @@ from pathlib import Path
 import streamlit as st
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-RESULTS_DIR = PROJECT_ROOT / "experiments" / "results"
+# N9: la UI escribe en un sandbox — experiments/results/ es evidencia firmada
+# (tag nota3-evidencia-2026-06-11) y el runner la sobrescribiría con un click.
+RESULTS_DIR = PROJECT_ROOT / "experiments" / "results_ui"
 
 
 def _get_experiment_status() -> dict:

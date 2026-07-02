@@ -172,14 +172,17 @@ def run_statistical_tests(sessions: list) -> dict:
 
 def compute_timing_stats(sessions: list) -> dict:
     """Compute timing statistics per system."""
-    system_times = {sys: {"reading": [], "rating": [], "total": []} for sys in SYSTEM_NAMES}
+    system_times = {sys: {"system_latency": [], "read_and_rate": [], "total": []} for sys in SYSTEM_NAMES}
 
     for session in sessions:
         for ts in session.get("timestamps", []):
             sys_key = ts.get("system", "")
             if sys_key in system_times:
-                system_times[sys_key]["reading"].append(ts.get("reading_time_ms", 0))
-                system_times[sys_key]["rating"].append(ts.get("rating_time_ms", 0))
+                # N9: claves nuevas (honestas) con fallback a las viejas
+                system_times[sys_key]["system_latency"].append(
+                    ts.get("system_latency_ms", ts.get("reading_time_ms", 0)))
+                system_times[sys_key]["read_and_rate"].append(
+                    ts.get("read_and_rate_ms", ts.get("rating_time_ms", 0)))
                 system_times[sys_key]["total"].append(ts.get("total_time_ms", 0))
 
     results = {}

@@ -51,9 +51,12 @@ def _render_exp8_dashboard(metrics: dict, full_results: dict, exp_id: str):
         return
 
     if exp_id == "exp8b":
-        st.caption("Official thesis baseline: exp8b uses Mistral 7B and is the primary comparison.")
+        st.caption("Historical baseline (exp8b, Mistral 7B) — v1 faithfulness metric, "
+                   "superseded by v2/v3/v4. The Nota 3 evidence is exp10-13 "
+                   "(Tabla 6 v4, RESULTADOS_RESUMEN.md).")
     elif exp_id == "exp8":
-        st.caption("Comparison baseline: exp8 uses Llama 3.1 and is kept for reference.")
+        st.caption("Historical reference (exp8, Llama 3.1) — v1 metric, superseded; "
+                   "see RESULTADOS_RESUMEN.md for the current evidence.")
 
     st.subheader("System Comparison")
     cols = st.columns(len(systems))

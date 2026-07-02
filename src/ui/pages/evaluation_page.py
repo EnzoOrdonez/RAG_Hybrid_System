@@ -254,12 +254,15 @@ def _render_break():
         st.rerun()
     else:
         st.success("Puedes continuar cuando estes listo.")
-
-    if remaining <= 0 or st.button("Estoy listo (continuar)", type="primary"):
-        st.session_state.eval_break_start = None
-        session.state = "evaluating"
-        session.save_checkpoint()
-        st.rerun()
+        if elapsed > max_break:
+            st.warning("Has superado el descanso maximo de 10 minutos.")
+        # N9: continuar REQUIERE el click del participante (antes auto-avanzaba
+        # al expirar los 2:00 y arrancaba el reloj de la siguiente pregunta).
+        if st.button("Estoy listo (continuar)", type="primary"):
+            st.session_state.eval_break_start = None
+            session.state = "evaluating"
+            session.save_checkpoint()
+            st.rerun()
 
 
 def _render_sus():

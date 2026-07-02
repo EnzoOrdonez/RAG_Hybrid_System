@@ -24,9 +24,12 @@ Requires network access to huggingface.co for the first run (downloads
 ~200MB nli-deberta-v3-small). Proxied sandboxes may fail to fetch.
 """
 
+from pathlib import Path
+
 from sentence_transformers import CrossEncoder
 
-MODEL_NAME = "cross-encoder/nli-deberta-v3-small"
+_LOCAL_MODEL = Path(__file__).resolve().parents[2] / "data" / "models" / "nli-deberta-v3-small"
+MODEL_NAME = str(_LOCAL_MODEL) if _LOCAL_MODEL.exists() else "cross-encoder/nli-deberta-v3-small"
 
 # Pairs: (premise, hypothesis). Expected labels by human judgment:
 #   1 => ENTAILMENT (premise clearly implies hypothesis)

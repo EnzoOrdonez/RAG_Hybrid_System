@@ -7,6 +7,7 @@ query assignment, rating collection, SUS questionnaire, and data export.
 
 import hashlib
 import json
+import logging
 import os
 import time
 from datetime import datetime
@@ -239,8 +240,11 @@ class EvaluationSession:
         if query is None:
             return
 
-        reading_time_ms = (response_shown_ts - search_clicked_ts) * 1000
-        rating_time_ms = (rated_ts - response_shown_ts) * 1000
+        # N9: nombres honestos — search_clicked->response_shown es LATENCIA del
+        # sistema (no lectura del participante); response_shown->rated engloba
+        # lectura + calificacion.
+        system_latency_ms = (response_shown_ts - search_clicked_ts) * 1000
+        read_and_rate_ms = (rated_ts - response_shown_ts) * 1000
 
         rating = {
             "query_id": query.get("query_id", f"q_{self.total_queries_answered}"),
@@ -253,16 +257,16 @@ class EvaluationSession:
             "timestamp_search_clicked": search_clicked_ts,
             "timestamp_response_shown": response_shown_ts,
             "timestamp_rated": rated_ts,
-            "reading_time_ms": reading_time_ms,
-            "rating_time_ms": rating_time_ms,
+            "system_latency_ms": system_latency_ms,
+            "read_and_rate_ms": read_and_rate_ms,
         }
         self.ratings.append(rating)
 
         self.timestamps.append({
             "query_id": rating["query_id"],
             "system": self.current_system,
-            "reading_time_ms": reading_time_ms,
-            "rating_time_ms": rating_time_ms,
+            "system_latency_ms": system_latency_ms,
+            "read_and_rate_ms": read_and_rate_ms,
             "total_time_ms": (rated_ts - query_shown_ts) * 1000,
         })
 
@@ -352,7 +356,20 @@ class EvaluationSession:
             session.timestamps = data.get("timestamps", [])
             session.query_sets = data.get("query_sets", {})
             return session
-        except Exception:
+        except Exception as e:
+            # N9: un checkpoint corrupto/esquema viejo NO debe tratarse como
+            # "no hay sesion" (el save posterior sobrescribiria los ratings).
+            # Se preserva el archivo para recuperacion manual.
+            try:
+                corrupt = path.with_name("session_checkpoint.corrupt.json")
+                path.rename(corrupt)
+                logging.getLogger(__name__).error(
+                    "Checkpoint ilegible para %s (%s); renombrado a %s",
+                    participant_id, e, corrupt.name)
+            except OSError:
+                logging.getLogger(__name__).error(
+                    "Checkpoint ilegible para %s (%s); no se pudo renombrar",
+                    participant_id, e)
             return None
 
     def export_results(self):
