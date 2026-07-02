@@ -127,7 +127,10 @@ Re-stats v2 (pareado por INTERSECCIÓN de no-excluidas en ambos brazos; n por pa
   gemma-vs-granite d_z=−0,53 p_BH=0,038 n=42) que NO se sostiene al cruzar verificadores —
   resultado frágil atribuible al instrumento (cf. TRUE, arXiv:2204.04991; Verifying the
   Verifiers, arXiv:2506.13342), no hallazgo. El 0/12 RAG-vs-RAG se mantiene bajo v3 y v4;
-  réplicas H5 en curso solo como nota de refuerzo.**]**
+  réplicas H5 ABORTADAS en el cierre N9 (no concluyentes
+  por ruido de entorno; el parcial 140/300 — `exp14_h5_replicas/` — muestra medias por celda
+  estables entre réplicas, Δ≤0,017: ruido por-generación, no por-agregado; este framing no
+  depende de ellas).**]**
 
 **Desglose de claims (instrumento, `tabla_claims_desglose`):** % contradicted casi insensible
 al escenario y al modelo (27–39 %), y donde varía, sube con MEJOR contexto (gemma léxico→híbrido

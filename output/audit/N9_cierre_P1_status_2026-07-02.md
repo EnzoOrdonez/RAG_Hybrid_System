@@ -126,3 +126,8 @@ Si sale SENSIBLE, el framing B se refuerza; si ESTABLE, el framing A gana defens
 | F4.3 plan nocturno | ⏸ suspendido por F4.2 | Comando de resume sigue documentado arriba; solo aplica si Enzo elige repetir bajo régimen controlado |
 | F5 figuras | ✅ | f2_v4 == tabla v4 (redondeo); censo v2==v4 en 16/16 → f3_v2 vigente, no se regenera (nota en TRACEABILITY) |
 | F6 POST | ✅ | pytest 7+1skip; evidencia intacta 2ª pasada; entrada "Cierre N9" en ledger; este cuadro |
+
+> **ADDENDUM final (mismo día):** decisión de Enzo sobre F4.3 → **H5 ABORTADO** (no se repite,
+> tampoco en régimen controlado); cerrado en ledger como no concluyente por ruido de entorno.
+> `exp14_h5_replicas/` (140/300) committeado como evidencia INMUTABLE del hallazgo. Push de la
+> ronda autorizado condicionado al check de integridad (ver commit de cierre).

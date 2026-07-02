@@ -634,3 +634,14 @@ modificados; solo los `_v3`/`_v4` nuevos); cifras v4 reproducidas desde JSON ant
 
 **Condicionados:** continuación de H5 (decisión de Enzo); revisión humana de
 `claim_audit_sample_v3.csv` sigue 0/50 (de Enzo).
+
+**Decisión final H5 (2026-07-02, mismo día):** Enzo decide **ABORTAR** las réplicas — no se
+repiten, tampoco bajo régimen controlado. H5 queda cerrado como **no concluyente por ruido de
+entorno**, con tres constancias: (a) el dato útil del parcial 140/300: las medias de fidelidad
+por celda son ESTABLES entre réplicas (gemma léxico 0,327/0,344/0,344; granite denso
+0,294/0,296/0,287; Δ≤0,017) — el ruido es por-generación, no por-agregado; (b) el framing B de
+la decisión 1 NO dependía de H5 (se decidió antes y por el criterio dual-verificador); (c) para
+la reescritura del A.3/paper es OBLIGATORIA la precisión: "granite determinista a temp=0" es una
+propiedad del entorno de ejecución, no del modelo. El parcial queda committeado como evidencia en
+`experiments/results/exp14_h5_replicas/` (meta.json + replicas_checkpoint.json, 140 filas);
+desde ese commit es INMUTABLE — todo re-análisis = archivos nuevos, mismo criterio que exp3..13.
