@@ -199,3 +199,32 @@ cambia cifras publicadas aún; A-G1 requiere decisión de Enzo. Reporte antes de
 
 **Siguiente:** scoring deberta-large (en curso, GPU) → HHEM (tras liberar GPU) → Bloque B ensembles
 con los 4 verificadores + control negativo → gold N≈200.
+
+---
+
+## Entrada 5 — Bloque D (gold N≈200) + reorden GPU (2026-07-23)
+
+**Reorden de scoring:** deberta-large resultó ~11× más lento por par que base (~7 pairs/s: large fp16
+apenas cabe en 6 GB → thrashing), ETA ~3 h. Es el verificador de MENOR valor (misma familia → errores
+correlacionados). HHEM (ortogonal, alto valor, responde "¿es artefacto de familia NLI?") estaba bloqueado
+detrás. Decisión: matar large (resumible por `.partial`, 2/12 hecho), correr HHEM primero.
+
+**HHEM smoke (2q/config):** carga de código custom offline OK (foundation pineado a `data/models/flan-t5-base`).
+Grounding scores mean **0.993** (casi todo grounded a τ=0.5). Dos lecturas posibles: (a) HHEM lenient
+inútil aquí, o (b) **hallazgo ortogonal clave** — un modelo de grounding RAG-específico ve estos claims
+COMO grounded, contra la "baja fidelidad" NLI → "baja fidelidad" sería artefacto de familia NLI. **El
+control negativo decide**: si HHEM también dice grounded a chunks aleatorios → lenient inútil; si NO →
+discrimina y la señal NLI-baja es artefacto. Probs crudas persistidas (τ = perilla CPU).
+
+**Bloque D — gold v4 GENERADO** (`scripts/build_gold_v4.py`; entregable para Enzo/anotadores):
+- 150 claims NUEVOS (seed 42), disjuntos de los 50 de v3 → total objetivo 200.
+- Estratos (sobre-muestrean la señal de desacuerdo): disagreement 50, near_threshold 40,
+  false_contr 30, random_anchor 30. Todos alcanzados.
+- **Juicio HUMANO CIEGO**: la plantilla (`output/audit/claim_audit_sample_v4.{csv,md}`) muestra claim +
+  mejor-evidencia + juicio vacío (correcto/incorrecto/dudoso); NO muestra etiquetas de verificadores
+  (evita anclaje). El scoring verificador-vs-humano es join post-hoc por (config,qid,claim). Estratos +
+  etiquetas de verificadores en `_meta.json` (no visible al anotador).
+- Potencia: binding = κ(verif,humano) CI half-width ≤0.1; con 200 y κ≈0.32 (muchos pares discordantes)
+  cubre también McNemar 10 pp entre verificadores (power 0.8). Esfuerzo ~4-5 h.
+- **Pendiente Enzo/anotadores:** llenar `juicio_humano`. Sin gold, la selección de verificador (Bloque B)
+  usa solo el control negativo como criterio provisional (anti-p-hacking).
