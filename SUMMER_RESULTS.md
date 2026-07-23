@@ -10,6 +10,14 @@
 NO mejora la fidelidad de la respuesta (0/12 pares RAG-vs-RAG significativos; Granite
 0.235/0.247/0.299)? ¿Instrumento, generación, contexto, o techo real?
 
+## Respuesta emergente (2026-07-23, sujeta a gold humano)
+**En gran parte, INSTRUMENTO.** Control negativo (400 pares aleatorios): los verificadores NLI
+marcan ~22% de texto NO relacionado como "contradicted" (small 0.237, base 0.215); HHEM-2.1
+(grounding ortogonal) solo 1% falso-grounded Y da grounding ≈0.99 en datos reales. El "0.30" es
+en gran parte artefacto del NLI (sobre-dispara contradicción). Ver
+`output/audit/tier3_negative_control_finding_2026-07-23.md`. Pendiente: gold humano para arbitrar,
+corrida HHEM completa para el nivel por escenario. NO cambia cifras publicadas (report-before-prose).
+
 ## Línea base v4 (referencia congelada)
 | Métrica | Valor | Fuente |
 |---|---|---|

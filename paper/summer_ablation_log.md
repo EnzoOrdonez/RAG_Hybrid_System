@@ -228,3 +228,35 @@ discrimina y la señal NLI-baja es artefacto. Probs crudas persistidas (τ = per
   cubre también McNemar 10 pp entre verificadores (power 0.8). Esfuerzo ~4-5 h.
 - **Pendiente Enzo/anotadores:** llenar `juicio_humano`. Sin gold, la selección de verificador (Bloque B)
   usa solo el control negativo como criterio provisional (anti-p-hacking).
+
+---
+
+## Entrada 6 — HALLAZGO MAYOR: control negativo → "baja fidelidad" ≈ artefacto NLI (2026-07-23)
+
+Reporte dedicado: `output/audit/tier3_negative_control_finding_2026-07-23.md`. **Report-before-prose:
+NO cambia cifras firmadas; contextualiza el 0,30. No tocar A.3/LACCI sin OK.**
+
+Control negativo (400 claims × 5 chunks ALEATORIOS no relacionados, seed 42;
+`scripts/build_negative_control.py` + `score_negative_control.py` + `analyze_negative_control.py`;
+reproduce el método de `h2_variant_eval.json`):
+
+| Verificador | Falso-positivo en aleatorio | Datos reales |
+|---|---|---|
+| NLI small vb_agree | **falso-contradicted 0,237** | fidelidad ≈0,30 |
+| NLI base vb_agree | **falso-contradicted 0,215** | fidelidad ≈0,30 |
+| NLI v0 legacy | 0,54–0,60 | — |
+| HHEM-2.1 τ=0,5 | **falso-grounded 0,010** (mean 0,002) | grounding ≈0,99 |
+
+**Los NLI marcan ~22 % de texto ALEATORIO no relacionado como "contradicted"** — falso-positivo
+sistemático de contradicción. HHEM (grounding ortogonal) ~1 % falso-grounded Y ≈0,99 en datos reales →
+discrimina nítidamente y ve los claims COMO anclados. **El enigma central se re-enmarca: el ≈0,30 es en
+gran parte artefacto del instrumento NLI** (sobre-dispara contradicción, sub-acredita entailment en docs
+técnicos). Converge con Tier 3-A (small ruidoso/frágil, 128 falso-contradicted).
+
+**Cautelas:** (1) HHEM ≈0,99 roza techo → puede no discriminar escenarios (varianza baja) — no invalida
+el punto del NIVEL pero sí implica techo; cuantificar con corrida completa. (2) Arbitraje objetivo
+requiere el gold humano (v4, pendiente): ¿HHEM o NLI? Selección de instrumento anclada en gold + control
+negativo, NUNCA en downstream. (3) HHEM sin truncar chunks largos (T5 sin límite duro).
+
+**En curso:** cadena overnight HHEM full + deberta-large + neg-control large (~5-6 h, checkpointeada) →
+ensemble sweep (Bloque B) con los 4 verificadores.

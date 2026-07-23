@@ -108,11 +108,22 @@ def main():
                  "generated_by": "scripts/rescore_grounding_exp15.py", "configs": {}}
     rows_out = {"model": "hhem-2.1", "tau": args.tau, "rule": "supported iff max_chunk p>tau",
                 "generated_by": "scripts/rescore_grounding_exp15.py", "configs": {}}
+    # resume: per-config checkpoint (the full run is ~3 h on 6 GB)
+    part_path = OUT_DIR / f"grounding_probs__hhem{suffix}.partial.json.gz"
+    rows_part = OUT_DIR / f"faithfulness_rows__hhem{suffix}.partial.json"
+    if not args.max_queries and part_path.exists():
+        with gzip.open(part_path, "rt", encoding="utf-8") as f:
+            probs_out["configs"] = json.load(f).get("configs", {})
+        if rows_part.exists():
+            rows_out["configs"] = json.loads(rows_part.read_text(encoding="utf-8")).get("configs", {})
+        print(f"resuming, {len(probs_out['configs'])} configs done", flush=True)
     t0 = time.time()
 
     for m in MODELS:
         for sc in SCENARIOS:
             cname = f"{sc} | {m}"
+            if cname in probs_out["configs"]:
+                continue
             rows = results[cname]["results"]
             if args.max_queries:
                 rows = [r for r in rows
@@ -163,6 +174,10 @@ def main():
                                  "faithfulness": round(sup / g, 4), "method": "nli"}
             probs_out["configs"][cname] = cfg_probs
             rows_out["configs"][cname] = cfg_rows
+            if not args.max_queries:
+                with gzip.open(part_path, "wt", encoding="utf-8") as f:
+                    json.dump(probs_out, f)
+                rows_part.write_text(json.dumps(rows_out, indent=1), encoding="utf-8")
             print(f"  {cname}: {len(cfg_rows)} responses, {len(pairs)} pairs "
                   f"({time.time()-t0:.0f}s)", flush=True)
 
@@ -170,6 +185,9 @@ def main():
         json.dump(probs_out, f)
     (OUT_DIR / f"faithfulness_rows__hhem{suffix}.json").write_text(
         json.dumps(rows_out, indent=1), encoding="utf-8")
+    if not args.max_queries:
+        part_path.unlink(missing_ok=True)
+        rows_part.unlink(missing_ok=True)
     print(f"wrote grounding_probs__hhem{suffix}.json.gz + faithfulness_rows__hhem{suffix}.json "
           f"({time.time()-t0:.0f}s)")
 
