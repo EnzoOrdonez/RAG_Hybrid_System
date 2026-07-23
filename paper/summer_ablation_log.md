@@ -55,5 +55,26 @@ Reglas de la fase (autorizadas por Enzo, 2026-07-22):
   → **Tier B** retrieval nuevo post-descarga (rrf_k {10,30,100}, linear, top_k_candidates {20,100},
   final_top_k_8; generación gateada por |ΔNDCG@5 indep| ≥ 0.02 o sig_bh; ≈4–8 h GPU).
 
-**Pendiente:** enmienda de CLAUDE.md (diff propuesto, requiere OK de Enzo); descarga de modelos;
-harness `scripts/run_exp15_ablation.py` + registro de brazos `experiments/ablation_arms.json`.
+**Pendiente:** harness `scripts/run_exp15_ablation.py` + registro de brazos
+`experiments/ablation_arms.json` + subset (`scripts/make_summer_subset.py`).
+
+---
+
+## Entrada 1 — Enmienda CLAUDE.md + descarga de modelos + arranque Tier 0 (2026-07-22)
+
+- **CLAUDE.md enmendado** con OK de Enzo (commit `7560184`): generación LLM solo bajo `exp15+`;
+  evidencia inmutable ampliada a `exp3..exp14`.
+- **Descarga única aprobada EJECUTADA** (sesión online supervisada, `scripts/download_summer_models.py`;
+  entorno re-congelado offline después). Proveniencia (manifiesto completo con sha256 por archivo:
+  `output/audit/summer_models_manifest_2026-07-22.json`, copia en `data/models/`):
+  - `BAAI/bge-large-en-v1.5` → `data/models/bge-large-en-v1.5`, revisión `d4aa6901d3a4`, 1.25 GB (safetensors).
+  - `cross-encoder/ms-marco-MiniLM-L-12-v2` → `data/models/ms-marco-MiniLM-L-12-v2`, revisión `7b0235231ca2`, 0.13 GB.
+  - `BAAI/bge-reranker-large` → `data/models/bge-reranker-large`, revisión `55611d7bca2a`, 2.11 GB.
+  → **Tier B desbloqueado.** Nota: los loaders aún cargan por nombre de hub; el ajuste local-first
+  se hará en el harness exp15 (los modelos de data/models se pasan por ruta).
+- **Tier 0 GO** (decisión Enzo): `scripts/rescore_nli_exp15.py` = clon parametrizado de
+  `rescore_nli_v3.py` que (a) escribe SOLO en `exp15_ablation_nli/` (exp12 read-only), (b) persiste
+  probs crudas por (config, query, claim, chunk) en gzip — el sweep variante×umbral pasa a ser
+  re-agregación CPU, y (c) emite la agregación vb_agree@0.7 en formato v3 como **validación cruzada
+  fila-por-fila contra el rescore firmado** antes de confiar en cualquier punto de operación nuevo.
+  Protocolo: smoke 2 queries → corrida completa small → base → sweep.
