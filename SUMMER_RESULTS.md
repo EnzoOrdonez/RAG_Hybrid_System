@@ -28,7 +28,7 @@ NO mejora la fidelidad de la respuesta (0/12 pares RAG-vs-RAG significativos; Gr
 ## Diagnóstico (Fase 1b) — hipótesis y estado
 | Hipótesis | Estado | Evidencia |
 |---|---|---|
-| Instrumento NLI ruidoso/descalibrado (¿0/12 artefacto del punto de operación?) | pendiente (Tier 0) | — |
+| Instrumento NLI ruidoso/descalibrado (¿0/12 artefacto del punto de operación?) | **Tier 0 COMPLETO (2026-07-23)**: instrumento ruidoso confirmado (κ small-base 0.30–0.36 a nivel claim); nulo robusto bajo base (0/64 puntos); bajo small el par granite hibrido-vs-lexico se vuelve significativo con ent≤0.6 (32/32 puntos laxos) y es direccionalmente consistente en 128/128 → efecto pequeño real plausible, sub-potenciado | `exp15_ablation_nli/sweep_{results.json,summary.md}`; ledger entrada 2 |
 | Generación no ancla en la evidencia | pendiente | — |
 | Lost in the middle | pendiente (Tier A) | — |
 | Corte de contexto / nº fragmentos | pendiente (Tier A/B) | — |

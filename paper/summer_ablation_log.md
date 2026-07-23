@@ -78,3 +78,48 @@ Reglas de la fase (autorizadas por Enzo, 2026-07-22):
   re-agregación CPU, y (c) emite la agregación vb_agree@0.7 en formato v3 como **validación cruzada
   fila-por-fila contra el rescore firmado** antes de confiar en cualquier punto de operación nuevo.
   Protocolo: smoke 2 queries → corrida completa small → base → sweep.
+
+---
+
+## Entrada 2 — Tier 0 COMPLETO: mapa de robustez del instrumento NLI (2026-07-23)
+
+**Config:** `exp15_ablation_nli/`. Scoring GPU una vez por verificador (small ~8 min, base ~15 min,
+fp16, pooling idéntico a v3); sweep = re-agregación CPU pura, 64 puntos = 4 variantes
+(v0, vb_agree, va_margin d0.1/d0.2) × umbrales ent×contr {0.5,0.6,0.7,0.8}², metodología v4
+completa por punto (primary_answered + exclude-vacuous + Wilcoxon/d_z/bootstrap/BH, seed 42).
+
+**Validación previa (condición para confiar en el sweep):** las filas vb_agree@0.7/0.7
+reconstruidas desde las probs crudas son **idénticas 1798/1798** al rescore firmado de exp12 en
+AMBOS verificadores (ancla automática del sweep; también verificado archivo-vs-archivo).
+El instrumento queda reproducido bit-perfect antes de mover cualquier perilla.
+
+**Resultados (sweep_results.json / sweep_summary.md):**
+1. **Verificador base: el nulo 0/12 es TOTALMENTE robusto — 0/64 puntos con algún par
+   RAG-vs-RAG significativo.**
+2. **Verificador small: 32/64 puntos muestran EXACTAMENTE un par significativo, siempre el mismo:
+   granite hibrido-vs-lexico.** Patrón nítido: significativo ⟺ ent_t ≤ 0.6 (las 4 variantes,
+   los 4 contr_t); con ent_t ≥ 0.7 → 0/12 en todos. Punto canónico (vb_agree 0.7/0.7):
+   d_z −0.309, p_bh 0.085, n 53 (near-miss).
+3. **Dirección consistente 128/128:** granite hibrido>lexico en TODOS los puntos × ambos
+   verificadores (d_z, convención b−a, negativo = hibrido mejor: small −0.20..−0.39,
+   base −0.20..−0.23). Efecto pequeño real plausible, sub-potenciado en el punto canónico.
+4. **La variante de guarda y contr_t son casi irrelevantes** (sig y kappa apenas cambian):
+   el eje sensible del instrumento es el umbral de ENTAILMENT, no la vía de contradicción.
+5. **Kappa small-vs-base a nivel claim: 0.30–0.36 en toda la grilla** (canónico 0.323,
+   n=14 469 claims). Acuerdo pobre → cualquier hallazgo mono-verificador es frágil; la regla
+   framing B (doble verificador) queda justificada por diseño.
+6. Nivel de fidelidad fuertemente dependiente de ent_t (granite hibrido 0.372@0.5 → 0.299@0.7 →
+   0.248@0.8): la métrica es relativa al instrumento; comparar solo dentro del mismo punto.
+
+**Veredicto Tier 0:** el "0/12" publicado (punto canónico, doble verificador) queda VERIFICADO y
+es robusto bajo base en toda la grilla. PERO el contraste central granite hibrido-vs-lexico es
+direccionalmente consistente en el 100% de la grilla y cruza significancia bajo small con ent
+laxo → hipótesis actualizada: **efecto real pequeño (híbrido > léxico en granite) enmascarado por
+un instrumento ruidoso (κ≈0.32) y potencia limitada (n≈53 tras exclusiones)**. No cambia ninguna
+cifra publicada; contextualiza el hallazgo central. Reportado a Enzo antes de tocar prosa
+(regla 3). Alcance: el sweep cubre la familia between-scenario; between-model no re-barrido
+(no era la pregunta).
+
+**Implicación para Tier A:** el eslabón retrieval→fidelidad merece el test directo
+(`reranker_off` y permutaciones de contexto) con n máximo disponible; considerar confirmatorio
+a 194 q del par granite hibrido-vs-lexico si Tier A lo respalda.
