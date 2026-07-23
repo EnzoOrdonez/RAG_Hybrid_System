@@ -1,0 +1,88 @@
+{
+  "date": "2026-07-23",
+  "purpose": "Tier 3 alternative verifiers (ledger entrada 4)",
+  "models": {
+    "cross-encoder/nli-deberta-v3-large": {
+      "local_dir": "data/models/nli-deberta-v3-large",
+      "revision": "bab4bc7178836f731dcfd18c06ca9def0a137712",
+      "files": {
+        ".gitattributes": {
+          "sha256": "98ccb431c012ebfe976280fbd45aea4cec7409935868ccecf3954370f96732a1",
+          "bytes": 1229
+        },
+        "added_tokens.json": {
+          "sha256": "a4b6bfe668f2b3cf6f0cd535e98a0663d2d0d4a4a15f13075ad3597d33985a23",
+          "bytes": 26
+        },
+        "CESoftmaxAccuracyEvaluator_AllNLI-dev_results.csv": {
+          "sha256": "9b1521dabfe07e1b5ce2d09fd3910d4ed85c0396b462dc629d81423a8a7fd299",
+          "bytes": 678
+        },
+        "config.json": {
+          "sha256": "30d88fd93586a85330162d169f68161aecc242e1be23dc41db335c069fbbab8f",
+          "bytes": 1100
+        },
+        "model.safetensors": {
+          "sha256": "01cb91b046c0c88c538c06c6d2a8ab8b11f9b9c5f9c2ef0c8e20c4086710063c",
+          "bytes": 1740312740
+        },
+        "README.md": {
+          "sha256": "2510c58dd047cc8ab0599247e93542b6e04ce4e3a21415c28f1169de38940502",
+          "bytes": 2934
+        },
+        "special_tokens_map.json": {
+          "sha256": "ed7c099c988dbb414b18a6980d20cb57b91b7cd119f6f6941eb364b0e892e712",
+          "bytes": 301
+        },
+        "spm.model": {
+          "sha256": "c679fbf93643d19aab7ee10c0b99e460bdbc02fedf34b92b05af343b4af586fd",
+          "bytes": 2464616
+        },
+        "tokenizer.json": {
+          "sha256": "5124ef2ead1a10a717703bc436de7f353da76d6340e4587719b42b1693707964",
+          "bytes": 8656624
+        },
+        "tokenizer_config.json": {
+          "sha256": "f3eecd07c370ef0bf7dd3780d3cd68cf9c8b00c267e21a208ddcd8f82bfec1a6",
+          "bytes": 1346
+        }
+      },
+      "total_bytes": 1751441594
+    },
+    "vectara/hallucination_evaluation_model": {
+      "local_dir": "data/models/hhem-2.1",
+      "revision": "8e4a2e6e96c708cc76c2344f7e4757df2515292c",
+      "files": {
+        ".gitattributes": {
+          "sha256": "639b9d689fd036937a1926afd81193a6cbaada93e7a23ca62655156f8890d8e1",
+          "bytes": 1581
+        },
+        "candle.png": {
+          "sha256": "05a635798365cfe058a6abd0880916ed525d7576022d5265c0d6577f3f6b44b4",
+          "bytes": 487413
+        },
+        "config.json": {
+          "sha256": "773139fe764fe20e146ab14e627b188ccafae35f93cf6f5258dc6c237016b870",
+          "bytes": 389
+        },
+        "configuration_hhem_v2.py": {
+          "sha256": "ec57fe344e3104d0d4a99b13d893529aac1e2bd69e83c2814235baf37cdcacc7",
+          "bytes": 760
+        },
+        "model.safetensors": {
+          "sha256": "634de18a38cf1e991c1acd0f7a9e0d30f7ea187fba42bb4798f862d3edd31e72",
+          "bytes": 438535352
+        },
+        "modeling_hhem_v2.py": {
+          "sha256": "fcc9cfcee513cc08eb46eac21f1acb498b122572fb35a7dec4d85fae45cb9bba",
+          "bytes": 2683
+        },
+        "README.md": {
+          "sha256": "e191ee1c170dab99edfbfab03c8168fe1389003229588676825ef5ec140c6ade",
+          "bytes": 15325
+        }
+      },
+      "total_bytes": 439043503
+    }
+  }
+}

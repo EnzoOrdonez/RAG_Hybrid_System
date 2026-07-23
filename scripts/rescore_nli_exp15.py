@@ -46,21 +46,18 @@ MODELS = ["granite4.1-8b", "gemma4-e4b", "mistral-7b-instruct", "qwen3.5-9b"]
 SCENARIOS = ["lexico", "denso", "hibrido"]
 ENT_T = 0.7
 CONTR_T = 0.7
-BASE_LOCAL = PROJECT_ROOT / "data" / "models" / "nli-deberta-v3-base"
-SMALL_LOCAL = PROJECT_ROOT / "data" / "models" / "nli-deberta-v3-small"
 EXP12_DIR = PROJECT_ROOT / "experiments/results/exp12_matrix"      # READ-ONLY
 OUT_DIR = PROJECT_ROOT / "experiments/results/exp15_ablation_nli"  # writes here
 
 
 def model_path(verifier):
-    if verifier == "base":
-        return str(BASE_LOCAL) if BASE_LOCAL.exists() else "cross-encoder/nli-deberta-v3-base"
-    return str(SMALL_LOCAL) if SMALL_LOCAL.exists() else "cross-encoder/nli-deberta-v3-small"
+    local = PROJECT_ROOT / "data" / "models" / f"nli-deberta-v3-{verifier}"
+    return str(local) if local.exists() else f"cross-encoder/nli-deberta-v3-{verifier}"
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--verifier", default="small", choices=["base", "small"])
+    ap.add_argument("--verifier", default="small", choices=["base", "small", "large"])
     ap.add_argument("--max-queries", type=int, default=None,
                     help="smoke mode: limit eligible responses per config; outputs "
                          "get a __smokeN suffix and never touch the full-run files")

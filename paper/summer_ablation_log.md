@@ -153,3 +153,49 @@ a 194 q del par granite hibrido-vs-lexico si Tier A lo respalda.
    server Ollama con defaults (condiciones canónicas de junio, sin KV q8), gate duro
    **"100 % GPU o aborta"**, Pass G 5 brazos (sonda 3× por brazo) + Pass N small y base,
    checkpointeado/reanudable. Decisión Enzo: reinicio inmediato y lanzamiento.
+
+---
+
+## Entrada 4 — Tier 3 arranque: descargas + Bloque A (anatomía del desacuerdo NLI) (2026-07-23)
+
+Segundo prompt maestro (libertad total para diagnosticar/mejorar). Tier 3 = verificador de fidelidad
+más estable (máximo impacto dado κ≈0.32). Decisiones Enzo: relajar gate Tier A; descargar HHEM+large;
+diseñar gold N≈200. Corrida limpia Tier A del 12:18 **abortó correctamente en el gate 100% GPU**
+(`offloaded 30/41 layers`) → confirma la causa raíz: **granite@4096 NO cabe 100% GPU en 6 GB con
+Ollama 0.22.1** (pesos 5.1 GB + KV 640 + compute 533 ≈ 6.3 GB > 6.0 usable; auto num_ctx=4096).
+
+**Descargas aprobadas EJECUTADAS** (`scripts/download_verifier_models.py`, manifiesto sha256 en
+`output/audit/verifier_models_manifest_2026-07-23.json`):
+- `cross-encoder/nli-deberta-v3-large` → `data/models/nli-deberta-v3-large`, rev `bab4bc717883`, 1.75 GB
+  (3.er voto NLI, API idéntica, id2label [contr,ent,neut] confirmado igual a small/base).
+- `vectara/hallucination_evaluation_model` (HHEM-2.1) → `data/models/hhem-2.1`, rev `8e4a2e6e96c7`,
+  0.44 GB (grounding, familia ortogonal). Dependencia dura: foundation `google/flan-t5-base`
+  (config+tokenizer, ~2 MB, SIN pesos — el safetensors de HHEM puebla el backbone) → `data/models/flan-t5-base`.
+
+**Bloque A — anatomía del desacuerdo** (`scripts/analyze_exp15_disagreement.py`, CPU sobre probs Tier 0;
+salidas en `exp15_ablation_nli/disagreement_{analysis.json,summary.md}` + `false_contradicted_candidates.csv`):
+1. **Confusión small×base, 14 469 claims: κ=0.323, acuerdo 67.3%.** Desacuerdo dominado por la frontera
+   supported↔unsupported (1968+1118=3086 claims) — el gate de ENTAILMENT, consistente con Tier 0.
+2. **small sobre-etiqueta contradicted 1.8×** (1696 vs 956 de base) y es más decisivo (empuja claims fuera
+   de unsupported hacia supported Y contradicted); base es conservador (estaciona en unsupported).
+3. **small 2.5× más frágil al umbral**: 3.04% de TODOS los claims cambian etiqueta supported al mover
+   ent_t ±0.05, vs 1.19% en base. El verificador **runtime (small) es el ruidoso** — argumento fuerte
+   para migrar el punto de operación a base o a un ensemble.
+4. **128 falso-contradicted** (small=contradicted conf≥0.9 ∧ base=supported): granite 52, qwen 43,
+   mistral 27, gemma 6; lexico 55, denso 36, hibrido 37 → `false_contradicted_candidates.csv`, alimenta
+   el estrato contradicted del gold (Bloque D). Familia del artefacto q085.
+5. **Sensibilidad de agregación — GATE A-G1 DISPARADO:** el `max`-over-chunks NO es inocuo.
+   `mean_top2` cambia 32% de etiquetas (shift sistemático); `noisy_or` cambia solo 5.5% PERO **hace el
+   par granite hibrido-vs-lexico SIGNIFICATIVO bajo small** (d_z −0.42, **p_bh 0.009**, 1/12) — porque
+   noisy-or acredita evidencia DISTRIBUIDA entre chunks, que la recuperación híbrida aporta más, mientras
+   max solo mira el mejor chunk. **El agregador max sub-acredita evidencia distribuida** → decisión Enzo
+   del agregador canónico antes de fijar el instrumento. (Nota: noisy-or también infla contradicción;
+   evaluar en Bloque B con control negativo, no adoptar por mover el contraste — regla anti-p-hacking.)
+
+**Lectura:** dos evidencias convergen en que "baja fidelidad" es en parte artefacto de medición:
+(a) el verificador runtime (small) es el más ruidoso/frágil y sobre-contradice; (b) el agregador max
+sub-acredita evidencia distribuida, ocultando una señal híbrido>léxico que noisy-or revela. Ninguna
+cambia cifras publicadas aún; A-G1 requiere decisión de Enzo. Reporte antes de prosa.
+
+**Siguiente:** scoring deberta-large (en curso, GPU) → HHEM (tras liberar GPU) → Bloque B ensembles
+con los 4 verificadores + control negativo → gold N≈200.
