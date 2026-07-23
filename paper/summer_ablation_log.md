@@ -123,3 +123,33 @@ cifra publicada; contextualiza el hallazgo central. Reportado a Enzo antes de to
 **Implicación para Tier A:** el eslabón retrieval→fidelidad merece el test directo
 (`reranker_off` y permutaciones de contexto) con n máximo disponible; considerar confirmatorio
 a 194 q del par granite hibrido-vs-lexico si Tier A lo respalda.
+
+---
+
+## Entrada 3 — CAUSA RAÍZ DE H5 IDENTIFICADA + protocolo de corrida limpia (2026-07-23)
+
+**Cronología:** smoke Tier A pasó sonda de determinismo (3× idénticas); 1 h después las sondas de
+`baseline_repro` y `reranker_off` FALLARON (corrida completa). Diagnóstico en caliente:
+
+1. **Mecanismo:** base de escritorio ≈1.7 GB VRAM (Edge/WebView2/Brave/apps Electron/overlays) →
+   granite4.1:8b @ num_ctx 4096 (Ollama 0.22.1 lo dimensiona en 6.2 GB; con flash-attention +
+   KV q8_0 baja a 5.7 GB; los pesos solos ≈4.9 GB) **no cabe** en los ~4.4 GB libres → split
+   33–43 % CPU / resto GPU → **generación no determinista**. Patrón medido: 1.ª generación ≠
+   2.ª/3.ª (idénticas entre sí) — divergencia frío-vs-caliente del prompt-cache con KV mixto.
+2. **No fue la versión:** logs de la app confirman **Ollama 0.22.1 ya el 2026-06-07** (exp12).
+   La diferencia junio↔hoy es la VRAM libre al cargar: junio = boot limpio (~0.4 GB base,
+   granite 5 351 MB **100 % GPU**, bit-determinista). Matiz: qwen3.5 corrió en junio con offload
+   parcial Y fue determinista → el split no rompe siempre; aquí sí (frío/caliente).
+   Esto cierra H5: "determinista a temp=0" = propiedad de **(modelo, versión, VRAM libre al
+   cargar)**; precisión ya exigida por el ledger N9, ahora con mecanismo.
+3. **Hallazgo colateral (exp12, para párrafo de limitación — NO cambia cifras):** el techo de
+   contexto se tocó en exp12: `tokens.input` máx = **4096 exacto** en hibrido|granite (≥1 query
+   con prompt truncado), p95 = 3 087; con salida ≤1 024, la cola larga (input+output > 4096)
+   sufrió context-shifting. Reportar a Enzo antes de cualquier prosa.
+4. **Higiene:** purgadas 37 entradas de caché LLM (claves recomputadas por sha256) y el
+   checkpoint 30/60 de baseline_repro — todo generado bajo split, propio y sin commitear.
+   Entradas de la era exp12 intactas (config_name distinto → claves distintas).
+5. **Protocolo de corrida limpia:** `scripts/launch_tierA_clean.ps1` — tras reinicio limpio:
+   server Ollama con defaults (condiciones canónicas de junio, sin KV q8), gate duro
+   **"100 % GPU o aborta"**, Pass G 5 brazos (sonda 3× por brazo) + Pass N small y base,
+   checkpointeado/reanudable. Decisión Enzo: reinicio inmediato y lanzamiento.
