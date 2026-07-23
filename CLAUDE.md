@@ -17,10 +17,12 @@ Se carga automáticamente cada sesión; estas reglas no hace falta repetirlas.
 
 ## Restricciones inviolables (evidencia de la tesis)
 
-- **NO modificar/borrar** `experiments/results/exp3..exp13` (+`exp8b`; no existen exp1/exp2)
-  — evidencia firmada, tag `nota3-evidencia-2026-06-11`. Todo recálculo = archivos
-  **`_vN` nuevos** (v3=N8, v4=N9, ...).
-- **NO generación LLM nueva**; solo re-análisis offline de respuestas guardadas.
+- **NO modificar/borrar** `experiments/results/exp3..exp14` (+`exp8b`; no existen exp1/exp2)
+  — evidencia firmada, tags `nota3-evidencia-2026-06-11` / `nota3-N9-cierre-2026-07-02`. Todo
+  recálculo = archivos **`_vN` nuevos** (v3=N8, v4=N9, ...).
+- **Generación LLM nueva SOLO bajo IDs `exp15+`** (fase de verano, autorizada 2026-07-22).
+  Sobre `exp3..exp14`: solo re-análisis offline. Ledger de fase: `paper/summer_ablation_log.md`;
+  perillas: `docs/KNOB_MAP_summer.md`; rama de trabajo: `summer/ablacion`.
 - Entorno: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42`, seed=42. Intérprete con
   stack ML = `py 3.14` (`...\pythoncore-3.14-64\python.exe`), no el `python` del PATH (3.11).
 - **GATE antes de `git push`**: reportar qué se publicaría y esperar OK explícito. Parar si
