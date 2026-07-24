@@ -38,13 +38,12 @@ from src.evaluation.statistical_analysis import (  # noqa: E402
     paired_comparison, cohens_d, apply_multiple_comparison_correction)
 
 DEFAULT_EXP_DIR = PROJECT_ROOT / "experiments" / "results" / "exp15_ablation_tierA"
-BASELINE_ARM = "baseline_repro"  # the anchor arm (config name starts with this)
 
 
-def derive_layout(exp_dir):
-    """From results.json: baseline config name, ordered arm config names (baseline last-
+def derive_layout(exp_dir, baseline_arm="baseline_repro"):
+    """From results.json: baseline config name, ordered arm config names (baseline
     excluded), and a {config_name: det_3x_bool} map from probe_report. Baseline is the
-    config whose scenario == BASELINE_ARM; arms keep results.json order."""
+    config whose scenario == baseline_arm; arms keep results.json order."""
     res = json.loads((exp_dir / "results.json").read_text(encoding="utf-8"))
     probe = res.get("probe_report", {})
     baseline = None
@@ -52,12 +51,12 @@ def derive_layout(exp_dir):
     for cname, c in res["configs"].items():
         scen = c.get("scenario", cname.split(" | ")[0])
         det3x[cname] = probe.get(scen, {}).get("determinism_3x_identical")
-        if scen == BASELINE_ARM:
+        if scen == baseline_arm:
             baseline = cname
         else:
             arms.append(cname)
     if baseline is None:
-        sys.exit(f"no baseline arm '{BASELINE_ARM}' in {exp_dir}/results.json")
+        sys.exit(f"no baseline arm '{baseline_arm}' in {exp_dir}/results.json")
     return baseline, arms, det3x
 
 
@@ -100,9 +99,11 @@ def main():
     ap.add_argument("--verifier", default="small", choices=["small", "base", "hhem"])
     ap.add_argument("--exp-dir", default=str(DEFAULT_EXP_DIR),
                     help="results dir (default: Tier A)")
+    ap.add_argument("--baseline-arm", default="baseline_repro",
+                    help="scenario name of the anchor arm (default baseline_repro; exp17 uses 'baseline')")
     args = ap.parse_args()
     EXP_DIR = Path(args.exp_dir)
-    BASELINE, ARM_ORDER, DET_3X = derive_layout(EXP_DIR)
+    BASELINE, ARM_ORDER, DET_3X = derive_layout(EXP_DIR, args.baseline_arm)
 
     if args.verifier == "hhem":
         rows_path = EXP_DIR / "faithfulness_rows__hhem.json"
