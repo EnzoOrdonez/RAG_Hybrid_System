@@ -10,15 +10,20 @@
 NO mejora la fidelidad de la respuesta (0/12 pares RAG-vs-RAG significativos; Granite
 0.235/0.247/0.299)? ¿Instrumento, generación, contexto, o techo real?
 
-## Respuesta emergente (2026-07-23, PARCIAL — sujeta a HHEM re-corrido + gold humano)
-**Evidencia válida:** los verificadores NLI marcan ~22% de texto NO relacionado como "contradicted"
-(control negativo, small 0.237, base 0.215) → parte del ruido de fidelidad son contradicciones
-inventadas por el instrumento. NO cuantifica cuánto del 0.30 es artefacto.
-**CORRECCIÓN (rigor):** una versión previa afirmó "HHEM ve las respuestas grounded ≈0.99 → baja
-fidelidad = artefacto NLI"; era ERRÓNEA (HHEM mal cargado, pesos `t5.` no aplicados → basura;
-datos reales daban 0.038, no 0.99). Fix aplicado + test de cordura. HHEM re-corriendo con carga
-correcta. Ver `output/audit/tier3_negative_control_finding_2026-07-23.md` (ledger entrada 7).
-NO cambia cifras publicadas (report-before-prose).
+## Respuesta (2026-07-23, robusta — sujeta a validación con gold humano)
+**El 0/12 es ROBUSTO AL INSTRUMENTO, con matiz de nivel.** Tres verificadores (NLI small, NLI base,
+HHEM grounding ortogonal) dan **0/12 RAG-vs-RAG significativos** en el test pareado bajo metodología v4.
+- **Nivel instrument-relative:** NLI sub-acredita la fidelidad. HHEM (grounding, buena especificidad:
+  falso-grounded 0.033) da +0.307 medio sobre NLI (granite 0.40-0.44 vs 0.23-0.30). El "0.30" publicado
+  es relativo al instrumento NLI; un grounding limpio da ≈0.55 medio. El NLI marca 22% de texto
+  ALEATORIO como contradicted (control negativo) → sub-acredita el nivel.
+- **Contraste genuino, no artefacto:** el nulo entre escenarios se sostiene incluso con el instrumento
+  más limpio (HHEM). Par más fuerte granite hib-vs-lex: direccionalmente consistente hib>lex en los 3
+  instrumentos pero p_bh 0.085-0.11, nunca sig → señal débil sub-potenciada.
+**Corrección de rigor:** una versión previa (commit 1794f54) afirmó "todo artefacto NLI, HHEM 0.99" — era
+ERRÓNEA (bug de carga HHEM). Corregido; el resultado real REFUERZA el 0/12 (robusto al instrumento).
+Ver `output/audit/tier3_negative_control_finding_2026-07-23.md` + `hhem_vs_nli.md` (ledger 6,7,8).
+Report-before-prose: refuerza el 0/12, candidato a nota de Limitaciones; NO cambia cifras.
 
 ## Línea base v4 (referencia congelada)
 | Métrica | Valor | Fuente |

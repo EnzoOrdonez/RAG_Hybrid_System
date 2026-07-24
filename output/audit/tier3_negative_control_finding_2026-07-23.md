@@ -34,13 +34,37 @@ falso-contradicted). Esto es evidencia real de que **parte del ruido de fidelida
 inventa contradicciones**, pero **por sí solo NO cuantifica cuánto** del 0,30 es artefacto — para eso
 hace falta el verificador de grounding bien cargado (HHEM, re-corriendo) y/o el gold humano.
 
-## Estado y siguiente
-- HHEM re-corriendo con la carga corregida: control negativo + datos reales → dará la comparación real
-  NLI-vs-grounding. Además necesita truncación/batch menor (era 1,9 h/config + OOM en 6 GB).
-- Gold humano (`claim_audit_sample_v4`, N≈200) sigue siendo el árbitro objetivo: ¿tienen razón los NLI
-  (contradicted) o el grounding? Selección de instrumento anclada en gold + control negativo, nunca en
-  el contraste downstream (anti-p-hacking).
-- **Lección de proceso:** el smoke de 2 queries dio 0,99 y me llevó a una conclusión apresurada; el dato
-  de datos completos (0,038) reveló la inconsistencia y el test controlado localizó el bug. Ningún
-  número de verificador nuevo se reporta sin (a) test controlado de cordura del modelo y (b) coherencia
-  smoke-vs-full.
+## RESULTADO DEFINITIVO (HHEM corregido, 12/12 configs) — `hhem_vs_nli.{json,md}`
+
+Con HHEM bien cargado (τ=0,5; especificidad negativa falso-grounded 0,033):
+
+**1. NIVEL — NLI sub-acredita la fidelidad de forma sistemática.** HHEM > NLI-small en los 12 configs,
+gap medio **+0,307** (rango +0,14..+0,43): granite 0,40-0,44 (vs NLI 0,23-0,30), mistral 0,49-0,58,
+qwen 0,63-0,69, gemma 0,74-0,80. Coherente con el 22 % de falso-contradicted del NLI: **el instrumento
+NLI baja el NIVEL absoluto de fidelidad.**
+
+**2. CONTRASTE — el nulo 0/12 es ROBUSTO AL INSTRUMENTO.** El test pareado between-scenario bajo HHEM
+(misma metodología v4: Wilcoxon + d_z + bootstrap + BH) da **0/12 RAG-vs-RAG significativos**, igual que
+NLI-small y NLI-base. El par más fuerte (granite hibrido-vs-lexico) es direccionalmente consistente
+(hib>lex) en TODOS los instrumentos pero nunca cruza BH: NLI-small p_bh 0,085, HHEM p_bh 0,11 — señal
+débil sub-potenciada, **ni nula ni significativa**.
+
+**Veredicto:** "mejor recuperación no mejora significativamente la fidelidad (0/12)" **SE SOSTIENE bajo
+tres familias de verificador** (NLI small, NLI base, HHEM grounding ortogonal). El ≈0,30 publicado es
+**relativo al instrumento** (un verificador de grounding limpio da ≈0,55 medio), pero el **contraste
+entre escenarios es genuinamente pequeño/nulo, NO un artefacto de medición.** Esto **corrige mi
+afirmación previa errónea** ("todo es artefacto NLI") y a la vez **refuerza** el hallazgo central de la
+tesis: es robusto a la elección de instrumento.
+
+## Implicación para A.3/LACCI (report-before-prose)
+- El 0/12 gana robustez (3 instrumentos). Material para reforzar, no cambiar, el hallazgo central.
+- Candidato a **Limitaciones**: la fidelidad absoluta es relativa al instrumento (NLI ≈0,30 vs HHEM
+  ≈0,55); reportar los números como instrument-relative. NO tocar prosa sin OK frase por frase.
+
+## Pendiente
+- **Gold humano** (`claim_audit_sample_v4`, N≈200) para arbitrar el NIVEL (¿0,30 NLI o 0,55 HHEM está más
+  cerca de la verdad?) y validar HHEM.
+- deberta-large (8/12, resumible) como tercer voto NLI.
+- **Lección de proceso:** el smoke de 2 queries (0,99) me llevó a una conclusión apresurada; los datos
+  completos (0,038 con bug; 0,40 corregido) y el test controlado la corrigieron. Ningún verificador
+  nuevo se reporta sin (a) test de cordura del modelo y (b) coherencia smoke-vs-full.

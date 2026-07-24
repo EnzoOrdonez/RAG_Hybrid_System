@@ -289,3 +289,30 @@ coherencia smoke-vs-full. El smoke de 2 queries indujo una conclusión apresurad
 
 **En curso:** deberta-large 8/12 (terminando); al liberar GPU: re-correr HHEM (control negativo + datos)
 con carga corregida + truncación/batch menor (era 1,9 h/config + OOM). Luego ensemble sweep real.
+
+---
+
+## Entrada 8 — RESULTADO DEFINITIVO Tier 3: el 0/12 es ROBUSTO AL INSTRUMENTO (2026-07-23)
+
+HHEM corregido (fix de load + truncación 1500c + batch 16 → 122 s/config vs 6694 s roto) sobre los 12
+configs. Análisis reproducible: `scripts/compute_exp15_hhem_analysis.py` →
+`exp15_ablation_nli/hhem_vs_nli.{json,md}`. Reporte: `output/audit/tier3_negative_control_finding_2026-07-23.md`.
+
+**1. NIVEL: NLI sub-acredita sistemáticamente.** HHEM > NLI-small en los 12 configs, gap medio **+0,307**
+(+0,14..+0,43). granite HHEM 0,40-0,44 vs NLI 0,23-0,30; gemma 0,74-0,80 vs 0,32-0,41; qwen 0,63-0,69;
+mistral 0,49-0,58. Coherente con el 22 % falso-contradicted del NLI → el instrumento NLI baja el NIVEL.
+
+**2. CONTRASTE: 0/12 ROBUSTO AL INSTRUMENTO.** Test pareado between-scenario bajo HHEM (metodología v4,
+BH) = **0/12 RAG-vs-RAG significativos**, igual que NLI-small y NLI-base. Par más fuerte granite
+hibrido-vs-lexico: d_z −0,35 p_bh **0,11** (NLI-small daba p_bh 0,085) — direccionalmente consistente
+hib>lex en los 3 instrumentos, nunca cruza BH.
+
+**VEREDICTO:** "mejor recuperación no mejora significativamente la fidelidad (0/12)" **se sostiene bajo
+tres familias de verificador** (NLI small, NLI base, HHEM grounding ortogonal). El ≈0,30 es
+relativo-al-instrumento (HHEM da ≈0,55 medio) pero el **contraste entre escenarios es genuinamente
+pequeño/nulo, NO artefacto**. Esto **corrige la afirmación errónea de la entrada 6** ("todo artefacto
+NLI") y **refuerza** el hallazgo central de la tesis (robusto al instrumento). Report-before-prose:
+material para reforzar el 0/12 y para una nota de Limitaciones (fidelidad absoluta instrument-relative);
+NO tocar A.3 sin OK.
+
+**Pendiente:** gold humano (arbitrar NIVEL 0,30 vs 0,55 + validar HHEM); deberta-large 8/12 (3.er voto).

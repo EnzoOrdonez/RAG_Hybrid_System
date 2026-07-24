@@ -1,0 +1,159 @@
+{
+ "tau": 0.5,
+ "level_comparison": {
+  "lexico | granite4.1-8b": {
+   "hhem": 0.4006,
+   "nli_small": 0.2347,
+   "gap": 0.1658,
+   "n": 186
+  },
+  "denso | granite4.1-8b": {
+   "hhem": 0.4299,
+   "nli_small": 0.2465,
+   "gap": 0.1834,
+   "n": 188
+  },
+  "hibrido | granite4.1-8b": {
+   "hhem": 0.4428,
+   "nli_small": 0.2988,
+   "gap": 0.144,
+   "n": 189
+  },
+  "lexico | gemma4-e4b": {
+   "hhem": 0.8037,
+   "nli_small": 0.4132,
+   "gap": 0.3905,
+   "n": 95
+  },
+  "denso | gemma4-e4b": {
+   "hhem": 0.7933,
+   "nli_small": 0.3774,
+   "gap": 0.4159,
+   "n": 91
+  },
+  "hibrido | gemma4-e4b": {
+   "hhem": 0.737,
+   "nli_small": 0.3173,
+   "gap": 0.4197,
+   "n": 88
+  },
+  "lexico | mistral-7b-instruct": {
+   "hhem": 0.491,
+   "nli_small": 0.2462,
+   "gap": 0.2448,
+   "n": 168
+  },
+  "denso | mistral-7b-instruct": {
+   "hhem": 0.5658,
+   "nli_small": 0.2806,
+   "gap": 0.2852,
+   "n": 171
+  },
+  "hibrido | mistral-7b-instruct": {
+   "hhem": 0.5782,
+   "nli_small": 0.288,
+   "gap": 0.2902,
+   "n": 174
+  },
+  "lexico | qwen3.5-9b": {
+   "hhem": 0.6371,
+   "nli_small": 0.255,
+   "gap": 0.3821,
+   "n": 123
+  },
+  "denso | qwen3.5-9b": {
+   "hhem": 0.6919,
+   "nli_small": 0.2646,
+   "gap": 0.4273,
+   "n": 133
+  },
+  "hibrido | qwen3.5-9b": {
+   "hhem": 0.6256,
+   "nli_small": 0.2936,
+   "gap": 0.332,
+   "n": 133
+  }
+ },
+ "gap_hhem_minus_nli": {
+  "mean": 0.3067,
+  "min": 0.144,
+  "max": 0.4273
+ },
+ "between_scenario_hhem": {
+  "denso | granite4.1-8b vs hibrido | granite4.1-8b": {
+   "n": 63,
+   "d_z": -0.0124,
+   "p_bh": 0.7039,
+   "sig_bh": false
+  },
+  "denso | granite4.1-8b vs lexico | granite4.1-8b": {
+   "n": 51,
+   "d_z": -0.1675,
+   "p_bh": 0.5352,
+   "sig_bh": false
+  },
+  "hibrido | granite4.1-8b vs lexico | granite4.1-8b": {
+   "n": 53,
+   "d_z": -0.3486,
+   "p_bh": 0.1124,
+   "sig_bh": false
+  },
+  "denso | gemma4-e4b vs hibrido | gemma4-e4b": {
+   "n": 30,
+   "d_z": -0.0508,
+   "p_bh": 0.7039,
+   "sig_bh": false
+  },
+  "denso | gemma4-e4b vs lexico | gemma4-e4b": {
+   "n": 30,
+   "d_z": 0.3258,
+   "p_bh": 0.4317,
+   "sig_bh": false
+  },
+  "hibrido | gemma4-e4b vs lexico | gemma4-e4b": {
+   "n": 30,
+   "d_z": 0.1197,
+   "p_bh": 0.7039,
+   "sig_bh": false
+  },
+  "denso | mistral-7b-instruct vs hibrido | mistral-7b-instruct": {
+   "n": 109,
+   "d_z": 0.0459,
+   "p_bh": 0.7039,
+   "sig_bh": false
+  },
+  "denso | mistral-7b-instruct vs lexico | mistral-7b-instruct": {
+   "n": 99,
+   "d_z": -0.1227,
+   "p_bh": 0.5352,
+   "sig_bh": false
+  },
+  "hibrido | mistral-7b-instruct vs lexico | mistral-7b-instruct": {
+   "n": 93,
+   "d_z": -0.2209,
+   "p_bh": 0.2188,
+   "sig_bh": false
+  },
+  "denso | qwen3.5-9b vs hibrido | qwen3.5-9b": {
+   "n": 29,
+   "d_z": -0.1345,
+   "p_bh": 0.7692,
+   "sig_bh": false
+  },
+  "denso | qwen3.5-9b vs lexico | qwen3.5-9b": {
+   "n": 18,
+   "d_z": -0.4381,
+   "p_bh": 0.4317,
+   "sig_bh": false
+  },
+  "hibrido | qwen3.5-9b vs lexico | qwen3.5-9b": {
+   "n": 18,
+   "d_z": -0.0027,
+   "p_bh": 0.9794,
+   "sig_bh": false
+  }
+ },
+ "n_sig_rag_pairs": 0,
+ "sig_pairs": [],
+ "verdict": "0/12 RAG-vs-RAG null is INSTRUMENT-ROBUST (holds under NLI small, base, and HHEM grounding). HHEM confirms NLI under-credits the LEVEL (mean gap +0.307) but the scenario CONTRAST is genuinely small/null, not an NLI artifact."
+}
