@@ -141,9 +141,25 @@ def pass_g(args, registry, exp_dir):
     llm = LLMManager(provider="ollama", model=tag, cache_enabled=True, seed=SEED)
     probe_report = {}
 
+    # Warmup (H5): the observed nondeterminism was "1st generation after load
+    # differs, 2nd/3rd identical". One throwaway generation stabilizes the
+    # runner before any measured query so per-arm generations are drawn from the
+    # warm state. Cache off so it never persists.
+    if qids:
+        qid0 = qids[0]
+        pr0, sp0, _ = rgm.build_prompt("hibrido", questions[qid0], contexts[arm_names[0]][qid0],
+                                       index, qtype[qid0], P)
+        LLMManager(provider="ollama", model=tag, cache_enabled=False, seed=SEED).generate(
+            prompt=pr0, system_prompt=sp0, temperature=0.0, config_name="warmup")
+        logger.info("warmup generation done")
+
     for arm in arm_names:
         config_name = f"{arm} | {label}"
-        # --- determinism probe: 3x first query, cache OFF; abort arm on mismatch
+        # --- determinism probe: 3x first query, cache OFF. Per Enzo (relaxed
+        # gate): WARN + record as metadata, do NOT skip. Bit-determinism is not a
+        # validity requirement for the paired arm-vs-baseline contrast (same
+        # queries, same environment/session; H5 cell means stable Δ≤0.017);
+        # single-sample non-bit-reproducibility is a documented limitation.
         qid0 = qids[0]
         pr, sp, _ = rgm.build_prompt("hibrido", questions[qid0], contexts[arm][qid0],
                                      index, qtype[qid0], P)
@@ -157,12 +173,14 @@ def pass_g(args, registry, exp_dir):
         vram = rgm.gpu_mem_used_mb()
         tok_s = (r.tokens_output / (r.latency_ms / 1000)) if r.latency_ms else 0.0
         probe_report[arm] = {"determinism_3x_identical": det_ok,
-                             "tok_per_s": round(tok_s, 2), "vram_used_mb": vram}
+                             "tok_per_s": round(tok_s, 2), "vram_used_mb": vram,
+                             "answer_lens_3x": [len(o) for o in outs]}
         logger.info("[%s] probe: determinism=%s tok/s=%.1f vram=%sMB",
                     arm, det_ok, tok_s, vram)
         if not det_ok:
-            logger.error("[%s] DETERMINISM PROBE FAILED - arm skipped (H5 protocol)", arm)
-            continue
+            logger.warning("[%s] determinism probe NOT bit-identical (lens %s) - running anyway "
+                           "(relaxed gate); results flagged single-sample.",
+                           arm, [len(o) for o in outs])
 
         cpath = ckpt_path(exp_dir, label, arm)
         results, done = [], set()
@@ -218,6 +236,12 @@ def pass_g(args, registry, exp_dir):
         "num_queries": len(qids),
         "model": tag, "arms": {a: registry["arms"][a] for a in registry["arms"]},
         "probe_report": probe_report,
+        "all_arms_bit_deterministic": all(p.get("determinism_3x_identical")
+                                          for p in probe_report.values()) if probe_report else None,
+        "reproducibility_note": ("Generations are single-sample. Bit-determinism per arm is recorded "
+                                 "in probe_report; where False, arm-vs-baseline paired contrasts remain "
+                                 "valid (same queries/session) but absolute answers are not "
+                                 "bit-reproducible (H5: VRAM-pressure CPU/GPU split; cell means stable)."),
         "configs": configs,
     }
     (exp_dir / "results.json").write_text(
