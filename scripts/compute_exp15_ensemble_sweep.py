@@ -47,7 +47,13 @@ _spec.loader.exec_module(sweep)
 
 ENT_T = CONTR_T = 0.7
 HHEM_TAU = 0.5
-NLI_TRIO = ["small", "base", "large"]
+# NLI members actually present on disk (large may still be scoring); ensembles
+# use whatever is available (>=2 needed for E1-E3).
+NLI_TRIO = [t for t in ("small", "base", "large")
+            if (Path(__file__).resolve().parent.parent
+                / "experiments/results/exp15_ablation_nli" / f"nli_probs__{t}.json.gz").exists()]
+HAS_HHEM = (Path(__file__).resolve().parent.parent
+            / "experiments/results/exp15_ablation_nli/grounding_probs__hhem.json.gz").exists()
 
 
 def load_nli(tag):
@@ -194,13 +200,21 @@ def negative_control(cand, nc):
 
 def main():
     nli = {t: load_nli(t) for t in NLI_TRIO}
-    hhem = load_hhem()
+    hhem = load_hhem() if HAS_HHEM else None
     claims = json.loads((OUT / "claims_extraction.json").read_text(encoding="utf-8"))["configs"]
     nc = json.loads((OUT / "negative_control_scores.json").read_text(encoding="utf-8"))
 
-    candidates = ["small", "base", "large", "hhem",
-                  "agg:small:noisy_or", "agg:base:noisy_or",
-                  "E1_mean", "E2_vote", "E3_conservative", "E4_sym_base", "E5_base_and_hhem"]
+    candidates = list(NLI_TRIO)
+    candidates += [f"agg:{t}:noisy_or" for t in NLI_TRIO if t in ("small", "base")]
+    if len(NLI_TRIO) >= 2:
+        candidates += ["E1_mean", "E2_vote", "E3_conservative"]
+    if "base" in NLI_TRIO:
+        candidates.append("E4_sym_base")
+    if HAS_HHEM:
+        candidates.append("hhem")
+        if "base" in NLI_TRIO:
+            candidates.append("E5_base_and_hhem")
+    print(f"NLI members: {NLI_TRIO} | HHEM: {HAS_HHEM} | candidates: {candidates}", flush=True)
 
     report = {"selection_criterion": "negative-control false-contradicted / false-grounded rate "
               "(lower=better); downstream is DESCRIPTIVE ONLY",

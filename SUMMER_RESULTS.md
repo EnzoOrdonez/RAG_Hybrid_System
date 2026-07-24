@@ -38,14 +38,32 @@ NO cambia cifras publicadas (report-before-prose).
 ## Diagnóstico (Fase 1b) — hipótesis y estado
 | Hipótesis | Estado | Evidencia |
 |---|---|---|
-| Instrumento NLI ruidoso/descalibrado (¿0/12 artefacto del punto de operación?) | **Tier 0 + Tier 3-A COMPLETOS (2026-07-23)**: (Tier 0) κ 0.30–0.36; nulo robusto bajo base (0/64); bajo small granite hib-vs-lex sig con ent≤0.6, consistente 128/128. (Tier 3-A) small sobre-contradice 1.8× y es 2.5× más frágil al umbral (3.04% vs 1.19% flips) → **el verificador runtime es el ruidoso**; 128 falso-contradicted; **el agregador `max` sub-acredita evidencia distribuida** — `noisy_or` hace granite hib>lex significativo (p_bh 0.009). Dos artefactos de medición convergen → "baja fidelidad" en parte instrumental | `exp15_ablation_nli/sweep_*` + `disagreement_*`; ledger entradas 2, 4 |
+| Instrumento NLI ruidoso/descalibrado (¿0/12 artefacto del punto de operación?) | **Tier 0 + Tier 3-A COMPLETOS**: (Tier 0) κ 0.30–0.36; nulo robusto bajo base (0/64); bajo small granite hib-vs-lex sig con ent≤0.6, consistente 128/128. (Tier 3-A) small sobre-contradice 1.8× y es 2.5× más frágil al umbral → **el verificador runtime es el ruidoso**; 128 falso-contradicted; agregador `max` sub-acredita evidencia distribuida (noisy_or→granite hib>lex p_bh 0.009). Control negativo: NLI marca **22% de texto aleatorio como contradicted**. → parte del 0.30 es instrumental; **cuánto** pendiente de HHEM (bug de carga corregido, re-corriendo) + gold | `exp15_ablation_nli/{sweep,disagreement,negative_control}_*`; ledger 2,4,6,7 |
 | Generación no ancla en la evidencia | pendiente | — |
 | Lost in the middle | pendiente (Tier A) | — |
 | Corte de contexto / nº fragmentos | pendiente (Tier A/B) | — |
 | Declinación confunde la métrica | parcialmente tratado en v2/v4 | denominadores decline-aware |
 
+## Matriz de factibilidad — Trabajos Futuros del A.3 (PRELIMINAR, 2026-07-23)
+Viabilidad en esta laptop (RTX 3060 6 GB) antes de las encuestas. Se cierra al terminar Tier A/3.
+
+| Línea (A.3) | Viable aquí | Costo | Payoff esperado | Veredicto preliminar |
+|---|---|---|---|---|
+| **1a. Decodificación anclada** (citar/atribuir evidencia, temperatura, prompt) | **Sí** | Bajo (infra Tier A lista) | Medio-alto si el techo NO es puro instrumento | **IMPLEMENTAR** — brazos de prompt/decoding en exp16 |
+| **1b. Modelo de mayor capacidad** | **No en 6 GB** | — | Alto pero incuantificable local | **DISEÑO/NUBE** — granite@4096 ya no cabe 100% GPU (hallazgo); ≥13B exige otra máquina/nube. Reportar trade-off |
+| **2. Anotación humana (relevancia + gold)** | **Parcial** (diseño sí, ejecución no) | ~4-5 h humano | Alto (rompe circularidad, arbitra instrumento) | **ENTREGADO EL DISEÑO** — `claim_audit_sample_v4` N≈200 listo; ejecuta Enzo/anotadores |
+| **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **EN CURSO** — control negativo + ensembles + HHEM (corregido); selección espera gold |
+| **4. Ablación de componentes (Tier A/B)** | **Sí** | Medio (GPU, gate determinismo relajado) | Alto (aísla qué mueve la fidelidad) | **EN CURSO** — Tier 0 hecho; Tier A pendiente re-corrida; Tier B oráculo listo |
+| **5. Cross-cloud: reescritura/expansión densa** | **Sí (piloto)** | Bajo (25 q) | Medio (la inyección léxica falló, exp13) | **PILOTO** — exp16 sobre `cross_cloud_subset` |
+| **6. Memoria semántica (tripletes/KG/versionada)** | **No (verano)** | Alto | Incierto | **SOLO DISEÑO** — excede el verano; entregar veredicto de factibilidad |
+
+Nota clave (hallazgo que ata 1b + corte de contexto): granite@4096 es simultáneamente el techo que truncó
+exp12 (input máx=4096 exacto) Y el máximo que casi-no-cabe en 6 GB → subir contexto O modelo exige salir
+de esta laptop. Esto acota fuertemente qué "generación más fiel" es implementable localmente.
+
 ## Mejoras (Fase 2)
-(pendiente — se definen tras la ablación)
+(pendiente — se definen tras cerrar Tier A/3; candidatas priorizadas: decodificación anclada [1a],
+verificador estable [3], piloto cross-cloud denso [5])
 
 ## Configuración recomendada para SUS/Likert
 (pendiente — cierre de Fase 3)
