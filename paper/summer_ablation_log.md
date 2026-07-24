@@ -356,3 +356,52 @@ Corregidos: `hhem_vs_nli.{json,md}`, reporte, SUMMER_RESULTS, memoria.
 menor falso-positivo=mejor): **E5_base_and_hhem 0,003** > hhem 0,033 > **E1_mean NLI 0,09** (mitad del
 NLI solo) > base 0,215 > small 0,237. noisy_or 0,55 RECHAZADO (su "significancia" viene de inflar
 contradicción — resuelve A-G1). Selección definitiva espera el gold. `ensemble_{results.json,summary.md}`.
+
+## Entrada 10 — Tier A COMPLETO: la ablación de contexto es NULA y robusta al instrumento (2026-07-24)
+
+Re-corrida Tier A con gate relajado (advertir+warmup, decisión Enzo entrada previa). 5 brazos × 60q,
+granite temp0 seed42, contexto = ids firmados exp11 híbrido full-rerank **transformados sin re-recuperar**.
+Passes desacoplados (G generación 4,75 h; N scoring NLI small+base; + HHEM triangulación). Contraste
+**pareado within-session por query_id vs baseline_repro** (Wilcoxon + d_z + bootstrap seed42, familia BH
+de 4; decline-aware: pares None descartados, vacuous=1.0). Scripts nuevos: `run_exp15_ablation.py::pass_g`
+(gate warn+warmup), `compute_tierA_arm_stats.py`, `rescore_grounding_tierA.py`.
+
+**Determinismo 3×:** baseline_repro / reranker_off / context_reversed = idénticos; final_top_k_3 y
+context_lost_middle = 1.ª gen difiere (cold-vs-warm cache, H5) → registrado en probe_report, contraste
+pareado sigue válido (misma sesión/queries).
+
+**RESULTADO — 0/4 brazos significativos bajo NLI-small, NLI-base Y HHEM (robusto al instrumento):**
+
+| Brazo | Transform | NLI small Δ (p_BH) | NLI base Δ (p_BH) | HHEM Δ (p_BH) |
+|---|---|---|---|---|
+| reranker_off | RRF pre-rerank | −0,058 (0,60) | −0,050 (0,82) | +0,007 (0,96) |
+| final_top_k_3 | top-3 | −0,019 (0,60) | +0,029 (0,53) | −0,006 (0,96) |
+| context_reversed | orden invertido | +0,043 (0,60) | +0,047 (0,53) | +0,060 (0,96) |
+| context_lost_middle | relevante al centro | +0,027 (0,60) | −0,005 (0,53) | −0,025 (0,96) |
+
+Nivel baseline_repro: 0,308 (small) / 0,204 (base) / 0,450 (HHEM). HHEM baseline 0,450 = exp12 granite
+hibrido HHEM 0,40–0,44 → **carga HHEM verificada** (no basura 0,04).
+
+**CONTRASTE CLAVE con Tier 3 (publicable):**
+| | Tier 3 entre-escenarios (léx/denso/híb) | Tier A transforms del MISMO pool híbrido |
+|---|---|---|
+| bajo NLI | 0/12 | 0/4 |
+| bajo HHEM | **1/12** (granite híb>léx cruza sig) | **0/4** (sigue nulo) |
+| robusto al instrumento | **NO** | **SÍ** |
+
+**Lectura mecanística:** la fidelidad responde (débil, granite, solo-HHEM) a **QUÉ documentos** selecciona
+el *método* de recuperación (híbrido vs léxico, NDCG 0,74 vs 0,44), pero **NO** a cómo se arregla un pool
+ya recuperado — reranking, top-k, orden y lost-in-the-middle son nulos en los 3 instrumentos. El efecto
+pequeño que existe es de **selección de contenido**, no de **ordenamiento/reranking/recorte**.
+→ **DESCARTA lost-in-the-middle y el reranking como palancas de fidelidad**; el cuello está en la
+generación/selección, no en la presentación del contexto.
+
+**Deriva H5 (baseline_repro julio vs exp12 hibrido junio, NLI small, 59q):** media +0,033 (Wilcoxon
+p=0,083, **n.s.**), |deriva por-query| 0,087, **corr r=0,858**, 39% (23/59) queries con fidelidad idéntica.
+La deriva (+0,033) es del orden de los efectos de brazo → **valida el diseño pareado within-session** (los
+brazos NO se comparan contra junio) y la decisión de relajar el gate (el ancla deriva poco, n.s.).
+
+**Report-before-prose:** refuerza el hallazgo central desde la generación ("mejor recuperación ≠ mejor
+fidelidad" se sostiene incluso degradando el contexto). Material de discusión/limitaciones, NO cambia
+cifras firmadas (exp15 nuevo). Reporte: `output/audit/tierA_ablation_finding_2026-07-24.md`. NO tocar A.3
+sin OK frase por frase.

@@ -37,18 +37,33 @@ el 0/12 depende del instrumento → material de discusión; NO cambia cifras fir
 | Entre-modelos robusto | 0/18 | exp12 v4 small∩base |
 | Expansión cross-cloud (25 q) | OFF≈ON (retirada) | exp13 |
 
-## Tabla de ablación (se llena por brazo)
-| Tier | Brazo | Retrieval (NDCG@5 indep) | Fidelidad (primary, NLI small) | n | Sig (BH) | Veredicto |
+## Tabla de ablación Tier A (2026-07-24, 5 brazos × 60q, exp15_ablation_tierA)
+Contexto = ids firmados exp11 híbrido full-rerank, **transformados sin re-recuperar**. granite temp0 seed42.
+Contraste pareado within-session vs `baseline_repro` (Wilcoxon+d_z+bootstrap seed42, familia BH de 4).
+Fidelidad = rescore vb_agree τ0.7 (NLI) / max_chunk τ0.5 (HHEM). Ver `arm_stats__{small,base,hhem}.md`.
+
+| Brazo | Transform | Fid. NLI small | NLI base | HHEM | Sig BH (los 3) | Veredicto |
 |---|---|---|---|---|---|---|
-| — | baseline_repro | pendiente | pendiente | — | — | ancla |
+| baseline_repro | identidad | 0.308 | 0.204 | 0.450 | ancla | reproduce exp12 (drift +0.03 n.s.) |
+| reranker_off | RRF pre-rerank | 0.243 | 0.144 | 0.438 | 0/3 | reranking NO sube fidelidad |
+| final_top_k_3 | top-3 | 0.282 | 0.222 | 0.438 | 0/3 | recorte de contexto NO mueve |
+| context_reversed | orden invertido | 0.315 | 0.214 | 0.469 | 0/3 | orden NO importa |
+| context_lost_middle | relevante al centro | 0.332 | 0.202 | 0.424 | 0/3 | **lost-in-the-middle NO** |
+
+**0/4 brazos significativos bajo NLI-small, NLI-base Y HHEM → el nulo de ablación de contexto es ROBUSTO
+al instrumento** (a diferencia del 0/12 entre-escenarios, que HHEM sí rompe a 1/12). Mecanística: la
+fidelidad responde débilmente a QUÉ documentos elige el *método* (híbrido vs léxico), NO a cómo se arregla
+un pool ya recuperado (rerank/top-k/orden/posición). Deriva H5 baseline_repro vs junio: +0.033 (n.s.
+p=0.083), r=0.86, 39% queries idénticas → valida gate relajado y diseño pareado within-session.
 
 ## Diagnóstico (Fase 1b) — hipótesis y estado
 | Hipótesis | Estado | Evidencia |
 |---|---|---|
 | Instrumento NLI ruidoso/descalibrado (¿0/12 artefacto del punto de operación?) | **Tier 0 + Tier 3-A COMPLETOS**: (Tier 0) κ 0.30–0.36; nulo robusto bajo base (0/64); bajo small granite hib-vs-lex sig con ent≤0.6, consistente 128/128. (Tier 3-A) small sobre-contradice 1.8× y es 2.5× más frágil al umbral → **el verificador runtime es el ruidoso**; 128 falso-contradicted; agregador `max` sub-acredita evidencia distribuida (noisy_or→granite hib>lex p_bh 0.009). Control negativo: NLI marca **22% de texto aleatorio como contradicted**. → parte del 0.30 es instrumental; **cuánto** pendiente de HHEM (bug de carga corregido, re-corriendo) + gold | `exp15_ablation_nli/{sweep,disagreement,negative_control}_*`; ledger 2,4,6,7 |
-| Generación no ancla en la evidencia | pendiente | — |
-| Lost in the middle | pendiente (Tier A) | — |
-| Corte de contexto / nº fragmentos | pendiente (Tier A/B) | — |
+| Generación no ancla en la evidencia | **parcial (Tier A)**: degradar el contexto (rerank off, orden, posición) no baja la fidelidad → el anclaje no depende del arreglo del pool; el cuello está en generación/selección de contenido, no en presentación | `arm_stats__*` |
+| Lost in the middle | **DESCARTADO (Tier A)**: context_lost_middle vs baseline 0/3 instrumentos (small +0.027, base −0.005, HHEM −0.025, todos n.s.) | `arm_stats__{small,base,hhem}.md` |
+| Corte de contexto / nº fragmentos | **parcial (Tier A)**: final_top_k_3 (5→3) 0/3 n.s.; recorte de fragmentos no mueve la fidelidad a este tamaño | `arm_stats__*` |
+| Reranking sube fidelidad | **DESCARTADO (Tier A)**: reranker_off 0/3, incluso tiende abajo (−0.05..−0.06 NLI, n.s.) | `arm_stats__*` |
 | Declinación confunde la métrica | parcialmente tratado en v2/v4 | denominadores decline-aware |
 
 ## Matriz de factibilidad — Trabajos Futuros del A.3 (PRELIMINAR, 2026-07-23)
@@ -60,7 +75,7 @@ Viabilidad en esta laptop (RTX 3060 6 GB) antes de las encuestas. Se cierra al t
 | **1b. Modelo de mayor capacidad** | **No en 6 GB** | — | Alto pero incuantificable local | **DISEÑO/NUBE** — granite@4096 ya no cabe 100% GPU (hallazgo); ≥13B exige otra máquina/nube. Reportar trade-off |
 | **2. Anotación humana (relevancia + gold)** | **Parcial** (diseño sí, ejecución no) | ~4-5 h humano | Alto (rompe circularidad, arbitra instrumento) | **ENTREGADO EL DISEÑO** — `claim_audit_sample_v4` N≈200 listo; ejecuta Enzo/anotadores |
 | **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **EN CURSO** — control negativo + ensembles + HHEM (corregido); selección espera gold |
-| **4. Ablación de componentes (Tier A/B)** | **Sí** | Medio (GPU, gate determinismo relajado) | Alto (aísla qué mueve la fidelidad) | **EN CURSO** — Tier 0 hecho; Tier A pendiente re-corrida; Tier B oráculo listo |
+| **4. Ablación de componentes (Tier A/B)** | **Sí** | Medio (GPU, gate determinismo relajado) | Alto (aísla qué mueve la fidelidad) | **Tier A HECHO 2026-07-24** — 0/4 robusto (rerank/top-k/orden/lost-middle no mueven fidelidad en 3 instrumentos); descarta lost-in-the-middle y reranking. Tier 0 hecho; Tier B oráculo listo |
 | **5. Cross-cloud: reescritura/expansión densa** | **Sí (piloto)** | Bajo (25 q) | Medio (la inyección léxica falló, exp13) | **PILOTO** — exp16 sobre `cross_cloud_subset` |
 | **6. Memoria semántica (tripletes/KG/versionada)** | **No (verano)** | Alto | Incierto | **SOLO DISEÑO** — excede el verano; entregar veredicto de factibilidad |
 
