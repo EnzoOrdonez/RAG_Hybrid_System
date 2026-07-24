@@ -10,20 +10,22 @@
 NO mejora la fidelidad de la respuesta (0/12 pares RAG-vs-RAG significativos; Granite
 0.235/0.247/0.299)? ¿Instrumento, generación, contexto, o techo real?
 
-## Respuesta (2026-07-23, robusta — sujeta a validación con gold humano)
-**El 0/12 es ROBUSTO AL INSTRUMENTO, con matiz de nivel.** Tres verificadores (NLI small, NLI base,
-HHEM grounding ortogonal) dan **0/12 RAG-vs-RAG significativos** en el test pareado bajo metodología v4.
-- **Nivel instrument-relative:** NLI sub-acredita la fidelidad. HHEM (grounding, buena especificidad:
-  falso-grounded 0.033) da +0.307 medio sobre NLI (granite 0.40-0.44 vs 0.23-0.30). El "0.30" publicado
-  es relativo al instrumento NLI; un grounding limpio da ≈0.55 medio. El NLI marca 22% de texto
-  ALEATORIO como contradicted (control negativo) → sub-acredita el nivel.
-- **Contraste genuino, no artefacto:** el nulo entre escenarios se sostiene incluso con el instrumento
-  más limpio (HHEM). Par más fuerte granite hib-vs-lex: direccionalmente consistente hib>lex en los 3
-  instrumentos pero p_bh 0.085-0.11, nunca sig → señal débil sub-potenciada.
-**Corrección de rigor:** una versión previa (commit 1794f54) afirmó "todo artefacto NLI, HHEM 0.99" — era
-ERRÓNEA (bug de carga HHEM). Corregido; el resultado real REFUERZA el 0/12 (robusto al instrumento).
-Ver `output/audit/tier3_negative_control_finding_2026-07-23.md` + `hhem_vs_nli.md` (ledger 6,7,8).
-Report-before-prose: refuerza el 0/12, candidato a nota de Limitaciones; NO cambia cifras.
+## Respuesta (2026-07-23 — sujeta a validación con gold humano)
+**El nulo 0/12 NO es robusto al instrumento: un verificador de grounding limpio (HHEM) revela un efecto
+retrieval→fidelidad para granite que el NLI ruidoso enmascara.** Test pareado between-scenario, familia
+BH v4-consistente (24, incl sin_rag):
+- NLI small: **0/12** (granite hib-vs-lex p_bh 0.085). NLI base: **0/12**.
+- **HHEM: 1/12** — **granite hibrido-vs-lexico p_bh 0.020, d_z −0.35, SIGNIFICATIVO** (mistral 0.067,
+  cerca). El efecto híbrido>léxico existe para el modelo determinista pero solo se detecta con un
+  instrumento menos ruidoso.
+- **Nivel instrument-relative:** HHEM (especificidad buena: falso-grounded 0.033) da +0.307 sobre NLI
+  (granite 0.40-0.44 vs 0.23-0.30). El NLI marca **22% de texto ALEATORIO** como contradicted → baja el
+  nivel Y enmascara el contraste. El "0.30" publicado es relativo al instrumento NLI.
+**Correcciones de rigor (3 iteraciones):** entrada 6 ("todo artefacto NLI, HHEM 0.99") sobre-vendió
+(bug de carga HHEM); entrada 8 ("0/12 robusto, sin efecto") sub-vendió (bug de familia BH excluyó
+sin_rag). La verdad está en medio: NLI enmascara un efecto real pequeño granite-específico que HHEM
+revela. Ver `hhem_vs_nli.md` + `tier3_negative_control_finding` (ledger 6,7,8,9). Report-before-prose:
+el 0/12 depende del instrumento → material de discusión; NO cambia cifras firmadas.
 
 ## Línea base v4 (referencia congelada)
 | Métrica | Valor | Fuente |

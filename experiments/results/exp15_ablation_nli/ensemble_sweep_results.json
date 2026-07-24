@@ -1,0 +1,80 @@
+{
+ "selection_criterion": "negative-control false-contradicted / false-grounded rate (lower=better); downstream is DESCRIPTIVE ONLY",
+ "hhem_tau": 0.5,
+ "ent_t": 0.7,
+ "candidates": {
+  "small": {
+   "neg_control_bad_rate": 0.2375,
+   "downstream_sig_rag_12": 0,
+   "downstream_granite_d_z": -0.3094,
+   "downstream_granite_p_bh": 0.084936
+  },
+  "base": {
+   "neg_control_bad_rate": 0.215,
+   "downstream_sig_rag_12": 0,
+   "downstream_granite_d_z": -0.1966,
+   "downstream_granite_p_bh": 0.332385
+  },
+  "agg:small:noisy_or": {
+   "neg_control_bad_rate": 0.5475,
+   "downstream_sig_rag_12": 1,
+   "downstream_granite_d_z": -0.4215,
+   "downstream_granite_p_bh": 0.009353
+  },
+  "agg:base:noisy_or": {
+   "neg_control_bad_rate": 0.6,
+   "downstream_sig_rag_12": 0,
+   "downstream_granite_d_z": -0.2386,
+   "downstream_granite_p_bh": 0.222036
+  },
+  "E1_mean": {
+   "neg_control_bad_rate": 0.09,
+   "downstream_sig_rag_12": 0,
+   "downstream_granite_d_z": -0.2039,
+   "downstream_granite_p_bh": 0.488688
+  },
+  "E2_vote": {
+   "neg_control_bad_rate": 0.1025,
+   "downstream_sig_rag_12": 0,
+   "downstream_granite_d_z": -0.1658,
+   "downstream_granite_p_bh": 0.544029
+  },
+  "E3_conservative": {
+   "neg_control_bad_rate": 0.4125,
+   "downstream_sig_rag_12": 0,
+   "downstream_granite_d_z": -0.1116,
+   "downstream_granite_p_bh": 0.62913
+  },
+  "E4_sym_base": {
+   "neg_control_bad_rate": 0.215,
+   "downstream_sig_rag_12": 0,
+   "downstream_granite_d_z": -0.1211,
+   "downstream_granite_p_bh": 0.6
+  },
+  "hhem": {
+   "neg_control_bad_rate": 0.0325,
+   "downstream_sig_rag_12": 1,
+   "downstream_granite_d_z": -0.3486,
+   "downstream_granite_p_bh": 0.020441
+  },
+  "E5_base_and_hhem": {
+   "neg_control_bad_rate": 0.0025,
+   "downstream_sig_rag_12": 0,
+   "downstream_granite_d_z": -0.2134,
+   "downstream_granite_p_bh": 0.288492
+  }
+ },
+ "provisional_front_runner": "E5_base_and_hhem",
+ "ranking_by_selection_criterion": [
+  "E5_base_and_hhem",
+  "hhem",
+  "E1_mean",
+  "E2_vote",
+  "base",
+  "E4_sym_base",
+  "small",
+  "E3_conservative",
+  "agg:small:noisy_or",
+  "agg:base:noisy_or"
+ ]
+}

@@ -316,3 +316,43 @@ material para reforzar el 0/12 y para una nota de Limitaciones (fidelidad absolu
 NO tocar A.3 sin OK.
 
 **Pendiente:** gold humano (arbitrar NIVEL 0,30 vs 0,55 + validar HHEM); deberta-large 8/12 (3.er voto).
+
+---
+
+## Entrada 9 — CORRECCIÓN de la entrada 8: familia BH inconsistente → HHEM es 1/12, NO 0/12 (2026-07-23)
+
+**Retracción del titular de la entrada 8** ("0/12 ROBUSTO AL INSTRUMENTO, se sostiene bajo HHEM"). Error
+metodológico: `compute_exp15_hhem_analysis.py` construía la familia BH between-scenario **excluyendo los
+pares sin_rag** (12 pares) → corrección BH distinta de la del v4 publicado, que la construye
+**incluyendo sin_rag** (24 pares = 4 modelos × C(4,2); confirmado por `verify_v4_offline.py` y
+`compute_faithfulness_metrics.main()`). Recomputado con la familia v4-consistente (vía
+`compute_exp15_nli_sweep.evaluate_point`):
+
+| Instrumento | RAG-vs-RAG sig (familia v4, 24) | granite hib-vs-lex |
+|---|---|---|
+| NLI small | 0/12 | p_bh 0,085 (no) |
+| NLI base | 0/12 | — |
+| **HHEM (grounding)** | **1/12** | **p_bh 0,020 (SÍ), d_z −0,35** |
+
+(mistral hib-vs-lex bajo HHEM: p_bh 0,067 — cerca, no sig.)
+
+**VEREDICTO CORREGIDO:** el nulo 0/12 **NO es robusto al cambio a HHEM**. Bajo el instrumento de
+grounding limpio (familia v4-consistente), **granite hibrido-vs-lexico CRUZA significancia (1/12,
+p_bh 0,020)** donde los NLI ruidosos no (p_bh 0,085). Lectura: **el efecto retrieval→fidelidad SÍ existe
+para el modelo determinista (granite: híbrido > léxico), pero solo es detectable con un instrumento
+menos ruidoso** — el NLI lo enmascara (22 % falso-contradicted). Es 1/12 (solo granite), d_z pequeño
+(−0,35), τ-dependiente → **matizar, no sobre-vender; pendiente gold humano para validar HHEM**.
+
+Las tres iteraciones convergen: entrada 6 ("todo artefacto NLI") sobre-vendió; entrada 8 ("0/12 robusto,
+sin efecto") sub-vendió por el bug de familia; **la verdad está en medio: NLI enmascara un efecto real
+pequeño y granite-específico que HHEM revela.** Lección añadida a las reglas: verificar la construcción
+de la familia estadística antes de cualquier titular.
+
+**Report-before-prose:** esto toca la interpretación del hallazgo central (el 0/12 depende del
+instrumento). NO cambia cifras firmadas (nuevo exp15). Reportar a Enzo antes de tocar A.3/LACCI.
+Corregidos: `hhem_vs_nli.{json,md}`, reporte, SUMMER_RESULTS, memoria.
+
+**Bloque B (ensemble sweep, ejecutado):** front-runner por control negativo (validez de constructo,
+menor falso-positivo=mejor): **E5_base_and_hhem 0,003** > hhem 0,033 > **E1_mean NLI 0,09** (mitad del
+NLI solo) > base 0,215 > small 0,237. noisy_or 0,55 RECHAZADO (su "significancia" viene de inflar
+contradicción — resuelve A-G1). Selección definitiva espera el gold. `ensemble_{results.json,summary.md}`.

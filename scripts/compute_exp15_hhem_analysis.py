@@ -36,6 +36,14 @@ _spec = importlib.util.spec_from_file_location(
 cfm = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(cfm)
 
+# canonical v4 between-scenario evaluation (BH family INCLUDING sin_rag pairs,
+# 24 = 4 models x C(4,2); the ad-hoc 12-pair family that excluded sin_rag gave
+# an inconsistent BH correction and a wrong 0/12 verdict — ledger entrada 9).
+_swspec = importlib.util.spec_from_file_location(
+    "sweep", ROOT / "scripts" / "compute_exp15_nli_sweep.py")
+sweep = importlib.util.module_from_spec(_swspec)
+_swspec.loader.exec_module(sweep)
+
 MODELS = ["granite4.1-8b", "gemma4-e4b", "mistral-7b-instruct", "qwen3.5-9b"]
 SCENS = ["lexico", "denso", "hibrido"]
 
@@ -61,38 +69,35 @@ def main():
                           "gap": round(hval - nval, 4), "n": len(fa)}
     gaps = [v["gap"] for v in level.values()]
 
-    # ---- 2. between-scenario family under HHEM ----------------------------
+    # ---- 2. between-scenario family under HHEM (v4-consistent, 24-pair BH) --
     override = {}
     for cfg, rows in hh.items():
         override[cfg] = {qid: {"faithfulness": v["faithfulness"], "supported": v["supported"],
                                "contradicted": 0, "unsupported": v.get("unsupported", 0),
                                "total_claims": v["total_claims"], "genuine": v["genuine"]}
                          for qid, v in rows.items() if v["faithfulness"] is not None}
-    cfm.EXCLUDED_METHODS.clear()
-    cfm.EXCLUDED_METHODS.update({"none", "error", "vacuous"})
-    per = cfm.load_per_config(EXP12 / "results.json", override, exclude_vacuous=True)
-    parsed = {c: cfm.parse_config(c) for c in per}
-    fam = []
-    for m in MODELS:
-        s2c = {parsed[c][0]: c for c in per if parsed[c][1] == m}
-        for s1, s2 in itertools.combinations(sorted(x for x in s2c if x != "sin_rag"), 2):
-            fam.append((s2c[s1], s2c[s2]))
-    res = cfm.run_family(per, fam, "hhem-between-scenario",
-                         include=cfm._incl_primary, metric_label="faithfulness_hhem")
-    rag = {p: d for p, d in res.items() if "sin_rag" not in p}
-    sig = sorted(p for p, d in rag.items() if d.get("sig_bh"))
+    # evaluate_point builds the family EXACTLY as compute_faithfulness_metrics.main()
+    # (all scenario pairs incl sin_rag; BH within), then reports the RAG-vs-RAG count.
+    ev = sweep.evaluate_point(override, "hhem-between-scenario")
+    rag = ev["rag_pair_stats"]  # {pair: {d_z, p_bh, n}}
+    sig = sorted(ev["sig_rag_pairs"])
 
-    out = {"tau": args.tau, "level_comparison": level,
+    out = {"tau": args.tau, "bh_family": "v4-consistent (24 pairs incl sin_rag)",
+           "level_comparison": level,
            "gap_hhem_minus_nli": {"mean": round(st.mean(gaps), 4),
                                   "min": min(gaps), "max": max(gaps)},
-           "between_scenario_hhem": {p: {"n": d.get("n"), "d_z": round(d.get("effect_size", 0), 4),
-                                         "p_bh": round(d.get("p_bh", 1), 4),
-                                         "sig_bh": bool(d.get("sig_bh"))} for p, d in rag.items()},
+           "between_scenario_hhem": {p: {"n": d.get("n"), "d_z": d.get("d_z"),
+                                         "p_bh": d.get("p_bh"),
+                                         "sig_bh": p in sig} for p, d in rag.items()},
            "n_sig_rag_pairs": len(sig), "sig_pairs": sig,
-           "verdict": ("0/12 RAG-vs-RAG null is INSTRUMENT-ROBUST (holds under NLI small, base, "
-                       "and HHEM grounding). HHEM confirms NLI under-credits the LEVEL "
-                       f"(mean gap +{round(st.mean(gaps),3)}) but the scenario CONTRAST is "
-                       "genuinely small/null, not an NLI artifact.")}
+           "verdict": (f"HHEM (v4-consistent BH family): {len(sig)}/12 RAG-vs-RAG significativos "
+                       f"({', '.join(sig) if sig else 'ninguno'}). NLI small/base dan 0/12. "
+                       "Bajo el instrumento de grounding limpio, granite hibrido-vs-lexico CRUZA "
+                       "significancia (p_bh 0.020, d_z -0.35) donde el NLI ruidoso no (p_bh 0.085): "
+                       "el efecto retrieval->fidelidad existe para el modelo determinista pero solo "
+                       "es detectable con un instrumento menos ruidoso. HHEM tambien sub-acredita el "
+                       f"NIVEL (gap medio +{round(st.mean(gaps),3)} sobre NLI). Efecto pequeno, "
+                       "tau-dependiente, solo granite (1/12): matizar, pendiente gold humano.")}
     (OUT / "hhem_vs_nli.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
 
     md = ["# Tier 3 — HHEM (grounding) vs NLI: nivel + robustez del nulo 0/12", "",
@@ -104,18 +109,18 @@ def main():
         md.append(f"| {cfg} | {v['hhem']} | {v['nli_small']} | {v['gap']:+.3f} |")
     md += ["", f"**Gap HHEM−NLI: mean +{round(st.mean(gaps),3)} (rango +{min(gaps)}..+{max(gaps)}).** "
            "NLI sub-acredita la fidelidad de forma sistemática.", "",
-           "## 2. Contraste entre escenarios bajo HHEM (RAG-vs-RAG, pareado BH)", "",
+           "## 2. Contraste entre escenarios bajo HHEM (RAG-vs-RAG, familia BH v4-consistente 24)", "",
            "| par | n | d_z | p_bh | sig |", "|---|---|---|---|---|"]
     for p, d in rag.items():
-        md.append(f"| {p[:44]} | {d.get('n')} | {round(d.get('effect_size',0),2):+} | "
-                  f"{round(d.get('p_bh',1),4)} | {'SÍ' if d.get('sig_bh') else 'no'} |")
-    md += ["", f"**HHEM: {len(sig)}/12 RAG-vs-RAG significativos** (NLI small daba 0/12).", "",
+        md.append(f"| {p[:44]} | {d.get('n')} | {round(d.get('d_z') or 0,2):+} | "
+                  f"{round(d.get('p_bh') or 1,4)} | {'SÍ' if p in sig else 'no'} |")
+    md += ["", f"**HHEM: {len(sig)}/12 RAG-vs-RAG significativos** (NLI small/base dan 0/12). "
+           f"Significativo: {', '.join(sig) if sig else 'ninguno'}.", "",
            "## Veredicto", "", out["verdict"],
-           "", "El par más fuerte (granite hibrido-vs-lexico) es direccionalmente consistente "
-           "(hib>lex) en todos los instrumentos pero nunca alcanza significancia tras BH "
-           "(NLI small p_bh 0.085, HHEM p_bh ~0.11): señal débil, sub-potenciada, NO nula pero "
-           "NO significativa. Pendiente: gold humano para validar HHEM; deberta-large (8/12) como "
-           "tercer voto.", ""]
+           "", "El par granite hibrido-vs-lexico es direccionalmente consistente (hib>lex) en los "
+           "tres instrumentos; bajo el NLI ruidoso NO cruza BH (p_bh 0.085) pero bajo HHEM (grounding "
+           "limpio, familia v4-consistente) SÍ (p_bh 0.020). Es 1/12, d_z pequeño (-0.35), "
+           "tau-dependiente. Pendiente: gold humano para validar HHEM; deberta-large (8/12) 3.er voto.", ""]
     (OUT / "hhem_vs_nli.md").write_text("\n".join(md), encoding="utf-8")
     sys.stdout.reconfigure(errors="replace")
     print("\n".join(md))

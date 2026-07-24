@@ -43,23 +43,31 @@ gap medio **+0,307** (rango +0,14..+0,43): granite 0,40-0,44 (vs NLI 0,23-0,30),
 qwen 0,63-0,69, gemma 0,74-0,80. Coherente con el 22 % de falso-contradicted del NLI: **el instrumento
 NLI baja el NIVEL absoluto de fidelidad.**
 
-**2. CONTRASTE — el nulo 0/12 es ROBUSTO AL INSTRUMENTO.** El test pareado between-scenario bajo HHEM
-(misma metodología v4: Wilcoxon + d_z + bootstrap + BH) da **0/12 RAG-vs-RAG significativos**, igual que
-NLI-small y NLI-base. El par más fuerte (granite hibrido-vs-lexico) es direccionalmente consistente
-(hib>lex) en TODOS los instrumentos pero nunca cruza BH: NLI-small p_bh 0,085, HHEM p_bh 0,11 — señal
-débil sub-potenciada, **ni nula ni significativa**.
+**2. CONTRASTE — el nulo 0/12 NO es robusto al instrumento (corrige una versión previa).** Con la
+**familia BH v4-consistente (24 pares, incl sin_rag** — como el v4 publicado; una versión previa la
+excluyó por error → 0/12 falso):
 
-**Veredicto:** "mejor recuperación no mejora significativamente la fidelidad (0/12)" **SE SOSTIENE bajo
-tres familias de verificador** (NLI small, NLI base, HHEM grounding ortogonal). El ≈0,30 publicado es
-**relativo al instrumento** (un verificador de grounding limpio da ≈0,55 medio), pero el **contraste
-entre escenarios es genuinamente pequeño/nulo, NO un artefacto de medición.** Esto **corrige mi
-afirmación previa errónea** ("todo es artefacto NLI") y a la vez **refuerza** el hallazgo central de la
-tesis: es robusto a la elección de instrumento.
+| Instrumento | RAG-vs-RAG sig | granite hib-vs-lex |
+|---|---|---|
+| NLI small | 0/12 | p_bh 0,085 (no) |
+| NLI base | 0/12 | — |
+| **HHEM (grounding)** | **1/12** | **p_bh 0,020, d_z −0,35 (SÍ)** |
+
+(mistral hib-vs-lex bajo HHEM p_bh 0,067 — cerca, no sig.)
+
+**Veredicto:** bajo el instrumento de grounding limpio (HHEM), **granite hibrido-vs-lexico CRUZA
+significancia (1/12)** donde los NLI ruidosos no. **El efecto retrieval→fidelidad SÍ existe para el
+modelo determinista (granite: híbrido > léxico), pero solo es detectable con un instrumento menos
+ruidoso** — el NLI lo enmascara (22 % falso-contradicted). 1/12 (solo granite), d_z pequeño (−0,35),
+τ-dependiente → matizar; pendiente gold humano para validar HHEM. Las tres iteraciones convergen: "todo
+artefacto NLI" sobre-vendió; "0/12 robusto sin efecto" sub-vendió (bug de familia); **la verdad: el NLI
+enmascara un efecto real pequeño granite-específico que HHEM revela.**
 
 ## Implicación para A.3/LACCI (report-before-prose)
-- El 0/12 gana robustez (3 instrumentos). Material para reforzar, no cambiar, el hallazgo central.
-- Candidato a **Limitaciones**: la fidelidad absoluta es relativa al instrumento (NLI ≈0,30 vs HHEM
-  ≈0,55); reportar los números como instrument-relative. NO tocar prosa sin OK frase por frase.
+- El 0/12 **depende del instrumento**: un grounding limpio revela híbrido>léxico para granite (1/12).
+  Toca la interpretación del hallazgo central → material de discusión, NO cambio de cifras (exp15 nuevo).
+- Candidato a **Limitaciones/discusión**: la fidelidad absoluta (NLI ≈0,30 vs HHEM ≈0,55) Y el contraste
+  entre escenarios son relativos al instrumento. NO tocar prosa sin OK frase por frase.
 
 ## Pendiente
 - **Gold humano** (`claim_audit_sample_v4`, N≈200) para arbitrar el NIVEL (¿0,30 NLI o 0,55 HHEM está más

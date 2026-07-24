@@ -1,5 +1,6 @@
 {
  "tau": 0.5,
+ "bh_family": "v4-consistent (24 pairs incl sin_rag)",
  "level_comparison": {
   "lexico | granite4.1-8b": {
    "hhem": 0.4006,
@@ -80,80 +81,82 @@
   "max": 0.4273
  },
  "between_scenario_hhem": {
-  "denso | granite4.1-8b vs hibrido | granite4.1-8b": {
-   "n": 63,
-   "d_z": -0.0124,
-   "p_bh": 0.7039,
-   "sig_bh": false
-  },
-  "denso | granite4.1-8b vs lexico | granite4.1-8b": {
-   "n": 51,
-   "d_z": -0.1675,
-   "p_bh": 0.5352,
-   "sig_bh": false
-  },
-  "hibrido | granite4.1-8b vs lexico | granite4.1-8b": {
-   "n": 53,
-   "d_z": -0.3486,
-   "p_bh": 0.1124,
-   "sig_bh": false
-  },
   "denso | gemma4-e4b vs hibrido | gemma4-e4b": {
    "n": 30,
    "d_z": -0.0508,
-   "p_bh": 0.7039,
+   "p_bh": 0.639889,
    "sig_bh": false
   },
   "denso | gemma4-e4b vs lexico | gemma4-e4b": {
    "n": 30,
    "d_z": 0.3258,
-   "p_bh": 0.4317,
+   "p_bh": 0.215873,
    "sig_bh": false
   },
   "hibrido | gemma4-e4b vs lexico | gemma4-e4b": {
    "n": 30,
    "d_z": 0.1197,
-   "p_bh": 0.7039,
+   "p_bh": 0.619787,
    "sig_bh": false
+  },
+  "denso | granite4.1-8b vs hibrido | granite4.1-8b": {
+   "n": 63,
+   "d_z": -0.0124,
+   "p_bh": 0.580923,
+   "sig_bh": false
+  },
+  "denso | granite4.1-8b vs lexico | granite4.1-8b": {
+   "n": 51,
+   "d_z": -0.1675,
+   "p_bh": 0.33481,
+   "sig_bh": false
+  },
+  "hibrido | granite4.1-8b vs lexico | granite4.1-8b": {
+   "n": 53,
+   "d_z": -0.3486,
+   "p_bh": 0.020441,
+   "sig_bh": true
   },
   "denso | mistral-7b-instruct vs hibrido | mistral-7b-instruct": {
    "n": 109,
    "d_z": 0.0459,
-   "p_bh": 0.7039,
+   "p_bh": 0.580923,
    "sig_bh": false
   },
   "denso | mistral-7b-instruct vs lexico | mistral-7b-instruct": {
    "n": 99,
    "d_z": -0.1227,
-   "p_bh": 0.5352,
+   "p_bh": 0.356803,
    "sig_bh": false
   },
   "hibrido | mistral-7b-instruct vs lexico | mistral-7b-instruct": {
    "n": 93,
    "d_z": -0.2209,
-   "p_bh": 0.2188,
+   "p_bh": 0.067326,
    "sig_bh": false
   },
   "denso | qwen3.5-9b vs hibrido | qwen3.5-9b": {
    "n": 29,
    "d_z": -0.1345,
-   "p_bh": 0.7692,
+   "p_bh": 0.73577,
    "sig_bh": false
   },
   "denso | qwen3.5-9b vs lexico | qwen3.5-9b": {
    "n": 18,
    "d_z": -0.4381,
-   "p_bh": 0.4317,
+   "p_bh": 0.2,
    "sig_bh": false
   },
   "hibrido | qwen3.5-9b vs lexico | qwen3.5-9b": {
    "n": 18,
    "d_z": -0.0027,
-   "p_bh": 0.9794,
+   "p_bh": 0.97937,
    "sig_bh": false
   }
  },
- "n_sig_rag_pairs": 0,
- "sig_pairs": [],
- "verdict": "0/12 RAG-vs-RAG null is INSTRUMENT-ROBUST (holds under NLI small, base, and HHEM grounding). HHEM confirms NLI under-credits the LEVEL (mean gap +0.307) but the scenario CONTRAST is genuinely small/null, not an NLI artifact."
+ "n_sig_rag_pairs": 1,
+ "sig_pairs": [
+  "hibrido | granite4.1-8b vs lexico | granite4.1-8b"
+ ],
+ "verdict": "HHEM (v4-consistent BH family): 1/12 RAG-vs-RAG significativos (hibrido | granite4.1-8b vs lexico | granite4.1-8b). NLI small/base dan 0/12. Bajo el instrumento de grounding limpio, granite hibrido-vs-lexico CRUZA significancia (p_bh 0.020, d_z -0.35) donde el NLI ruidoso no (p_bh 0.085): el efecto retrieval->fidelidad existe para el modelo determinista pero solo es detectable con un instrumento menos ruidoso. HHEM tambien sub-acredita el NIVEL (gap medio +0.307 sobre NLI). Efecto pequeno, tau-dependiente, solo granite (1/12): matizar, pendiente gold humano."
 }
