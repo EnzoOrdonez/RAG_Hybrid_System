@@ -37,22 +37,28 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.evaluation.statistical_analysis import (  # noqa: E402
     paired_comparison, cohens_d, apply_multiple_comparison_correction)
 
-EXP_DIR = PROJECT_ROOT / "experiments" / "results" / "exp15_ablation_tierA"
-BASELINE = "baseline_repro | granite4.1-8b"
-ARM_ORDER = [
-    "reranker_off | granite4.1-8b",
-    "final_top_k_3 | granite4.1-8b",
-    "context_reversed | granite4.1-8b",
-    "context_lost_middle | granite4.1-8b",
-]
-# probe determinism flags (from results.json probe_report) — for annotation only
-DET_3X = {
-    "baseline_repro | granite4.1-8b": True,
-    "reranker_off | granite4.1-8b": True,
-    "final_top_k_3 | granite4.1-8b": False,
-    "context_reversed | granite4.1-8b": True,
-    "context_lost_middle | granite4.1-8b": False,
-}
+DEFAULT_EXP_DIR = PROJECT_ROOT / "experiments" / "results" / "exp15_ablation_tierA"
+BASELINE_ARM = "baseline_repro"  # the anchor arm (config name starts with this)
+
+
+def derive_layout(exp_dir):
+    """From results.json: baseline config name, ordered arm config names (baseline last-
+    excluded), and a {config_name: det_3x_bool} map from probe_report. Baseline is the
+    config whose scenario == BASELINE_ARM; arms keep results.json order."""
+    res = json.loads((exp_dir / "results.json").read_text(encoding="utf-8"))
+    probe = res.get("probe_report", {})
+    baseline = None
+    arms, det3x = [], {}
+    for cname, c in res["configs"].items():
+        scen = c.get("scenario", cname.split(" | ")[0])
+        det3x[cname] = probe.get(scen, {}).get("determinism_3x_identical")
+        if scen == BASELINE_ARM:
+            baseline = cname
+        else:
+            arms.append(cname)
+    if baseline is None:
+        sys.exit(f"no baseline arm '{BASELINE_ARM}' in {exp_dir}/results.json")
+    return baseline, arms, det3x
 
 
 def paired_bootstrap_meandiff(a, b, n_boot=10000, seed=42):
@@ -92,7 +98,11 @@ def pair(rows_base, rows_arm):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--verifier", default="small", choices=["small", "base", "hhem"])
+    ap.add_argument("--exp-dir", default=str(DEFAULT_EXP_DIR),
+                    help="results dir (default: Tier A)")
     args = ap.parse_args()
+    EXP_DIR = Path(args.exp_dir)
+    BASELINE, ARM_ORDER, DET_3X = derive_layout(EXP_DIR)
 
     if args.verifier == "hhem":
         rows_path = EXP_DIR / "faithfulness_rows__hhem.json"
@@ -149,7 +159,7 @@ def main():
         c["sig_bh"] = bool(sg)
 
     out = {
-        "experiment_id": "exp15_ablation_tierA",
+        "experiment_id": EXP_DIR.name,
         "verifier": args.verifier,
         "variant": vvariant, "thresholds": vthresh,
         "baseline": "baseline_repro", "n_queries_subset": 60,
@@ -165,10 +175,11 @@ def main():
 
     # markdown
     thr = "τ0.5" if args.verifier == "hhem" else "τ0.7"
-    L = [f"# Tier A — arm vs baseline_repro ({vlabel}, {vvariant} {thr})",
+    nondet = [c["arm"] for c in contrasts if c["det_3x"] is False]
+    L = [f"# {out['experiment_id']} — arm vs baseline_repro ({vlabel}, {vvariant} {thr})",
          "",
-         f"Baseline_repro mean faithfulness: **{base_mean}** (n={base_n}/60 scored). "
-         f"Decline-aware: None pairs dropped, vacuous=1.0. BH family = 4 contrasts.",
+         f"baseline_repro mean faithfulness: **{base_mean}** (n={base_n} scored). "
+         f"Decline-aware: None pairs dropped, vacuous=1.0. BH family = {len(contrasts)} contrasts.",
          "",
          "| Arm | det3x | n_pair | base | arm | Δ(arm-base) | boot95 | test p | d_z | p_BH | sig |",
          "|---|---|---|---|---|---|---|---|---|---|---|"]
@@ -180,9 +191,10 @@ def main():
             f"{c['p_value']} | {c['cohens_d_z']} ({c['d_label']}) | {c['p_bh']} | "
             f"{'YES' if c['sig_bh'] else 'no'} |")
     n_sig = sum(c["sig_bh"] for c in contrasts)
-    L += ["", f"**{n_sig}/{len(contrasts)} arm-vs-baseline contrasts significant (BH).**",
-          "det3x=False (final_top_k_3, context_lost_middle) => answers carry H5 "
-          "cold/warm-cache noise; paired Δ still valid (same session/queries) but weigh softly."]
+    L += ["", f"**{n_sig}/{len(contrasts)} arm-vs-baseline contrasts significant (BH).**"]
+    if nondet:
+        L.append(f"det3x=False ({', '.join(nondet)}) => answers carry H5 cold/warm-cache "
+                 "noise; paired Δ still valid (same session/queries) but weigh softly.")
     (EXP_DIR / f"arm_stats__{args.verifier}.md").write_text("\n".join(L), encoding="utf-8")
     print("\n".join(L))
 

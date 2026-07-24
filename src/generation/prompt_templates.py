@@ -159,3 +159,80 @@ def _build_cross_cloud_context(chunks: list) -> str:
             parts.append(f"  [{i}] {source}\n  {text}")
         parts.append("")
     return "\n".join(parts)
+
+
+# ============================================================
+# Anchored-decoding prompt variants (exp16, Fase 2 — additive).
+# These do NOT alter the canonical SYSTEM_PROMPT / templates above; they are
+# selected only when a caller passes variant != "baseline" to build_prompt.
+# The retrieved context is already presented as numbered chunks "[1] [Source: ...]"
+# by _build_standard_context, so a claim can cite a chunk by its number.
+# ============================================================
+
+ANCHORED_SYSTEM_PROMPT = """You are a cloud computing documentation assistant specialized in \
+AWS, Azure, GCP, and Kubernetes. Answer questions accurately based ONLY on the \
+provided documentation context.
+
+Each context chunk begins with a bracketed NUMBER, like [1], [2], [3].
+
+Rules:
+1. ONLY use information from the provided context.
+2. Attribute EVERY factual sentence to the chunk(s) that support it by ending the sentence \
+with the chunk NUMBER(s) in brackets. Example: "Amazon EKS runs upstream Kubernetes [1]." \
+or "Billing tiers are applied automatically [2][3]."
+3. Cite by NUMBER only. Do NOT write "[Source: ...]" citations; use the bracketed chunk \
+numbers instead.
+4. Do NOT state any fact that is not supported by a listed chunk. If a sentence would have \
+no supporting chunk number, do not write it.
+5. If the context doesn't contain enough info, say: "Based on the available documentation, \
+I cannot find sufficient information to fully answer this question."
+6. Be precise with technical terms; keep to what the numbered chunks support."""
+
+STRICT_SYSTEM_PROMPT = """You are a cloud computing documentation assistant specialized in \
+AWS, Azure, GCP, and Kubernetes. Answer questions accurately based ONLY on the \
+provided documentation context.
+
+Rules:
+1. ONLY use information from the provided context.
+2. State a fact ONLY if it is explicitly present in the context. If you are not certain a \
+detail is in the context, OMIT it.
+3. Prefer a short, fully-grounded answer over a longer, more complete one. Do not add \
+background, caveats, or general knowledge that is not in the context.
+4. If the context does not support any answer, reply exactly: "Based on the available \
+documentation, I cannot find sufficient information to fully answer this question."
+5. Cite sources: [Source: provider/service/section_path].
+6. Be precise with technical terms and configurations."""
+
+# User-prompt suffix appended after the per-query-type template (so procedural/cross_cloud
+# templates stay intact). Empty for baseline.
+ANCHOR_SUFFIX = {
+    "baseline": "",
+    "anchored_cite": (
+        "\n\nIMPORTANT: Each context chunk above is labeled with a bracketed number "
+        "([1], [2], ...). End EVERY factual sentence with the number(s) of the chunk(s) that "
+        "support it, e.g. '... is enabled by default [2].'. Cite by NUMBER, not with "
+        "'[Source: ...]'. Omit any statement no numbered chunk supports."),
+    "strict_abstain": (
+        "\n\nIMPORTANT: Use ONLY facts explicitly stated in the context. If a detail is not "
+        "clearly in the context, leave it out. A brief, fully-supported answer is better than "
+        "a longer one that includes unsupported claims."),
+}
+
+_VARIANT_SYSTEM = {
+    "baseline": SYSTEM_PROMPT,
+    "anchored_cite": ANCHORED_SYSTEM_PROMPT,
+    "strict_abstain": STRICT_SYSTEM_PROMPT,
+}
+
+
+def variant_prompt(variant: str = "baseline"):
+    """Return (system_prompt, user_suffix) for an anchored-decoding variant.
+
+    variant="baseline" yields the canonical SYSTEM_PROMPT and an empty suffix, so a
+    caller that appends the suffix only when non-empty reproduces the exact pre-exp16
+    prompt byte-for-byte. Unknown variants raise (fail loud, no silent baseline).
+    """
+    if variant not in _VARIANT_SYSTEM:
+        raise ValueError(f"unknown prompt variant: {variant!r} "
+                         f"(known: {sorted(_VARIANT_SYSTEM)})")
+    return _VARIANT_SYSTEM[variant], ANCHOR_SUFFIX[variant]

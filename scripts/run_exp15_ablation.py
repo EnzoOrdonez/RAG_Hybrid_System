@@ -33,6 +33,7 @@ import gzip
 import importlib.util
 import json
 import logging
+import re
 import sys
 import time
 from datetime import datetime
@@ -155,6 +156,7 @@ def pass_g(args, registry, exp_dir):
 
     for arm in arm_names:
         config_name = f"{arm} | {label}"
+        variant = registry["arms"][arm].get("prompt_variant", "baseline")
         # --- determinism probe: 3x first query, cache OFF. Per Enzo (relaxed
         # gate): WARN + record as metadata, do NOT skip. Bit-determinism is not a
         # validity requirement for the paired arm-vs-baseline contrast (same
@@ -162,7 +164,7 @@ def pass_g(args, registry, exp_dir):
         # single-sample non-bit-reproducibility is a documented limitation.
         qid0 = qids[0]
         pr, sp, _ = rgm.build_prompt("hibrido", questions[qid0], contexts[arm][qid0],
-                                     index, qtype[qid0], P)
+                                     index, qtype[qid0], P, variant=variant)
         llm_nc = LLMManager(provider="ollama", model=tag, cache_enabled=False, seed=SEED)
         outs = []
         for _ in range(3):
@@ -191,7 +193,7 @@ def pass_g(args, registry, exp_dir):
         todo = [q for q in qids if q not in done]
         for i, qid in enumerate(todo):
             prompt, sysp, _ = rgm.build_prompt("hibrido", questions[qid], contexts[arm][qid],
-                                               index, qtype[qid], P)
+                                               index, qtype[qid], P, variant=variant)
             t = time.perf_counter()
             resp = llm.generate(prompt=prompt, system_prompt=sysp,
                                 temperature=0.0, config_name=config_name)
@@ -228,10 +230,11 @@ def pass_g(args, registry, exp_dir):
             "scenario": arm, "model": tag, "results": rs}
     payload = {
         "experiment_id": args.exp_id,
-        "name": "exp15 ablation Tier A (generation from signed exp11 id lists)",
+        "name": registry.get("name", "exp15 ablation Tier A (generation from signed exp11 id lists)"),
         "timestamp": datetime.now().isoformat(),
         "seed": SEED, "temperature": 0.0,
-        "context_source": "exp11_retrieval194_fullrerank (transformed id lists; no re-retrieval)",
+        "context_source": registry.get(
+            "context_source", "exp11_retrieval194_fullrerank (transformed id lists; no re-retrieval)"),
         "queries": str(SUBSET_PATH.relative_to(PROJECT_ROOT)),
         "num_queries": len(qids),
         "model": tag, "arms": {a: registry["arms"][a] for a in registry["arms"]},
@@ -276,6 +279,7 @@ def pass_n(args, registry, exp_dir):
     probs_out = {"verifier": name, "verifier_tag": args.verifier,
                  "classes": ["contradiction", "entailment", "neutral"],
                  "pooling": "per-arm predict, batch 64, fp16 (rescore_nli_v3 mirror)",
+                 "strip_inline_cites": bool(getattr(args, "strip_inline_cites", False)),
                  "generated_by": "scripts/run_exp15_ablation.py::pass_n", "configs": {}}
     claims_out = {"generated_by": "scripts/run_exp15_ablation.py::pass_n", "configs": {}}
     rows_v3 = {"verifier": name, "variant": "vb_agree", "margin": 0.0,
@@ -290,6 +294,8 @@ def pass_n(args, registry, exp_dir):
         pairs, spans = [], []
         for r in cdata["results"]:
             answer = r.get("answer") or ""
+            if getattr(args, "strip_inline_cites", False):
+                answer = re.sub(r"\[\d+\]", "", answer)
             if not answer.strip():
                 cfg_rows[r["query_id"]] = {"total_claims": 0, "not_a_claim": 0, "genuine": 0,
                                            "supported": 0, "contradicted": 0, "unsupported": 0,
@@ -357,14 +363,20 @@ def main():
     ap.add_argument("--pass", dest="pass_", required=True, choices=["G", "N"])
     ap.add_argument("--arms", default=None,
                     help="comma-separated arm names (default: all in registry)")
+    ap.add_argument("--arms-file", default=str(ARMS_PATH),
+                    help="arm registry JSON (default: Tier A ablation_arms.json)")
     ap.add_argument("--verifier", default="small", choices=["small", "base"],
                     help="Pass N only")
+    ap.add_argument("--strip-inline-cites", action="store_true",
+                    help="Pass N only: strip standalone [N] citation markers from answers "
+                         "before claim extraction (exp16 anchored arms; default off keeps the "
+                         "signed claim-extraction path untouched)")
     ap.add_argument("--max-queries", type=int, default=None)
     ap.add_argument("--no-resume", action="store_true")
     args = ap.parse_args()
 
     set_all_seeds(SEED)
-    registry = json.loads(ARMS_PATH.read_text(encoding="utf-8"))
+    registry = json.loads(Path(args.arms_file).read_text(encoding="utf-8"))
     args.arms = ([a.strip() for a in args.arms.split(",")] if args.arms
                  else list(registry["arms"].keys()))
     unknown = [a for a in args.arms if a not in registry["arms"]]

@@ -1,0 +1,27 @@
+{
+  "description": "exp16 Fase 2 — anchored-decoding arms. All arms use the SAME signed exp11 hibrido top-5 pool (transform=identity); only the prompt/system varies via prompt_variant. Paired within-session vs baseline_repro. New generation under exp16 (allowed).",
+  "name": "exp16 anchored decoding (prompt-variant arms over the hibrido pool)",
+  "context_source": "exp11_retrieval194_fullrerank hibrido (identity; prompt/system varies per arm, no re-retrieval)",
+  "model": "granite4.1:8b",
+  "queries": "data/evaluation/summer_subset.json",
+  "arms": {
+    "baseline_repro": {
+      "tier": "2", "component": "prompt", "prompt_variant": "baseline",
+      "exp11_config": "RAG Hibrido Propuesto", "transform": "identity",
+      "passes": ["G", "N"],
+      "hypothesis": "Within-session anchor with the canonical prompt (byte-identical to exp12/TierA). H5 drift (+0.033 vs June) forbids reusing TierA baseline across sessions, so it is regenerated here."
+    },
+    "anchored_cite": {
+      "tier": "2", "component": "prompt", "prompt_variant": "anchored_cite",
+      "exp11_config": "RAG Hibrido Propuesto", "transform": "identity",
+      "passes": ["G", "N"],
+      "hypothesis": "Forcing a per-sentence chunk-number citation [N] and forbidding unsupported statements makes the model self-attribute each claim to evidence. Tests whether explicit attribution raises measured faithfulness (guard against copy-gaming via overlap/length metrics)."
+    },
+    "strict_abstain": {
+      "tier": "2", "component": "prompt", "prompt_variant": "strict_abstain",
+      "exp11_config": "RAG Hibrido Propuesto", "transform": "identity",
+      "passes": ["G", "N"],
+      "hypothesis": "State only what is explicit; omit uncertain details; prefer a short grounded answer. Trades completeness for grounding -> expected higher faithfulness AND higher omission/decline rate (report decline-aware)."
+    }
+  }
+}

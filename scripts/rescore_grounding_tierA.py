@@ -28,16 +28,17 @@ from src.generation.hallucination_detector import (  # noqa: E402
     HallucinationDetector, classify_artifact)
 from scripts.rescore_grounding_exp15 import load_hhem  # noqa: E402
 
-EXP_DIR = PROJECT_ROOT / "experiments/results/exp15_ablation_tierA"
+DEFAULT_EXP_DIR = PROJECT_ROOT / "experiments/results/exp15_ablation_tierA"
 CHUNK_MAP = PROJECT_ROOT / "data/indices/chunk_map_bge-large_adaptive_500.json"
-ARMS = ["baseline_repro", "reranker_off", "final_top_k_3",
-        "context_reversed", "context_lost_middle"]
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tau", type=float, default=0.5)
+    ap.add_argument("--exp-dir", default=str(DEFAULT_EXP_DIR),
+                    help="results dir with results.json (default: Tier A)")
     args = ap.parse_args()
+    EXP_DIR = Path(args.exp_dir)
 
     model = load_hhem()
     det = HallucinationDetector(use_nli=False)
@@ -52,7 +53,7 @@ def main():
                 "generated_by": "scripts/rescore_grounding_tierA.py", "configs": {}}
     t0 = time.time()
 
-    cnames = [c for c in results if any(c.startswith(a + " ") for a in ARMS)]
+    cnames = list(results.keys())
     for cname in cnames:
         rows = results[cname]["results"]
         cfg_probs, cfg_rows = {}, {}
