@@ -11,16 +11,5 @@
    "vb_agree": 0.215
   }
  },
- "hhem_false_grounded": {
-  "tau_0.5": 0.01,
-  "tau_0.8": 0.0075,
-  "tau_0.9": 0.0075,
-  "tau_0.95": 0.005,
-  "tau_0.99": 0.0025
- },
- "hhem_random_score_dist": {
-  "mean": 0.0021,
-  "median": 0.0,
-  "max": 0.9995
- }
+ "hhem_false_grounded": {}
 }

@@ -60,7 +60,7 @@ def score_hhem(pairs):
     model = rg.load_hhem()
     out = []
     for p in pairs:
-        pairs_in = [(txt, p["claim"]) for txt in p["random_chunk_texts"]]
+        pairs_in = [(txt[:1500], p["claim"]) for txt in p["random_chunk_texts"]]
         with torch.no_grad():
             s = model.predict(pairs_in)
         out.append([round(float(x), 5) for x in s])

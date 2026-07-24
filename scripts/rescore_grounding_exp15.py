@@ -79,10 +79,18 @@ def load_hhem():
     HHEMv2Config.foundation = str(FOUNDATION_LOCAL)  # pin offline
     config = HHEMv2Config()
     model = mod.HHEMv2ForSequenceClassification(config)
-    # load HHEM weights
+    # load HHEM weights: safetensors keys are prefixed "t5." (the full
+    # HHEMv2ForSequenceClassification state, whose submodule is self.t5), so we
+    # load into `model`, NOT model.t5 (that mismatched -> strict=False dropped
+    # every weight -> random T5 -> garbage scores; caught by the controlled
+    # sanity test sky-blue->high / sky-red->low).
     from safetensors.torch import load_file
     state = load_file(str(HHEM_LOCAL / "model.safetensors"))
-    model.t5.load_state_dict(state, strict=False)
+    missing, unexpected = model.load_state_dict(state, strict=False)
+    n_loaded = len(state) - len(unexpected)
+    if n_loaded < 100:
+        raise SystemExit(f"HHEM load FAILED: only {n_loaded}/{len(state)} tensors matched "
+                         f"(missing={len(missing)}, unexpected={len(unexpected)})")
     model.eval()
     if torch.cuda.is_available():
         model = model.half().cuda()
@@ -136,7 +144,11 @@ def main():
                 genuine = [c for c in claims if not classify_artifact(c)]
                 n_art = len(claims) - len(genuine)
                 cids = [cid for cid in r["retrieved_ids"] if cid in chunk_map]
-                texts = [chunk_map[cid]["text"] for cid in cids]
+                # truncate premise to ~1500 chars (~375 tok) so premise+claim+prompt
+                # stays under flan-t5's 512-token window: avoids the 664>512 warning,
+                # the batch-of-long-sequences OOM (10.4 GiB on 6 GB), and the ~1.9 h/config
+                # slowdown. Chunks are size-500 so most are already short.
+                texts = [chunk_map[cid]["text"][:1500] for cid in cids]
                 if not claims or not texts:
                     cfg_rows[r["query_id"]] = {"total_claims": len(claims), "not_a_claim": n_art,
                                                "genuine": 0, "supported": 0, "unsupported": 0,
@@ -155,7 +167,7 @@ def main():
             scores = []
             if pairs:
                 import torch
-                B = 64
+                B = 16  # T5 on 6 GB: 64 OOMs on batches of long sequences
                 for i in range(0, len(pairs), B):
                     with torch.no_grad():
                         s = model.predict(pairs[i:i + B])

@@ -70,6 +70,7 @@ def main():
         md += ["", f"HHEM score en pares aleatorios: mean {rep['hhem_random_score_dist']['mean']}, "
                f"median {rep['hhem_random_score_dist']['median']}"]
     (OUT / "negative_control_rates.md").write_text("\n".join(md), encoding="utf-8")
+    sys.stdout.reconfigure(errors="replace")
     print("\n".join(md))
 
 

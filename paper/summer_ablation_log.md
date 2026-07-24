@@ -260,3 +260,32 @@ negativo, NUNCA en downstream. (3) HHEM sin truncar chunks largos (T5 sin límit
 
 **En curso:** cadena overnight HHEM full + deberta-large + neg-control large (~5-6 h, checkpointeada) →
 ensemble sweep (Bloque B) con los 4 verificadores.
+
+---
+
+## Entrada 7 — CORRECCIÓN: bug de carga de HHEM invalida los números HHEM de la entrada 6 (2026-07-23)
+
+**Retracción parcial de la entrada 6.** La afirmación "HHEM ve las respuestas como grounded ≈0,99 → la
+baja fidelidad es artefacto NLI" era ERRÓNEA. Cadena:
+- HHEM full (datos reales, config lexico|granite, 186 resp) dio fidelidad **0,038**, NO 0,99. El smoke de
+  2 queries (0,99) era no representativo Y —resultó— basura de un modelo mal cargado.
+- Test controlado localizó el bug: contradicción "the sky is red" → 1,0; grounded "the sky is blue" →
+  0,12 (invertido/aleatorio). **Causa:** los pesos del safetensors llevan prefijo `t5.`
+  (`t5.classifier.weight`) y se cargaban en `model.t5` (espera sin prefijo) → `strict=False` descartó
+  TODOS los pesos → T5 aleatorio. **Fix:** `model.load_state_dict(state)` + guarda que aborta si
+  <100 tensores cargan. Tras el fix el test da correcto (sky-blue 0,856, sky-red 0,005, EKS 0,968,
+  no-relacionado 0,003).
+- **VOID:** todos los números HHEM previos (smoke 0,99; neg-control falso-grounded 0,010; fidelidad real
+  0,038). La conclusión "baja fidelidad = artefacto NLI" NO está respaldada; pendiente de re-corrida.
+
+**SIGUE VÁLIDO** (verificadores NLI deberta CrossEncoder, cargan bien): control negativo NLI
+falso-contradicted small 0,237 / base 0,215 (v0 0,54–0,60) — los NLI marcan ~22 % de texto ALEATORIO
+como contradicted. Tier 3-A completo (small ruidoso, 2,5× más frágil, 128 falso-contradicted). Esto
+evidencia que parte del ruido viene de contradicciones inventadas por el NLI, pero **no cuantifica cuánto**
+del 0,30 es artefacto — para eso HHEM bien cargado (re-corriendo) + gold.
+
+**Lección de proceso:** nunca reportar un verificador nuevo sin (a) test controlado de cordura y (b)
+coherencia smoke-vs-full. El smoke de 2 queries indujo una conclusión apresurada; corregido.
+
+**En curso:** deberta-large 8/12 (terminando); al liberar GPU: re-correr HHEM (control negativo + datos)
+con carga corregida + truncación/batch menor (era 1,9 h/config + OOM). Luego ensemble sweep real.
