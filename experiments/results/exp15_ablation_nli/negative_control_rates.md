@@ -11,6 +11,8 @@
 
 ## HHEM: tasa falso-grounded por τ (menor=mejor)
 
-| τ |  |
-|---|
-| rate |  |
+| τ | tau_0.5 | tau_0.8 | tau_0.9 | tau_0.95 | tau_0.99 |
+|---|---|---|---|---|---|
+| rate | 0.0325 | 0.005 | 0.0 | 0.0 | 0.0 |
+
+HHEM score en pares aleatorios: mean 0.0545, median 0.028
