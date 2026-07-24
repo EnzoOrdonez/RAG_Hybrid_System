@@ -405,3 +405,38 @@ brazos NO se comparan contra junio) y la decisión de relajar el gate (el ancla 
 fidelidad" se sostiene incluso degradando el contexto). Material de discusión/limitaciones, NO cambia
 cifras firmadas (exp15 nuevo). Reporte: `output/audit/tierA_ablation_finding_2026-07-24.md`. NO tocar A.3
 sin OK frase por frase.
+
+## Entrada 11 — Fase 2 exp16: decodificación anclada NO mejora la fidelidad (negativo triangulado) (2026-07-24)
+
+Rama `summer/mejoras` (desde 3b60ed3; infra commit 7f331e1). 3 brazos de prompt sobre el MISMO pool
+híbrido (identidad de contexto), solo cambia system+sufijo. Contraste pareado within-session vs
+`baseline_repro`. **baseline regenerado fresco `--no-cache`** — hallazgo operativo: el caché LLM se indexa
+por `config_name‖prompt`, NO por exp-id, así que exp16 baseline_repro (prompt canónico) colisionó con el
+caché de Tier A y se sirvió stale (~7h antes); fresh q016 2247 vs cached 2704 → deriva H5 cross-sesión pese
+a det3x=True within-session. `--strip-inline-cites` quita los `[N]` antes de extraer claims, uniforme en
+los 3 brazos (path firmado `_extract_claims` intacto).
+
+**RESULTADO — 0/2 bajo NLI-small, NLI-base Y HHEM (ninguna mejora, robusto al instrumento):**
+
+| Brazo | small Δ | base Δ | HHEM Δ | veredicto |
+|---|---|---|---|---|
+| anchored_cite (cita [N] por claim) | −0,034 | −0,040 | −0,056 | 0/3; tiende ABAJO en los 3 |
+| strict_abstain (omitir lo no explícito) | −0,002 | +0,031 | +0,038 | 0/3; plano |
+
+Nivel baseline 0,296/0,226/0,498 (small/base/HHEM); |d_z|≤0,19. HHEM baseline 0,498 → carga verificada.
+
+**Guardas anti-gaming (mecanismo del fallo):** ambos brazos suben la declinación (baseline 51,7 % →
+anchored 58,3 % / strict 60,0 %) y recortan contenido (palabras 352→223/191; claims 11,95→7,55/5,27).
+anchored_cite baja el solape verbatim (0,122→0,061 → NO copia) y aun así baja la fidelidad → **cita ≠
+grounding** (teatro de citación). strict_abstain sube el solape (0,233 → copia más) y fidelidad plana.
+Ninguna compra fidelidad; solo hacen que granite diga menos y se abstenga más.
+
+**Veredicto:** la decodificación anclada por prompt no mejora la fidelidad de granite (n=60). Junto con
+Tier A (nulo de recuperación): ni el arreglo del contexto ni el prompt mueven la fidelidad → techo de
+capacidad del modelo (1b, fuera de 6 GB) o instrumento (Tier 3, gold pendiente). Caveat de potencia:
+declinación baseline 51,7 % → n efectivo ≈29, underpowered; la DIRECCIÓN (anchored abajo, strict plano) +
+las guardas argumentan contra un positivo oculto. Confirmatorio 194q solo con OK.
+
+**Report-before-prose:** toca la matriz de factibilidad (línea 1a A.3: IMPLEMENTAR → IMPLEMENTADA Y
+PROBADA, sin ganancia local — resultado negativo honesto). NO cambia cifras firmadas (exp16 nuevo). NO
+tocar prosa A.3 sin OK. Reporte: `output/audit/exp16_anchored_finding_2026-07-24.md`.

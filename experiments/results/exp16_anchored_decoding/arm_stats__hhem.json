@@ -1,0 +1,62 @@
+{
+ "experiment_id": "exp16_anchored_decoding",
+ "verifier": "hhem",
+ "variant": "max_chunk",
+ "thresholds": [
+  0.5
+ ],
+ "baseline": "baseline_repro",
+ "n_queries_subset": 60,
+ "baseline_mean_faithfulness": 0.4983,
+ "baseline_n_scored": 60,
+ "bh_family": "4 arm-vs-baseline_repro contrasts (fdr_bh)",
+ "decline_rule": "None-faithfulness pairs dropped (decline-aware); vacuous kept as 1.0",
+ "bootstrap": {
+  "n_boot": 10000,
+  "seed": 42,
+  "ci": "percentile 95%"
+ },
+ "contrasts": [
+  {
+   "arm": "anchored_cite",
+   "det_3x": true,
+   "n_paired": 50,
+   "n_common_qids": 60,
+   "n_decline_baseline": 0,
+   "n_decline_arm": 10,
+   "baseline_mean_ffn": 0.4983,
+   "arm_mean_ffn": 0.4142,
+   "mean_diff_arm_minus_base": -0.0561,
+   "boot95_lo": -0.1405,
+   "boot95_hi": 0.0245,
+   "test": "wilcoxon_signed_rank",
+   "statistic": 435.0,
+   "p_value": 0.24902,
+   "cohens_d_z": -0.1882,
+   "d_label": "negligible",
+   "p_bh": 0.49804,
+   "sig_bh": false
+  },
+  {
+   "arm": "strict_abstain",
+   "det_3x": true,
+   "n_paired": 55,
+   "n_common_qids": 60,
+   "n_decline_baseline": 0,
+   "n_decline_arm": 5,
+   "baseline_mean_ffn": 0.4983,
+   "arm_mean_ffn": 0.5319,
+   "mean_diff_arm_minus_base": 0.0377,
+   "boot95_lo": -0.0724,
+   "boot95_hi": 0.1469,
+   "test": "wilcoxon_signed_rank",
+   "statistic": 443.0,
+   "p_value": 0.54384,
+   "cohens_d_z": 0.0909,
+   "d_label": "negligible",
+   "p_bh": 0.54384,
+   "sig_bh": false
+  }
+ ],
+ "generated_by": "scripts/compute_tierA_arm_stats.py"
+}

@@ -1,0 +1,42 @@
+{
+ "experiment_id": "exp16_anchored_decoding",
+ "rows_verifier": "small",
+ "decline_phrase": "cannot find sufficient information to fully answer this question",
+ "overlap": "mean frac of answer word-5-grams in chunks",
+ "arms": [
+  {
+   "config": "baseline_repro | granite4.1-8b",
+   "scenario": "baseline_repro",
+   "n": 60,
+   "decline_rate": 0.5167,
+   "n_decline": 31,
+   "mean_answer_chars": 2497.9,
+   "mean_answer_words": 351.7,
+   "mean_genuine_claims": 11.95,
+   "verbatim_overlap_5gram": 0.1218
+  },
+  {
+   "config": "anchored_cite | granite4.1-8b",
+   "scenario": "anchored_cite",
+   "n": 60,
+   "decline_rate": 0.5833,
+   "n_decline": 35,
+   "mean_answer_chars": 1545.5,
+   "mean_answer_words": 222.9,
+   "mean_genuine_claims": 7.55,
+   "verbatim_overlap_5gram": 0.0613
+  },
+  {
+   "config": "strict_abstain | granite4.1-8b",
+   "scenario": "strict_abstain",
+   "n": 60,
+   "decline_rate": 0.6,
+   "n_decline": 36,
+   "mean_answer_chars": 1323.8,
+   "mean_answer_words": 190.8,
+   "mean_genuine_claims": 5.267,
+   "verbatim_overlap_5gram": 0.233
+  }
+ ],
+ "generated_by": "scripts/compute_exp16_guards.py"
+}

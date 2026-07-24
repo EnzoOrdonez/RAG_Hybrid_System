@@ -17,6 +17,7 @@ Env:    HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42
 import argparse
 import gzip
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -37,6 +38,9 @@ def main():
     ap.add_argument("--tau", type=float, default=0.5)
     ap.add_argument("--exp-dir", default=str(DEFAULT_EXP_DIR),
                     help="results dir with results.json (default: Tier A)")
+    ap.add_argument("--strip-inline-cites", action="store_true",
+                    help="strip standalone [N] citation markers from answers before claim "
+                         "extraction (exp16 anchored arms; uniform across arms)")
     args = ap.parse_args()
     EXP_DIR = Path(args.exp_dir)
 
@@ -50,6 +54,7 @@ def main():
                  "source": "exp15_ablation_tierA/results.json (read-only)",
                  "generated_by": "scripts/rescore_grounding_tierA.py", "configs": {}}
     rows_out = {"model": "hhem-2.1", "tau": args.tau, "rule": "supported iff max_chunk p>tau",
+                "strip_inline_cites": bool(args.strip_inline_cites),
                 "generated_by": "scripts/rescore_grounding_tierA.py", "configs": {}}
     t0 = time.time()
 
@@ -60,6 +65,8 @@ def main():
         pairs, spans = [], []
         for r in rows:
             answer = r.get("answer") or ""
+            if args.strip_inline_cites:
+                answer = re.sub(r"\[\d+\]", "", answer)
             claims = det._extract_claims(answer) if answer.strip() else []
             genuine = [c for c in claims if not classify_artifact(c)]
             n_art = len(claims) - len(genuine)

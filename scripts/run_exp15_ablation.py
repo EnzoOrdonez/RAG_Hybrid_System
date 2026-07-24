@@ -139,7 +139,8 @@ def pass_g(args, registry, exp_dir):
     qp = QueryProcessor()
     qtype = {qid: qp.process(questions[qid]).query_type for qid in qids}
 
-    llm = LLMManager(provider="ollama", model=tag, cache_enabled=True, seed=SEED)
+    llm = LLMManager(provider="ollama", model=tag,
+                     cache_enabled=not getattr(args, "no_cache", False), seed=SEED)
     probe_report = {}
 
     # Warmup (H5): the observed nondeterminism was "1st generation after load
@@ -228,6 +229,16 @@ def pass_g(args, registry, exp_dir):
         configs[ck["config_name"]] = {
             "total_queries": len(rs), "errors": sum(1 for r in rs if r.get("error")),
             "scenario": arm, "model": tag, "results": rs}
+    # merge probe_report with any prior run so re-running a SUBSET of arms (e.g. only
+    # baseline with --no-cache) preserves the other arms' probe/determinism metadata.
+    prior_probe = {}
+    rj = exp_dir / "results.json"
+    if rj.exists():
+        try:
+            prior_probe = json.loads(rj.read_text(encoding="utf-8")).get("probe_report", {})
+        except Exception:
+            prior_probe = {}
+    merged_probe = {**prior_probe, **probe_report}
     payload = {
         "experiment_id": args.exp_id,
         "name": registry.get("name", "exp15 ablation Tier A (generation from signed exp11 id lists)"),
@@ -238,9 +249,9 @@ def pass_g(args, registry, exp_dir):
         "queries": str(SUBSET_PATH.relative_to(PROJECT_ROOT)),
         "num_queries": len(qids),
         "model": tag, "arms": {a: registry["arms"][a] for a in registry["arms"]},
-        "probe_report": probe_report,
+        "probe_report": merged_probe,
         "all_arms_bit_deterministic": all(p.get("determinism_3x_identical")
-                                          for p in probe_report.values()) if probe_report else None,
+                                          for p in merged_probe.values()) if merged_probe else None,
         "reproducibility_note": ("Generations are single-sample. Bit-determinism per arm is recorded "
                                  "in probe_report; where False, arm-vs-baseline paired contrasts remain "
                                  "valid (same queries/session) but absolute answers are not "
@@ -373,6 +384,10 @@ def main():
                          "signed claim-extraction path untouched)")
     ap.add_argument("--max-queries", type=int, default=None)
     ap.add_argument("--no-resume", action="store_true")
+    ap.add_argument("--no-cache", action="store_true",
+                    help="Pass G: disable the LLM cache so answers are generated fresh in "
+                         "THIS session (avoids serving a same-config answer cached from an "
+                         "earlier session/boot — H5 cross-session drift). Checkpoints still resume.")
     args = ap.parse_args()
 
     set_all_seeds(SEED)

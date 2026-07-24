@@ -71,7 +71,7 @@ Viabilidad en esta laptop (RTX 3060 6 GB) antes de las encuestas. Se cierra al t
 
 | Línea (A.3) | Viable aquí | Costo | Payoff esperado | Veredicto preliminar |
 |---|---|---|---|---|
-| **1a. Decodificación anclada** (citar/atribuir evidencia, temperatura, prompt) | **Sí** | Bajo (infra Tier A lista) | Medio-alto si el techo NO es puro instrumento | **IMPLEMENTAR** — brazos de prompt/decoding en exp16 |
+| **1a. Decodificación anclada** (citar/atribuir evidencia, temperatura, prompt) | **Sí** | Bajo (infra lista) | **Nula (probado)** | **IMPLEMENTADA Y PROBADA 2026-07-24 (exp16) — SIN ganancia local.** anchored_cite + strict_abstain: 0/2 bajo NLI-small/base/HHEM; anchored tiende ABAJO (cita≠grounding), ambos suben declinación y recortan contenido. Descarta la línea como victoria local |
 | **1b. Modelo de mayor capacidad** | **No en 6 GB** | — | Alto pero incuantificable local | **DISEÑO/NUBE** — granite@4096 ya no cabe 100% GPU (hallazgo); ≥13B exige otra máquina/nube. Reportar trade-off |
 | **2. Anotación humana (relevancia + gold)** | **Parcial** (diseño sí, ejecución no) | ~4-5 h humano | Alto (rompe circularidad, arbitra instrumento) | **ENTREGADO EL DISEÑO** — `claim_audit_sample_v4` N≈200 listo; ejecuta Enzo/anotadores |
 | **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **EN CURSO** — control negativo + ensembles + HHEM (corregido); selección espera gold |
@@ -84,8 +84,23 @@ exp12 (input máx=4096 exacto) Y el máximo que casi-no-cabe en 6 GB → subir c
 de esta laptop. Esto acota fuertemente qué "generación más fiel" es implementable localmente.
 
 ## Mejoras (Fase 2)
-(pendiente — se definen tras cerrar Tier A/3; candidatas priorizadas: decodificación anclada [1a],
-verificador estable [3], piloto cross-cloud denso [5])
+### exp16 — decodificación anclada (2026-07-24): RESULTADO NEGATIVO triangulado
+3 brazos de prompt sobre el mismo pool híbrido (solo cambia system+sufijo), pareado within-session vs
+baseline_repro fresco (`--no-cache`, co-temporal). Ver `exp16_anchored_finding_2026-07-24.md`, ledger 11.
+
+| Brazo | Δ small | Δ base | Δ HHEM | Sig (3 instr.) |
+|---|---|---|---|---|
+| anchored_cite (cita [N] por claim) | −0.034 | −0.040 | −0.056 | 0/3 — tiende ABAJO |
+| strict_abstain (omitir lo no explícito) | −0.002 | +0.031 | +0.038 | 0/3 — plano |
+
+**La decodificación anclada NO mejora la fidelidad** (0/2 bajo NLI-small/base/HHEM). Guardas anti-gaming:
+ambos brazos suben la declinación (51.7%→58/60%) y recortan contenido (palabras 352→223/191, claims
+11.95→7.55/5.27); anchored_cite baja el solape (0.061, no copia) pero igual baja la fidelidad → **cita ≠
+grounding**. Junto con Tier A (nulo de recuperación): ni contexto ni prompt mueven la fidelidad → techo de
+capacidad del modelo (1b, fuera de 6GB) o instrumento (Tier 3, gold pendiente). Caveat: declinación
+baseline 51.7% → n efectivo ≈29, underpowered; dirección + guardas argumentan contra un positivo oculto.
+
+(Candidatas restantes: verificador estable [3, espera gold], piloto cross-cloud denso [5].)
 
 ## Configuración recomendada para SUS/Likert
 (pendiente — cierre de Fase 3)
