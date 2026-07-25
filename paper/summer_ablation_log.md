@@ -504,3 +504,19 @@ declinación) — ganancia extra no capturada por el análisis condicional.
 Se reforzó el rigor sin perseguir significancia con datos inventados. `powered_reanalysis.{json,md}`.
 Report-before-prose: sigue siendo piloto; NO cambia cifras firmadas. Confirmatorio real exigiría autorar
 queries pre-registradas (decisión de Enzo, no tomada) o gold humano.
+
+## Entrada 14 — Fase 3: cierre de la fase + config de encuestas (2026-07-24)
+
+Consolidación (docs, sin GPU, sin generación nueva). Matriz de factibilidad CERRADA (1a probada-nula, 1b
+diseño/nube, 2 diseño entregado, 3 hecho-espera-gold, 4 Tier A hecho, 5 exp17 piloto positivo, 6 solo
+diseño). Config recomendada para SUS/Likert escrita en SUMMER_RESULTS:
+- Pipeline base sin cambios (híbrido+rerank+granite temp0 prompt canónico; exp16 mostró no tocar el prompt).
+- ÚNICO cambio recomendado: cobertura balanceada por proveedor SOLO en el ramo comparativo cross-cloud
+  (exp17, única palanca positiva de la fase; detección cross_cloud ya existe en QueryProcessor).
+- No recomendado: decodificación anclada (nula), modelo mayor (no cabe 6 GB), memoria semántica (fuera).
+
+**Cierre de la fase:** diagnóstico (Tier 0/A/3) + mejoras (exp16 negativo honesto, exp17 positivo) + matriz
+= COMPLETOS. Respuesta central: la fidelidad responde a QUÉ evidencia entra (selección de contenido), no a
+su presentación ni a la instrucción. Pendiente (no bloquea encuestas, sí el paper): gold humano N≈200 +
+confirmatorio pre-registrado de exp17 si se busca significancia. Todo committeado local en `summer/ablacion`
++ `summer/mejoras`; NADA pusheado (GATE). Report-before-prose: nada de A.3/LACCI tocado sin OK.

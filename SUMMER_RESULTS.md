@@ -83,15 +83,15 @@ p=0.083), r=0.86, 39% queries idénticas → valida gate relajado y diseño pare
 | Reranking sube fidelidad | **DESCARTADO (Tier A)**: reranker_off 0/3, incluso tiende abajo (−0.05..−0.06 NLI, n.s.) | `arm_stats__*` |
 | Declinación confunde la métrica | parcialmente tratado en v2/v4 | denominadores decline-aware |
 
-## Matriz de factibilidad — Trabajos Futuros del A.3 (PRELIMINAR, 2026-07-23)
-Viabilidad en esta laptop (RTX 3060 6 GB) antes de las encuestas. Se cierra al terminar Tier A/3.
+## Matriz de factibilidad — Trabajos Futuros del A.3 (CERRADA 2026-07-24)
+Viabilidad en esta laptop (RTX 3060 6 GB) antes de las encuestas. Cerrada tras Tier A + exp16 + exp17.
 
 | Línea (A.3) | Viable aquí | Costo | Payoff esperado | Veredicto preliminar |
 |---|---|---|---|---|
 | **1a. Decodificación anclada** (citar/atribuir evidencia, temperatura, prompt) | **Sí** | Bajo (infra lista) | **Nula (probado)** | **IMPLEMENTADA Y PROBADA 2026-07-24 (exp16) — SIN ganancia local.** anchored_cite + strict_abstain: 0/2 bajo NLI-small/base/HHEM; anchored tiende ABAJO (cita≠grounding), ambos suben declinación y recortan contenido. Descarta la línea como victoria local |
 | **1b. Modelo de mayor capacidad** | **No en 6 GB** | — | Alto pero incuantificable local | **DISEÑO/NUBE** — granite@4096 ya no cabe 100% GPU (hallazgo); ≥13B exige otra máquina/nube. Reportar trade-off |
 | **2. Anotación humana (relevancia + gold)** | **Parcial** (diseño sí, ejecución no) | ~4-5 h humano | Alto (rompe circularidad, arbitra instrumento) | **ENTREGADO EL DISEÑO** — `claim_audit_sample_v4` N≈200 listo; ejecuta Enzo/anotadores |
-| **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **EN CURSO** — control negativo + ensembles + HHEM (corregido); selección espera gold |
+| **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **HECHO (selección espera gold)** — NLI 22% falso-contradicted; HHEM especificidad buena (falso-grounded 0.033) revela efecto que el NLI enmascara; front-runner ensemble E5_base+hhem (0.003). Selección definitiva = gold humano |
 | **4. Ablación de componentes (Tier A/B)** | **Sí** | Medio (GPU, gate determinismo relajado) | Alto (aísla qué mueve la fidelidad) | **Tier A HECHO 2026-07-24** — 0/4 robusto (rerank/top-k/orden/lost-middle no mueven fidelidad en 3 instrumentos); descarta lost-in-the-middle y reranking. Tier 0 hecho; Tier B oráculo listo |
 | **5. Cross-cloud: reescritura/expansión densa** | **Sí** | Bajo (25 q) | **Positivo (piloto)** | **PILOTO CON SEÑAL POSITIVA 2026-07-24 (exp17).** La expansión léxica falló (exp13), pero **rebalancear la cobertura por proveedor** (7/25→25/25) sube la fidelidad comparativa en 3 instrumentos (HHEM +0.081, guardas confirman genuino). No sig a n=25 → confirmatorio con OK. Trabajo Futuro accionable |
 | **6. Memoria semántica (tripletes/KG/versionada)** | **No (verano)** | Alto | Incierto | **SOLO DISEÑO** — excede el verano; entregar veredicto de factibilidad |
@@ -146,5 +146,39 @@ sobre-estimar potencia → bootstrap = guarda. Confirmatorio real exigiría quer
 contenido) POSITIVO**. La fidelidad responde a la selección de evidencia, no a su ordenamiento ni al prompt.
 (Candidata restante: verificador estable [3], espera gold.)
 
-## Configuración recomendada para SUS/Likert
-(pendiente — cierre de Fase 3)
+## Configuración recomendada para SUS/Likert (Fase 3, cerrada 2026-07-24)
+Config del sistema a poner frente a los participantes de las encuestas, derivada de los hallazgos de la
+fase. Objetivo: la mejor variante DEFENDIBLE que corre en esta laptop, sin cambiar nada de la evidencia
+firmada (esto es la config de despliegue para usuarios, no una cifra del paper).
+
+**Pipeline base (sin cambios — es lo que ya funciona y está medido):**
+- Recuperación: **híbrido** (BM25 + denso bge-large + RRF, k=60) + rerank cross-encoder ms-marco-L12,
+  final top-5. NDCG@5 indep 0.74 (vs léxico 0.44). Es el mejor retrieval medido; Tier A confirmó que su
+  arreglo (orden/recorte) no hay que tocarlo.
+- Generación: granite4.1:8b, temp 0, seed 42, prompt canónico. exp16 mostró que anclar por prompt NO
+  mejora (y sube declinación) → **no cambiar el prompt**. Es la única opción a 6 GB (1b exige nube).
+- Métrica de fidelidad mostrada/registrada: reportar relativa al instrumento (el "0.30" es NLI-relativo;
+  HHEM da ~+0.31 de nivel). Para la encuesta, la fidelidad es contexto interno, no se le pide juzgarla al
+  usuario; se mantiene el verificador runtime actual pero se DOCUMENTA su ruido (22% falso-contradicted).
+
+**Único cambio recomendado (bajo riesgo, con señal positiva): cobertura balanceada por proveedor en
+queries comparativas cross-cloud.** exp17: el retrieval híbrido deja 18/25 comparaciones sin uno de los
+proveedores pedidos → respuestas ancladas a un solo lado. El rebalanceo (⌈5/|P|⌉ por proveedor del mismo
+pool) sube cobertura 7/25→25/25 y la fidelidad comparativa en los 3 instrumentos (mejora genuina: menos
+declinación, más contenido, sin copiar). Aplicarlo SOLO al ramo comparativo cross-cloud (detección ya
+existe: `QueryProcessor` clasifica `cross_cloud`); no toca las queries de un solo proveedor. Es la única
+palanca de mejora que dio positivo en toda la fase.
+
+**Lo que NO se recomienda tocar para las encuestas:** decodificación anclada (exp16 nula/negativa);
+modelo mayor (no cabe en 6 GB); memoria semántica/KG (fuera de alcance). Todo eso queda como Trabajo
+Futuro en A.3 con veredicto de factibilidad ya escrito.
+
+**Pendientes que NO bloquean las encuestas (pero sí el cierre del paper):** gold humano
+(`claim_audit_sample_v4`, N≈200) para (a) arbitrar el nivel de fidelidad NLI vs HHEM y (b) seleccionar el
+verificador definitivo; confirmatorio pre-registrado de exp17 si se quiere cruzar significancia con n mayor.
+
+## Estado de cierre de la fase de verano (2026-07-24)
+Diagnóstico + mejoras + matriz: **COMPLETOS**. La fidelidad responde a QUÉ evidencia entra (selección de
+contenido: Tier 3 + exp17), no a su presentación (Tier A) ni a la instrucción (exp16). Config de encuestas
+definida. Ramas `summer/ablacion` (Tier A/3) y `summer/mejoras` (exp16/17) committeadas local, sin push
+(GATE). Falta: gold humano (ejecución de Enzo) y, si se decide, confirmatorio pre-registrado de exp17.
