@@ -10,7 +10,24 @@
 NO mejora la fidelidad de la respuesta (0/12 pares RAG-vs-RAG significativos; Granite
 0.235/0.247/0.299)? ¿Instrumento, generación, contexto, o techo real?
 
-## Respuesta (2026-07-23 — sujeta a validación con gold humano)
+## Respuesta corta (actualizada 2026-07-24)
+**¿Por qué mejor recuperación ≠ mejor fidelidad? Porque la fidelidad responde a QUÉ evidencia entra
+(selección de contenido), no a la calidad topical del ranking, ni al arreglo del contexto, ni al prompt.**
+Diagnóstico completo de la fase:
+- **Instrumento (Tier 3):** el 0/12 NO es robusto — HHEM revela granite híbrido>léxico (1/12) que el NLI
+  ruidoso (22% falso-contradicted) enmascara.
+- **Arreglo del contexto (Tier A):** NULO robusto (0/4 en 3 instrumentos) — rerank/top-k/orden/lost-middle
+  no mueven la fidelidad. Lost-in-the-middle descartado.
+- **Prompt / decodificación anclada (exp16):** NULO/negativo (0/2 en 3 instrumentos) — citar o abstenerse
+  no mejora; solo sube declinación y recorta contenido.
+- **Selección de contenido / cobertura (exp17):** **POSITIVO** — balancear la cobertura de proveedores en
+  cross-cloud (7/25→25/25) sube la fidelidad comparativa en los 3 instrumentos (HHEM +0.081; guardas
+  confirman genuino: declina menos, dice más, no copia). Piloto n=25, no sig, direccional-consistente.
+
+Converge: el único eje que mueve la fidelidad es la selección de evidencia (Tier 3 + exp17), no su
+presentación (Tier A) ni la instrucción (exp16). Todo pendiente de gold humano.
+
+## Respuesta Tier 3 (detalle, 2026-07-23 — sujeta a validación con gold)
 **El nulo 0/12 NO es robusto al instrumento: un verificador de grounding limpio (HHEM) revela un efecto
 retrieval→fidelidad para granite que el NLI ruidoso enmascara.** Test pareado between-scenario, familia
 BH v4-consistente (24, incl sin_rag):
@@ -76,7 +93,7 @@ Viabilidad en esta laptop (RTX 3060 6 GB) antes de las encuestas. Se cierra al t
 | **2. Anotación humana (relevancia + gold)** | **Parcial** (diseño sí, ejecución no) | ~4-5 h humano | Alto (rompe circularidad, arbitra instrumento) | **ENTREGADO EL DISEÑO** — `claim_audit_sample_v4` N≈200 listo; ejecuta Enzo/anotadores |
 | **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **EN CURSO** — control negativo + ensembles + HHEM (corregido); selección espera gold |
 | **4. Ablación de componentes (Tier A/B)** | **Sí** | Medio (GPU, gate determinismo relajado) | Alto (aísla qué mueve la fidelidad) | **Tier A HECHO 2026-07-24** — 0/4 robusto (rerank/top-k/orden/lost-middle no mueven fidelidad en 3 instrumentos); descarta lost-in-the-middle y reranking. Tier 0 hecho; Tier B oráculo listo |
-| **5. Cross-cloud: reescritura/expansión densa** | **Sí (piloto)** | Bajo (25 q) | Medio (la inyección léxica falló, exp13) | **PILOTO** — exp16 sobre `cross_cloud_subset` |
+| **5. Cross-cloud: reescritura/expansión densa** | **Sí** | Bajo (25 q) | **Positivo (piloto)** | **PILOTO CON SEÑAL POSITIVA 2026-07-24 (exp17).** La expansión léxica falló (exp13), pero **rebalancear la cobertura por proveedor** (7/25→25/25) sube la fidelidad comparativa en 3 instrumentos (HHEM +0.081, guardas confirman genuino). No sig a n=25 → confirmatorio con OK. Trabajo Futuro accionable |
 | **6. Memoria semántica (tripletes/KG/versionada)** | **No (verano)** | Alto | Incierto | **SOLO DISEÑO** — excede el verano; entregar veredicto de factibilidad |
 
 Nota clave (hallazgo que ata 1b + corte de contexto): granite@4096 es simultáneamente el techo que truncó
@@ -100,7 +117,27 @@ grounding**. Junto con Tier A (nulo de recuperación): ni contexto ni prompt mue
 capacidad del modelo (1b, fuera de 6GB) o instrumento (Tier 3, gold pendiente). Caveat: declinación
 baseline 51.7% → n efectivo ≈29, underpowered; dirección + guardas argumentan contra un positivo oculto.
 
-(Candidatas restantes: verificador estable [3, espera gold], piloto cross-cloud denso [5].)
+### exp17 — recuperación balanceada por proveedor (2026-07-24): PRIMER POSITIVO de la fase
+Diagnóstico: solo 7/25 queries comparativas cross-cloud recuperan TODOS los proveedores en top-5 (sesgo a
+un proveedor pese a NDCG 0.85) → comparación imposible de anclar. 2 brazos del MISMO pool híbrido (baseline
+= exp13 exp_off, validado overlap 5.0/5; balanced = ⌈5/|P|⌉ por proveedor). Cobertura 7/25 → 25/25.
+Ver `exp17_crosscloud_finding_2026-07-24.md`, ledger 12.
+
+| Instrumento | baseline | balanced | Δ | d_z | p |
+|---|---|---|---|---|---|
+| NLI small | 0.199 | 0.236 | +0.037 | 0.13 | 0.40 |
+| NLI base | 0.151 | 0.196 | +0.045 | 0.21 | 0.14 |
+| HHEM | 0.477 | 0.558 | **+0.081** | 0.26 | 0.24 |
+
+**Balancear la cobertura de proveedores sube la fidelidad comparativa en los 3 instrumentos** (efecto
+pequeño, no sig a n=25, pero direccional-consistente). Guardas confirman mejora GENUINA (opuesto a exp16):
+declinación 56%→32% (BAJA), palabras 349→427 (SUBE), claims 11.5→14.9 (SUBE), solape 0.11→0.13 (plano). La
+cobertura (no el arreglo ni el prompt) es la palanca. Converge con Tier 3: el eje que mueve la fidelidad es
+QUÉ evidencia entra. Caveat: piloto n=25, familia BH de 1, underpowered → confirmatorio con OK.
+
+**Síntesis Fase 2:** Tier A (arreglo contexto) nulo · exp16 (prompt) nulo/negativo · **exp17 (cobertura de
+contenido) POSITIVO**. La fidelidad responde a la selección de evidencia, no a su ordenamiento ni al prompt.
+(Candidata restante: verificador estable [3], espera gold.)
 
 ## Configuración recomendada para SUS/Likert
 (pendiente — cierre de Fase 3)

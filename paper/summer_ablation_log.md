@@ -440,3 +440,41 @@ las guardas argumentan contra un positivo oculto. Confirmatorio 194q solo con OK
 **Report-before-prose:** toca la matriz de factibilidad (línea 1a A.3: IMPLEMENTAR → IMPLEMENTADA Y
 PROBADA, sin ganancia local — resultado negativo honesto). NO cambia cifras firmadas (exp16 nuevo). NO
 tocar prosa A.3 sin OK. Reporte: `output/audit/exp16_anchored_finding_2026-07-24.md`.
+
+## Entrada 12 — exp17 piloto cross-cloud: cobertura balanceada por proveedor SUBE la fidelidad (PRIMER positivo) (2026-07-24)
+
+Rama `summer/mejoras` (infra 46a7a53). Diagnóstico que motivó el piloto: de 25 queries comparativas
+cross-cloud, **solo 7/25 recuperan TODOS los proveedores pedidos en el top-5** (18/25 pierden ≥1 proveedor
+entero pese a NDCG 0.85) → la comparación es imposible de anclar. Falla de SELECCIÓN DE CONTENIDO, no de
+ranking topical; la expansión léxica de exp13 nunca la tocó.
+
+2 brazos del MISMO pool híbrido (aísla la cobertura), pareado within-session, granite temp0 seed42
+`--no-cache`. baseline = rerank(pool)[:5] (**validado idéntico a exp13 exp_off: overlap 5.0/5 en 25/25**);
+balanced = ⌈5/|P|⌉ por proveedor pedido del mismo pool reordenado. **Cobertura 7/25 → 25/25** (set cambió
+en 22/25).
+
+**RESULTADO — balanced > baseline en los 3 instrumentos (primer positivo direccional de la fase):**
+
+| Instrumento | baseline | balanced | Δ | d_z | p |
+|---|---|---|---|---|---|
+| NLI small | 0,199 | 0,236 | +0,037 | 0,13 | 0,40 |
+| NLI base | 0,151 | 0,196 | +0,045 | 0,21 | 0,14 |
+| **HHEM** | 0,477 | 0,558 | **+0,081** | 0,26 | 0,24 |
+
+Ninguno cruza significancia (n=25, familia BH de 1, underpowered), pero los TRES apuntan arriba y HHEM (el
+más limpio, per Tier 3) da el mayor efecto. HHEM baseline 0,477 → carga verificada.
+
+**Guardas — patrón OPUESTO a exp16 (mejora GENUINA, no gaming):** declinación 56 %→**32 %** (BAJA),
+palabras 349→**427** (SUBE), claims 11,5→**14,9** (SUBE), solape verbatim 0,109→0,129 (plano, no copia).
+exp16 subía declinación y recortaba contenido; exp17 hace lo contrario → la fidelidad sube porque, con
+ambos proveedores presentes, granite deja de declinar y ancla más claims. **La cobertura es la palanca.**
+
+**Síntesis de la fase:** Tier A (arreglo del contexto) NULO · exp16 (prompt) NULO/negativo · **exp17
+(selección de contenido = cobertura) POSITIVO.** Converge con Tier 3: el único eje que mueve la fidelidad
+es QUÉ evidencia entra, no cómo se ordena ni cómo se instruye.
+
+**Caveat honesto:** piloto n=25, no significativo; señal direccional consistente + guardas, NO conclusión.
+Confirmatorio a mayor n (ampliar el set comparativo cross-cloud) requiere OK.
+
+**Report-before-prose:** matriz línea 5 A.3: PILOTO → PILOTO CON SEÑAL POSITIVA. NO cambia cifras firmadas
+(exp17 nuevo). NO tocar prosa A.3 sin OK. Reporte: `output/audit/exp17_crosscloud_finding_2026-07-24.md`.

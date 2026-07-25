@@ -1,0 +1,42 @@
+{
+ "experiment_id": "exp17_crosscloud_balanced",
+ "verifier": "hhem",
+ "variant": "max_chunk",
+ "thresholds": [
+  0.5
+ ],
+ "baseline": "baseline_repro",
+ "n_queries_subset": 60,
+ "baseline_mean_faithfulness": 0.4772,
+ "baseline_n_scored": 25,
+ "bh_family": "4 arm-vs-baseline_repro contrasts (fdr_bh)",
+ "decline_rule": "None-faithfulness pairs dropped (decline-aware); vacuous kept as 1.0",
+ "bootstrap": {
+  "n_boot": 10000,
+  "seed": 42,
+  "ci": "percentile 95%"
+ },
+ "contrasts": [
+  {
+   "arm": "balanced",
+   "det_3x": false,
+   "n_paired": 25,
+   "n_common_qids": 25,
+   "n_decline_baseline": 0,
+   "n_decline_arm": 0,
+   "baseline_mean_ffn": 0.4772,
+   "arm_mean_ffn": 0.5583,
+   "mean_diff_arm_minus_base": 0.081,
+   "boot95_lo": -0.0373,
+   "boot95_hi": 0.2032,
+   "test": "wilcoxon_signed_rank",
+   "statistic": 99.0,
+   "p_value": 0.23552,
+   "cohens_d_z": 0.2564,
+   "d_label": "small",
+   "p_bh": 0.23552,
+   "sig_bh": false
+  }
+ ],
+ "generated_by": "scripts/compute_tierA_arm_stats.py"
+}
