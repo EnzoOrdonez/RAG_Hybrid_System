@@ -130,10 +130,17 @@ Ver `exp17_crosscloud_finding_2026-07-24.md`, ledger 12.
 | HHEM | 0.477 | 0.558 | **+0.081** | 0.26 | 0.24 |
 
 **Balancear la cobertura de proveedores sube la fidelidad comparativa en los 3 instrumentos** (efecto
-pequeño, no sig a n=25, pero direccional-consistente). Guardas confirman mejora GENUINA (opuesto a exp16):
-declinación 56%→32% (BAJA), palabras 349→427 (SUBE), claims 11.5→14.9 (SUBE), solape 0.11→0.13 (plano). La
-cobertura (no el arreglo ni el prompt) es la palanca. Converge con Tier 3: el eje que mueve la fidelidad es
-QUÉ evidencia entra. Caveat: piloto n=25, familia BH de 1, underpowered → confirmatorio con OK.
+pequeño, no sig a n=25 per-query, pero direccional-consistente). Guardas confirman mejora GENUINA (opuesto
+a exp16): declinación 56%→32% (BAJA), palabras 349→427 (SUBE), claims 11.5→14.9 (SUBE), solape 0.11→0.13
+(plano). La cobertura (no el arreglo ni el prompt) es la palanca. Converge con Tier 3: el eje que mueve la
+fidelidad es QUÉ evidencia entra.
+
+**Reanálisis de mayor potencia (mismas 25 q, claim-level, pool agotado → sin queries nuevas; ledger 13):**
+GLMM `supported ~ arm + (1|query)` una-cola: HHEM OR 1.25 **p=0.021**, base 0.056 (marginal), small 0.152;
+bootstrap conservador por query NO cruza (HHEM 0.23). Sugestivo, no concluyente: real en dirección, al
+borde según el modelo. Caveats: una-cola, 3 verificadores (no sobrevive Bonferroni ×3), GLMM puede
+sobre-estimar potencia → bootstrap = guarda. Confirmatorio real exigiría queries pre-registradas nuevas
+(decisión de Enzo) o gold.
 
 **Síntesis Fase 2:** Tier A (arreglo contexto) nulo · exp16 (prompt) nulo/negativo · **exp17 (cobertura de
 contenido) POSITIVO**. La fidelidad responde a la selección de evidencia, no a su ordenamiento ni al prompt.

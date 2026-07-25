@@ -58,6 +58,30 @@ Encaja con toda la fase: Tier A (arreglo del contexto) = nulo; exp16 (prompt) = 
 es QUÉ evidencia entra, no cómo se ordena ni cómo se instruye. La contribución de recuperación del híbrido
 sí puede volverse fidelidad — pero solo cuando la selección garantiza la evidencia que la respuesta necesita.
 
+## Reanálisis de mayor potencia (mismas 25 queries, sin datos nuevos)
+Pool cross-cloud agotado en 25 (las 4 removidas son inválidas: corpus K8s/CNCF borrado en el rebuild).
+En vez de autorar queries (result-chasing), se reanaliza a resolución de CLAIM conservando el pareo por
+query: **GLMM binomial `supported ~ arm + (1|query)`** (el intercepto aleatorio por query da el contraste
+within-query a nivel claim; una query de 30 claims informa más que una de 3) + **bootstrap de cluster por
+query** (unidad válida, sin pseudo-replicación) del diff micro-promediado. Tests una-cola (H1: balanced >
+baseline; dirección pre-especificada por el mecanismo). Condicional a claim genuino (declinaciones/vacuous
+salen). Ver `powered_reanalysis.{json,md}`.
+
+| Verificador | micro base→bal (diff) | GLMM OR | GLMM p (1-cola) | bootstrap p (1-cola) |
+|---|---|---|---|---|
+| NLI small | 0,213→0,247 (+0,035) | 1,15 | 0,152 | 0,30 |
+| NLI base | 0,167→0,210 (+0,042) | 1,24 | 0,056 | 0,14 |
+| **HHEM** | 0,571→0,605 (+0,033) | **1,25** | **0,021** | 0,23 |
+
+**Lectura honesta (no sobre-vender):** bajo el modelo que conserva el pareo a nivel claim, **HHEM cruza
+significancia una-cola (p=0,021)** y base queda marginal (0,056); pero el bootstrap conservador (cluster
+por query) NO cruza (HHEM 0,23). El efecto es **real en dirección y consistente, al borde de la
+significancia según el modelo** — sugestivo, no concluyente. Caveats: (1) una-cola; (2) 3 verificadores →
+HHEM 0,021 no sobrevive Bonferroni ×3 (0,063); (3) el GLMM puede sobre-estimar levemente la potencia
+(correlación residual entre claims de una misma respuesta) — por eso el bootstrap es la guarda
+conservadora. Nota aparte: balanced tiene MÁS claims genuinos (372 vs 287) por menos declinación — una
+ganancia extra que el análisis condicional a claim NO captura.
+
 ## Implicación para A.3/LACCI (report-before-prose)
 - **Matriz línea 5 (cross-cloud reescritura/expansión densa):** de "PILOTO" → **PILOTO CON SEÑAL POSITIVA**.
   La expansión léxica (exp13) falló, pero el rebalanceo de cobertura por proveedor sube la fidelidad

@@ -478,3 +478,29 @@ Confirmatorio a mayor n (ampliar el set comparativo cross-cloud) requiere OK.
 
 **Report-before-prose:** matriz línea 5 A.3: PILOTO → PILOTO CON SEÑAL POSITIVA. NO cambia cifras firmadas
 (exp17 nuevo). NO tocar prosa A.3 sin OK. Reporte: `output/audit/exp17_crosscloud_finding_2026-07-24.md`.
+
+## Entrada 13 — exp17 reanálisis de mayor potencia (mismas 25 q, claim-level): sugestivo, no concluyente (2026-07-24)
+
+Enzo eligió "más potencia sin queries nuevas" (el pool cross-cloud está AGOTADO en 25; las 4 removidas son
+inválidas — corpus K8s/CNCF borrado en el rebuild; autorar queries = result-chasing, rechazado). Reanálisis
+a resolución de claim conservando el pareo por query, SIN datos nuevos:
+- **GLMM binomial** `supported ~ arm + (1|query)` (VB): contraste within-query a nivel claim.
+- **Bootstrap de cluster por query** (unidad válida) del diff micro-promediado, seed 42.
+Tests una-cola (H1 balanced>baseline, dirección pre-especificada). Condicional a claim genuino.
+
+| Verificador | micro base→bal | GLMM OR | GLMM p(1c) | boot p(1c) |
+|---|---|---|---|---|
+| NLI small | 0,213→0,247 | 1,15 | 0,152 | 0,30 |
+| NLI base | 0,167→0,210 | 1,24 | 0,056 | 0,14 |
+| **HHEM** | 0,571→0,605 | **1,25** | **0,021** | 0,23 |
+
+**Veredicto honesto:** el modelo con pareo a nivel claim sube **HHEM a p=0,021 una-cola** (base marginal
+0,056), pero el bootstrap conservador NO cruza (HHEM 0,23) → efecto real en dirección, **al borde de la
+significancia según el modelo, sugestivo no concluyente.** Caveats registrados: una-cola; 3 verificadores
+(HHEM 0,021 no sobrevive Bonferroni ×3 = 0,063); el GLMM puede sobre-estimar potencia (correlación residual
+intra-respuesta) → el bootstrap es la guarda. Balanced además tiene MÁS claims genuinos (372 vs 287, menos
+declinación) — ganancia extra no capturada por el análisis condicional.
+
+Se reforzó el rigor sin perseguir significancia con datos inventados. `powered_reanalysis.{json,md}`.
+Report-before-prose: sigue siendo piloto; NO cambia cifras firmadas. Confirmatorio real exigiría autorar
+queries pre-registradas (decisión de Enzo, no tomada) o gold humano.
