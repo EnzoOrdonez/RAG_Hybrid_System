@@ -1,3 +1,19 @@
+# ############################################################
+# RETIRADO 2026-07-30 — ESTE ARCHIVO NO SE CONSUME EN NINGUNA PARTE.
+#
+# Verificado por grep sobre todo el repo (.py/.yaml/.md/.sh/.ps1): cero
+# consumidores. Nunca configuro una corrida; es documentacion historica del
+# diseno experimental. Se conserva por valor documental, movido fuera de
+# config/ para que nadie lo edite creyendo que cambia algo.
+#
+# Los valores VIVOS estan en:
+#   src/pipeline/pipeline_config.py    perillas del pipeline (fusion, top_k,
+#                                      reranker, expansion, modelos)
+#   scripts/run_generation_matrix.py   escenarios de generacion + decodificacion
+#   src/generation/hallucination_detector.py  verificador NLI y umbrales
+# Inventario completo y trazado: docs/KNOB_MAP_summer.md
+# ############################################################
+
 # ============================================================
 # EVALUATION CONFIG - Experimental Design
 # ============================================================

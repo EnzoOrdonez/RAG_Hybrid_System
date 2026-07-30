@@ -1,10 +1,16 @@
 # KNOB_MAP — Fase de verano (ablación exp15+)
 
-Inventario verificado (2026-07-22) de cada perilla efectiva del pipeline y su consumidor real.
-Contexto: `config/config.yaml` (sección retrieval/reranking) y `config/evaluation_config.yaml`
-**NO se consumen en runtime de experimentos** — `evaluation_config.yaml` tiene cero consumidores
-Python (es documentación); los valores vivos están hardcodeados en `src/pipeline/pipeline_config.py`
+Inventario verificado (2026-07-22; re-verificado 2026-07-30) de cada perilla efectiva del pipeline
+y su consumidor real. Los valores vivos están hardcodeados en `src/pipeline/pipeline_config.py`
 y en los runners de `scripts/`.
+
+**Config muerta vs viva (re-verificado 2026-07-30 por grep sobre todo el repo):**
+- `config/evaluation_config.yaml` — **cero consumidores** (Python, yaml, sh, ps1). Es documentación.
+- `config/config.yaml` — **secciones retrieval/reranking muertas** en runtime de experimentos, pero
+  el archivo **SÍ se consume** en el lado corpus: `ingestion_pipeline.py:21`, `deduplicator.py:313`,
+  `text_cleaner.py:199`, `build_index.py:39`. **No retirarlo**; retirar solo sus secciones muertas.
+- `config/cloud_services.yaml`, `config/terminology_mappings.yaml` — vivos
+  (`ingestion_pipeline.py:28`, `terminology_normalizer.py:25`, `query_processor.py:83`).
 
 ## Perillas efectivas (valores vigentes)
 
@@ -32,8 +38,14 @@ y en los runners de `scripts/`.
 ## Rutas canónicas (no negociables para exp15+)
 
 - **Prompt canónico** = `scripts/run_generation_matrix.py` (`build_prompt`, routing por query_type;
-  115/194 no-default) + `src/generation/prompt_templates.py`. `RAGPipeline.query()` **NO** replica
-  esta ruta — nunca usarlo para generar brazos comparables.
+  115/194 no-default) + `src/generation/prompt_templates.py`.
+  **Corregido 2026-07-30:** la afirmación previa («`RAGPipeline.query()` **NO** replica esta ruta»)
+  era imprecisa. Verificado en `rag_pipeline.py:270-291`: la construcción del prompt es la MISMA
+  (`build_context` → `get_template` → rama `cross_cloud` con `context_by_provider` → `SYSTEM_PROMPT`);
+  `rgm.build_prompt` está documentado como réplica de ella. La diferencia real es el **origen del
+  contexto**: `rgm` recibe `retrieved_ids` firmados de exp11, `RAGPipeline` recupera en vivo. Sigue
+  vigente la regla operativa: para **brazos comparables** usar `rgm` (contexto congelado); `RAGPipeline`
+  es la ruta de **despliegue**. La paridad de prompt debe quedar cubierta por test antes de empaquetar.
 - **Contextos exp12** = `retrieved_ids` de exp11 (top-5 post-rerank, orden exp11); el retrieval no
   se re-ejecuta en generación. exp11 también guarda el orden pre-rerank RRF (top-5) por query.
 - **Caché LLM** `data/llm_cache/{model}_cache.json`, key = sha256(config_name ‖ prompt ‖ system ‖
