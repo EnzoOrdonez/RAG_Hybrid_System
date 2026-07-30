@@ -520,3 +520,266 @@ diseño). Config recomendada para SUS/Likert escrita en SUMMER_RESULTS:
 su presentación ni a la instrucción. Pendiente (no bloquea encuestas, sí el paper): gold humano N≈200 +
 confirmatorio pre-registrado de exp17 si se busca significancia. Todo committeado local en `summer/ablacion`
 + `summer/mejoras`; NADA pusheado (GATE). Report-before-prose: nada de A.3/LACCI tocado sin OK.
+
+## Entrada 15 — Fase post-verano · Bloque 0: correcciones de rigor y desbloqueo del gold (2026-07-30)
+
+Bloque **sin GPU de generación y sin datos nuevos**: solo re-análisis offline, corrección de defectos
+y construcción de las piezas que faltaban. Auditoría previa antes de tocar nada:
+`git diff --name-status nota3-evidencia-2026-06-11 -- experiments/results` = **solo altas (`A`), cero
+modificaciones/bajas** → evidencia firmada `exp3..exp14`+`exp8b` intacta.
+
+### D1 — familia BH mal declarada en los artefactos de exp16/exp17 (CORREGIDO)
+
+`scripts/compute_tierA_arm_stats.py` hardcodeaba tres campos del JSON de salida ignorando
+`--exp-dir`/`--baseline-arm`, con lo que exp16 y exp17 heredaban la metadata de Tier A:
+
+| Artefacto | Declaraba | Real |
+|---|---|---|
+| exp15_ablation_tierA | familia 4 · n=60 · `baseline_repro` | correcto |
+| exp16_anchored_decoding | familia **4** · n=60 · `baseline_repro` | familia **2** |
+| exp17_crosscloud_balanced | familia **4** · n=**60** · **`baseline_repro`** | familia **1** · n=**25** · **`baseline`** |
+
+**Los p-valores nunca estuvieron mal** — la corrección BH sí se aplicó sobre la familia real
+(exp17 p_bh = p; exp16 p_bh = p×2) y el Markdown ya imprimía «BH family = 1 contrasts». Mentía solo
+la metadata del JSON. Es la misma clase de defecto que obligó a retractar la entrada 8, así que se
+trata igual: campos derivados (`args.baseline_arm`, `len(rows_base)`, `len(contrasts)`), los 9
+artefactos regenerados y **verificado que el bloque `contrasts` queda byte-idéntico** en los 9 →
+ninguna cifra publicada cambia. Regresión permanente en `tests/test_arm_stats.py` (31 tests): el test
+falla contra los artefactos antiguos y pasa contra los nuevos, comprobado.
+
+### D2 — el gold v4 medía a HHEM con una mano atada (CORREGIDO, diseño de dos etapas)
+
+`build_gold_v4.py` mostraba al anotador **un solo chunk** (argmax-entailment de NLI-small) y la
+columna `question` **vacía**. Pero los instrumentos no ven eso: NLI `vb_agree` lee los 5 chunks
+(contradicción exige ≥2 de acuerdo) y HHEM puntúa `max_chunk` sobre los 5 con premisa truncada a
+1500 chars. → κ(humano, HHEM) salía sesgada **a la baja por construcción**, justo en la decisión que
+el gold existe para arbitrar (nivel NLI 0,30 vs HHEM 0,55).
+
+Cerrar el confound mostrando los 5 chunks a los 150 claims cuesta **3-4× el tiempo del anotador**
+(medido: 120 k chars → 566 k @800 / 879 k @1500; los 150 claims abarcan **139 contextos distintos**,
+así que agrupar no comprime). Decisión de Enzo: **dos etapas**.
+
+- **Etapa A** — los 150 claims, 1 chunk @800 (+ ahora la **pregunta**, sin la cual un claim con
+  pronombre no es juzgable). Selección **verificada idéntica** a la anterior: mismos 150 claims,
+  mismos estratos, mismo orden; la única columna que cambia en el CSV es `question`.
+- **Etapa B** — submuestreo **proporcional por estrato** de 50 de esos mismos claims, con los **5
+  chunks @1500** (paridad exacta con HHEM). Se rellena **después** de la A y sin consultarla.
+
+La etapa B convierte el confound de *caveat* en *corrección*: mide cuántos juicios **cambian** al ver
+la evidencia completa. Ciego reforzado — la etapa B **no marca** qué chunk usó el instrumento (marcarlo
+dirigiría la atención); el índice argmax vive solo en el `_meta.json`. Orden barajado (seed 42) para
+que la posición no filtre estrato. Limitación registrada: arrastre de memoria entre etapas.
+
+### D4 — el gold no tenía consumidor (CONSTRUIDO)
+
+Existía el constructor, no el analizador: nada leía el CSV de vuelta. Nuevo
+`scripts/analyze_gold_v4.py`, reutilizando `label_one()` de `compute_exp15_ensemble_sweep.py` para
+etiquetar por claim a los 5 candidatos (small, base, hhem, E1_mean, E5_base_and_hhem). Entrega
+κ, IC95 bootstrap, curva de confiabilidad + ECE, precisión/recall, barrido de umbral y el sesgo de la
+etapa B. Familia BH declarada = 5 tests candidato-vs-humano.
+
+**Hallazgo metodológico durante la construcción:** la primera versión ponderaba replicando los
+estratos por orden de prioridad, y su propio guard de auto-validación la tumbó (16/150 discrepancias).
+Causa real: `build_gold_v4.pick()` muestrea **secuencialmente sobre estratos SOLAPADOS** (413 de 14 409
+claims llevan más de un flag), así que el estrato de un claim depende de **qué pase lo sacó**, no de una
+prioridad fija — no hay forma cerrada para la probabilidad de inclusión. Sustituido por **Horvitz-Thompson
+con π estimada re-ejecutando el muestreador real** (400 réplicas), agrupando por patrón de flags (los
+claims con flags idénticos son intercambiables bajo el muestreador, lo que colapsa el error Monte Carlo).
+Las π recuperadas coinciden con lo esperado analíticamente (patrón sin flags: 0,00209 vs 30/14 409 =
+0,00208), lo que valida la réplica.
+
+Consecuencia honesta que el script reporta en portada: **n efectivo de Kish = 42,7 sobre 150**. El gold
+se diseñó para *discriminar verificadores*, no para estimar una κ poblacional; la κ ponderada es
+insesgada pero de varianza alta, así que se reportan las tres lecturas (ponderada, `random_anchor`
+sin supuestos, y por estrato). Verificado de punta a punta con `--simulate` (datos sintéticos, no
+escribe nada). Segundo defecto propio detectado y corregido: la etapa B se escribe **barajada**, así
+que el join debe ir por la columna `stage_a_idx`, nunca por posición.
+
+### D5/D6 — config muerta y artefacto suelto
+
+- `config/evaluation_config.yaml`: **cero consumidores** (grep .py/.yaml/.md/.sh/.ps1) → movido a
+  `config/deprecated/` con cabecera que apunta a los valores vivos. `config/config.yaml` **sí se
+  consume** (lado corpus: `ingestion_pipeline.py:21`, `deduplicator.py:313`, `text_cleaner.py:199`,
+  `build_index.py:39`) → **no se retira**; se marcan sus secciones muertas. Éstas **contradecían al
+  sistema real**: `query_expansion.enabled: true` (vivo: **False**, retirada en N4/exp13) y
+  `reranking.default_model: ms-marco-mini-6` (vivo: **ms-marco-MiniLM-L-12-v2**). Los 4 YAML siguen
+  parseando.
+- `nli_probs__large.partial.json.gz`: 8/12 configs (granite **completo** en los 3 escenarios; faltan
+  mistral-híbrido y qwen ×3 ≈ 24 k pares). Decisión de Enzo: **terminarla** — desbloquea el tercer voto
+  NLI, hoy `NLI_TRIO` filtra por existencia de archivo y los ensembles E1/E2/E3 corren con 2 miembros
+  (E2_vote, mayoría, queda mal definido con 2). Corriendo, reanuda desde el `.partial`.
+
+### D-KNOB — corrección de `docs/KNOB_MAP_summer.md`
+
+La afirmación «`RAGPipeline.query()` **NO** replica la ruta del prompt canónico» era **imprecisa**.
+Verificado en `rag_pipeline.py:270-291`: la construcción del prompt es la misma (`build_context` →
+`get_template` → rama `cross_cloud` con `context_by_provider` → `SYSTEM_PROMPT`), y `rgm.build_prompt`
+se documenta a sí mismo como réplica de ella. La diferencia real es el **origen del contexto** (ids
+firmados de exp11 vs recuperación en vivo). Importa porque habilita empaquetar `RAGPipeline` como
+artefacto desplegable de las encuestas; la paridad de prompt queda pendiente de test antes de empaquetar.
+
+**Estado:** suite `pytest` verde (38 pasan, 1 skip) antes y después. Ninguna cifra publicada cambia.
+Report-before-prose: nada de A.3/LACCI tocado. Sin push (GATE).
+
+## Entrada 16 — Bloque 4 (parcial): dos divergencias entre el pipeline MEDIDO y el DESPLEGABLE (2026-07-30)
+
+Al empaquetar la config de encuestas aparecieron dos defectos que **no** estaban en la lista de tareas.
+Ninguno cambia una cifra publicada; ambos cambian qué significa "desplegar lo que medimos".
+
+### F1 — `RAGPipeline.query()` nunca enruta el prompt por `query_type`
+
+`rag_pipeline.py:118-121` instancia el `QueryProcessor` **solo si `config.query_expansion`**, y ese flag
+es **False** desde N4/exp13 en los tres sistemas de la tesis. Con `self.query_processor = None`, `query()`
+cae en `query_type = "default"` → `RAG_PROMPT` para **todas** las preguntas. La ruta medida
+(`run_generation_matrix.py:167`) construye un `QueryProcessor` incondicionalmente y **sí** enruta:
+de las 194, `cross_cloud` 51 + `procedural` 64 = **115/194 usan una plantilla distinta de la default**
+(y las 51 cross_cloud además usan `_build_cross_cloud_context`, agrupado por proveedor).
+
+→ El demo/UI y el runner medido **no comparten prompt en el 59 % de las queries**. Esto matiza —y hace
+más preciso— lo corregido en la entrada 15 sobre el KNOB_MAP: la *construcción* del prompt sí es idéntica,
+pero el `query_type` que la alimenta no lo es, porque `RAGPipeline` no lo calcula.
+
+**Alcance en evidencia firmada:** `_build_retriever()` hace `qp = self.query_processor or QueryProcessor()`,
+así que **la recuperación no se ve afectada** — el fallo aísla solo el prompt en `query()`. Pero **exp8**
+("End-to-End System Comparison") **sí tiene respuestas** y salió por esa ruta, y `exp8_stats_corrected.csv`
+es **inmutable**. Cambiar el comportamiento por defecto haría que una re-corrida de exp8 discrepara de su
+propio artefacto firmado.
+
+**Resolución (aditiva, default apagado):** nueva perilla `PipelineConfig.prompt_routing` (False = legado
+exacto). `RAGPipeline` gana un `_routing_qp` separado — el enrutado del prompt es una preocupación de
+prompt, no de expansión; que viajara sobre `query_expansion` era el bug. Test:
+`test_legacy_configs_keep_both_knobs_off`.
+
+### F2 — `QueryProcessor._detect_providers` pierde GCP y detecta proveedores sin corpus
+
+`PROVIDER_KEYWORDS['gcp'] = {gcp, google cloud, google cloud platform}` — sin `google` a secas y sin
+acrónimos de servicio. Consecuencia medida sobre las 25 queries cross-cloud de exp17: **solo 20/25**
+resuelven el mismo conjunto de proveedores que la etiqueta `cloud_providers` usada por el piloto.
+
+| qid | etiqueta exp17 | detecta | causa |
+|---|---|---|---|
+| q173 | aws, azure, gcp | aws, azure, **k8s** | "GKE" invisible; "Kubernetes" sí matchea |
+| q184 | aws, azure, gcp | aws, azure | "Google Artifact Registry" (no dice "google cloud") |
+| q187 | aws, azure, gcp | aws, azure | ídem |
+| q189 | aws, azure, gcp | **k8s** | "EKS vs AKS vs GKE": ningún keyword de proveedor |
+| q197 | aws, azure, gcp | aws, azure | "Google Eventarc" |
+
+Agravante: el corpus vivo tiene **solo aws/azure/gcp** (24 481 chunks; K8s/CNCF borrados en el rebuild,
+ledger entrada 13), pero el detector sigue devolviendo `k8s`/`cncf` — q189 resolvería a un proveedor con
+**cero chunks**. Afecta también a `_get_provider_filter` en queries `single_provider`, no solo al balanceo.
+
+**Resolución (sin tocar `QueryProcessor`):** `resolve_wanted_providers()` en
+`src/retrieval/coverage_balancer.py` une detector + alias (`google`) + nombres de servicio **derivados del
+propio `chunk_map`** (EKS→aws, AKS→azure, GKE→gcp), y descarta proveedores sin chunks. Derivar del índice
+en vez de hardcodear hace imposible esta clase de obsolescencia. **Verificado 25/25** contra las etiquetas
+de exp17. NO se parchea `QueryProcessor` porque `run_generation_matrix.py` le pide el `query_type` que
+enruta el prompt: cambiarlo alteraría re-corridas de exp11/exp12 firmados. **Decisión pendiente de Enzo:**
+si se arregla el detector de raíz para exp18+.
+
+### Empaquetado desplegable
+
+`balance()` movido a `src/retrieval/coverage_balancer.py` (el script de exp17 lo importa → exp17 sigue
+reproduciéndose byte a byte). Nueva `SURVEY_DEPLOY` = `PROPOSED_HYBRID` con **exactamente dos** perillas
+cambiadas (`prompt_routing`, `balance_cross_cloud_providers`), fuera de `PIPELINE_CONFIGS` para que
+`get_config("hybrid")` siga devolviendo el sistema medido. Balanceo cableado tras el rerank, solo si
+`query_type == "cross_cloud"`; el rerank pasa a top_k=50 en esa rama (el cross-encoder ya puntúa todos los
+candidatos y trunca después → sin coste extra) y la rama no-balanceada queda byte-idéntica.
+
+**Tests:** `tests/test_coverage_balancer.py` (18) — contrato de `balance()`, resolución de proveedores,
+y **aceptación**: replicar la regla sobre el pool guardado de exp17 devuelve los `balanced_ids` exactos en
+las **25/25** queries; `SURVEY_DEPLOY` difiere del sistema medido en exactamente 3 campos (nombre + 2
+perillas). `pytest.ini` con marcadores `slow`/`gpu`/`needs_artifacts`: suite completa 56 pasan + 1 skip
+(25 s), suite rápida 54 en **1,5 s**.
+
+## Entrada 17 — Bloque 3 (diseño de nube) + infra de exp18 + el techo de contexto es a k>5, no a k=5 (2026-07-30)
+
+### Hallazgo: la ventana de 4096 NO ata a la configuración desplegada
+
+La matriz de factibilidad daba por sentado que "contexto completo sin truncar" era una palanca de la
+línea 1b. Medido, no lo es **a k=5**. Calibración `tokens ≈ 0,2228·chars + 261` ajustada sobre los
+`tokens.input` reales de exp12 granite/híbrido (n=192 no truncados, R²=0,922), proyectada sobre el
+subset de 60 q escalando el contexto de cada query por su propio tamaño medio de chunk:
+
+| k | p50 tok | p90 tok | max | supera 4096 |
+|---|---|---|---|---|
+| **5 (actual)** | 1973 | 2999 | 3154 | **0/60 (0 %)** |
+| 10 | 3685 | 5737 | 6047 | 24/60 (40 %) |
+| 15 | 5397 | 8474 | 8940 | 50/60 (83 %) |
+| 20 | 7109 | 11212 | 11833 | 55/60 (92 %) |
+
+Concuerda con el dato directo de exp12: **2/194** prompts tocaron 4096. → La nube compra **capacidad
+de modelo**; compra **contexto solo si más fragmentos ayudan**, y eso empieza a poder testearse recién
+por encima de k≈7. (Estimación, no medición: supone que los chunks 6-20 miden como los 1-5. Los
+`tokens.input` reales se registran al correr exp18.)
+
+**Consecuencia de diseño para exp18:** el brazo `final_top_k_10` **no es un test limpio de cantidad** —
+a k=10 el 40 % del subset ya viene truncado, así que confunde "más evidencia" con "evidencia cortada"
+**por construcción**. Se reclasifica como **sonda del límite de truncamiento** y se analiza **partido**
+por truncado/no-truncado, con los tokens observados registrados en `results.json::observed_truncation`.
+Un test limpio de cantidad exige una ventana mayor, es decir, nube.
+
+### Infra de exp18 (escrita, sin correr — la GPU está ocupada con deberta-large)
+
+- `scripts/build_exp18_evidence_arms.py` — 4 listas de ids desde el MISMO pool híbrido k=50:
+  `baseline_repro` (rerank[:5]), `oracle_evidence` (top-5 por **bge-reranker-large**),
+  `evidence_swapped` (top-5 de OTRA query del mismo `query_type`), `final_top_k_10`.
+  - **Anti-circularidad (Flag 17):** el oráculo de selección es bge-reranker-large, **independiente**
+    de los verificadores que puntúan (NLI small/base, HHEM). Seleccionar evidencia con el mismo
+    instrumento que mide anclaje fabricaría el resultado.
+  - El emparejamiento del swap es un **desarreglo** dentro de `query_type` (seed 42): ninguna query
+    conserva su propia evidencia. Los tipos con un solo miembro se registran aparte.
+  - Auto-validación: `baseline_repro` debe solapar 5,0/5 con los ids firmados de exp11 híbrido.
+- `scripts/run_exp18_ceiling.py` — generación por brazo con el prompt canónico (`rgm.build_prompt`),
+  granite temp0 seed42, `--no-cache`, warmup + sonda de determinismo 3× por brazo, checkpoint cada 10.
+  La pregunta y su `query_type` son siempre los **propios** de la query, también en `evidence_swapped`:
+  el brazo pregunta si el generador sigue la evidencia que le dieron para la pregunta que le hicieron.
+  Escribe el esquema estándar → los scorers existentes funcionan vía `--exp-dir`.
+  **Familia BH declarada = 3 contrastes brazo-vs-`baseline_repro` por verificador.**
+
+### Bloque 3 — `docs/CLOUD_EXPERIMENT_DESIGN.md` (propuesta, cero gasto)
+
+Cuatro brazos, y el segundo es el que casi todo el mundo se salta:
+
+| | Brazo | Motor | Modelo | Gen. |
+|---|---|---|---|---|
+| A | control de replicación | **Ollama** (idéntico a local) | granite4.1:8b | 60 |
+| B | **puente de motor** | vLLM bf16 | granite4.1:8b | 60 |
+| C | **capacidad** | vLLM bf16 | modelo mayor ~32B | 60 |
+| D | confirmatorio exp17 | vLLM bf16 | ambos | 100 |
+| E | contexto *(condicional a exp18)* | vLLM bf16 | mayor, top-20 | 60 |
+
+Sin **B**, "modelo mayor en vLLM vs granite en Ollama" confunde capacidad con motor de inferencia.
+Con B: capacidad = C−B a motor constante; efecto de motor = A−B; validez del puerto = A vs local.
+**bf16 sin cuantizar** en C (cuantizar confunde capacidad con precisión numérica → es la razón de pedir
+80 GB). Contextos congelados (ids de exp11): no se re-recupera nada en la nube. **La puntuación no se
+paga en la nube** — vuelven solo los JSON y se puntúa en local con los scripts existentes, lo que además
+mantiene el instrumento idéntico al del resto de la fase.
+
+**Costo: A100 80 GB, 5-9 h de reloj ≈ USD 10-18; techo sugerido USD 50.** Aviso registrado: vLLM no es
+bit-determinista al variar el tamaño de batch → sonda con batch=1 o registrar y tratar como pareado
+dentro de sesión. **A es compuerta:** si el control no reproduce el nivel local dentro de la deriva H5
+conocida (+0,033 n.s., r=0,86), nada de B/C/D es interpretable.
+
+**Compuerta general: nada se lanza antes de exp18**, que cuesta ~3-4 h de GPU propia y cero dinero, y
+decide qué vale la pena pagar. Trade-off de contribución explícito en §7 del documento: si C rompe el
+techo es un **hallazgo**, no automáticamente la config recomendada — reencuadrar la contribución
+"corre en 6 GB" es decisión de Enzo.
+
+### Bloque 4 — pulido
+
+- `pytest.ini` con marcadores `slow`/`gpu`/`needs_artifacts`. Suite **71 tests**: rápida **68 en 1,6 s**,
+  completa ~25 s (antes: 39 tests, 66 s, sin forma de separar).
+- `tests/test_decide_nli_status.py` (14) — la regla en la que descansa **toda** cifra de fidelidad no
+  tenía cobertura directa: `test_nli_calibration.py` prueba el MODELO (¿son probabilidades?), nunca la
+  DECISIÓN. Fija la asimetría de N8/Tier 3: `supported` lleva guarda (`max_ent > max_contr`) en todas
+  las variantes; `contradicted` bajo v0 no lleva ninguna (de ahí el 22 % de falso-contradicted del
+  control negativo); `vb_agree` exige ≥2 chunks. Incluye la propiedad `vb_agree ⊆ v0` y los bordes
+  estrictos (`>` no `>=`) en el umbral.
+- `scripts/verify_summer_offline.py` — re-deriva **cada** celda de fidelidad de Tier A/exp16/exp17
+  desde las probs persistidas y recomputa los contrastes pareados. **Todo pasa**; niveles HHEM del
+  ancla 0,4499 / 0,4983 / 0,4772, que cuadran con el ledger (0,450 / 0,498 / 0,477). Incluye la guarda
+  de carga del instrumento (0,40-0,55; un HHEM mal cargado puntuaba ~0,04 y "corría") y la de familia
+  BH declarada.
+- `REPRODUCE.md` — reproducción desde limpio en 5 niveles, de segundos a horas, con los avisos
+  operativos que muerden: H5 (nunca comparar contra una sesión anterior) y la clave del caché LLM
+  (`config_name‖prompt`, no exp-id — lo que sirvió respuestas stale a exp16).

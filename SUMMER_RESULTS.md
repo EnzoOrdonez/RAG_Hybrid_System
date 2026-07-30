@@ -182,3 +182,75 @@ Diagnóstico + mejoras + matriz: **COMPLETOS**. La fidelidad responde a QUÉ evi
 contenido: Tier 3 + exp17), no a su presentación (Tier A) ni a la instrucción (exp16). Config de encuestas
 definida. Ramas `summer/ablacion` (Tier A/3) y `summer/mejoras` (exp16/17) committeadas local, sin push
 (GATE). Falta: gold humano (ejecución de Enzo) y, si se decide, confirmatorio pre-registrado de exp17.
+
+---
+
+# Fase post-verano (arranque 2026-07-30)
+
+**Mandato:** métodos nuevos sobre la palanca correcta, diagnóstico de si el techo es de cómputo,
+y pulido del código. Ledger detallado: `paper/summer_ablation_log.md` entradas 15-17.
+
+## Correcciones de rigor (Bloque 0)
+
+| # | Defecto | Estado | ¿Cambia alguna cifra? |
+|---|---|---|---|
+| D1 | familia BH hardcodeada: exp16 declaraba 4 contrastes (son 2), exp17 declaraba 4/n=60/`baseline_repro` (son 1/n=25/`baseline`) | corregido, 9 artefactos regenerados con `contrasts` **byte-idéntico** | **No** — la corrección BH sí se aplicó sobre la familia real |
+| D2 | el gold mostraba 1 chunk al humano y 5 a HHEM → κ(humano,HHEM) sesgada a la baja por construcción | rediseñado en 2 etapas | No (aún sin anotar) |
+| D4 | el gold no tenía analizador | `scripts/analyze_gold_v4.py` construido y verificado | — |
+| F1 | `RAGPipeline` nunca enruta el prompt por `query_type` → plantilla distinta a la ruta medida en **115/194** queries | perilla `prompt_routing`, default apagado | No — legado intacto (exp8) |
+| F2 | detección de proveedores pierde GCP; devuelve `k8s`/`cncf` sin corpus | resolvedor propio, **25/25** vs etiquetas exp17 | No |
+
+## Gold humano — diseño de dos etapas (decisión de Enzo 2026-07-30)
+
+Los instrumentos no ven lo mismo que el anotador: NLI `vb_agree` lee los 5 chunks y HHEM puntúa
+`max_chunk` sobre los 5 (premisa a 1500 chars), pero el CSV mostraba **uno**. Cerrar el confound para
+los 150 costaba 3-4× el tiempo del anotador (medido: 120 k → 566-879 k chars; 139 contextos distintos,
+agrupar no comprime). Diseño adoptado:
+
+- **Etapa A** — los 150 claims, 1 chunk @800 **+ la pregunta**. Selección verificada **idéntica** a la
+  anterior. ≈4-5 h.
+- **Etapa B** — 50 de esos mismos claims (submuestreo proporcional por estrato), **5 chunks @1500**
+  (paridad exacta con HHEM), barajada, después de la A. ≈3,5 h.
+
+La etapa B convierte el confound de *caveat* en *corrección*: mide cuántos juicios cambian al ver la
+evidencia completa. `analyze_gold_v4.py` pondera por **Horvitz-Thompson** re-ejecutando el muestreador
+real (los estratos se solapan: 413 de 14 409 claims llevan >1 flag, así que no hay forma cerrada) y
+reporta el **n efectivo de Kish = 42,7** sobre 150 — el gold se diseñó para discriminar verificadores,
+no para estimar una κ poblacional, y el script no lo esconde.
+
+## El techo de contexto está a k>5, no a k=5
+
+| k | p50 tok | p90 tok | supera 4096 |
+|---|---|---|---|
+| **5 (config actual)** | 1973 | 2999 | **0/60** |
+| 10 | 3685 | 5737 | 24/60 (40 %) |
+| 20 | 7109 | 11212 | 55/60 (92 %) |
+
+**La ventana de 4096 no ata a la configuración desplegada** (concuerda con exp12: 2/194 tocaron el
+límite). Matiza la matriz de factibilidad: la nube compra **capacidad de modelo**, y compra contexto
+solo si más fragmentos ayudan — testeable limpio únicamente por encima de k≈7.
+
+## Config desplegable para las encuestas — empaquetada
+
+`SURVEY_DEPLOY` en `src/pipeline/pipeline_config.py` = el sistema medido con **exactamente dos**
+perillas: `prompt_routing=True` (sin ella el demo usa otra plantilla que la ruta medida en 115/194) y
+`balance_cross_cloud_providers=True` (exp17). Fuera de `PIPELINE_CONFIGS` para que
+`get_config("hybrid")` siga devolviendo el sistema medido. **Test de aceptación:** replicar la regla
+sobre el pool guardado de exp17 devuelve los `balanced_ids` exactos en **25/25**.
+
+## Reproducibilidad
+
+`REPRODUCE.md` (5 niveles) + `scripts/verify_summer_offline.py`, que re-deriva **cada** celda de Tier A
+/ exp16 / exp17 desde las probs persistidas y recomputa los contrastes pareados: **todo cuadra exacto,
+sin GPU**. Suite 71 tests (rápida: 68 en 1,6 s).
+
+## En curso / pendiente
+
+- **exp18 (compuerta)** — infra escrita, sin correr. 4 brazos: `oracle_evidence` (techo de selección,
+  oráculo **independiente** bge-reranker-large), `evidence_swapped` (¿el generador lee el contexto?),
+  `final_top_k_10` (sonda del límite de truncamiento, analizada partida). Su resultado decide si
+  exp19/exp20 valen la pena y si la nube está justificada.
+- **deberta-large** — corriendo, completa el 3.er voto NLI (8/12 → 12/12).
+- **Nube** — `docs/CLOUD_EXPERIMENT_DESIGN.md`: A100 80 GB, 5-9 h ≈ USD 10-18, techo sugerido USD 50.
+  **Cero gasto sin OK y sin leer exp18 antes.**
+- **Gold humano** — etapas A y B listas para anotar (Enzo).
