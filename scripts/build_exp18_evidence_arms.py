@@ -5,8 +5,10 @@ Tier 3 + exp17) but never answered "how high could it go?". Ablation can only re
 components; it cannot measure the ceiling with ideal evidence. That gap is what makes
 the cloud spend undecidable, so this runs first and gates everything after it.
 
-Four arms over the 60-query summer subset, all from the SAME hybrid candidate pool
-(k=50) so only the SELECTION differs:
+Four arms, all from the SAME hybrid candidate pool (k=50) so only the SELECTION differs.
+Ids are built for all 194 queries; the RUNNER decides the scale per arm (see ARM_SCALE in
+run_exp18_ceiling.py: oracle and top-10 at 194 because their nulls carry decisions, swap at
+60 because it expects a large effect):
 
   baseline_repro   rerank(pool)[:5] with ms-marco-L12          anchor
   oracle_evidence  top-5 by bge-reranker-large over the pool   ceiling of SELECTION
@@ -24,14 +26,18 @@ retrieval improvement could ever have moved faithfulness -- which would explain 
 (no query keeps its own evidence).
 
 Why `final_top_k_10` is a boundary probe, not a clean quantity test: at k=5 the granite
-4096-token window never binds (0/60 estimated), but at k=10 it binds on ~40% of the subset.
-So this arm confounds "more evidence" with "truncated evidence" BY CONSTRUCTION. The
-estimated prompt size per query is recorded here so the analysis can split truncated from
+4096-token window never binds (0/60 on the subset, 2/194 directly observed in exp12), but at
+k=10 it binds on a large minority. So this arm confounds "more evidence" with "truncated
+evidence" BY CONSTRUCTION. The estimated prompt size per query is recorded here, and the
+runner records the OBSERVED tokens.input, so the analysis can split truncated from
 untruncated instead of averaging over the confound. Testing quantity cleanly needs a bigger
 window, i.e. the cloud.
 
+Resumable: retrieval is deterministic, so the per-query checkpoint resumes exactly. The
+environment has killed long jobs twice; without this the whole oracle pass would be lost.
+
 Out: experiments/results/exp18_evidence_ceiling/{retrieval_ids.json, retrieval_report.md}
-Usage: python scripts/build_exp18_evidence_arms.py [--no-oracle]
+Usage: python scripts/build_exp18_evidence_arms.py [--queries all|subset] [--no-oracle]
 Env:   HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42
 """
 import argparse
@@ -59,6 +65,7 @@ POOL_K = 50
 FINAL_K = 5
 BIG_K = 10
 SEED = 42
+CHECKPOINT_EVERY = 10
 # chars -> input tokens, fitted on exp12 granite/hibrido (n=192 untruncated, R^2=0.922)
 TOK_A, TOK_B = 0.2228, 261
 CTX_LIMIT = 4096
@@ -175,10 +182,25 @@ def main():
     swap_of, singletons = deranged_pairing(
         subset, lambda it: routing_type[it["query_id"]], rng)
 
+    # Per-query checkpoint. Retrieval is deterministic, so resuming is exact -- and the
+    # environment has killed long jobs twice, which would otherwise throw away the whole
+    # oracle pass. Written every CHECKPOINT_EVERY queries and removed on success.
+    part_path = OUT_DIR / f"retrieval_ids{suffix}.partial.json"
     pools, ids_out, rows = {}, {}, []
     overlaps = []
+    done_qids = set()
+    if part_path.exists():
+        prev = json.loads(part_path.read_text(encoding="utf-8"))
+        ids_out = prev["ids"]
+        rows = prev["per_query"]
+        overlaps = [r["exp11_overlap@5"] for r in rows if r["exp11_overlap@5"] is not None]
+        done_qids = set(ids_out)
+        logger.info("resuming: %d queries already built", len(done_qids))
+
     for n, item in enumerate(subset, 1):
         qid, q = item["query_id"], item["question"]
+        if qid in done_qids:
+            continue
         cands = hybrid.search(q, top_k=POOL_K, top_k_candidates=POOL_K,
                               use_reranker=False, use_expansion=False)
         reranked = reranker.rerank(q, cands, top_k=POOL_K)
@@ -223,6 +245,9 @@ def main():
                      "est_tokens_k10": round(est_tokens(big_ids, chunk_map))})
         logger.info("[%d/%d] %s ovlp11=%s oracle∩base=%s", n, len(subset), qid, ov,
                     rows[-1]["oracle_overlap_with_baseline"])
+        if len(rows) % CHECKPOINT_EVERY == 0:
+            part_path.write_text(json.dumps({"ids": ids_out, "per_query": rows}),
+                                 encoding="utf-8")
 
     # evidence_swapped resolves only after every pool is built
     for qid in ids_out:
@@ -273,6 +298,7 @@ def main():
         "per_query": rows, "ids": ids_out,
         "generated_by": "scripts/build_exp18_evidence_arms.py",
     }
+    part_path.unlink(missing_ok=True)
     (OUT_DIR / f"retrieval_ids{suffix}.json").write_text(
         json.dumps(payload, indent=1), encoding="utf-8")
 
