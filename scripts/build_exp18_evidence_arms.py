@@ -71,13 +71,20 @@ def patch_offline_model_paths():
     RR.CROSS_ENCODER_MODELS["ms-marco-mini-12"]["full_name"] = str(MODELS / "ms-marco-MiniLM-L-12-v2")
 
 
-def load_subset():
-    d = json.loads(SUBSET.read_text(encoding="utf-8"))
-    ids = d.get("query_ids") or d.get("ids") or [q["query_id"] for q in d.get("queries", [])]
+def load_all_queries():
     q = json.loads(QUERIES.read_text(encoding="utf-8"))
-    q = q.get("queries", q) if isinstance(q, dict) else q
-    by_id = {r["query_id"]: r for r in q}
-    return [by_id[i] for i in ids if i in by_id]
+    return q.get("queries", q) if isinstance(q, dict) else q
+
+
+def subset_ids():
+    d = json.loads(SUBSET.read_text(encoding="utf-8"))
+    return set(d.get("query_ids") or d.get("ids")
+               or [q["query_id"] for q in d.get("queries", [])])
+
+
+def load_subset():
+    ids = subset_ids()
+    return [r for r in load_all_queries() if r["query_id"] in ids]
 
 
 def deranged_pairing(items, key, rng):
@@ -115,7 +122,13 @@ def est_tokens(ids, chunk_map):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-oracle", action="store_true",
-                    help="skip the bge-reranker-large arm (SLOW: ~1 min/query)")
+                    help="skip the bge-reranker-large arm (SLOW)")
+    ap.add_argument("--queries", default="all", choices=["all", "subset"],
+                    help="'all' = the 194-query set (default; the oracle and top-10 arms "
+                         "need it for power), 'subset' = the 60-query summer subset")
+    ap.add_argument("--max-queries", type=int, default=None,
+                    help="smoke mode: stop after N queries; writes to retrieval_ids__smokeN.json "
+                         "so it can never overwrite the real build")
     args = ap.parse_args()
     patch_offline_model_paths()
     from src.pipeline.rag_pipeline import load_hybrid_index
@@ -126,8 +139,13 @@ def main():
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     rng = random.Random(SEED)
-    subset = load_subset()
-    logger.info("subset: %d queries", len(subset))
+    subset = load_all_queries() if args.queries == "all" else load_subset()
+    in_subset = subset_ids()
+    if args.max_queries:
+        subset = subset[: args.max_queries]
+    suffix = f"__smoke{args.max_queries}" if args.max_queries else ""
+    logger.info("queries: %d (%s)%s", len(subset), args.queries,
+                " [SMOKE]" if suffix else "")
 
     exp11 = {r["query_id"]: r["retrieved_ids"] for r in
              json.loads(EXP11.read_text(encoding="utf-8"))["configs"]
@@ -191,6 +209,7 @@ def main():
         ids_out[qid] = {"question": q,
                         "dataset_query_type": item["query_type"],
                         "routing_query_type": routing_type[qid],
+                        "in_summer_subset": qid in in_subset,
                         "baseline_repro_ids": base_ids,
                         "final_top_k_10_ids": big_ids,
                         "oracle_evidence_ids": oracle_ids,
@@ -217,8 +236,19 @@ def main():
 
     payload = {
         "experiment_id": "exp18_evidence_ceiling",
-        "source": "summer_subset.json (60 q)", "pool_k": POOL_K, "final_k": FINAL_K,
-        "big_k": BIG_K, "seed": SEED,
+        "source": ("test_queries.json (194 q)" if args.queries == "all"
+                   else "summer_subset.json (60 q)"),
+        "n_queries": len(rows),
+        "n_in_summer_subset": sum(1 for r in ids_out.values() if r["in_summer_subset"]),
+        "arm_scale": {
+            "baseline_repro": "all", "oracle_evidence": "all", "final_top_k_10": "all",
+            "evidence_swapped": "subset",
+            "why": ("oracle_evidence is the only arm whose NULL must be believed, so it needs "
+                    "power for the pre-registered TOST; final_top_k_10 is analysed split by "
+                    "truncation and both strata need n (at 60 the split was 24/36); "
+                    "evidence_swapped expects a large effect, 60 suffices."),
+        },
+        "pool_k": POOL_K, "final_k": FINAL_K, "big_k": BIG_K, "seed": SEED,
         "retrieval": "PROPOSED_HYBRID (hybrid rrf, k=50) + ms-marco-L12 rerank",
         "oracle": ("bge-reranker-large — INDEPENDENT of the NLI/HHEM verifiers that score "
                    "faithfulness (anti-circularity, Flag 17)"),
@@ -243,9 +273,10 @@ def main():
         "per_query": rows, "ids": ids_out,
         "generated_by": "scripts/build_exp18_evidence_arms.py",
     }
-    (OUT_DIR / "retrieval_ids.json").write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    (OUT_DIR / f"retrieval_ids{suffix}.json").write_text(
+        json.dumps(payload, indent=1), encoding="utf-8")
 
-    L = ["# exp18 — brazos de evidencia (60 q del subset de verano)", "",
+    L = [f"# exp18 — brazos de evidencia ({len(rows)} q)", "",
          f"Auto-validación: baseline_repro vs exp11 híbrido firmado, solape@5 medio = "
          f"**{payload['self_validation_baseline_vs_exp11_mean_overlap@5']}/5** (5.0 = réplica exacta).", "",
          f"Oráculo independiente (bge-reranker-large) vs baseline: solape@5 medio "
@@ -260,9 +291,9 @@ def main():
         L.append(f"| {r['qid']} | {r['query_type']} | {r['exp11_overlap@5']} | "
                  f"{r['oracle_overlap_with_baseline']} | {r['swap_partner']} | "
                  f"{r['est_tokens_k5']} | {r['est_tokens_k10']} |")
-    (OUT_DIR / "retrieval_report.md").write_text("\n".join(L), encoding="utf-8")
+    (OUT_DIR / f"retrieval_report{suffix}.md").write_text("\n".join(L), encoding="utf-8")
     print("\n".join(L[:12]))
-    print(f"\nwrote {OUT_DIR/'retrieval_ids.json'} + retrieval_report.md")
+    print(f"\nwrote {OUT_DIR/f'retrieval_ids{suffix}.json'} + retrieval_report{suffix}.md")
 
 
 if __name__ == "__main__":

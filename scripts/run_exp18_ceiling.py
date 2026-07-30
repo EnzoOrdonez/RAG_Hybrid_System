@@ -39,6 +39,19 @@ CHUNK_MAP_PATH = PROJECT_ROOT / "data/indices/chunk_map_bge-large_adaptive_500.j
 # baseline first: the anchor must exist before any contrast is meaningful
 ARMS = ["baseline_repro", "oracle_evidence", "evidence_swapped", "final_top_k_10"]
 
+# Per-arm query scale. Not uniform, and deliberately so: with the paired-difference SD
+# measured in Tier A (0.318), n=57 only detects 0.118 in faithfulness -- larger than the
+# biggest effect this phase ever found (exp17 HHEM +0.081). An arm whose NULL is going to
+# be believed therefore cannot run at 60.
+#   oracle_evidence   all  the only arm whose null drives a decision (the cloud spend), so
+#                          it carries the pre-registered TOST and needs the power for it
+#   final_top_k_10    all  analysed SPLIT by truncation; at n=60 the split was 24/36 and
+#                          neither stratum could say anything
+#   evidence_swapped  60   expects a large effect by construction; 60 is plenty
+#   baseline_repro    all  anchor for the two full-scale arms (60-subset ⊂ 194)
+ARM_SCALE = {"baseline_repro": "all", "oracle_evidence": "all",
+             "final_top_k_10": "all", "evidence_swapped": "subset"}
+
 _spec = importlib.util.spec_from_file_location(
     "rgm", PROJECT_ROOT / "scripts/run_generation_matrix.py")
 rgm = importlib.util.module_from_spec(_spec)
@@ -76,15 +89,23 @@ def main():
     bad = [a for a in arms if a not in ARMS]
     if bad:
         sys.exit(f"unknown arm(s) {bad}; known: {ARMS}")
-    qids = list(ids_doc)
-    if args.max_queries:
-        qids = qids[: args.max_queries]
+    all_qids = list(ids_doc)
+    sub_qids = [q for q in all_qids if ids_doc[q].get("in_summer_subset")]
+    if not sub_qids:
+        sys.exit("retrieval_ids.json has no `in_summer_subset` flags — rebuild with the "
+                 "current build_exp18_evidence_arms.py")
 
+    def qids_for(arm):
+        qs = all_qids if ARM_SCALE[arm] == "all" else sub_qids
+        return qs[: args.max_queries] if args.max_queries else qs
+
+    qids = all_qids[: args.max_queries] if args.max_queries else all_qids
     missing = [a for a in arms
-               if any(ids_doc[q].get(f"{a}_ids") is None for q in qids)]
+               if any(ids_doc[q].get(f"{a}_ids") is None for q in qids_for(a))]
     if missing:
         sys.exit(f"arm(s) {missing} have no ids in retrieval_ids.json — rebuild with "
                  f"build_exp18_evidence_arms.py (did you pass --no-oracle?)")
+    logger.info("scale: %s", {a: len(qids_for(a)) for a in arms})
 
     chunk_map = json.loads(CHUNK_MAP_PATH.read_text(encoding="utf-8"))
     index = ChunkMapIndex(chunk_map)
@@ -107,7 +128,8 @@ def main():
 
     for arm in arms:
         config_name = f"{arm} | {label}"
-        q0 = qids[0]
+        arm_qids = qids_for(arm)
+        q0 = arm_qids[0]
         pr, sp, _ = rgm.build_prompt("hibrido", questions[q0], ids_doc[q0][f"{arm}_ids"],
                                      index, qtype[q0], P)
         llm_nc = LLMManager(provider="ollama", model=tag, cache_enabled=False, seed=SEED)
@@ -126,7 +148,7 @@ def main():
             ck = json.loads(cpath.read_text(encoding="utf-8"))
             results, done = ck["results"], set(ck["completed_ids"])
             logger.info("[%s] resume: %d done", config_name, len(done))
-        todo = [q for q in qids if q not in done]
+        todo = [q for q in arm_qids if q not in done]
         for i, qid in enumerate(todo):
             arm_ids = ids_doc[qid][f"{arm}_ids"]
             prompt, sysp, _ = rgm.build_prompt("hibrido", questions[qid], arm_ids,
@@ -152,7 +174,7 @@ def main():
                 cpath.write_text(json.dumps(
                     {"config_name": config_name, "completed_ids": sorted(done),
                      "results": results}, ensure_ascii=False), encoding="utf-8")
-                logger.info("[%s] %d/%d", config_name, len(done), len(qids))
+                logger.info("[%s] %d/%d", config_name, len(done), len(arm_qids))
 
     configs = {}
     for arm in ARMS:
@@ -184,7 +206,9 @@ def main():
         "name": "exp18 evidence-ceiling diagnostic (selection / attention / quantity)",
         "timestamp": datetime.now().isoformat(), "seed": SEED, "temperature": 0.0,
         "context_source": "exp18 retrieval_ids.json (same hybrid pool; 4 selections)",
-        "queries": "data/evaluation/summer_subset.json", "num_queries": len(qids),
+        "queries": doc.get("source", "test_queries.json"),
+        "num_queries": len(qids),
+        "arm_scale": {a: {"scope": ARM_SCALE[a], "n": len(qids_for(a))} for a in ARMS},
         "model": tag, "probe_report": merged,
         "observed_truncation": trunc,
         "all_arms_bit_deterministic": (

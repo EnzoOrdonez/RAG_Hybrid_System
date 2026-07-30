@@ -848,3 +848,80 @@ referencia) y confirma que el "oraculo independiente" siempre sera otro modelo. 
 `git diff` vs `nota3-evidencia-2026-06-11` **solo altas**. Ninguna cifra del A.3/LACCI tocada.
 **Report-before-prose:** las tasas de declinacion corregidas y el 20 %→48 % de exp17 son material
 para el paper; NO se toca prosa sin OK frase por frase.
+
+## Entrada 19 — exp18 PRE-REGISTRO (escrito y committeado ANTES de generar un solo dato) (2026-07-30)
+
+Se registra aqui, antes de correr, para que el analisis no pueda elegirse despues de ver los
+numeros. La matriz de decision de exp18 **acepta un nulo** para argumentar que el techo es de
+capacidad y que el gasto en nube esta justificado; un nulo asi tiene que ser una **afirmacion
+positiva de equivalencia**, no una ausencia de significancia.
+
+### Pregunta
+El techo de fidelidad (HHEM ~0,45-0,55 / NLI ~0,30) ¿es de **seleccion de evidencia**, de
+**capacidad de generacion**, o del **instrumento**? La ablacion solo podia quitar componentes;
+nunca midio el techo con evidencia (casi) ideal.
+
+### Brazos y escala (los 4 salen del MISMO pool hibrido k=50; solo cambia la SELECCION)
+
+| Brazo | Construccion | n | Por que ese n |
+|---|---|---|---|
+| `baseline_repro` | rerank(pool)[:5] ms-marco-L12 | 194 | ancla |
+| `oracle_evidence` | top-5 por **bge-reranker-large** | **194** | unico brazo cuyo NULO decide; lleva el TOST |
+| `final_top_k_10` | rerank(pool)[:10] | **194** | se analiza partido por truncamiento; a n=60 el split era 24/36 |
+| `evidence_swapped` | top-5 de OTRA query del mismo tipo de routing | 60 | espera efecto grande |
+
+**Justificacion de la escala (medida, no supuesta):** con la SD de la diferencia pareada
+observada en Tier A/HHEM (**0,318**), el MDE(80 %, α .05 bilateral) es **0,118 a n=57** y **0,066
+a n=185**. El mayor efecto positivo de toda la fase (exp17 HHEM **+0,081**) seria **indetectable
+a n=60**; harian falta n=121.
+
+### Analisis primario
+Fidelidad **HHEM** por query, contraste pareado vs `baseline_repro` (Wilcoxon + d_z + bootstrap
+seed 42). **Familia BH declarada = 3 contrastes brazo-vs-baseline, por verificador.** Bilateral.
+
+### Equivalencia pre-registrada (brazo `oracle_evidence`)
+**TOST con banda ±0,081**, fijada en `compute_exp18_diagnosis.py::TOST_BAND` antes de correr.
+La banda es el efecto HHEM de exp17: *"el oraculo no compra ni lo que compro balancear la
+cobertura"*. Es una cantidad **preexistente y ciega a este contraste**, no un umbral ajustado
+hasta que algo pase. α=0,05; se declara equivalencia si ambos tests unilaterales rechazan
+(equivalente a que el IC90 quepa entero en la banda).
+
+**Potencia de equivalencia verificada por simulacion** (efecto real 0, SD 0,318, 400 replicas):
+n=57 → **20 %**, n=121 → 74 %, n=185 → **94 %**. Coincide con el calculo analitico (22 % / 93 %) y
+es la razon de escalar el brazo a 194. El TOST se valido ademas contra 4 casos de respuesta
+conocida (nulo a n=185 → equivalente; nulo a n=57 → no concluyente; efecto +0,15 → no
+equivalente; efecto justo en la banda → no equivalente).
+
+### Secundario
+GLMM binomial claim-level `supported ~ arm + (1|query)` + bootstrap de cluster por query,
+reusando `compute_exp17_powered.py`. Motivo (C4): 25 % de las queries tienen ≤2 claims genuinos,
+asi que su fidelidad solo puede valer 0/0,5/1 — la coarseness del denominador, no el n, es lo que
+infla la varianza. **Secundario, no primario:** exp17 ya mostro que el GLMM puede sobre-estimar
+potencia, y el bootstrap por cluster es la guarda.
+
+### Triangulacion
+Los 3 verificadores (NLI small, NLI base, HHEM). Guardas anti-gaming obligatorias con la regla de
+declinacion **unificada** (entrada 18): pure_decline / hedged_partial / answered, palabras, claims,
+solape verbatim.
+
+### Lectura de `evidence_swapped` (no es fidelidad)
+Divergencia de la respuesta vs baseline (jaccard 5-grama, jaccard de tokens, tasa de respuestas
+identicas, reaparicion de claims). Solape **ALTO** ⇒ el generador no lee el contexto, y entonces
+el nulo de recuperacion queda explicado de raiz. La fidelidad sola no puede distinguir eso de un
+modelo que sigue correctamente evidencia equivocada: ambos puntuan bajo.
+
+### Caveat declarado de antemano
+`final_top_k_10` **no es un test limpio de cantidad**: a k=10 una fraccion grande supera los 4096
+tokens, asi que confunde "mas evidencia" con "evidencia cortada" **por construccion**. Se analiza
+partido por truncamiento **observado** (`tokens.input`, medido en la corrida, no estimado); solo el
+estrato no-truncado es lectura limpia. Un test limpio de cantidad exige una ventana mayor (nube).
+
+### Anti-circularidad
+El oraculo de seleccion es **bge-reranker-large**, independiente de los verificadores que puntuan
+(Flag 17). Prohibido seleccionar evidencia con el mismo instrumento que mide anclaje.
+
+### Sanity-checks obligatorios antes de interpretar
+`baseline_repro` debe solapar **5,0/5** con los ids firmados de exp11 hibrido · nivel HHEM del
+ancla en **0,40-0,55** (guarda de carga: un HHEM mal cargado puntuaba ~0,04 y "corria") · sonda de
+determinismo 3× por brazo · `--no-cache` (el cache se indexa por `config_name‖prompt`, no por
+exp-id — sirvio respuestas stale a exp16).

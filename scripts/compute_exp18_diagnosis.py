@@ -44,6 +44,22 @@ EXP_DIR = PROJECT_ROOT / "experiments/results/exp18_evidence_ceiling"
 BASELINE_ARM = "baseline_repro"
 CTX_LIMIT = 4096
 
+# ---------------------------------------------------------------- pre-registered TOST
+# The decision matrix uses "oracle_evidence is no better than baseline" to argue that the
+# selection lever is exhausted and the ceiling is generator capacity -- i.e. it ACCEPTS a
+# null to justify spending on cloud. A non-significant Wilcoxon cannot carry that: absence
+# of evidence is not evidence of absence, and at n=57 this design could not even detect the
+# largest effect the phase ever measured. So the null has to be a POSITIVE claim of
+# equivalence, declared before the data exist.
+#
+# Band = +/- 0.081, the exp17 HHEM effect of provider balancing. Read as: "selecting evidence
+# with an independent oracle does not buy even what balancing coverage bought." It is a
+# PRE-EXISTING quantity from another experiment, blind to this contrast -- not a threshold
+# tuned until something passes. Fixed here, in code, before the run.
+TOST_BAND = 0.081
+TOST_ARM = "oracle_evidence"
+TOST_ALPHA = 0.05
+
 
 def word_ngrams(text, n=5):
     w = re.findall(r"\w+", text.lower())
@@ -58,6 +74,47 @@ def jac(a, b):
     if not a and not b:
         return 1.0
     return len(a & b) / len(a | b) if (a | b) else 0.0
+
+
+def tost(diffs, band=TOST_BAND, alpha=TOST_ALPHA):
+    """Two one-sided tests for equivalence of a paired difference within +/- band.
+
+    Equivalence is declared when BOTH one-sided t-tests reject, which is the same as the
+    (1-2*alpha) CI falling entirely inside the band. Reporting the CI alongside p keeps the
+    claim readable: it says which effect sizes the data exclude, not merely that nothing
+    reached significance.
+    """
+    from scipy import stats
+    d = np.asarray(diffs, float)
+    d = d[~np.isnan(d)]
+    n = len(d)
+    if n < 3:
+        return None
+    mean, se = float(d.mean()), float(d.std(ddof=1) / np.sqrt(n))
+    if se == 0:
+        return {"n": n, "mean_diff": round(mean, 4), "equivalent": bool(abs(mean) < band),
+                "note": "zero variance"}
+    df = n - 1
+    t_lo = (mean + band) / se          # H0: diff <= -band
+    t_hi = (mean - band) / se          # H0: diff >= +band
+    p_lo = float(stats.t.sf(t_lo, df))
+    p_hi = float(stats.t.cdf(t_hi, df))
+    p = max(p_lo, p_hi)
+    crit = float(stats.t.ppf(1 - alpha, df))
+    lo, hi = mean - crit * se, mean + crit * se   # (1-2a) CI
+    return {
+        "n": n, "band": band, "alpha": alpha,
+        "mean_diff": round(mean, 4), "se": round(se, 4),
+        "ci90": [round(lo, 4), round(hi, 4)],
+        "p_tost": round(p, 5),
+        "equivalent": bool(p < alpha),
+        "reading": ("EQUIVALENTE: la diferencia cae dentro de ±%.3f, asi que el oraculo no "
+                    "compra ni lo que compro balancear la cobertura -> la palanca de "
+                    "SELECCION esta agotada" % band) if p < alpha else
+                   ("NO concluyente: el IC90 no cabe entero en ±%.3f, asi que estos datos NO "
+                    "permiten afirmar equivalencia (ni significancia). Un nulo aqui NO "
+                    "justifica el gasto en nube." % band),
+    }
 
 
 def main():
@@ -121,6 +178,23 @@ def main():
             "baseline_claim_reappearance": round(float(np.mean(cov)), 4) if cov else None,
         })
 
+    # ------------------------------------- 1b. pre-registered equivalence (oracle arm)
+    equivalence = None
+    if TOST_ARM in by_arm and rows:
+        b_name = arm_cfg_name(BASELINE_ARM)
+        a_name = arm_cfg_name(TOST_ARM)
+        diffs = []
+        for qid in by_arm[TOST_ARM]:
+            fb = (rows.get(b_name, {}).get(qid) or {}).get("faithfulness")
+            fa = (rows.get(a_name, {}).get(qid) or {}).get("faithfulness")
+            if fb is not None and fa is not None:
+                diffs.append(float(fa) - float(fb))
+        equivalence = tost(diffs)
+        if equivalence:
+            equivalence["arm"] = TOST_ARM
+            equivalence["band_source"] = ("exp17 HHEM effect of provider balancing (+0.081); "
+                                          "pre-existing and blind to this contrast")
+
     # ------------------------------------------------- 2. truncation split
     split = None
     if "final_top_k_10" in by_arm and rows:
@@ -161,6 +235,7 @@ def main():
             "retrieval null directly. Faithfulness alone cannot distinguish that from the "
             "model correctly following wrong evidence, since both score low."),
         "answer_divergence": divergence,
+        "preregistered_equivalence": equivalence,
         "truncation_split_final_top_k_10": split,
         "generated_by": "scripts/compute_exp18_diagnosis.py",
     }
@@ -179,6 +254,15 @@ def main():
               "sigue la evidencia (el techo es del generador, y el nulo de recuperación queda "
               "explicado). Solape BAJO ⇒ sí la sigue, y el techo hay que buscarlo en su capacidad "
               "de anclar evidencia buena.", ""]
+    if equivalence:
+        L += [f"## Equivalencia pre-registrada — `{TOST_ARM}` (TOST, banda ±{TOST_BAND})", "",
+              f"n={equivalence['n']} · Δ={equivalence['mean_diff']} · "
+              f"IC90=[{equivalence['ci90'][0]}, {equivalence['ci90'][1]}] · "
+              f"p_TOST={equivalence['p_tost']} · "
+              f"**{'EQUIVALENTE' if equivalence['equivalent'] else 'NO concluyente'}**", "",
+              equivalence["reading"], "",
+              "Banda anclada en el efecto HHEM de exp17 (+0,081): preexistente y ciega a este "
+              "contraste, no un umbral ajustado hasta que algo pase.", ""]
     if split:
         L += ["## `final_top_k_10` partido por truncamiento observado", "",
               f"{split['n_truncated']} queries alcanzan el límite de {CTX_LIMIT} tokens.", "",
