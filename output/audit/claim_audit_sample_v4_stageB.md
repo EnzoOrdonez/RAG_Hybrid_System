@@ -1,0 +1,3639 @@
+# Gold v4 · ETAPA B — mismo claim, CONTEXTO COMPLETO (5 chunks)
+
+50 claims (submuestreo proporcional por estrato de los 150 de la etapa A, seed 42). **Rellenar SOLO después de terminar la etapa A**, y sin consultar lo que respondiste allí.
+
+Objetivo: los verificadores puntúan contra los **5** chunks del contexto (HHEM `max_chunk`, premisa truncada a 1500 chars; NLI `vb_agree` exige ≥2 chunks). La etapa A te mostró **uno**. Comparando tu juicio aquí con el de allí medimos cuánto sesga eso la κ, en vez de solo declararlo como limitación.
+
+Mismo criterio: `correcto` (el claim está respaldado por ALGUNO de los chunks), `incorrecto` (contradicho, o no respaldado por ninguno), `dudoso` (evidencia insuficiente). Los chunks van en el orden en que los vio el modelo.
+
+## B1. denso | gemma4-e4b — q149
+**Pregunta:** Compare AWS EKS and AWS IAM in terms of use cases and features
+
+**Claim:** Features: It is an AWS service that can be used with no additional charge ..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: Identity and Access Management for Amazon Elastic Container Service<a name="security-iam"></a>)
+
+> [AWS > ECS > Identity and Access Management for Amazon Elastic Container Service<a name="security-iam"></a>] AWS Identity and Access Management \(IAM\) is an AWS service that helps an administrator securely control access to AWS resources\. IAM administrators control who can be *authenticated* \(signed in\) and *authorized* \(have permissions\) to use Amazon ECS resources\. IAM is an AWS service that you can use with no additional charge\.
+> 
+> **Topics**
+> + [Audience](#security_iam_audience)
+> + [Authenticating with identities](#security_iam_authentication)
+> + [Managing access using policies](#security_iam_access-manage)
+> + [How Amazon Elastic Container Service works with IAM](security_iam_service-with-iam.md)
+> + [Identity\-based policy examples for Amazon Elastic Container Service](security_iam_id-based-policy-examples.md)
+> + [AWS managed policies for Amazon Elastic Container Service](security-iam-awsmanpol.md)
+> + [Using service\-linked roles for Amazon ECS](using-service-linked-roles.md)
+> + [Amazon ECS task execution IAM role](task_execution_IAM_role.md)
+> + [Task IAM role](task-iam-roles.md)
+> + [Additional configuration for Windows IAM roles for tasks](windows_task_IAM_roles.md)
+> + [Amazon ECS container instance IAM role](instance_IAM_role.md)
+> + [ECS Anywhere IAM role](iam-role-ecsanywhere.md)
+> + [Amazon ECS CodeDeploy IAM Role](codedeploy_IAM_role.md)
+> + [Amazon ECS CloudWatch Events IAM Role](CWE_IAM_role.md)
+> + [Grant permission to tag resources on creation](supported-iam-actions-tagging.
+
+**[E2]** (aws/ECS :: How Amazon Elastic Container Service works with IAM<a name="security_iam_service-with-iam"></a>)
+
+> [AWS > ECS > How Amazon Elastic Container Service works with IAM<a name="security_iam_service-with-iam"></a>] Before you use IAM to manage access to Amazon ECS, learn what IAM features are available to use with Amazon ECS\.
+> 
+> 
+> 
+> 
+> 
+> 
+> **IAM features you can use with Amazon Elastic Container Service**  
+> 
+> | IAM feature | Amazon ECS support | 
+> | --- | --- | 
+> |  [Identity\-based policies](#security_iam_service-with-iam-id-based-policies)  |    Yes  | 
+> |  [Resource\-based policies](#security_iam_service-with-iam-resource-based-policies)  |    No   | 
+> |  [Policy actions](#security_iam_service-with-iam-id-based-policies-actions)  |    Yes  | 
+> |  [Policy resources](#security_iam_service-with-iam-id-based-policies-resources)  |    Partial  | 
+> |  [Policy condition keys](#security_iam_service-with-iam-id-based-policies-conditionkeys)  |    Yes  | 
+> |  [ACLs](#security_iam_service-with-iam-acls)  |    No   | 
+> |  [ABAC \(tags in policies\)](#security_iam_service-with-iam-tags)  |    Yes  | 
+> |  [Temporary credentials](#security_iam_service-with-iam-roles-tempcreds)  |    Yes  | 
+> |  [Principal permissions](#security_iam_service-with-iam-principal-permissions)  |    Yes  | 
+> |  [Service roles](#security_iam_service-with-iam-roles-service)  |    Yes  | 
+> |  [Service\-linked roles](#security_iam_service-with-iam-roles-service-linked)  |    Yes  | 
+> 
+> To get a high\-level view of how Amazon ECS and other AWS services work with most IAM features, see [AWS services that work with IAM](https://docs.aws.amaz
+
+**[E3]** (aws/ECS :: How Amazon Elastic Container Service works with IAM<a name="security_iam_service-with-iam"></a> > Identity\-based policies for Amazon ECS<a name="security_iam_service-with-iam-id-based-policies"></a> > Identity\-based policy examples for Amazon ECS<a name="security_iam_service-with-iam-id-based-policies-examples"></a>)
+
+> [AWS > ECS > How Amazon Elastic Container Service works with IAM<a name="security_iam_service-with-iam"></a> > Identity\-based policies for Amazon ECS<a name="security_iam_service-with-iam-id-based-policies"></a> > Identity\-based policy examples for Amazon ECS<a name="security_iam_service-with-iam-id-based-policies-examples"></a>] To view examples of Amazon ECS identity\-based policies, see [Identity\-based policy examples for Amazon Elastic Container Service](security_iam_id-based-policy-examples.md)\.
+
+**[E4]** (aws/EKS :: Stay Tuned)
+
+> ferencing
+>   - Enhanced security controls
+>   - Enterprise-grade documentation features
+> 
+> - **Streamlined Contribution Process**:
+>   - Direct editing of documentation source files
+>   - Faster pull request processing
+>   - Increased automation
+>   - Reduced manual steps [AWS > EKS > Stay Tuned] For more information about the new experience, see [Contribute](https://docs.aws.amazon.com/eks/latest/userguide/contribute.html) in the Amazon EKS User Guide.
+> 
+> We look forward to your contributions with the new GitHub experience. The improved platform makes it easier than ever to help us enhance the Amazon EKS documentation.
+
+**[E5]** (aws/EKS :: Stay Tuned)
+
+> ferencing
+>   - Enhanced security controls
+>   - Enterprise-grade documentation features
+> 
+> - **Streamlined Contribution Process**:
+>   - Direct editing of documentation source files
+>   - Faster pull request processing
+>   - Increased automation
+>   - Reduced manual steps [AWS > EKS > Stay Tuned] For more information about the new experience, see [Contribute](https://docs.aws.amazon.com/eks/latest/userguide/contribute.html) in the Amazon EKS User Guide.
+> 
+> We look forward to your contributions with the new GitHub experience. The improved platform makes it easier than ever to help us enhance the Amazon EKS documentation.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B2. lexico | mistral-7b-instruct — q191
+**Pregunta:** What are the key differences between AWS S3 lifecycle policies and Azure Blob Storage tiering?
+
+**Claim:** In Azure, these policies can be used to transition blobs to delete blob at the end of their lifecycle or to transition blobs between tiers based on their use patterns ..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Blob Storage :: Estimate the cost of archiving data > Scenario: Continuous tiering)
+
+>  this [workbook](https://azure.github.io/Storage/docs/backup-and-archive/azure-archive-storage-cost-estimation/azure-archive-storage-cost-estimation.xlsx). You can update the prices and values in that worksheet to estimate your costs. [AZURE > Blob Storage > Estimate the cost of archiving data > Scenario: Continuous tiering] This scenario assumes that you plan to periodically move data to the archive tier. Perhaps you're using [Blob Storage inventory reports](blob-inventory.md) to gauge which blobs are accessed less frequently, and then using [lifecycle management policies](lifecycle-management-overview.md) to automate the archival process.
+> 
+> Each month, you'd assume the cost of writing to the archive tier. The cost to store and then rehydrate data would increase over time as you archive more blobs. 
+> 
+> Using the [Sample prices](#sample-prices) that appear in this article, the following table demonstrates three months of spending. 
+> 
+> This scenario assumes a monthly ingest of 200,000 files totaling 10,240 GB in size to archive. It also assumes a one-time read each month of about 1% of archived capacity. The operation used this scenario is the [Put Blob](/rest/api/storageservices/put-blob) operation. 
+> 
+> 
+> [TABLE_1]
+> 
+> > [!TIP]
+> > To model costs over 12 months, open the **Continuous Tiering** tab of this [workbook](https://azure.github.io/Storage/docs/backup-and-archive/azure-archive-storage-cost-estimation/azure-archive-storage-cost-estimation.xlsx). You can update the prices and values
+
+**[E2]** (aws/EC2 :: Amazon EBS local snapshots on Outposts<a name="snapshots-outposts"></a> > Frequently asked questions<a name="faq"></a>)
+
+>  lifecycle of local snapshots using Amazon Data Lifecycle Manager\. For more information see, [Automate snapshots on an Outpost](#dlm)\.
+> 
+> **6\. Can I create, use, or delete local snapshots if my Outpost loses connectivity to its [AWS > EC2 > Amazon EBS local snapshots on Outposts<a name="snapshots-outposts"></a> > Frequently asked questions<a name="faq"></a>]  Region?**  
+> No\. The Outpost must have connectivity with its Region as the Region provides the access, authorization, logging, and monitoring services that are critical for your snapshots' health\. If there is no connectivity, you can't create new local snapshots, create volumes or launch instances from existing local snapshots, or delete local snapshots\.
+> 
+> **7\. How quickly is Amazon S3 storage capacity made available after deleting local snapshots?**  
+> Amazon S3 storage capacity becomes available within 72 hours after deleting local snapshots and the volumes that reference them\.
+> 
+> **8\. How can I ensure that I do not run out of Amazon S3 capacity on my Outpost?**  
+> We recommend that you use Amazon CloudWatch alarms to monitor your Amazon S3 storage capacity, and delete snapshots and volumes that you no longer need to avoid running out of storage capacity\. If you are using Amazon Data Lifecycle Manager to automate the lifecycle of local snapshots, ensure that your snapshot retention policies do not retain snapshots for longer than is needed\.
+> 
+> **9\. What happens if I run out of local Amazon S3 capacity on my Outposts?
+
+**[E3]** (azure/Blob Storage :: Introduction to Azure Data Lake Storage > Data Lake Storage > Optimized cost and performance)
+
+>  in much the same way that files are organized on your computer.
+> 
+> Operations such as renaming or deleting a directory, become single atomic metadata operations on the directory. There's no need to enumerate and process all objects that share the name prefix of the directory. [AZURE > Blob Storage > Introduction to Azure Data Lake Storage > Data Lake Storage > Optimized cost and performance] Azure Data Lake Storage is priced at Azure Blob Storage levels. It builds on Azure Blob Storage capabilities such as automated lifecycle policy management and object level tiering to manage big data storage costs.
+> 
+> Performance is optimized because you don't need to copy or transform data as a prerequisite for analysis. The hierarchical namespace capability of Azure Data Lake Storage allows for efficient access and navigation. This architecture means that data processing requires fewer computational resources, reducing both the speed and cost of accessing data.
+
+**[E4]** (azure/Blob Storage :: Lifecycle management policies that delete blobs)
+
+> [AZURE > Blob Storage > Lifecycle management policies that delete blobs] You can use lifecycle management policies to transition blobs to delete blob at the end of their lifecycle. This article contains examples of policy definitions that delete blobs.
+> 
+> For general information about Azure Storage lifecycle management policies, see [Azure Blob Storage lifecycle management overview](lifecycle-management-overview.md).
+
+**[E5]** (azure/Blob Storage :: Lifecycle management policies that transition blobs between tiers)
+
+> [AZURE > Blob Storage > Lifecycle management policies that transition blobs between tiers] You can use Lifecycle management policies to transition blobs to cost-efficient access tiers based on their use patterns. This article contains examples of policy definitions that transition blobs between tiers.
+> 
+> For general information about Azure Storage lifecycle management policies, see [Azure Blob Storage lifecycle management overview](lifecycle-management-overview.md).
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B3. denso | granite4.1-8b — q178
+**Pregunta:** How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?
+
+**Claim:** Azure relies on pod scheduling failures and resource constraints to trigger scale-up actions..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: Amazon ECS cluster Auto Scaling<a name="cluster-auto-scaling"></a>)
+
+> [AWS > ECS > Amazon ECS cluster Auto Scaling<a name="cluster-auto-scaling"></a>] **Important**  
+> As of May 27, 2022, Amazon ECS changed how the resources that facilitate cluster Auto Scaling is managed\. To learn more, see [Update on the way Amazon ECS creates resources for cluster auto scaling](#update-ecs-resources-cas)\.
+> 
+> Amazon ECS can manage the scaling of Amazon EC2 instances that are registered to your cluster\. This is referred to as Amazon ECS cluster auto scaling\. This is done by using an Amazon ECS Auto Scaling group capacity provider with managed scaling turned on\. When you use an Auto Scaling group capacity provider with managed scaling turned on, Amazon ECS creates two custom CloudWatch metrics and a target tracking scaling policy that attaches to your Auto Scaling group\. Amazon ECS then manages the scale\-in and scale\-out actions of the Auto Scaling group based on the load your tasks put on your cluster\. For more information about Auto Scaling group capacity providers, see [Auto Scaling group capacity providers](asg-capacity-providers.md)\.
+> 
+> **Note**  
+> Amazon ECS cluster auto scaling is only supported with Auto Scaling group capacity providers\. For Amazon ECS workloads that are hosted on AWS Fargate, see [AWS Fargate capacity providers](fargate-capacity-providers.md)\.
+
+**[E2]** (aws/ECS :: Amazon ECS cluster Auto Scaling<a name="cluster-auto-scaling"></a> > How cluster Auto Scaling works<a name="how-it-works"></a> > Cluster Auto Scaling considerations<a name="cluster-auto-scaling-considerations"></a>)
+
+>  scaling feature is on\. For more information, see [Managed scale\-out behavior](#managed-scaling-scaleout)\.
+> + By default, managed termination is off\.
+> + By default, Auto Scaling instance scale\-in protection is off\. For [AWS > ECS > Amazon ECS cluster Auto Scaling<a name="cluster-auto-scaling"></a> > How cluster Auto Scaling works<a name="how-it-works"></a> > Cluster Auto Scaling considerations<a name="cluster-auto-scaling-considerations"></a>]  more information, see [Using instance scale\-in protection](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-instance-protection.html) in the *Amazon EC2 Auto Scaling User Guide*\.
+> + The Auto Scaling group that's used with your capacity provider can't use instance weighting settings\. Instance weighting isn't supported when used together with an Amazon ECS capacity provider\.
+
+**[E3]** (aws/ECS :: Service auto scaling<a name="service-auto-scaling"></a>)
+
+> [AWS > ECS > Service auto scaling<a name="service-auto-scaling"></a>] *Automatic scaling* is the ability to increase or decrease the desired count of tasks in your Amazon ECS service automatically\. Amazon ECS leverages the Application Auto Scaling service to provide this functionality\. For more information, see the [Application Auto Scaling User Guide](https://docs.aws.amazon.com/autoscaling/application/userguide/what-is-application-auto-scaling.html)\.
+> 
+> Amazon ECS publishes CloudWatch metrics with your service’s average CPU and memory usage\. For more information, see [Service utilization](cloudwatch-metrics.md#service_utilization)\. You can use these and other CloudWatch metrics to scale out your service \(add more tasks\) to deal with high demand at peak times, and to scale in your service \(run fewer tasks\) to reduce costs during periods of low utilization\. 
+> 
+> Amazon ECS Service Auto Scaling supports the following types of automatic scaling:
+> + [Target tracking scaling policies](service-autoscaling-targettracking.md)— Increase or decrease the number of tasks that your service runs based on a target value for a specific metric\. This is similar to the way that your thermostat maintains the temperature of your home\. You select temperature and the thermostat does the rest\.
+> + [Step scaling policies](service-autoscaling-stepscaling.md)— Increase or decrease the number of tasks that your service runs based on a set of scaling adjustments, known as step adjustments, that var
+
+**[E4]** (aws/ECS :: Amazon ECS cluster Auto Scaling<a name="cluster-auto-scaling"></a> > How cluster Auto Scaling works<a name="how-it-works"></a>)
+
+> **  
+> Amazon ECS cluster auto scaling is only supported with Auto Scaling group capacity providers\. For Amazon ECS workloads that are hosted on AWS Fargate, see [AWS Fargate capacity providers](fargate-capacity-providers.md)\. [AWS > ECS > Amazon ECS cluster Auto Scaling<a name="cluster-auto-scaling"></a> > How cluster Auto Scaling works<a name="how-it-works"></a>] The following is the workflow used for Amazon ECS cluster auto scaling\. For more information, see [Turn on cluster Auto Scaling](turn-on-cluster-auto-scaling.md)\.
+> 
+> 1. Create an Auto Scaling group
+> 
+> 1. Create a capacity provider that uses that Auto Scaling group
+> 
+> 1. Turn on managed scaling for the capacity provider
+> 
+> 1. Associate the capacity provider with a cluster
+> 
+> 1. Create a capacity provider strategy that uses the capacity provider\.
+> 
+>    The capacity provider strategy determines how the tasks are spread across the cluster's capacity providers\. When you run a standalone task or create a service, you either use the cluster's default capacity provider strategy or a capacity provider strategy that overrides the default one\.
+> 
+> For each Auto Scaling group capacity provider that's associated with a cluster, Amazon ECS creates and manages the following resources:
+> + A low metric value CloudWatch alarm
+> + A high metric value CloudWatch alarm
+> + A target tracking scaling policy
+> **Note**  
+> Amazon ECS creates the target tracking scaling policy and attaches it to the Auto Scaling group\. To update the target tracking scaling 
+
+**[E5]** (azure/AKS :: Cluster autoscaling in Azure Kubernetes Service (AKS) overview > About the cluster autoscaler)
+
+> Facebook
+> x.com
+> LinkedIn
+> Email
+> 
+> Copy Markdown
+> Print [AZURE > AKS > Cluster autoscaling in Azure Kubernetes Service (AKS) overview > About the cluster autoscaler] Clusters often need a way to scale automatically to adjust to changing application demands, such as between workdays and evenings or weekends. AKS clusters can scale in the following ways:
+> Thecluster autoscalerperiodically checks for pods that can't be scheduled on nodes because of resource constraints. The cluster then automatically increases the number of nodes. Manual scaling is disabled when you use the cluster autoscaler. For more information, seeHow does scale up work?.TheHorizontal Pod Autoscaleruses the Metrics Server in a Kubernetes cluster to monitor the resource demand of pods. If an application needs more resources, the number of pods is automatically increased to meet the demand.TheVertical Pod Autoscalerautomatically sets resource requests and limits on containers per workload based on past usage to ensure pods are scheduled onto nodes that have the required CPU and memory resources.
+> 
+> It's a common practice to enable cluster autoscaler for nodes and either the Vertical Pod Autoscaler or Horizontal Pod Autoscaler for pods. When you enable the cluster autoscaler, it applies the specified scaling rules when the node pool size is lower than the minimum node count, up to the maximum node count. The cluster autoscaler waits to take effect until a new node is needed in the node pool or until a node might be saf
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B4. denso | mistral-7b-instruct — q036
+**Pregunta:** What is Azure Virtual Machines and what are its main capabilities?
+
+**Claim:** Offering a Start/Stop VMs v2 feature that starts or stops virtual machines on user-defined schedules, provides insights through Azure Application Insights, and sends optional notifications using action groups .
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Virtual Machines :: Virtual machines in Azure > Latest features > What's new)
+
+> Facebook
+> x.com
+> LinkedIn
+> Email
+> 
+> Documentation for creating and managing virtual machines in Azure. [AZURE > Virtual Machines > Virtual machines in Azure > Latest features > What's new] Dasv7 size series - general purposeDsv6 size series - general purposeFasv7 size series - compute optimizedAzure BoostHibernation
+> 
+> Azure CLIAzure portalAzure PowerShellTerraform
+
+**[E2]** (azure/Virtual Machines :: Virtual machines in Azure > Troubleshooting > How-To Guide)
+
+> Azure portalAzure PowerShellTerraformAzure CLI
+> 
+> Linux in Azure learning pathCreate a Windows virtual machine in Azure [AZURE > Virtual Machines > Virtual machines in Azure > Troubleshooting > How-To Guide] Troubleshooting GuidesTroubleshoot deployment issuesTroubleshoot allocation failuresTroubleshoot unexpected rebootsMicrosoft Q&A
+> 
+> Azure Well-Architected Framework Virtual Machine considerationsAzure Well-Architected Framework Disk Storage considerationsCloud adoption frameworkAzure architecture center
+
+**[E3]** (azure/Azure Functions :: Start/Stop VMs v2 overview)
+
+> [AZURE > Azure Functions > Start/Stop VMs v2 overview] The Start/Stop VMs v2 feature starts or stops Azure Virtual Machines instances across multiple subscriptions. It starts or stops virtual machines on user-defined schedules, provides insights through [Azure Application Insights](/azure/azure-monitor/app/app-insights-overview), and send optional notifications by using [action groups](/azure/azure-monitor/alerts/action-groups). For most scenarios, Start/Stop VMs can manage virtual machines deployed and managed both by Azure Resource Manager and by Azure Service Manager (classic), which is [deprecated](/azure/virtual-machines/classic-vm-deprecation).
+> 
+> This new version of Start/Stop VMs v2 provides a decentralized low-cost automation option for customers who want to optimize their VM costs. It offers all of the same functionality as the original version that was available with Azure Automation, but it's designed to take advantage of newer technology in Azure. The Start/Stop VMs v2 relies on multiple Azure services and it will be charged based on the services that are deployed and consumed.
+
+**[E4]** (azure/Virtual Network :: What is Azure Virtual Network?)
+
+> [AZURE > Virtual Network > What is Azure Virtual Network?] Azure Virtual Network provides the fundamental building block for your private network in Azure. This service enables Azure resources like virtual machines (VMs) to securely communicate with each other, the internet, and on-premises networks. Virtual networks deliver the scale, availability, and isolation benefits of Azure infrastructure while maintaining the familiar networking concepts you use in traditional datacenters.
+> 
+> > [!VIDEO https://learn-video.azurefd.net/vod/player?id=6b5b138e-8406-406e-8b34-40bdadf9fc6d]
+> 
+> > [!NOTE]
+> > Azure Virtual Network is one of the services that make up the Network Foundations category in Azure. Other services in this category include [Azure DNS](../dns/dns-overview.md) and [Azure Private Link](../private-link/private-link-overview.md). Each service has its own unique features and use cases. For more information on this service category, see [Network Foundations](../networking/foundations/network-foundations-overview.md).
+
+**[E5]** (azure/Virtual Machines :: Sizes for virtual machines in Azure > List of VM size families by type > General purpose)
+
+>  general purpose VM instances. While traditional Azure virtual machines provide fixed CPU performance, B-series virtual machines are the only VM type that use credits for CPU performance provisioning. B-series VMs utilize a CPU credit model to track how much CPU is consumed - the [AZURE > Virtual Machines > Sizes for virtual machines in Azure > List of VM size families by type > General purpose]  virtual machine accumulates CPU credits when a workload is operating below the base CPU performance threshold and uses credits when running above the base CPU performance threshold until all of its credits are consumed. Upon consuming all the CPU credits, a B-series virtual machine is throttled back to its base CPU performance until it accumulates the credits to CPU burst again.View the full B family pageUsage Flexibility:B-family VMs are best suited for workloads that do not require constant full CPU performance.Ideal Applications:B-family VMs are ideal applications include web servers, proof of concepts, small databases, and development build environments.Performance Needs:Some workloads often have burstable performance requirements, meaning they only need high performance sporadically. B-family VMs are perfect for this use case.D familyThe 'D' family of VM sizes are one of Azure's general purpose VM sizes. They're designed for a variety of demanding workloads, such as enterprise applications, web and application servers, development and test environments, and batch processing task
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B5. lexico | mistral-7b-instruct — q080
+**Pregunta:** How to set up monitoring and alerts for Azure AKS?
+
+**Claim:** Navigate to the Azure portal and create a new Log Analytics workspace.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/AKS :: Monitor Azure Kubernetes Service (AKS) > Alerts > AKS alert rules)
+
+>  information to include diverse resources. An example is CPU percentage.
+> Most log queries compare aDateTimevalue to the present time using thenowoperator and going back one hour. To learn how to build log-based alerts, seeCreate log alerts from Container insights. [AZURE > AKS > Monitor Azure Kubernetes Service (AKS) > Alerts > AKS alert rules] The following table lists some suggested alert rules for AKS. These alerts are only examples. You can set alerts for any metric, log entry, or activity log entry listed in theAKS monitoring data reference.
+> ConditionDescriptionCPU Usage Percentage>95Alerts when the average CPU usage across all nodes exceeds the threshold.Memory Working Set Percentage>100Alerts when the average working set across all nodes exceeds the threshold.
+
+**[E2]** (azure/AKS :: Monitor Azure Kubernetes Service (AKS) > Alerts > Advisor recommendations)
+
+>  entry listed in theAKS monitoring data reference.
+> ConditionDescriptionCPU Usage Percentage>95Alerts when the average CPU usage across all nodes exceeds the threshold.Memory Working Set Percentage>100Alerts when the average working set across all nodes exceeds the threshold. [AZURE > AKS > Monitor Azure Kubernetes Service (AKS) > Alerts > Advisor recommendations] For some services, if critical conditions or imminent changes occur during resource operations, an alert displays on the serviceOverviewpage in the portal. You can find more information and recommended fixes for the alert inAdvisor recommendationsunderMonitoringin the left menu. During normal operations, no advisor recommendations display.
+> For more information on Azure Advisor, seeAzure Advisor overview.
+> NoteIf you're creating or running an application that runs on your service,Azure Monitor application insightsmight offer more types of alerts.
+
+**[E3]** (azure/AKS :: Monitor Azure Kubernetes Service (AKS) > AKS monitoring data: metrics, logs, integrations)
+
+> Some services in Azure have a built-in monitoring dashboard in the Azure portal that provides a starting point for monitoring your service. These dashboards are calledinsights, and you can find them in theInsights Hubof Azure Monitor in the Azure portal. [AZURE > AKS > Monitor Azure Kubernetes Service (AKS) > AKS monitoring data: metrics, logs, integrations] AKS generates the same kinds of monitoring data as other Azure resources as described inMonitor data from Azure resources. For detailed information on the metrics and logs created by AKS, see theAKS monitoring data reference.
+> Other Azure services and featurescollect other data and enable other analysis options as shown in the following diagram and table.
+> 
+> SourceDescriptionPlatform metricsPlatform metricsare automatically collected for AKS clusters at no cost. You can analyze these metrics using themetrics exploreror use them to createmetric alerts.Prometheus metricsWhen youenable metric scrapingfor your cluster, themanaged service for Prometheusin Azure Monitor collectsPrometheus metricsand stores them in anAzure Monitor workspace. Analyze these metrics usingprebuilt dashboardsinAzure Managed Grafanaand withPrometheus alerts.Activity logsThe Azure Monitoractivity logautomatically collects some data for AKS clusters at no cost. These log files track information like when a cluster is created or changes are made to a cluster configuration. To analyze activity log data with your other log data,send activity log data to a Log
+
+**[E4]** (azure/AKS :: Monitor Azure Kubernetes Service (AKS) > Alerts > Types of alerts)
+
+>  The site applies to a continually expanding subset of Azure services, including all services that are part of the Azure Landing Zone (ALZ).
+> The common alert schema standardizes the consumption of Azure Monitor alert notifications. For more information, seeCommon alert schema. [AZURE > AKS > Monitor Azure Kubernetes Service (AKS) > Alerts > Types of alerts] You can alert on any metric or log data source in the Azure Monitor data platform. There are many different types of alerts depending on the services you're monitoring and the monitoring data you're collecting. Different types of alerts have various benefits and drawbacks. For more information, seeChoose the right monitoring alert type.
+> The following list describes the types of Azure Monitor alerts you can create:
+> Metric alertsevaluate resource metrics at regular intervals. Metrics can be platform metrics, custom metrics, logs from Azure Monitor converted to metrics, or Application Insights metrics. Metric alerts can also apply multiple conditions and dynamic thresholds.Log alertsallow users to use a Log Analytics query to evaluate resource logs at a predefined frequency.Activity log alertstrigger when a new activity log event occurs that matches defined conditions. Resource Health alerts and Service Health alerts are activity log alerts that report on your service and resource health.
+> Some Azure services also supportsmart detection alerts,Prometheus alerts, orrecommended alert rules.
+> For some services, you can monitor at 
+
+**[E5]** (azure/AKS :: Monitor Azure Kubernetes Service (AKS) > Alerts)
+
+>  that includes data from other Azure services, selectLogsfrom theAzure Monitormenu. SeeLog query scope and time range in Azure Monitor Log Analyticsfor details.
+> For a list of common queries for any service, see theLog Analytics queries interface. [AZURE > AKS > Monitor Azure Kubernetes Service (AKS) > Alerts] Azure Monitor alerts proactively notify you when specific conditions are found in your monitoring data. Alerts allow you to identify and address issues in your system before your customers notice them. For more information, seeAzure Monitor alerts.
+> There are many sources of common alerts for Azure resources. For examples of common alerts for Azure resources, seeSample log alert queries. TheAzure Monitor Baseline Alerts (AMBA)site provides a semi-automated method of implementing important platform metric alerts, dashboards, and guidelines. The site applies to a continually expanding subset of Azure services, including all services that are part of the Azure Landing Zone (ALZ).
+> The common alert schema standardizes the consumption of Azure Monitor alert notifications. For more information, seeCommon alert schema.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B6. lexico | gemma4-e4b — q110
+**Pregunta:** How to configure IAM permissions for Google Cloud Compute Engine?
+
+**Claim:** Configuring IAM permissions for Google Cloud Compute Engine involves understanding the principle of least privilege and assigning specific roles to identities at the appropriate scope (project or resource).
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/Compute Engine :: Compute Engine IAM roles and permissionsStay organized with collectionsSave and categorize content based on your preferences.)
+
+> [GCP > Compute Engine > Compute Engine IAM roles and permissionsStay organized with collectionsSave and categorize content based on your preferences.] When you add a new member to your project, you can use anIdentity and Access Management (IAM)policy to give that member one or
+> more IAM roles. Each IAM role contains permissions
+> that grant the member access to specific resources.Compute Engine has a set ofpredefined IAM rolesthat are described on
+> this page. You can alsocreate custom rolesthat contain subsets of permissions that map directly to your needs.To learn which permissions are required for each method, see the
+> Compute Engine API reference documentation:Compute Engine v1 API referenceCompute Engine beta API referenceFor information about granting access, see the following pages.To set IAM policies at a project level, seeManage access to projects, folders, and organizationsin the IAM documentation.To set policies on specific Compute Engine resources, readGranting access to Compute Engine resources.To assign roles to a Compute Engine service account, readCreate a VM that uses a user-managed service account.What is IAM?Google Cloud offersIAM,
+> which lets you give more granular access to specific
+> Google Cloud resources and prevents unwanted access to other resources.
+> IAM lets you adopt thesecurity principle of least privilege,
+> so you grant only the necessary access to your resources.IAM lets you controlwho (identity)haswhat (roles)permission towhichresources by setting
+> IAM po
+
+**[E2]** (gcp/GKE :: Deploying workloadsStay organized with collectionsSave and categorize content based on your preferences. > Required roles)
+
+>  in the Google Cloud consoleGoogle Cloud CLI overviewInstallkubectland configure cluster accessProvision GKE resources with TerraformLearn how to simplify deployment from your IDE with Cloud Code in
+> ourDeploy and update from an
+> IDEtutorial.
+> 
+> Send feedback [GCP > GKE > Deploying workloadsStay organized with collectionsSave and categorize content based on your preferences. > Required roles] If you are not a project owner, you must have the following
+> Identity and Access Management (IAM) role at minimum to deploy workloads:
+> Kubernetes Engine Cluster Viewer (roles/container.clusterViewer): This
+> provides thecontainer.clusters.getpermission, which is required to
+> authenticate to clusters in a Google Cloud project. This does not authorize
+> you to perform any actions inside those clusters. Your cluster administrator
+> can authorize you to perform other actions on the cluster by using either
+> IAM or Kubernetes RBAC.For details about all the permissions included in this role, or to grant a
+> role with read/write permissions, seeKubernetes Engine
+> rolesin the
+> IAM documentation.
+> You can learn more about how access control works in GKE inAccess control.
+
+**[E3]** (gcp/Compute Engine :: Compute Engine IAM roles and permissionsStay organized with collectionsSave and categorize content based on your preferences. > What is IAM?)
+
+> .getresourcemanager.projects.getIamPolicyresourcemanager.projects.listWhat's nextLearn more about IAMCreate and manage custom IAM rolesGrant IAM roles to project usersGrant IAM roles for specific Compute Engine resourcesGrant IAM roles to service accounts
+> 
+> Send feedback [GCP > Compute Engine > Compute Engine IAM roles and permissionsStay organized with collectionsSave and categorize content based on your preferences. > What is IAM?] Google Cloud offersIAM,
+> which lets you give more granular access to specific
+> Google Cloud resources and prevents unwanted access to other resources.
+> IAM lets you adopt thesecurity principle of least privilege,
+> so you grant only the necessary access to your resources.
+> IAM lets you controlwho (identity)haswhat (roles)permission towhichresources by setting
+> IAM policies. IAM policies grant specific roles
+> to a project member, giving that identity certain permissions. For example, for
+> a given resource, such as a project, you can assign theCompute Network Admin role(roles/compute.networkAdmin)
+> to a user account (a Google Account or an account from anexternal identity provider)
+> and that account can control network-related resources in the project, but
+> cannot manage other resources, like instances and disks. You can also use
+> IAM to manage theGoogle Cloud console legacy rolesgranted to project team members.
+
+**[E4]** (gcp/Compute Engine :: Compute Engine IAM roles and permissionsStay organized with collectionsSave and categorize content based on your preferences.)
+
+>  Engine as part of the MIG are
+> performed by theGoogle APIs Service Agentfor your project, which has an email address like the following:PROJECT_ID@cloudservices.gserviceaccount.comBy default, the Google APIs Service Agent is granted the [GCP > Compute Engine > Compute Engine IAM roles and permissionsStay organized with collectionsSave and categorize content based on your preferences.]  Instance Group Manager
+> Service Agent role (roles/compute.instanceGroupManagerServiceAgent) at the
+> project level, which gives enough privileges to create resources based on the
+> MIG's configuration. If you're customizing access for the Google APIs Service
+> Agent, then grant the Compute Instance Admin (v1) role
+> (roles/compute.instanceAdmin.v1) and, optionally, the Service Account User
+> role (roles/iam.serviceAccountUser). The Service Account User role is required
+> only if the MIG creates VMs that can run as a service account.Note that the Google APIs Service Agent is also used by other processes,
+> includingDeployment Manager.When you create a MIG or update its instance template, Compute Engine
+> validates that the Google APIs Service Agent has the following role and
+> permissions:Service Account User role, which is important if you plan to create instances
+> that can run as a service accountPermissions to all the resources referenced from instance templates, such
+> as images, disks, VPC networks, and subnetsPredefined Compute Engine IAM rolesWith IAM, every API method in Compute Engine API requires
+> that the i
+
+**[E5]** (gcp/Compute Engine :: Managing access to Compute Engine resourcesStay organized with collectionsSave and categorize content based on your preferences. > Before you begin)
+
+> manage access to custom imageswith IAM.Learn more aboutService accounts.Learn more aboutCompute Engine IAM roles.Learn more about the permissions that are included inpredefined
+> Compute Engine IAM roles.Learn how to create and managecustom roles.
+> 
+> Send feedback [GCP > Compute Engine > Managing access to Compute Engine resourcesStay organized with collectionsSave and categorize content based on your preferences. > Before you begin] Review theIAM overview.Read the Compute Engineaccess control overview.Familiarize yourself withIAM roles for Compute Engine.If you haven't already, set upauthentication.
+>   Authentication verifies your identity for access to Google Cloud services and APIs. To run
+>   code or samples from a local development environment, you can authenticate to
+>   Compute Engine by selecting one of the following options:Select the tab for how you plan to use the samples on this page:ConsoleWhen you use the Google Cloud console to access Google Cloud services and
+>         APIs, you don't need to set up authentication.gcloudInstallthe Google Cloud CLI.
+>         
+>           After installation,initializethe Google Cloud CLI by running the following command:gcloudinitIf you're using an external identity provider (IdP), you must firstsign in to the gcloud CLI with your federated identity.Set a default region and zone.RESTTo use the REST API samples on this page in a local development environment, you use the
+>     credentials you provide to the gcloud CLI.Installthe Google Cloud CLI
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B7. lexico | gemma4-e4b — q061
+**Pregunta:** What is Google Cloud BigQuery and what problems does it solve?
+
+**Claim:** Big Data Processing: It helps in analyzing big datasets on GKE by providing necessary data storage and.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/GKE :: AI/ML orchestration on GKE documentation > Analyze data on GKE using BigQuery, Cloud Run, and Gemma)
+
+>  between different namespaces on GKE.
+> TutorialAI/ML Batch
+> 
+> This tutorial shows you how to integrate a Large Language Model application based on retrieval-augmented generation with PDF files that you upload to a Cloud Storage bucket.
+> TutorialAI/ML Data Loading [GCP > GKE > AI/ML orchestration on GKE documentation > Analyze data on GKE using BigQuery, Cloud Run, and Gemma] This tutorial shows you how to analyze big datasets on GKE by leveraging BigQuery for data storage and processing, Cloud Run for request handling, and a Gemma LLM for data analysis and predictions.
+> TutorialAI/ML Data Loading
+> 
+> Learn how to leverage GKE and Ray to efficiently preprocess large datasets for machine learning.
+> MLOpsTrainingRay
+
+**[E2]** (gcp/GKE :: GKE release notesStay organized with collectionsSave and categorize content based on your preferences. > November 22, 2022)
+
+>  Scheduler, and Controller Manager.These logs are stored in Cloud Logging and can be queried in the Cloud Logging Log Explorer or Cloud Logging API. These logs can also be sent to Google Cloud Storage, BigQuery, or Pub/Sub using the Log Router. [GCP > GKE > GKE release notesStay organized with collectionsSave and categorize content based on your preferences. > November 22, 2022] IssueGKE version 1.21.14-gke.9500 has an issue where Pods in certain conditions might get stuck terminating indefinitely, due to a Linux kernel bug. The version has been removed and is no longer available for new clusters. If your node pools are running 1.21.14-gke.9500 and experience the issue, we recommenddowngrading the node poolto 1.21.14-gke.8500.
+
+**[E3]** (gcp/GKE :: Start learning about KubernetesStay organized with collectionsSave and categorize content based on your preferences.)
+
+> . In GKE, the control plane is
+> provided and managed by Google Cloud.Learn more in the Kubernetes documentation:Control plane componentsRole-based access control (RBAC)Kubernetes includes arole-based access control (RBAC)mechanism [GCP > GKE > Start learning about KubernetesStay organized with collectionsSave and categorize content based on your preferences.]  that lets you
+> create authorization policies for accessing your clusters and their resources.
+> When using GKE, you'll often use a combination of Kubernetes RBAC
+> and Google Cloud's Identity and Access Management to secure your applications.Learn more in the Kubernetes documentation:Role-based access controlRecommended readingThis section provides links to recommended resources for learning more about
+> Kubernetes. In particular,Kubernetes.io, the official
+> Kubernetes website, has lots of up-to-date, reliable material about all
+> things Kubernetes.Guides and tutorialsKubernetes overview: A
+> thorough conceptual overview of Kubernetes.Why you need Kubernetes and
+> what it can
+> dois a great introduction to the problems that Kubernetes can solve.Tutorial: Learn Kubernetes
+> basics: Walks you
+> through the basics of Kubernetes with a simple example.Tutorial: Introducing containers: Learn about containers and container
+> orchestration with a simple example application, finishing with the example
+> running on GKE.Kubernetes tutorials: When you're
+> ready to move beyond the basics, this section of the Kubernetes documentation provides
+> tutorials on a v
+
+**[E4]** (gcp/Compute Engine :: Red Hat Enterprise Linux FAQStay organized with collectionsSave and categorize content based on your preferences. > Support FAQs > How is support offered for pay-as-you-go (PAYG) RHEL licenses on Compute Engine?)
+
+> This section answers common questions related to support for RHEL licenses. [GCP > Compute Engine > Red Hat Enterprise Linux FAQStay organized with collectionsSave and categorize content based on your preferences. > Support FAQs > How is support offered for pay-as-you-go (PAYG) RHEL licenses on Compute Engine?] When you are running PAYG RHEL images on Compute Engine, access to
+> Google Cloud Support is included in the contract. When you have issues
+> with these images, contact Google Cloud Support. You don't need to contact
+> Red Hat separately. Google will work with Red Hat to solve issues needing
+> escalation.
+> Google Cloud offers different support packages to meet different needs, such
+> as 24/7 coverage, phone support, and access to a technical support manager.
+> For more information, seeGoogle Cloud Support.
+
+**[E5]** (gcp/GKE :: GKE release notesStay organized with collectionsSave and categorize content based on your preferences. > November 29, 2022)
+
+> 1.24.6-gke.1500with this release.Control planes and nodes with auto-upgrade enabled in the Rapid channel will be upgraded from version 1.25 to version1.25.3-gke.800with this release. [GCP > GKE > GKE release notesStay organized with collectionsSave and categorize content based on your preferences. > November 29, 2022] FeatureYou can now usedeprecation insightsto identify clusters on versions 1.23 and earlier thatuse Docker-based node images, which are unsupported on GKE version 1.24 and later.
+> FeatureKubernetes control plane logsare now Generally Available. You can now configure GKE clusters with control plane version 1.22.0 or later to export to Cloud Logging logs emitted by the Kubernetes API server, Scheduler, and Controller Manager.These logs are stored in Cloud Logging and can be queried in the Cloud Logging Log Explorer or Cloud Logging API. These logs can also be sent to Google Cloud Storage, BigQuery, or Pub/Sub using the Log Router.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B8. lexico | mistral-7b-instruct — q176
+**Pregunta:** Compare container orchestration options across AWS ECS, Azure Container Instances, and Google Cloud Run
+
+**Claim:** Integration: All three services integrate with their respective container registries (Amazon ECR for AWS, Docker Hub for AWS, and Container Registry for GCP) ..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: What is Amazon Elastic Container Service?<a name="Welcome"></a>)
+
+> [AWS > ECS > What is Amazon Elastic Container Service?<a name="Welcome"></a>] Amazon Elastic Container Service \(Amazon ECS\) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications\. As a fully managed service, Amazon ECS comes with AWS configuration and operational best practices built\-in\. This also means that you don't need to manage control plane, nodes, or add\-ons\. It's integrated with both AWS and third\-party tools, such as Amazon Elastic Container Registry and Docker\. This integration makes it easier for teams to focus on building the applications, not the environment\. You can run and scale your container workloads across AWS Regions in the cloud, and on\-premises, without the complexity of managing a control plane or nodes\.
+> 
+> The following are key features of Amazon ECS:
+> + A serverless option with AWS Fargate\. With AWS Fargate, you don't need to manage servers, handle capacity planning, or isolate container workloads for security\. Fargate handles the infrastructure management aspects of your workload for you\. You can schedule the placement of your containers across your cluster based on your resource needs, isolation policies, and availability requirements\.
+> + An external instance option with ECS Anywhere\. With ECS Anywhere, you can use the Amazon ECS console and AWS CLI to manage your on\-premises container workloads\. 
+> + An Amazon EC2 option\. With EC2, you can use the Amazon ECS consol
+
+**[E2]** (aws/ECS :: Running a standalone task using the Amazon ECS console<a name="ecs_run_task-v2"></a>)
+
+>  the default, expand **Task Placement**, and then choose from the following options\.
+> 
+>     For more information, see [Amazon ECS task placement](task-placement.md)\.
+>    + **AZ Balanced Spread** \- Distribute tasks across Availability Zones and [AWS > ECS > Running a standalone task using the Amazon ECS console<a name="ecs_run_task-v2"></a>]  across container instances in the Availability Zone\.
+>    + **AZ Balanced BinPack** \- Distribute tasks across Availability Zones and across container instances with the least available memory\.
+>    + **BinPack** \- Distribute tasks based on the least available amount of CPU or memory\.
+>    + **One Task Per Host** \- Place, at most, one task from the service on each container instance\.
+>    + **Custom** \- Define your own task placement strategy\. 
+> 
+>    If you chose **Custom**, define the algorithm for placing tasks and the rules that are considered during task placement\.
+>    + Under **Strategy**, for **Type** and **Field**, choose the algorithm and the entity to use for the algorithm\.
+> 
+>      You can enter a maximum of 5 strategies\.
+>    + Under **Constraint**, for **Type** and **Expression**, choose the rule and attribute for the constraint\.
+> 
+>      When you enter the **Expression**, do not enter the double quotation marks \(`" "`\)\. For example, to set the constraint to place tasks on T2 instances, for the **Expression**, enter **attribute:ecs\.instance\-type =\~ t2\.\***\.
+> 
+>      You can enter a maximum of 10 constraints\.
+> 
+> 1. \(Optional\) To
+
+**[E3]** (gcp/GKE :: Start learning about GKEStay organized with collectionsSave and categorize content based on your preferences.)
+
+> [GCP > GKE > Start learning about GKEStay organized with collectionsSave and categorize content based on your preferences.] This page helps you find the right place to get started learning the
+> fundamentals you need to use GKE, whether you're an experienced
+> Kubernetes user or a complete beginner.New to Google Cloud?GKE relies on and can be used with many other Google Cloud
+> services, from IAM for access control to Cloud Billing for
+> managing your costs. To get started with Google Cloud basics, see the following:Google Cloud overviewCompare AWS and Azure services with
+> Google Cloud: If you're
+> familiar with other public cloud providers, this guide can help you
+> understand how Google Cloud services and features map to theirs.Google Cloud CLI: Learn about the Google Cloud CLI command line
+> tool for creating and managing Google Cloud resources.Cloud Quotas: Learn how Google Cloud usesquotasto monitor
+> and manage your Google Cloud resource usage, including when using GKE.New to containers?GKE is based on Kubernetes, and Kubernetes is a container
+> orchestration platform. If you're completely new to the world of containerized
+> applications, start here!Kubernetes comicWhat are containers?Tutorial: Introducing
+> containers: Learn about
+> containers and container orchestration with a simple example application
+> deployed on GKENew to Kubernetes?A lot of the documentation on this site assumes that you're already familiar
+> with basic Kubernetes concepts and terminology. If you're not, the following
+> resou
+
+**[E4]** (aws/ECS :: Run a standalone task in the classic Amazon ECS console<a name="ecs_run_task"></a> > [ Classic console ])
+
+> \. Therefore, a NAT gateway is required for outbound internet access, and inbound internet traffic is routed through a load balancer\.
+> 
+>    1. For **Security groups**, a security group was created for your task that allows HTTP traffic from the internet [AWS > ECS > Run a standalone task in the classic Amazon ECS console<a name="ecs_run_task"></a> > [ Classic console ]]  \(0\.0\.0\.0/0\)\. To edit the name or the rules of this security group, choose **Edit** and then modify your security group settings\. Do the same if you want to choose an existing security group\.
+> 
+> 1. \(Optional\) For **Task Placement**, you can specify how tasks are placed using task placement strategies and constraints\. Choose from the following options:
+>    + **AZ Balanced Spread** \- Distribute tasks across Availability Zones and across container instances in the Availability Zone\.
+>    + **AZ Balanced BinPack** \- Distribute tasks across Availability Zones and across container instances with the least available memory\.
+>    + **BinPack** \- Distribute tasks based on the least available amount of CPU or memory\.
+>    + **One Task Per Host** \- Place, at most, one task from the service on each container instance\.
+>    + **Custom** \- Define your own task placement strategy\. 
+> 
+>     For more information, see [Amazon ECS task placement](task-placement.md)\.
+> 
+> 1. \(Optional\) To send command, environment variable, task IAM role, or task execution role overrides to one or more containers in your task definition, cho
+
+**[E5]** (gcp/GKE :: GKE and Cloud RunStay organized with collectionsSave and categorize content based on your preferences.)
+
+>  can therefore easily be migrated between runtimes.
+> Here's anexamplecomparing the YAML files of a Kubernetes deployment and a
+> Cloud Run service.Both GKE and Cloud Run integrate seamlessly withCloud LoggingandCloud Monitoring, providing you with a
+> central [GCP > GKE > GKE and Cloud RunStay organized with collectionsSave and categorize content based on your preferences.] ized view on the Google Cloud console to observe application metrics
+> regardless of their platform. You can also useservice-level objectives
+> (SLO) monitoringon both
+> platforms, and view a unified display of the SLOs on the Cloud Monitoring
+> dashboard.You can implement continuous delivery to either GKE resources
+> or Cloud Run services by usingCloud Deploy. Or, if
+> you prefer, simultaneously deploy your application to both GKE
+> and Cloud Run usingparallel deployment.You can facilitateadvanced traffic
+> managementby using
+> external and internal load balancers for services on GKE and
+> Cloud Run. This includes the ability to expose external endpoints so
+> that you can deploy and run different URLs for the same application across
+> both platforms. You can also split traffic to the same service across
+> GKE and Cloud Run, enabling a seamless migration from
+> one platform to another.Google Cloud provides security tools to improve your security posture when
+> using both runtimes.OS
+> scanninglets you scan
+> containers for vulnerabilities before deploying to either platform. A centralBinary Authorizationpolicy can enforce integration with
+> the G
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B9. hibrido | granite4.1-8b — q157
+**Pregunta:** Compare the scaling options of Azure Cosmos DB vs Azure Container Instances
+
+**Claim:** Therefore, a direct comparison regarding scaling options between Azure Cosmos DB and ACI cannot be made from the given documentation.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Cosmos DB :: Databases, containers, and items in Azure Cosmos DB > Azure Cosmos DB containers)
+
+>  CassandraAPI for MongoDBAPI for Apache GremlinAPI for TableAzure Cosmos DB databaseDatabaseKeyspaceDatabaseDatabaseNot applicable
+> NoteWith API for Table accounts, tables in Azure Cosmos DB are created at the account level to maintain compatibility with Azure Table Storage. [AZURE > Cosmos DB > Databases, containers, and items in Azure Cosmos DB > Azure Cosmos DB containers] An Azure Cosmos DB container is where data is stored. Unlike most relational databases, which scale up with larger sizes of virtual machines, Azure Cosmos DB scales out.
+> Data is stored on one or more servers calledpartitions. To increase partitions, you increase throughput, or they grow automatically as storage increases. This relationship provides an unlimited amount of throughput and storage for a container.
+> When you create a container, you need to supply a partition key. The partition key is a property that you select from your items to help Azure Cosmos DB distribute the data efficiently across partitions. Azure Cosmos DB uses the value of this property to route data to the appropriate partition to be written, updated, or deleted. You can also use the partition key in theWHEREclause in queries for efficient data retrieval.
+> The underlying storage mechanism for data in Azure Cosmos DB is referred to as aphysical partition. Physical partitions can have a throughput amount up to 10,000 Request Units per second, and they can store up to 50 GB of data. Azure Cosmos DB abstracts this partitioning concept wit
+
+**[E2]** (azure/Cosmos DB :: Partitioning and horizontal scaling in Azure Cosmos DB > Physical partitions)
+
+> ef Productslogical partition can grow up to 20 GB.Selecting a partition keywith a wide range of possible values ensures that the container is able to scale.
+> Use Azure Monitor Alerts tomonitor whether a logical partition's size is approaching 20 GB. [AZURE > Cosmos DB > Partitioning and horizontal scaling in Azure Cosmos DB > Physical partitions] A container scales by distributing data and throughput across physical partitions. Internally, one or more logical partitions map to a single physical partition. Typically, smaller containers have many logical partitions but require only a single physical partition. Unlike logical partitions, physical partitions are an internal system implementation, and Azure Cosmos DB fully manages them.
+> The number of physical partitions in a container depends on these characteristics:
+> The amount of throughput provisioned (each individual physical partition can provide a throughput of up to 10,000 request units per second). The 10,000 RU/s limit for physical partitions implies that logical partitions also have a 10,000 RU/s limit, as each logical partition is only mapped to one physical partition.The total data storage (each individual physical partition can store up to 50 gigabytes of data).
+> NotePhysical partitions are an internal system implementation, fully managed by Azure Cosmos DB. When developing your solutions, don't focus on physical partitions because you can't control them. Instead, focus on partition keys. Choosing a partition key that e
+
+**[E3]** (azure/Cosmos DB :: Frequently asked questions about Azure Cosmos DB for Table > Other frequently asked questions > Can I scale up or scale down the throughput of my API for Table table?)
+
+>  the container or from a set of containers at the back end. For example, you see that the used throughput is more than the provisioned throughput, and you're getting throttled. For more information, seeSet throughput for Azure Cosmos DB containers. [AZURE > Cosmos DB > Frequently asked questions about Azure Cosmos DB for Table > Other frequently asked questions > Can I scale up or scale down the throughput of my API for Table table?] Yes, you can use the Azure Cosmos DB portal's scale pane to scale the throughput. For more information, seeSet throughput.
+> 
+> Yes, if you don't override the TableThroughput via app.config and don't use a precreated container in Azure Cosmos DB, the service creates a table with throughput of 400.
+
+**[E4]** (azure/Cosmos DB :: Azure Cosmos DB - Database for the AI Era > ...with unmatched reliability and flexibility > Azure Cosmos DB vs. Azure DocumentDB)
+
+>  jobs to manage.Near real-time insights into your operational data.No effect on operational workloads.Optimized for large-scale analytics workloads.Cost effective.Analytics for locally available, globally distributed, multi-region writes.Native integration with Azure Synapse Analytics. [AZURE > Cosmos DB > Azure Cosmos DB - Database for the AI Era > ...with unmatched reliability and flexibility > Azure Cosmos DB vs. Azure DocumentDB] Azure Cosmos DB and Azure DocumentDB are both powerful NoSQL database services designed to help you build successful applications with flexible JSON data models. Azure Cosmos DB is optimized for scale-out scenarios that require global distribution, massive scale, and instantaneous scaling. It offers a 99.999% availability service level agreement (SLA) with automatic failover across multiple regions. This reliability makes it well-suited for high-traffic web apps, IoT data collection, real-time gaming, and global online stores that need reliable performance worldwide.
+> Azure DocumentDB (vCore) is optimized for scale-up scenarios that prioritize rich query capabilities and familiar development experiences. Azure DocumentDB is powered by the open-source DocumentDB engine built on the PostgreSQL engine with full MongoDB wire protocol compatibility. Azure DocumentDB excels at complex aggregation pipelines, analytical queries, and advanced document database features. It's ideal for content management systems, analytics platforms, MongoDB migrations, and
+
+**[E5]** (azure/Cosmos DB :: Partitioning and horizontal scaling in Azure Cosmos DB > Managing logical partitions)
+
+> 's 6,000 provisioned RU/s. Because provisioned throughput is evenly divided across your container's physical partitions, it's important to choose a partition key that evenly distributes throughput consumption. For more information, seeChoosing the right logical partition key. [AZURE > Cosmos DB > Partitioning and horizontal scaling in Azure Cosmos DB > Managing logical partitions] Azure Cosmos DB automatically manages the placement of logical partitions on physical partitions to meet the scalability and performance needs of the container. When the throughput and storage requirements of an application increase, Azure Cosmos DB moves logical partitions to spread the load across more physical partitions. Learn more aboutphysical partitions.
+> Azure Cosmos DB uses hash-based partitioning to distribute logical partitions across physical partitions. Azure Cosmos DB hashes the partition key value of an item. The hashed result determines the logical partition. Then, Azure Cosmos DB allocates the key space of partition key hashes evenly across the physical partitions.
+> Transactions in stored procedures or triggers are allowed only for items in a single logical partition.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B10. denso | granite4.1-8b — q012
+**Pregunta:** What is the SLA for AWS RDS?
+
+**Claim:** For precise SLA information, one would need to refer directly to Amazon's official AWS Service Level Agreements documentation or contact AWS support.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/EC2 :: Tutorial: Connect an Amazon EC2 instance to an Amazon RDS database<a name="tutorial-connect-ec2-instance-to-rds-database"></a> > Time to complete the tutorial<a name="tutorial-connect-ec2-rds-time"></a>)
+
+>  are automatically created and assigned to the EC2 instance and RDS database\.
+> 
+>   If you do not use the automatic connection feature, you'll need to manually create and assign the security groups\. You do this in Option 3 of this tutorial\. [AWS > EC2 > Tutorial: Connect an Amazon EC2 instance to an Amazon RDS database<a name="tutorial-connect-ec2-instance-to-rds-database"></a> > Time to complete the tutorial<a name="tutorial-connect-ec2-rds-time"></a>] 30 minutes
+> 
+> You can complete the entire tutorial in one sitting, or you can complete it one task at a time\.
+> 
+> By completing this tutorial, you might incur costs for the AWS resources that you create\. 
+> 
+> You can use Amazon EC2 under the [free tier](http://aws.amazon.com/free) provided your AWS account is less than 12 months old and you configure your resources according to the free tier requirements\.
+> 
+> If your EC2 instance and your RDS database are in different Availability Zones, you will incur data transfer fees\. To avoid incurring these fees, the EC2 instance and the RDS database must be in the same Availability Zone\. For information about data transfer fees, see [Data Transfer](http://aws.amazon.com/ec2/pricing/on-demand/#Data_Transfer) on the Amazon EC2 On\-Demand Pricing page\.
+> 
+> To prevent incurring costs after you've completed the tutorial, make sure to delete the resources if they are no longer needed\. For the steps to delete the resources, see [Clean up](tutorial-ec2-rds-clean-up.md)\.
+
+**[E2]** (aws/EC2 :: Tutorial: Connect an Amazon EC2 instance to an Amazon RDS database<a name="tutorial-connect-ec2-instance-to-rds-database"></a> > Architecture<a name="tutorial-connect-ec2-rds-architecture"></a>)
+
+>  EC2 instance, and one for the RDS database\), you have better control over the security of the instance and the database\. If you were to use the same security group on both the instance and the database, and then modified the security group [AWS > EC2 > Tutorial: Connect an Amazon EC2 instance to an Amazon RDS database<a name="tutorial-connect-ec2-instance-to-rds-database"></a> > Architecture<a name="tutorial-connect-ec2-rds-architecture"></a>]  to suit, say, only the database, the modification would affect both the instance and the database\. In other words, if you were to use one security group, you could unintentionally modify the security of a resource \(either the instance or the database\) because you'd forgotten that the security group was attached to it\.
+> 
+>   The security groups that are automatically created also respect least privilege as they only allow the mutual connection for this workload on the database port by creating a workload\-specific security group pair\.
+
+**[E3]** (aws/EC2 :: Monitor network performance for your EC2 instance<a name="monitoring-network-performance-ena"></a> > Metrics for ENA Express<a name="network-performance-metrics-ena-express"></a>)
+
+>  the CloudWatch agent\. The agent enables you to select individual metrics and control publication\.
+> 
+> You can also use the ethtool to retrieve the metrics for each network interface, such as eth0, as follows\.
+> 
+> 
+> [CODE_BLOCK_1] [AWS > EC2 > Monitor network performance for your EC2 instance<a name="monitoring-network-performance-ena"></a> > Metrics for ENA Express<a name="network-performance-metrics-ena-express"></a>] ENA Express is powered by AWS Scalable Reliable Datagram \(SRD\) technology\. SRD is a high performance network transport protocol that uses dynamic routing to increase throughput and minimize tail latency\. You can use ENA Express metrics to help ensure that your instances take full advantage of the performance improvements that SRD technology provides, for example:
+> + Evaluate your resources to ensure that they have sufficient capacity to establish more SRD connections\.
+> + Identify where there are potential issues that prevent eligible outgoing packets from using SRD\.
+> + Calculate the percentage of outgoing traffic that uses SRD for the instance\.
+> + Calculate the percentage of incoming traffic that uses SRD for the instance\.
+> 
+> **Note**  
+> To produce metrics, use driver version 2\.8 or higher\.
+> 
+> The following ENA Express metrics are available using the ethtool command for Linux based instances\.
+> + `ena_srd_mode` – Describes which ENA Express features are enabled\. Values are as follows:
+>   + `0` = ENA Express off, UDP off
+>   + `1` = ENA Express on, UDP off
+>   + `2` = 
+
+**[E4]** (aws/EC2 :: Task 3: Manually connect your EC2 instance to your RDS database by creating security groups and assigning them to the instances<a name="option3-task3-connect-rds-database-to-ec2-instance"></a> > Steps to create new security groups and add them to the instances<a name="option3-task3-connect-rds-database-to-ec2-instance-steps"></a>)
+
+>  procedure\.
+> 
+>    1. Choose **Create security group**\.
+> 
+> 1. Edit the EC2 instance security group to add an outbound rule, as follows:
+> 
+>    1. In the navigation pane, choose **Security Groups**\.
+> 
+>     [AWS > EC2 > Task 3: Manually connect your EC2 instance to your RDS database by creating security groups and assigning them to the instances<a name="option3-task3-connect-rds-database-to-ec2-instance"></a> > Steps to create new security groups and add them to the instances<a name="option3-task3-connect-rds-database-to-ec2-instance-steps"></a>] 1. Select the EC2 instance security group \(you named it **ec2\-rds\-manual\-configuration**\), and choose the **Outbound rules** tab\.
+> 
+>    1. Choose **Edit outbound rules**\.
+> 
+>    1. Choose **Add rule**, and do the following:
+> 
+>       1. For **Type**, choose **MYSQL/Aurora**\.
+> 
+>       1. For **Source**, choose the RDS database security group **rds\-ec2\-manual\-configuration** that you created in Step 3 of this procedure\.
+> 
+>       1. Choose **Save rules**\.
+> 
+> 1. Add the EC2 instance security group to the EC2 instance as follows:
+> 
+>    1. In the navigation pane, choose **Instances**\.
+> 
+>    1. Select your EC2 instance, and choose **Actions**, **Security**, **Change security groups**\.
+> 
+>    1. Under **Associated security groups**, choose the **Select security groups** field, choose **ec2\-rds\-manual\-configuration** that you created earlier, and then choose **Add security group**\.
+> 
+>    1. Choose **Save**\.
+> 
+> 1. Add the RDS database security group to the 
+
+**[E5]** (aws/EC2 :: Task 3: Manually connect your EC2 instance to your RDS database by creating security groups and assigning them to the instances<a name="option3-task3-connect-rds-database-to-ec2-instance"></a> > Steps to create new security groups and add them to the instances<a name="option3-task3-connect-rds-database-to-ec2-instance-steps"></a>)
+
+> The objective of this task is to reproduce the connection configuration of the automatic connection feature by performing the following manually: You create two new security groups, and then add a security group each to the EC2 instance and the RDS database\. [AWS > EC2 > Task 3: Manually connect your EC2 instance to your RDS database by creating security groups and assigning them to the instances<a name="option3-task3-connect-rds-database-to-ec2-instance"></a> > Steps to create new security groups and add them to the instances<a name="option3-task3-connect-rds-database-to-ec2-instance-steps"></a>] Use the following steps to connect an EC2 instance to your RDS database by creating two new security groups\. You then add a security group each to the EC2 instance and the RDS database\.
+> 
+> **To create two new security groups and assign one each to the EC2 instance and RDS database**
+> 
+> 1. Open the Amazon EC2 console at [https://console\.aws\.amazon\.com/ec2/](https://console.aws.amazon.com/ec2/)\.
+> 
+> 1. First create the security group to add to the EC2 instance, as follows:
+> 
+>    1. In the navigation pane, choose **Security Groups**\.
+> 
+>    1. Choose **Create security group**\.
+> 
+>    1. For **Security group name**, enter a descriptive name for the security group\. For this tutorial, enter **ec2\-rds\-manual\-configuration**\.
+> 
+>    1. For **Description**, enter a brief description\. For this tutorial, enter **EC2 instance security group to allow EC2 instance to securely connect to RDS database
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B11. lexico | granite4.1-8b — q183
+**Pregunta:** What are the differences between AWS DynamoDB and Azure Cosmos DB?
+
+**Claim:** Getting Started with Azure Cosmos DB for Table ().
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Cosmos DB :: Azure Cosmos DB for Table documentation > About API for Table > Overview)
+
+> Facebook
+> x.com
+> LinkedIn
+> Email
+> 
+> Azure Cosmos DB provides the API for Table for applications that are written for Azure Table storage and require premium capabilities. [AZURE > Cosmos DB > Azure Cosmos DB for Table documentation > About API for Table > Overview] What is Azure Cosmos DB for Table?FAQ
+> 
+> Differences between API for Table and Azure Table storagePartitioningOptimize your costs
+
+**[E2]** (azure/Cosmos DB :: Partitioning in Azure Cosmos DB for Apache Cassandra > Differences between Apache Cassandra and Azure Cosmos DB)
+
+>  Azure Cosmos DB is implemented in a similar way, except it uses a different hash algorithm, and has a larger internal token ring. However, externally we expose the same token range as Apache Cassandra, i.e., -2^63 to -2^ [AZURE > Cosmos DB > Partitioning in Azure Cosmos DB for Apache Cassandra > Differences between Apache Cassandra and Azure Cosmos DB] 63 - 1.
+
+**[E3]** (azure/Cosmos DB :: Azure Cosmos DB for Table documentation > Get started > Quickstart)
+
+> What is Azure Cosmos DB for Table?FAQ
+> 
+> Differences between API for Table and Azure Table storagePartitioningOptimize your costs [AZURE > Cosmos DB > Azure Cosmos DB for Table documentation > Get started > Quickstart] Manage your data using a .NET appManage your data using a Java app
+> 
+> Query dataDistribute data globally
+
+**[E4]** (azure/Cosmos DB :: Azure Cosmos DB for Apache Cassandra documentation > Migrate existing Apache Cassandra data > How-To Guide)
+
+> Differences between platforms
+> 
+> Migrate using Kafka ConnectMigrate using Azure Databricks [AZURE > Cosmos DB > Azure Cosmos DB for Apache Cassandra documentation > Migrate existing Apache Cassandra data > How-To Guide] Migrate from PostgreSQL using Apache KafkaMigrate from Oracle Database to API for Striim
+
+**[E5]** (azure/Cosmos DB :: Azure Cosmos DB for Apache Cassandra documentation > Migrate existing Apache Cassandra data > Architecture)
+
+> From Apache Cassandra to API for CassandraConnect to API for Cassandra from SparkChange feed support with query predicates
+> 
+> Connect to SparkAccess from Azure DatabricksAccess from HDInsight [AZURE > Cosmos DB > Azure Cosmos DB for Apache Cassandra documentation > Migrate existing Apache Cassandra data > Architecture] Differences between platforms
+> 
+> Migrate using Kafka ConnectMigrate using Azure Databricks
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B12. denso | mistral-7b-instruct — q070
+**Pregunta:** How to set up AWS ECS for a production workload?
+
+**Claim:** Create an Amazon ECS service to run and maintain the specified number of instances of your task definition simultaneously in the cluster .
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: What is Amazon Elastic Container Service?<a name="Welcome"></a> > Access Amazon ECS<a name="welcome-interfaces"></a>)
+
+>  is suitable for the following workloads:
+> +  Workloads that require consistently high CPU core and memory usage
+> + Large workloads that need to be optimized for price
+> + Your applications need to access persistent storage
+> + You must directly manage your infrastructure [AWS > ECS > What is Amazon Elastic Container Service?<a name="Welcome"></a> > Access Amazon ECS<a name="welcome-interfaces"></a>] You can create, access, and manage your Amazon ECS resources using any of the following interfaces:
+> + **AWS Management Console** — Provides a web interface that you can use to access your Amazon ECS resources\.
+> + **AWS Command Line Interface \(AWS CLI\)** — Provides commands for a broad set of AWS services, including Amazon ECS\. It's supported on Windows, Mac, and Linux\. For more information, see [AWS Command Line Interface](https://aws.amazon.com/cli/)\.
+> + **AWS SDKs** — Provides language\-specific APIs and takes care of many of the connection details\. These include calculating signatures, handling request retries, and error handling\. For more information, see [AWS SDKs](http://aws.amazon.com/tools/#SDKs)\.
+> + **AWS Copilot** — Provides an open\-source tool for developers to build, release, and operate production ready containerized applications on Amazon ECS\. For more information, see [AWS Copilot](https://github.com/aws/copilot-cli) on the GitHub website\.
+> + **Amazon ECS CLI** — Provides a command line interface for you to run your applications on Amazon ECS and AWS Fargate usin
+
+**[E2]** (aws/ECS :: Amazon ECS capacity providers<a name="cluster-capacity-providers"></a> > Capacity provider types<a name="capacity-providers-types"></a>)
+
+>  `1` for *capacityProviderA* and a weight of `4` for *capacityProviderB*\. Then, for every one task that's run using *capacityProviderA*, there are four tasks that use *capacityProviderB*\. [AWS > ECS > Amazon ECS capacity providers<a name="cluster-capacity-providers"></a> > Capacity provider types<a name="capacity-providers-types"></a>] The infrastructure that your Amazon ECS workloads are run on determines the type of capacity provider that you can use\.
+> 
+> For Amazon ECS workloads that are hosted on Fargate, the following predefined capacity providers are available:
+> + Fargate
+> + Fargate Spot
+> 
+> For Amazon ECS workloads that are hosted on Amazon EC2 instances, you must create and maintain a capacity provider that consists of the following components:
+> + A name
+> + An Auto Scaling group
+> + The settings for managed scaling and managed termination protection\.
+
+**[E3]** (aws/ECS :: Amazon ECS services<a name="ecs_services"></a>)
+
+> [AWS > ECS > Amazon ECS services<a name="ecs_services"></a>] You can use an Amazon ECS service to run and maintain a specified number of instances of a task definition simultaneously in an Amazon ECS cluster\. If one of your tasks fails or stops, the Amazon ECS service scheduler launches another instance of your task definition to replace it\. This helps maintain your desired number of tasks in the service\.
+> 
+> You can also optionally run your service behind a load balancer\. The load balancer distributes traffic across the tasks that are associated with the service\.
+> 
+> **Topics**
+> + [Service scheduler concepts](#service_scheduler)
+> + [Additional service concepts](#service_concepts)
+> + [Service definition parameters](service_definition_parameters.md)
+> + [Service management in the Amazon ECS console](v2-service-actions.md)
+> + [Amazon ECS Deployment types](deployment-types.md)
+> + [Service load balancing](service-load-balancing.md)
+> + [Service auto scaling](service-auto-scaling.md)
+> + [Interconnecting services](interconnecting-services.md)
+> + [Task scale\-in protection](task-scale-in-protection.md)
+> + [Service throttle logic](service-throttle-logic.md)
+> + [Service management using the AWS CLI](service-management-cli.md)
+
+**[E4]** (aws/ECS :: Scheduling Amazon ECS tasks<a name="scheduling_tasks"></a>)
+
+> [AWS > ECS > Scheduling Amazon ECS tasks<a name="scheduling_tasks"></a>] Amazon Elastic Container Service \(Amazon ECS\) is a shared state, optimistic concurrency system that provides flexible scheduling capabilities for your tasks and containers\. The Amazon ECS schedulers use the same cluster state information as the Amazon ECS API to make appropriate placement decisions\.
+> 
+> Each task that uses the Fargate launch type has its own isolation boundary and doesn't share underlying resources with any other tasks\. These resources include the underlying kernel, CPU resources, memory resources, and elastic network interface\.
+> 
+> Amazon ECS provides a service scheduler for long\-running tasks and applications\. It also provides the ability to run tasks manually for batch jobs or single run tasks\. Amazon ECS provides one whenever it places tasks on your cluster\. You can specify the task placement strategies and constraints for running tasks that best meet your needs\. For example, you can specify whether tasks run across multiple Availability Zones or within a single Availability Zone\. And, optionally, you can integrate tasks with your own custom or third\-party schedulers\.
+> 
+> **Service scheduler**
+> 
+> The service scheduler is suitable for long running stateless services and applications\. The service scheduler ensures that the scheduling strategy that you specify is followed and reschedules tasks when a task fails\. For example, if the underlying infrastructure fails, the service sched
+
+**[E5]** (aws/ECS :: Creating a service using the console<a name="create-service-console-v2"></a> > Quickly create a service<a name="create-default-service"></a>)
+
+>  custom \(Advanced\)** option is selected and you need to manually define the strategy\.
+>   + If your cluster doesn't have a default capacity provider strategy defined and no capacity providers added to the cluster, the Fargate launch type is selected\. [AWS > ECS > Creating a service using the console<a name="create-service-console-v2"></a> > Quickly create a service<a name="create-default-service"></a>] You can use the new console to quickly create and deploy a service\. The service has the following configuration:
+> + Deploys in the VPC and subnets associated with your cluster
+> + Deploys one task
+> + Uses the rolling deployment
+> + Uses the capacity provider strategy with your default capacity provider
+> + Uses the deployment circuit breaker to detect failures and sets the option to automatically roll back the deployment on failure
+> 
+> To deploy a service using the default parameters follow these steps\.
+> 
+> **To create a service \(Amazon ECS console\)**
+> 
+> 1. Open the console at [https://console\.aws\.amazon\.com/ecs/v2](https://console.aws.amazon.com/ecs/v2)\.
+> 
+> 1. In the navigation page, choose **Clusters**\.
+> 
+> 1. On the **Clusters** page, select the cluster to create the service in\.
+> 
+> 1. From the **Services** tab, choose **Create**\.
+> 
+> 1. Under **Deployment configuration**, specify how your application is deployed\.
+> 
+>    1. For **Application type**, choose **Service**\.
+> 
+>    1. For **Task definition**, choose the task definition family and revision to use\.
+> 
+>    1. For **Service name**, enter
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B13. denso | mistral-7b-instruct — q082
+**Pregunta:** How to configure networking for Azure App Service?
+
+**Claim:** In your Function App, expand Settings, and then select Networking..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Azure Functions :: Azure Functions networking options > Troubleshooting > Network troubleshooter)
+
+> [!INCLUDE [app-service-web-vnet-troubleshooting](../../includes/app-service-web-vnet-troubleshooting.md)] [AZURE > Azure Functions > Azure Functions networking options > Troubleshooting > Network troubleshooter] You can also use the Network troubleshooter to resolve connection issues. To open the network troubleshooter, go to the app in the Azure portal. Select **Diagnostic and solve problem**, and then search for **Network troubleshooter**.
+> 
+> **Connection issues** - It checks the status of the virtual network integration, including checking if the Private IP has been assigned to all instances of the plan and the DNS settings. If a custom DNS isn't configured, default Azure DNS is applied. The troubleshooter also checks for common Function app dependencies including connectivity for Azure Storage and other binding dependencies.
+> 
+> :::image type="content" source="./media/functions-networking-options/network-troubleshooter-function-app.png" alt-text="Screenshot that shows running troubleshooter for connection issues.":::
+> 
+> **Configuration issues** - This troubleshooter checks if your subnet is valid for virtual network integration.
+> 
+> :::image type="content" source="./media/functions-networking-options/network-troubleshooter-configuration-function-app.png" alt-text="Screenshot that shows running troubleshooter for configuration issues.":::
+> 
+> **Subnet/VNet deletion issue** - This troubleshooter checks if your subnet has any locks and if it has any unused Service Association Links that 
+
+**[E2]** (azure/Azure Functions :: Create and manage function apps in the Flex Consumption plan > Enable virtual network integration > [Visual Studio Code](#tab/vs-code))
+
+> Outbound traffic configuration**, select **Not configured**.
+> 
+> 1. In the **Virtual Network Integration** page, select **Add virtual network integration**.
+> 
+> 1. Select an existing **Virtual network** and **Subnet** and select **Connect**. [AZURE > Azure Functions > Create and manage function apps in the Flex Consumption plan > Enable virtual network integration > [Visual Studio Code](#tab/vs-code)] You can't currently configure virtual networking in Visual Studio Code.
+> 
+> ---
+> 
+> When you're choosing a subnet, these considerations apply:
+> 
+> - The subnet you choose can't already be used for other purposes, such as with private endpoints or service endpoints, or be delegated to any other hosting plan or service. 
+> - You can't share the same subnet between a Container Apps environment and a Flex Consumption app.
+> - You can share the same subnet with more than one app running in a Flex Consumption plan. Because the networking resources are shared across all apps, one function app might affect the performance of others on the same subnet.
+> - In a Flex Consumption plan, a single function app might use up to 40 IP addresses, even when the app scales beyond 40 instances. While this rule of thumb is helpful when estimating the subnet size you need, it isn't strictly enforced.
+
+**[E3]** (azure/Virtual Network :: Azure Virtual Network frequently asked questions (FAQ) > Azure services that connect to virtual networks > Can I use Web Apps with a virtual network?)
+
+> 's in the deallocated state. The MAC address remains assigned to the network adapter until you do one of these tasks:
+> 
+> * Delete the network adapter.
+> * Change the private IP address that's assigned to the primary IP configuration of the primary network adapter. [AZURE > Virtual Network > Azure Virtual Network frequently asked questions (FAQ) > Azure services that connect to virtual networks > Can I use Web Apps with a virtual network?] Yes. You can deploy the Web Apps feature of Azure App Service inside a virtual network by using an App Service Environment. You can then:
+> 
+> * Connect the back end of your apps to your virtual networks by using virtual network integration.
+> * Lock down inbound traffic to your app by using service endpoints.
+> 
+> For more information, see the following articles:
+> 
+> * [App Service networking features](../app-service/networking-features.md)
+> * [Use an App Service Environment](../app-service/environment/using.md?toc=%2fazure%2fvirtual-network%2ftoc.json)
+> * [Integrate your app with an Azure virtual network](../app-service/overview-vnet-integration.md?toc=%2fazure%2fvirtual-network%2ftoc.json)
+> * [Set up Azure App Service access restrictions](../app-service/app-service-ip-restrictions.md)
+
+**[E4]** (azure/Virtual Network :: Azure Virtual Network frequently asked questions (FAQ) > Azure services that connect to virtual networks > Can I deploy Cloud Services with web and worker roles (PaaS) in a virtual network?)
+
+>  network](../app-service/overview-vnet-integration.md?toc=%2fazure%2fvirtual-network%2ftoc.json)
+> * [Set up Azure App Service access restrictions](../app-service/app-service-ip-restrictions.md) [AZURE > Virtual Network > Azure Virtual Network frequently asked questions (FAQ) > Azure services that connect to virtual networks > Can I deploy Cloud Services with web and worker roles (PaaS) in a virtual network?] Yes. You can (optionally) deploy Cloud Services role instances in virtual networks. To do so, you specify the virtual network name and the role/subnet mappings in the network configuration section of your service configuration. You don't need to update any of your binaries.
+
+**[E5]** (azure/Azure Functions :: How to use a secured storage account with Azure Functions > Secure storage for an existing function app > 3. Enable application and configuration routing)
+
+>  to communicate with the newly secured storage account. [AZURE > Azure Functions > How to use a secured storage account with Azure Functions > Secure storage for an existing function app > 3. Enable application and configuration routing] > [!NOTE]
+> > These configuration steps are required only for the [Elastic Premium](./functions-premium-plan.md) and [Dedicated (App Service)](./dedicated-plan.md) hosting plans.
+> > The [Flex Consumption plan](./flex-consumption-plan.md) doesn't require site settings to configure networking.
+> 
+> You're now ready to route your function app's traffic to go through the virtual network:
+> 
+> 1. Enable [application routing](../app-service/overview-vnet-integration.md#application-routing) to route your app's traffic to the virtual network:
+> 
+>     1. In your function app, expand **Settings**, and then select **Networking**. In the **Networking** page, under **Outbound traffic configuration**, select the subnet associated with your virtual network integration.
+> 
+>     1. In the new page, under **Application routing**, select **Outbound internet traffic**.
+> 
+> 1. If your app uses an Azure Files share, enable [content share routing](../app-service/overview-vnet-integration.md#content-share) by selecting **Content storage** under **Configuration routing**. This allows your app to communicate with Azure Files using the virtual network.
+> 
+> [!INCLUDE [functions-content-over-vnet-shared-storage-note](../../includes/functions-content-over-vnet-shared-storage-note.md)]
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B14. hibrido | granite4.1-8b — q125
+**Pregunta:** How to implement auto-scaling with Google Cloud BigQuery?
+
+**Claim:** Utilize BigQuery's Automatic Scaling: Ensure that you have sufficient quota limits set in your Google Cloud project to accommodate high-throughput queries..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/GKE :: Learning Path: Scalable applications - ScalingStay organized with collectionsSave and categorize content based on your preferences.)
+
+>  for scalable apps in order.
+> As you progress through the set of tutorials, you learn new skills and use
+> additional Google Cloud products and services.You also need to create an IAM service account and grant some
+> permissions for the Horizontal Pod Autoscaler to work [GCP > GKE > Learning Path: Scalable applications - ScalingStay organized with collectionsSave and categorize content based on your preferences.]  correctly:Create an IAM service account. This service account is used
+> in the tutorial to grant access to custom metrics that allow the Horizontal
+> Pod Autoscaler to determine when to scale up or down:gcloudiamservice-accountscreatescalable-appsGrant access to the IAM service account to perform the
+> required scaling actions:gcloudprojectsadd-iam-policy-bindingPROJECT_ID\--roleroles/cloudtrace.agent\--member"serviceAccount:scalable-apps@PROJECT_ID.iam.gserviceaccount.com"gcloudprojectsadd-iam-policy-bindingPROJECT_ID\--roleroles/monitoring.metricWriter\--member"serviceAccount:scalable-apps@PROJECT_ID.iam.gserviceaccount.com"gcloudiamservice-accountsadd-iam-policy-binding"scalable-apps@PROJECT_ID.iam.gserviceaccount.com"\--roleroles/iam.workloadIdentityUser\--member"serviceAccount:PROJECT_ID.svc.id.goog[default/default]"The following access is granted to the IAM service account:roles/cloudtrace.agent: Write trace data such as latency information
+> to Trace.roles/monitoring.metricWriter: Write metrics to Cloud Monitoring.roles/iam.workloadIdentityUser: Allow a Kubernetes service
+
+**[E2]** (gcp/GKE :: Learning Path: Scalable applications - ScalingStay organized with collectionsSave and categorize content based on your preferences.)
+
+> [GCP > GKE > Learning Path: Scalable applications - ScalingStay organized with collectionsSave and categorize content based on your preferences.] AutopilotThis set of tutorials is for IT administrators and Operators that want
+> to deploy, run, and manage modern application environments that run on
+> Google Kubernetes Engine (GKE). As you progress through this set of tutorials you
+> learn how to configure monitoring and alerts, scale workloads, and simulate
+> failure, all using the Cymbal Bank sample microservices application:Create a cluster and deploy a sample applicationMonitor with Google Cloud Managed Service for PrometheusScale workloads (this tutorial)Simulate a failureCentralize change managementOverview and objectivesA consumer application like Cymbal Bank often has varying numbers of users at
+> different times. Ideally your website is able to cope with surges in traffic
+> without slowing down or having other issues, but without the organization having
+> to spend money on Cloud resources that they don't actually need. A solution that
+> Google Cloud provides for this is autoscaling.In this tutorial, you learn how to configure clusters and workloads in a
+> GKE cluster to scale using both built-in Kubernetes metrics and
+> custom metrics from Cloud Monitoring and Cloud Trace. You learn how to
+> complete the following tasks:Enable custom metrics in Cloud Monitoring for Trace.Custom metrics let you scale using additional monitoring data or external
+> inputs beyond the awareness of the Kubernetes c
+
+**[E3]** (gcp/Compute Engine :: Designing resilient systemsStay organized with collectionsSave and categorize content based on your preferences.)
+
+> healing.
+> Autoscaling lets you deal with spikes in traffic by scaling the number of VMs up
+> or down based on specific signals. Autohealing performs health checking and, if
+> necessary, automatically recreates unhealthy VMs.MIGs [GCP > Compute Engine > Designing resilient systemsStay organized with collectionsSave and categorize content based on your preferences.]  are also available for regions, so you can create a group of VMs
+> distributed across multiple zones within a single region. For more information,
+> seeCreating and managing regional MIGs.Use load balancingGoogle Cloud offers a load balancing service that helps you support periods of
+> heavy traffic so that you don't overload your compute instances. WithCloud Load Balancing, you can
+> do the following:Deploy your application on VMs within multiple zones usingregional MIGs.
+> Then, you can configure aforwarding rulethat can
+> spread traffic across all VMs in all zones within the region. Each forwarding
+> rule can define one entry point to your application using an external IP
+> address.Deploy VMs across multiple regions using global load balancing.
+> HTTP(S) load balancing enables your traffic to enter the Google Cloud system
+> at the location nearest the client.Cross-regional load balancingprovides redundancy so that if a region is unreachable, traffic is
+> automatically diverted to another region. In this way, your service remains
+> reachable using the same external IP address.Useautoscalingto automatically add or delete
+> VMs from a MIG based 
+
+**[E4]** (gcp/GKE :: Learning Path: Scalable applications - ScalingStay organized with collectionsSave and categorize content based on your preferences. > Before you begin)
+
+>  as listed on ourPricing pageuntil you disable GKE or delete the project.
+> You are also responsible for other Google Cloud costs incurred while running the
+> Cymbal Bank sample application, such as charges for Compute Engine VMs and
+> Trace. [GCP > GKE > Learning Path: Scalable applications - ScalingStay organized with collectionsSave and categorize content based on your preferences. > Before you begin] To learn how to scale your deployments, you must complete thefirst tutorialto create a GKE cluster that uses Autopilot and deploy
+> the Cymbal Bank sample microservices-based application.
+> We recommend that you complete this set of tutorials for scalable apps in order.
+> As you progress through the set of tutorials, you learn new skills and use
+> additional Google Cloud products and services.
+> You also need to create an IAM service account and grant some
+> permissions for the Horizontal Pod Autoscaler to work correctly:
+> Create an IAM service account. This service account is used
+> in the tutorial to grant access to custom metrics that allow the Horizontal
+> Pod Autoscaler to determine when to scale up or down:gcloudiamservice-accountscreatescalable-appsGrant access to the IAM service account to perform the
+> required scaling actions:gcloudprojectsadd-iam-policy-bindingPROJECT_ID\--roleroles/cloudtrace.agent\--member"serviceAccount:scalable-apps@PROJECT_ID.iam.gserviceaccount.com"gcloudprojectsadd-iam-policy-bindingPROJECT_ID\--roleroles/monitoring.metricWriter\--member"serviceAccount:scalable-apps
+
+**[E5]** (aws/ECS :: Tutorial: Using cluster auto scaling with the AWS Management Console and the Amazon ECS console<a name="tutorial-cluster-auto-scaling-console"></a> > Step 1: Create an Amazon ECS cluster<a name="console-tutorial-cluster"></a>)
+
+>  *Amazon EC2 Auto Scaling User Guide*\.
+> + You have a VPC and security group created to use\. For more information, see [Create a virtual private cloud](get-set-up-for-amazon-ecs.md#create-a-vpc)\. [AWS > ECS > Tutorial: Using cluster auto scaling with the AWS Management Console and the Amazon ECS console<a name="tutorial-cluster-auto-scaling-console"></a> > Step 1: Create an Amazon ECS cluster<a name="console-tutorial-cluster"></a>] Use the following steps to create an Amazon ECS cluster\. 
+> 
+> Amazon ECS creates an Amazon EC2 Auto Scaling launch template and Auto Scaling group on your behalf as part of the AWS CloudFormation stack\. 
+> 
+> 1. Open the console at [https://console\.aws\.amazon\.com/ecs/v2](https://console.aws.amazon.com/ecs/v2)\.
+> 
+> 1. From the navigation bar, select the Region to use\.
+> 
+> 1. In the navigation pane, choose **Clusters**\.
+> 
+> 1. On the **Clusters** page, choose **Create cluster**\.
+> 
+> 1. Under **Cluster configuration**, for **Cluster name**, enter `ConsoleTutorial-cluster`\.
+> 
+> 1. Add Amazon EC2 instances to your cluster, expand **Infrastructure**, and then select **Amazon EC2 instances**\. Next, configure the Auto Scaling group which acts as the capacity provider\.
+> 
+>    1. Create a Auto Scaling group, from Auto Scaling group \(ASG\)\. Celect **Create new group**, and then provide the following details about the group:
+>      + For **Operating system/Architecture**, choose **Amazon Linux 2**\.
+>      + For **EC2 instance type**, choose **t3\.nano**\.
+>      + For **Capa
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B15. denso | gemma4-e4b — q148
+**Pregunta:** Compare AWS VPC and AWS ECS in terms of use cases and features
+
+**Claim:** This comparison focuses on the distinct roles of Amazon VPC (networking foundation) and Amazon ECS (container orchestration) within the AWS ecosystem.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: External instances \(Amazon ECS Anywhere\)<a name="ecs-anywhere"></a> > Considerations<a name="ecs-anywhere-considerations"></a> > Amazon FSx for Windows File Server with ECS Anywhere<a name="ecs-anywhere-fsx"></a>)
+
+>  applications include using Amazon ECR to pull container images or using CloudWatch for CloudWatch Logs\. For more information, see [Service endpoints](https://docs.aws.amazon.com/general/latest/gr/aws-service-information.html) in the *AWS General Reference*\. [AWS > ECS > External instances \(Amazon ECS Anywhere\)<a name="ecs-anywhere"></a> > Considerations<a name="ecs-anywhere-considerations"></a> > Amazon FSx for Windows File Server with ECS Anywhere<a name="ecs-anywhere-fsx"></a>] In order to use the Amazon FSx for Windows File Server with Amazon ECS external instances you must establish a connection between your on\-premises data center and the AWS Cloud\. For information about the options for connecting your network to your VPC, see [Amazon Virtual Private Cloud Connectivity Options](https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/introduction.html)\.
+
+**[E2]** (aws/ECS :: Amazon ECS components<a name="welcome-features"></a> > Fargate architecture overview<a name="welcome-architecture"></a>)
+
+>  ECS container agent](ECS_agent.md)\.
+> 
+> ![\[Diagram showing container agent tasks within an Amazon ECS environment.\]](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/images/overview-containeragent-fargate.png) [AWS > ECS > Amazon ECS components<a name="welcome-features"></a> > Fargate architecture overview<a name="welcome-architecture"></a>] Amazon ECS is a Regional service that simplifies the management involved with running containers in a highly available manner across multiple Availability Zones within an AWS Region\. You can create Amazon ECS clusters within a new or existing VPC\. After a cluster is up and running, you can create task definitions that define which container images run across your clusters\. Your task definitions are used to run tasks or create services\. Container images are stored in and pulled from container registries, such as the [Amazon Elastic Container Registry](https://docs.aws.amazon.com/ecr)\.
+> 
+> The following diagram shows the architecture of an Amazon ECS environment that runs on AWS Fargate\.
+> 
+> ![\[Diagram showing architecture of an Amazon ECS environment using the Fargate launch type.\]](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/images/overview-fargate.png)
+
+**[E3]** (aws/EC2 :: Virtual private clouds<a name="using-vpc"></a>)
+
+> [AWS > EC2 > Virtual private clouds<a name="using-vpc"></a>] Amazon Virtual Private Cloud \(Amazon VPC\) enables you to define a virtual network in your own logically isolated area within the AWS cloud, known as a *virtual private cloud* or *VPC*\. You can create AWS resources, such as Amazon EC2 instances, into the subnets of your VPC\. Your VPC closely resembles a traditional network that you might operate in your own data center, with the benefits of using scalable infrastructure from AWS\. You can configure your VPC; you can select its IP address range, create subnets, and configure route tables, network gateways, and security settings\. You can connect instances in your VPC to the internet or to your own data center\.
+
+**[E4]** (aws/ECS :: What is Amazon Elastic Container Service?<a name="Welcome"></a>)
+
+> [AWS > ECS > What is Amazon Elastic Container Service?<a name="Welcome"></a>] Amazon Elastic Container Service \(Amazon ECS\) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications\. As a fully managed service, Amazon ECS comes with AWS configuration and operational best practices built\-in\. This also means that you don't need to manage control plane, nodes, or add\-ons\. It's integrated with both AWS and third\-party tools, such as Amazon Elastic Container Registry and Docker\. This integration makes it easier for teams to focus on building the applications, not the environment\. You can run and scale your container workloads across AWS Regions in the cloud, and on\-premises, without the complexity of managing a control plane or nodes\.
+> 
+> The following are key features of Amazon ECS:
+> + A serverless option with AWS Fargate\. With AWS Fargate, you don't need to manage servers, handle capacity planning, or isolate container workloads for security\. Fargate handles the infrastructure management aspects of your workload for you\. You can schedule the placement of your containers across your cluster based on your resource needs, isolation policies, and availability requirements\.
+> + An external instance option with ECS Anywhere\. With ECS Anywhere, you can use the Amazon ECS console and AWS CLI to manage your on\-premises container workloads\. 
+> + An Amazon EC2 option\. With EC2, you can use the Amazon ECS consol
+
+**[E5]** (aws/ECS :: Common use cases in Amazon ECS<a name="common_use_cases"></a> > Additional resources<a name="additional-resources"></a>)
+
+> ancing Application Load Balancers\. This provides service discovery for a microservice architecture\.
+> + [Amazon Elastic Container Service \- Reference Architecture: Service Discovery](https://github.com/awslabs/ecs-refarch-service-discovery/): This Amazon [AWS > ECS > Common use cases in Amazon ECS<a name="common_use_cases"></a> > Additional resources<a name="additional-resources"></a>]  ECS reference architecture provides service discovery to containers using CloudWatch Events, Lambda, and Route 53 private hosted zones\. 
+> + [Metrics and traces collection from Amazon ECS using AWS Distro for OpenTelemetry with dynamic service discovery](http://aws.amazon.com/blogs/containers/metrics-and-traces-collection-from-amazon-ecs-using-aws-distro-for-opentelemetry-with-dynamic-service-discovery/): This post demonstrates how to employ a single instance of an ADOT Collector to collect X\-Ray traces and Prometheus metrics from Amazon ECS services that were dynamically discovered using AWS Cloud Map\.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B16. lexico | qwen3.5-9b — q119
+**Pregunta:** How to deploy a workload on Google Cloud Cloud Run?
+
+**Claim:** GKE cluster creation in Google Cloud console.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/GKE :: Google Kubernetes Engine documentation > Create a cluster and deploy a workload in the Google Cloud console)
+
+>  how to deploy a containerized application with Kubernetes Engine in less than 30 minutes.
+> 
+> This tutorial demonstrates how to use graphical processinng units (GPUs) on GKE to run large language models (LLMs) for AI/ML inference. [GCP > GKE > Google Kubernetes Engine documentation > Create a cluster and deploy a workload in the Google Cloud console] Learn how to create a Kubernetes cluster and deploy a 'hello world' web app in Google Cloud console.
+> 
+> This tutorial shows how to run a web application behind an external HTTP(S) load balancer by configuring the Ingress resource.
+
+**[E2]** (gcp/GKE :: Create a cluster and deploy a workload using Terraform)
+
+> [GCP > GKE > Create a cluster and deploy a workload using Terraform] AutopilotA Kubernetesclusterprovides compute, storage, networking,
+> and other services for applications, similar to a virtual data center. Apps and
+> their associated services that run in Kubernetes are calledworkloads.This tutorial lets you quickly see a running Google Kubernetes Engine cluster and sample workload, all set up using Terraform. You can then explore the workload in the Google Cloud console before going on to ourmore in-depth learning path, or to start planning and creating your own production-ready cluster. This tutorial assumes that you are already familiar with Terraform.If you'd prefer to set up your sample cluster and workload in the Google Cloud console, seeCreate a cluster in the Google Cloud console.
+> Before you beginTake the following steps to enable the Kubernetes Engine API:Sign in to your Google Cloud account. If you're new to
+>         Google Cloud,create an accountto evaluate how our products perform in
+>         real-world scenarios. New customers also get $300 in free credits to
+>         run, test, and deploy workloads.Installthe Google Cloud CLI.If you're using an external identity provider (IdP), you must firstsign in to the gcloud CLI with your federated identity.Toinitializethe gcloud CLI, run the following command:gcloudinitCreate or select a Google Cloud project.Roles required to select or create a projectSelect a project: Selecting a project doesn't require a specific
+>       IAM ro
+
+**[E3]** (gcp/GKE :: Create a cluster and deploy a workload using Terraform > Clean up)
+
+> 6 linkto view your Service in the browser. The output is similar to
+> the following:Hello, world!
+> Version: 2.0.0
+> Hostname: example-hello-app-deployment-5df979c4fb-kdwgr [GCP > GKE > Create a cluster and deploy a workload using Terraform > Clean up] To avoid incurring charges to your Google Cloud account for
+>           the resources used on this page, delete the Google Cloud project with the
+>           resources.
+> If you plan to take additional tutorials or toexplore your sample further, wait until you're finished to perform this cleanup step.
+> In Cloud Shell, run the following command to delete the Terraform resources:terraformdestroy--auto-approve
+
+**[E4]** (gcp/GKE :: Deploying workloadsStay organized with collectionsSave and categorize content based on your preferences. > Observing your workloads)
+
+>  in GKEtells you how to ensure that your application's Pods run on the same or
+> different underlying machines.GKE Sandboxexplains
+> how to protect your host kernel by using sandbox Pods when you deploy unknown
+> or untrusted workloads. [GCP > GKE > Deploying workloadsStay organized with collectionsSave and categorize content based on your preferences. > Observing your workloads] GKE provides a range of features for observing your workloads and
+> their health, including at-a-glance overviews of workload state and metrics in
+> the Google Cloud console, as well as more in-depth metrics, logs, and
+> alerting.
+> Learn more about using the GKE pages in the Google Cloud console
+> inGKE in the
+> Google Cloud console.Learn more about usingApp Hubto view
+> your workloads and Services.Learn more about GKE and Google Cloud observability inObservability for
+> GKE.View details for your AI/ML workloads in Google Cloud console, 
+> including resources such as JobSets, RayJobs, PyTorchJobs, and Deployments for
+> inference serving.
+
+**[E5]** (gcp/GKE :: Create a cluster and deploy a workload in the Google Cloud console)
+
+> [GCP > GKE > Create a cluster and deploy a workload in the Google Cloud console] AutopilotA Kubernetesclusterprovides compute, storage, networking,
+> and other services for applications, similar to a virtual data center. Apps and
+> their associated services that run in Kubernetes are calledworkloads.This tutorial lets you quickly see a running Google Kubernetes Engine cluster and sample workload, all set up using the Google Cloud console. You can then explore the workload in the Google Cloud console before going on to ourmore in-depth learning path, or to start planning and creating your own production-ready cluster.If you'd prefer to set up your sample cluster and workload by using Terraform, seeCreate a cluster with Terraform.To follow step-by-step guidance for this task directly in the
+>   Google Cloud console, clickGuide me:Guide me
+> Before you beginTake the following steps to enable the Kubernetes Engine API:Visit theKubernetes Engine pagein the Google Cloud console.Create or select a project.Wait for the API and related services to be enabled.
+>     This can take several minutes.Verify that billing is enabled for your Google Cloud project.Required rolesMake sure that you have the following role or roles on the project:
+>           
+>           Compute Admin, Kubernetes Engine Admin, Service Account UserCheck for the rolesIn the Google Cloud console, go to theIAMpage.Go to IAMSelect the project.In thePrincipalcolumn, find all rows that identify you or a group that
+>                 you
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B17. denso | mistral-7b-instruct — q019
+**Pregunta:** What are the limits and quotas for AWS EC2?
+
+**Claim:** Fleet quotas for EC2 Fleets and Spot Fleets: An EC2 Fleet request or a Spot Fleet request can't span Regions or different subnets from the same Availability Zone ..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/EC2 :: Fleet quotas<a name="fleet-quotas"></a>)
+
+> [AWS > EC2 > Fleet quotas<a name="fleet-quotas"></a>] The usual Amazon EC2 quotas \(formerly referred to as limits\) apply to instances launched by an EC2 Fleet or a Spot Fleet, such as [Spot Instance limits](using-spot-limits.md) and [volume limits](volume_limits.md)\.
+> 
+> In addition, the following quotas apply:
+> 
+> 
+> ****  
+> 
+> | Quota description | Quota | 
+> | --- | --- | 
+> | The number of EC2 Fleets and Spot Fleets per Region in the active, deleted\_running, and cancelled\_running states | 1,000 ¹ ² ³ ⁴ | 
+> | The number of Spot capacity pools \(unique combination of instance type and subnet\) | 300 ¹ ⁴ | 
+> | The size of the user data in a launch specification | 16 KB ² | 
+> | The target capacity per EC2 Fleet or Spot Fleet | 10,000 | 
+> | The target capacity across all EC2 Fleets and Spot Fleets in a Region | 100,000 ¹ | 
+> |  An EC2 Fleet request or a Spot Fleet request can't span Regions\.  |  | 
+> | An EC2 Fleet request or a Spot Fleet request can't span different subnets from the same Availability Zone\. |  | 
+> 
+> ¹ These quotas apply to both your EC2 Fleets and your Spot Fleets\.
+> 
+> ² These are hard quotas\. You cannot request an increase for these quotas\.
+> 
+> ³ After you delete an EC2 Fleet or cancel a Spot Fleet request, and if you specified that the fleet should *not* terminate its Spot Instances when you deleted or canceled the request, the fleet request enters the `deleted_running` \(EC2 Fleet\) or `cancelled_running` \(Spot Fleet\) state and the instances continue to run until they are in
+
+**[E2]** (aws/EC2 :: Amazon EC2 service quotas<a name="ec2-resource-limits"></a>)
+
+> [AWS > EC2 > Amazon EC2 service quotas<a name="ec2-resource-limits"></a>] Amazon EC2 provides different resources that you can use\. These resources include images, instances, volumes, and snapshots\. When you create your AWS account, we set default *quotas* \(also referred to as limits\) on these resources on a per\-Region basis\. For example, there is a maximum number of instances that you can launch in a Region\. So if you were to launch an instance in the US West \(Oregon\) Region, for example, the request must not cause your usage to exceed your maximum number of instances in that Region\.
+> 
+> The Service Quotas console is a central location where you can view and manage your quotas for AWS services, and request a quota increase for many of the resources that you use\. Use the quota information that we provide to manage your AWS infrastructure\. Plan to request any quota increases in advance of the time that you'll need them\.
+> 
+> For more information, see [Amazon EC2 endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/ec2-service.html) in the *Amazon Web Services General Reference*\. For information about Amazon EBS quotas, see [Amazon EBS quotas](ebs-resource-quotas.md)\.
+
+**[E3]** (aws/ECS :: Amazon ECS service quotas<a name="service-quotas"></a>)
+
+> [AWS > ECS > Amazon ECS service quotas<a name="service-quotas"></a>] The following tables provide the default service quotas, also referred to as limits, for Amazon ECS for an AWS account\. For more information about the service quotas for other AWS services that you can use with Amazon ECS, such as Elastic Load Balancing and Auto Scaling, see [AWS service quotas](https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html) in the *Amazon Web Services General Reference*\. For information about API throttling in the Amazon ECS API, see [Request throttling for the Amazon ECS API](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/request-throttling.html)\.
+
+**[E4]** (aws/EC2 :: Reserved Instance quotas<a name="ri-limits"></a> > View your Reserved Instance quotas and request a quota increase<a name="view-ri-quotas"></a>)
+
+>  20 running On\-Demand Instances, and you purchase 20 zonal Reserved Instances, you can launch a further 20 On\-Demand Instances that match the specifications of your zonal Reserved Instances, giving you a total of 40 running instances\. [AWS > EC2 > Reserved Instance quotas<a name="ri-limits"></a> > View your Reserved Instance quotas and request a quota increase<a name="view-ri-quotas"></a>] The Amazon EC2 console provides quota information\. You can also request an increase in your quotas\. For more information, see [View your current quotas](ec2-resource-limits.md#view-limits) and [Request an increase](ec2-resource-limits.md#request-increase)\.
+
+**[E5]** (aws/EC2 :: Amazon EC2 service quotas<a name="ec2-resource-limits"></a> > View your current quotas<a name="view-limits"></a>)
+
+>  quotas](https://docs.aws.amazon.com/general/latest/gr/ec2-service.html) in the *Amazon Web Services General Reference*\. For information about Amazon EBS quotas, see [Amazon EBS quotas](ebs-resource-quotas.md)\. [AWS > EC2 > Amazon EC2 service quotas<a name="ec2-resource-limits"></a> > View your current quotas<a name="view-limits"></a>] You can view your quotas for each Region using the Service Quotas console\.
+> 
+> **To view your current quotas using the Service Quotas console**
+> 
+> 1. Open the Service Quotas console at [https://console\.aws\.amazon\.com/servicequotas/home/services/ec2/quotas/](https://console.aws.amazon.com/servicequotas/home/services/ec2/quotas/)\.
+> 
+> 1. From the navigation bar \(at the top of the screen\), select a Region\.  
+> ![\[Select a Region.\]](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/images/EC2_select_region.png)
+> 
+> 1. Use the filter field to filter the list by resource name\. For example, enter **On\-Demand** to locate the quotas for On\-Demand Instances\.
+> 
+> 1. To view more information, choose the quota name to open the details page for the quota\.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B18. lexico | granite4.1-8b — q120
+**Pregunta:** How to deploy a workload on Google Cloud GKE?
+
+**Claim:** After deployment, navigate to the Deployment details page for [CODE]..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/GKE :: Google Kubernetes Engine documentation > Create a cluster and deploy a workload in the Google Cloud console)
+
+>  how to deploy a containerized application with Kubernetes Engine in less than 30 minutes.
+> 
+> This tutorial demonstrates how to use graphical processinng units (GPUs) on GKE to run large language models (LLMs) for AI/ML inference. [GCP > GKE > Google Kubernetes Engine documentation > Create a cluster and deploy a workload in the Google Cloud console] Learn how to create a Kubernetes cluster and deploy a 'hello world' web app in Google Cloud console.
+> 
+> This tutorial shows how to run a web application behind an external HTTP(S) load balancer by configuring the Ingress resource.
+
+**[E2]** (gcp/GKE :: Explore your cluster and workload > Before you begin)
+
+>  the load balancer name to find even more information, such as its frontend and backend details.
+> What's nextTry our more in-depthLearning path: Scalable apps.Learn how to get started with real life cluster administration in ourCluster administration overview. [GCP > GKE > Explore your cluster and workload > Before you begin] Ensure that you've followed the steps in one of these quickstarts to create a cluster and deploy a sample app:
+> Create a cluster and deploy a workload in the Google Cloud console.Create a cluster and deploy a workload using Terraform
+
+**[E3]** (gcp/GKE :: Create a cluster and deploy a workload in the Google Cloud console > View a live demo in your browser)
+
+>  have minimum availability. This occurs because Autopilot
+> deletes and then re-creates the nodes. Wait a few minutes, then clickrefreshRefreshto update the page.Wait until the deployment completes and you see theDeployment detailspage. [GCP > GKE > Create a cluster and deploy a workload in the Google Cloud console > View a live demo in your browser] In the Google Cloud console, go to
+> theDeployment detailspage forhello-world-app:In the Google Cloud console, go to the GKEWorkloadspage.Go to WorkloadsIn theNamecolumn, click the name of the workload you deployed,hello-world-app.In theEndpointscolumn, click the IP address, which is publicly available.GKE opens a new browser tab and sends a request to your
+> app. Dismiss any secure-site warnings, and you should seeHello, world!in the new browser tab.IfEndpointsis empty, your organization might have a policy that
+> prevents external access.
+> You have successfully created a GKE cluster in
+> Autopilot mode and deployed a sample workload.
+
+**[E4]** (gcp/GKE :: Create a cluster and deploy a workload in the Google Cloud console > Before you begin)
+
+>  nextExplore your cluster and workloadto learn about the some of the key workload settings and resources that
+> you deployed.Try our more in-depthLearning path: Scalable apps.Learn how to get started with real life cluster administration in ourCluster administration overview. [GCP > GKE > Create a cluster and deploy a workload in the Google Cloud console > Before you begin] Take the following steps to enable the Kubernetes Engine API:
+> Visit theKubernetes Engine pagein the Google Cloud console.Create or select a project.Wait for the API and related services to be enabled.
+>     This can take several minutes.Verify that billing is enabled for your Google Cloud project.
+
+**[E5]** (gcp/GKE :: Explore your cluster and workload > Before you begin > Required roles)
+
+> Ensure that you've followed the steps in one of these quickstarts to create a cluster and deploy a sample app:
+> Create a cluster and deploy a workload in the Google Cloud console.Create a cluster and deploy a workload using Terraform [GCP > GKE > Explore your cluster and workload > Before you begin > Required roles] To get the permissions that
+>       you need to interact with clusters and workloads,
+>     
+>       ask your administrator to grant you theKubernetes Engine Viewer(roles/container.viewer)
+>      IAM role
+>      on your project.
+>   
+> 
+>   
+> 
+>   
+>   
+>   For more information about granting roles, seeManage access to projects, folders, and organizations.
+> You might also be able to get
+>         the required permissions throughcustom
+>         rolesor otherpredefined
+>         roles.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B19. hibrido | qwen3.5-9b — q181
+**Pregunta:** Compare monitoring solutions: AWS CloudWatch vs Azure Monitor vs Google Cloud Monitoring
+
+**Claim:** AWS CloudWatch: The provided context contains detailed information about AWS CloudWatch monitoring solutions, including: CloudWatch Logs for container and container instance logs.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/EC2 :: List the available CloudWatch metrics for your instances<a name="viewing_metrics_with_cloudwatch"></a> > Amazon EC2 usage metrics<a name="service-quota-metrics"></a>)
+
+>  by the type of instance running\. For example, you might compare data from an m1\.small instance and an m1\.large instance to determine which has the better business value for your application\. Available for instances with Detailed Monitoring enabled\.  | [AWS > EC2 > List the available CloudWatch metrics for your instances<a name="viewing_metrics_with_cloudwatch"></a> > Amazon EC2 usage metrics<a name="service-quota-metrics"></a>] You can use CloudWatch usage metrics to provide visibility into your account's usage of resources\. Use these metrics to visualize your current service usage on CloudWatch graphs and dashboards\.
+> 
+> Amazon EC2 usage metrics correspond to AWS service quotas\. You can configure alarms that alert you when your usage approaches a service quota\. For more information about CloudWatch integration with service quotas, see [AWS usage metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Service-Quota-Integration.html) in the *Amazon CloudWatch User Guide*\.
+> 
+> Amazon EC2 publishes the following metrics in the `AWS/Usage` namespace\.
+> 
+> 
+> | Metric | Description | 
+> | --- | --- | 
+> | `ResourceCount` |  The number of the specified resources running in your account\. The resources are defined by the dimensions associated with the metric\. The most useful statistic for this metric is `MAXIMUM`, which represents the maximum number of resources used during the 1\-minute period\.  | 
+> 
+> The following dimensions are used to refine the usage metr
+
+**[E2]** (aws/ECS :: Monitoring Amazon ECS<a name="ecs_monitoring"></a>)
+
+> [AWS > ECS > Monitoring Amazon ECS<a name="ecs_monitoring"></a>] You can monitor your Amazon ECS resources using Amazon CloudWatch, which collects and processes raw data from Amazon ECS into readable, near real\-time metrics\. These statistics are recorded for a period of two weeks, so that you can access historical information and gain a better perspective on how your clusters or services are performing\. Amazon ECS metric data is automatically sent to CloudWatch in 1\-minute periods\. For more information about CloudWatch, see the [Amazon CloudWatch User Guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/)\.
+> 
+> Monitoring is an important part of maintaining the reliability, availability, and performance of Amazon ECS and your AWS solutions\. You should collect monitoring data from all of the parts of your AWS solution so that you can more easily debug a multi\-point failure if one occurs\. Before you start monitoring Amazon ECS; however, you should create a monitoring plan that includes answers to the following questions:
+> + What are your monitoring goals?
+> + What resources will you monitor?
+> + How often will you monitor these resources?
+> + What monitoring tools will you use?
+> + Who will perform the monitoring tasks?
+> + Who should be notified when something goes wrong?
+> 
+> The metrics made available depend on the launch type of the tasks and services in your clusters\. If you are using the Fargate launch type for your services, then CPU and memory utilization metric
+
+**[E3]** (aws/ECS :: Logging and Monitoring in Amazon Elastic Container Service<a name="ecs-logging-monitoring"></a>)
+
+> [AWS > ECS > Logging and Monitoring in Amazon Elastic Container Service<a name="ecs-logging-monitoring"></a>] Monitoring is an important part of maintaining the reliability, availability, and performance of Amazon Elastic Container Service and your AWS solutions\. You should collect monitoring data from all of the parts of your AWS solution so that you can more easily debug a multi\-point failure if one occurs\. AWS provides several tools for monitoring your Amazon ECS resources and responding to potential incidents:
+> 
+> **Amazon CloudWatch Alarms**  
+> Watch a single metric over a time period that you specify, and perform one or more actions based on the value of the metric relative to a given threshold over a number of time periods\. The action is a notification sent to an Amazon Simple Notification Service \(Amazon SNS\) topic or Amazon EC2 Auto Scaling policy\. CloudWatch alarms do not invoke actions simply because they are in a particular state; the state must have changed and been maintained for a specified number of periods\. For more information, see [Amazon ECS CloudWatch metrics](cloudwatch-metrics.md)\.  
+> For clusters with tasks or services using the EC2 launch type, you can use CloudWatch alarms to scale in and scale out the container instances based on CloudWatch metrics, such as cluster memory reservation\.
+> 
+> **Amazon CloudWatch Logs**  
+> Monitor, store, and access the log files from the containers in your Amazon ECS tasks by specifying the `awslogs` log driver in your
+
+**[E4]** (aws/EC2 :: Monitor Amazon EC2<a name="monitoring_ec2"></a>)
+
+> [AWS > EC2 > Monitor Amazon EC2<a name="monitoring_ec2"></a>] Monitoring is an important part of maintaining the reliability, availability, and performance of your Amazon Elastic Compute Cloud \(Amazon EC2\) instances and your AWS solutions\. You should collect monitoring data from all of the parts in your AWS solutions so that you can more easily debug a multi\-point failure if one occurs\. Before you start monitoring Amazon EC2, however, you should create a monitoring plan that should include:
+> + What are your goals for monitoring?
+> + What resources will you monitor?
+> + How often will you monitor these resources?
+> + What monitoring tools will you use?
+> + Who will perform the monitoring tasks?
+> + Who should be notified when something goes wrong? 
+> 
+> After you have defined your monitoring goals and have created your monitoring plan, the next step is to establish a baseline for normal Amazon EC2 performance in your environment\. You should measure Amazon EC2 performance at various times and under different load conditions\. As you monitor Amazon EC2, you should store a history of monitoring data that you collect\. You can compare current Amazon EC2 performance to this historical data to help you to identify normal performance patterns and performance anomalies, and devise methods to address them\. For example, you can monitor CPU utilization, disk I/O, and network utilization for your EC2 instances\. When performance falls outside your established baseline, you might need to reconfigu
+
+**[E5]** (aws/ECS :: Monitoring tools<a name="monitoring-automated-manual"></a> > Manual monitoring tools<a name="monitoring-manual-tools"></a>)
+
+> ) in the *AWS CloudTrail User Guide*\. [AWS > ECS > Monitoring tools<a name="monitoring-automated-manual"></a> > Manual monitoring tools<a name="monitoring-manual-tools"></a>] Another important part of monitoring Amazon ECS involves manually monitoring those items that the CloudWatch alarms don't cover\. The CloudWatch, Trusted Advisor, and other AWS console dashboards provide an at\-a\-glance view of the state of your AWS environment\. We recommend that you also check the log files on your container instances and the containers in your tasks\.
+> + CloudWatch home page: 
+>   + Current alarms and status
+>   + Graphs of alarms and resources
+>   + Service health status
+> 
+>   In addition, you can use CloudWatch to do the following: 
+>   + Create [customized dashboards](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html) to monitor the services you care about\.
+>   + Graph metric data to troubleshoot issues and discover trends\.
+>   + Search and browse all your AWS resource metrics\.
+>   + Create and edit alarms to be notified of problems\.
+> + AWS Trusted Advisor can help you monitor your AWS resources to improve performance, reliability, security, and cost effectiveness\. Four Trusted Advisor checks are available to all users; more than 50 checks are available to users with a Business or Enterprise support plan\. For more information, see [AWS Trusted Advisor](https://aws.amazon.com/premiumsupport/trustedadvisor/)\.
+> + AWS Compute Optimizer is a service that ana
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B20. lexico | mistral-7b-instruct — q071
+**Pregunta:** How to monitor AWS DynamoDB with CloudWatch?
+
+**Claim:** Next, go to the Amazon CloudWatch console.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/EC2 :: Monitor the lifecycle of snapshots and AMIs<a name="dlm-monitor-lifecycle"></a>)
+
+> [AWS > EC2 > Monitor the lifecycle of snapshots and AMIs<a name="dlm-monitor-lifecycle"></a>] You can use the following features to monitor the lifecycle of your snapshots and AMIs\.
+> 
+> **Topics**
+> + [Console and AWS CLI](#monitor-console-cli)
+> + [AWS CloudTrail](#monitor-lifecycle-cloudtrail)
+> + [Monitor your policies using CloudWatch Events](monitor-cloudwatch-events.md)
+> + [Monitor your policies using Amazon CloudWatch](monitor-dlm-cw-metrics.md)
+
+**[E2]** (aws/Lambda :: Configure Handler Class)
+
+> - none - API Gateway HTTP API (`events/apigateway-v2.json`)
+> - `apig` - API Gateway REST API (`events/apigateway-v1.json`)
+> - `cws` - CloudWatch scheduled event (`events/cloudwatch-s [AWS > Lambda > Configure Handler Class] cheduled.json`)
+> - `cwl` - CloudWatch Logs (`events/cloudwatch-logs.json`)
+> - `sns` - SNS notification (`events/sns-notification.json`)
+> - `cfg` - Config rule (`events/config-rule.json`)
+> - `cc` - CodeCommit push (`events/codecommit-push.json`)
+> - `cog` - Cognito Sync (`events/cognito-sync.json`)
+> - `kin` - Kinesis record (`events/kinesis-record.json`)
+> - `fh` - Kinesis Firehose record (`events/firehose-record.json`)
+> - `lex` - Lex dialog (`events/lex-flowers.json`)
+> - `ddb` - DynamoDB record (`events/dynamodb-record.json`)
+> - `s3` - S3Event record (`events/s3-notification.json`)
+> - `sqs` - SQSEvent record (`events/sqs-record.json`)
+
+**[E3]** (aws/Lambda :: Configure Handler Class)
+
+> - none - API Gateway HTTP API (`events/apigateway-v2.json`)
+> - `apig` - API Gateway REST API (`events/apigateway-v1.json`)
+> - `cws` - CloudWatch scheduled event (`events/cloudwatch-s [AWS > Lambda > Configure Handler Class] cheduled.json`)
+> - `cwl` - CloudWatch Logs (`events/cloudwatch-logs.json`)
+> - `sns` - SNS notification (`events/sns-notification.json`)
+> - `cfg` - Config rule (`events/config-rule.json`)
+> - `cc` - CodeCommit push (`events/codecommit-push.json`)
+> - `cog` - Cognito Sync (`events/cognito-sync.json`)
+> - `kin` - Kinesis record (`events/kinesis-record.json`)
+> - `fh` - Kinesis Firehose record (`events/firehose-record.json`)
+> - `lex` - Lex dialog (`events/lex-flowers.json`)
+> - `ddb` - DynamoDB record (`events/dynamodb-record.json`)
+> - `s3` - S3Event record (`events/s3-notification.json`)
+> - `sqs` - SQSEvent record (`events/sqs-record.json`)
+
+**[E4]** (aws/Lambda :: Configure Handler Class)
+
+> - none - API Gateway HTTP API (`events/apigateway-v2.json`)
+> - `apig` - API Gateway REST API (`events/apigateway-v1.json`)
+> - `cws` - CloudWatch scheduled event (`events/cloudwatch-s [AWS > Lambda > Configure Handler Class] cheduled.json`)
+> - `cwl` - CloudWatch Logs (`events/cloudwatch-logs.json`)
+> - `sns` - SNS notification (`events/sns-notification.json`)
+> - `cfg` - Config rule (`events/config-rule.json`)
+> - `cc` - CodeCommit push (`events/codecommit-push.json`)
+> - `cog` - Cognito Sync (`events/cognito-sync.json`)
+> - `kin` - Kinesis record (`events/kinesis-record.json`)
+> - `fh` - Kinesis Firehose record (`events/firehose-record.json`)
+> - `lex` - Lex dialog (`events/lex-flowers.json`)
+> - `ddb` - DynamoDB record (`events/dynamodb-record.json`)
+> - `s3` - S3Event record (`events/s3-notification.json`)
+> - `sqs` - SQSEvent record (`events/sqs-record.json`)
+
+**[E5]** (aws/EC2 :: CloudWatch metrics for Spot Fleet<a name="spot-fleet-cloudwatch-metrics"></a>)
+
+> [AWS > EC2 > CloudWatch metrics for Spot Fleet<a name="spot-fleet-cloudwatch-metrics"></a>] Amazon EC2 provides Amazon CloudWatch metrics that you can use to monitor your Spot Fleet\.
+> 
+> **Important**  
+> To ensure accuracy, we recommend that you enable detailed monitoring when using these metrics\. For more information, see [Enable or turn off detailed monitoring for your instances](using-cloudwatch-new.md)\.
+> 
+> For more information about CloudWatch metrics provided by Amazon EC2, see [Monitor your instances using CloudWatch](using-cloudwatch.md)\.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B21. denso | gemma4-e4b — q029
+**Pregunta:** What is AWS ECS and what are its main features?
+
+**Claim:** Deployment Options: ECS Anywhere: This allows users to manage on-premises container workloads using the Amazon ECS console and AWS CLI ..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: Amazon ECS components<a name="welcome-features"></a> > Clusters<a name="welcome-clusters"></a>)
+
+> [AWS > ECS > Amazon ECS components<a name="welcome-features"></a> > Clusters<a name="welcome-clusters"></a>] An Amazon ECS *cluster* is a logical grouping of tasks or services\. You can use clusters to isolate your applications\. This way, they don't use the same underlying infrastructure\. When your tasks are run on Fargate, your cluster resources are also managed by Fargate\.
+
+**[E2]** (aws/ECS :: What is Amazon Elastic Container Service?<a name="Welcome"></a>)
+
+> [AWS > ECS > What is Amazon Elastic Container Service?<a name="Welcome"></a>] Amazon Elastic Container Service \(Amazon ECS\) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications\. As a fully managed service, Amazon ECS comes with AWS configuration and operational best practices built\-in\. This also means that you don't need to manage control plane, nodes, or add\-ons\. It's integrated with both AWS and third\-party tools, such as Amazon Elastic Container Registry and Docker\. This integration makes it easier for teams to focus on building the applications, not the environment\. You can run and scale your container workloads across AWS Regions in the cloud, and on\-premises, without the complexity of managing a control plane or nodes\.
+> 
+> The following are key features of Amazon ECS:
+> + A serverless option with AWS Fargate\. With AWS Fargate, you don't need to manage servers, handle capacity planning, or isolate container workloads for security\. Fargate handles the infrastructure management aspects of your workload for you\. You can schedule the placement of your containers across your cluster based on your resource needs, isolation policies, and availability requirements\.
+> + An external instance option with ECS Anywhere\. With ECS Anywhere, you can use the Amazon ECS console and AWS CLI to manage your on\-premises container workloads\. 
+> + An Amazon EC2 option\. With EC2, you can use the Amazon ECS consol
+
+**[E3]** (aws/ECS :: AWS services integrated with Amazon ECS<a name="ecs-integrations"></a>)
+
+> [AWS > ECS > AWS services integrated with Amazon ECS<a name="ecs-integrations"></a>] Amazon ECS works with other AWS services to provide additional solutions for your business challenges\. This topic identifies services that either use Amazon ECS to add functionality, or services that Amazon ECS uses to perform tasks\.
+> 
+> **Topics**
+> + [Using Amazon ECR with Amazon ECS](ecr-repositories.md)
+> + [Creating Amazon ECS resources with AWS CloudFormation](creating-resources-with-cloudformation.md)
+> + [Amazon Elastic Container Service on AWS Outposts](ecs-on-outposts.md)
+> + [Use App Mesh with Amazon ECS](gs-app-mesh.md)
+> + [AWS Deep Learning Containers on Amazon ECS](deep-learning-containers.md)
+
+**[E4]** (aws/EC2 :: What is Amazon EC2?<a name="concepts"></a> > Features of Amazon EC2<a name="ec2-features"></a>)
+
+>  scale up or down to handle changes in requirements or spikes in popularity, reducing your need to forecast traffic\.
+> 
+> For more information about cloud computing, see [What is cloud computing?](https://aws.amazon.com/what-is-cloud-computing/) [AWS > EC2 > What is Amazon EC2?<a name="concepts"></a> > Features of Amazon EC2<a name="ec2-features"></a>] Amazon EC2 provides the following features:
+> + Virtual computing environments, known as *instances*
+> + Preconfigured templates for your instances, known as *Amazon Machine Images \(AMIs\)*, that package the bits you need for your server \(including the operating system and additional software\)
+> + Various configurations of CPU, memory, storage, and networking capacity for your instances, known as *instance types*
+> + Secure login information for your instances using *key pairs* \(AWS stores the public key, and you store the private key in a secure place\)
+> + Storage volumes for temporary data that's deleted when you stop, hibernate, or terminate your instance, known as *instance store volumes*
+> + Persistent storage volumes for your data using Amazon Elastic Block Store \(Amazon EBS\), known as *Amazon EBS volumes*
+> + Multiple physical locations for your resources, such as instances and Amazon EBS volumes, known as *Regions* and *Availability Zones*
+> + A firewall that enables you to specify the protocols, ports, and source IP ranges that can reach your instances using *security groups*
+> + Static IPv4 addresses for dynamic cloud computing, kn
+
+**[E5]** (aws/ECS :: Getting started with the console using Amazon EC2<a name="getting-started-ecs-ec2-v2"></a>)
+
+> [AWS > ECS > Getting started with the console using Amazon EC2<a name="getting-started-ecs-ec2-v2"></a>] Amazon Elastic Container Service \(Amazon ECS\) is a fast and highly scalable container management service that makes it easy to launch and manage your containers\. For a broad overview on Amazon ECS, see [What is Amazon Elastic Container Service?](Welcome.md)\.
+> 
+> Get started with Amazon ECS using the EC2 launch type by registering a task definition, creating a cluster, and creating a service in the classic console\.
+> 
+> Complete the following steps to get started with Amazon ECS using the EC2 launch type\.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B22. hibrido | granite4.1-8b — q039
+**Pregunta:** What are the available SKUs for Azure Virtual Machines?
+
+**Claim:** discusses standard and basic SKUs for public IP addresses used by Azure Bastion, but this does not directly relate to VM SKUs.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Virtual Network :: Manage a public IP address with Azure Bastion)
+
+> [AZURE > Virtual Network > Manage a public IP address with Azure Bastion] Public IP addresses are available in two SKUs; standard, and basic. The selection of SKU determines the features of the IP address. The SKU determines the resources that the IP address can be associated with.
+> 
+> Azure Bastion is deployed to provide secure management connectivity to virtual machines in a virtual network. Azure Bastion Service enables you to securely and seamlessly RDP & SSH to the VMs in your virtual network. Azure Bastion enables connections without exposing a public IP on the VM. Connections are made directly from the Azure portal, without the need of an extra client/agent or piece of software. Azure Bastion supports standard SKU public IP addresses.
+> 
+> An Azure Bastion host requires a public IP address for its configuration.
+> 
+> In this article, you learn how to create an Azure Bastion host using an existing public IP in your subscription. Azure Bastion doesn't support the change of the public IP address after creation. Azure Bastion supports assigning an IP address within an IP prefix range but not assigning the IP prefix range itself. 
+> 
+> >[!NOTE]
+> >[!INCLUDE [Pricing](~/reusable-content/ce-skilling/azure/includes/bastion-pricing.md)]
+
+**[E2]** (azure/Virtual Machines :: Azure managed disk types > Next steps)
+
+>  Azure Disks Reservation offers one year commitment plan for Premium SSD SKUs from P30 (1 TiB) to P80 (32 TiB) in all production regions. For more information about reserved disks pricing, seeAzure Disks pricing page. [AZURE > Virtual Machines > Azure managed disk types > Next steps] Learn more about how managed disks are billed, seeUnderstand Azure Disk Storage billing.Learn theBest practices for achieving high availability with Azure virtual machines and managed disks.Learn about thePerformance optionsfor managed disks.
+> 
+> Was this page helpful?YesNoNoNeed help with this topic?Want to try using Ask Learn to clarify or guide you through this topic?Ask LearnAsk LearnSuggest a fix?
+
+**[E3]** (azure/AKS :: Storage options for applications in Azure Kubernetes Service (AKS) > Volumes > Azure Disk)
+
+>  SKUs offered and their corresponding detailed capacity limits, seeGeneral purpose virtual machine sizes.
+> To help determine best fit for your workload between Azure Files and Azure NetApp Files, review the information provided in the articleAzure Files and Azure NetApp Files comparison. [AZURE > AKS > Storage options for applications in Azure Kubernetes Service (AKS) > Volumes > Azure Disk] UseAzure Diskto create a KubernetesDataDiskresource. Disks types include:
+> Premium SSDs (recommended for most workloads)Ultra disksStandard SSDsStandard HDDs
+> TipFor most production and development workloads, use Premium SSDs.
+> Because an Azure Disk is mounted asReadWriteOnce, it's only available to a single node. For storage volumes accessible by pods on multiple nodes simultaneously, use Azure Files.
+
+**[E4]** (azure/Virtual Network :: What is Azure Virtual Network encryption? > Availability)
+
+>  confirm flow encryption between virtual machines. For more information, see [Virtual network flow logs](../network-watcher/vnet-flow-logs-overview.md).
+> 
+> - The start/stop of existing virtual machines is required after enabling encryption in a virtual network. [AZURE > Virtual Network > What is Azure Virtual Network encryption? > Availability] Azure Virtual Network encryption is generally available in all Azure public regions and is currently in public preview in Azure Government and Microsoft Azure operated by 21Vianet.
+> 
+> Azure Virtual Network encryption has the following limitations:
+> 
+> - In scenarios where a PaaS is involved, the virtual machine where the PaaS is hosted dictates if virtual network encryption is supported. The virtual machine must meet the listed requirements. 
+> 
+> - For Internal load balancer, all virtual machines behind the load balancer must be on a supported virtual machine SKU.
+> 
+> - **AllowUnencrypted** is the only supported enforcement at general availability. **DropUnencrypted** enforcement will be supported in the future.
+> 
+> - Virtual networks with encryption enabled don't support [Azure DNS Private Resolver](/azure/dns/dns-private-resolver-overview), [Application Gateway](/azure/application-gateway/overview), and [Azure Firewall](/azure/firewall/overview).
+> 
+> - Virtual Network Encryption **should not** be enabled in virtual networks that have [Azure ExpressRoute Gateways](/azure/expressroute/expressroute-introduction).
+>     - ```Enabling VNET Encryption for Virt
+
+**[E5]** (azure/AKS :: Quotas, virtual machine size restrictions, and region availability in Azure Kubernetes Service (AKS) > Supported VM sizes)
+
+>  latest node updates. If you don't have the available IP address space or vCPU quota to handle these temporary resources, the cluster upgrade process fails. For more information on the Windows Server node upgrade process, seeUpgrade a node pool in AKS. [AZURE > AKS > Quotas, virtual machine size restrictions, and region availability in Azure Kubernetes Service (AKS) > Supported VM sizes] The list of supported VM sizes in AKS is evolving with the release of new VM SKUs in Azure. Follow theAKS release notesto stay informed of new supported SKUs.
+> 
+> Each node in an AKS cluster contains a fixed amount of compute resources such as vCPU and memory. Due to the required compute resources needed to run Kubernetes correctly, certain VM SKU sizes are restricted by default in AKS. These restrictions are to ensure that pods can be scheduled and function correctly on these nodes.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B23. hibrido | gemma4-e4b — q195
+**Pregunta:** Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build
+
+**Claim:** It is used alongside Cloud Deploy and Artifact Registry [Source: gcp/GKE/GKE overviewStay organized with collectionsSave.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/GKE :: GKE overviewStay organized with collectionsSave and categorize content based on your preferences.)
+
+>  CI/CD options withCloud BuildandCloud Deploy.Improved security postureHardened node operating system for apps:Container-Optimized OS.Built-in security measures.Policy Controller.Automatic upgradesto new GKE versions.Integrated security posture monitoring [GCP > GKE > GKE overviewStay organized with collectionsSave and categorize content based on your preferences.]  tooling with thesecurity posture dashboard.Google Cloud logging and monitoring integrations withGoogle Cloud Observability.Cost optimizationIn Autopilot mode, pay only for the compute resources
+>           your running Pods request.In GKE Standard mode, you pay for all
+>           resources on nodes, regardless of Pod requests.Save costs by running fault-tolerant workloads, such as batch jobs, onSpot Pods.Minimized operational overhead in Autopilot mode because
+>           Google Cloud manages both the
+>           nodes and the control plane.Reliability and availability>99%monthly
+>           uptime SLO.Pod-level SLA in Autopilot clusters because Google manages
+>           the nodes.Highly-available control plane and worker nodes inAutopilot modeand inregional Standard clusters.Proactive monitoring and recommendationsto mitigate potential workload disruptions caused by upcoming
+>           deprecations.Multi-cluster Service capabilities.Best practice:Configure the application CI/CD pipeline to use Cloud Build,
+> Cloud Deploy, and Artifact Registry.
+> By using  managed build and deployment services,
+> you can optimize for security, sc
+
+**[E2]** (azure/Azure Functions :: Create and manage function apps in the Flex Consumption plan > Deploy your code project > [Continuous Deployment](#tab/continuous-deployment))
+
+>  sure to set `--build-remote true` to perform a [remote build].
+> ::: zone-end [AZURE > Azure Functions > Create and manage function apps in the Flex Consumption plan > Deploy your code project > [Continuous Deployment](#tab/continuous-deployment)] Azure Functions has both a custom GitHub Action and a custom Azure Pipelines Task to support continuous deployment. Refer the following guides to incorporate these tools in your CI/CD pipelines:
+> 
+> - [Build and deploy using Azure Pipelines](./functions-how-to-azure-devops.md)
+> - [Build and deploy using GitHub Actions](./functions-how-to-github-actions.md)
+
+**[E3]** (gcp/GKE :: GKE overviewStay organized with collectionsSave and categorize content based on your preferences. > When to use GKE > Use cases for GKE)
+
+>  deprecations.Multi-cluster Service capabilities.
+> Best practice:Configure the application CI/CD pipeline to use Cloud Build,
+> Cloud Deploy, and Artifact Registry.
+> By using  managed build and deployment services,
+> you can optimize for security, scale, and simplicity. [GCP > GKE > GKE overviewStay organized with collectionsSave and categorize content based on your preferences. > When to use GKE > Use cases for GKE] GKE and Kubernetes are used in a variety of industries, including
+> robotics, healthcare, retail, education, gaming, and financial services. Examples of workloads you can run include:
+> AI and ML operationsData processing at scaleScalableonline games platformsReliable applications under heavy load
+> For case studies by industry and application, refer toGoogle Cloud customers.
+
+**[E4]** (azure/Azure Functions :: Continuous deployment for Azure Functions > <a name="build-providers"></a>Select a build provider > [Azure Pipelines](#tab/azure-pipelines))
+
+> , including Azure Pipelines and GitHub Actions. The App Service (Kudu) service requires you to [enable basic authentication](#enable-basic-authentication-for-deployments) and work with text-based credentials. 
+> 
+> Azure Functions supports these build providers: [AZURE > Azure Functions > Continuous deployment for Azure Functions > <a name="build-providers"></a>Select a build provider > [Azure Pipelines](#tab/azure-pipelines)] Azure Pipelines is one of the services in Azure DevOps and the default build provider for Azure Repos projects. You can also use Azure Pipelines to build projects from GitHub. In Azure Pipelines, there's an [`AzureFunctionApp`](/azure/devops/pipelines/tasks/reference/azure-function-app-v2) task designed specifically for deploying to Azure Functions. This task provides you with control over how the project gets built, packaged, and deployed. Azure Pipelines supports managed identities.
+
+**[E5]** (gcp/GKE :: Deploying workloadsStay organized with collectionsSave and categorize content based on your preferences. > Managing workload deployment)
+
+>  Google Cloud observability inObservability for
+> GKE.View details for your AI/ML workloads in Google Cloud console, 
+> including resources such as JobSets, RayJobs, PyTorchJobs, and Deployments for
+> inference serving. [GCP > GKE > Deploying workloadsStay organized with collectionsSave and categorize content based on your preferences. > Managing workload deployment] If you or your administrator want to set up a continuous integration and
+> delivery (CI/CD) pipeline for deploying your workloads, you can find
+> GKE-specific best practices and guidelines for CI/CD inBest
+> practices for continuous integration and delivery to
+> GKE,
+> as well as tutorials for setting up CI/CD pipelines with specific tools and
+> products.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B24. lexico | qwen3.5-9b — q079
+**Pregunta:** How to deploy a containerized application on AWS EC2?
+
+**Claim:** AWS CDK for ECS Deployments
+****.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/GKE :: AI/ML orchestration on GKE documentation > Deploy an agentic AI application on GKE with the Agent Development Kit (ADK) and Vertex AI)
+
+> Learn how to deploy and manage a containerized agentic AI application on GKE, using the Agent Development Kit (ADK) and vLLM for scalable inference with Llama 3.1.
+> TutorialAI/ML InferenceAgentic AI [GCP > GKE > AI/ML orchestration on GKE documentation > Deploy an agentic AI application on GKE with the Agent Development Kit (ADK) and Vertex AI] Learn how to deploy and manage a containerized agentic AI application on GKE, using the Agent Development Kit (ADK) and Vertex AI for scalable inference with Gemini 2.0 Flash.
+> TutorialAI/ML InferenceAgentic AI
+> 
+> Learn how to deploy LLMs using Tensor Processing Units (TPUs) on GKE with the Optimum TPU serving framework from Hugging Face.
+> TutorialAI/ML InferenceTPU
+
+**[E2]** (gcp/GKE :: GKE overviewStay organized with collectionsSave and categorize content based on your preferences. > Get started with GKE)
+
+> 
+> to manually manage the node pools and clusters.What's nextStart learning about GKE.Learn how to deploy a containerized application in GKE.Learn more about types of clusters.Learn more about Kubernetes.Explore the GKE documentation.
+> 
+> 
+> Send feedback [GCP > GKE > GKE overviewStay organized with collectionsSave and categorize content based on your preferences. > Get started with GKE] You can start exploring GKE in minutes.
+> You can use GKE'sfree tier,
+> which lets you get started with Kubernetes without incurring costs for cluster
+> management.
+> Get started in Google Cloud consoleTry thequickstartto deploy a
+> containerized web application.Read theAutopilot overview,
+> which has guidance and resources for planning and operating your platform.
+
+**[E3]** (aws/ECS :: Amazon ECS developer tools overview<a name="ecs-developer-tools"></a> > AWS App2Container<a name="developer-tools-a2c"></a>)
+
+> K](tutorial-ecs-web-server-cdk.md)\.
+> 
+> Use the AWS CDK if you want to define infrastructure or architecture as code in your preferred programming language\. For example, you can use the same language that you use to write your applications\. [AWS > ECS > Amazon ECS developer tools overview<a name="ecs-developer-tools"></a> > AWS App2Container<a name="developer-tools-a2c"></a>] Sometimes enterprise customers might already have applications that are hosted on premises or on EC2 instances or both\. They are interested in the portability and tooling ecosystem of containers specifically on Amazon ECS, and need to containerize first\. AWS App2Container allows you to do just that\. App2Container \(A2C\) is a command line tool for modernizing \.NET and Java applications into containerized applications\. A2C analyzes and builds an inventory of all applications running in virtual machines, on premises or in the cloud\. After you select the application you want to containerize, A2C packages the application artifact and identified dependencies into container images\. It then configures the network ports and generates the Amazon ECS task\. Last, it creates a CloudFormation template that you can deploy or modify if needed\.
+> 
+> For more information, see [Getting started with AWS App2Container](https://docs.aws.amazon.com/app2container/latest/UserGuide/start-intro.html)\.
+> 
+> Use App2Container if you have applications that are hosted on premises or on Amazon EC2 instances or both\.
+
+**[E4]** (gcp/GKE :: Google Kubernetes Engine documentation > Create a cluster and deploy a workload in the Google Cloud console)
+
+>  how to deploy a containerized application with Kubernetes Engine in less than 30 minutes.
+> 
+> This tutorial demonstrates how to use graphical processinng units (GPUs) on GKE to run large language models (LLMs) for AI/ML inference. [GCP > GKE > Google Kubernetes Engine documentation > Create a cluster and deploy a workload in the Google Cloud console] Learn how to create a Kubernetes cluster and deploy a 'hello world' web app in Google Cloud console.
+> 
+> This tutorial shows how to run a web application behind an external HTTP(S) load balancer by configuring the Ingress resource.
+
+**[E5]** (aws/ECS :: Getting started with Amazon ECS using the AWS CDK<a name="tutorial-ecs-web-server-cdk"></a>)
+
+> [AWS > ECS > Getting started with Amazon ECS using the AWS CDK<a name="tutorial-ecs-web-server-cdk"></a>] The AWS Cloud Development Kit \(AWS CDK\) is an Infrastructure\-as\-Code \(IAC\) framework that you can use to define AWS cloud infrastructure by using a programming language of your choosing\. To define your own cloud infrastructure, you first write an app \(in one of the CDK's supported languages\) that contains one or more stacks\. Then, you synthesize it to an AWS CloudFormation template and deploy your resources to your AWS account\. Follow the steps in this topic to deploy a containerized web server with Amazon Elastic Container Service \(Amazon ECS\) and the AWS CDK on Fargate\. 
+> 
+> The AWS Construct Library, included with the CDK, provides modules that you can use to model the resources that AWS services provide\. For popular services, the library provides curated constructs with smart defaults and best practices\. One of these modules, specifically `[aws\-ecs\-patterns](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns-readme.html)`, provides high\-level abstractions that you can use to define your containerized service and all the necessary supporting resources in a few lines of code\.
+> 
+> This topic uses the [https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedFargateService.html](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedFargateService.html) cons
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B25. denso | granite4.1-8b — q088
+**Pregunta:** How to deploy an application using Azure Blob Storage?
+
+**Claim:** Location: The Azure region (e.g., [CODE], [CODE]) where your resources will reside..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Blob Storage :: Quickstart: Azure Blob Storage client library for Python > Run the sample code)
+
+>  The Azure region where your resources are deployed.
+> 
+>     The deployment might take a few minutes to complete. The output from the `azd up` command includes the name of the newly created storage account, which you'll need later to run the code. [AZURE > Blob Storage > Quickstart: Azure Blob Storage client library for Python > Run the sample code] At this point, the resources are deployed to Azure and the code is almost ready to run. Follow these steps to install packages, update the name of the storage account in the code, and run the sample console app:
+> 
+> - **Install packages**: In the local directory, install packages for the Azure Blob Storage and Azure Identity client libraries using the following command: `pip install azure-storage-blob azure-identity`
+> - **Update the storage account name**: In the local directory, edit the file named **blob_quickstart.py**. Find the `<storage-account-name>` placeholder and replace it with the actual name of the storage account created by the `azd up` command. Save the changes.
+> - **Run the project**: Execute the following command to run the app: `python blob_quickstart.py`.
+> - **Observe the output**: This app creates a test file in your local *data* folder and uploads it to a container in the storage account. The example then lists the blobs in the container and downloads the file with a new name so that you can compare the old and new files. 
+> 
+> To learn more about how the sample code works, see [Code examples](#code-examples).
+> 
+> When you're 
+
+**[E2]** (azure/Blob Storage :: Quickstart: Azure Blob Storage client library for Python)
+
+> [AZURE > Blob Storage > Quickstart: Azure Blob Storage client library for Python] ::: zone pivot="blob-storage-quickstart-scratch"
+> 
+> > [!NOTE]
+> > The **Build from scratch** option walks you step by step through the process of creating a new project, installing packages, writing the code, and running a basic console app. This approach is recommended if you want to understand all the details involved in creating an app that connects to Azure Blob Storage. If you prefer to automate deployment tasks and start with a completed project, choose [Start with a template](storage-quickstart-blobs-python.md?pivots=blob-storage-quickstart-template).
+> 
+> ::: zone-end
+> 
+> ::: zone pivot="blob-storage-quickstart-template"
+> 
+> > [!NOTE]
+> > The **Start with a template** option uses the Azure Developer CLI to automate deployment tasks and starts you off with a completed project. This approach is recommended if you want to explore the code as quickly as possible without going through the setup tasks. If you prefer step by step instructions to build the app, choose [Build from scratch](storage-quickstart-blobs-python.md?pivots=blob-storage-quickstart-scratch).
+> 
+> ::: zone-end
+> 
+> Get started with the Azure Blob Storage client library for Python to manage blobs and containers.
+> 
+> ::: zone pivot="blob-storage-quickstart-scratch"
+> 
+> In this article, you follow steps to install the package and try out example code for basic tasks.
+> 
+> ::: zone-end
+> 
+> ::: zone pivot="blob-storage-quickstart-template"
+> 
+> In this article, you use 
+
+**[E3]** (azure/Blob Storage :: Quickstart: Azure Blob Storage client library for Java SE)
+
+> [AZURE > Blob Storage > Quickstart: Azure Blob Storage client library for Java SE] ::: zone pivot="blob-storage-quickstart-scratch"
+> 
+> > [!NOTE]
+> > The **Build from scratch** option walks you step by step through the process of creating a new project, installing packages, writing the code, and running a basic console app. This approach is recommended if you want to understand all the details involved in creating an app that connects to Azure Blob Storage. If you prefer to automate deployment tasks and start with a completed project, choose [Start with a template](storage-quickstart-blobs-java.md?pivots=blob-storage-quickstart-template).
+> 
+> ::: zone-end
+> 
+> ::: zone pivot="blob-storage-quickstart-template"
+> 
+> > [!NOTE]
+> > The **Start with a template** option uses the Azure Developer CLI to automate deployment tasks and starts you off with a completed project. This approach is recommended if you want to explore the code as quickly as possible without going through the setup tasks. If you prefer step by step instructions to build the app, choose [Build from scratch](storage-quickstart-blobs-java.md?pivots=blob-storage-quickstart-scratch).
+> 
+> ::: zone-end
+> 
+> Get started with the Azure Blob Storage client library for Java to manage blobs and containers.
+> 
+> ::: zone pivot="blob-storage-quickstart-scratch"
+> 
+> In this article, you follow steps to install the package and try out example code for basic tasks.
+> 
+> ::: zone-end
+> 
+> ::: zone pivot="blob-storage-quickstart-template"
+> 
+> In this article, you use the [
+
+**[E4]** (azure/Blob Storage :: Quickstart: Azure Blob Storage client library for Python > Setting up > Initialize the Azure Developer CLI template and deploy resources)
+
+> ) installed, you can create a storage account and run the sample code with just a few commands. You can run the project in your local development environment, or in a [DevContainer](https://code.visualstudio.com/docs/devcontainers/containers). [AZURE > Blob Storage > Quickstart: Azure Blob Storage client library for Python > Setting up > Initialize the Azure Developer CLI template and deploy resources] From an empty directory, follow these steps to initialize the `azd` template, provision Azure resources, and get started with the code:
+> 
+> - Clone the quickstart repository assets from GitHub and initialize the template locally:
+> 
+>     
+> [CODE_BLOCK_3]
+> 
+> 
+>     You'll be prompted for the following information:
+> 
+>     - **Environment name**: This value is used as a prefix for all Azure resources created by Azure Developer CLI. The name must be unique across all Azure subscriptions and must be between 3 and 24 characters long. The name can contain numbers and lowercase letters only.
+> 
+> - Log in to Azure:
+> 
+>     
+> [CODE_BLOCK_4]
+> 
+> - Provision and deploy the resources to Azure:
+> 
+>     
+> [CODE_BLOCK_5]
+> 
+> 
+>     You'll be prompted for the following information:
+> 
+>     - **Subscription**: The Azure subscription that your resources are deployed to.
+>     - **Location**: The Azure region where your resources are deployed.
+> 
+>     The deployment might take a few minutes to complete. The output from the `azd up` command includes the name of the newly created storage account, which you'll need later to run the code.
+
+**[E5]** (azure/Blob Storage :: Quickstart: Azure Blob Storage client library for Java SE > Setting up > Initialize the Azure Developer CLI template and deploy resources)
+
+> ) installed, you can create a storage account and run the sample code with just a few commands. You can run the project in your local development environment, or in a [DevContainer](https://code.visualstudio.com/docs/devcontainers/containers). [AZURE > Blob Storage > Quickstart: Azure Blob Storage client library for Java SE > Setting up > Initialize the Azure Developer CLI template and deploy resources] From an empty directory, follow these steps to initialize the `azd` template, provision Azure resources, and get started with the code:
+> 
+> - Clone the quickstart repository assets from GitHub and initialize the template locally:
+> 
+>     
+> [CODE_BLOCK_8]
+> 
+> 
+>     You'll be prompted for the following information:
+> 
+>     - **Environment name**: This value is used as a prefix for all Azure resources created by Azure Developer CLI. The name must be unique across all Azure subscriptions and must be between 3 and 24 characters long. The name can contain numbers and lowercase letters only.
+> 
+> - Log in to Azure:
+> 
+>     
+> [CODE_BLOCK_9]
+> 
+> - Provision and deploy the resources to Azure:
+> 
+>     
+> [CODE_BLOCK_10]
+> 
+> 
+>     You'll be prompted for the following information:
+> 
+>     - **Subscription**: The Azure subscription that your resources are deployed to.
+>     - **Location**: The Azure region where your resources are deployed.
+> 
+>     The deployment might take a few minutes to complete. The output from the `azd up` command includes the name of the newly created storage account, which you'll need later to run the code.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B26. hibrido | granite4.1-8b — q169
+**Pregunta:** Compare Azure App Service and Azure AKS in terms of capabilities and pricing
+
+**Claim:** The choice of tier determines the features available for managing your cluster, with Standard being the default for Automatic SKU clusters ((azure/AKS/Core concepts for Azure Kubernetes Service (AKS) > Pricing tiers))..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/AKS :: Core concepts for Azure Kubernetes Service (AKS) > Pricing tiers)
+
+>  nodes, scaling, security, and other preconfigured settings. AKS Standard provides more control over the cluster configuration, including the ability to manage node pools, scaling, and other settings.
+> For more information, seeAKS Automatic and Standard feature comparison. [AZURE > AKS > Core concepts for Azure Kubernetes Service (AKS) > Pricing tiers] AKS offers three pricing tiers for cluster management: Free, Standard, and Premium. The pricing tier you choose determines the features that are available for managing your cluster.
+> For more information, seePricing tiers for AKS cluster management.
+> 
+> For more information, seeSupported Kubernetes versions in AKS.
+
+**[E2]** (azure/AKS :: Core concepts for Azure Kubernetes Service (AKS) > Pricing tiers)
+
+>  nodes, scaling, security, and other preconfigured settings. AKS Standard provides more control over the cluster configuration, including the ability to manage node pools, scaling, and other settings.
+> For more information, seeAKS Automatic and Standard feature comparison. [AZURE > AKS > Core concepts for Azure Kubernetes Service (AKS) > Pricing tiers] AKS offers three pricing tiers for cluster management: Free, Standard, and Premium. The pricing tier you choose determines the features that are available for managing your cluster.
+> For more information, seePricing tiers for AKS cluster management.
+> 
+> For more information, seeSupported Kubernetes versions in AKS.
+
+**[E3]** (azure/AKS :: Free, Standard, and Premium pricing tiers for Azure Kubernetes Service (AKS) cluster management > AKS pricing tiers comparison)
+
+> Standard tier, and thePremium tier.
+> SKU and tier relationship:
+> Base SKU clusters: Can use any of the three pricing tiers (Free, Standard, or Premium).Automatic SKU clusters: Must use the Standard tier (automatically selected during cluster creation). [AZURE > AKS > Free, Standard, and Premium pricing tiers for Azure Kubernetes Service (AKS) cluster management > AKS pricing tiers comparison] The following table compares the Free, Standard, and Premium pricing tiers for AKS cluster management:
+> TierWhen to useSupported cluster typesPricingFeature comparisonFreeâ¢ Development/testing environments.â¢ Learning and evaluation scenarios.â¢ Non-production workloads.â¢ Development clusters or small scale testing environments.â¢ Clusters with fewer than 10 nodes.â¢ Free cluster management.â¢ Pay-as-you-go for resources you consume.â¢ Recommended for clusters with fewer than 10 nodes, but can support up to 1,000 nodes.â¢ Includes all current AKS features.Standardâ¢ Production workloads requiring 99.9-99.95% API server uptime.â¢ Workloads needing financial service level agreement (SLA) coverage.â¢ Default tier for Automatic SKU clusters.â¢ Enterprise-grade or production workloads.â¢ Clusters with up to 5,000 nodes.â¢ Pay-as-you-go for resources you consume.â¢Standard tier cluster management pricing details.â¢ Uptime SLA is enabled by default.â¢ Greater cluster reliability.â¢ Supports up to 5,000 nodes in a cluster.â¢ Includes all current AKS features.Premiumâ¢ Product
+
+**[E4]** (azure/Azure Functions :: Linux container support in Azure Functions > Feature support comparison)
+
+>  of cost. _Best-effort_ support for this hosting scenario is provided only by contributors and by the community. You're responsible for maintaining your own function app containers in a cluster, even when deploying them to Azure Kubernetes Service (AKS). | [AZURE > Azure Functions > Linux container support in Azure Functions > Feature support comparison] The degree to which various features and behaviors of Azure Functions are supported when running your function app in a container depends on the container hosting option you choose.
+> 
+> 
+> [TABLE_0]
+>  
+> | Dedicated GPUs | Yes ([workload profiles](../container-apps/workload-profiles-overview.md)) | Yes ([workload profiles](../container-apps/workload-profiles-overview.md)) | No | No | Yes | 
+> | [Configurable memory/CPU count](../container-apps/workload-profiles-overview.md) | Yes | Yes | No | No | Yes |
+> | "Free grant" option | [Yes](../container-apps/billing.md#consumption-plan) | [Yes](../container-apps/billing.md#consumption-plan) | No | No | No |
+> | Pricing details | [Container Apps billing](../container-apps/billing.md) | [Container Apps billing](../container-apps/billing.md) | [Premium plan billing](./functions-premium-plan.md#billing) | [Dedicated plan billing](./dedicated-plan.md#billing) | [AKS pricing](/azure/aks/free-standard-pricing-tiers) | 
+> | Service name requirements | 2-32 characters: limited to lowercase letters, numbers, and hyphens. Must start with a letter and end with an alphanumeric character. | 2-32 characters: lim
+
+**[E5]** (azure/AKS :: What is Azure Kubernetes Service (AKS)? > Container solutions in Azure)
+
+> , and you only pay for the AKS nodes that run your applications.
+> 
+> NoteAKS isCNCF-certifiedand is compliant with SOC, ISO, PCI DSS, and HIPAA. For more information, see theMicrosoft Azure compliance overview. [AZURE > AKS > What is Azure Kubernetes Service (AKS)? > Container solutions in Azure] Azure offers a range of container solutions designed to accommodate various workloads, architectures, and business needs.
+> Container solutionResource typeAzure Kubernetes ServiceManaged KubernetesAzure Red Hat OpenShiftManaged KubernetesAzure Arc-enabled KubernetesUnmanaged KubernetesAzure Container InstancesManaged Docker container instanceAzure Container AppsManaged Kubernetes
+> For more information comparing the various solutions, see the following resources:
+> Comparing the service models of Azure container solutionsComparing Azure compute service options
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B27. hibrido | granite4.1-8b — q180
+**Pregunta:** What are the main differences between AWS CloudFormation and Azure Resource Manager templates?
+
+**Claim:** To compare AWS CloudFormation and Azure Resource Manager templates, we would need documentation that describes ARM templates from Azure.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: Creating Amazon ECS resources with AWS CloudFormation<a name="creating-resources-with-cloudformation"></a>)
+
+> [AWS > ECS > Creating Amazon ECS resources with AWS CloudFormation<a name="creating-resources-with-cloudformation"></a>] Amazon ECS is integrated with AWS CloudFormation, a service that you can use to model and set up AWS resources with templates that you define\. This way, you can spend less time creating and managing your resources and infrastructure\. Using AWS CloudFormation, you can create a template that describes all the AWS resources that you want, such as specific Amazon ECS clusters\. Then, AWS CloudFormation takes care of provisioning and configuring those resources for you\. 
+> 
+> When you use AWS CloudFormation, you can reuse your template to set up your Amazon ECS resources in a consistent and repeatable manner\. You describe your resources one time, and then provision the same resources again across multiple AWS accounts and AWS Regions\.
+
+**[E2]** (aws/Lambda :: License Summary)
+
+>  [sample-apps](./sample-apps) - Sample applications that demonstrate features and use cases for the AWS Lambda service and managed runtimes.
+> - [templates](./templates) - AWS CloudFormation templates for creating functions and VPC network resources. [AWS > Lambda > License Summary] The sample code within this repo is made available under a modified MIT license. See the [LICENSE](./LICENSE) file.
+
+**[E3]** (aws/Lambda :: License Summary)
+
+>  [sample-apps](./sample-apps) - Sample applications that demonstrate features and use cases for the AWS Lambda service and managed runtimes.
+> - [templates](./templates) - AWS CloudFormation templates for creating functions and VPC network resources. [AWS > Lambda > License Summary] The sample code within this repo is made available under a modified MIT license. See the [LICENSE](./LICENSE) file.
+
+**[E4]** (aws/Lambda :: License Summary)
+
+>  [sample-apps](./sample-apps) - Sample applications that demonstrate features and use cases for the AWS Lambda service and managed runtimes.
+> - [templates](./templates) - AWS CloudFormation templates for creating functions and VPC network resources. [AWS > Lambda > License Summary] The sample code within this repo is made available under a modified MIT license. See the [LICENSE](./LICENSE) file.
+
+**[E5]** (aws/ECS :: Creating Amazon ECS resources with AWS CloudFormation<a name="creating-resources-with-cloudformation"></a> > Amazon ECS and AWS CloudFormation templates<a name="working-with-templates"></a>)
+
+>  
+> 
+> When you use AWS CloudFormation, you can reuse your template to set up your Amazon ECS resources in a consistent and repeatable manner\. You describe your resources one time, and then provision the same resources again across multiple AWS accounts and AWS Regions\. [AWS > ECS > Creating Amazon ECS resources with AWS CloudFormation<a name="creating-resources-with-cloudformation"></a> > Amazon ECS and AWS CloudFormation templates<a name="working-with-templates"></a>] To provision and configure resources for Amazon ECS and related services, make sure that you're familiar with [AWS CloudFormation templates](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-guide.html)\. AWS CloudFormation templates are text files in the JSON or YAML format that describe the resources that you want to provision in your AWS CloudFormation stacks\. If you're unfamiliar with either the JSON or YAML format, or both, you can use AWS CloudFormation Designer to get started using AWS CloudFormation templates\. For more information, see [What is AWS CloudFormation Designer?](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/working-with-templates-cfn-designer.html) in the *AWS CloudFormation User Guide*\.
+> 
+> Amazon ECS supports creating clusters, task definitions, services, and task sets  in AWS CloudFormation\. The following examples demonstrate how to create resources with these templates using the AWS CLI\. You can also create these resources using the AWS CloudFormat
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B28. hibrido | qwen3.5-9b — q082
+**Pregunta:** How to configure networking for Azure App Service?
+
+**Claim:** Automated Deployment Configuration: Set the [CODE] app setting to the name of the file share ].
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Azure Functions :: How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Deployment templates](#tab/templates))
+
+> 't have permissions to configure networking or you haven't fully prepared your network, select **Configure networking after creation** in the **Networking** tab. You can configure networking for your new function app in the portal under **Settings** > **Networking**. [AZURE > Azure Functions > How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Deployment templates](#tab/templates)] Use Bicep files or Azure Resource Manager (ARM) templates to create a secured function app and storage account resources. When you create a secured storage account in an automated deployment, you must set the `vnetContentShareEnabled` site property, create the file share as part of your deployment, and set the `WEBSITE_CONTENTSHARE` app setting to the name of the file share. For more information, including links to example deployments, see [Secured deployments](functions-infrastructure-as-code.md?pivots=premium-plan#secured-deployments).
+> 
+> ---
+
+**[E2]** (azure/Azure Functions :: How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Deployment templates](#tab/templates))
+
+> 't have permissions to configure networking or you haven't fully prepared your network, select **Configure networking after creation** in the **Networking** tab. You can configure networking for your new function app in the portal under **Settings** > **Networking**. [AZURE > Azure Functions > How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Deployment templates](#tab/templates)] Use Bicep files or Azure Resource Manager (ARM) templates to create a secured function app and storage account resources. When you create a secured storage account in an automated deployment, you must set the `vnetContentShareEnabled` site property, create the file share as part of your deployment, and set the `WEBSITE_CONTENTSHARE` app setting to the name of the file share. For more information, including links to example deployments, see [Secured deployments](functions-infrastructure-as-code.md?pivots=premium-plan#secured-deployments).
+> 
+> ---
+
+**[E3]** (azure/Azure Functions :: Tutorial: Establish Azure Functions private site access > Configure access restrictions)
+
+>  to provision and deploy the function app. [AZURE > Azure Functions > Tutorial: Establish Azure Functions private site access > Configure access restrictions] The next step is to configure [access restrictions](../app-service/app-service-ip-restrictions.md) to ensure only resources on the virtual network can invoke the function.
+> 
+> [Private site](functions-networking-options.md#private-endpoints) access is enabled by creating an Azure Virtual Network [service endpoint](../virtual-network/virtual-network-service-endpoints-overview.md) between the function app and the specified virtual network. Access restrictions are implemented via service endpoints. Service endpoints ensure only traffic originating from within the specified virtual network can access the designated resource. In this case, the designated resource is the Azure Function.
+> 
+> 1. Within the function app, select the **Networking** link under the _Settings_ section header.
+> 1. The _Networking_ page is the starting point to configure Azure Front Door, the Azure CDN, and also Access Restrictions.
+> 1. Select **Configure Access Restrictions** to configure private site access.
+> 1. On the _Access Restrictions_ page, you see only the default restriction in place. The default doesn't place any restrictions on access to the function app.  Select **Add rule** to create a private site access restriction configuration.
+> 1. In the _Add Access Restriction_ pane, provide a _Name_, _Priority_, and _Description_ for the new rule.
+> 1. Select 
+
+**[E4]** (azure/Azure Functions :: Tutorial: Establish Azure Functions private site access > Configure access restrictions)
+
+>  to provision and deploy the function app. [AZURE > Azure Functions > Tutorial: Establish Azure Functions private site access > Configure access restrictions] The next step is to configure [access restrictions](../app-service/app-service-ip-restrictions.md) to ensure only resources on the virtual network can invoke the function.
+> 
+> [Private site](functions-networking-options.md#private-endpoints) access is enabled by creating an Azure Virtual Network [service endpoint](../virtual-network/virtual-network-service-endpoints-overview.md) between the function app and the specified virtual network. Access restrictions are implemented via service endpoints. Service endpoints ensure only traffic originating from within the specified virtual network can access the designated resource. In this case, the designated resource is the Azure Function.
+> 
+> 1. Within the function app, select the **Networking** link under the _Settings_ section header.
+> 1. The _Networking_ page is the starting point to configure Azure Front Door, the Azure CDN, and also Access Restrictions.
+> 1. Select **Configure Access Restrictions** to configure private site access.
+> 1. On the _Access Restrictions_ page, you see only the default restriction in place. The default doesn't place any restrictions on access to the function app.  Select **Add rule** to create a private site access restriction configuration.
+> 1. In the _Add Access Restriction_ pane, provide a _Name_, _Priority_, and _Description_ for the new rule.
+> 1. Select 
+
+**[E5]** (azure/AKS :: Configure Azure CNI networking in Azure Kubernetes Service (AKS) > Configure networking)
+
+> , install the Azure CLI extension on first use. For more information about extensions, seeUse and manage extensions with the Azure CLI.Runaz versionto find the version and dependent libraries that are installed. To upgrade to the latest version, runaz upgrade. [AZURE > AKS > Configure Azure CNI networking in Azure Kubernetes Service (AKS) > Configure networking] For information on planning IP addresses, seeIP address planning for your Azure Kubernetes Service clusters.
+> Azure portalAzure PowerShellAzure CLISign in to theAzure portal.On the Azure portal home page, selectCreate a resource.UnderCategories, selectContainers>Azure Kubernetes Service (AKS).On theBasicstab, configure the following settings:UnderProject details:Subscription: Select your Azure subscription.Resource group: SelectCreate new, enter a resource group name (such astest-rg), and then selectOk.UnderCluster details:Kubernetes cluster name: Enter a cluster name, such asaks-cluster.Region: SelectEast US 2.SelectNext>Nextto get to theNetworkingtab.ForContainer networking, selectAzure CNI Node Subnet.SelectReview + create>Create.When you create an AKS cluster by using Azure PowerShell, you can also configure Azure CNI networking.UseNew-AzAksClusterto create an AKS cluster with default settings and Azure CNI networking:## Create a resource group for the AKS cluster. ##
+> $rg = @{
+>     Name = "test-rg"
+>     Location = "eastus2"
+> }
+> New-AzResourceGroup @rg
+> 
+> $net = @{
+>       NetworkPlugin = "azure"
+>       ResourceGroupName = "
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B29. hibrido | granite4.1-8b — q175
+**Pregunta:** What is the equivalent of AWS IAM in Azure and GCP?
+
+**Claim:** Azure: Azure AD + RBAC.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/Cloud Functions :: Authorize access with IAM)
+
+> [GCP > Cloud Functions > Authorize access with IAM] You useIdentity and Access Management (IAM)to authorize identities to perform
+> administrative actions on functions created using theCloud Functions v2 API—for example, usinggcloud functions, the REST API, or Terraform. Administration actions include
+> creating, updating, and deleting functions. For information about
+> IAM access for functions created with Cloud Run, seeAccess control with IAM.
+> In IAM, you grantprincipals(the identities you want
+> to enable, usually a user or service account email) the appropriate
+> IAMroleson the function or
+> project. These roles includepermissionsthat define the actions the
+> principal is allowed to do.
+
+**[E2]** (gcp/GKE :: Learning Path: Scalable applications - ScalingStay organized with collectionsSave and categorize content based on your preferences. > Set up custom metrics collection)
+
+> .io/gcp-service-account=scalable-apps@PROJECT_ID.iam.gserviceaccount.comThis configuration allows Pods that use thedefaultKubernetes service
+> account in thedefaultnamespace to access the same Google Cloud
+> resources as the IAM service account. [GCP > GKE > Learning Path: Scalable applications - ScalingStay organized with collectionsSave and categorize content based on your preferences. > Set up custom metrics collection] You can configure the Horizontal Pod Autoscaler to use basic built-in Kubernetes
+> CPU and memory metrics, or you can use custom metrics from Cloud Monitoring
+> like HTTP requests per second or the quantity ofSELECTstatements. Custom
+> metrics can work without application changes, and give your cluster more insight
+> into the overall performance and needs of the application. In this tutorial, you
+> learn how to use both the built-in and custom metrics.
+> To allow Horizontal Pod Autoscaler to read custom metrics from
+> Monitoring, you must install theCustom Metrics - Stackdriver Adapteradapter in your cluster.Deploy the custom metrics Stackdriver adapter to your cluster:kubectlapply-fhttps://raw.githubusercontent.com/GoogleCloudPlatform/k8s-stackdriver/master/custom-metrics-stackdriver-adapter/deploy/production/adapter.yamlTo allow the Stackdriver adapter to get custom metrics from your cluster,
+> you use Workload Identity Federation for GKE. This approach uses an IAM
+> service account that has permissions to read monitoring metrics.Grant the IAM service account theroles/monitori
+
+**[E3]** (aws/ECS :: Related services<a name="welcome-related"></a>)
+
+> [AWS > ECS > Related services<a name="welcome-related"></a>] Amazon ECS can be used along with the following AWS services:
+> 
+> **AWS Identity and Access Management**  
+> AWS Identity and Access Management \(IAM\) is an access management service that helps you securely control access to AWS resources\. You can use IAM to control who's authenticated \(signed in\) and authorized \(has permissions\) to view or perform specific actions on resources\. In Amazon ECS, you can use IAM to control access at the container instance level using IAM roles\. You can also use it to control access at the task level using IAM task roles\. For more information, see [Identity and Access Management for Amazon Elastic Container Service](security-iam.md)\. 
+> 
+> **Amazon EC2 Auto Scaling**  
+> Auto Scaling is a service that sets up automatic scaling for your tasks\. The scaling is based on user\-defined policies, health status checks, and schedules\. You can use Auto Scaling alongside a Fargate task within a service to scale in response to a number of metrics\. Or, alternatively, you can use it with an EC2 task to scale the container instances within your cluster\. For more information, see [Service auto scaling](service-auto-scaling.md)\.
+> 
+> **Elastic Load Balancing**  
+> The Elastic Load Balancing service automatically distributes incoming application traffic across the tasks in your Amazon ECS service\. You can use it to achieve greater levels of fault tolerance in your applications\. At the same time, you can 
+
+**[E4]** (aws/ECS :: ECS Anywhere IAM role<a name="iam-role-ecsanywhere"></a> > Checking for the ECS Anywhere \(`ecsAnywhereRole`\) in the IAM console<a name="procedure-check-ecsanywhere-role"></a>)
+
+> When registering an on\-premise server or virtual machine \(VM\) to your cluster, the server or VM requires an IAM role to communicate with AWS APIs\. You only need to create this IAM role once per AWS account\. [AWS > ECS > ECS Anywhere IAM role<a name="iam-role-ecsanywhere"></a> > Checking for the ECS Anywhere \(`ecsAnywhereRole`\) in the IAM console<a name="procedure-check-ecsanywhere-role"></a>] 1. Open the IAM console at [https://console\.aws\.amazon\.com/iam/](https://console.aws.amazon.com/iam/)\.
+> 
+> 1. In the navigation pane, choose **Roles**\. 
+> 
+> 1. In the search box, enter `ecsAnywhereRole`\. If the role does exist, choose the role to view the attached policies\.
+> 
+> 1. On the **Permissions** tab, verify that the **AmazonEC2ContainerServiceforEC2Role** and **AmazonSSMManagedInstanceCore** is attached to the role\.
+> 
+>    1. Choose **Add Permissions**, **Attach policies**\.
+> 
+>    1. To narrow the available policies to attach, for **Filter**, enter **AmazonEC2ContainerServiceforEC2Role** and **AmazonSSMManagedInstanceCore**\.
+> 
+>    1. Check the box to the left of the **AmazonEC2ContainerServiceforEC2Role** and **AmazonSSMManagedInstanceCore** policy, and then choose **Attach policy**\.
+> 
+> 1. Choose **Trust relationships**\.
+> 
+> 1. Verify that the trust relationship contains the following policy\. If the trust relationship matches the policy below, choose **Cancel**\. If the trust relationship does not match, choose **Edit trust policy**, copy the policy into the **Policy Document** win
+
+**[E5]** (aws/ECS :: Identity and Access Management for Amazon Elastic Container Service<a name="security-iam"></a>)
+
+> [AWS > ECS > Identity and Access Management for Amazon Elastic Container Service<a name="security-iam"></a>] AWS Identity and Access Management \(IAM\) is an AWS service that helps an administrator securely control access to AWS resources\. IAM administrators control who can be *authenticated* \(signed in\) and *authorized* \(have permissions\) to use Amazon ECS resources\. IAM is an AWS service that you can use with no additional charge\.
+> 
+> **Topics**
+> + [Audience](#security_iam_audience)
+> + [Authenticating with identities](#security_iam_authentication)
+> + [Managing access using policies](#security_iam_access-manage)
+> + [How Amazon Elastic Container Service works with IAM](security_iam_service-with-iam.md)
+> + [Identity\-based policy examples for Amazon Elastic Container Service](security_iam_id-based-policy-examples.md)
+> + [AWS managed policies for Amazon Elastic Container Service](security-iam-awsmanpol.md)
+> + [Using service\-linked roles for Amazon ECS](using-service-linked-roles.md)
+> + [Amazon ECS task execution IAM role](task_execution_IAM_role.md)
+> + [Task IAM role](task-iam-roles.md)
+> + [Additional configuration for Windows IAM roles for tasks](windows_task_IAM_roles.md)
+> + [Amazon ECS container instance IAM role](instance_IAM_role.md)
+> + [ECS Anywhere IAM role](iam-role-ecsanywhere.md)
+> + [Amazon ECS CodeDeploy IAM Role](codedeploy_IAM_role.md)
+> + [Amazon ECS CloudWatch Events IAM Role](CWE_IAM_role.md)
+> + [Grant permission to tag resources on creation](supported-iam-actions-tagging.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B30. lexico | mistral-7b-instruct — q085
+**Pregunta:** How to configure networking for Azure Virtual Network?
+
+**Claim:** Configure service endpoints on the destination service..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Azure Functions :: How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Azure portal](#tab/portal))
+
+> You can create a function app, along with a new storage account that is secured behind a virtual network. The following sections show you how to create these resources by using either the Azure portal or by using deployment templates. [AZURE > Azure Functions > How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Azure portal](#tab/portal)] Complete the steps in [Create a function app in a Premium plan](functions-create-vnet.md#create-a-function-app-in-a-premium-plan). This section of the virtual networking tutorial shows you how to create a function app that connects to storage over private endpoints.
+> 
+> > [!NOTE]
+> > When you create your function app in the Azure portal, you can also choose an existing secured storage account in the **Storage** tab. However, you must configure the appropriate networking on the function app so that it can connect through the virtual network used to secure the storage account. If you don't have permissions to configure networking or you haven't fully prepared your network, select **Configure networking after creation** in the **Networking** tab. You can configure networking for your new function app in the portal under **Settings** > **Networking**.
+
+**[E2]** (azure/Virtual Network :: What is Azure Virtual Network? > Virtual networks and availability zones)
+
+> increase certain networking limits](/azure/azure-portal/supportability/networking-quota-requests). For more information, see [Networking limits](../azure-resource-manager/management/azure-subscription-service-limits.md#azure-networking-limits). [AZURE > Virtual Network > What is Azure Virtual Network? > Virtual networks and availability zones] Virtual networks and subnets span all availability zones in a region. You don't need to divide them by availability zones to accommodate zonal resources. For example, if you configure a zonal VM, you don't have to take into consideration the virtual network when selecting the availability zone for the VM. The same is true for other zonal resources.
+
+**[E3]** (azure/Azure Functions :: Azure Functions networking options > Inbound networking features > Service endpoints)
+
+> outbound calls to private endpoints](#private-endpoints). For more details on using private endpoints with the storage account for your function app, visit [restrict your storage account to a virtual network](#restrict-your-storage-account-to-a-virtual-network). [AZURE > Azure Functions > Azure Functions networking options > Inbound networking features > Service endpoints] Using service endpoints, you can restrict many Azure services to selected virtual network subnets to provide a higher level of security. Regional virtual network integration enables your function app to reach Azure services that are secured with service endpoints. This configuration is supported on all [plans](functions-scale.md#networking-features) that support virtual network integration. Follow these steps to access a secured service endpoint:
+> 
+> 1. Configure regional virtual network integration with your function app to connect to a specific subnet.
+> 1. Go to the destination service and configure service endpoints against the integration subnet.
+> 
+> To learn more, see [Virtual network service endpoints](../virtual-network/virtual-network-service-endpoints-overview.md).
+
+**[E4]** (azure/Virtual Network :: Windows VMs with the Microsoft Azure Network Adapter > Check the status of MANA support > Hardware check)
+
+>  On the **Networking settings** page, for **Network Interface**, select your NIC.
+> 1. On the **NIC Overview** pane, under **Essentials**, note whether **Accelerated Networking** is set to **Enabled** or **Disabled**. [AZURE > Virtual Network > Windows VMs with the Microsoft Azure Network Adapter > Check the status of MANA support > Hardware check] When you enable Accelerated Networking, you can identify the underlying MANA NIC as a PCI device in the virtual machine.
+> 
+> > [!NOTE]
+> > When you configure multiple NICs on MANA-supported hardware, there's still only one PCI Express (PCIe) Virtual Function (VF) assigned to the VM. MANA is designed such that all VM NICs interact with the same PCIe VF. Because network resource limits are set at the level of the VM type, this configuration has no effect on performance.
+
+**[E5]** (azure/AKS :: Configure Azure CNI Overlay networking in Azure Kubernetes Service (AKS) > About Azure CNI Overlay AKS clusters with dual-stack networking)
+
+>  \
+>   --resource-group $RESOURCE_GROUP \
+>   --cluster-name $CLUSTER_NAME \
+>   --name $NODE_POOL_NAME \
+>   --node-count 1 \
+>   --mode system \
+>   --vnet-subnet-id $SUBNET_RESOURCE_ID [AZURE > AKS > Configure Azure CNI Overlay networking in Azure Kubernetes Service (AKS) > About Azure CNI Overlay AKS clusters with dual-stack networking] You can deploy your Azure CNI Overlay AKS clusters in a dual-stack mode with an Azure virtual network. In this configuration, nodes receive both an IPv4 and IPv6 address from the Azure virtual network subnet. Pods receive an IPv4 and IPv6 address from a different address space to the Azure virtual network subnet of the nodes. Network address translation (NAT) is then configured so that the pods can reach resources on the Azure virtual network. The source IP address of the traffic is NAT'd to the node's primary IP address of the same family (IPv4 to IPv4andIPv6 to IPv6).
+> NoteYou can also deploy dual-stack networking clusters by using Azure CNI Powered by Cilium. For more information, seeDual-stack networking with Azure CNI Powered by Cilium.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B31. denso | granite4.1-8b — q120
+**Pregunta:** How to deploy a workload on Google Cloud GKE?
+
+**Claim:** Wait for the API and related services to be enabled..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/GKE :: Create a cluster and deploy a workload using Terraform)
+
+> [GCP > GKE > Create a cluster and deploy a workload using Terraform] AutopilotA Kubernetesclusterprovides compute, storage, networking,
+> and other services for applications, similar to a virtual data center. Apps and
+> their associated services that run in Kubernetes are calledworkloads.This tutorial lets you quickly see a running Google Kubernetes Engine cluster and sample workload, all set up using Terraform. You can then explore the workload in the Google Cloud console before going on to ourmore in-depth learning path, or to start planning and creating your own production-ready cluster. This tutorial assumes that you are already familiar with Terraform.If you'd prefer to set up your sample cluster and workload in the Google Cloud console, seeCreate a cluster in the Google Cloud console.
+> Before you beginTake the following steps to enable the Kubernetes Engine API:Sign in to your Google Cloud account. If you're new to
+>         Google Cloud,create an accountto evaluate how our products perform in
+>         real-world scenarios. New customers also get $300 in free credits to
+>         run, test, and deploy workloads.Installthe Google Cloud CLI.If you're using an external identity provider (IdP), you must firstsign in to the gcloud CLI with your federated identity.Toinitializethe gcloud CLI, run the following command:gcloudinitCreate or select a Google Cloud project.Roles required to select or create a projectSelect a project: Selecting a project doesn't require a specific
+>       IAM ro
+
+**[E2]** (gcp/GKE :: Run a large-scale workload with flex-start with queued provisioningStay organized with collectionsSave and categorize content based on your preferences. > Before you begin)
+
+>  workloads are required to run across multiple nodes simultaneously.For smaller workloads that can run on a single node, useFlex-start VMs.
+> For more information about GPU provisioning in GKE, seeObtain
+> accelerators for AI workloads. [GCP > GKE > Run a large-scale workload with flex-start with queued provisioningStay organized with collectionsSave and categorize content based on your preferences. > Before you begin] Before you start, make sure that you have performed the following tasks:
+> Enable
+>     
+>     
+>     
+>     
+>     the Google Kubernetes Engine API.Enable Google Kubernetes Engine APIIf you want to use the Google Cloud CLI for this task,installand theninitializethe
+>     gcloud CLI. If you previously installed the gcloud CLI, get the latest
+>     version by running thegcloud components updatecommand. Earlier gcloud CLI versions might not support running the commands in this document.
+> Ensure that you have a GKE cluster in version 1.32.2-gke.1652000 or later.Ensure that you have enoughpreemptible quotafor the VMs that will be provisioned.Ensure that youmanage disruptions in workloads that use Dynamic Workload Schedulerto prevent workload disruption.Ensure that you're familiar with thelimitations of flex-start with queued provisioning.When using a Standard cluster, ensure that you maintain at least one
+> node pool without flex-start with queued provisioning enabled for the cluster to
+> function correctly.
+
+**[E3]** (gcp/GKE :: GKE overviewStay organized with collectionsSave and categorize content based on your preferences. > How GKE works)
+
+>  gaming, and financial services. Examples of workloads you can run include:
+> AI and ML operationsData processing at scaleScalableonline games platformsReliable applications under heavy load
+> For case studies by industry and application, refer toGoogle Cloud customers. [GCP > GKE > GKE overviewStay organized with collectionsSave and categorize content based on your preferences. > How GKE works] A GKE environment consists ofnodes, which areCompute Engine
+> virtual machines (VMs), that are grouped together to form acluster. You
+> package your apps (also calledworkloads) into containers. You deploy sets
+> of containers asPodsto your nodes. You use the Kubernetes API to interact
+> with your workloads, including administering, scaling, and monitoring.
+> Kubernetes clusters have a set of management nodes called thecontrol plane,
+> which run system components such as the Kubernetes API server. In
+> GKE, Google Cloud manages the
+> control plane and system components for you. In Autopilot mode, which
+> is the recommended way to run GKE,
+> Google Cloud also manages your worker nodes.
+> Google Cloud automatically upgrades
+> component versions for improved stability and security, ensuring high
+> availability, and ensuring integrity of data stored in the cluster's persistent
+> storage.
+> For more information, refer toGKE cluster architecture.
+> Best practice:If you run your workloads in VMs, consider usingMigrate for GKEto
+> containerize the workloads without having to rewrite apps or modify source code.
+
+**[E4]** (gcp/GKE :: Create a cluster and deploy a workload in the Google Cloud console > Before you begin)
+
+>  nextExplore your cluster and workloadto learn about the some of the key workload settings and resources that
+> you deployed.Try our more in-depthLearning path: Scalable apps.Learn how to get started with real life cluster administration in ourCluster administration overview. [GCP > GKE > Create a cluster and deploy a workload in the Google Cloud console > Before you begin] Take the following steps to enable the Kubernetes Engine API:
+> Visit theKubernetes Engine pagein the Google Cloud console.Create or select a project.Wait for the API and related services to be enabled.
+>     This can take several minutes.Verify that billing is enabled for your Google Cloud project.
+
+**[E5]** (gcp/GKE :: Create a cluster and deploy a workload in the Google Cloud console)
+
+> [GCP > GKE > Create a cluster and deploy a workload in the Google Cloud console] AutopilotA Kubernetesclusterprovides compute, storage, networking,
+> and other services for applications, similar to a virtual data center. Apps and
+> their associated services that run in Kubernetes are calledworkloads.This tutorial lets you quickly see a running Google Kubernetes Engine cluster and sample workload, all set up using the Google Cloud console. You can then explore the workload in the Google Cloud console before going on to ourmore in-depth learning path, or to start planning and creating your own production-ready cluster.If you'd prefer to set up your sample cluster and workload by using Terraform, seeCreate a cluster with Terraform.To follow step-by-step guidance for this task directly in the
+>   Google Cloud console, clickGuide me:Guide me
+> Before you beginTake the following steps to enable the Kubernetes Engine API:Visit theKubernetes Engine pagein the Google Cloud console.Create or select a project.Wait for the API and related services to be enabled.
+>     This can take several minutes.Verify that billing is enabled for your Google Cloud project.Required rolesMake sure that you have the following role or roles on the project:
+>           
+>           Compute Admin, Kubernetes Engine Admin, Service Account UserCheck for the rolesIn the Google Cloud console, go to theIAMpage.Go to IAMSelect the project.In thePrincipalcolumn, find all rows that identify you or a group that
+>                 you
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B32. hibrido | qwen3.5-9b — q041
+**Pregunta:** What regions support Azure Virtual Network?
+
+**Claim:** Virtual Network TAP - Supported in these regions: UK South.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Virtual Network :: Virtual network routing appliance overview > Limitations (public preview))
+
+>  in a limited set of Azure regions. The current public preview regions include:  
+> - East US  
+> - East US 2  
+> - West Central US  
+> - West US  
+> - North Europe  
+> - UK South  
+> - West Europe  
+> - East Asia [AZURE > Virtual Network > Virtual network routing appliance overview > Limitations (public preview)] - This preview is intended for testing, evaluation, and feedback purposes. Don't use the preview for production workloads.
+> 
+> - Each subscription can have up to two virtual network routing appliance instances. For more instances per subscriptions, please request in [this form](https://forms.office.com/r/kqEKRr5mpB).
+> 
+> - During preview, each virtual network appliance supports up to 200 Gbps of configurable bandwidth.
+> 
+> - Select regions offer the preview: West US, East US, East Asia, North Europe, West Europe, East US 2, West Central US, and UK South.
+> 
+> - Global and cross-region Private Endpoint aren't supported.
+> 
+> - IPv4 is supported. IPv6 isn't in scope for this public preview.
+> 
+> - During preview, the virtual network appliance instance doesn't provide metrics or logs.
+> 
+> - The preview is free. Advance notice is provided before billing is enabled.
+> 
+> - During preview, client tools such as Azure CLI, PowerShell, and Terraform aren't supported.
+
+**[E2]** (azure/Virtual Network :: Virtual network TAP > Supported Regions)
+
+>  encryption enabled can't be set as mirroring source.
+> - Virtual network TAP doesn't support IPv6.
+> - [Temporary] When a VM is added or removed as a source, the VM might experience network downtime (up to 60 seconds). [AZURE > Virtual Network > Virtual network TAP > Supported Regions] - Asia East
+> - US West Central
+> - UK South
+> - US East
+> - India Central
+> - Germany West Central
+> - US Central
+> 
+> - Australia East
+> - Korean Central
+> - Canada Central
+
+**[E3]** (azure/Virtual Network :: Azure Virtual Network frequently asked questions (FAQ) > Virtual network service endpoints > Can an Azure service have both a virtual network ACL and an IP firewall?)
+
+>  US or East US region, and virtual networks are in multiple regions, the virtual networks can access Azure Cosmos DB.
+> 
+> Azure SQL is an exception and is regional in nature. Both the virtual network and the Azure service need to be in the same region. [AZURE > Virtual Network > Azure Virtual Network frequently asked questions (FAQ) > Virtual network service endpoints > Can an Azure service have both a virtual network ACL and an IP firewall?] Yes. A virtual network ACL and an IP firewall can coexist. The features complement each other to help ensure isolation and security.
+> 
+> Deletion of virtual networks and deletion of subnets are independent operations. They're supported even when you turn on service endpoints for Azure services.
+> 
+> If you set up virtual network ACLs for Azure services, the ACL information associated with those Azure services is disabled when you delete a virtual network or subnet that has virtual network service endpoints turned on.
+
+**[E4]** (azure/Virtual Network :: Virtual network routing appliance overview > Preview region availability)
+
+>  high bandwidth without requiring an additional load balancer in front of it.
+> As such, you do not need to place a load balancer in front of the appliance. If you do so, the load balancer will not forward traffic to the appliance. [AZURE > Virtual Network > Virtual network routing appliance overview > Preview region availability] During the public preview, virtual network routing appliance is available in a limited set of Azure regions. The current public preview regions include:  
+> - East US  
+> - East US 2  
+> - West Central US  
+> - West US  
+> - North Europe  
+> - UK South  
+> - West Europe  
+> - East Asia
+
+**[E5]** (azure/Virtual Network :: Create a virtual network routing appliance > Register for the public preview (AFEC) and get approval > Register your subscription by using Azure Feature Exposure Control (AFEC))
+
+> 2).
+> 
+> The virtual network routing appliance public preview is limited to the following regions:
+> 
+> - West US  
+> - East US  
+> - East Asia  
+> - North Europe  
+> - West Europe  
+> - East US 2  
+> - West Central US  
+> - UK South [AZURE > Virtual Network > Create a virtual network routing appliance > Register for the public preview (AFEC) and get approval > Register your subscription by using Azure Feature Exposure Control (AFEC)] AFEC controls preview access to the virtual network routing appliance. The AFEC feature name for enabling the virtual network routing appliance preview is:  
+> - Microsoft.network/AllowVirtualNetworkAppliance
+> 
+> Register for the preview by activating the AFEC flag in the Azure portal.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B33. hibrido | qwen3.5-9b — q093
+**Pregunta:** How to implement backup and disaster recovery for Azure AKS?
+
+**Claim:** Important Note: Before proceeding, ensure that the application isn't writing data to the source disk.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/AKS :: Azure storage CSI driver and volume provisioning > Learn about volume snapshots > Create a volume snapshot)
+
+>  the following scenarios:
+> Backup and restore: Create point-in-time backups of stateful application data and restore when
+> needed.Data cloning: Clone existing volumes to create new persistent volumes with the same data.Disaster recovery: Quickly recover from data loss or corruption. [AZURE > AKS > Azure storage CSI driver and volume provisioning > Learn about volume snapshots > Create a volume snapshot] NoteBefore proceeding, ensure that the application isn't writing data to the source disk.
+> For an example of this capability, create avolume snapshot classwith thekubectl applycommand:kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/azuredisk-csi-driver/master/deploy/example/snapshot/storageclass-azuredisk-snapshot.yamlThe output of the command resembles the following example:volumesnapshotclass.snapshot.storage.k8s.io/csi-azuredisk-vsc createdCreate avolume snapshotfrom the PVC that was created earlier in this article.kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/azuredisk-csi-driver/master/deploy/example/snapshot/azuredisk-volume-snapshot.yamlThe output of the command resembles the following example:volumesnapshot.snapshot.storage.k8s.io/azuredisk-volume-snapshot createdTo verify that the snapshot was created correctly, run the following command:kubectl describe volumesnapshot azuredisk-volume-snapshotThe output of the command resembles the following example:Name:         azuredisk-volume-snapshot
+> Namespace:    default
+> Labels:       <none>
+
+**[E2]** (azure/AKS :: Azure storage CSI driver and volume provisioning > Learn about volume snapshots > Create a volume snapshot)
+
+>  the following scenarios:
+> Backup and restore: Create point-in-time backups of stateful application data and restore when
+> needed.Data cloning: Clone existing volumes to create new persistent volumes with the same data.Disaster recovery: Quickly recover from data loss or corruption. [AZURE > AKS > Azure storage CSI driver and volume provisioning > Learn about volume snapshots > Create a volume snapshot] NoteBefore proceeding, ensure that the application isn't writing data to the source disk.
+> For an example of this capability, create avolume snapshot classwith thekubectl applycommand:kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/azuredisk-csi-driver/master/deploy/example/snapshot/storageclass-azuredisk-snapshot.yamlThe output of the command resembles the following example:volumesnapshotclass.snapshot.storage.k8s.io/csi-azuredisk-vsc createdCreate avolume snapshotfrom the PVC that was created earlier in this article.kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/azuredisk-csi-driver/master/deploy/example/snapshot/azuredisk-volume-snapshot.yamlThe output of the command resembles the following example:volumesnapshot.snapshot.storage.k8s.io/azuredisk-volume-snapshot createdTo verify that the snapshot was created correctly, run the following command:kubectl describe volumesnapshot azuredisk-volume-snapshotThe output of the command resembles the following example:Name:         azuredisk-volume-snapshot
+> Namespace:    default
+> Labels:       <none>
+
+**[E3]** (azure/Virtual Machines :: Introduction to Azure managed disks > Backup and disaster recovery options > Snapshots)
+
+> ), Azure Backup, managed disk snapshots, restore points, and Azure Site Recovery. The ideal configuration of backup and disaster recovery options for your needs can vary. To decide which works best for your needs, seeBackup and disaster recovery for Azure managed disks. [AZURE > Virtual Machines > Introduction to Azure managed disks > Backup and disaster recovery options > Snapshots] A managed disk snapshot is a read-only, crash-consistent full copy of a managed disk that's stored as a standard managed disk by default. With snapshots, you can back up your managed disks at any point in time. These snapshots exist independently of the source disk, and you can use them to create new managed disks.
+> To learn how to create managed disk snapshots, seeCreate a snapshot of a virtual hard disk.
+
+**[E4]** (azure/Virtual Machines :: Introduction to Azure managed disks > Backup and disaster recovery options)
+
+>  use to ensure their performance automatically shifts to meet the changing demands of your workload, others require manual adjustment, and other disk types can't do either.
+> To learn about the options each disk type has, seeOverview of options to improve Azure managed disk performance [AZURE > Virtual Machines > Introduction to Azure managed disks > Backup and disaster recovery options] Managed disks support several backup and disaster recovery options. These options include built-in redundancy options (locally redundant storage, and zone-redundant storage), Azure Backup, managed disk snapshots, restore points, and Azure Site Recovery. The ideal configuration of backup and disaster recovery options for your needs can vary. To decide which works best for your needs, seeBackup and disaster recovery for Azure managed disks.
+
+**[E5]** (azure/Virtual Network :: Secure your Virtual Network deployment > Backup and recovery)
+
+>  effective during failure scenarios. This ensures that security mechanisms continue to function properly even when the network experiences stress or partial outages. For more information, see [Azure Chaos Studio](/azure/chaos-studio/chaos-studio-overview). [AZURE > Virtual Network > Secure your Virtual Network deployment > Backup and recovery] Backup and recovery for Virtual Networks focuses on preserving network configurations and ensuring rapid restoration of network connectivity if there's accidental deletion or configuration errors. While virtual networks themselves don't require traditional backups, configuration preservation is critical.
+> 
+> - **Export and protect network configurations**: Use Azure Resource Manager to export virtual network configurations as templates that can be stored and used for disaster recovery. Automate this process using Azure Automation or Azure Pipelines. Use Azure DevOps to securely store and manage your code like custom Azure Policy definitions and Azure Resource Manager templates. Enable Soft-Delete and purge protection in Key Vault to protect keys against accidental or malicious deletion. For more information, see [Export templates](/azure/azure-resource-manager/templates/export-template-portal).
+> 
+> - **Document network architecture**: Maintain comprehensive documentation of your network design, including IP address schemes, routing tables, security group rules, and connectivity requirements. Store this documentation in a secure, accessible lo
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B34. hibrido | granite4.1-8b — q103
+**Pregunta:** How to deploy a workload on Google Cloud Compute Engine?
+
+**Claim:** Ensure the instance's firewall rules allow necessary traffic (e.g., HTTP, HTTPS)..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/GKE :: Create a cluster and deploy a workload in the Google Cloud console > Before you begin > Required roles)
+
+>  enable the Kubernetes Engine API:
+> Visit theKubernetes Engine pagein the Google Cloud console.Create or select a project.Wait for the API and related services to be enabled.
+>     This can take several minutes.Verify that billing is enabled for your Google Cloud project. [GCP > GKE > Create a cluster and deploy a workload in the Google Cloud console > Before you begin > Required roles] Make sure that you have the following role or roles on the project:
+>           
+>           Compute Admin, Kubernetes Engine Admin, Service Account User
+> Check for the rolesIn the Google Cloud console, go to theIAMpage.Go to IAMSelect the project.In thePrincipalcolumn, find all rows that identify you or a group that
+>                 you're included in. To learn which groups you're included in, contact your
+>                 administrator.For all rows that specify or include you, check theRolecolumn to see whether
+>               the list of roles includes the required roles.
+> Grant the rolesIn the Google Cloud console, go to theIAMpage.Go to IAMSelect the project.Clickperson_addGrant access.In theNew principalsfield, enter your user identifier.
+>               
+>               This is typically the email address for a Google Account.ClickSelect a role, then search for the role.To grant additional roles, clickaddAdd
+>               another roleand add each additional role.ClickSave.
+
+**[E2]** (gcp/GKE :: Create a cluster and deploy a workload using Terraform)
+
+> [GCP > GKE > Create a cluster and deploy a workload using Terraform] AutopilotA Kubernetesclusterprovides compute, storage, networking,
+> and other services for applications, similar to a virtual data center. Apps and
+> their associated services that run in Kubernetes are calledworkloads.This tutorial lets you quickly see a running Google Kubernetes Engine cluster and sample workload, all set up using Terraform. You can then explore the workload in the Google Cloud console before going on to ourmore in-depth learning path, or to start planning and creating your own production-ready cluster. This tutorial assumes that you are already familiar with Terraform.If you'd prefer to set up your sample cluster and workload in the Google Cloud console, seeCreate a cluster in the Google Cloud console.
+> Before you beginTake the following steps to enable the Kubernetes Engine API:Sign in to your Google Cloud account. If you're new to
+>         Google Cloud,create an accountto evaluate how our products perform in
+>         real-world scenarios. New customers also get $300 in free credits to
+>         run, test, and deploy workloads.Installthe Google Cloud CLI.If you're using an external identity provider (IdP), you must firstsign in to the gcloud CLI with your federated identity.Toinitializethe gcloud CLI, run the following command:gcloudinitCreate or select a Google Cloud project.Roles required to select or create a projectSelect a project: Selecting a project doesn't require a specific
+>       IAM ro
+
+**[E3]** (gcp/GKE :: Create a cluster and deploy a workload in the Google Cloud console)
+
+> [GCP > GKE > Create a cluster and deploy a workload in the Google Cloud console] AutopilotA Kubernetesclusterprovides compute, storage, networking,
+> and other services for applications, similar to a virtual data center. Apps and
+> their associated services that run in Kubernetes are calledworkloads.This tutorial lets you quickly see a running Google Kubernetes Engine cluster and sample workload, all set up using the Google Cloud console. You can then explore the workload in the Google Cloud console before going on to ourmore in-depth learning path, or to start planning and creating your own production-ready cluster.If you'd prefer to set up your sample cluster and workload by using Terraform, seeCreate a cluster with Terraform.To follow step-by-step guidance for this task directly in the
+>   Google Cloud console, clickGuide me:Guide me
+> Before you beginTake the following steps to enable the Kubernetes Engine API:Visit theKubernetes Engine pagein the Google Cloud console.Create or select a project.Wait for the API and related services to be enabled.
+>     This can take several minutes.Verify that billing is enabled for your Google Cloud project.Required rolesMake sure that you have the following role or roles on the project:
+>           
+>           Compute Admin, Kubernetes Engine Admin, Service Account UserCheck for the rolesIn the Google Cloud console, go to theIAMpage.Go to IAMSelect the project.In thePrincipalcolumn, find all rows that identify you or a group that
+>                 you
+
+**[E4]** (gcp/Compute Engine :: Create and start a Compute Engine instanceStay organized with collectionsSave and categorize content based on your preferences. > Try it for yourself)
+
+> If you're new to Google Cloud, create an account to evaluate how
+>       Compute Engine performs in real-world
+>       scenarios. New customers also get $300 in free credits to run, test, and
+>       deploy workloads.Try Compute Engine free [GCP > Compute Engine > Create and start a Compute Engine instanceStay organized with collectionsSave and categorize content based on your preferences. > Try it for yourself] If you're new to Google Cloud, create an account to evaluate how
+>       Compute Engine performs in real-world
+>       scenarios. New customers also get $300 in free credits to run, test, and
+>       deploy workloads.
+> Try Compute Engine free
+
+**[E5]** (gcp/Compute Engine :: CPU platformsStay organized with collectionsSave and categorize content based on your preferences. > Try it for yourself)
+
+> If you're new to Google Cloud, create an account to evaluate how
+>       Compute Engine performs in real-world
+>       scenarios. New customers also get $300 in free credits to run, test, and
+>       deploy workloads.Try Compute Engine free [GCP > Compute Engine > CPU platformsStay organized with collectionsSave and categorize content based on your preferences. > Try it for yourself] If you're new to Google Cloud, create an account to evaluate how
+>       Compute Engine performs in real-world
+>       scenarios. New customers also get $300 in free credits to run, test, and
+>       deploy workloads.
+> Try Compute Engine free
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B35. denso | granite4.1-8b — q041
+**Pregunta:** What regions support Azure Virtual Network?
+
+**Claim:** Azure Virtual Network Routing Appliance (Public Preview) supports the following regions: East US.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Virtual Network :: Virtual network routing appliance overview > Limitations (public preview))
+
+>  in a limited set of Azure regions. The current public preview regions include:  
+> - East US  
+> - East US 2  
+> - West Central US  
+> - West US  
+> - North Europe  
+> - UK South  
+> - West Europe  
+> - East Asia [AZURE > Virtual Network > Virtual network routing appliance overview > Limitations (public preview)] - This preview is intended for testing, evaluation, and feedback purposes. Don't use the preview for production workloads.
+> 
+> - Each subscription can have up to two virtual network routing appliance instances. For more instances per subscriptions, please request in [this form](https://forms.office.com/r/kqEKRr5mpB).
+> 
+> - During preview, each virtual network appliance supports up to 200 Gbps of configurable bandwidth.
+> 
+> - Select regions offer the preview: West US, East US, East Asia, North Europe, West Europe, East US 2, West Central US, and UK South.
+> 
+> - Global and cross-region Private Endpoint aren't supported.
+> 
+> - IPv4 is supported. IPv6 isn't in scope for this public preview.
+> 
+> - During preview, the virtual network appliance instance doesn't provide metrics or logs.
+> 
+> - The preview is free. Advance notice is provided before billing is enabled.
+> 
+> - During preview, client tools such as Azure CLI, PowerShell, and Terraform aren't supported.
+
+**[E2]** (azure/Virtual Network :: Azure Virtual Network frequently asked questions (FAQ) > Configuration > Can I connect a virtual network to another virtual network in Azure?)
+
+>  and availability zones?](/azure/reliability/availability-zones-overview)
+> 
+> You can connect virtual networks in different regions by using virtual network peering. For details, see [Virtual network peering](virtual-network-peering-overview.md). [AZURE > Virtual Network > Azure Virtual Network frequently asked questions (FAQ) > Configuration > Can I connect a virtual network to another virtual network in Azure?] Yes. You can connect one virtual network to another virtual network by using either:
+> 
+> * Virtual network peering. For details, see [Virtual network peering](virtual-network-peering-overview.md).
+> * An Azure VPN gateway. For details, see [Configure a network-to-network VPN gateway connection](../vpn-gateway/vpn-gateway-howto-vnet-vnet-resource-manager-portal.md?toc=%2fazure%2fvirtual-network%2ftoc.json).
+
+**[E3]** (azure/Virtual Network :: What is Azure Virtual Network? > Virtual networks and availability zones)
+
+> increase certain networking limits](/azure/azure-portal/supportability/networking-quota-requests). For more information, see [Networking limits](../azure-resource-manager/management/azure-subscription-service-limits.md#azure-networking-limits). [AZURE > Virtual Network > What is Azure Virtual Network? > Virtual networks and availability zones] Virtual networks and subnets span all availability zones in a region. You don't need to divide them by availability zones to accommodate zonal resources. For example, if you configure a zonal VM, you don't have to take into consideration the virtual network when selecting the availability zone for the VM. The same is true for other zonal resources.
+
+**[E4]** (azure/Virtual Network :: [Azure portal](#tab/azureportal) > Create a virtual network)
+
+>                           |
+>     | **Resource group**     | Enter *myResourceGroup*                           |
+>     | **Region**             | Select **(US) East US**                           |
+> 
+> 1. Select **Review + create**, and then select **Create**. [AZURE > Virtual Network > [Azure portal](#tab/azureportal) > Create a virtual network] 1. In the portal, search for and select **Virtual networks**.
+> 
+> 1. Select **+ Create**.
+> 
+> 1. On the **Basics** tab of **Create virtual network**, enter or select the following values:
+> 
+>     | Setting                | Value                                             |
+>     |------------------------|---------------------------------------------------|
+>     | **Subscription**       | Select your subscription                          |
+>     | **Resource group**     | Select **myResourceGroup**                        |
+>     | **Virtual network name** | Enter *myVNet*                                  |
+>     | **Region**             | Select **(US) East US**                           |
+> 
+> 1. Select **Review + create**, and then select **Create**.
+
+**[E5]** (azure/Virtual Network :: Virtual network TAP > Virtual network TAP partner solutions > Network packet brokers)
+
+> - Asia East
+> - US West Central
+> - UK South
+> - US East
+> - India Central
+> - Germany West Central
+> - US Central
+> 
+> - Australia East
+> - Korean Central
+> - Canada Central [AZURE > Virtual Network > Virtual network TAP > Virtual network TAP partner solutions > Network packet brokers] [TABLE_1]
+> 
+> [TABLE_2]
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B36. lexico | qwen3.5-9b — q021
+**Pregunta:** What is AWS CloudWatch and what are its main features?
+
+**Claim:** Can monitor Data Lifecycle Manager (DLM) policies.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/EC2 :: Monitor the lifecycle of snapshots and AMIs<a name="dlm-monitor-lifecycle"></a>)
+
+> [AWS > EC2 > Monitor the lifecycle of snapshots and AMIs<a name="dlm-monitor-lifecycle"></a>] You can use the following features to monitor the lifecycle of your snapshots and AMIs\.
+> 
+> **Topics**
+> + [Console and AWS CLI](#monitor-console-cli)
+> + [AWS CloudTrail](#monitor-lifecycle-cloudtrail)
+> + [Monitor your policies using CloudWatch Events](monitor-cloudwatch-events.md)
+> + [Monitor your policies using Amazon CloudWatch](monitor-dlm-cw-metrics.md)
+
+**[E2]** (aws/EC2 :: Monitoring Capacity Reservations<a name="cr-monitor"></a>)
+
+> [AWS > EC2 > Monitoring Capacity Reservations<a name="cr-monitor"></a>] You can use the following features to monitor your Capacity Reservations:
+> 
+> **Topics**
+> + [CloudWatch metrics](capacity-reservation-cw-metrics.md)
+> + [EventBridge events](cr-eventbridge.md)
+> + [Utilization notifications](monitor-cr-utilization.md)
+
+**[E3]** (aws/EC2 :: Create alarms that stop, terminate, reboot, or recover an instance<a name="UsingAlarmActions"></a>)
+
+> [AWS > EC2 > Create alarms that stop, terminate, reboot, or recover an instance<a name="UsingAlarmActions"></a>] Using Amazon CloudWatch alarm actions, you can create alarms that automatically stop, terminate, reboot, or recover your instances\. You can use the stop or terminate actions to help you save money when you no longer need an instance to be running\. You can use the reboot and recover actions to automatically reboot those instances or recover them onto new hardware if a system impairment occurs\.
+> 
+> The `AWSServiceRoleForCloudWatchEvents` service\-linked role enables AWS to perform alarm actions on your behalf\. The first time you create an alarm in the AWS Management Console, the AWS CLI, or the IAM API, CloudWatch creates the service\-linked role for you\.
+> 
+> There are a number of scenarios in which you might want to automatically stop or terminate your instance\. For example, you might have instances dedicated to batch payroll processing jobs or scientific computing tasks that run for a period of time and then complete their work\. Rather than letting those instances sit idle \(and accrue charges\), you can stop or terminate them, which can help you to save money\. The main difference between using the stop and the terminate alarm actions is that you can easily start a stopped instance if you need to run it again later, and you can keep the same instance ID and root volume\. However, you cannot start a terminated instance\. Instead, you must launch a new instance\. W
+
+**[E4]** (aws/ECS :: Rolling update<a name="deployment-type-ecs"></a> > Failure detection methods<a name="deployment-failure-detection"></a>)
+
+>  deployment state change events](ecs_cwe_events.md#ecs_service_deployment_events)\.
+> 
+> In order to take advantage of all the features, use the new console or the AWS CLI to deploy your service\. [AWS > ECS > Rolling update<a name="deployment-type-ecs"></a> > Failure detection methods<a name="deployment-failure-detection"></a>] The rolling update deployment has two methods which provide a way for you to quickly identify when a deployment has failed, and then to optionally roll back the failure to the last working deployment\.
+> + [Deployment circuit breaker](deployment-circuit-breaker.md)
+> + [CloudWatch alarms](deployment-alarm-failure.md)
+> 
+> You can use either method, or both methods together\. When you use both methods together, the deployment is set to failed as soon as the failure criteria for either failure method is met\.
+> 
+> Use the following guidelines to help determine which method to use:
+> + Circuit breaker \- Use this method when you want to stop a deployment when the tasks can't start\.
+> + CloudWatch alarms \- Use this method when you want to stop a deployment based on application metrics\.
+> 
+> For information about how Amazon ECS deployment process, see [Task deployment](https://docs.aws.amazon.com/AmazonECS/latest/bestpracticesguide/service-options.html) in the Amazon ECS *Best Practices Guide*\.
+
+**[E5]** (aws/EC2 :: Monitor your policies using Amazon CloudWatch<a name="monitor-dlm-cw-metrics"></a> > View CloudWatch metrics for your policies<a name="view-metrics"></a> > [ CloudWatch console ])
+
+> \.com/ec2/](https://console.aws.amazon.com/ec2/)\.
+> 
+> 1. In the navigation pane, choose **Lifecycle Manager**\.
+> 
+> 1. Select a policy in the grid and then choose the **Monitoring** tab\.
+> 
+> ------ [AWS > EC2 > Monitor your policies using Amazon CloudWatch<a name="monitor-dlm-cw-metrics"></a> > View CloudWatch metrics for your policies<a name="view-metrics"></a> > [ CloudWatch console ]] **To view metrics using the Amazon CloudWatch console**
+> 
+> 1. Open the CloudWatch console at [https://console\.aws\.amazon\.com/cloudwatch/](https://console.aws.amazon.com/cloudwatch/)\.
+> 
+> 1. In the navigation pane, choose **Metrics**\.
+> 
+> 1. Select the **EBS** namespace and then select **Data Lifecycle Manager metrics**\.
+> 
+> ------
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B37. hibrido | qwen3.5-9b — q021
+**Pregunta:** What is AWS CloudWatch and what are its main features?
+
+**Claim:** Watch a single metric over a time period that you specify.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/EC2 :: What is Amazon EC2?<a name="concepts"></a> > Features of Amazon EC2<a name="ec2-features"></a>)
+
+>  scale up or down to handle changes in requirements or spikes in popularity, reducing your need to forecast traffic\.
+> 
+> For more information about cloud computing, see [What is cloud computing?](https://aws.amazon.com/what-is-cloud-computing/) [AWS > EC2 > What is Amazon EC2?<a name="concepts"></a> > Features of Amazon EC2<a name="ec2-features"></a>] Amazon EC2 provides the following features:
+> + Virtual computing environments, known as *instances*
+> + Preconfigured templates for your instances, known as *Amazon Machine Images \(AMIs\)*, that package the bits you need for your server \(including the operating system and additional software\)
+> + Various configurations of CPU, memory, storage, and networking capacity for your instances, known as *instance types*
+> + Secure login information for your instances using *key pairs* \(AWS stores the public key, and you store the private key in a secure place\)
+> + Storage volumes for temporary data that's deleted when you stop, hibernate, or terminate your instance, known as *instance store volumes*
+> + Persistent storage volumes for your data using Amazon Elastic Block Store \(Amazon EBS\), known as *Amazon EBS volumes*
+> + Multiple physical locations for your resources, such as instances and Amazon EBS volumes, known as *Regions* and *Availability Zones*
+> + A firewall that enables you to specify the protocols, ports, and source IP ranges that can reach your instances using *security groups*
+> + Static IPv4 addresses for dynamic cloud computing, kn
+
+**[E2]** (aws/ECS :: Monitoring tools<a name="monitoring-automated-manual"></a> > Manual monitoring tools<a name="monitoring-manual-tools"></a>)
+
+> ) in the *AWS CloudTrail User Guide*\. [AWS > ECS > Monitoring tools<a name="monitoring-automated-manual"></a> > Manual monitoring tools<a name="monitoring-manual-tools"></a>] Another important part of monitoring Amazon ECS involves manually monitoring those items that the CloudWatch alarms don't cover\. The CloudWatch, Trusted Advisor, and other AWS console dashboards provide an at\-a\-glance view of the state of your AWS environment\. We recommend that you also check the log files on your container instances and the containers in your tasks\.
+> + CloudWatch home page: 
+>   + Current alarms and status
+>   + Graphs of alarms and resources
+>   + Service health status
+> 
+>   In addition, you can use CloudWatch to do the following: 
+>   + Create [customized dashboards](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html) to monitor the services you care about\.
+>   + Graph metric data to troubleshoot issues and discover trends\.
+>   + Search and browse all your AWS resource metrics\.
+>   + Create and edit alarms to be notified of problems\.
+> + AWS Trusted Advisor can help you monitor your AWS resources to improve performance, reliability, security, and cost effectiveness\. Four Trusted Advisor checks are available to all users; more than 50 checks are available to users with a Business or Enterprise support plan\. For more information, see [AWS Trusted Advisor](https://aws.amazon.com/premiumsupport/trustedadvisor/)\.
+> + AWS Compute Optimizer is a service that ana
+
+**[E3]** (aws/ECS :: Amazon ECS CloudWatch Container Insights<a name="cloudwatch-container-insights"></a>)
+
+> [AWS > ECS > Amazon ECS CloudWatch Container Insights<a name="cloudwatch-container-insights"></a>] CloudWatch Container Insights collects, aggregates, and summarizes metrics and logs from your containerized applications and microservices\. The metrics include utilization for resources such as CPU, memory, disk, and network\. The metrics are available in CloudWatch automatic dashboards\. For a full list of Amazon ECS Container Insights metrics, see [Amazon ECS Container Insights Metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-metrics-ECS.html) in the *Amazon CloudWatch User Guide*\.
+> 
+> Operational data is collected as performance log events\. These are entries that use a structured JSON schema for high\-cardinality data to be ingested and stored at scale\. From this data, CloudWatch creates higher\-level aggregated metrics at the cluster, service, and task level as CloudWatch metrics\. For more information, see [Amazon ECS Container Insights metrics;](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-metrics-ECS.html) in the *Amazon CloudWatch User Guide*\.
+> 
+> **Important**  
+> Metrics collected by CloudWatch Container Insights are charged as custom metrics\. For more information about CloudWatch pricing, see [CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/)\. Amazon ECS also provides monitoring metrics that are provided at no additional cost\. For more information, see [Amazon ECS CloudWatch m
+
+**[E4]** (aws/ECS :: Logging and Monitoring in Amazon Elastic Container Service<a name="ecs-logging-monitoring"></a>)
+
+> [AWS > ECS > Logging and Monitoring in Amazon Elastic Container Service<a name="ecs-logging-monitoring"></a>] Monitoring is an important part of maintaining the reliability, availability, and performance of Amazon Elastic Container Service and your AWS solutions\. You should collect monitoring data from all of the parts of your AWS solution so that you can more easily debug a multi\-point failure if one occurs\. AWS provides several tools for monitoring your Amazon ECS resources and responding to potential incidents:
+> 
+> **Amazon CloudWatch Alarms**  
+> Watch a single metric over a time period that you specify, and perform one or more actions based on the value of the metric relative to a given threshold over a number of time periods\. The action is a notification sent to an Amazon Simple Notification Service \(Amazon SNS\) topic or Amazon EC2 Auto Scaling policy\. CloudWatch alarms do not invoke actions simply because they are in a particular state; the state must have changed and been maintained for a specified number of periods\. For more information, see [Amazon ECS CloudWatch metrics](cloudwatch-metrics.md)\.  
+> For clusters with tasks or services using the EC2 launch type, you can use CloudWatch alarms to scale in and scale out the container instances based on CloudWatch metrics, such as cluster memory reservation\.
+> 
+> **Amazon CloudWatch Logs**  
+> Monitor, store, and access the log files from the containers in your Amazon ECS tasks by specifying the `awslogs` log driver in your
+
+**[E5]** (aws/ECS :: Amazon ECS events and EventBridge<a name="cloudwatch_event_stream"></a>)
+
+> [AWS > ECS > Amazon ECS events and EventBridge<a name="cloudwatch_event_stream"></a>] Using Amazon EventBridge, you can automate your AWS services and respond automatically to system events such as application availability issues or resource changes\. Events from AWS services are delivered to EventBridge in near real time\. You can write simple rules to indicate which events are of interest to you and what automated actions to take when an event matches a rule\. The actions that can be automatically configured to include the following:
+> + Adding events to log groups in CloudWatch Logs
+> + Invoking an AWS Lambda function
+> + Invoking Amazon EC2 Run Command
+> + Relaying the event to Amazon Kinesis Data Streams
+> + Activating an AWS Step Functions state machine
+> + Notifying an Amazon SNS topic or an Amazon Simple Queue Service \(Amazon SQS\) queue
+> 
+> For more information, see [Getting Started with Amazon EventBridge](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-getting-set-up.html) in the *Amazon EventBridge User Guide*\.
+> 
+> You can use Amazon ECS events for EventBridge to receive near real\-time notifications regarding the current state of your Amazon ECS clusters\. If your tasks are using the Fargate launch type, you can see the state of your tasks\. If your tasks are using the EC2 launch type, you can see the state of both the container instances and the current state of all tasks running on those container instances\. For services, you can see events related to the
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B38. denso | qwen3.5-9b — q127
+**Pregunta:** When should you use AWS IAM instead of AWS EKS?
+
+**Claim:** IAM is described as an AWS service that helps administrators securely control access to AWS resources, including authentication and authorization for AWS resources.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: Identity and Access Management for Amazon Elastic Container Service<a name="security-iam"></a>)
+
+> [AWS > ECS > Identity and Access Management for Amazon Elastic Container Service<a name="security-iam"></a>] AWS Identity and Access Management \(IAM\) is an AWS service that helps an administrator securely control access to AWS resources\. IAM administrators control who can be *authenticated* \(signed in\) and *authorized* \(have permissions\) to use Amazon ECS resources\. IAM is an AWS service that you can use with no additional charge\.
+> 
+> **Topics**
+> + [Audience](#security_iam_audience)
+> + [Authenticating with identities](#security_iam_authentication)
+> + [Managing access using policies](#security_iam_access-manage)
+> + [How Amazon Elastic Container Service works with IAM](security_iam_service-with-iam.md)
+> + [Identity\-based policy examples for Amazon Elastic Container Service](security_iam_id-based-policy-examples.md)
+> + [AWS managed policies for Amazon Elastic Container Service](security-iam-awsmanpol.md)
+> + [Using service\-linked roles for Amazon ECS](using-service-linked-roles.md)
+> + [Amazon ECS task execution IAM role](task_execution_IAM_role.md)
+> + [Task IAM role](task-iam-roles.md)
+> + [Additional configuration for Windows IAM roles for tasks](windows_task_IAM_roles.md)
+> + [Amazon ECS container instance IAM role](instance_IAM_role.md)
+> + [ECS Anywhere IAM role](iam-role-ecsanywhere.md)
+> + [Amazon ECS CodeDeploy IAM Role](codedeploy_IAM_role.md)
+> + [Amazon ECS CloudWatch Events IAM Role](CWE_IAM_role.md)
+> + [Grant permission to tag resources on creation](supported-iam-actions-tagging.
+
+**[E2]** (aws/ECS :: Related services<a name="welcome-related"></a>)
+
+> [AWS > ECS > Related services<a name="welcome-related"></a>] Amazon ECS can be used along with the following AWS services:
+> 
+> **AWS Identity and Access Management**  
+> AWS Identity and Access Management \(IAM\) is an access management service that helps you securely control access to AWS resources\. You can use IAM to control who's authenticated \(signed in\) and authorized \(has permissions\) to view or perform specific actions on resources\. In Amazon ECS, you can use IAM to control access at the container instance level using IAM roles\. You can also use it to control access at the task level using IAM task roles\. For more information, see [Identity and Access Management for Amazon Elastic Container Service](security-iam.md)\. 
+> 
+> **Amazon EC2 Auto Scaling**  
+> Auto Scaling is a service that sets up automatic scaling for your tasks\. The scaling is based on user\-defined policies, health status checks, and schedules\. You can use Auto Scaling alongside a Fargate task within a service to scale in response to a number of metrics\. Or, alternatively, you can use it with an EC2 task to scale the container instances within your cluster\. For more information, see [Service auto scaling](service-auto-scaling.md)\.
+> 
+> **Elastic Load Balancing**  
+> The Elastic Load Balancing service automatically distributes incoming application traffic across the tasks in your Amazon ECS service\. You can use it to achieve greater levels of fault tolerance in your applications\. At the same time, you can 
+
+**[E3]** (aws/ECS :: How Amazon Elastic Container Service works with IAM<a name="security_iam_service-with-iam"></a>)
+
+> [AWS > ECS > How Amazon Elastic Container Service works with IAM<a name="security_iam_service-with-iam"></a>] Before you use IAM to manage access to Amazon ECS, learn what IAM features are available to use with Amazon ECS\.
+> 
+> 
+> 
+> 
+> 
+> 
+> **IAM features you can use with Amazon Elastic Container Service**  
+> 
+> | IAM feature | Amazon ECS support | 
+> | --- | --- | 
+> |  [Identity\-based policies](#security_iam_service-with-iam-id-based-policies)  |    Yes  | 
+> |  [Resource\-based policies](#security_iam_service-with-iam-resource-based-policies)  |    No   | 
+> |  [Policy actions](#security_iam_service-with-iam-id-based-policies-actions)  |    Yes  | 
+> |  [Policy resources](#security_iam_service-with-iam-id-based-policies-resources)  |    Partial  | 
+> |  [Policy condition keys](#security_iam_service-with-iam-id-based-policies-conditionkeys)  |    Yes  | 
+> |  [ACLs](#security_iam_service-with-iam-acls)  |    No   | 
+> |  [ABAC \(tags in policies\)](#security_iam_service-with-iam-tags)  |    Yes  | 
+> |  [Temporary credentials](#security_iam_service-with-iam-roles-tempcreds)  |    Yes  | 
+> |  [Principal permissions](#security_iam_service-with-iam-principal-permissions)  |    Yes  | 
+> |  [Service roles](#security_iam_service-with-iam-roles-service)  |    Yes  | 
+> |  [Service\-linked roles](#security_iam_service-with-iam-roles-service-linked)  |    Yes  | 
+> 
+> To get a high\-level view of how Amazon ECS and other AWS services work with most IAM features, see [AWS services that work with IAM](https://docs.aws.amaz
+
+**[E4]** (aws/EKS :: Amazon EKS User Guide)
+
+> [AWS > EKS > Amazon EKS User Guide] Welcome to the Amazon EKS User Guide repository. This repository contains the open source version of the [Amazon EKS User Guide](https://docs.aws.amazon.com/eks/latest/userguide/).
+> 
+> You can now edit the EKS User Guide source directly. The AsciiDoc markup language meets the needs of the AWS Platform, while also being easy to learn. 
+> 
+> Use the "Edit this page on GitHub" links in the right sidebar of the EKS User Guide to submit changes. 
+> 
+> - **AsciiDoc-Powered Documentation**: The docs now use AsciiDoc, an intuitive yet powerful authoring language similar to Markdown that offers:
+>   - Advanced formatting capabilities
+>   - Robust cross-referencing
+>   - Enhanced security controls
+>   - Enterprise-grade documentation features
+> 
+> - **Streamlined Contribution Process**:
+>   - Direct editing of documentation source files
+>   - Faster pull request processing
+>   - Increased automation
+>   - Reduced manual steps
+
+**[E5]** (aws/EKS :: Amazon EKS User Guide)
+
+> [AWS > EKS > Amazon EKS User Guide] Welcome to the Amazon EKS User Guide repository. This repository contains the open source version of the [Amazon EKS User Guide](https://docs.aws.amazon.com/eks/latest/userguide/).
+> 
+> You can now edit the EKS User Guide source directly. The AsciiDoc markup language meets the needs of the AWS Platform, while also being easy to learn. 
+> 
+> Use the "Edit this page on GitHub" links in the right sidebar of the EKS User Guide to submit changes. 
+> 
+> - **AsciiDoc-Powered Documentation**: The docs now use AsciiDoc, an intuitive yet powerful authoring language similar to Markdown that offers:
+>   - Advanced formatting capabilities
+>   - Robust cross-referencing
+>   - Enhanced security controls
+>   - Enterprise-grade documentation features
+> 
+> - **Streamlined Contribution Process**:
+>   - Direct editing of documentation source files
+>   - Faster pull request processing
+>   - Increased automation
+>   - Reduced manual steps
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B39. denso | granite4.1-8b — q173
+**Pregunta:** How do managed Kubernetes services compare across AWS EKS, Azure AKS, and GKE?
+
+**Claim:** Users do not need to manage or maintain the underlying Kubernetes components such as the API server, controller manager, scheduler, etc..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/AKS :: Core concepts for Azure Kubernetes Service (AKS) > What is AKS?)
+
+> Facebook
+> x.com
+> LinkedIn
+> Email
+> 
+> Copy Markdown
+> Print
+> 
+> Kubernetes is an open-source container orchestration platform for automating the deployment, scaling, and management of containerized applications. For more information, see the officialKubernetes documentation. [AZURE > AKS > Core concepts for Azure Kubernetes Service (AKS) > What is AKS?] AKS is a managed Kubernetes service that simplifies deploying, managing, and scaling containerized applications that use Kubernetes. For more information, seeWhat is Azure Kubernetes Service (AKS)?.
+> 
+> An AKS cluster is divided into two main components:
+> Control plane: The control plane provides the core Kubernetes services and orchestration of application workloads.Nodes: Nodes are the underlying virtual machines (VMs) that run your applications.
+> 
+> NoteAKS managed components have the labelkubernetes.azure.com/managedby:aks.AKS manages the Helm releases with the prefixaks-managed. Continuously increasing revisions on these releases are expected and safe.
+
+**[E2]** (azure/AKS :: Core concepts for Azure Kubernetes Service (AKS) > What is AKS?)
+
+> Facebook
+> x.com
+> LinkedIn
+> Email
+> 
+> Copy Markdown
+> Print
+> 
+> Kubernetes is an open-source container orchestration platform for automating the deployment, scaling, and management of containerized applications. For more information, see the officialKubernetes documentation. [AZURE > AKS > Core concepts for Azure Kubernetes Service (AKS) > What is AKS?] AKS is a managed Kubernetes service that simplifies deploying, managing, and scaling containerized applications that use Kubernetes. For more information, seeWhat is Azure Kubernetes Service (AKS)?.
+> 
+> An AKS cluster is divided into two main components:
+> Control plane: The control plane provides the core Kubernetes services and orchestration of application workloads.Nodes: Nodes are the underlying virtual machines (VMs) that run your applications.
+> 
+> NoteAKS managed components have the labelkubernetes.azure.com/managedby:aks.AKS manages the Helm releases with the prefixaks-managed. Continuously increasing revisions on these releases are expected and safe.
+
+**[E3]** (azure/AKS :: What is Azure Kubernetes Service (AKS)? > Container solutions in Azure > When to use AKS)
+
+> Managed KubernetesAzure Arc-enabled KubernetesUnmanaged KubernetesAzure Container InstancesManaged Docker container instanceAzure Container AppsManaged Kubernetes
+> For more information comparing the various solutions, see the following resources:
+> Comparing the service models of Azure container solutionsComparing Azure compute service options [AZURE > AKS > What is Azure Kubernetes Service (AKS)? > Container solutions in Azure > When to use AKS] The following list describes some common use cases for AKS:
+> Lift and shift to containers with AKS: Migrate existing applications to containers and run them in a fully managed Kubernetes environment.Microservices with AKS: Simplify the deployment and management of microservices-based applications with streamlined horizontal scaling, self-healing, load balancing, and secret management.Secure DevOps for AKS: Efficiently balance speed and security by implementing secure DevOps with Kubernetes.Bursting from AKS with ACI: Use virtual nodes to provision pods inside ACI that start in seconds and scale to meet demand.Machine learning model training with AKS: Train models using large datasets with familiar tools, such as TensorFlow and Kubeflow.Data streaming with AKS: Ingest and process real-time data streams with millions of data points collected via sensors, and perform fast analyses and computations to develop insights into complex scenarios.Using Windows containers on AKS: Run Windows Server containers on AKS to modernize your Windows applic
+
+**[E4]** (azure/AKS :: Support policies for Azure Kubernetes Service > Managed features in AKS)
+
+> Facebook
+> x.com
+> LinkedIn
+> Email
+> 
+> Copy Markdown
+> Print
+> 
+> For release information, seeAKS release notes.For information on preview features, see theAKS roadmap. [AZURE > AKS > Support policies for Azure Kubernetes Service > Managed features in AKS] Base infrastructure as a service (IaaS) cloud components, like compute or networking components, allow you access to low-level controls and customization options. By contrast, AKS provides a turnkey Kubernetes deployment that gives you a common set of configurations and capabilities you need for your cluster. As an AKS user, you have limited customization and deployment options. In exchange, you don't need to worry about or manage Kubernetes clusters directly.
+> With AKS, you get a fully managedcontrol plane. The control plane contains all of the components and services you need to operate and deliver Kubernetes clusters to end users. Microsoft maintains and operates all Kubernetes components.
+> Microsoft manages and monitors the following components through the control plane:
+> Kubelet or Kubernetes API servers.etcdor a compatible key-value store, providing Quality of Service (QoS), scalability, and runtime.DNS services like kube-dns or CoreDNS.Kubernetes proxy or networking, except whenBYOCNIis used.Any otheradd-onsor system component running in the kube-system namespace.
+> AKS isn't a Platform-as-a-Service (PaaS) solution. Some components, like agent nodes, haveshared responsibility, where you must help maintain the AKS cluster. User input is
+
+**[E5]** (gcp/GKE :: Explore GKE documentationStay organized with collectionsSave and categorize content based on your preferences. > GKE outside Google Cloud > GKE Multi-Cloud)
+
+> , and optimize
+> container workloads depending on where they're running. GKE Multi-Cloud
+> and Google Distributed Cloud both extend GKE for use outside
+> Google Cloud, letting you create and manage hybrid or entirely
+> on-premises deployments. [GCP > GKE > Explore GKE documentationStay organized with collectionsSave and categorize content based on your preferences. > GKE outside Google Cloud > GKE Multi-Cloud] GKE on AWS: Work with
+> GKE clusters running on AWS infrastructure.GKE on Azure: Work
+> with GKE clusters running on Azure infrastructure.GKE attached clusters:
+> Add CNCF-conformant Kubernetes clusters to your fleet to view and manage
+> along with your GKE clusters, with instructions for EKS, AKS,
+> and other conformant cluster types.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B40. hibrido | granite4.1-8b — q072
+**Pregunta:** How to secure AWS VPC using IAM policies?
+
+**Claim:** [Example IAM policies for ClassicLink](#iam-example-classiclink).
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/EC2 :: Example policies for working with the AWS CLI or an AWS SDK<a name="ExamplePolicies_EC2"></a>)
+
+> [AWS > EC2 > Example policies for working with the AWS CLI or an AWS SDK<a name="ExamplePolicies_EC2"></a>] You must grant users the permissions they require for Amazon EC2 using IAM policies\. The following examples show policy statements that you could use to control the permissions that users have to Amazon EC2\. These policies are designed for requests that are made with the AWS CLI or an AWS SDK\. For more information, see [Creating IAM policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_create.html) in the IAM User Guide\. For example policies for working in the Amazon EC2 console, see [Example policies for working in the Amazon EC2 console](iam-policies-ec2-console.md)\. For examples of IAM policies specific to Amazon VPC, see [Identity and Access Management for Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/security-iam.html)\.
+> 
+> In the following examples, replace each *user input placeholder* with your own information\.
+> 
+> **Topics**
+> + [Read\-only access](#iam-example-read-only)
+> + [Restrict access to a specific Region](#iam-example-region)
+> + [Work with instances](#iam-example-instances)
+> + [Work with volumes](#iam-example-manage-volumes)
+> + [Work with snapshots](#iam-example-manage-snapshots)
+> + [Launch instances \(RunInstances\)](#iam-example-runinstances)
+> + [Work with Spot Instances](#iam-example-spot-instances)
+> + [Work with Reserved Instances](#iam-example-reservedinstances)
+> + [Tag resources](#iam-example-taggingresources)
+> + [Work wi
+
+**[E2]** (aws/EC2 :: ClassicLink<a name="vpc-classiclink"></a> > Example IAM policies for ClassicLink<a name="iam-example-classiclink"></a>)
+
+> 1. In the navigation pane, choose **Your VPCs**\.
+> 
+> 1. Select your VPC\.
+> 
+> 1. Choose **Actions**, **Edit VPC settings**\.
+> 
+> 1. For **ClassicLink**, deselect **Enable**\. [AWS > EC2 > ClassicLink<a name="vpc-classiclink"></a> > Example IAM policies for ClassicLink<a name="iam-example-classiclink"></a>] You can enable a VPC for ClassicLink and then link an EC2\-Classic instance to the VPC\. You can also view your ClassicLink\-enabled VPCs, and all of your EC2\-Classic instances that are linked to a VPC\. You can create policies with resource\-level permission for the `ec2:EnableVpcClassicLink`, `ec2:DisableVpcClassicLink`, `ec2:AttachClassicLinkVpc`, and `ec2:DetachClassicLinkVpc` actions to control how users are able to use those actions\. Resource\-level permissions are not supported for `ec2:Describe*` actions\.
+> 
+> **Topics**
+> + [Full permissions to work with ClassicLink](#iam-example-classiclink-full)
+> + [Enable and disable a VPC for ClassicLink](#iam-example-classiclink-enable)
+> + [Link instances](#iam-example-classiclink-link)
+> + [Unlink instances](#iam-example-classiclink-unlink)
+
+**[E3]** (aws/ECS :: Using AWS Systems Manager Parameter Store<a name="secrets-app-ssm-paramstore"></a> > Required IAM permissions<a name="secrets-app-ssm-paramstore-iam"></a>)
+
+>  Systems Manager Parameter Store\.
+> + Only secrets that store text data are supported\. Secrets that store binary data are not supported\.
+> + Use interface VPC endpoints to enhance security controls\.
+> + The VPC your task uses must use DNS resolution\. [AWS > ECS > Using AWS Systems Manager Parameter Store<a name="secrets-app-ssm-paramstore"></a> > Required IAM permissions<a name="secrets-app-ssm-paramstore-iam"></a>] To use this feature, you must have the Amazon ECS task execution role and reference it in your task definition\. This allows the container agent to pull the necessary Systems Manager resources\. For more information, see [Amazon ECS task execution IAM role](task_execution_IAM_role.md)\.
+> 
+> **Important**  
+> For tasks that use the EC2 launch type, you must use the ECS agent configuration variable `ECS_ENABLE_AWSLOGS_EXECUTIONROLE_OVERRIDE=true` to use this feature\. You can add it to the `./etc/ecs/ecs.config` file during container instance creation or you can add it to an existing instance and then restart the ECS agent\. For more information, see [Amazon ECS container agent configuration](ecs-agent-config.md)\.
+> 
+> To provide access to the Systems Manager Parameter Store parameters that you create, manually add the following permissions as a policy to the task execution role\. For information about how to manage permissions, see [Adding and Removing IAM identity permissions](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage-attach-detach.html) in th
+
+**[E4]** (aws/EC2 :: Connect to your Linux instance using EC2 Instance Connect<a name="Connect-using-EC2-Instance-Connect"></a>)
+
+> [AWS > EC2 > Connect to your Linux instance using EC2 Instance Connect<a name="Connect-using-EC2-Instance-Connect"></a>] Amazon EC2 Instance Connect provides a simple and secure way to connect to your Linux instances using Secure Shell \(SSH\)\. With EC2 Instance Connect, you use AWS Identity and Access Management \(IAM\) [policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html) and [principals](https://docs.aws.amazon.com/IAM/latest/UserGuide/intro-structure.html#intro-structure-principal) to control SSH access to your instances, removing the need to share and manage SSH keys\. All connection requests using EC2 Instance Connect are [logged to AWS CloudTrail so that you can audit connection requests](monitor-with-cloudtrail.md#ec2-instance-connect-cloudtrail)\.
+> 
+> You can use EC2 Instance Connect to connect to your instances using the Amazon EC2 console, the EC2 Instance Connect CLI, or the SSH client of your choice\.
+> 
+> When you connect to an instance using EC2 Instance Connect, the Instance Connect API pushes an SSH public key to the [instance metadata](ec2-instance-metadata.md) where it remains for 60 seconds\. An IAM policy attached to your user authorizes your user to push the public key to the instance metadata\. The SSH daemon uses `AuthorizedKeysCommand` and `AuthorizedKeysCommandUser`, which are configured when Instance Connect is installed, to look up the public key from the instance metadata for authentication, and connects you to the instance\.
+
+**[E5]** (aws/EC2 :: Example policies for working with the AWS CLI or an AWS SDK<a name="ExamplePolicies_EC2"></a> > Example: Allow a specific instance to view resources in other AWS services<a name="iam-example-source-instance"></a>)
+
+>  with VPC `vpc-ec43eb89` only\. To specify a VPC for the `ec2:Vpc` condition key, you must specify the full ARN of the VPC\.
+> 
+> 
+> [CODE_BLOCK_56] [AWS > EC2 > Example policies for working with the AWS CLI or an AWS SDK<a name="ExamplePolicies_EC2"></a> > Example: Allow a specific instance to view resources in other AWS services<a name="iam-example-source-instance"></a>] The following is an example of a policy that you might attach to an IAM role\. The policy allows an instance to view resources in various AWS services\. It uses the `ec2:SourceInstanceARN` condition key to specify that the instance from which the request is made must be instance `i-093452212644b0dd6`\. If the same IAM role is associated with another instance, the other instance cannot perform any of these actions\.
+> 
+> The `ec2:SourceInstanceARN` key is an AWS global condition key, therefore it can be used for other service actions, not just Amazon EC2\.
+> 
+> 
+> [CODE_BLOCK_57]
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B41. lexico | granite4.1-8b — q162
+**Pregunta:** What are the differences between Azure Functions and Azure Virtual Machines?
+
+**Claim:** Azure Virtual Machines: Can be deployed within any Azure virtual network, providing extensive networking options such as private IP addresses, subnets, and network security groups for robust isolation and connectivity..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Entra ID :: What is managed identities for Azure resources? > Differences between system-assigned and user-assigned managed identities)
+
+>  operations are available for review in Azure Activity logs.View sign in activity in Microsoft Entra ID sign in logs.
+> Operations on managed identities can be performed by using an Azure Resource Manager template, the Azure portal, Azure CLI, PowerShell, and REST APIs. [AZURE > Entra ID > What is managed identities for Azure resources? > Differences between system-assigned and user-assigned managed identities] The following table summarizes the differences between system-assigned and user-assigned managed identities:
+> PropertySystem-assigned managed identityUser-assigned managed identityCreationCreated as part of an Azure resource (for example, Azure Virtual Machines or Azure App Service).Created as a stand-alone Azure resource.Life cycleShared life cycle with the Azure resource that the managed identity is created with.When the parent resource is deleted, the managed identity is deleted as well.Independent life cycle.Must be explicitly deleted.Sharing across Azure resourcesCanât be shared.It can only be associated with a single Azure resource.Can be shared.The same user-assigned managed identity can be associated with more than one Azure resource.Common use casesWorkloads contained within a single Azure resource.Workloads needing independent identities.For example, an application that runs on a single virtual machine.Workloads that run on multiple resources and can share a single identity.Workloads needing preauthorization to a secure resource, as part of a provisioning flow
+
+**[E2]** (azure/Virtual Machines :: Azure managed disk types > Ultra Disks)
+
+>  your needs, this decision tree should help with typical scenarios:
+> 
+> For a video that covers some high level differences for the different disk types, and some ways for determining what impacts your workload requirements, seeBlock storage options with Azure Disk Storage and Elastic SAN. [AZURE > Virtual Machines > Azure managed disk types > Ultra Disks] Azure Ultra Disks are the highest-performing storage option for Azure virtual machines (VMs). You can change the performance parameters of an Ultra Disk without having to restart your VMs. Ultra Disks are suited for data-intensive workloads such as SAP HANA, top-tier databases, and transaction-heavy workloads.
+> Ultra Disks must be used as data disks and can only be created as empty disks. When using Ultra Disks as data disks, use Premium solid-state drives (SSDs) as operating system (OS) disks.
+
+**[E3]** (azure/Azure Functions :: Azure Functions Flex Consumption plan hosting > Virtual network integration)
+
+>  migrating from the Linux Consumption plan, see [Migrate Consumption plan apps to the Flex Consumption plan](migration/migrate-plan-consumption-to-flex.md?pivots=platform-linux) for step-by-step migration instructions and important differences between the plans. [AZURE > Azure Functions > Azure Functions Flex Consumption plan hosting > Virtual network integration] Flex Consumption expands on the traditional benefits of Consumption plan by adding support for [virtual network integration](./functions-networking-options.md#virtual-network-integration). When your apps run in a Flex Consumption plan, they can connect to other Azure services secured inside a virtual network. All while still allowing you to take advantage of serverless billing and scale, together with the scale and throughput benefits of the Flex Consumption plan. For more information, see [Enable virtual network integration](./flex-consumption-how-to.md#enable-virtual-network-integration).
+
+**[E4]** (azure/Virtual Network :: Create a custom IPv6 address prefix in Azure > Differences between using BYOIPv4 and BYOIPv6)
+
+>  to the Internet. A custom IP address prefix functions as a regional resource that represents a contiguous block of customer owned IP addresses.
+> 
+> For this article, choose between the Azure portal, Azure CLI, or Azure PowerShell to create a custom IPv6 address prefix. [AZURE > Virtual Network > Create a custom IPv6 address prefix in Azure > Differences between using BYOIPv4 and BYOIPv6] [!INCLUDE [ip-services-ipv4-ipv6-differences](../../../includes/ip-services-ipv4-ipv6-differences.md)]
+
+**[E5]** (azure/Virtual Machines :: Introduction to Azure managed disks > Disk roles > Data disk)
+
+>  learn about the differences between an MBR and a GPT on Windows deployments, seeWindows and GPT FAQ.
+> On Azure Windows VMs, drive C is your OS disk and is persistent storage, unless you're usingephemeral OS disks. [AZURE > Virtual Machines > Introduction to Azure managed disks > Disk roles > Data disk] A data disk is a managed disk attached to a virtual machine to store application data or other data. Data disks are registered as SCSI drives and are labeled with a letter that you choose. The size and type of the virtual machine determines how many data disks you can attach to the VM and the disk types you can use with the VM.
+> Generally, you should use data disks to store your applications and data, instead of storing them on anOS disk. Using data disks to store applications and data offers the following benefits over using OS disks:
+> Improved backup and disaster recoveryMore flexibility and scalabilityPerformance isolationEasier maintenanceImproved security and access control
+> For more information on these benefits, seeWhy should I use the data disk to store applications and data instead of the OS disk?.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B42. lexico | granite4.1-8b — q048
+**Pregunta:** What is Azure Cosmos DB and what are its main capabilities?
+
+**Claim:** EnableMongo: Enables support for native MongoDB features..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Cosmos DB :: Configure your Azure Cosmos DB for MongoDB account capabilities > Enable a capability)
+
+>  Cosmos DB for MongoDB accounts with Customer Managed Keys (CMK).
+> Note2This capability cannot be enabled on an Azure Cosmos DB for MongoDB accounts with continuous backup.
+> ImportantChanging capabilities using Azure Resource Manager is not available for Azure Cosmos DB for MongoDB accounts. [AZURE > Cosmos DB > Configure your Azure Cosmos DB for MongoDB account capabilities > Enable a capability] Retrieve your existing account capabilities by usingaz cosmosdb show:az cosmosdb show \
+>     --resource-group <azure_resource_group> \
+>     --name <azure_cosmos_db_account_name>You should see a capability section that's similar to this example output:"capabilities": [
+>   {
+>     "name": "EnableMongo"
+>   }
+> ]Review the default capability. In this example, the only capability that's set isEnableMongo.Set the new capability on your database account. The list of capabilities should include the list of previously enabled capabilities that you want to keep.Only explicitly named capabilities are set on your account. For example, if you want to add theDisableRateLimitingResponsescapability to the preceding example, use theaz cosmosdb updatecommand with the--capabilitiesparameter, and list all capabilities that you want to have in your account:az cosmosdb update \
+>     --resource-group <azure_resource_group> \
+>     --name <azure_cosmos_db_account_name> \
+>     --capabilities EnableMongo DisableRateLimitingResponsesImportantThe list of capabilities must always specifyallcapabilities that you want to enabl
+
+**[E2]** (azure/Cosmos DB :: Configure your Azure Cosmos DB for MongoDB account capabilities > Disable a capability)
+
+>  using a PowerShell array to list the capabilities:az cosmosdb update \
+>     --resource-group <azure_resource_group> \
+>     --name <azure_cosmos_db_account_name> \
+>     --capabilities @("EnableMongo","DisableRateLimitingResponses") [AZURE > Cosmos DB > Configure your Azure Cosmos DB for MongoDB account capabilities > Disable a capability] Retrieve your existing account capabilities by usingaz cosmosdb show:az cosmosdb show \
+>     --resource-group <azure_resource_group> \
+>     --name <azure_cosmos_db_account_name>You should see a capability section that's similar to this example output:"capabilities": [
+>   {
+>     "name": "EnableMongo"
+>   },
+>   {
+>     "name": "DisableRateLimitingResponses"
+>   }
+> ]Check for all capabilities that are currently set. In this example, two capabilities are set:EnableMongoandDisableRateLimitingResponses.Remove one of the capabilities from your database account. The list of capabilities should include the list of previously enabled capabilities that you want to keep.Only explicitly named capabilities are set on your account. For example, if you want to remove theDisableRateLimitingResponsescapability, you would use theaz cosmosdb updatecommand, and list the capability that you want to keep:az cosmosdb update \
+>     --resource-group <azure_resource_group> \
+>     --name <azure_cosmos_db_account_name> \
+>     --capabilities EnableMongoTipIf you're using PowerShell and an error message appears when you use this command, instead try using a PowerShell array to list the cap
+
+**[E3]** (azure/Cosmos DB :: Configure your Azure Cosmos DB for MongoDB account capabilities > Next steps)
+
+>  use this command, instead try using a PowerShell array to list the capabilities:az cosmosdb update \
+>     --resource-group <azure_resource_group> \
+>     --name <azure_cosmos_db_account_name> \
+>     --capabilities @("EnableMongo") [AZURE > Cosmos DB > Configure your Azure Cosmos DB for MongoDB account capabilities > Next steps] Learn how touse Studio 3Twith Azure Cosmos DB for MongoDB.Learn how touse Robo 3Twith Azure Cosmos DB for MongoDB.Explore MongoDBsampleswith Azure Cosmos DB for MongoDB.Trying to do capacity planning for a migration to Azure Cosmos DB? You can use information about your existing database cluster for capacity planning.If all you know is the number of vCores and servers in your existing database cluster, learn how toestimate request units by using vCores or vCPUs.If you know typical request rates for your current database workload, learn how toestimate request units by using the Azure Cosmos DB capacity planner.
+
+**[E4]** (azure/Cosmos DB :: Configure your Azure Cosmos DB for MongoDB account capabilities > Available capabilities)
+
+> 
+> Email
+> 
+> Copy Markdown
+> Print
+> 
+> An Azure account with an active subscription.Create an account for free.An Azure Cosmos DB for MongoDB account.Create an API for MongoDB account.Azure CLIor Azure portal access. Changing capabilities via Azure Resource Manager isn't supported. [AZURE > Cosmos DB > Configure your Azure Cosmos DB for MongoDB account capabilities > Available capabilities] CapabilityDescriptionRemovableDisableRateLimitingResponsesAllows Mongo API to retry rate-limiting requests on the server side until the value that's set formax-request-timeout.YesEnableMongoRoleBasedAccessControlEnable support for creating users and roles for native MongoDB role-based access control.NoEnableMongoRetryableWritesEnables support for retryable writes on the account.YesEnableMongo16MBDocumentSupportEnables support for inserting documents up to 16 MB in size.1NoEnableUniqueCompoundNestedDocsEnables support for compound and unique indexes on nested fields if the nested field isn't an array.NoEnableTtlOnCustomPathProvides the ability to set a custom Time to Live (TTL) on any one field in a collection. Setting TTL on partial unique index property is not supported.2NoEnablePartialUniqueIndexEnables support for a unique partial index, so you have more flexibility to specify exactly which fields in documents you'd like to index.No
+> Note1This capability cannot be enabled on an Azure Cosmos DB for MongoDB accounts with Customer Managed Keys (CMK).
+> Note2This capability cannot be enabled on an Azure
+
+**[E5]** (azure/Cosmos DB :: Azure Cosmos DB for Table documentation > About API for Table > Overview)
+
+> Facebook
+> x.com
+> LinkedIn
+> Email
+> 
+> Azure Cosmos DB provides the API for Table for applications that are written for Azure Table storage and require premium capabilities. [AZURE > Cosmos DB > Azure Cosmos DB for Table documentation > About API for Table > Overview] What is Azure Cosmos DB for Table?FAQ
+> 
+> Differences between API for Table and Azure Table storagePartitioningOptimize your costs
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B43. hibrido | granite4.1-8b — q178
+**Pregunta:** How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?
+
+**Claim:** Azure VMSS: Relies on AKS APIs or stopping the cluster for zero-node configurations..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: Amazon ECS cluster Auto Scaling<a name="cluster-auto-scaling"></a> > How cluster Auto Scaling works<a name="how-it-works"></a> > Cluster Auto Scaling considerations<a name="cluster-auto-scaling-considerations"></a>)
+
+> CapacityProviderReservation` metric generates a CloudWatch alarm\. This alarm updates the `DesiredCapacity` value for the Auto Scaling group\. The Auto Scaling group uses this value to terminate EC2 container instances, and then deregister them from the cluster\. [AWS > ECS > Amazon ECS cluster Auto Scaling<a name="cluster-auto-scaling"></a> > How cluster Auto Scaling works<a name="how-it-works"></a> > Cluster Auto Scaling considerations<a name="cluster-auto-scaling-considerations"></a>] Consider the following when using cluster Auto Scaling:
+> + Don't change or manage the desired capacity for the Auto Scaling group that's associated with a capacity provider with any scaling policies other than the one Amazon ECS manages\.
+> + Amazon ECS uses the `AWSServiceRoleForECS` service\-linked IAM role for the permissions that it requires to call AWS Auto Scaling on your behalf\. For more information about using and creating Amazon ECS service\-linked IAM roles, see [Using service\-linked roles for Amazon ECS](using-service-linked-roles.md)\.
+> + When using capacity providers with Auto Scaling groups, the user, group, or role that creates the capacity providers requires the `autoscaling:CreateOrUpdateTags` permission\. This is because Amazon ECS adds a tag to the Auto Scaling group when it associates it with the capacity provider\.
+> **Important**  
+> Make sure any tooling that you use doesn't remove the `AmazonECSManaged` tag from the Auto Scaling group\. If this tag is removed, Amazon ECS can
+
+**[E2]** (azure/AKS :: AKS frequently asked questions > Operations > Can I use virtual machine scale sets to manually scale to zero nodes?)
+
+>  autoscale all or specificUsernode poolsto zero.You can't directly scalesystem node poolsto zero.
+> 
+> No. Scale operations that use the virtual machine scale set APIs aren't supported. You can use the AKS APIs (az aks scale). [AZURE > AKS > AKS frequently asked questions > Operations > Can I use virtual machine scale sets to manually scale to zero nodes?] No. Scale operations that use the virtual machine scale set APIs aren't supported. You can use the AKS API to scale nonsystem node pools to zero orstop your clusterinstead.
+> 
+> No. This configuration isn't supported.Stop your clusterinstead.
+
+**[E3]** (aws/ECS :: Troubleshooting service auto scaling<a name="troubleshoot-service-auto-scaling"></a>)
+
+> [AWS > ECS > Troubleshooting service auto scaling<a name="troubleshoot-service-auto-scaling"></a>] Application Auto Scaling turns off scale\-in processes while Amazon ECS deployments are in progress and they resume once the deployment has completed\. However, scale\-out processes continue to occur, unless suspended, during a deployment\. For more information, see [Suspending and resuming scaling for Application Auto Scaling](https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-suspend-resume-scaling.html)\.
+
+**[E4]** (aws/ECS :: Service auto scaling<a name="service-auto-scaling"></a>)
+
+> [AWS > ECS > Service auto scaling<a name="service-auto-scaling"></a>] *Automatic scaling* is the ability to increase or decrease the desired count of tasks in your Amazon ECS service automatically\. Amazon ECS leverages the Application Auto Scaling service to provide this functionality\. For more information, see the [Application Auto Scaling User Guide](https://docs.aws.amazon.com/autoscaling/application/userguide/what-is-application-auto-scaling.html)\.
+> 
+> Amazon ECS publishes CloudWatch metrics with your service’s average CPU and memory usage\. For more information, see [Service utilization](cloudwatch-metrics.md#service_utilization)\. You can use these and other CloudWatch metrics to scale out your service \(add more tasks\) to deal with high demand at peak times, and to scale in your service \(run fewer tasks\) to reduce costs during periods of low utilization\. 
+> 
+> Amazon ECS Service Auto Scaling supports the following types of automatic scaling:
+> + [Target tracking scaling policies](service-autoscaling-targettracking.md)— Increase or decrease the number of tasks that your service runs based on a target value for a specific metric\. This is similar to the way that your thermostat maintains the temperature of your home\. You select temperature and the thermostat does the rest\.
+> + [Step scaling policies](service-autoscaling-stepscaling.md)— Increase or decrease the number of tasks that your service runs based on a set of scaling adjustments, known as step adjustments, that var
+
+**[E5]** (azure/Virtual Network :: Disable SR-IOV on a virtual network adapter > Enable Accelerated Networking on Virtual Machine Scale Sets)
+
+>  all the VMs in the availability set, and [confirm that Accelerated Networking is enabled](./create-virtual-machine-accelerated-networking.md#confirm-that-accelerated-networking-is-enabled).
+> 
+>    
+> [CODE_BLOCK_9] [AZURE > Virtual Network > Disable SR-IOV on a virtual network adapter > Enable Accelerated Networking on Virtual Machine Scale Sets] Azure Virtual Machine Scale Sets is slightly different, but follows the same workflow.
+> 
+> 1. First, stop the VMs:
+> 
+>    
+> [CODE_BLOCK_10]
+> 
+> 
+> 1. Once the VMs are stopped, update the Accelerated Networking property under the network interface.
+> 
+>    
+> [CODE_BLOCK_11]
+> 
+> 
+> 1. Virtual Machine Scale Sets has an upgrade policy that applies updates by using automatic, rolling, or manual settings. The following instructions set the policy to automatic so Virtual Machine Scale Sets picks up the changes immediately after restart.
+> 
+>    
+> [CODE_BLOCK_12]
+> 
+> 
+> 1. Finally, restart Virtual Machine Scale Sets.
+> 
+>    
+> [CODE_BLOCK_13]
+> 
+> 
+> ---
+> 
+> Once you restart and the upgrades finish, the VF appears inside VMs that use a supported OS and VM size.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B44. hibrido | qwen3.5-9b — q082
+**Pregunta:** How to configure networking for Azure App Service?
+
+**Claim:** Automated Deployment Configuration: Create the file share as part of your deployment.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Azure Functions :: How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Deployment templates](#tab/templates))
+
+> 't have permissions to configure networking or you haven't fully prepared your network, select **Configure networking after creation** in the **Networking** tab. You can configure networking for your new function app in the portal under **Settings** > **Networking**. [AZURE > Azure Functions > How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Deployment templates](#tab/templates)] Use Bicep files or Azure Resource Manager (ARM) templates to create a secured function app and storage account resources. When you create a secured storage account in an automated deployment, you must set the `vnetContentShareEnabled` site property, create the file share as part of your deployment, and set the `WEBSITE_CONTENTSHARE` app setting to the name of the file share. For more information, including links to example deployments, see [Secured deployments](functions-infrastructure-as-code.md?pivots=premium-plan#secured-deployments).
+> 
+> ---
+
+**[E2]** (azure/Azure Functions :: How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Deployment templates](#tab/templates))
+
+> 't have permissions to configure networking or you haven't fully prepared your network, select **Configure networking after creation** in the **Networking** tab. You can configure networking for your new function app in the portal under **Settings** > **Networking**. [AZURE > Azure Functions > How to use a secured storage account with Azure Functions > Secure storage during function app creation > [Deployment templates](#tab/templates)] Use Bicep files or Azure Resource Manager (ARM) templates to create a secured function app and storage account resources. When you create a secured storage account in an automated deployment, you must set the `vnetContentShareEnabled` site property, create the file share as part of your deployment, and set the `WEBSITE_CONTENTSHARE` app setting to the name of the file share. For more information, including links to example deployments, see [Secured deployments](functions-infrastructure-as-code.md?pivots=premium-plan#secured-deployments).
+> 
+> ---
+
+**[E3]** (azure/Azure Functions :: Tutorial: Establish Azure Functions private site access > Configure access restrictions)
+
+>  to provision and deploy the function app. [AZURE > Azure Functions > Tutorial: Establish Azure Functions private site access > Configure access restrictions] The next step is to configure [access restrictions](../app-service/app-service-ip-restrictions.md) to ensure only resources on the virtual network can invoke the function.
+> 
+> [Private site](functions-networking-options.md#private-endpoints) access is enabled by creating an Azure Virtual Network [service endpoint](../virtual-network/virtual-network-service-endpoints-overview.md) between the function app and the specified virtual network. Access restrictions are implemented via service endpoints. Service endpoints ensure only traffic originating from within the specified virtual network can access the designated resource. In this case, the designated resource is the Azure Function.
+> 
+> 1. Within the function app, select the **Networking** link under the _Settings_ section header.
+> 1. The _Networking_ page is the starting point to configure Azure Front Door, the Azure CDN, and also Access Restrictions.
+> 1. Select **Configure Access Restrictions** to configure private site access.
+> 1. On the _Access Restrictions_ page, you see only the default restriction in place. The default doesn't place any restrictions on access to the function app.  Select **Add rule** to create a private site access restriction configuration.
+> 1. In the _Add Access Restriction_ pane, provide a _Name_, _Priority_, and _Description_ for the new rule.
+> 1. Select 
+
+**[E4]** (azure/Azure Functions :: Tutorial: Establish Azure Functions private site access > Configure access restrictions)
+
+>  to provision and deploy the function app. [AZURE > Azure Functions > Tutorial: Establish Azure Functions private site access > Configure access restrictions] The next step is to configure [access restrictions](../app-service/app-service-ip-restrictions.md) to ensure only resources on the virtual network can invoke the function.
+> 
+> [Private site](functions-networking-options.md#private-endpoints) access is enabled by creating an Azure Virtual Network [service endpoint](../virtual-network/virtual-network-service-endpoints-overview.md) between the function app and the specified virtual network. Access restrictions are implemented via service endpoints. Service endpoints ensure only traffic originating from within the specified virtual network can access the designated resource. In this case, the designated resource is the Azure Function.
+> 
+> 1. Within the function app, select the **Networking** link under the _Settings_ section header.
+> 1. The _Networking_ page is the starting point to configure Azure Front Door, the Azure CDN, and also Access Restrictions.
+> 1. Select **Configure Access Restrictions** to configure private site access.
+> 1. On the _Access Restrictions_ page, you see only the default restriction in place. The default doesn't place any restrictions on access to the function app.  Select **Add rule** to create a private site access restriction configuration.
+> 1. In the _Add Access Restriction_ pane, provide a _Name_, _Priority_, and _Description_ for the new rule.
+> 1. Select 
+
+**[E5]** (azure/AKS :: Configure Azure CNI networking in Azure Kubernetes Service (AKS) > Configure networking)
+
+> , install the Azure CLI extension on first use. For more information about extensions, seeUse and manage extensions with the Azure CLI.Runaz versionto find the version and dependent libraries that are installed. To upgrade to the latest version, runaz upgrade. [AZURE > AKS > Configure Azure CNI networking in Azure Kubernetes Service (AKS) > Configure networking] For information on planning IP addresses, seeIP address planning for your Azure Kubernetes Service clusters.
+> Azure portalAzure PowerShellAzure CLISign in to theAzure portal.On the Azure portal home page, selectCreate a resource.UnderCategories, selectContainers>Azure Kubernetes Service (AKS).On theBasicstab, configure the following settings:UnderProject details:Subscription: Select your Azure subscription.Resource group: SelectCreate new, enter a resource group name (such astest-rg), and then selectOk.UnderCluster details:Kubernetes cluster name: Enter a cluster name, such asaks-cluster.Region: SelectEast US 2.SelectNext>Nextto get to theNetworkingtab.ForContainer networking, selectAzure CNI Node Subnet.SelectReview + create>Create.When you create an AKS cluster by using Azure PowerShell, you can also configure Azure CNI networking.UseNew-AzAksClusterto create an AKS cluster with default settings and Azure CNI networking:## Create a resource group for the AKS cluster. ##
+> $rg = @{
+>     Name = "test-rg"
+>     Location = "eastus2"
+> }
+> New-AzResourceGroup @rg
+> 
+> $net = @{
+>       NetworkPlugin = "azure"
+>       ResourceGroupName = "
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B45. hibrido | qwen3.5-9b — q092
+**Pregunta:** How to implement backup and disaster recovery for Azure Virtual Machines?
+
+**Claim:** Built-in redundancy options: Locally redundant storage (LRS) and zone-redundant storage (ZRS).
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (azure/Virtual Machines :: Introduction to Azure managed disks > Backup and disaster recovery options > Snapshots)
+
+> ), Azure Backup, managed disk snapshots, restore points, and Azure Site Recovery. The ideal configuration of backup and disaster recovery options for your needs can vary. To decide which works best for your needs, seeBackup and disaster recovery for Azure managed disks. [AZURE > Virtual Machines > Introduction to Azure managed disks > Backup and disaster recovery options > Snapshots] A managed disk snapshot is a read-only, crash-consistent full copy of a managed disk that's stored as a standard managed disk by default. With snapshots, you can back up your managed disks at any point in time. These snapshots exist independently of the source disk, and you can use them to create new managed disks.
+> To learn how to create managed disk snapshots, seeCreate a snapshot of a virtual hard disk.
+
+**[E2]** (azure/Virtual Machines :: Introduction to Azure managed disks > Backup and disaster recovery options)
+
+>  use to ensure their performance automatically shifts to meet the changing demands of your workload, others require manual adjustment, and other disk types can't do either.
+> To learn about the options each disk type has, seeOverview of options to improve Azure managed disk performance [AZURE > Virtual Machines > Introduction to Azure managed disks > Backup and disaster recovery options] Managed disks support several backup and disaster recovery options. These options include built-in redundancy options (locally redundant storage, and zone-redundant storage), Azure Backup, managed disk snapshots, restore points, and Azure Site Recovery. The ideal configuration of backup and disaster recovery options for your needs can vary. To decide which works best for your needs, seeBackup and disaster recovery for Azure managed disks.
+
+**[E3]** (azure/Virtual Network :: Secure your Virtual Network deployment > Backup and recovery)
+
+>  effective during failure scenarios. This ensures that security mechanisms continue to function properly even when the network experiences stress or partial outages. For more information, see [Azure Chaos Studio](/azure/chaos-studio/chaos-studio-overview). [AZURE > Virtual Network > Secure your Virtual Network deployment > Backup and recovery] Backup and recovery for Virtual Networks focuses on preserving network configurations and ensuring rapid restoration of network connectivity if there's accidental deletion or configuration errors. While virtual networks themselves don't require traditional backups, configuration preservation is critical.
+> 
+> - **Export and protect network configurations**: Use Azure Resource Manager to export virtual network configurations as templates that can be stored and used for disaster recovery. Automate this process using Azure Automation or Azure Pipelines. Use Azure DevOps to securely store and manage your code like custom Azure Policy definitions and Azure Resource Manager templates. Enable Soft-Delete and purge protection in Key Vault to protect keys against accidental or malicious deletion. For more information, see [Export templates](/azure/azure-resource-manager/templates/export-template-portal).
+> 
+> - **Document network architecture**: Maintain comprehensive documentation of your network design, including IP address schemes, routing tables, security group rules, and connectivity requirements. Store this documentation in a secure, accessible lo
+
+**[E4]** (azure/Virtual Machines :: Introduction to Azure managed disks > Backup and disaster recovery options > Images)
+
+>  back up your managed disks at any point in time. These snapshots exist independently of the source disk, and you can use them to create new managed disks.
+> To learn how to create managed disk snapshots, seeCreate a snapshot of a virtual hard disk. [AZURE > Virtual Machines > Introduction to Azure managed disks > Backup and disaster recovery options > Images] Managed disks support creating managed custom images. You can create an image from your custom VHD in a storage account or directly from a generalized (via Sysprep) VM. The image contains all managed disks associated with a VM, including both the OS and data disks. A managed custom image lets you create hundreds of VMs without the need to copy or manage any storage accounts.
+> For information on creating images, seeCreate a legacy managed image of a generalized VM in Azure.
+
+**[E5]** (azure/AKS :: Azure storage CSI driver and volume provisioning > Learn about volume snapshots > Create a volume snapshot)
+
+>  the following scenarios:
+> Backup and restore: Create point-in-time backups of stateful application data and restore when
+> needed.Data cloning: Clone existing volumes to create new persistent volumes with the same data.Disaster recovery: Quickly recover from data loss or corruption. [AZURE > AKS > Azure storage CSI driver and volume provisioning > Learn about volume snapshots > Create a volume snapshot] NoteBefore proceeding, ensure that the application isn't writing data to the source disk.
+> For an example of this capability, create avolume snapshot classwith thekubectl applycommand:kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/azuredisk-csi-driver/master/deploy/example/snapshot/storageclass-azuredisk-snapshot.yamlThe output of the command resembles the following example:volumesnapshotclass.snapshot.storage.k8s.io/csi-azuredisk-vsc createdCreate avolume snapshotfrom the PVC that was created earlier in this article.kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/azuredisk-csi-driver/master/deploy/example/snapshot/azuredisk-volume-snapshot.yamlThe output of the command resembles the following example:volumesnapshot.snapshot.storage.k8s.io/azuredisk-volume-snapshot createdTo verify that the snapshot was created correctly, run the following command:kubectl describe volumesnapshot azuredisk-volume-snapshotThe output of the command resembles the following example:Name:         azuredisk-volume-snapshot
+> Namespace:    default
+> Labels:       <none>
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B46. denso | mistral-7b-instruct — q101
+**Pregunta:** How to migrate an on-premises application to Google Cloud Cloud Run?
+
+**Claim:** If you're using Ubuntu Pro, start by creating a VM and choosing the desired Ubuntu Pro version from the public images tab.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/Compute Engine :: Compute Engine documentation > Patterns for scalable and resilient apps)
+
+>  easily migrate VMs from your on-premises data center, AWS, or Azure into Compute Engine. You validate, run, and migrate applications into Google Cloud without rewriting them, modifying the image, or changing management processes.
+> MigrationOn-PremAutomation [GCP > Compute Engine > Compute Engine documentation > Patterns for scalable and resilient apps] Learn patterns and practices for creating apps that are resilient and scalable, two essential goals of many modern architecture exercises. A well-designed app scales up and down as demand increases and decreases, and is resilient enough to withstand service disruptions.
+> ScalingResilienceDesign
+
+**[E2]** (gcp/Compute Engine :: Ubuntu Pro FAQStay organized with collectionsSave and categorize content based on your preferences. > Migration FAQs > I plan to migrate Ubuntu Pro instances from AWS or Azure to Compute Engine. What is the recommended toolset or method to do so?)
+
+> start using a Linux VMguide. When creating the VM, on the public images tab, choose a Ubuntu Pro
+> version.
+> To migrate an instance running Ubuntu Pro on-premise or on other clouds
+> to Google Cloud, seeChoose a migration path. [GCP > Compute Engine > Ubuntu Pro FAQStay organized with collectionsSave and categorize content based on your preferences. > Migration FAQs > I plan to migrate Ubuntu Pro instances from AWS or Azure to Compute Engine. What is the recommended toolset or method to do so?] You can add VM instances, custom images, or disks that are available
+> in an existing environment, such as on-premise or on other cloud providers,
+> to Compute Engine.
+> To migrate an instance running Ubuntu Pro on-premise or on other clouds to
+> Google Cloud, seeChoose a migration path.
+
+**[E3]** (gcp/GKE :: GKE and Cloud RunStay organized with collectionsSave and categorize content based on your preferences.)
+
+>  can therefore easily be migrated between runtimes.
+> Here's anexamplecomparing the YAML files of a Kubernetes deployment and a
+> Cloud Run service.Both GKE and Cloud Run integrate seamlessly withCloud LoggingandCloud Monitoring, providing you with a
+> central [GCP > GKE > GKE and Cloud RunStay organized with collectionsSave and categorize content based on your preferences.] ized view on the Google Cloud console to observe application metrics
+> regardless of their platform. You can also useservice-level objectives
+> (SLO) monitoringon both
+> platforms, and view a unified display of the SLOs on the Cloud Monitoring
+> dashboard.You can implement continuous delivery to either GKE resources
+> or Cloud Run services by usingCloud Deploy. Or, if
+> you prefer, simultaneously deploy your application to both GKE
+> and Cloud Run usingparallel deployment.You can facilitateadvanced traffic
+> managementby using
+> external and internal load balancers for services on GKE and
+> Cloud Run. This includes the ability to expose external endpoints so
+> that you can deploy and run different URLs for the same application across
+> both platforms. You can also split traffic to the same service across
+> GKE and Cloud Run, enabling a seamless migration from
+> one platform to another.Google Cloud provides security tools to improve your security posture when
+> using both runtimes.OS
+> scanninglets you scan
+> containers for vulnerabilities before deploying to either platform. A centralBinary Authorizationpolicy can enforce integration with
+> the G
+
+**[E4]** (gcp/Compute Engine :: Red Hat Enterprise Linux FAQStay organized with collectionsSave and categorize content based on your preferences. > Migration FAQs > I plan to migrate RHEL instances from AWS or Azure to Compute Engine. What is the recommended toolset or method to do so?)
+
+> start using a Linux VMguide. When
+> creating the VM, on the public images tab, choose a RHEL version.
+> To migrate an instance running RHEL on-premise or on other clouds to
+> Google Cloud, seeChoose a migration path. [GCP > Compute Engine > Red Hat Enterprise Linux FAQStay organized with collectionsSave and categorize content based on your preferences. > Migration FAQs > I plan to migrate RHEL instances from AWS or Azure to Compute Engine. What is the recommended toolset or method to do so?] You can add VM instances, custom images, or disks that are available in an
+> existing environment, such as on-premise or on other cloud providers, to
+> Compute Engine.
+> To migrate an instance running RHEL on-premise or on other clouds to
+> Google Cloud, seeChoose a migration path.
+
+**[E5]** (gcp/GKE :: GKE and Cloud RunStay organized with collectionsSave and categorize content based on your preferences. > Why use GKE and Cloud Run together?)
+
+>  architecture.What's nextLearn how to convert your Cloud Run service into a Kubernetes
+> deployment inMigrate from Cloud Run to
+> GKE.Package your Kubernetes deployment into a Cloud Run-compatible
+> container followingMigrate from Kubernetes to
+> Cloud Run.
+> 
+> Send feedback [GCP > GKE > GKE and Cloud RunStay organized with collectionsSave and categorize content based on your preferences. > Why use GKE and Cloud Run together?] GKE and Cloud Run offer different advantages for running
+> containerized applications, and cater to different levels of workload
+> complexity. However, you don't need to choose between the two platforms. You can
+> simultaneously leverage the strengths of both GKE and
+> Cloud Run by migrating your workloads between the two platforms as the
+> need arises. A hybrid strategy like this can empower you to optimize costs,
+> performance, and management overhead.
+> The following are some benefits of using both runtimes to deploy your workloads:
+> GKE and Cloud Run offer a relatively high level of
+> portability:Both platforms use standard container images as deployment artifacts. You
+> can use the same image for your application in either platform without any
+> modifications, thus enabling seamless migration of workloads between
+> GKE and Cloud Run. You don't need to update yourcontinuous integration setupto migrate between
+> GKE and Cloud Run as long as container images are
+> stored inArtifact Registry.GKE and Cloud Run both use a declarative API model.
+> TheCloud Run Admin API
+> v1is designed to be
+> comp
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B47. hibrido | granite4.1-8b — q074
+**Pregunta:** How to deploy a containerized application on AWS IAM?
+
+**Claim:** On the Configure task and container definitions page, scroll down and choose Configure via JSON..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/ECS :: Getting started with Amazon ECS using the AWS CDK<a name="tutorial-ecs-web-server-cdk"></a>)
+
+> [AWS > ECS > Getting started with Amazon ECS using the AWS CDK<a name="tutorial-ecs-web-server-cdk"></a>] The AWS Cloud Development Kit \(AWS CDK\) is an Infrastructure\-as\-Code \(IAC\) framework that you can use to define AWS cloud infrastructure by using a programming language of your choosing\. To define your own cloud infrastructure, you first write an app \(in one of the CDK's supported languages\) that contains one or more stacks\. Then, you synthesize it to an AWS CloudFormation template and deploy your resources to your AWS account\. Follow the steps in this topic to deploy a containerized web server with Amazon Elastic Container Service \(Amazon ECS\) and the AWS CDK on Fargate\. 
+> 
+> The AWS Construct Library, included with the CDK, provides modules that you can use to model the resources that AWS services provide\. For popular services, the library provides curated constructs with smart defaults and best practices\. One of these modules, specifically `[aws\-ecs\-patterns](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns-readme.html)`, provides high\-level abstractions that you can use to define your containerized service and all the necessary supporting resources in a few lines of code\.
+> 
+> This topic uses the [https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedFargateService.html](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedFargateService.html) cons
+
+**[E2]** (aws/ECS :: Getting started with Amazon ECS using the AWS CDK<a name="tutorial-ecs-web-server-cdk"></a> > Step 2: Use the AWS CDK to define a containerized web server on Fargate<a name="ecs-web-server-cdk-step-2"></a> > [ C\# ])
+
+> _ecs_stack.py` so that it resembles the following\.
+> 
+> 
+> [CODE_BLOCK_14]
+> 
+> 
+> ------
+> 
+> Update `src/main/java/com.myorg/HelloEcsStack.java` so that it resembles the following\.
+> 
+> 
+> [CODE_BLOCK_15]
+> 
+> 
+> ------ [AWS > ECS > Getting started with Amazon ECS using the AWS CDK<a name="tutorial-ecs-web-server-cdk"></a> > Step 2: Use the AWS CDK to define a containerized web server on Fargate<a name="ecs-web-server-cdk-step-2"></a> > [ C\# ]] Update `src/HelloEcs/HelloEcsStack.cs` so that it resembles the following\.
+> 
+> 
+> [CODE_BLOCK_16]
+> 
+> 
+> ------
+> 
+> The preceding short snippet includes the following:
+> + The service's logical name: `MyWebServer`\.
+> + The container image that was obtained from DockerHub: `amazon/amazon-ecs-sample`\.
+> + Other relevant information, such as the fact that the load balancer has a public address and is accessible from the Internet\.
+> 
+>  The AWS CDK will create all the resources that are required to deploy the web server including the following resources\. These resources were omitted in this example\.
+> + Amazon ECS cluster 
+> + Amazon VPC and Amazon EC2 instances 
+> +  Auto Scaling group
+> +  Application Load Balancer 
+> +  IAM roles and policies 
+> 
+>  Some automatically provisioned resources are shared by all Amazon ECS services defined in the stack\.
+> 
+> Save the source file, then run the `cdk synth` command in your application's main directory\. The AWS CDK runs the app and synthesizes an AWS CloudFormation template from it, and then displays the template\. The template is an approximately 60
+
+**[E3]** (aws/ECS :: Getting started with the classic console using Amazon EC2<a name="getting-started-ecs-ec2"></a> > Step 1: Register a task definition<a name="getting-started-ec2-task-def"></a>)
+
+> -ecs.md) and that your AWS user has either the permissions specified in the `AdministratorAccess` or the [Amazon ECS first\-run wizard permissions](security_iam_id-based-policy-examples.md#first-run-permissions) IAM policy example\. [AWS > ECS > Getting started with the classic console using Amazon EC2<a name="getting-started-ecs-ec2"></a> > Step 1: Register a task definition<a name="getting-started-ec2-task-def"></a>] A task definition is like a blueprint for your application\. Each time that you launch a task in Amazon ECS, you specify a task definition\. The service then knows which Docker image to use for containers, how many containers to use in the task, and the resource allocation for each container\. For more information about task definitions, see [Amazon ECS task definitions](task_definitions.md)\.
+> 
+> The following steps walk you through creating a task definition that will deploy a simple web application\.
+> 
+> **To register a task definition**
+> 
+> 1. Open the Amazon ECS classic console at [https://console\.aws\.amazon\.com/ecs/](https://console.aws.amazon.com/ecs/)\.
+> 
+> 1. From the navigation bar, select the Region you want to use\.
+> 
+> 1. In the navigation pane, choose **Task Definitions**, **Create new Task Definition**\.
+> 
+> 1. On the **Select launch type compatibility** page, select **EC2** and choose **Next step**\.
+> 
+> 1. On the **Configure task and container definitions** page, scroll down and choose **Configure via JSON**\.
+> 
+> 1. Copy and paste the following example task defini
+
+**[E4]** (aws/ECS :: Manage container instances remotely using AWS Systems Manager<a name="ec2-run-command"></a> > Using Run Command<a name="using_run_command"></a>)
+
+>  Systems Manager operations, see [Create an IAM Instance Profile for Systems Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html) in the *AWS Systems Manager User Guide*\.
+> 
+> 1. Choose **Attach Policy**\. [AWS > ECS > Manage container instances remotely using AWS Systems Manager<a name="ec2-run-command"></a> > Using Run Command<a name="using_run_command"></a>] After you attach Systems Manager managed policies to your `ecsInstanceRole` and verify that AWS Systems Manager Agent \(SSM Agent\) is installed on your container instances, you can start using Run Command to send commands to your container instances\. For information about running commands and shell scripts on your instances and viewing the resulting output, see [Running Commands Using Systems Manager Run Command](https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html) and [Run Command Walkthroughs](https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command-walkthroughs.html) in the *AWS Systems Manager User Guide\.* 
+> 
+> **Example: To update container instance software with Run Command**
+> 
+> A common use case for Run Command is to update the instance software on your entire fleet of container instances at one time\.
+> 
+> 1. [Attach Systems Manager managed policies to your `ecsInstanceRole`\.](#run_command_iam_policy)
+> 
+> 1. Verify that SSM Agent is installed on your container instances\. For more information, see [Manually install SSM Agent on EC2 ins
+
+**[E5]** (aws/ECS :: Amazon ECS developer tools overview<a name="ecs-developer-tools"></a> > Docker Desktop integration with Amazon ECS<a name="developer-tools-dockercli"></a>)
+
+>  see [Using the Amazon ECS command line interface](ECS_CLI.md)\.
+> 
+> Use the ECS CLI if you have a Compose application and want to deploy it to Amazon ECS, or test local containers with containers running in Amazon ECS in the cloud\. [AWS > ECS > Amazon ECS developer tools overview<a name="ecs-developer-tools"></a> > Docker Desktop integration with Amazon ECS<a name="developer-tools-dockercli"></a>] AWS and Docker have collaborated to make a simplified developer experience that you can use to deploy and manage containers on Amazon ECS directly using Docker tools\. You can now build and test your containers locally using Docker Desktop and Docker Compose, and then deploy them to Amazon ECS on Fargate\. To get started with the Amazon ECS and Docker integration, download Docker Desktop and optionally sign up for a Docker ID\. For more information, see [Docker Desktop](https://www.docker.com/products/docker-desktop) and [Docker ID signup](https://hub.docker.com/signup/awsedge?utm_source=awsedge)\.
+> 
+> Beginners to containers often start learning about containers by using Docker tools such as the Docker CLI and Docker Compose\. This makes using the Docker Compose CLI plugin for Amazon ECS a natural next step in running containers on AWS after testing locally\. Docker provides a walkthrough on deploying containers on Amazon ECS\. For more information, see [Deploying Docker containers on Amazon ECS](https://docs.docker.com/engine/context/ecs-integration/)\.
+> 
+> You can take advantage of addi
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B48. hibrido | mistral-7b-instruct — q110
+**Pregunta:** How to configure IAM permissions for Google Cloud Compute Engine?
+
+**Claim:** In the body of the request, provide the updated IAM policy from the previous step.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/Compute Engine :: Create a managed instance group (MIG) > Before you begin > Required roles)
+
+>  guide,verify that you have
+>             the permissions required to complete this guide. If you created a new
+>             project, then you already have the required permissions.Verify that billing is enabled for your Google Cloud project.Enable the Compute Engine API.Enable the API [GCP > Compute Engine > Create a managed instance group (MIG) > Before you begin > Required roles] To get the permissions that
+>       you need to create an instance template and a MIG,
+>     
+>       ask your administrator to grant you theCompute Instance Admin (v1)(roles/compute.instanceAdmin.v1)
+>      IAM role
+>      on your project.
+>   
+> 
+>   
+> 
+>   
+>   
+>   For more information about granting roles, seeManage access to projects, folders, and organizations.
+> This predefined role contains
+>         
+>         the permissions required to create an instance template and a MIG. To see the exact permissions that are
+>         required, expand theRequired permissionssection:
+> Required permissionsThe following permissions are required to create an instance template and a MIG:Create an instance template:compute.instanceTemplates.createCreate a MIG:compute.instanceGroupManagers.createDelete a MIG:compute.instanceGroupManagers.delete
+> You might also be able to get
+>           these permissions
+>         withcustom rolesor
+>         otherpredefined roles.
+
+**[E2]** (gcp/Compute Engine :: Managing access to Compute Engine resourcesStay organized with collectionsSave and categorize content based on your preferences. > Before you begin)
+
+> manage access to custom imageswith IAM.Learn more aboutService accounts.Learn more aboutCompute Engine IAM roles.Learn more about the permissions that are included inpredefined
+> Compute Engine IAM roles.Learn how to create and managecustom roles.
+> 
+> Send feedback [GCP > Compute Engine > Managing access to Compute Engine resourcesStay organized with collectionsSave and categorize content based on your preferences. > Before you begin] Review theIAM overview.Read the Compute Engineaccess control overview.Familiarize yourself withIAM roles for Compute Engine.If you haven't already, set upauthentication.
+>   Authentication verifies your identity for access to Google Cloud services and APIs. To run
+>   code or samples from a local development environment, you can authenticate to
+>   Compute Engine by selecting one of the following options:Select the tab for how you plan to use the samples on this page:ConsoleWhen you use the Google Cloud console to access Google Cloud services and
+>         APIs, you don't need to set up authentication.gcloudInstallthe Google Cloud CLI.
+>         
+>           After installation,initializethe Google Cloud CLI by running the following command:gcloudinitIf you're using an external identity provider (IdP), you must firstsign in to the gcloud CLI with your federated identity.Set a default region and zone.RESTTo use the REST API samples on this page in a local development environment, you use the
+>     credentials you provide to the gcloud CLI.Installthe Google Cloud CLI
+
+**[E3]** (gcp/Compute Engine :: Managing access to Compute Engine resourcesStay organized with collectionsSave and categorize content based on your preferences. > Granting access to Compute Engine resources > Console)
+
+>  zone of the VM. For regional or
+> global resources, replacezones/ZONEwithregions/REGIONorglobal.VM_NAME: the name of the VM instance.In the body of the request, provide the updated IAM
+> policy from the previous step. [GCP > Compute Engine > Managing access to Compute Engine resourcesStay organized with collectionsSave and categorize content based on your preferences. > Granting access to Compute Engine resources > Console] In the Google Cloud console, go to the respective resource page for which
+> you want to add permissions.For instances, go to theVM instances page.For zonal and regional disks, go to theDisks page.For snapshots, go to theSnapshots page.For images, go to theImages page.For instance templates, go to theInstance templates page.For machine images, go to theMachine images page.For reservations, go to theReservations page.For sole-tenant nodes, go to theSole-tenant nodes page.Select the checkboxes next to the resources you want to update.Complete the following steps based on the resource page.For VM instances, clickpersonPermissions.For all other resources, complete the following:Check if the info panel is visible. If it is not visible, clickShow info panel.Select thePermissionstab.Clickperson_addAdd principal.Add the identity for the principal and select the required role.To save your changes, clickSave.
+
+**[E4]** (gcp/Compute Engine :: Compute Engine IAM roles and permissionsStay organized with collectionsSave and categorize content based on your preferences.)
+
+> [GCP > Compute Engine > Compute Engine IAM roles and permissionsStay organized with collectionsSave and categorize content based on your preferences.] When you add a new member to your project, you can use anIdentity and Access Management (IAM)policy to give that member one or
+> more IAM roles. Each IAM role contains permissions
+> that grant the member access to specific resources.Compute Engine has a set ofpredefined IAM rolesthat are described on
+> this page. You can alsocreate custom rolesthat contain subsets of permissions that map directly to your needs.To learn which permissions are required for each method, see the
+> Compute Engine API reference documentation:Compute Engine v1 API referenceCompute Engine beta API referenceFor information about granting access, see the following pages.To set IAM policies at a project level, seeManage access to projects, folders, and organizationsin the IAM documentation.To set policies on specific Compute Engine resources, readGranting access to Compute Engine resources.To assign roles to a Compute Engine service account, readCreate a VM that uses a user-managed service account.What is IAM?Google Cloud offersIAM,
+> which lets you give more granular access to specific
+> Google Cloud resources and prevents unwanted access to other resources.
+> IAM lets you adopt thesecurity principle of least privilege,
+> so you grant only the necessary access to your resources.IAM lets you controlwho (identity)haswhat (roles)permission towhichresources by setting
+> IAM po
+
+**[E5]** (gcp/Compute Engine :: Managing access to Compute Engine resourcesStay organized with collectionsSave and categorize content based on your preferences.)
+
+> initIf you're using an external identity provider (IdP), you must firstsign in to the gcloud CLI with your federated identity.For more information, seeAuthenticate for using RESTin the Google Cloud authentication documentation.Required rolesTo get the permissions that [GCP > Compute Engine > Managing access to Compute Engine resourcesStay organized with collectionsSave and categorize content based on your preferences.] 
+>       you need to manage access to Compute Engine resources,
+>     
+>       ask your administrator to grant you theCompute Admin(roles/compute.admin)
+>      IAM role
+>      on the resource.
+>   
+> 
+>   
+> 
+>   
+>   
+>   For more information about granting roles, seeManage access to projects, folders, and organizations.This predefined role contains
+>         
+>         the permissions required to manage access to Compute Engine resources. To see the exact permissions that are
+>         required, expand theRequired permissionssection:Required permissionsThe following permissions are required to manage access to Compute Engine resources:To grant or revoke access to resources:compute.projects.geton the projectcompute.RESOURCE_TYPE.geton the resourcecompute.RESOURCE_TYPE.getIamPolicyon the resourcecompute.RESOURCE_TYPE.setIamPolicyon the resourceTo test caller permissions:compute.RESOURCE_TYPE.getIamPolicyon the resourceReplaceRESOURCE_TYPEwith the resource that you want to manage  access to. For exampleinstances,instanceTemplates, orimages.You might also be able to get
+>           these permis
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B49. lexico | granite4.1-8b — q173
+**Pregunta:** How do managed Kubernetes services compare across AWS EKS, Azure AKS, and GKE?
+
+**Claim:** Azure AKS: Offers advanced networking services that extend beyond Azure, including integration with other cloud providers through features like Advanced Container Networking Services..
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (gcp/GKE :: Explore GKE documentationStay organized with collectionsSave and categorize content based on your preferences. > GKE outside Google Cloud > GKE Multi-Cloud)
+
+> , and optimize
+> container workloads depending on where they're running. GKE Multi-Cloud
+> and Google Distributed Cloud both extend GKE for use outside
+> Google Cloud, letting you create and manage hybrid or entirely
+> on-premises deployments. [GCP > GKE > Explore GKE documentationStay organized with collectionsSave and categorize content based on your preferences. > GKE outside Google Cloud > GKE Multi-Cloud] GKE on AWS: Work with
+> GKE clusters running on AWS infrastructure.GKE on Azure: Work
+> with GKE clusters running on Azure infrastructure.GKE attached clusters:
+> Add CNCF-conformant Kubernetes clusters to your fleet to view and manage
+> along with your GKE clusters, with instructions for EKS, AKS,
+> and other conformant cluster types.
+
+**[E2]** (azure/AKS :: Monitor Azure Kubernetes Service (AKS) > Alerts > AKS alert rules)
+
+>  information to include diverse resources. An example is CPU percentage.
+> Most log queries compare aDateTimevalue to the present time using thenowoperator and going back one hour. To learn how to build log-based alerts, seeCreate log alerts from Container insights. [AZURE > AKS > Monitor Azure Kubernetes Service (AKS) > Alerts > AKS alert rules] The following table lists some suggested alert rules for AKS. These alerts are only examples. You can set alerts for any metric, log entry, or activity log entry listed in theAKS monitoring data reference.
+> ConditionDescriptionCPU Usage Percentage>95Alerts when the average CPU usage across all nodes exceeds the threshold.Memory Working Set Percentage>100Alerts when the average working set across all nodes exceeds the threshold.
+
+**[E3]** (azure/AKS :: Advanced Container Networking Services for Azure Kubernetes Service (AKS) overview > Container Network Observability)
+
+> Facebook
+> x.com
+> LinkedIn
+> Email
+> 
+> Copy Markdown
+> Print [AZURE > AKS > Advanced Container Networking Services for Azure Kubernetes Service (AKS) overview > Container Network Observability] Container Network Observability provides deep insights into network traffic and performance across containerized environments. This feature setworks across both Cilium and non-Cilium data planes, offering flexibility for diverse networking needs. The feature uses eBPF to enhance scalability and performance by identifying potential bottlenecks and network congestion before applications are affected.
+> Key benefits of Container Network Observability include:
+> Compatibility with all Container Networking Interface (CNI) variants in Azure.Container network metrics, including node-level metrics and Hubble metrics for detailed network insights.Hubble metrics for Domain Name System (DNS) resolution, pod-to-pod communication, and service interactions.Container network logsthat capture essential metadata such as IPs, ports, and traffic flow for troubleshooting, monitoring, and security enforcement.Integration with the managed service for Prometheus in Azure Monitor and Azure Managed Grafana for simplified metrics storage and visualization.
+
+**[E4]** (azure/AKS :: Set up Layer 7(L7) policies with Advanced Container Networking Services > Clean up resources)
+
+> . You can find them under theDashboards > Azure Managed Prometheusfolder, with filenames like"Kubernetes/Networking/L7 (Namespace)"and"Kubernetes/Networking/L7 (Workload)".
+> You should see metrics similar to the following: [AZURE > AKS > Set up Layer 7(L7) policies with Advanced Container Networking Services > Clean up resources] If you don't plan on using this application, delete the other resources you created in this article using theaz group deletecommand.
+> az group delete --name $RESOURCE_GROUP
+> 
+> In this how-to article, you learned how to enable and apply L7 Policies with Advanced Container Networking Services for your AKS cluster.
+> For more information about Advanced Container Networking Services for Azure Kubernetes Service (AKS), seeWhat is Advanced Container Networking Services for Azure Kubernetes Service (AKS)?.
+
+**[E5]** (azure/AKS :: Core concepts for Azure Kubernetes Service (AKS) > What is AKS?)
+
+> Facebook
+> x.com
+> LinkedIn
+> Email
+> 
+> Copy Markdown
+> Print
+> 
+> Kubernetes is an open-source container orchestration platform for automating the deployment, scaling, and management of containerized applications. For more information, see the officialKubernetes documentation. [AZURE > AKS > Core concepts for Azure Kubernetes Service (AKS) > What is AKS?] AKS is a managed Kubernetes service that simplifies deploying, managing, and scaling containerized applications that use Kubernetes. For more information, seeWhat is Azure Kubernetes Service (AKS)?.
+> 
+> An AKS cluster is divided into two main components:
+> Control plane: The control plane provides the core Kubernetes services and orchestration of application workloads.Nodes: Nodes are the underlying virtual machines (VMs) that run your applications.
+> 
+> NoteAKS managed components have the labelkubernetes.azure.com/managedby:aks.AKS manages the Helm releases with the prefixaks-managed. Continuously increasing revisions on these releases are expected and safe.
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
+
+## B50. lexico | granite4.1-8b — q065
+**Pregunta:** How to set up AWS RDS for a production workload?
+
+**Claim:** Citation: *"For DB instance class, leave the default, which is db.t3.micro."*.
+
+**Contexto completo (5 chunks):**
+
+**[E1]** (aws/EC2 :: Tutorial: Connect an Amazon EC2 instance to an Amazon RDS database<a name="tutorial-connect-ec2-instance-to-rds-database"></a> > Considerations<a name="tutorial-connect-ec2-rds-considerations"></a>)
+
+>  because you'd forgotten that the security group was attached to it\.
+> 
+>   The security groups that are automatically created also respect least privilege as they only allow the mutual connection for this workload on the database port by creating a workload\-specific security group pair\. [AWS > EC2 > Tutorial: Connect an Amazon EC2 instance to an Amazon RDS database<a name="tutorial-connect-ec2-instance-to-rds-database"></a> > Considerations<a name="tutorial-connect-ec2-rds-considerations"></a>] Consider the following when you complete the tasks in this tutorial:
+> + **Two consoles** – You will use the following two consoles for this tutorial:
+>   + Amazon EC2 console – You will use the EC2 console to launch instances, to automatically connect an EC2 instance to an RDS database, and for the manual option to configure the connection by creating the security groups\.
+>   + Amazon RDS console – You will use the RDS console to create an RDS database and to automatically connect an EC2 instance to an RDS database\.
+> + **One VPC** – To use the automatic connection feature, your EC2 instance and your RDS database must be in the same VPC\.
+> 
+>   If you were to manually configure the connection between your EC2 instance and your RDS database, you could launch your EC2 instance in one VPC and your RDS database in another VPC; however, you’d need to set up additional routing and VPC configuration\. This scenario is not covered in this tutorial\.
+> + **One AWS Region** – The EC2 instance and RDS data
+
+**[E2]** (aws/EC2 :: Task 2: Create an RDS database and automatically connect it to your EC2 instance<a name="option2-task2-create-rds-database"></a> > Steps to create an RDS database<a name="option2-task2-create-rds-database-steps"></a>)
+
+> The objective of this task is to create an RDS database and use the automatic connection feature in the RDS console to automatically configure the connection between your EC2 instance and your RDS database\. [AWS > EC2 > Task 2: Create an RDS database and automatically connect it to your EC2 instance<a name="option2-task2-create-rds-database"></a> > Steps to create an RDS database<a name="option2-task2-create-rds-database-steps"></a>] Use the following steps to create an RDS database and connect it to your EC2 instance using the automatic feature in the RDS console\.
+> 
+> To view an animation of these steps, see [View an animation: Create an RDS database and automatically connect it to an EC2 instance](#task2-create-rds-database-animation)\.
+> 
+> **DB instance configuration**
+> 
+> The steps in this task configure the DB instance as follows:
+> + Engine type: MySQL
+> + Template: Free tier
+> + DB instance identifier: **tutorial\-database**
+> + DB instance class: `db.t3.micro`
+> 
+> **Important**  
+> In a production environment, you should configure your instance to meet your specific needs\.
+> 
+> **To create an RDS database and automatically connect it to an EC2 instance**
+> 
+> 1. Open the Amazon RDS console at [https://console\.aws\.amazon\.com/rds/](https://console.aws.amazon.com/rds/)\.
+> 
+> 1. From the Region selector \(at top right\), choose the AWS Region in which you created the EC2 instance\. The EC2 instance and the RDS database must be in the same Region\.
+> 
+> 1. On the dashboard, choose **Create database**\.
+> 
+
+**[E3]** (aws/EC2 :: Task 2: Create an RDS database – *optional*<a name="option3-task2-create-rds-database"></a> > Steps to create an RDS database<a name="option3-task2-create-rds-database-steps"></a>)
+
+>  database and would like to use it for this tutorial, you can skip this task\.
+> 
+> The objective of this task is to create an RDS database\. You'll use this instance in Task 3 when you connect it to your EC2 instance\. [AWS > EC2 > Task 2: Create an RDS database – *optional*<a name="option3-task2-create-rds-database"></a> > Steps to create an RDS database<a name="option3-task2-create-rds-database-steps"></a>] Use the following steps to create an RDS database for Option 3 of this tutorial\.
+> 
+> To view an animation of these steps, see [View an animation: Create a DB instance](#option3-task2-create-rds-database-animation)\.
+> 
+> **RDS database configuration**
+> 
+> The steps in this task configure the RDS database as follows:
+> + Engine type: MySQL
+> + Template: Free tier
+> + DB instance identifier: **tutorial\-database\-manual**
+> + DB instance class: `db.t3.micro`
+> 
+> **Important**  
+> In a production environment, you should configure your instance to meet your specific needs\.
+> 
+> **To create a MySQL DB instance**
+> 
+> 1. Open the Amazon RDS console at [https://console\.aws\.amazon\.com/rds/](https://console.aws.amazon.com/rds/)\.
+> 
+> 1. From the Region selector \(at top right\), choose the AWS Region in which you created the EC2 instance\. The EC2 instance and the DB instance must be in the same Region\.
+> 
+> 1. On the dashboard, choose **Create database**\.
+> 
+> 1. Under **Choose a database creation method**, choose **Easy create**\. When you choose this option, the automatic connection feature to automatically config
+
+**[E4]** (aws/EC2 :: Tutorial: Connect an Amazon EC2 instance to an Amazon RDS database<a name="tutorial-connect-ec2-instance-to-rds-database"></a> > Architecture<a name="tutorial-connect-ec2-rds-architecture"></a>)
+
+>  EC2 instance, and one for the RDS database\), you have better control over the security of the instance and the database\. If you were to use the same security group on both the instance and the database, and then modified the security group [AWS > EC2 > Tutorial: Connect an Amazon EC2 instance to an Amazon RDS database<a name="tutorial-connect-ec2-instance-to-rds-database"></a> > Architecture<a name="tutorial-connect-ec2-rds-architecture"></a>]  to suit, say, only the database, the modification would affect both the instance and the database\. In other words, if you were to use one security group, you could unintentionally modify the security of a resource \(either the instance or the database\) because you'd forgotten that the security group was attached to it\.
+> 
+>   The security groups that are automatically created also respect least privilege as they only allow the mutual connection for this workload on the database port by creating a workload\-specific security group pair\.
+
+**[E5]** (aws/EC2 :: Task 1: Create an RDS database – *optional*<a name="option1-task1-create-rds-database"></a> > Steps to create an RDS database<a name="option1-task1-create-rds-database-steps"></a>)
+
+>  that you can use, you can skip this task\.
+> 
+> **Important**  
+> If you use an existing RDS database, make sure that it is in the same VPC as your EC2 instance so that you can use the automatic connection feature\. [AWS > EC2 > Task 1: Create an RDS database – *optional*<a name="option1-task1-create-rds-database"></a> > Steps to create an RDS database<a name="option1-task1-create-rds-database-steps"></a>] Use the following steps to create an RDS database\.
+> 
+> To view an animation of these steps, see [View an animation: Create an RDS database](#task1-create-rds-database-animation)\.
+> 
+> **RDS database configuration**
+> 
+> The steps in this task configure the RDS database as follows:
+> + Engine type: MySQL
+> + Template: Free tier
+> + DB instance identifier: **tutorial\-database\-1**
+> + DB instance class: `db.t3.micro`
+> 
+> **Important**  
+> In a production environment, you should configure your database to meet your specific needs\.
+> 
+> **To create a MySQL RDS database**
+> 
+> 1. Open the Amazon RDS console at [https://console\.aws\.amazon\.com/rds/](https://console.aws.amazon.com/rds/)\.
+> 
+> 1. From the Region selector \(at top right\), choose an AWS Region\. The database and the EC2 instance must be in the same Region in order to use the automatic connection feature in the EC2 console\.
+> 
+> 1. On the dashboard, choose **Create database**\.
+> 
+> 1. Under **Choose a database creation method**, check that **Standard create** is selected\. If you choose **Easy create**, the VPC selector is not available\. You must ensure t
+
+**Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______

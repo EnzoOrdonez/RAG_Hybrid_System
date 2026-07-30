@@ -5,6 +5,8 @@
 Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disagreement': 50, 'random_anchor': 30}
 
 ## 1. denso | granite4.1-8b — q178
+**Pregunta:** How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?
+
 **Claim:** Azure relies on pod scheduling failures and resource constraints to trigger scale-up actions..
 
 **Mejor evidencia** (aws/ECS):
@@ -25,6 +27,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 2. lexico | granite4.1-8b — q170
+**Pregunta:** Compare Azure Cosmos DB and Azure Virtual Machines in terms of capabilities and pricing
+
 **Claim:** Provides hardware acceleration of initial connection setup, enhancing performance and reducing latency..
 
 **Mejor evidencia** (azure/Cosmos DB):
@@ -42,6 +46,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 3. lexico | granite4.1-8b — q183
+**Pregunta:** What are the differences between AWS DynamoDB and Azure Cosmos DB?
+
 **Claim:** Getting Started with Azure Cosmos DB for Table ().
 
 **Mejor evidencia** (azure/Cosmos DB):
@@ -55,6 +61,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 4. lexico | granite4.1-8b — q022
+**Pregunta:** What is AWS Lambda and what are its main features?
+
 **Claim:** Sample applications: The [CODE] directory provides example applications that demonstrate various features and use cases of AWS Lambda, including managed runtimes in multiple programming languages such as Node.js, Python, Ruby, Java, Go, C#, and PowerShell.
 
 **Mejor evidencia** (aws/Lambda):
@@ -68,6 +76,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 5. hibrido | granite4.1-8b — q189
+**Pregunta:** How do the Kubernetes managed services handle cluster upgrades in EKS vs AKS vs GKE?
+
 **Claim:** Control Over Upgrades: EKS requires upgrading the control plane first and allows node pool upgrades alongside it if needed..
 
 **Mejor evidencia** (azure/AKS):
@@ -77,6 +87,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 6. denso | mistral-7b-instruct — q101
+**Pregunta:** How to migrate an on-premises application to Google Cloud Cloud Run?
+
 **Claim:** If you're using Ubuntu Pro, start by creating a VM and choosing the desired Ubuntu Pro version from the public images tab.
 
 **Mejor evidencia** (gcp/GKE):
@@ -96,6 +108,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 7. hibrido | qwen3.5-9b — q082
+**Pregunta:** How to configure networking for Azure App Service?
+
 **Claim:** Automated Deployment Configuration: Create the file share as part of your deployment.
 
 **Mejor evidencia** (azure/Azure Functions):
@@ -107,6 +121,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 8. lexico | granite4.1-8b — q196
+**Pregunta:** What are the equivalent networking concepts across AWS, Azure, and GCP for VPCs, subnets, and security groups?
+
 **Claim:** Subnets: All three providers support subnets within their respective VPC/VNet structures..
 
 **Mejor evidencia** (aws/ECS):
@@ -118,6 +134,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 9. lexico | mistral-7b-instruct — q004
+**Pregunta:** What is AWS EKS and what are its main features?
+
 **Claim:** If a potential security issue is discovered, it should be reported via AWS's vulnerability reporting page and not on GitHub..
 
 **Mejor evidencia** (aws/EKS):
@@ -137,6 +155,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 10. lexico | qwen3.5-9b — q175
+**Pregunta:** What is the equivalent of AWS IAM in Azure and GCP?
+
 **Claim:** - Reserved Instance usage examples.
 
 **Mejor evidencia** (aws/Lambda):
@@ -152,6 +172,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 11. hibrido | granite4.1-8b — q178
+**Pregunta:** How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?
+
 **Claim:** Azure VMSS: Relies on AKS APIs or stopping the cluster for zero-node configurations..
 
 **Mejor evidencia** (azure/Virtual Network):
@@ -178,6 +200,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 12. denso | qwen3.5-9b — q006
+**Pregunta:** What are the pricing tiers for AWS S3?
+
 **Claim:** Burstable performance instances (T instances).
 
 **Mejor evidencia** (aws/EC2):
@@ -190,6 +214,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 13. denso | qwen3.5-9b — q123
+**Pregunta:** How to migrate an on-premises application to Google Cloud GKE?
+
 **Claim:** GKE Multi-Cloud - Extends GKE for use outside Google Cloud, including: GKE attached clusters (add CNCF-conformant Kubernetes clusters to your fleet).
 
 **Mejor evidencia** (gcp/GKE):
@@ -203,6 +229,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 14. lexico | granite4.1-8b — q116
+**Pregunta:** How to set up logging and monitoring for Google Cloud Cloud Functions?
+
 **Claim:** Enable Data Access Audit Logs.
 
 **Mejor evidencia** (gcp/Cloud Functions):
@@ -212,6 +240,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 15. denso | qwen3.5-9b — q166
+**Pregunta:** Compare Azure App Service and Azure Blob Storage in terms of capabilities and pricing
+
 **Claim:** Use Case Selection: Blob Storage: Choose when you don't require a web server to render content and need to store unstructured data.
 
 **Mejor evidencia** (azure/Blob Storage):
@@ -223,6 +253,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 16. hibrido | granite4.1-8b — q190
+**Pregunta:** Compare DNS services: AWS Route 53 vs Azure DNS vs Google Cloud DNS
+
 **Claim:** Important note: Increase forwarding timeout values for Windows DNS servers forwarding to Azure DNS to avoid resolution issues..
 
 **Mejor evidencia** (aws/EC2):
@@ -232,6 +264,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 17. hibrido | qwen3.5-9b — q082
+**Pregunta:** How to configure networking for Azure App Service?
+
 **Claim:** Automated Deployment Configuration: Set the [CODE] app setting to the name of the file share ].
 
 **Mejor evidencia** (azure/Azure Functions):
@@ -243,6 +277,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 18. lexico | qwen3.5-9b — q119
+**Pregunta:** How to deploy a workload on Google Cloud Cloud Run?
+
 **Claim:** Using Terraform for GKE setup.
 
 **Mejor evidencia** (gcp/GKE):
@@ -262,6 +298,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 19. lexico | qwen3.5-9b — q021
+**Pregunta:** What is AWS CloudWatch and what are its main features?
+
 **Claim:** Can monitor Data Lifecycle Manager (DLM) policies.
 
 **Mejor evidencia** (aws/EC2):
@@ -276,6 +314,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 20. denso | mistral-7b-instruct — q108
+**Pregunta:** How to set up logging and monitoring for Google Cloud Cloud Build?
+
 **Claim:** Access the build logs using [CODE] or the Google Cloud console.
 
 **Mejor evidencia** (gcp/Cloud Functions):
@@ -289,6 +329,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 21. lexico | gemma4-e4b — q170
+**Pregunta:** Compare Azure Cosmos DB and Azure Virtual Machines in terms of capabilities and pricing
+
 **Claim:** | A compute service used to host middle-tier services and provide enhanced networking capabilities.
 
 **Mejor evidencia** (azure/Cosmos DB):
@@ -306,6 +348,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 22. denso | granite4.1-8b — q089
+**Pregunta:** How to configure networking for Azure Blob Storage?
+
 **Claim:** Click Create virtual network..
 
 **Mejor evidencia** (azure/Blob Storage):
@@ -317,6 +361,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 23. hibrido | qwen3.5-9b — q094
+**Pregunta:** How to configure networking for Azure Container Instances?
+
 **Claim:** Azure Bastion for connecting to VMs.
 
 **Mejor evidencia** (azure/Virtual Network):
@@ -342,6 +388,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 24. lexico | granite4.1-8b — q048
+**Pregunta:** What is Azure Cosmos DB and what are its main capabilities?
+
 **Claim:** EnableMongo: Enables support for native MongoDB features..
 
 **Mejor evidencia** (azure/Cosmos DB):
@@ -359,6 +407,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 25. hibrido | gemma4-e4b — q195
+**Pregunta:** Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build
+
 **Claim:** Functionality: Google Cloud Build is recommended as part of the best practice for configuring an application CI/CD pipeline for GKE.
 
 **Mejor evidencia** (azure/Azure Functions):
@@ -372,6 +422,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 26. lexico | granite4.1-8b — q076
+**Pregunta:** How to configure auto-scaling in AWS EC2?
+
 **Claim:** [CODE]: This optional parameter specifies that only aggregated metrics for the Auto Scaling group should be reported..
 
 **Mejor evidencia** (gcp/GKE):
@@ -388,6 +440,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 27. denso | granite4.1-8b — q173
+**Pregunta:** How do managed Kubernetes services compare across AWS EKS, Azure AKS, and GKE?
+
 **Claim:** Users do not need to manage or maintain the underlying Kubernetes components such as the API server, controller manager, scheduler, etc..
 
 **Mejor evidencia** (gcp/GKE):
@@ -406,6 +460,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 28. denso | granite4.1-8b — q012
+**Pregunta:** What is the SLA for AWS RDS?
+
 **Claim:** For precise SLA information, one would need to refer directly to Amazon's official AWS Service Level Agreements documentation or contact AWS support.
 
 **Mejor evidencia** (aws/EC2):
@@ -421,6 +477,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 29. lexico | qwen3.5-9b — q064
+**Pregunta:** How to set up AWS EKS for a production workload?
+
 **Claim:** AsciiDoc markup language used for documentation.
 
 **Mejor evidencia** (aws/EKS):
@@ -434,6 +492,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 30. lexico | granite4.1-8b — q048
+**Pregunta:** What is Azure Cosmos DB and what are its main capabilities?
+
 **Claim:** Multi-Model Support: Supports various data models through different APIs: API for Table.
 
 **Mejor evidencia** (azure/Cosmos DB):
@@ -451,6 +511,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 31. denso | qwen3.5-9b — q097
+**Pregunta:** How to scale Azure Monitor horizontally?
+
 **Claim:** Azure Functions-specific monitoring metrics.
 
 **Mejor evidencia** (azure/Azure Functions):
@@ -470,6 +532,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 32. hibrido | qwen3.5-9b — q041
+**Pregunta:** What regions support Azure Virtual Network?
+
 **Claim:** Virtual Network TAP - Supported in these regions: UK South.
 
 **Mejor evidencia** (azure/Virtual Network):
@@ -493,6 +557,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 33. hibrido | mistral-7b-instruct — q175
+**Pregunta:** What is the equivalent of AWS IAM in Azure and GCP?
+
 **Claim:** Similar to AWS IAM, it allows administrators to control who can access which resources in their GCP project.
 
 **Mejor evidencia** (gcp/GKE):
@@ -508,6 +574,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 34. denso | qwen3.5-9b — q064
+**Pregunta:** How to set up AWS EKS for a production workload?
+
 **Claim:** AWS ECS (Elastic Container Service) -.
 
 **Mejor evidencia** (aws/ECS):
@@ -523,6 +591,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 35. denso | mistral-7b-instruct — q122
+**Pregunta:** How to implement auto-scaling with Google Cloud Cloud Storage?
+
 **Claim:** For Amazon ECS, auto-scaling is implemented using an Auto Scaling group capacity provider with managed scaling turned on.
 
 **Mejor evidencia** (aws/ECS):
@@ -543,6 +613,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 36. lexico | qwen3.5-9b — q117
+**Pregunta:** How to implement auto-scaling with Google Cloud Cloud Run?
+
 **Claim:** Infrastructure Management: Cloud Run manages the underlying infrastructure automatically.
 
 **Mejor evidencia** (gcp/GKE):
@@ -561,6 +633,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 37. denso | qwen3.5-9b — q082
+**Pregunta:** How to configure networking for Azure App Service?
+
 **Claim:** Connect the back end of your apps to your virtual networks by using virtual network integration.
 
 **Mejor evidencia** (azure/Virtual Network):
@@ -580,6 +654,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 38. denso | mistral-7b-instruct — q082
+**Pregunta:** How to configure networking for Azure App Service?
+
 **Claim:** In your Function App, expand Settings, and then select Networking..
 
 **Mejor evidencia** (azure/Virtual Network):
@@ -599,6 +675,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 39. denso | mistral-7b-instruct — q019
+**Pregunta:** What are the limits and quotas for AWS EC2?
+
 **Claim:** Fleet quotas for EC2 Fleets and Spot Fleets: An EC2 Fleet request or a Spot Fleet request can't span Regions or different subnets from the same Availability Zone ..
 
 **Mejor evidencia** (aws/EC2):
@@ -608,6 +686,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 40. lexico | mistral-7b-instruct — q187
+**Pregunta:** Compare the machine learning platforms: AWS SageMaker vs Azure Machine Learning vs Google Vertex AI
+
 **Claim:** Through their partnership with NVIDIA, they deliver the latest GPUs while optimizing the software stack with a wide.
 
 **Mejor evidencia** (gcp/Compute Engine):
@@ -623,6 +703,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 41. lexico | qwen3.5-9b — q164
+**Pregunta:** When should you choose Azure Blob Storage over Azure Entra ID?
+
 **Claim:** These services serve different purposes:.
 
 **Mejor evidencia** (azure/Blob Storage):
@@ -636,6 +718,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 42. hibrido | granite4.1-8b — q075
+**Pregunta:** How to monitor AWS RDS with CloudWatch?
+
 **Claim:** Create Alarms (Optional): To set up notifications for specific thresholds, create CloudWatch alarms based on the RDS metrics..
 
 **Mejor evidencia** (aws/EC2):
@@ -659,6 +743,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 43. hibrido | mistral-7b-instruct — q167
+**Pregunta:** Compare the scaling options of Azure Virtual Machines vs Azure Blob Storage
+
 **Claim:** Scaling Blob Storage: In Azure Blob Storage [1], the performance of your storage requests can be increased by using more clients.
 
 **Mejor evidencia** (azure/Blob Storage):
@@ -670,6 +756,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 44. hibrido | qwen3.5-9b — q070
+**Pregunta:** How to set up AWS ECS for a production workload?
+
 **Claim:** Container instances require external network access to communicate with the Amazon ECS service endpoint.
 
 **Mejor evidencia** (aws/ECS):
@@ -684,6 +772,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 45. hibrido | mistral-7b-instruct — q088
+**Pregunta:** How to deploy an application using Azure Blob Storage?
+
 **Claim:** In the storage account, select Containers under Data storage..
 
 **Mejor evidencia** (azure/Azure Functions):
@@ -698,6 +788,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 46. hibrido | granite4.1-8b — q169
+**Pregunta:** Compare Azure App Service and Azure AKS in terms of capabilities and pricing
+
 **Claim:** The choice of tier determines the features available for managing your cluster, with Standard being the default for Automatic SKU clusters ((azure/AKS/Core concepts for Azure Kubernetes Service (AKS) > Pricing tiers))..
 
 **Mejor evidencia** (azure/AKS):
@@ -711,6 +803,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 47. hibrido | gemma4-e4b — q029
+**Pregunta:** What is AWS ECS and what are its main features?
+
 **Claim:** Amazon Elastic Container Service (Amazon ECS) is a fully managed container orchestration service designed to help users easily deploy, manage, and scale containerized applications [Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source: Source
 
 **Mejor evidencia** (aws/EC2):
@@ -726,6 +820,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 48. denso | granite4.1-8b — q115
+**Pregunta:** How to configure IAM permissions for Google Cloud Pub/Sub?
+
 **Claim:** For precise steps and configurations specific to Pub/Sub, refer directly to the [Google Cloud IAM documentation for Pub/Sub](https://cloud.google.com/pubsub/iam) or similar authoritative sources outside the provided context.
 
 **Mejor evidencia** (gcp/Compute Engine):
@@ -741,6 +837,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 49. denso | granite4.1-8b — q104
+**Pregunta:** How to implement auto-scaling with Google Cloud GKE?
+
 **Claim:** Deploy the Custom Metrics Stackdriver Adapter: This adapter allows the HPA to read custom metrics from Monitoring..
 
 **Mejor evidencia** (gcp/GKE):
@@ -753,6 +851,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 50. denso | mistral-7b-instruct — q075
+**Pregunta:** How to monitor AWS RDS with CloudWatch?
+
 **Claim:** In the "CloudWatch alarms" section, create a new CloudWatch alarm for your RDS instance by clicking on "Create Alarm".
 
 **Mejor evidencia** (aws/ECS):
@@ -763,6 +863,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 51. hibrido | gemma4-e4b — q195
+**Pregunta:** Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build
+
 **Claim:** It is used alongside Cloud Deploy and Artifact Registry [Source: gcp/GKE/GKE overviewStay organized with collectionsSave.
 
 **Mejor evidencia** (gcp/GKE):
@@ -779,6 +881,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 52. denso | granite4.1-8b — q030
+**Pregunta:** What is Azure Blob Storage and what are its main capabilities?
+
 **Claim:** Scalability and Durability: Azure Blob Storage supports both standard and premium storage accounts with replicated data to ensure durability and high availability.
 
 **Mejor evidencia** (azure/Blob Storage):
@@ -790,6 +894,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 53. denso | qwen3.5-9b — q021
+**Pregunta:** What is AWS CloudWatch and what are its main features?
+
 **Claim:** Graphs of alarms and resources.
 
 **Mejor evidencia** (aws/ECS):
@@ -800,6 +906,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 54. denso | qwen3.5-9b — q146
+**Pregunta:** Compare AWS S3 and AWS CloudWatch in terms of use cases and features
+
 **Claim:** AWS ECS CloudWatch metrics.
 
 **Mejor evidencia** (aws/EC2):
@@ -811,6 +919,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 55. hibrido | granite4.1-8b — q072
+**Pregunta:** How to secure AWS VPC using IAM policies?
+
 **Claim:** [Example IAM policies for ClassicLink](#iam-example-classiclink).
 
 **Mejor evidencia** (aws/EC2):
@@ -826,6 +936,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 56. lexico | granite4.1-8b — q044
+**Pregunta:** What are the service limits for Azure AKS?
+
 **Claim:** Upcoming Changes: Starting September 2025, a rollout will enable quota for all current and new AKS customers, enforcing limits on the maximum number of managed clusters per region..
 
 **Mejor evidencia** (azure/AKS):
@@ -838,6 +950,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 57. hibrido | qwen3.5-9b — q181
+**Pregunta:** Compare monitoring solutions: AWS CloudWatch vs Azure Monitor vs Google Cloud Monitoring
+
 **Claim:** AWS CloudWatch: The provided context contains detailed information about AWS CloudWatch monitoring solutions, including: CloudWatch Logs for container and container instance logs.
 
 **Mejor evidencia** (aws/ECS):
@@ -850,6 +964,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 58. denso | mistral-7b-instruct — q118
+**Pregunta:** How to implement auto-scaling with Google Cloud VPC?
+
 **Claim:** Create a new GKE cluster using Autopilot mode: Choose a name for your cluster, set the node pool configuration, and click on "Create"..
 
 **Mejor evidencia** (aws/ECS):
@@ -870,6 +986,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 59. hibrido | granite4.1-8b — q076
+**Pregunta:** How to configure auto-scaling in AWS EC2?
+
 **Claim:** Purchasing Option: Select "Request Spot instances" if you want to use Spot Instances with adjustable maximum prices and interruption behaviors..
 
 **Mejor evidencia** (aws/EC2):
@@ -895,6 +1013,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 60. denso | mistral-7b-instruct — q070
+**Pregunta:** How to set up AWS ECS for a production workload?
+
 **Claim:** Create an Amazon ECS service to run and maintain the specified number of instances of your task definition simultaneously in the cluster .
 
 **Mejor evidencia** (aws/ECS):
@@ -913,6 +1033,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 61. denso | qwen3.5-9b — q128
+**Pregunta:** When should you use AWS VPC instead of AWS RDS?
+
 **Claim:** RDS provides database hosting.
 
 **Mejor evidencia** (aws/EC2):
@@ -935,6 +1057,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 62. denso | granite4.1-8b — q136
+**Pregunta:** What are the differences between AWS CloudWatch and AWS EKS?
+
 **Claim:** Metrics are filtered by [CODE], [CODE], [CODE], etc., reflecting only resources with running tasks..
 
 **Mejor evidencia** (aws/ECS):
@@ -949,6 +1073,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 63. denso | granite4.1-8b — q029
+**Pregunta:** What is AWS ECS and what are its main features?
+
 **Claim:** External Instance Option with ECS Anywhere: Allows management of on-premises container workloads using the same tools as AWS-managed clusters, extending ECS capabilities to hybrid environments..
 
 **Mejor evidencia** (aws/ECS):
@@ -965,6 +1091,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 64. hibrido | granite4.1-8b — q116
+**Pregunta:** How to set up logging and monitoring for Google Cloud Cloud Functions?
+
 **Claim:** [GCP > Cloud Functions > Functions audit logging > API interface audit logs](https://cloud.google.com/functions/docs/audit-logging#api_interface).
 
 **Mejor evidencia** (gcp/Cloud Functions):
@@ -978,6 +1106,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 65. hibrido | qwen3.5-9b — q021
+**Pregunta:** What is AWS CloudWatch and what are its main features?
+
 **Claim:** Watch a single metric over a time period that you specify.
 
 **Mejor evidencia** (aws/EC2):
@@ -993,6 +1123,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 66. denso | granite4.1-8b — q041
+**Pregunta:** What regions support Azure Virtual Network?
+
 **Claim:** Azure Virtual Network Routing Appliance (Public Preview) supports the following regions: East US.
 
 **Mejor evidencia** (azure/Virtual Network):
@@ -1015,6 +1147,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 67. lexico | qwen3.5-9b — q079
+**Pregunta:** How to deploy a containerized application on AWS EC2?
+
 **Claim:** AWS CDK for ECS Deployments
 ****.
 
@@ -1030,6 +1164,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 68. hibrido | granite4.1-8b — q125
+**Pregunta:** How to implement auto-scaling with Google Cloud BigQuery?
+
 **Claim:** Utilize BigQuery's Automatic Scaling: Ensure that you have sufficient quota limits set in your Google Cloud project to accommodate high-throughput queries..
 
 **Mejor evidencia** (gcp/Compute Engine):
@@ -1046,6 +1182,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 69. denso | granite4.1-8b — q182
+**Pregunta:** How do load balancing services differ across AWS ELB, Azure Load Balancer, and Google Cloud Load Balancing?
+
 **Claim:** AWS ELB offers specialized ALBs and NLBs with distinct features tailored for application layer routing and high-performance TCP/UDP traffic, respectively..
 
 **Mejor evidencia** (aws/ECS):
@@ -1059,6 +1197,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 70. lexico | mistral-7b-instruct — q080
+**Pregunta:** How to set up monitoring and alerts for Azure AKS?
+
 **Claim:** Navigate to the Azure portal and create a new Log Analytics workspace.
 
 **Mejor evidencia** (azure/AKS):
@@ -1071,6 +1211,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 71. hibrido | qwen3.5-9b — q130
+**Pregunta:** Compare AWS EKS and AWS EC2 in terms of use cases and features
+
 **Claim:** The documentation contains detailed information about AWS ECS (Elastic Container Service) and AWS EC2, but not EKS.
 
 **Mejor evidencia** (aws/EC2):
@@ -1084,6 +1226,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 72. denso | granite4.1-8b — q178
+**Pregunta:** How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?
+
 **Claim:** AWS EC2 (via ECS): Specifically designed for ECS workloads, not directly applicable to EC2 instances without additional configuration..
 
 **Mejor evidencia** (aws/ECS):
@@ -1104,6 +1248,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 73. lexico | granite4.1-8b — q103
+**Pregunta:** How to deploy a workload on Google Cloud Compute Engine?
+
 **Claim:** Select Create an Autopilot cluster..
 
 **Mejor evidencia** (gcp/GKE):
@@ -1117,6 +1263,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 74. lexico | mistral-7b-instruct — q196
+**Pregunta:** What are the equivalent networking concepts across AWS, Azure, and GCP for VPCs, subnets, and security groups?
+
 **Claim:** VPC (Virtual Private Cloud): A VPC (Virtual Private Cloud) network is a logically isolated section of the Google Cloud Platform that you can use to launch and manage resources..
 
 **Mejor evidencia** (aws/ECS):
@@ -1128,6 +1276,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 75. lexico | granite4.1-8b — q173
+**Pregunta:** How do managed Kubernetes services compare across AWS EKS, Azure AKS, and GKE?
+
 **Claim:** Azure AKS: Offers advanced networking services that extend beyond Azure, including integration with other cloud providers through features like Advanced Container Networking Services..
 
 **Mejor evidencia** (gcp/GKE):
@@ -1146,6 +1296,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 76. denso | granite4.1-8b — q182
+**Pregunta:** How do load balancing services differ across AWS ELB, Azure Load Balancer, and Google Cloud Load Balancing?
+
 **Claim:** Global Load Balancing: Routes traffic to the nearest location using Cloud DNS geolocation routing policies, enhancing latency reduction and redundancy across regions..
 
 **Mejor evidencia** (gcp/Compute Engine):
@@ -1162,6 +1314,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 77. lexico | gemma4-e4b — q110
+**Pregunta:** How to configure IAM permissions for Google Cloud Compute Engine?
+
 **Claim:** Configuring IAM permissions for Google Cloud Compute Engine involves understanding the principle of least privilege and assigning specific roles to identities at the appropriate scope (project or resource).
 
 **Mejor evidencia** (gcp/GKE):
@@ -1180,6 +1334,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 78. hibrido | qwen3.5-9b — q092
+**Pregunta:** How to implement backup and disaster recovery for Azure Virtual Machines?
+
 **Claim:** Built-in redundancy options: Locally redundant storage (LRS) and zone-redundant storage (ZRS).
 
 **Mejor evidencia** (azure/Virtual Machines):
@@ -1190,6 +1346,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 79. lexico | gemma4-e4b — q061
+**Pregunta:** What is Google Cloud BigQuery and what problems does it solve?
+
 **Claim:** Big Data Processing: It helps in analyzing big datasets on GKE by providing necessary data storage and.
 
 **Mejor evidencia** (gcp/GKE):
@@ -1207,6 +1365,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 80. hibrido | granite4.1-8b — q175
+**Pregunta:** What is the equivalent of AWS IAM in Azure and GCP?
+
 **Claim:** Azure: Azure AD + RBAC.
 
 **Mejor evidencia** (gcp/GKE):
@@ -1222,6 +1382,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 81. hibrido | mistral-7b-instruct — q122
+**Pregunta:** How to implement auto-scaling with Google Cloud Cloud Storage?
+
 **Claim:** In this example, replace [CODE] with the YAML file containing your application's deployment configuration and [CODE] with the name of your deployment.
 
 **Mejor evidencia** (aws/ECS):
@@ -1238,6 +1400,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 82. denso | mistral-7b-instruct — q019
+**Pregunta:** What are the limits and quotas for AWS EC2?
+
 **Claim:** Fleet quotas for EC2 Fleets and Spot Fleets: The target capacity per EC2 Fleet or Spot Fleet: 10,000.
 
 **Mejor evidencia** (aws/EC2):
@@ -1247,6 +1411,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 83. denso | mistral-7b-instruct — q038
+**Pregunta:** What is Azure AKS and what are its main capabilities?
+
 **Claim:** Networking: Leverage our networking options for your needs.
 
 **Mejor evidencia** (azure/AKS):
@@ -1257,6 +1423,8 @@ Estratos (ocultos al anotador): {'false_contr': 30, 'near_threshold': 40, 'disag
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 84. lexico | qwen3.5-9b — q132
+**Pregunta:** What are the differences between AWS Lambda and AWS EC2?
+
 **Claim:** Comparative Answer:
 
 Based on the provided documentation context, I cannot find sufficient information to fully answer this question about the differences between AWS Lambda and AWS EC2.
@@ -1270,6 +1438,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 85. denso | mistral-7b-instruct — q089
+**Pregunta:** How to configure networking for Azure Blob Storage?
+
 **Claim:** Select Next, Next, and select Create..
 
 **Mejor evidencia** (azure/Azure Functions):
@@ -1287,6 +1457,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 86. hibrido | gemma4-e4b — q150
+**Pregunta:** Compare the pricing models of AWS CloudWatch vs AWS IAM
+
 **Claim:** While the context provides details regarding:.
 
 **Mejor evidencia** (aws/ECS):
@@ -1297,6 +1469,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 87. hibrido | granite4.1-8b — q157
+**Pregunta:** Compare the scaling options of Azure Cosmos DB vs Azure Container Instances
+
 **Claim:** Therefore, a direct comparison regarding scaling options between Azure Cosmos DB and ACI cannot be made from the given documentation.
 
 **Mejor evidencia** (azure/Cosmos DB):
@@ -1308,6 +1482,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 88. denso | mistral-7b-instruct — q027
+**Pregunta:** What is AWS RDS and what are its main features?
+
 **Claim:** Multi-AZ deployment: AWS RDS supports multi-AZ deployments for high availability and data durability.
 
 **Mejor evidencia** (aws/RDS):
@@ -1319,6 +1495,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 89. denso | mistral-7b-instruct — q036
+**Pregunta:** What is Azure Virtual Machines and what are its main capabilities?
+
 **Claim:** Offering a Start/Stop VMs v2 feature that starts or stops virtual machines on user-defined schedules, provides insights through Azure Application Insights, and sends optional notifications using action groups .
 
 **Mejor evidencia** (azure/Virtual Machines):
@@ -1328,6 +1506,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 90. hibrido | qwen3.5-9b — q119
+**Pregunta:** How to deploy a workload on Google Cloud Cloud Run?
+
 **Claim:** Must end with a letter or a.
 
 **Mejor evidencia** (gcp/GKE):
@@ -1339,6 +1519,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 91. denso | mistral-7b-instruct — q004
+**Pregunta:** What is AWS EKS and what are its main features?
+
 **Claim:** Streamlined Contribution Process: Faster pull request processing.
 
 **Mejor evidencia** (aws/EC2):
@@ -1354,6 +1536,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 92. hibrido | granite4.1-8b — q039
+**Pregunta:** What are the available SKUs for Azure Virtual Machines?
+
 **Claim:** discusses standard and basic SKUs for public IP addresses used by Azure Bastion, but this does not directly relate to VM SKUs.
 
 **Mejor evidencia** (azure/AKS):
@@ -1367,6 +1551,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 93. lexico | gemma4-e4b — q031
+**Pregunta:** What regions support Azure Entra ID?
+
 **Claim:** Microsoft Azure operated by 21Vianet.
 
 **Mejor evidencia** (azure/Blob Storage):
@@ -1380,6 +1566,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 94. hibrido | granite4.1-8b — q074
+**Pregunta:** How to deploy a containerized application on AWS IAM?
+
 **Claim:** On the Configure task and container definitions page, scroll down and choose Configure via JSON..
 
 **Mejor evidencia** (aws/ECS):
@@ -1389,6 +1577,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 95. hibrido | granite4.1-8b — q180
+**Pregunta:** What are the main differences between AWS CloudFormation and Azure Resource Manager templates?
+
 **Claim:** To compare AWS CloudFormation and Azure Resource Manager templates, we would need documentation that describes ARM templates from Azure.
 
 **Mejor evidencia** (aws/Lambda):
@@ -1399,6 +1589,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 96. denso | granite4.1-8b — q064
+**Pregunta:** How to set up AWS EKS for a production workload?
+
 **Claim:** None of these sections specifically address the setup or configuration of AWS EKS for production workloads.
 
 **Mejor evidencia** (azure/AKS):
@@ -1408,6 +1600,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 97. lexico | granite4.1-8b — q065
+**Pregunta:** How to set up AWS RDS for a production workload?
+
 **Claim:** Action: Choose an appropriate database engine (e.g., MySQL, PostgreSQL) based on your application requirements.
 
 **Mejor evidencia** (aws/EC2):
@@ -1430,6 +1624,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 98. hibrido | qwen3.5-9b — q161
+**Pregunta:** When should you choose Azure Virtual Network over Azure Container Instances?
+
 **Claim:** What the documentation does mention:.
 
 **Mejor evidencia** (azure/Virtual Network):
@@ -1439,6 +1635,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 99. lexico | mistral-7b-instruct — q085
+**Pregunta:** How to configure networking for Azure Virtual Network?
+
 **Claim:** Configure service endpoints on the destination service..
 
 **Mejor evidencia** (azure/Azure Functions):
@@ -1448,6 +1646,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 100. hibrido | granite4.1-8b — q198
+**Pregunta:** How does the concept of availability zones differ across AWS, Azure, and GCP?
+
 **Claim:** Management: Azure automatically distributes VMs within an availability set across different zones to balance fault domains and update domains..
 
 **Mejor evidencia** (aws/EC2):
@@ -1461,6 +1661,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 101. lexico | granite4.1-8b — q162
+**Pregunta:** What are the differences between Azure Functions and Azure Virtual Machines?
+
 **Claim:** Azure Virtual Machines: Can be deployed within any Azure virtual network, providing extensive networking options such as private IP addresses, subnets, and network security groups for robust isolation and connectivity..
 
 **Mejor evidencia** (azure/Virtual Machines):
@@ -1473,6 +1675,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 102. denso | granite4.1-8b — q096
+**Pregunta:** How to scale Azure Blob Storage horizontally?
+
 **Claim:** *Reference*: [Scalability targets for standard storage accounts](../common/scalability-targets-standard-account.md) mentions replication options that contribute to scalability..
 
 **Mejor evidencia** (azure/Blob Storage):
@@ -1489,6 +1693,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 103. hibrido | mistral-7b-instruct — q038
+**Pregunta:** What is Azure AKS and what are its main capabilities?
+
 **Claim:** When you create an AKS cluster, Azure automatically creates and configures a control plane for you at no cost.
 
 **Mejor evidencia** (azure/AKS):
@@ -1506,6 +1712,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 104. lexico | mistral-7b-instruct — q176
+**Pregunta:** Compare container orchestration options across AWS ECS, Azure Container Instances, and Google Cloud Run
+
 **Claim:** Integration: All three services integrate with their respective container registries (Amazon ECR for AWS, Docker Hub for AWS, and Container Registry for GCP) ..
 
 **Mejor evidencia** (aws/ECS):
@@ -1524,6 +1732,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 105. lexico | qwen3.5-9b — q142
+**Pregunta:** What are the differences between AWS RDS and AWS VPC?
+
 **Claim:** VPC configuration requirements for RDS.
 
 **Mejor evidencia** (aws/EC2):
@@ -1535,6 +1745,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 106. denso | gemma4-e4b — q149
+**Pregunta:** Compare AWS EKS and AWS IAM in terms of use cases and features
+
 **Claim:** Features: It is an AWS service that can be used with no additional charge ..
 
 **Mejor evidencia** (aws/ECS):
@@ -1551,6 +1763,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 107. denso | mistral-7b-instruct — q103
+**Pregunta:** How to deploy a workload on Google Cloud Compute Engine?
+
 **Claim:** To deploy a workload on Google Cloud Compute Engine, follow these steps based on the provided context:.
 
 **Mejor evidencia** (gcp/Compute Engine):
@@ -1566,6 +1780,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 108. denso | granite4.1-8b — q132
+**Pregunta:** What are the differences between AWS Lambda and AWS EC2?
+
 **Claim:** AWS Lambda: Serverless compute service where you run code without provisioning or managing servers.
 
 **Mejor evidencia** (aws/EC2):
@@ -1581,6 +1797,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 109. lexico | mistral-7b-instruct — q178
+**Pregunta:** How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?
+
 **Claim:** Azure VMSS (Flexible orchestration mode): In Flexible orchestration mode, you can choose whether your instances are spread across multiple zones or fault domains within a single region.
 
 **Mejor evidencia** (azure/Virtual Machines):
@@ -1591,6 +1809,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 110. hibrido | gemma4-e4b — q093
+**Pregunta:** How to implement backup and disaster recovery for Azure AKS?
+
 **Claim:** Data cloning: Cloning existing volumes to create new persistent volumes with the same data..
 
 **Mejor evidencia** (azure/AKS):
@@ -1603,6 +1823,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 111. lexico | gemma4-e4b — q136
+**Pregunta:** What are the differences between AWS CloudWatch and AWS EKS?
+
 **Claim:** | Provides documentation using AsciiDoc markup, detailing advanced formatting, cross-referencing, and contribution processes  .
 
 **Mejor evidencia** (aws/EKS):
@@ -1616,6 +1838,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 112. hibrido | qwen3.5-9b — q093
+**Pregunta:** How to implement backup and disaster recovery for Azure AKS?
+
 **Claim:** Important Note: Before proceeding, ensure that the application isn't writing data to the source disk.
 
 **Mejor evidencia** (azure/AKS):
@@ -1628,6 +1852,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 113. hibrido | qwen3.5-9b — q102
+**Pregunta:** How to set up logging and monitoring for Google Cloud Cloud SQL?
+
 **Claim:** Cloud SQL metrics and monitoring setup.
 
 **Mejor evidencia** (gcp/GKE):
@@ -1646,6 +1872,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 114. lexico | gemma4-e4b — q187
+**Pregunta:** Compare the machine learning platforms: AWS SageMaker vs Azure Machine Learning vs Google Vertex AI
+
 **Claim:** <br>- Reduce prediction latency.
 
 **Mejor evidencia** (gcp/Compute Engine):
@@ -1660,6 +1888,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 115. denso | gemma4-e4b — q029
+**Pregunta:** What is AWS ECS and what are its main features?
+
 **Claim:** Deployment Options: ECS Anywhere: This allows users to manage on-premises container workloads using the Amazon ECS console and AWS CLI ..
 
 **Mejor evidencia** (aws/ECS):
@@ -1676,6 +1906,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 116. denso | mistral-7b-instruct — q090
+**Pregunta:** How to configure networking for Azure Cosmos DB?
+
 **Claim:** [Configure Azure Private Link for an Azure Cosmos DB account > Create a private endpoint by using the Azure portal] (Source: azure/Cosmos DB/Configure Azure Private Link for an Azure Cosmos DB account > Create a private endpoint by using the Azure portal).
 
 **Mejor evidencia** (azure/Cosmos DB):
@@ -1686,6 +1918,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 117. denso | granite4.1-8b — q195
+**Pregunta:** Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build
+
 **Claim:** Service: Google Cloud Build (Cloud Build).
 
 **Mejor evidencia** (gcp/GKE):
@@ -1702,6 +1936,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 118. denso | gemma4-e4b — q148
+**Pregunta:** Compare AWS VPC and AWS ECS in terms of use cases and features
+
 **Claim:** This comparison focuses on the distinct roles of Amazon VPC (networking foundation) and Amazon ECS (container orchestration) within the AWS ecosystem.
 
 **Mejor evidencia** (aws/ECS):
@@ -1713,6 +1949,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 119. denso | qwen3.5-9b — q077
+**Pregunta:** How to monitor AWS Lambda with CloudWatch?
+
 **Claim:** EC2 monitoring with CloudWatch.
 
 **Mejor evidencia** (aws/ECS):
@@ -1723,6 +1961,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 120. lexico | qwen3.5-9b — q159
+**Pregunta:** Compare the scaling options of Azure Container Instances vs Azure Virtual Machines
+
 **Claim:** Azure Container Instances information is not present in the provided documentation.
 
 **Mejor evidencia** (azure/Virtual Machines):
@@ -1735,6 +1975,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 121. hibrido | granite4.1-8b — q136
+**Pregunta:** What are the differences between AWS CloudWatch and AWS EKS?
+
 **Claim:** How to configure logging and monitoring in EKS using CloudWatch..
 
 **Mejor evidencia** (aws/ECS):
@@ -1745,6 +1987,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 122. denso | granite4.1-8b — q065
+**Pregunta:** How to set up AWS RDS for a production workload?
+
 **Claim:** By following these steps, you can successfully set up Amazon RDS for a production workload, ensuring scalability, reliability, and optimal performance.
 
 **Mejor evidencia** (aws/ECS):
@@ -1760,6 +2004,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 123. lexico | qwen3.5-9b — q122
+**Pregunta:** How to implement auto-scaling with Google Cloud Cloud Storage?
+
 **Claim:** Networking and forwarding rules for VMs.
 
 **Mejor evidencia** (gcp/Compute Engine):
@@ -1777,6 +2023,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 124. lexico | granite4.1-8b — q073
+**Pregunta:** How to deploy a containerized application on AWS CloudWatch?
+
 **Claim:** If you need guidance on deploying a containerized application using AWS ECS or similar services, please provide more context or clarify the specific service you intend to use for deployment.
 
 **Mejor evidencia** (gcp/GKE):
@@ -1790,6 +2038,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 125. hibrido | mistral-7b-instruct — q110
+**Pregunta:** How to configure IAM permissions for Google Cloud Compute Engine?
+
 **Claim:** In the body of the request, provide the updated IAM policy from the previous step.
 
 **Mejor evidencia** (gcp/Compute Engine):
@@ -1805,6 +2055,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 126. lexico | granite4.1-8b — q080
+**Pregunta:** How to set up monitoring and alerts for Azure AKS?
+
 **Claim:** These can be analyzed using the Metrics Explorer or used to create metric alerts.
 
 **Mejor evidencia** (azure/AKS):
@@ -1817,6 +2069,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 127. lexico | mistral-7b-instruct — q071
+**Pregunta:** How to monitor AWS DynamoDB with CloudWatch?
+
 **Claim:** Next, go to the Amazon CloudWatch console.
 
 **Mejor evidencia** (aws/EC2):
@@ -1832,6 +2086,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 128. lexico | granite4.1-8b — q120
+**Pregunta:** How to deploy a workload on Google Cloud GKE?
+
 **Claim:** After deployment, navigate to the Deployment details page for [CODE]..
 
 **Mejor evidencia** (gcp/GKE):
@@ -1844,6 +2100,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 129. denso | qwen3.5-9b — q187
+**Pregunta:** Compare the machine learning platforms: AWS SageMaker vs Azure Machine Learning vs Google Vertex AI
+
 **Claim:** Best Practice: Choose Vertex AI for teams focused on MLOps and rapid time-to-value.
 
 **Mejor evidencia** (gcp/GKE):
@@ -1862,6 +2120,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 130. lexico | granite4.1-8b — q117
+**Pregunta:** How to implement auto-scaling with Google Cloud Cloud Run?
+
 **Claim:** for hybrid deployment considerations..
 
 **Mejor evidencia** (gcp/GKE):
@@ -1881,6 +2141,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 131. hibrido | qwen3.5-9b — q162
+**Pregunta:** What are the differences between Azure Functions and Azure Virtual Machines?
+
 **Claim:** What the context covers:.
 
 **Mejor evidencia** (azure/Azure Functions):
@@ -1892,6 +2154,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 132. denso | granite4.1-8b — q120
+**Pregunta:** How to deploy a workload on Google Cloud GKE?
+
 **Claim:** Wait for the API and related services to be enabled..
 
 **Mejor evidencia** (gcp/GKE):
@@ -1908,6 +2172,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 133. lexico | granite4.1-8b — q065
+**Pregunta:** How to set up AWS RDS for a production workload?
+
 **Claim:** Citation: *"For DB instance class, leave the default, which is db.t3.micro."*.
 
 **Mejor evidencia** (aws/EC2):
@@ -1930,6 +2196,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 134. hibrido | qwen3.5-9b — q136
+**Pregunta:** What are the differences between AWS CloudWatch and AWS EKS?
+
 **Claim:** Any information about EKS-specific metrics or monitoring.
 
 **Mejor evidencia** (aws/ECS):
@@ -1940,6 +2208,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 135. hibrido | granite4.1-8b — q109
+**Pregunta:** How to implement auto-scaling with Google Cloud Cloud Build?
+
 **Claim:** Note: For precise implementation details specific to your environment, refer to the official Google Cloud Build documentation or consult with a cloud architect familiar with GCP services.
 
 **Mejor evidencia** (aws/ECS):
@@ -1956,6 +2226,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 136. lexico | qwen3.5-9b — q109
+**Pregunta:** How to implement auto-scaling with Google Cloud Cloud Build?
+
 **Claim:** Connecting GitHub repositories to Cloud Build.
 
 **Mejor evidencia** (gcp/Cloud Functions):
@@ -1974,6 +2246,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 137. lexico | granite4.1-8b — q065
+**Pregunta:** How to set up AWS RDS for a production workload?
+
 **Claim:** Citation: *"The security groups that are automatically created also respect least privilege as they only allow the mutual connection for this workload on the database port by creating a workload‑specific security group pair."*.
 
 **Mejor evidencia** (aws/EC2):
@@ -1996,6 +2270,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 138. denso | qwen3.5-9b — q080
+**Pregunta:** How to set up monitoring and alerts for Azure AKS?
+
 **Claim:** Measure two types of information: Calculation of a value: Makes calculations based on numeric columns (e.g., CPU percentage).
 
 **Mejor evidencia** (azure/AKS):
@@ -2008,6 +2284,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 139. hibrido | granite4.1-8b — q192
+**Pregunta:** Compare identity federation approaches across AWS, Azure, and GCP
+
 **Claim:** Inference for AWS and Azure:.
 
 **Mejor evidencia** (gcp/GKE):
@@ -2019,6 +2297,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 140. denso | granite4.1-8b — q088
+**Pregunta:** How to deploy an application using Azure Blob Storage?
+
 **Claim:** Location: The Azure region (e.g., [CODE], [CODE]) where your resources will reside..
 
 **Mejor evidencia** (azure/Blob Storage):
@@ -2038,6 +2318,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 141. lexico | mistral-7b-instruct — q191
+**Pregunta:** What are the key differences between AWS S3 lifecycle policies and Azure Blob Storage tiering?
+
 **Claim:** In Azure, these policies can be used to transition blobs to delete blob at the end of their lifecycle or to transition blobs between tiers based on their use patterns ..
 
 **Mejor evidencia** (aws/EC2):
@@ -2052,6 +2334,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 142. hibrido | granite4.1-8b — q103
+**Pregunta:** How to deploy a workload on Google Cloud Compute Engine?
+
 **Claim:** Ensure the instance's firewall rules allow necessary traffic (e.g., HTTP, HTTPS)..
 
 **Mejor evidencia** (gcp/GKE):
@@ -2068,6 +2352,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 143. denso | mistral-7b-instruct — q145
+**Pregunta:** Compare the pricing models of AWS S3 vs AWS EKS
+
 **Claim:** It is suitable for production workloads requiring 99.9-99.95% API server uptime, workloads requiring 24-month Long Term Support (LTS) Kubernetes version support, regulated environments requiring extended maintenance, and enterprise-grade or production workloads ..
 
 **Mejor evidencia** (azure/AKS):
@@ -2080,6 +2366,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 144. denso | granite4.1-8b — q089
+**Pregunta:** How to configure networking for Azure Blob Storage?
+
 **Claim:** Go to Networking settings..
 
 **Mejor evidencia** (azure/Blob Storage):
@@ -2091,6 +2379,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 145. lexico | gemma4-e4b — q193
+**Pregunta:** How do encryption at rest implementations differ between AWS KMS, Azure Key Vault, and GCP Cloud KMS?
+
 **Claim:** Scope of Encryption: When an encrypted EBS volume is created and attached to a supported instance type, the following data types are encrypted: Data at rest inside the volume..
 
 **Mejor evidencia** (aws/EC2):
@@ -2102,6 +2392,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 146. lexico | qwen3.5-9b — q119
+**Pregunta:** How to deploy a workload on Google Cloud Cloud Run?
+
 **Claim:** GKE cluster creation in Google Cloud console.
 
 **Mejor evidencia** (gcp/GKE):
@@ -2115,6 +2407,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 147. denso | mistral-7b-instruct — q082
+**Pregunta:** How to configure networking for Azure App Service?
+
 **Claim:** In the Virtual Network Integration page, under Outbound traffic configuration, select Not configured..
 
 **Mejor evidencia** (azure/Virtual Network):
@@ -2125,6 +2419,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 148. lexico | mistral-7b-instruct — q082
+**Pregunta:** How to configure networking for Azure App Service?
+
 **Claim:** During the creation process, ensure to select the option for "Virtual network integration" and choose an existing virtual network or create a new one.
 
 **Mejor evidencia** (azure/Azure Functions):
@@ -2136,6 +2432,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 149. denso | qwen3.5-9b — q127
+**Pregunta:** When should you use AWS IAM instead of AWS EKS?
+
 **Claim:** IAM is described as an AWS service that helps administrators securely control access to AWS resources, including authentication and authorization for AWS resources.
 
 **Mejor evidencia** (aws/ECS):
@@ -2160,6 +2458,8 @@ Based on the provided documentation context, I cannot find sufficient informatio
 **Juicio humano:** ______ (correcto / incorrecto / dudoso)  |  **Comentario:** ______
 
 ## 150. lexico | granite4.1-8b — q107
+**Pregunta:** How to set up logging and monitoring for Google Cloud BigQuery?
+
 **Claim:** Enable Stackdriver Logging (Cloud Logging).
 
 **Mejor evidencia** (gcp/GKE):
