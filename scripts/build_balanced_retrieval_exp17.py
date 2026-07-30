@@ -54,24 +54,10 @@ def patch_offline_model_paths():
     RR.CROSS_ENCODER_MODELS["ms-marco-mini-12"]["full_name"] = str(MODELS / "ms-marco-MiniLM-L-12-v2")
 
 
-def balance(reranked_ids, provider_of, wanted, k=FINAL_K):
-    """Select k ids covering each wanted provider, taken in reranked order.
-    quota = ceil(k/|wanted|) per provider; then fill any remainder from the best
-    remaining ids (any provider). Preserves reranked order within/across picks."""
-    quota = math.ceil(k / len(wanted))
-    per = {p: 0 for p in wanted}
-    picked, pickset = [], set()
-    for cid in reranked_ids:
-        p = provider_of(cid)
-        if p in per and per[p] < quota and len(picked) < k:
-            picked.append(cid); pickset.add(cid); per[p] += 1
-    if len(picked) < k:  # fill remainder from best remaining
-        for cid in reranked_ids:
-            if cid not in pickset:
-                picked.append(cid); pickset.add(cid)
-                if len(picked) == k:
-                    break
-    return picked
+# The selection rule now lives in src/ so RAGPipeline (the deployable survey config)
+# and this script share ONE implementation; a second copy would let the shipped
+# artifact drift away from the measured one.
+from src.retrieval.coverage_balancer import balance  # noqa: E402,F401
 
 
 def ndcg_at_k(sel_ids, rel, k=FINAL_K):
