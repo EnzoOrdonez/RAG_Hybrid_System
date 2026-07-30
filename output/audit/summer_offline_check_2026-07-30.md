@@ -19,7 +19,7 @@ Re-deriva cada cifra desde las probabilidades persistidas: si el pase GPU se hiz
 - [OK ] exp15_ablation_tierA/hhem: declared BH family == contrast count — declares 4, has 4
 - [OK ] exp15_ablation_tierA/hhem: declared anchor == actual anchor — declares baseline_repro, is baseline_repro
     · 0/4 significativos (BH) · nivel ancla 0.4499
-- [OK ] exp15_ablation_tierA: nivel HHEM del ancla en rango (carga verificada) — 0.4499 (fuera de 0.40-0.55 => el modelo no cargó bien)
+- [OK ] exp15_ablation_tierA: nivel HHEM del ancla en rango (carga verificada) — 0.4499
 
 ## exp16_anchored_decoding
 - [OK ] exp16_anchored_decoding/small: 157 faithfulness cells re-aggregated from raw probs — exact
@@ -37,7 +37,7 @@ Re-deriva cada cifra desde las probabilidades persistidas: si el pase GPU se hiz
 - [OK ] exp16_anchored_decoding/hhem: declared BH family == contrast count — declares 2, has 2
 - [OK ] exp16_anchored_decoding/hhem: declared anchor == actual anchor — declares baseline_repro, is baseline_repro
     · 0/2 significativos (BH) · nivel ancla 0.4983
-- [OK ] exp16_anchored_decoding: nivel HHEM del ancla en rango (carga verificada) — 0.4983 (fuera de 0.40-0.55 => el modelo no cargó bien)
+- [OK ] exp16_anchored_decoding: nivel HHEM del ancla en rango (carga verificada) — 0.4983
 
 ## exp17_crosscloud_balanced
 - [OK ] exp17_crosscloud_balanced/small: 50 faithfulness cells re-aggregated from raw probs — exact
@@ -55,7 +55,7 @@ Re-deriva cada cifra desde las probabilidades persistidas: si el pase GPU se hiz
 - [OK ] exp17_crosscloud_balanced/hhem: declared BH family == contrast count — declares 1, has 1
 - [OK ] exp17_crosscloud_balanced/hhem: declared anchor == actual anchor — declares baseline, is baseline
     · 0/1 significativos (BH) · nivel ancla 0.4772
-- [OK ] exp17_crosscloud_balanced: nivel HHEM del ancla en rango (carga verificada) — 0.4772 (fuera de 0.40-0.55 => el modelo no cargó bien)
+- [OK ] exp17_crosscloud_balanced: nivel HHEM del ancla en rango (carga verificada) — 0.4772
 
 ## Resultado
 **Todas las verificaciones pasaron.** Las cifras titulares de la fase de verano se reproducen desde los artefactos committeados, sin GPU.

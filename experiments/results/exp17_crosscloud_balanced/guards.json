@@ -1,15 +1,23 @@
 {
  "experiment_id": "exp17_crosscloud_balanced",
  "rows_verifier": "small",
- "decline_phrase": "cannot find sufficient information to fully answer this question",
+ "decline_rule": "scripts/compute_faithfulness_metrics.classify_response \u2014 the SAME function the faithfulness metric uses (14 canonical DECLINE_PATTERNS + 14 EXTENDED_REFUSAL_PATTERNS, case-insensitive; pure_decline = marker within the first 300 chars)",
  "overlap": "mean frac of answer word-5-grams in chunks",
  "arms": [
   {
    "config": "baseline | granite4.1-8b",
    "scenario": "baseline",
    "n": 25,
-   "decline_rate": 0.56,
-   "n_decline": 14,
+   "pure_decline_rate": 0.56,
+   "hedged_partial_rate": 0.24,
+   "answered_rate": 0.2,
+   "any_refusal_rate": 0.8,
+   "n_by_class": {
+    "pure_decline": 14,
+    "hedged_partial": 6,
+    "answered": 5,
+    "empty": 0
+   },
    "mean_answer_chars": 2563.2,
    "mean_answer_words": 349.4,
    "mean_genuine_claims": 11.48,
@@ -19,8 +27,16 @@
    "config": "balanced | granite4.1-8b",
    "scenario": "balanced",
    "n": 25,
-   "decline_rate": 0.32,
-   "n_decline": 8,
+   "pure_decline_rate": 0.36,
+   "hedged_partial_rate": 0.16,
+   "answered_rate": 0.48,
+   "any_refusal_rate": 0.52,
+   "n_by_class": {
+    "pure_decline": 9,
+    "hedged_partial": 4,
+    "answered": 12,
+    "empty": 0
+   },
    "mean_answer_chars": 3127.0,
    "mean_answer_words": 427.4,
    "mean_genuine_claims": 14.88,

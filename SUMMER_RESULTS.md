@@ -199,6 +199,28 @@ y pulido del código. Ledger detallado: `paper/summer_ablation_log.md` entradas 
 | D4 | el gold no tenía analizador | `scripts/analyze_gold_v4.py` construido y verificado | — |
 | F1 | `RAGPipeline` nunca enruta el prompt por `query_type` → plantilla distinta a la ruta medida en **115/194** queries | perilla `prompt_routing`, default apagado | No — legado intacto (exp8) |
 | F2 | detección de proveedores pierde GCP; devuelve `k8s`/`cncf` sin corpus | resolvedor propio, **25/25** vs etiquetas exp17 | No |
+| C2 | dos definiciones vivas de "declinación": guards usaban 1 substring exacto, la métrica 28 regex | unificado a `classify_response`; guards regenerados | **Sí, en el ledger** — los veredictos se refuerzan |
+| C3 | el caveat «n efectivo ≈29» de la entrada 11 era falso; el `n_paired` real es 50-59 | corregido en el ledger | No |
+
+### C2 — las tasas de declinación corregidas refuerzan ambos veredictos
+
+Los guards probaban un substring exacto case-sensitive; la métrica usa `classify_response` con 28
+patrones case-insensitive y **tres** clases. Unificado, y la partición en tres cambia la lectura:
+
+| | `pure_decline` | `answered` |
+|---|---|---|
+| exp16 baseline → anchored_cite | 46,7 % → **65,0 %** (+18,3 pp; antes se reportó +6,6) | 40 % → 28,3 % |
+| exp16 baseline → strict_abstain | 46,7 % → **68,3 %** (+21,6 pp; antes +8,3) | 40 % → 23,3 % |
+| exp17 baseline → balanced | 56 % → **36 %** (−20 pp) | 20 % → **48 %** (se dobla) |
+
+exp16 hace callar al modelo **el doble** de lo reportado. **exp17 más que dobla las queries
+plenamente respondidas** — el positivo es más fuerte que el del piloto. Report-before-prose: material
+para el paper, sin tocar prosa.
+
+**Ojo con la palabra "declinación":** 37 de 60 respuestas del baseline de Tier A llevan una frase de
+rechazo y **aun así afirman claims** y se puntúan normal (q002 declina, responde 128 palabras y saca
+fidelidad 1,0 sobre 1 claim). El denominador decline-aware solo descarta las que no tienen **ningún**
+claim genuino (3/60). `hedged_partial` no es abstención.
 
 ## Gold humano — diseño de dos etapas (decisión de Enzo 2026-07-30)
 

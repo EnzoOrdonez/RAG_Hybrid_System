@@ -783,3 +783,68 @@ techo es un **hallazgo**, no automáticamente la config recomendada — reencuad
 - `REPRODUCE.md` — reproducción desde limpio en 5 niveles, de segundos a horas, con los avisos
   operativos que muerden: H5 (nunca comparar contra una sesión anterior) y la clave del caché LLM
   (`config_name‖prompt`, no exp-id — lo que sirvió respuestas stale a exp16).
+
+## Entrada 18 — Bloque B: una sola definicion de "declinacion" (C2) y correccion del caveat de potencia (C3) (2026-07-30)
+
+Dos defectos hallados al criticar el plan de exp18. Ninguno cambia un veredicto; ambos cambian
+cifras que el ledger citaba, y uno de ellos **refuerza notablemente el positivo de exp17**.
+
+### C2 — habia dos definiciones vivas de "declinacion", discrepantes hasta 24 pp
+
+`compute_exp16_guards.py:26` probaba **un substring exacto y sensible a mayusculas**;
+`compute_faithfulness_metrics.py` usa `classify_response` sobre **28 regex case-insensitive**
+(los 14 canonicos de `response_formatter.DECLINE_PATTERNS` + los 14 de
+`EXTENDED_REFUSAL_PATTERNS`). Discrepaban en **todos** los brazos de Tier A, exp16 y exp17.
+
+Unificado: los guards ahora **importan `classify_response`** del modulo que usa la metrica — la
+misma funcion, no una copia — y reportan sus **tres** clases, porque esa distincion es la que
+carga la interpretacion: `pure_decline` (marcador en los primeros 300 chars: el modelo abre
+rechazando), `hedged_partial` (marcador mas tarde: hedgea y **aun asi responde**), `answered`.
+
+**Cifras corregidas (los veredictos no cambian; se refuerzan):**
+
+| | pure_decline | answered | (antes, regla estrecha) |
+|---|---|---|---|
+| exp16 baseline | 46,7 % | 40,0 % | 51,7 % |
+| exp16 anchored_cite | **65,0 %** (+18,3 pp) | 28,3 % | +6,6 pp |
+| exp16 strict_abstain | **68,3 %** (+21,6 pp) | 23,3 % | +8,3 pp |
+| exp17 baseline | 56,0 % | 20,0 % | 56 % |
+| exp17 balanced | **36,0 %** (−20 pp) | **48,0 %** (se dobla) | 32 % |
+
+exp16 hace callar al modelo **el doble** de lo reportado. Y exp17 no solo declina menos: **mas que
+dobla las queries plenamente respondidas** (20 % → 48 %) — el positivo es mas fuerte de lo que
+decia el piloto. Regenerados `guards.{json,md}` de exp16 y exp17. Regresion permanente en
+`tests/test_decline_rule.py` (12): los guards deben usar el clasificador canonico, no re-implementarlo;
+el contrato de las tres clases incluido el borde puro-vs-hedged; y los artefactos committeados deben
+coincidir con el clasificador.
+
+### C3 — el caveat de potencia de la entrada 11 es FALSO
+
+La entrada 11 dice «declinacion baseline 51,7 % → n efectivo ≈29, underpowered». **El `n_paired`
+real es 50-59 de 60** en los tres verificadores (Tier A 55-59, exp16 50-55, exp17 25/25).
+
+Causa: **37 de 60 respuestas que contienen una frase de rechazo NO son declinaciones** — declinan
+y *ademas* responden. Caso q002: dice "I cannot find sufficient information…" y luego responde 128
+palabras; puntua **fidelidad 1,0 sobre 1 claim genuino**. El denominador decline-aware solo descarta
+las que no tienen **ningun** claim genuino (3/60 `vacuous`, 0 `None`), no las que hedgean.
+→ El caveat de exp16 sobre-vendia la falta de potencia. La conclusion de exp16 (nulo/negativo) no
+cambia, pero su razon declarada era incorrecta.
+
+### C4 — la varianza no viene del n, viene del denominador
+
+11,8 claims genuinos por query de media, pero **25 % de las queries tienen ≤2** → su fidelidad solo
+puede valer 0 / 0,5 / 1. SD de la fidelidad por query = 0,311. Eso, y no el tamano muestral, es lo
+que infla la varianza del contraste pareado. Motiva usar el analisis claim-level como secundario en
+exp18 (708 claims por brazo a n=60 frente a 57 queries).
+
+### C5 — no existe ancla humana de relevancia ni respuesta de referencia
+
+`relevant_chunk_ids` esta **vacio en las 194** y `answer` **vacio en las 194**. Descarta dos disenos
+que se consideraron para exp18 (un brazo de evidencia gold y un control positivo con respuesta de
+referencia) y confirma que el "oraculo independiente" siempre sera otro modelo. No es defecto nuevo
+—el A.3 ya lo declara asi— pero conviene tenerlo explicito antes de interpretar cualquier techo.
+
+**Verificacion:** suite completa **82 pasan + 1 skip**; `verify_summer_offline.py` exit 0;
+`git diff` vs `nota3-evidencia-2026-06-11` **solo altas**. Ninguna cifra del A.3/LACCI tocada.
+**Report-before-prose:** las tasas de declinacion corregidas y el 20 %→48 % de exp17 son material
+para el paper; NO se toca prosa sin OK frase por frase.
