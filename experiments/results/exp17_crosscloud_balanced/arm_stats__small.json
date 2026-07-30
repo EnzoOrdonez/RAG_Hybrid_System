@@ -6,11 +6,11 @@
   0.7,
   0.7
  ],
- "baseline": "baseline_repro",
- "n_queries_subset": 60,
+ "baseline": "baseline",
+ "n_queries_subset": 25,
  "baseline_mean_faithfulness": 0.199,
  "baseline_n_scored": 25,
- "bh_family": "4 arm-vs-baseline_repro contrasts (fdr_bh)",
+ "bh_family": "1 arm-vs-baseline contrasts (fdr_bh)",
  "decline_rule": "None-faithfulness pairs dropped (decline-aware); vacuous kept as 1.0",
  "bootstrap": {
   "n_boot": 10000,

@@ -9,7 +9,7 @@
  "n_queries_subset": 60,
  "baseline_mean_faithfulness": 0.4983,
  "baseline_n_scored": 60,
- "bh_family": "4 arm-vs-baseline_repro contrasts (fdr_bh)",
+ "bh_family": "2 arm-vs-baseline_repro contrasts (fdr_bh)",
  "decline_rule": "None-faithfulness pairs dropped (decline-aware); vacuous kept as 1.0",
  "bootstrap": {
   "n_boot": 10000,

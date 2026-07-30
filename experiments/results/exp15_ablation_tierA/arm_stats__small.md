@@ -1,6 +1,6 @@
-# Tier A — arm vs baseline_repro (NLI small, vb_agree τ0.7)
+# exp15_ablation_tierA — arm vs baseline_repro (NLI small, vb_agree τ0.7)
 
-Baseline_repro mean faithfulness: **0.3077** (n=60/60 scored). Decline-aware: None pairs dropped, vacuous=1.0. BH family = 4 contrasts.
+baseline_repro mean faithfulness: **0.3077** (n=60 scored). Decline-aware: None pairs dropped, vacuous=1.0. BH family = 4 contrasts.
 
 | Arm | det3x | n_pair | base | arm | Δ(arm-base) | boot95 | test p | d_z | p_BH | sig |
 |---|---|---|---|---|---|---|---|---|---|---|

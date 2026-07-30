@@ -1,6 +1,6 @@
-# exp17_crosscloud_balanced — arm vs baseline_repro (HHEM grounding, max_chunk τ0.5)
+# exp17_crosscloud_balanced — arm vs baseline (HHEM grounding, max_chunk τ0.5)
 
-baseline_repro mean faithfulness: **0.4772** (n=25 scored). Decline-aware: None pairs dropped, vacuous=1.0. BH family = 1 contrasts.
+baseline mean faithfulness: **0.4772** (n=25 scored). Decline-aware: None pairs dropped, vacuous=1.0. BH family = 1 contrasts.
 
 | Arm | det3x | n_pair | base | arm | Δ(arm-base) | boot95 | test p | d_z | p_BH | sig |
 |---|---|---|---|---|---|---|---|---|---|---|

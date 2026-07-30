@@ -1,6 +1,6 @@
-# exp17_crosscloud_balanced — arm vs baseline_repro (NLI base, vb_agree τ0.7)
+# exp17_crosscloud_balanced — arm vs baseline (NLI base, vb_agree τ0.7)
 
-baseline_repro mean faithfulness: **0.1514** (n=25 scored). Decline-aware: None pairs dropped, vacuous=1.0. BH family = 1 contrasts.
+baseline mean faithfulness: **0.1514** (n=25 scored). Decline-aware: None pairs dropped, vacuous=1.0. BH family = 1 contrasts.
 
 | Arm | det3x | n_pair | base | arm | Δ(arm-base) | boot95 | test p | d_z | p_BH | sig |
 |---|---|---|---|---|---|---|---|---|---|---|

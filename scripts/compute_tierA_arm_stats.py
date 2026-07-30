@@ -163,9 +163,14 @@ def main():
         "experiment_id": EXP_DIR.name,
         "verifier": args.verifier,
         "variant": vvariant, "thresholds": vthresh,
-        "baseline": "baseline_repro", "n_queries_subset": 60,
+        # These three MUST be derived, never hardcoded: exp16 (2 contrasts) and exp17
+        # (1 contrast, baseline arm 'baseline', n=25) reuse this script via --exp-dir,
+        # and a mis-declared BH family is exactly the defect that ledger entry 9 had to
+        # retract. See tests/test_arm_stats.py.
+        "baseline": args.baseline_arm,
+        "n_queries_subset": len(rows_base),
         "baseline_mean_faithfulness": base_mean, "baseline_n_scored": base_n,
-        "bh_family": "4 arm-vs-baseline_repro contrasts (fdr_bh)",
+        "bh_family": f"{len(contrasts)} arm-vs-{args.baseline_arm} contrasts (fdr_bh)",
         "decline_rule": "None-faithfulness pairs dropped (decline-aware); vacuous kept as 1.0",
         "bootstrap": {"n_boot": 10000, "seed": 42, "ci": "percentile 95%"},
         "contrasts": contrasts,
@@ -177,9 +182,9 @@ def main():
     # markdown
     thr = "τ0.5" if args.verifier == "hhem" else "τ0.7"
     nondet = [c["arm"] for c in contrasts if c["det_3x"] is False]
-    L = [f"# {out['experiment_id']} — arm vs baseline_repro ({vlabel}, {vvariant} {thr})",
+    L = [f"# {out['experiment_id']} — arm vs {args.baseline_arm} ({vlabel}, {vvariant} {thr})",
          "",
-         f"baseline_repro mean faithfulness: **{base_mean}** (n={base_n} scored). "
+         f"{args.baseline_arm} mean faithfulness: **{base_mean}** (n={base_n} scored). "
          f"Decline-aware: None pairs dropped, vacuous=1.0. BH family = {len(contrasts)} contrasts.",
          "",
          "| Arm | det3x | n_pair | base | arm | Δ(arm-base) | boot95 | test p | d_z | p_BH | sig |",

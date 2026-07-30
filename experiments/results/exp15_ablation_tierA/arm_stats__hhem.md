@@ -1,6 +1,6 @@
-# Tier A — arm vs baseline_repro (HHEM grounding, max_chunk τ0.5)
+# exp15_ablation_tierA — arm vs baseline_repro (HHEM grounding, max_chunk τ0.5)
 
-Baseline_repro mean faithfulness: **0.4499** (n=60/60 scored). Decline-aware: None pairs dropped, vacuous=1.0. BH family = 4 contrasts.
+baseline_repro mean faithfulness: **0.4499** (n=60 scored). Decline-aware: None pairs dropped, vacuous=1.0. BH family = 4 contrasts.
 
 | Arm | det3x | n_pair | base | arm | Δ(arm-base) | boot95 | test p | d_z | p_BH | sig |
 |---|---|---|---|---|---|---|---|---|---|---|
