@@ -99,7 +99,9 @@ def main():
         qs = all_qids if ARM_SCALE[arm] == "all" else sub_qids
         return qs[: args.max_queries] if args.max_queries else qs
 
-    qids = all_qids[: args.max_queries] if args.max_queries else all_qids
+    # Union over the arms actually being run, NOT just the first arm's list: the arms have
+    # different scopes, so the subset arm's queries are not a prefix of the full arm's.
+    qids = sorted({q for a in arms for q in qids_for(a)}, key=all_qids.index)
     missing = [a for a in arms
                if any(ids_doc[q].get(f"{a}_ids") is None for q in qids_for(a))]
     if missing:
