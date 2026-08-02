@@ -295,10 +295,34 @@ def pass_n(args, registry, exp_dir):
     claims_out = {"generated_by": "scripts/run_exp15_ablation.py::pass_n", "configs": {}}
     rows_v3 = {"verifier": name, "variant": "vb_agree", "margin": 0.0,
                "generated_by": "scripts/run_exp15_ablation.py::pass_n", "configs": {}}
+
+    # Per-arm checkpoint. pass_g has had one since Tier A; pass_n never did, and it is the
+    # longer pass on exp18 (~51k pairs per verifier, the top-10 arm alone is 29k because it
+    # carries 10 chunks). The environment has killed long jobs repeatedly, and without this
+    # a kill throws away the whole verifier pass. Scoring is deterministic re-aggregation of
+    # a fixed model over fixed text -- unlike generation, resuming it is exact and carries no
+    # H5 exposure.
+    part_path = exp_dir / f"pass_n__{args.verifier}.partial.json.gz"
+    if not getattr(args, "no_resume", False) and part_path.exists():
+        with gzip.open(part_path, "rt", encoding="utf-8") as f:
+            prev = json.load(f)
+        probs_out["configs"] = prev["probs"]
+        claims_out["configs"] = prev["claims"]
+        rows_v3["configs"] = prev["rows"]
+        logger.info("pass N resume: %d arms already scored", len(prev["probs"]))
+
+    def _save_partial():
+        with gzip.open(part_path, "wt", encoding="utf-8") as f:
+            json.dump({"probs": probs_out["configs"], "claims": claims_out["configs"],
+                       "rows": rows_v3["configs"]}, f)
+
     t0 = time.time()
 
     for cname, cdata in results.items():
         arm = cdata["scenario"]
+        if cname in probs_out["configs"]:
+            logger.info("[%s] already scored, skipping", cname)
+            continue
         if args.arms and arm not in args.arms:
             continue
         cfg_probs, cfg_claims, cfg_rows = {}, {}, {}
@@ -357,6 +381,7 @@ def pass_n(args, registry, exp_dir):
         rows_v3["configs"][cname] = cfg_rows
         logger.info("[%s] %d responses, %d pairs (%.0fs)",
                     cname, len(cfg_rows), len(pairs), time.time() - t0)
+        _save_partial()
 
     with gzip.open(exp_dir / f"nli_probs__{args.verifier}.json.gz", "wt", encoding="utf-8") as f:
         json.dump(probs_out, f)
@@ -364,6 +389,7 @@ def pass_n(args, registry, exp_dir):
         json.dumps(claims_out, indent=1), encoding="utf-8")
     (exp_dir / f"faithfulness_rows__{args.verifier}__vb_agree.json").write_text(
         json.dumps(rows_v3, indent=1), encoding="utf-8")
+    part_path.unlink(missing_ok=True)
     logger.info("Pass N done (%s) in %.0fs", args.verifier, time.time() - t0)
 
 
