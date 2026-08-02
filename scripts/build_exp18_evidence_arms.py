@@ -232,6 +232,12 @@ def main():
                         "dataset_query_type": item["query_type"],
                         "routing_query_type": routing_type[qid],
                         "in_summer_subset": qid in in_subset,
+                        # Full reranked candidate pool. Needed by
+                        # compute_exp18_selection_bound.py: an upper bound computed over a
+                        # subset of the pool is not an upper bound over the pool, and
+                        # understating the selection ceiling is exactly the bias that
+                        # argues for spending on cloud.
+                        "pool_ids": pool_ids,
                         "baseline_repro_ids": base_ids,
                         "final_top_k_10_ids": big_ids,
                         "oracle_evidence_ids": oracle_ids,

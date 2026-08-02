@@ -1,0 +1,211 @@
+"""exp18 — how much faithfulness could ANY evidence selection buy? (bracketed, not guessed)
+
+The `oracle_evidence` arm selects with bge-reranker-large, which ranks by TOPICAL RELEVANCE
+to the query. The metric asks something else: are the claims the model DECIDED TO ASSERT
+supported by the given chunks. A chunk can be maximally relevant and still not contain the
+specific fact the model asserted. So that arm measures the ceiling of relevance-optimal
+selection, which is a LOWER bound on the selection ceiling -- and its null, alone, cannot
+support "there is no selection headroom", which is the claim the cloud spend rests on.
+
+This closes that gap. For each query it takes the claims the BASELINE ALREADY WROTE and
+scores them against ALL 50 pool chunks, then reports two quantities that bracket the true
+k=5 optimum:
+
+  upper_bound       claims supportable by ANY pool chunk (max over all 50 > tau), / genuine.
+                    A STRICT UPPER BOUND: no 5-chunk selection can support a claim that no
+                    chunk in the pool supports. Needs no combinatorics.
+  achievable_k5     greedy max-coverage over the pool with k=5, floored at the baseline's own
+                    subset. A CONSTRUCTIVE LOWER BOUND on the k=5 optimum: this selection
+                    exists and achieves this number.
+
+Why both. Choosing the best 5 of 50 to maximise covered claims is max-coverage, NP-hard;
+greedy only guarantees (1-1/e)~0.63 of the optimum, so greedy alone would UNDERSTATE the
+ceiling -- and understating the selection ceiling is precisely the bias that argues for
+spending on cloud. Reporting the bracket avoids claiming either direction.
+
+CIRCULAR BY CONSTRUCTION, and declared as such: the selection is chosen using the answer's
+own claims, so this is NOT an effect estimate, NOT an experimental arm, and NEVER enters the
+BH family or the TOST. Its value is logical, not inferential: no non-circular selector can
+beat `upper_bound`. Read it as:
+
+  upper_bound ~ baseline      selection is genuinely exhausted -> the ceiling is elsewhere
+                              (capacity / instrument), and the cloud diagnostic is justified
+  achievable_k5 >> baseline   headroom EXISTS and is reachable with 5 chunks; the oracle's
+                              null then means relevance ranking cannot find it, and the
+                              missing piece is a grounding-guided selector -- a LOCAL method,
+                              no spend required
+
+Scoring mirrors rescore_grounding_exp15.py exactly (HHEM-2.1, premise truncated to 1500
+chars, batch 16, supported iff max chunk p > tau) so the numbers are directly comparable to
+every other faithfulness figure in the phase.
+
+Usage: python scripts/compute_exp18_selection_bound.py [--tau 0.5] [--max-queries N]
+Env:   HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42
+"""
+import argparse
+import gzip
+import json
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.generation.hallucination_detector import (  # noqa: E402
+    HallucinationDetector, classify_artifact)
+from scripts.rescore_grounding_exp15 import load_hhem  # noqa: E402
+
+EXP_DIR = PROJECT_ROOT / "experiments/results/exp18_evidence_ceiling"
+CHUNK_MAP = PROJECT_ROOT / "data/indices/chunk_map_bge-large_adaptive_500.json"
+BASELINE_ARM = "baseline_repro"
+FINAL_K = 5
+PREMISE_CHARS = 1500   # == rescore_grounding_exp15
+BATCH = 16             # T5 on 6 GB
+
+
+def greedy_cover(cov, k):
+    """Greedy max-coverage: pick k chunks covering the most still-uncovered claims.
+
+    cov[j] = set of claim indices chunk j supports. Greedy is (1-1/e)-optimal, which is why
+    the result is reported as a LOWER bound and floored at the baseline's own subset.
+    """
+    chosen, covered = [], set()
+    for _ in range(min(k, len(cov))):
+        best, gain = None, -1
+        for j in range(len(cov)):
+            if j in chosen:
+                continue
+            g = len(cov[j] - covered)
+            if g > gain:
+                best, gain = j, g
+        if best is None or gain <= 0:
+            break
+        chosen.append(best)
+        covered |= cov[best]
+    return chosen, covered
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tau", type=float, default=0.5)
+    ap.add_argument("--max-queries", type=int, default=None,
+                    help="smoke mode; writes to a __smokeN file that cannot overwrite the real one")
+    args = ap.parse_args()
+    suffix = f"__smoke{args.max_queries}" if args.max_queries else ""
+
+    ids_doc = json.loads((EXP_DIR / "retrieval_ids.json").read_text(encoding="utf-8"))["ids"]
+    results = json.loads((EXP_DIR / "results.json").read_text(encoding="utf-8"))["configs"]
+    chunk_map = json.loads(CHUNK_MAP.read_text(encoding="utf-8"))
+    base_cfg = next(k for k, c in results.items() if c.get("scenario") == BASELINE_ARM)
+    rows = results[base_cfg]["results"]
+    if args.max_queries:
+        rows = rows[: args.max_queries]
+
+    det = HallucinationDetector(use_nli=False)
+    print(f"loading HHEM-2.1 ... ({len(rows)} queries)", flush=True)
+    model = load_hhem()
+
+    part = EXP_DIR / f"selection_bound{suffix}.partial.json"
+    per_query = json.loads(part.read_text(encoding="utf-8")) if part.exists() else {}
+    if per_query:
+        print(f"resuming: {len(per_query)} queries done", flush=True)
+
+    t0 = time.time()
+    for n, r in enumerate(rows, 1):
+        qid = r["query_id"]
+        if qid in per_query:
+            continue
+        answer = r.get("answer") or ""
+        claims = det._extract_claims(answer) if answer.strip() else []
+        genuine = [c for c in claims if not classify_artifact(c)]
+        pool_ids = ids_doc[qid].get("pool_ids")
+        if not pool_ids:
+            sys.exit(
+                f"{qid}: retrieval_ids.json has no `pool_ids`. The bound MUST be computed "
+                f"over the full k=50 candidate pool -- a bound over a subset of the pool is "
+                f"not a bound over the pool, and it would understate the selection ceiling. "
+                f"Re-run: python scripts/build_exp18_evidence_arms.py --queries all")
+        pool_ids = [c for c in pool_ids if c in chunk_map]
+        if not genuine or not pool_ids:
+            per_query[qid] = {"genuine": 0, "baseline_faith": None,
+                              "upper_bound": None, "achievable_k5": None, "n_pool": len(pool_ids)}
+            continue
+
+        texts = [chunk_map[c]["text"][:PREMISE_CHARS] for c in pool_ids]
+        pairs = [(t, cl) for cl in genuine for t in texts]
+        scores = []
+        import torch
+        for i in range(0, len(pairs), BATCH):
+            with torch.no_grad():
+                scores.extend(float(x) for x in model.predict(pairs[i:i + BATCH]))
+        S = np.array(scores).reshape(len(genuine), len(pool_ids))   # claim x chunk
+
+        sup = S > args.tau
+        # strict upper bound: any chunk in the pool may support the claim
+        upper = int(sup.any(axis=1).sum()) / len(genuine)
+        # constructive lower bound on the k=5 optimum
+        cov = [set(np.nonzero(sup[:, j])[0].tolist()) for j in range(len(pool_ids))]
+        _, covered = greedy_cover(cov, FINAL_K)
+        base_idx = [pool_ids.index(c) for c in ids_doc[qid]["baseline_repro_ids"]
+                    if c in pool_ids]
+        base_cov = set(np.nonzero(sup[:, base_idx].any(axis=1))[0].tolist()) if base_idx else set()
+        achievable = max(len(covered), len(base_cov)) / len(genuine)
+
+        per_query[qid] = {
+            "genuine": len(genuine), "n_pool": len(pool_ids),
+            "baseline_faith": round(len(base_cov) / len(genuine), 4),
+            "upper_bound": round(upper, 4),
+            "achievable_k5": round(achievable, 4),
+        }
+        if n % 10 == 0:
+            part.write_text(json.dumps(per_query), encoding="utf-8")
+            print(f"  [{n}/{len(rows)}] {qid} base={per_query[qid]['baseline_faith']} "
+                  f"k5={per_query[qid]['achievable_k5']} upper={per_query[qid]['upper_bound']} "
+                  f"({time.time()-t0:.0f}s)", flush=True)
+
+    vals = [v for v in per_query.values() if v.get("upper_bound") is not None]
+    # validity: the bracket must hold in EVERY query, by construction
+    bad = [q for q, v in per_query.items() if v.get("upper_bound") is not None
+           and not (v["baseline_faith"] <= v["achievable_k5"] + 1e-9 <= v["upper_bound"] + 1e-9)]
+    out = {
+        "experiment_id": "exp18_evidence_ceiling", "tau": args.tau,
+        "n_queries_scored": len(vals),
+        "baseline_mean": round(float(np.mean([v["baseline_faith"] for v in vals])), 4),
+        "achievable_k5_mean": round(float(np.mean([v["achievable_k5"] for v in vals])), 4),
+        "upper_bound_mean": round(float(np.mean([v["upper_bound"] for v in vals])), 4),
+        "bracket_violations": bad,
+        "status": "CIRCULAR BY CONSTRUCTION — upper/achievable are bounds, not effect "
+                  "estimates. Never enter the BH family or the TOST.",
+        "reading": ("upper_bound ~ baseline => selection genuinely exhausted (ceiling is "
+                    "capacity or instrument); achievable_k5 >> baseline => headroom exists "
+                    "and is reachable with 5 chunks, so the oracle's null means relevance "
+                    "ranking cannot find it and the missing piece is a grounding-guided "
+                    "selector, which is LOCAL."),
+        "per_query": per_query,
+        "generated_by": "scripts/compute_exp18_selection_bound.py",
+    }
+    (EXP_DIR / f"selection_bound{suffix}.json").write_text(
+        json.dumps(out, indent=1), encoding="utf-8")
+    part.unlink(missing_ok=True)
+
+    L = [f"# exp18 — cota de seleccion (HHEM tau {args.tau}, n={len(vals)})", "",
+         "**Circular por construccion**: la seleccion se elige usando los claims que la propia "
+         "respuesta escribio. Son COTAS, no estimaciones de efecto. No entran en la familia BH "
+         "ni en el TOST.", "",
+         "| | media |", "|---|---|",
+         f"| baseline (su propio top-5) | {out['baseline_mean']} |",
+         f"| **alcanzable con k=5** (greedy, suelo=baseline) | **{out['achievable_k5_mean']}** |",
+         f"| **cota superior** (cualquier chunk del pool) | **{out['upper_bound_mean']}** |", "",
+         f"Violaciones del bracket: **{len(bad)}** (debe ser 0; "
+         f"baseline <= alcanzable <= cota por construccion).", "", out["reading"]]
+    (EXP_DIR / f"selection_bound{suffix}.md").write_text("\n".join(L), encoding="utf-8")
+    print("\n".join(L))
+    if bad:
+        sys.exit(f"\nBRACKET VIOLADO en {len(bad)} queries -> hay un bug, no interpretar")
+
+
+if __name__ == "__main__":
+    main()
