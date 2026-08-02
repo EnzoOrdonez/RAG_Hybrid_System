@@ -925,3 +925,95 @@ El oraculo de seleccion es **bge-reranker-large**, independiente de los verifica
 ancla en **0,40-0,55** (guarda de carga: un HHEM mal cargado puntuaba ~0,04 y "corria") · sonda de
 determinismo 3× por brazo · `--no-cache` (el cache se indexa por `config_name‖prompt`, no por
 exp-id — sirvio respuestas stale a exp16).
+
+## Entrada 20 — exp18: matriz de decision CORREGIDA, committeada ANTES de puntuar (2026-08-02)
+
+La generacion esta hecha (entrada previa) pero **nadie ha visto una sola cifra de fidelidad**. Se fija
+aqui como se lee, por el mismo motivo que se pre-registro el TOST: si la matriz decide un gasto, no
+puede elegirse despues de ver los numeros.
+
+### Por que se reescribe la matriz propuesta
+
+La version propuesta decia: *"oraculo equivalente ⇒ nube justificada"*. **Es un non sequitur**, y es
+justo la fila que sostiene el gasto. La equivalencia bajo un oraculo de RELEVANCIA descarta unicamente
+el margen del **ranking topico**. Sobreviven cuatro explicaciones:
+
+  (a) capacidad de generacion,
+  (b) suelo del instrumento (22 % falso-contradicted sobre texto aleatorio),
+  (c) recall del pool k=50 — la evidencia puede sencillamente no estar,
+  (d) **relevancia ≠ anclabilidad**: `bge-reranker-large` ordena por relevancia topica a la CONSULTA,
+      mientras la metrica pregunta si los claims que el modelo DECIDIO AFIRMAR estan respaldados. Un
+      chunk puede ser muy relevante y no contener el hecho concreto afirmado.
+
+→ El brazo de oraculo mide el techo de la **seleccion optima-por-relevancia**, que es una **cota
+inferior** del techo de seleccion. Su nulo, por si solo, no prueba "no hay margen".
+
+### Matriz de decision (lectura CONJUNTA, no del oraculo solo)
+
+| `evidence_swapped` | `oracle_evidence` | Lectura | Nube |
+|---|---|---|---|
+| diverge mucho (usa el contexto) | **sube** sig. | margen de seleccion alcanzable en LOCAL | no urgente |
+| diverge mucho | **equivalente** (TOST) **y cota ≈ baseline** | seleccion agotada de verdad; queda capacidad | **justificada** |
+| diverge mucho | **equivalente** pero **cota >> baseline** | hay margen, el ranking topico no lo encuentra | **no** — falta un selector guiado por anclaje, y es local |
+| apenas diverge (ignora el contexto) | cualquiera | el generador NO usa la evidencia → reencuadra el nulo de recuperacion entero | **justificada** (capacidad/atencion) |
+| — | ni sig. ni equivalente | **INCONCLUSO** | **no justifica gasto**; se reporta asi, sin redondear |
+
+**Regla dura: un nulo simple NO justifica gasto. Solo la equivalencia TOST junto con la cota.**
+
+**Banda ±0,081: se mantiene.** Es un tamano de efecto, invariante al n; el n solo cambia la POTENCIA
+(94 % de equivalencia a n=185, simulado). Supuesto declarado: se midio en 25 queries cross-cloud con
+HHEM y se aplica a 194 mixtas, en calidad de "el menor efecto que nos importaria".
+
+### Cota de seleccion condicionada a la respuesta (desambigua (c) y (d))
+
+Para cada query: tomar los claims que el baseline **ya escribio** y elegir del pool k=50 los 5 chunks
+que MAXIMIZAN su soporte HHEM. Es la fidelidad maxima alcanzable **por seleccion** para esa respuesta.
+
+**Circular por construccion, y declarado como tal: vale SOLO como cota superior.** Nunca como
+estimacion de efecto, nunca como brazo, nunca dentro de la familia BH ni del TOST. Su valor es logico,
+no inferencial: **ningun metodo de seleccion no-circular puede superarla**, asi que si la cota no sube
+sobre el baseline, la seleccion esta agotada de verdad — y si la cota sube pero el oraculo no, entonces
+el techo NO es capacidad sino que falta un selector guiado por anclaje, que es un metodo LOCAL y no
+requiere gastar un centavo.
+
+### Lecturas de apoyo, tambien fijadas de antemano
+
+- **`evidence_swapped` es un control de validez, no un brazo mas.** Si la respuesta apenas cambia al
+  darle la evidencia de OTRA consulta, la generacion no esta usando el contexto y ninguna mejora de
+  recuperacion podria haber movido nunca la fidelidad — eso reencuadraria el hallazgo central. Se lee
+  por DIVERGENCIA de respuesta (jaccard 5-grama y de tokens, tasa de identicas, reaparicion de claims),
+  no por fidelidad: un brazo con evidencia ajena puntua bajo tanto si el modelo la ignoro como si la
+  siguio correctamente, y la fidelidad no distingue esos dos casos.
+- **Denominadores desiguales (C9).** Claims genuinos por respuesta medidos sobre las 642 ANTES de
+  puntuar: baseline **10,6** · oracle **10,7** · **swapped 4,8** · **top10 15,0**. La fidelidad es
+  `soportados/genuinos`, asi que parte de cualquier Δ entre brazos es un cambio de denominador. Cada Δ
+  se reporta junto al conteo de claims, y el **GLMM claim-level pasa a lectura de primera linea**.
+  (De paso: que el swap afirme menos de la MITAD de claims ya sugiere que el generador si reacciona a
+  la evidencia — pero es senal previa, no conclusion.)
+- **`final_top_k_10` se lee PARTIDO** por truncacion observada (74 truncadas / 120 no). Solo el estrato
+  no-truncado es lectura limpia de "mas evidencia ayuda".
+- **Familia BH declarada = 3 contrastes brazo-vs-baseline_repro, por verificador.** Triangulacion en
+  los 3 (NLI small, NLI base, HHEM).
+
+### Guardas de instrumento antes de interpretar nada
+
+Nivel HHEM del ancla en **0,40-0,55** (un HHEM mal cargado puntuaba ~0,04 y "corria"). La cota debe ser
+**≥ la fidelidad del baseline en TODA query por construccion**; si alguna la incumple, hay un bug y se
+para. Si el nivel del ancla cae fuera de rango, se para y se diagnostica.
+
+### Otros hallazgos del barrido de supuestos fragiles
+
+- `vacuous → faithfulness = 1.0` esta duplicado en **9 sitios**. Interaccion peligrosa: si el brazo
+  swapped produjera respuestas cuyos claims son todos artefactos, puntuarian 1,0 y el brazo disenado
+  para mostrar anclaje bajo saldria ALTO. **Medido: 2-3 % en todos los brazos (top10 0 %) → no es
+  amenaza aqui.** Descartado con datos. Deuda tecnica.
+- Umbrales 0,7 definidos en **6 sitios** (constantes de clase de `hallucination_detector` + 5 scripts
+  con su propio ENT_T/CONTR_T). Todos valen 0,7 hoy → sin bug vivo, pero cambiar la constante de clase
+  no propagaria. Deuda tecnica, severidad menor que la regla de declinacion (que si divergia).
+- `_extract_claims` y `classify_artifact`: **una sola implementacion**, importada por todos. Limpio.
+
+### Correccion de una afirmacion propia
+
+Se dijo antes que «oraculo ∩ baseline = 2,046/5 ⇒ hay margen de seleccion real». Eso establece que los
+brazos **DIFIEREN** (el brazo no es degenerado y su nulo seria informativo), **no** que el oraculo sea
+mejor. Overclaim; lo que puede responderlo es la cota.
