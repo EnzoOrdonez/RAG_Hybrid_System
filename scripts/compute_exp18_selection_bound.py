@@ -154,11 +154,20 @@ def main():
         base_cov = set(np.nonzero(sup[:, base_idx].any(axis=1))[0].tolist()) if base_idx else set()
         achievable = max(len(covered), len(base_cov)) / len(genuine)
 
+        # Diagnostics for the claims NO pool chunk supports. Without these, "the pool cannot
+        # support it" is indistinguishable from "it sits just under tau": a max of 0.02 means
+        # the claim is genuinely absent from the retrieved evidence, a max of 0.49 means the
+        # bound is an artefact of where the threshold was put.
+        best_over_pool = S.max(axis=1)
+        unsup = best_over_pool[~sup.any(axis=1)]
         per_query[qid] = {
             "genuine": len(genuine), "n_pool": len(pool_ids),
             "baseline_faith": round(len(base_cov) / len(genuine), 4),
             "upper_bound": round(upper, 4),
             "achievable_k5": round(achievable, 4),
+            "n_unsupportable": int(len(unsup)),
+            "unsupportable_best_score": [round(float(x), 4) for x in unsup],
+            "near_tau_unsupportable": int((unsup > args.tau - 0.1).sum()),
         }
         if n % 10 == 0:
             part.write_text(json.dumps(per_query), encoding="utf-8")
@@ -167,6 +176,8 @@ def main():
                   f"({time.time()-t0:.0f}s)", flush=True)
 
     vals = [v for v in per_query.values() if v.get("upper_bound") is not None]
+    all_unsup = [s for v in vals for s in v["unsupportable_best_score"]]
+    near = sum(v["near_tau_unsupportable"] for v in vals)
     # validity: the bracket must hold in EVERY query, by construction
     bad = [q for q, v in per_query.items() if v.get("upper_bound") is not None
            and not (v["baseline_faith"] <= v["achievable_k5"] + 1e-9 <= v["upper_bound"] + 1e-9)]
@@ -177,6 +188,19 @@ def main():
         "achievable_k5_mean": round(float(np.mean([v["achievable_k5"] for v in vals])), 4),
         "upper_bound_mean": round(float(np.mean([v["upper_bound"] for v in vals])), 4),
         "bracket_violations": bad,
+        "unsupportable_claims": {
+            "n": len(all_unsup),
+            "best_score_over_pool": {
+                "mean": round(float(np.mean(all_unsup)), 4) if all_unsup else None,
+                "p50": round(float(np.median(all_unsup)), 4) if all_unsup else None,
+                "p90": round(float(np.percentile(all_unsup, 90)), 4) if all_unsup else None,
+            },
+            "n_within_0.1_of_tau": near,
+            "why": ("Claims no pool chunk supports. If their best score is far below tau, the "
+                    "claim is genuinely absent from the retrieved evidence and no selection "
+                    "could ever ground it. If it clusters just under tau, the bound is an "
+                    "artefact of the threshold, not of the evidence."),
+        },
         "status": "CIRCULAR BY CONSTRUCTION — upper/achievable are bounds, not effect "
                   "estimates. Never enter the BH family or the TOST.",
         "reading": ("upper_bound ~ baseline => selection genuinely exhausted (ceiling is "
@@ -200,7 +224,15 @@ def main():
          f"| **alcanzable con k=5** (greedy, suelo=baseline) | **{out['achievable_k5_mean']}** |",
          f"| **cota superior** (cualquier chunk del pool) | **{out['upper_bound_mean']}** |", "",
          f"Violaciones del bracket: **{len(bad)}** (debe ser 0; "
-         f"baseline <= alcanzable <= cota por construccion).", "", out["reading"]]
+         f"baseline <= alcanzable <= cota por construccion).", "",
+         f"**Claims que NINGUN chunk del pool soporta:** {len(all_unsup)}. "
+         f"Su mejor score sobre el pool: media {out['unsupportable_claims']['best_score_over_pool']['mean']}, "
+         f"p50 {out['unsupportable_claims']['best_score_over_pool']['p50']}, "
+         f"p90 {out['unsupportable_claims']['best_score_over_pool']['p90']} (tau {args.tau}). "
+         f"A menos de 0,1 del umbral: **{near}**.", "",
+         "Si esos scores estan muy por debajo de tau, el claim sencillamente NO esta en la "
+         "evidencia recuperada y ninguna seleccion podria anclarlo; si se agolpan justo bajo "
+         "tau, la cota es artefacto del umbral y no de la evidencia.", "", out["reading"]]
     (EXP_DIR / f"selection_bound{suffix}.md").write_text("\n".join(L), encoding="utf-8")
     print("\n".join(L))
     if bad:
