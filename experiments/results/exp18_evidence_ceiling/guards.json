@@ -1,0 +1,85 @@
+{
+ "experiment_id": "exp18_evidence_ceiling",
+ "rows_verifier": "small",
+ "decline_rule": "scripts/compute_faithfulness_metrics.classify_response \u2014 the SAME function the faithfulness metric uses (14 canonical DECLINE_PATTERNS + 14 EXTENDED_REFUSAL_PATTERNS, case-insensitive; pure_decline = marker within the first 300 chars)",
+ "overlap": "mean frac of answer word-5-grams in chunks",
+ "arms": [
+  {
+   "config": "baseline_repro | granite4.1-8b",
+   "scenario": "baseline_repro",
+   "n": 194,
+   "pure_decline_rate": 0.4588,
+   "hedged_partial_rate": 0.1546,
+   "answered_rate": 0.3866,
+   "any_refusal_rate": 0.6134,
+   "n_by_class": {
+    "pure_decline": 89,
+    "hedged_partial": 30,
+    "answered": 75,
+    "empty": 0
+   },
+   "mean_answer_chars": 2390.4,
+   "mean_answer_words": 332.6,
+   "mean_genuine_claims": 10.582,
+   "verbatim_overlap_5gram": 0.1076
+  },
+  {
+   "config": "oracle_evidence | granite4.1-8b",
+   "scenario": "oracle_evidence",
+   "n": 194,
+   "pure_decline_rate": 0.4381,
+   "hedged_partial_rate": 0.1392,
+   "answered_rate": 0.4227,
+   "any_refusal_rate": 0.5773,
+   "n_by_class": {
+    "pure_decline": 85,
+    "hedged_partial": 27,
+    "answered": 82,
+    "empty": 0
+   },
+   "mean_answer_chars": 2470.7,
+   "mean_answer_words": 339.8,
+   "mean_genuine_claims": 10.737,
+   "verbatim_overlap_5gram": 0.1054
+  },
+  {
+   "config": "evidence_swapped | granite4.1-8b",
+   "scenario": "evidence_swapped",
+   "n": 60,
+   "pure_decline_rate": 0.8833,
+   "hedged_partial_rate": 0.1,
+   "answered_rate": 0.0167,
+   "any_refusal_rate": 0.9833,
+   "n_by_class": {
+    "pure_decline": 53,
+    "hedged_partial": 6,
+    "answered": 1,
+    "empty": 0
+   },
+   "mean_answer_chars": 1132.2,
+   "mean_answer_words": 159.7,
+   "mean_genuine_claims": 4.833,
+   "verbatim_overlap_5gram": 0.0215
+  },
+  {
+   "config": "final_top_k_10 | granite4.1-8b",
+   "scenario": "final_top_k_10",
+   "n": 194,
+   "pure_decline_rate": 0.2268,
+   "hedged_partial_rate": 0.1031,
+   "answered_rate": 0.6701,
+   "any_refusal_rate": 0.3299,
+   "n_by_class": {
+    "pure_decline": 44,
+    "hedged_partial": 20,
+    "answered": 130,
+    "empty": 0
+   },
+   "mean_answer_chars": 2895.8,
+   "mean_answer_words": 397.3,
+   "mean_genuine_claims": 14.985,
+   "verbatim_overlap_5gram": 0.0935
+  }
+ ],
+ "generated_by": "scripts/compute_exp16_guards.py"
+}

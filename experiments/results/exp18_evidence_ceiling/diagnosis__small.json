@@ -1,0 +1,68 @@
+{
+ "experiment_id": "exp18_evidence_ceiling",
+ "verifier": "small",
+ "baseline_arm": "baseline_repro",
+ "divergence_note": "Answer divergence vs baseline. LOW divergence on `evidence_swapped` means the generator does not track the evidence it is given -- which would explain the retrieval null directly. Faithfulness alone cannot distinguish that from the model correctly following wrong evidence, since both score low.",
+ "answer_divergence": [
+  {
+   "arm": "oracle_evidence",
+   "n_paired": 194,
+   "jaccard_5gram_vs_baseline": 0.0806,
+   "token_jaccard_vs_baseline": 0.3858,
+   "identical_answer_rate": 0.0,
+   "baseline_claim_reappearance": 0.0132
+  },
+  {
+   "arm": "evidence_swapped",
+   "n_paired": 60,
+   "jaccard_5gram_vs_baseline": 0.0358,
+   "token_jaccard_vs_baseline": 0.2512,
+   "identical_answer_rate": 0.0,
+   "baseline_claim_reappearance": 0.0009
+  },
+  {
+   "arm": "final_top_k_10",
+   "n_paired": 194,
+   "jaccard_5gram_vs_baseline": 0.0599,
+   "token_jaccard_vs_baseline": 0.3535,
+   "identical_answer_rate": 0.0,
+   "baseline_claim_reappearance": 0.0179
+  }
+ ],
+ "preregistered_equivalence": {
+  "n": 190,
+  "band": 0.081,
+  "alpha": 0.05,
+  "mean_diff": 0.0008,
+  "se": 0.0253,
+  "ci90": [
+   -0.0411,
+   0.0426
+  ],
+  "p_tost": 0.00089,
+  "equivalent": true,
+  "reading": "EQUIVALENTE dentro de \u00b10.081: seleccionar con un oraculo de RELEVANCIA TOPICA no compra ni lo que compro balancear la cobertura. Esto descarta el margen alcanzable por ranking topico, NO el margen de seleccion en general -> leer junto a selection_bound.json (matriz, ledger entrada 20).",
+  "arm": "oracle_evidence",
+  "band_source": "exp17 HHEM effect of provider balancing (+0.081); pre-existing and blind to this contrast"
+ },
+ "truncation_split_final_top_k_10": {
+  "context_limit": 4096,
+  "n_truncated": 74,
+  "groups": {
+   "untruncated": {
+    "n": 117,
+    "baseline_mean": 0.2323,
+    "top10_mean": 0.224,
+    "mean_diff": -0.0083
+   },
+   "truncated": {
+    "n": 73,
+    "baseline_mean": 0.2596,
+    "top10_mean": 0.3048,
+    "mean_diff": 0.0453
+   }
+  },
+  "note": "Only `untruncated` is a clean read on whether more evidence helps. The truncated group mixes more evidence with cut-off evidence and must not be averaged into a single number."
+ },
+ "generated_by": "scripts/compute_exp18_diagnosis.py"
+}

@@ -1,0 +1,153 @@
+{
+ "experiment_id": "exp18_evidence_ceiling",
+ "analysis": "claim-level reanalysis of the 3 arm-vs-baseline_repro contrasts",
+ "baseline_arm": "baseline_repro",
+ "arms": [
+  "oracle_evidence",
+  "evidence_swapped",
+  "final_top_k_10"
+ ],
+ "direction": "TWO-SIDED (ledger entry 19 pre-registration); exp17's one-sided p-values are converted, not reused as-is",
+ "estimators": "imported from scripts/compute_exp17_powered.py (same validated code)",
+ "models": {
+  "glmm": "supported ~ arm + (1|query), binomial VB; keeps query pairing",
+  "cluster_bootstrap": "resample queries; paired micro-faithfulness diff; seed 42"
+ },
+ "conditionality": "claim-level is conditional on a genuine claim, so declines and vacuous answers drop out. evidence_swapped declines in 88% of its queries, so its conditional result answers only 'among the claims it did assert, were they grounded?' -- read with arm_stats and guards.",
+ "denominator_note": "genuine claims per response differ sharply across arms (baseline 10.6, oracle 10.7, swapped 4.8, top-10 15.0), which is why the claim-level view is a first-line reading here.",
+ "verifiers": {
+  "small": {
+   "oracle_evidence": {
+    "n_queries_paired": 194,
+    "n_claims": 4136,
+    "micro_baseline": 0.2655,
+    "micro_arm": 0.2727,
+    "micro_diff": 0.0072,
+    "boot95": [
+     -0.0524,
+     0.068
+    ],
+    "boot_p_two_sided": 0.8068,
+    "glmm_odds_ratio": 0.9511,
+    "glmm_p_two_sided": 0.37668
+   },
+   "evidence_swapped": {
+    "n_queries_paired": 60,
+    "n_claims": 1005,
+    "micro_baseline": 0.2923,
+    "micro_arm": 0.1034,
+    "micro_diff": -0.1889,
+    "boot95": [
+     -0.3431,
+     -0.0217
+    ],
+    "boot_p_two_sided": 0.0262,
+    "glmm_odds_ratio": 0.2718,
+    "glmm_p_two_sided": 0.0
+   },
+   "final_top_k_10": {
+    "n_queries_paired": 194,
+    "n_claims": 4960,
+    "micro_baseline": 0.2655,
+    "micro_arm": 0.2738,
+    "micro_diff": 0.0084,
+    "boot95": [
+     -0.0438,
+     0.0638
+    ],
+    "boot_p_two_sided": 0.7574,
+    "glmm_odds_ratio": 1.0413,
+    "glmm_p_two_sided": 0.4275
+   }
+  },
+  "base": {
+   "oracle_evidence": {
+    "n_queries_paired": 194,
+    "n_claims": 4136,
+    "micro_baseline": 0.1481,
+    "micro_arm": 0.1992,
+    "micro_diff": 0.0512,
+    "boot95": [
+     0.007,
+     0.0973
+    ],
+    "boot_p_two_sided": 0.0246,
+    "glmm_odds_ratio": 1.4505,
+    "glmm_p_two_sided": 0.0
+   },
+   "evidence_swapped": {
+    "n_queries_paired": 60,
+    "n_claims": 1005,
+    "micro_baseline": 0.1776,
+    "micro_arm": 0.031,
+    "micro_diff": -0.1466,
+    "boot95": [
+     -0.2186,
+     -0.0759
+    ],
+    "boot_p_two_sided": 0.0,
+    "glmm_odds_ratio": 0.1606,
+    "glmm_p_two_sided": 0.0
+   },
+   "final_top_k_10": {
+    "n_queries_paired": 194,
+    "n_claims": 4960,
+    "micro_baseline": 0.1481,
+    "micro_arm": 0.1386,
+    "micro_diff": -0.0094,
+    "boot95": [
+     -0.0447,
+     0.027
+    ],
+    "boot_p_two_sided": 0.592,
+    "glmm_odds_ratio": 0.9625,
+    "glmm_p_two_sided": 0.52746
+   }
+  },
+  "hhem": {
+   "oracle_evidence": {
+    "n_queries_paired": 194,
+    "n_claims": 4136,
+    "micro_baseline": 0.4929,
+    "micro_arm": 0.5305,
+    "micro_diff": 0.0375,
+    "boot95": [
+     -0.0088,
+     0.0823
+    ],
+    "boot_p_two_sided": 0.1138,
+    "glmm_odds_ratio": 1.1724,
+    "glmm_p_two_sided": 0.0009
+   },
+   "evidence_swapped": {
+    "n_queries_paired": 60,
+    "n_claims": 1005,
+    "micro_baseline": 0.4615,
+    "micro_arm": 0.1069,
+    "micro_diff": -0.3546,
+    "boot95": [
+     -0.4358,
+     -0.272
+    ],
+    "boot_p_two_sided": 0.0,
+    "glmm_odds_ratio": 0.1205,
+    "glmm_p_two_sided": 0.0
+   },
+   "final_top_k_10": {
+    "n_queries_paired": 194,
+    "n_claims": 4960,
+    "micro_baseline": 0.4929,
+    "micro_arm": 0.4723,
+    "micro_diff": -0.0206,
+    "boot95": [
+     -0.0596,
+     0.017
+    ],
+    "boot_p_two_sided": 0.2934,
+    "glmm_odds_ratio": 1.0221,
+    "glmm_p_two_sided": 0.58978
+   }
+  }
+ },
+ "generated_by": "scripts/compute_exp18_powered.py"
+}

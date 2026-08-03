@@ -108,9 +108,18 @@ def tost(diffs, band=TOST_BAND, alpha=TOST_ALPHA):
         "ci90": [round(lo, 4), round(hi, 4)],
         "p_tost": round(p, 5),
         "equivalent": bool(p < alpha),
-        "reading": ("EQUIVALENTE: la diferencia cae dentro de ±%.3f, asi que el oraculo no "
-                    "compra ni lo que compro balancear la cobertura -> la palanca de "
-                    "SELECCION esta agotada" % band) if p < alpha else
+        # This arm alone CANNOT conclude "selection is exhausted". The oracle ranks by
+        # TOPICAL RELEVANCE to the query, while the metric asks whether the claims the model
+        # chose to assert are supported -- so equivalence here rules out headroom reachable
+        # by relevance ranking, and nothing more. Whether any selection could help is
+        # answered by selection_bound.json, and the verdict is the JOINT reading of the two
+        # (ledger entry 20). An earlier version of this string asserted the stronger claim;
+        # it would have contradicted the bound artifact sitting next to it.
+        "reading": ("EQUIVALENTE dentro de ±%.3f: seleccionar con un oraculo de RELEVANCIA "
+                    "TOPICA no compra ni lo que compro balancear la cobertura. Esto descarta "
+                    "el margen alcanzable por ranking topico, NO el margen de seleccion en "
+                    "general -> leer junto a selection_bound.json (matriz, ledger entrada 20)."
+                    % band) if p < alpha else
                    ("NO concluyente: el IC90 no cabe entero en ±%.3f, asi que estos datos NO "
                     "permiten afirmar equivalencia (ni significancia). Un nulo aqui NO "
                     "justifica el gasto en nube." % band),

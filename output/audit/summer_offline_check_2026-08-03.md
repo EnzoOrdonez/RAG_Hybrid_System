@@ -60,12 +60,22 @@ Experimentos descubiertos por forma del artefacto: exp15_ablation_tierA, exp16_a
 - [OK ] exp17_crosscloud_balanced: nivel HHEM del ancla en rango (carga verificada) — 0.4772
 
 ## exp18_evidence_ceiling  (ancla: baseline_repro)
-- [OK ] exp18_evidence_ceiling/small: 188 faithfulness cells re-aggregated from raw probs — exact
-- [PEND] exp18_evidence_ceiling/small: sin arm_stats todavia (experimento generado, analisis pendiente)
-- [OK ] exp18_evidence_ceiling/base: 188 faithfulness cells re-aggregated from raw probs — exact
-- [PEND] exp18_evidence_ceiling/base: sin arm_stats todavia (experimento generado, analisis pendiente)
+- [OK ] exp18_evidence_ceiling/small: 625 faithfulness cells re-aggregated from raw probs — exact
+- [OK ] exp18_evidence_ceiling/small: 3 paired contrasts recomputed (Wilcoxon/d_z/BH) — exact
+- [OK ] exp18_evidence_ceiling/small: declared BH family == contrast count — declares 3, has 3
+- [OK ] exp18_evidence_ceiling/small: declared anchor == actual anchor — declares baseline_repro, is baseline_repro
+    · 1/3 significativos (BH) · nivel ancla 0.2415
+- [OK ] exp18_evidence_ceiling/base: 625 faithfulness cells re-aggregated from raw probs — exact
+- [OK ] exp18_evidence_ceiling/base: 3 paired contrasts recomputed (Wilcoxon/d_z/BH) — exact
+- [OK ] exp18_evidence_ceiling/base: declared BH family == contrast count — declares 3, has 3
+- [OK ] exp18_evidence_ceiling/base: declared anchor == actual anchor — declares baseline_repro, is baseline_repro
+    · 1/3 significativos (BH) · nivel ancla 0.1418
 - [OK ] exp18_evidence_ceiling/hhem: 625 faithfulness cells re-aggregated from raw probs — exact
-- [PEND] exp18_evidence_ceiling/hhem: sin arm_stats todavia (experimento generado, analisis pendiente)
+- [OK ] exp18_evidence_ceiling/hhem: 3 paired contrasts recomputed (Wilcoxon/d_z/BH) — exact
+- [OK ] exp18_evidence_ceiling/hhem: declared BH family == contrast count — declares 3, has 3
+- [OK ] exp18_evidence_ceiling/hhem: declared anchor == actual anchor — declares baseline_repro, is baseline_repro
+    · 1/3 significativos (BH) · nivel ancla 0.4638
+- [OK ] exp18_evidence_ceiling: nivel HHEM del ancla en rango (carga verificada) — 0.4638
 
 ## Resultado
 **Todas las verificaciones pasaron.** Las cifras titulares de la fase de verano se reproducen desde los artefactos committeados, sin GPU.
