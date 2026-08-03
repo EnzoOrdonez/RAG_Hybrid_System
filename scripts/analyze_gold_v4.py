@@ -67,9 +67,17 @@ ens = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(ens)
 
 # Candidates worth arbitrating. 'large' is excluded while only a .partial file exists.
+#
+# This list is trimmed by what happens to be on disk, which is the same silent-degradation
+# shape that cost a whole scoring pass elsewhere in this phase: a candidate that quietly
+# disappears also disappears from the declared BH family, and a reader has no way to tell
+# five candidates were intended and three ran. So the intended set is written down and the
+# gap is reported, never just absorbed.
+CANDIDATES_INTENDED = ["small", "base", "hhem", "E5_base_and_hhem", "E1_mean"]
 CANDIDATES = ["small", "base"] + (["hhem", "E5_base_and_hhem"] if ens.HAS_HHEM else [])
 if len(ens.NLI_TRIO) >= 2:
     CANDIDATES.append("E1_mean")
+CANDIDATES_MISSING = [c for c in CANDIDATES_INTENDED if c not in CANDIDATES]
 
 # human judgement -> supported? ; 'dudoso' is ambiguous and handled by --dudoso
 JUDGE_MAP = {"correcto": 1, "incorrecto": 0}
@@ -256,6 +264,11 @@ def main():
                          "end-to-end smoke test; writes NOTHING to output/")
     args = ap.parse_args()
 
+    if CANDIDATES_MISSING:
+        print(f"[AVISO] {len(CANDIDATES_MISSING)} candidato(s) previstos NO se evaluaran por "
+              f"falta de probs persistidas: {CANDIDATES_MISSING}. Quedan fuera tambien de la "
+              f"familia BH.", file=sys.stderr)
+
     meta = json.loads((AUDIT / "claim_audit_sample_v4_meta.json").read_text(encoding="utf-8"))
     probs = {t: ens.load_nli(t) for t in ens.NLI_TRIO}
     hhem = ens.load_hhem() if ens.HAS_HHEM else {}
@@ -401,6 +414,13 @@ def main():
                 for k, v in sorted(pi_by_pattern.items()) if v > 0},
         },
         "bh_family": f"{len(CANDIDATES)} candidate-vs-human kappa tests (fdr_bh)",
+        "candidates_intended": CANDIDATES_INTENDED,
+        "candidates_available": CANDIDATES,
+        "candidates_missing": CANDIDATES_MISSING,
+        "candidates_note": (
+            f"{len(CANDIDATES_MISSING)} intended candidate(s) could not be evaluated because "
+            f"their persisted probabilities are absent: {CANDIDATES_MISSING}. They are also "
+            f"absent from the BH family above." if CANDIDATES_MISSING else None),
         "bootstrap": {"n_boot": N_BOOT, "seed": SEED, "scheme": "stratified, within-stratum"},
         "selection_note": ("Promotion to primary verifier is NOT decided here: the "
                            "pre-registered blind criterion is the negative control in "

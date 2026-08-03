@@ -49,9 +49,31 @@ ENT_T = CONTR_T = 0.7
 HHEM_TAU = 0.5
 # NLI members actually present on disk (large may still be scoring); ensembles
 # use whatever is available (>=2 needed for E1-E3).
-NLI_TRIO = [t for t in ("small", "base", "large")
+NLI_TRIO_EXPECTED = ("small", "base", "large")
+NLI_TRIO = [t for t in NLI_TRIO_EXPECTED
             if (Path(__file__).resolve().parent.parent
                 / "experiments/results/exp15_ablation_nli" / f"nli_probs__{t}.json.gz").exists()]
+
+# A work list derived from FILE EXISTENCE silently changes what the estimators mean.
+# deberta-large stopped at 11/12 configs, so nli_probs__large.json.gz was never written and
+# this "trio" has been TWO members. That is not a smaller trio, it is a different estimator:
+# E2_vote requires n>=2 agreeing labels, which with three members is a MAJORITY and with two
+# is UNANIMITY. The committed ensemble_sweep_results.json recorded no field saying how many
+# members were used, so the numbers read as majority-of-three when they are not. Everything
+# below therefore reports the member list, and any candidate whose semantics change is
+# renamed rather than emitted under a name that no longer describes it.
+DEGRADED = len(NLI_TRIO) < len(NLI_TRIO_EXPECTED)
+
+
+def candidate_label(cand):
+    """Name that still describes what was computed, given the members available."""
+    if not DEGRADED:
+        return cand
+    if cand == "E2_vote":
+        return f"E2_vote[{len(NLI_TRIO)}m=unanimity]"
+    if cand in ("E1_mean", "E3_conservative"):
+        return f"{cand}[{len(NLI_TRIO)}m]"
+    return cand
 HAS_HHEM = (Path(__file__).resolve().parent.parent
             / "experiments/results/exp15_ablation_nli/grounding_probs__hhem.json.gz").exists()
 
@@ -218,20 +240,31 @@ def main():
 
     report = {"selection_criterion": "negative-control false-contradicted / false-grounded rate "
               "(lower=better); downstream is DESCRIPTIVE ONLY",
-              "hhem_tau": HHEM_TAU, "ent_t": ENT_T, "candidates": {}}
+              "hhem_tau": HHEM_TAU, "ent_t": ENT_T,
+              # Recorded so a reader never has to guess what the ensembles were built from.
+              "nli_members_expected": list(NLI_TRIO_EXPECTED),
+              "nli_members_used": list(NLI_TRIO),
+              "nli_trio_degraded": DEGRADED,
+              "degraded_note": (
+                  f"Only {len(NLI_TRIO)} of {len(NLI_TRIO_EXPECTED)} NLI members were "
+                  f"available, so E1/E2/E3 are NOT the three-member estimators their plain "
+                  f"names describe. In particular E2_vote needs >=2 agreeing labels, which "
+                  f"is a MAJORITY with three members and UNANIMITY with two. Affected "
+                  f"candidates are renamed in this report." if DEGRADED else None),
+              "candidates": {}}
     for cand in candidates:
         nc_rate = negative_control(cand, nc)
         rows = rows_for_candidate(cand, nli, hhem, claims)
         ev = sweep.evaluate_point(rows, f"ens-{cand}")
         gp = ev.get("granite_hib_vs_lex", {})
-        report["candidates"][cand] = {
+        report["candidates"][candidate_label(cand)] = {
             "neg_control_bad_rate": nc_rate,
             "downstream_sig_rag_12": len(ev["sig_rag_pairs"]),
             "downstream_granite_d_z": gp.get("d_z"),
             "downstream_granite_p_bh": gp.get("p_bh"),
         }
-        print(f"{cand:22s} neg_ctrl={nc_rate:.3f}  sig_rag={len(ev['sig_rag_pairs'])}/12  "
-              f"granite p_bh={gp.get('p_bh')}", flush=True)
+        print(f"{candidate_label(cand):28s} neg_ctrl={nc_rate:.3f}  "
+              f"sig_rag={len(ev['sig_rag_pairs'])}/12  granite p_bh={gp.get('p_bh')}", flush=True)
 
     ranked = sorted(report["candidates"].items(), key=lambda kv: kv[1]["neg_control_bad_rate"])
     report["provisional_front_runner"] = ranked[0][0]

@@ -383,6 +383,17 @@ def pass_n(args, registry, exp_dir):
                     cname, len(cfg_rows), len(pairs), time.time() - t0)
         _save_partial()
 
+    # Completeness gate. A scoring pass that silently skipped work must never exit 0: that
+    # is exactly how exp18 ended up with 1 of 4 arms scored while the log said "Pass N done".
+    # Only enforced when the caller did NOT ask for an explicit subset via --arms.
+    scored = {c.split(" | ")[0] for c in probs_out["configs"]}
+    expected = {c.get("scenario", cname.split(" | ")[0]) for cname, c in results.items()}
+    if not getattr(args, "arms_explicit", False) and scored != expected:
+        missing = sorted(expected - scored)
+        sys.exit(f"INCOMPLETE pass N ({args.verifier}): scored {sorted(scored)} but "
+                 f"results.json has {sorted(expected)}. Missing: {missing}. "
+                 f"Nothing written; the partial is kept so a re-run resumes.")
+
     with gzip.open(exp_dir / f"nli_probs__{args.verifier}.json.gz", "wt", encoding="utf-8") as f:
         json.dump(probs_out, f)
     (exp_dir / "claims_extraction.json").write_text(
@@ -390,7 +401,8 @@ def pass_n(args, registry, exp_dir):
     (exp_dir / f"faithfulness_rows__{args.verifier}__vb_agree.json").write_text(
         json.dumps(rows_v3, indent=1), encoding="utf-8")
     part_path.unlink(missing_ok=True)
-    logger.info("Pass N done (%s) in %.0fs", args.verifier, time.time() - t0)
+    logger.info("Pass N done (%s): %d/%d arms scored in %.0fs",
+                args.verifier, len(scored), len(expected), time.time() - t0)
 
 
 def main():
@@ -418,13 +430,42 @@ def main():
 
     set_all_seeds(SEED)
     registry = json.loads(Path(args.arms_file).read_text(encoding="utf-8"))
-    args.arms = ([a.strip() for a in args.arms.split(",")] if args.arms
-                 else list(registry["arms"].keys()))
-    unknown = [a for a in args.arms if a not in registry["arms"]]
-    if unknown:
-        raise SystemExit(f"unknown arms: {unknown}")
     exp_dir = PROJECT_ROOT / "experiments" / "results" / args.exp_id
     exp_dir.mkdir(parents=True, exist_ok=True)
+    args.arms_explicit = args.arms is not None
+
+    # The arm list is resolved PER PASS, from whichever source is authoritative for it.
+    #
+    # Pass G builds arms, so the registry is authoritative: it defines HOW each arm is
+    # constructed. Pass N only SCORES what was already generated, so results.json is
+    # authoritative and the registry is irrelevant.
+    #
+    # Getting this wrong cost a full scoring pass: pass N used to default to the registry,
+    # which defaults to Tier A's ablation_arms.json. Run against exp18 (arms
+    # oracle_evidence / evidence_swapped / final_top_k_10, none of them in Tier A's
+    # registry) the intersection was just `baseline_repro`, so three arms were skipped in
+    # silence and the run still exited 0 saying "Pass N done". rescore_grounding_tierA.py
+    # iterates results.json directly and scored all four -- that asymmetry was the smell.
+    if args.pass_ == "G":
+        args.arms = ([a.strip() for a in args.arms.split(",")] if args.arms
+                     else list(registry["arms"].keys()))
+        unknown = [a for a in args.arms if a not in registry["arms"]]
+        if unknown:
+            raise SystemExit(f"unknown arms for pass G: {unknown} "
+                             f"(registry {args.arms_file} has {sorted(registry['arms'])})")
+    else:
+        res_path = exp_dir / "results.json"
+        if not res_path.exists():
+            raise SystemExit(f"pass N needs {res_path}; run pass G first")
+        generated = [c.get("scenario", cname.split(" | ")[0]) for cname, c
+                     in json.loads(res_path.read_text(encoding="utf-8"))["configs"].items()]
+        args.arms = ([a.strip() for a in args.arms.split(",")] if args.arms
+                     else list(dict.fromkeys(generated)))
+        unknown = [a for a in args.arms if a not in generated]
+        if unknown:
+            raise SystemExit(f"unknown arms for pass N: {unknown} "
+                             f"(results.json has {sorted(set(generated))})")
+        logger.info("pass N will score %d arm(s): %s", len(args.arms), args.arms)
 
     if args.pass_ == "G":
         pass_g(args, registry, exp_dir)

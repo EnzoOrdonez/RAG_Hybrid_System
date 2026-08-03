@@ -45,12 +45,34 @@ TOL = 1e-9
 ENT_T = CONTR_T = 0.7
 HHEM_TAU = 0.5
 
-# (experiment dir, anchor arm) — the three consumers of the paired harness
-EXPERIMENTS = [
-    ("exp15_ablation_tierA", "baseline_repro"),
-    ("exp16_anchored_decoding", "baseline_repro"),
-    ("exp17_crosscloud_balanced", "baseline"),
-]
+def discover_experiments():
+    """(dir name, anchor arm) for every experiment using the paired arm harness.
+
+    Discovered by artifact SHAPE, never listed by hand. A hardcoded list here already went
+    stale once: it named three experiments, so exp18 was silently not verified at all --
+    the same defect family as the pass_n arm registry. Shape-based discovery cannot go
+    stale, and the anchor arm is derived from results.json rather than assumed.
+
+    Anchor = the arm named `baseline*`; the harness contrasts everything else against it.
+    """
+    found = []
+    for d in sorted(RESULTS.iterdir()) if RESULTS.exists() else []:
+        rp = d / "results.json"
+        if not (d.is_dir() and rp.exists()):
+            continue
+        try:
+            cfgs = json.loads(rp.read_text(encoding="utf-8")).get("configs", {})
+        except Exception:
+            continue
+        arms = [c.get("scenario") for c in cfgs.values() if c.get("scenario")]
+        if len(arms) != len(cfgs) or not any(d.glob("faithfulness_rows__*.json")):
+            continue  # not the arm schema (signed exp3..exp14 land here)
+        anchors = [a for a in arms if a.startswith("baseline")]
+        if len(anchors) != 1:
+            log(f"- [SKIP] {d.name}: expected exactly one baseline* arm, got {anchors}")
+            continue
+        found.append((d.name, anchors[0]))
+    return found
 
 from src.generation.hallucination_detector import decide_nli_status  # noqa: E402
 
@@ -143,7 +165,16 @@ def verify_rows(exp, exp_dir, verifier):
 def verify_arm_stats(exp, exp_dir, baseline_arm, verifier):
     art = exp_dir / f"arm_stats__{verifier}.json"
     if not art.exists():
-        check(f"{exp}/{verifier}: arm_stats present", False, "missing")
+        # An experiment that has been generated but not yet analysed is PENDING, not broken:
+        # failing on it would make this gate unusable for exactly the window in which it is
+        # most useful. A PARTIAL set of arm_stats is a different matter and does fail below.
+        siblings = list(exp_dir.glob("arm_stats__*.json"))
+        if not siblings:
+            log(f"- [PEND] {exp}/{verifier}: sin arm_stats todavia (experimento generado, "
+                f"analisis pendiente)")
+        else:
+            check(f"{exp}/{verifier}: arm_stats present", False,
+                  f"faltan solo algunos: hay {[p.name for p in siblings]}")
         return
     stored = json.loads(art.read_text(encoding="utf-8"))
     rows_path = (exp_dir / "faithfulness_rows__hhem.json" if verifier == "hhem"
@@ -201,12 +232,16 @@ def main():
         "exacto.")
     log("")
 
-    for exp, baseline_arm in EXPERIMENTS:
+    experiments = discover_experiments()
+    log(f"Experimentos descubiertos por forma del artefacto: "
+        f"{', '.join(e for e, _ in experiments)}")
+    log("")
+    if not experiments:
+        check("hay experimentos con el esquema de brazos", False, "ninguno encontrado")
+
+    for exp, baseline_arm in experiments:
         exp_dir = RESULTS / exp
-        if not exp_dir.exists():
-            check(f"{exp}: presente", False, "directorio ausente")
-            continue
-        log(f"## {exp}")
+        log(f"## {exp}  (ancla: {baseline_arm})")
         for verifier in ("small", "base", "hhem"):
             verify_rows(exp, exp_dir, verifier)
             stored = verify_arm_stats(exp, exp_dir, baseline_arm, verifier)

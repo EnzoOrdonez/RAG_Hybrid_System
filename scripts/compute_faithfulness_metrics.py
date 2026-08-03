@@ -65,6 +65,8 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.utils.signed_evidence import guard_write  # noqa: E402
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("faithfulness_metrics")
 
@@ -473,7 +475,9 @@ def main():
                 "faithfulness__between_model": between_model,
             },
         }
-        out_path = exp_dir / "faithfulness_metrics.json"
+        # --write-v1 rewrites the PUBLISHED v1 artifact; inside signed evidence that
+        # is the one action the project forbids outright.
+        out_path = guard_write(exp_dir / "faithfulness_metrics.json")
         out_path.write_text(
             json.dumps(out, indent=2, ensure_ascii=False,
                        default=lambda o: o.item() if isinstance(o, np.generic) else str(o)),
@@ -530,7 +534,7 @@ def main():
             "faithfulness_answered__between_model": between_model_v2,
         },
     }
-    out_path_v2 = exp_dir / f"faithfulness_metrics_{out_tag}.json"
+    out_path_v2 = guard_write(exp_dir / f"faithfulness_metrics_{out_tag}.json")
     out_path_v2.write_text(
         json.dumps(out_v2, indent=2, ensure_ascii=False,
                    default=lambda o: o.item() if isinstance(o, np.generic) else str(o)),
