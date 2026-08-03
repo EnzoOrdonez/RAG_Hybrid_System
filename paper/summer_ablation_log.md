@@ -1017,3 +1017,113 @@ para. Si el nivel del ancla cae fuera de rango, se para y se diagnostica.
 Se dijo antes que «oraculo ∩ baseline = 2,046/5 ⇒ hay margen de seleccion real». Eso establece que los
 brazos **DIFIEREN** (el brazo no es degenerado y su nulo seria informativo), **no** que el oraculo sea
 mejor. Overclaim; lo que puede responderlo es la cota.
+
+## Entrada 21 — exp18: fallo silencioso de pass_N, barrido de su familia, y la cota de seleccion (2026-08-03)
+
+### El fallo
+
+Los 4 pases de puntuacion de exp18 salieron con **exit 0**, pero NLI puntuo **1 de 4 brazos**.
+HHEM tenia los 4 (194/194/60/194); `faithfulness_rows__{small,base}__vb_agree.json`,
+`nli_probs__*.json.gz` y `claims_extraction.json` tenian solo `baseline_repro`.
+
+**Causa:** `main()` resolvia `args.arms` por defecto desde el **registro de arms**, que por defecto
+es el de **Tier A**. `pass_n` filtra con `if args.arms and arm not in args.arms: continue`.
+
+| | |
+|---|---|
+| registro Tier A | `baseline_repro, reranker_off, final_top_k_3, context_reversed, context_lost_middle` |
+| brazos de exp18 | `baseline_repro, oracle_evidence, evidence_swapped, final_top_k_10` |
+| interseccion | **solo `baseline_repro`** |
+
+El chequeo `unknown` validaba lo que el usuario pasa en `--arms` **contra el registro**, nunca el
+registro **contra `results.json`**. El defecto de fondo: `pass_n` toma su lista de trabajo de
+`results.json` pero la filtra por un registro de **otro experimento**. `rescore_grounding_tierA.py`
+itera `results.json` directo y por eso HHEM no fallo — **esa asimetria entre los dos scorers era el
+olor**.
+
+**Alcance verificado — ninguna evidencia previa afectada:** exp15 5/5, exp16 3/3, exp17 2/2 completos
+en los 3 verificadores. exp16/exp17 tienen registro propio y se corrieron con `--arms-file`; exp18 no
+tiene registro (usa runner propio) y cayo al de Tier A.
+
+**Fix:** `args.arms` se resuelve **por pase** — G desde el registro (autoritativo para *construir*), N
+desde `results.json` (autoritativo para *puntuar*) — mas un **gate de completitud** que aborta con
+exit != 0 nombrando los brazos que faltan, **antes** de escribir artefactos.
+
+### Barrido de la misma familia: no era el ultimo, habia tres mas (dos mios)
+
+**S1 — el "trio" NLI han sido 2 miembros, y nada lo registraba.** `NLI_TRIO` en
+`compute_exp15_ensemble_sweep.py` se construye por **existencia de fichero**; como deberta-large quedo
+11/12, `nli_probs__large.json.gz` nunca existio. `E1_mean`/`E2_vote`/`E3_conservative` se documentan
+como ensembles del **trio** y se computaron con **dos**. `E2_vote` exige `n>=2` acuerdos, que con tres
+es **mayoria** y con dos es **unanimidad**: otro estimador bajo el mismo nombre. Ahora se registran
+`nli_members_expected/used/degraded` y los candidatos afectados se **renombran**
+(`E2_vote[2m=unanimity]`). No se recomputa (large se queda 11/12 por decision). No afecta la seleccion
+del front-runner (E5 = base+hhem, ajeno al trio), pero las cifras E1/E2/E3 committeadas son de 2
+miembros.
+
+**S2 — `verify_summer_offline.py` tenia `EXPERIMENTS` fija de 3** → exp18 **no se verificaba**. Ahora
+auto-descubre por **forma del artefacto** y deriva el ancla de `results.json`. Distingue ademas `PEND`
+(generado, sin analizar) de `FAIL` (analisis parcial), para que el gate siga siendo util justo en la
+ventana en que mas hace falta.
+
+**S3 — `analyze_gold_v4.py` recortaba `CANDIDATES` con `HAS_HHEM`**, sacando `hhem`/`E5` del analisis
+**y de la familia BH** en silencio. Ahora registra `candidates_intended/available/missing` y avisa.
+
+**S4 (latente, no disparado) — `compute_faithfulness_metrics.py` (default `exp12_matrix`) y
+`compute_retrieval_metrics.py` (default `exp8`) escriben in-place y sus defaults apuntan a evidencia
+FIRMADA.** Nuevo `src/utils/signed_evidence.py::guard_write` rehusa **sobrescribir un fichero
+existente** dentro de `exp3..exp14`/`exp8b`; crear ficheros `_vN` **nuevos** sigue permitido, que es la
+via sancionada. La lista firmada vive en **un solo sitio**, con test que lo fija — duplicarla seria el
+mismo patron que causo todos estos defectos.
+
+**Descartados tras revisar:** `rescore_nli_{v2,v3,exp15}`, `rescore_grounding_exp15`,
+`compute_exp15_hhem_analysis`, `build_claim_audit_sample` llevan `MODELS`x`SCENARIOS` de exp12
+hardcodeados, pero su `OUT_DIR` tambien es fijo (son exp12-especificos por diseno) y un config ausente
+da `KeyError` **ruidoso**, no un salto silencioso.
+
+**Patron comun de los cinco:** una lista de trabajo derivada por conveniencia (registro, existencia de
+fichero, constante) en vez de derivada de la fuente de verdad, **y sin registrar que se uso**. Por eso
+los fixes son todos "deriva del artefacto real y **registra el conjunto usado**".
+
+### Cota de seleccion (n=188 de 194; 6 queries sin claims genuinos)
+
+| | media HHEM |
+|---|---|
+| baseline (su propio top-5) | **0,4552** |
+| **alcanzable con k=5** (greedy, suelo = baseline) | **0,5834** |
+| **cota superior** (cualquier chunk del pool k=50) | **0,5879** |
+
+**Validacion cruzada:** el baseline calculado por el script de la cota coincide con el scorer canonico
+(`faithfulness_rows__hhem.json`) en **0,0000, cero discrepancias en las 188 queries**. Dos rutas de
+codigo independientes dan lo mismo. Bracket sin violaciones. Nivel del ancla 0,4552, dentro de la
+guarda de carga 0,40-0,55.
+
+**Margen alcanzable sobre el baseline: +0,1282**, frente a la banda de equivalencia pre-registrada de
+**±0,081**. El margen es ~1,6x la banda, y el `alcanzable` (0,5834) captura casi toda la `cota`
+(0,5879): no es un optimo teorico inalcanzable, es una seleccion de 5 chunks que existe.
+
+**Claims que ningun chunk del pool soporta: 759**, mejor score p50 0,226 / p90 0,439 (tau 0,5);
+**123 (16 %) a menos de 0,1 del umbral**. O sea: la mayor parte de lo no soportable **no esta en la
+evidencia recuperada** (no es artefacto de umbral), pero un 16 % si es sensible a donde se puso tau y
+debe reportarse como sensibilidad.
+
+**Lectura bajo la matriz pre-registrada (entrada 20), con el caveat de que el brazo de oraculo aun no
+esta puntuado en NLI:** la fila 2 —"cota ≈ baseline ⇒ seleccion agotada ⇒ **nube justificada**"—
+**queda descartada**: la cota NO es ≈ baseline. Quedan vivas la fila 1 (el oraculo sube ⇒ margen local)
+y la fila 3 (el oraculo plano pero cota alta ⇒ **falta un selector guiado por anclaje, que es LOCAL**).
+En ambas, **la nube deja de estar justificada por la via de "la seleccion esta agotada"**.
+
+Recordatorio de estatus: la cota es **circular por construccion** (se elige la seleccion usando los
+claims que la propia respuesta escribio). Es una **cota**, no una estimacion de efecto; no entra en la
+familia BH ni en el TOST. Su valor es logico: ningun selector no-circular puede superar `upper_bound`.
+
+**Report-before-prose:** esto toca la decision de nube y potencialmente el encuadre del hallazgo
+central. Nada de A.3/LACCI tocado.
+
+### Estado
+
+Suite **82 → 118 tests**; 116 pasan, **1 falla a proposito** (`test_scored_arms_complete` sobre
+exp18/NLI = criterio de aceptacion del fix), 1 skip. `verify_summer_offline.py` exit 0 y **cubriendo
+exp18** (sus 625 celdas HHEM re-agregan exacto desde los probs crudos). `git diff` vs
+`nota3-evidencia-2026-06-11`: **solo altas**. Snapshot de determinismo tomado para small y base:
+al relanzar, `baseline_repro` debe salir identico; si difiere, **parar**.
