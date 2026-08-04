@@ -66,10 +66,16 @@ class CrossEncoderReranker:
     def _load_model(self):
         from sentence_transformers import CrossEncoder
 
+        from src.utils.local_models import resolve
+
+        # See EmbeddingManager._load_model: local snapshot first so the deployed pipeline
+        # starts offline. Same weights, different source.
         full_name = self.config["full_name"]
-        logger.info("Loading cross-encoder: %s on %s", full_name, self.device)
+        source = resolve(full_name)
+        logger.info("Loading cross-encoder: %s (from %s) on %s", full_name,
+                    "local snapshot" if source != full_name else "hub/cache", self.device)
         start = time.time()
-        model = CrossEncoder(full_name, max_length=self.max_length, device=self.device)
+        model = CrossEncoder(source, max_length=self.max_length, device=self.device)
         elapsed = time.time() - start
         logger.info("Cross-encoder loaded in %.1fs", elapsed)
         return model

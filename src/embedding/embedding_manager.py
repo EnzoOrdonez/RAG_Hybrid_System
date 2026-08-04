@@ -103,21 +103,28 @@ class EmbeddingManager:
         """Load the sentence-transformer model."""
         from sentence_transformers import SentenceTransformer
 
+        from src.utils.local_models import resolve
+
+        # Prefer the local snapshot under data/models/ when there is one. The deployment path
+        # used to load by HF ID only, so it could not start offline even with the weights on
+        # disk. Same weights and revision either way; only the source changes.
         full_name = self.config["full_name"]
-        logger.info("Loading embedding model: %s ...", full_name)
+        source = resolve(full_name)
+        logger.info("Loading embedding model: %s (from %s) ...", full_name,
+                    "local snapshot" if source != full_name else "hub/cache")
         start = time.time()
 
         if self.model_name == "instructor-large":
             try:
                 from InstructorEmbedding import INSTRUCTOR
-                model = INSTRUCTOR(full_name, device=self.device)
+                model = INSTRUCTOR(source, device=self.device)
             except ImportError:
                 logger.warning(
                     "InstructorEmbedding not installed, using SentenceTransformer fallback"
                 )
-                model = SentenceTransformer(full_name, device=self.device)
+                model = SentenceTransformer(source, device=self.device)
         else:
-            model = SentenceTransformer(full_name, device=self.device)
+            model = SentenceTransformer(source, device=self.device)
 
         elapsed = time.time() - start
         logger.info("Model loaded in %.1fs on %s", elapsed, self.device)

@@ -49,26 +49,9 @@ def _sources():
 
 
 def _code_only(src):
-    """Executable tokens only — every string literal and comment removed.
-
-    Prose may legitimately NAME what the code refuses to reach ("not bge-reranker-large: that
-    stays the independent oracle"), and a guard that fires on its own documentation trains
-    people to weaken it. What matters is what the module can actually call.
-    """
-    import io
-    import tokenize
-    # Py3.12+ splits f-strings into FSTRING_START/MIDDLE/END, so filtering tokenize.STRING alone
-    # leaves the literal text of every f-string behind. Match by NAME to stay version-tolerant.
-    drop = {"STRING", "COMMENT", "FSTRING_START", "FSTRING_MIDDLE", "FSTRING_END"}
-    kept = []
-    try:
-        for tok in tokenize.generate_tokens(io.StringIO(src).readline):
-            if tokenize.tok_name.get(tok.type) in drop:
-                continue
-            kept.append(tok.string)
-    except tokenize.TokenError:  # pragma: no cover - malformed source is its own failure
-        return src
-    return " ".join(kept)
+    """Executable tokens only. Shared with the other source-level guard via conftest."""
+    from conftest import code_only
+    return code_only(src)
 
 
 def test_the_selector_scripts_exist():
