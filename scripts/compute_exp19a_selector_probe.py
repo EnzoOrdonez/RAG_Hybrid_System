@@ -112,11 +112,21 @@ def main():
                        .read_text(encoding="utf-8"))["per_query"]
 
     qids = sorted(index)[: args.max_queries] if args.max_queries else sorted(index)
-    print(f"loading ms-marco-L12 ... ({len(qids)} queries)", flush=True)
+
+    # Checkpoint/resume: this environment kills long jobs, and it has already killed this one.
+    # Keyed by query, so a resumed run redoes at most the query in flight.
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    suffix = f"__smoke{args.max_queries}" if args.max_queries else ""
+    ckpt = OUT_DIR / f"probe{suffix}.partial.json"
+    done = json.loads(ckpt.read_text(encoding="utf-8")) if ckpt.exists() else {}
+    todo = [q for q in qids if q not in done]
+    if done:
+        print(f"resuming: {len(done)} queries done, {len(todo)} to go", flush=True)
+
+    print(f"loading ms-marco-L12 ... ({len(todo)} queries)", flush=True)
     model = load_reranker()
 
-    rows, sanity = [], {"n_checked": 0, "exact_top5": 0, "mean_overlap": []}
-    for n, qid in enumerate(qids, 1):
+    for n, qid in enumerate(todo, 1):
         meta = index[qid]
         pool_ids, claims = meta["pool_ids"], meta["claims"]
         S = np.load(scores_dir / f"{qid}.npy")
@@ -130,9 +140,6 @@ def main():
         base_ids = [c for c in ids_doc[qid]["baseline_repro_ids"] if c in pool_ids]
         base_idx = [pool_ids.index(c) for c in base_ids]
         overlap = len(set(q_top) & set(base_idx))
-        sanity["n_checked"] += 1
-        sanity["exact_top5"] += int(set(q_top) == set(base_idx))
-        sanity["mean_overlap"].append(overlap)
 
         # (claim, chunk) — the selector under test
         pairs = [(c, t) for c in claims for t in texts]
@@ -147,7 +154,7 @@ def main():
         # of five supporting chunks and says nothing about whether the RIGHT claims got covered.
         supporting = set(np.nonzero(sup.any(axis=0))[0].tolist())
         rec = (lambda idx: len(set(idx) & supporting) / len(supporting)) if supporting else (lambda idx: None)
-        rows.append({
+        done[qid] = ({
             "qid": qid, "n_claims": len(claims), "n_pool": len(pool_ids),
             "n_supporting_chunks": len(supporting),
             # PRIMARY: claim coverage of the fixed answer, with the bound as ceiling
@@ -160,9 +167,20 @@ def main():
             "recall5_baseline": rec(base_idx),
             "top5_overlap_with_baseline": overlap,
         })
+        ckpt.write_text(json.dumps(done), encoding="utf-8")
         if n % 10 == 0:
-            print(f"  [{n}/{len(qids)}] {qid} recall5 q={rows[-1]['recall5_query_rank']} "
-                  f"claim={rows[-1]['recall5_claim_rank']}", flush=True)
+            print(f"  [{n}/{len(todo)}] {qid} faith base={done[qid]['faith_baseline']:.3f} "
+                  f"claim={done[qid]['faith_claim_rank']:.3f}", flush=True)
+
+    # Derive the work list from what is on disk, and refuse to publish a partial result.
+    rows = [done[q] for q in qids if q in done]
+    if len(rows) != len(qids):
+        sys.exit(f"INCOMPLETE: {len(qids) - len(rows)} of {len(qids)} queries unscored. "
+                 f"Re-run to resume from {ckpt.name}; a gate read off a partial sample is worse "
+                 f"than no gate.")
+    sanity = {"n_checked": len(rows),
+              "exact_top5": sum(1 for r in rows if r["top5_overlap_with_baseline"] == FINAL_K),
+              "mean_overlap": [r["top5_overlap_with_baseline"] for r in rows]}
 
     def mean(field):
         xs = [r[field] for r in rows if r[field] is not None]
@@ -235,8 +253,8 @@ def main():
         "not_in_any_family": "descriptive probe; enters no BH family and no TOST",
         "per_query": rows, "generated_by": "scripts/compute_exp19a_selector_probe.py",
     }
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / "probe.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
+    (OUT_DIR / f"probe{suffix}.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
+    ckpt.unlink(missing_ok=True)
 
     ff = out["fixed_answer_claim_coverage"]
     r5 = out["recall_of_supporting_chunks@5_DIAGNOSTIC"]
@@ -261,7 +279,7 @@ def main():
          f"Diagnostico (no primaria): recall@5 de chunks que anclan — baseline "
          f"{r5['baseline_selection']}, claim {r5['claim_rank']}. " + r5["why_not_primary"], "",
          out["verifier_hygiene"]]
-    (OUT_DIR / "probe.md").write_text("\n".join(L), encoding="utf-8")
+    (OUT_DIR / f"probe{suffix}.md").write_text("\n".join(L), encoding="utf-8")
     print("\n".join(L))
 
 
