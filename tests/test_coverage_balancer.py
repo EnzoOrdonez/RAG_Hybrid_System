@@ -181,15 +181,29 @@ def test_balance_reproduces_exp17_balanced_ids_from_the_stored_pool():
 
 
 @pytest.mark.needs_artifacts
-def test_survey_config_flips_exactly_two_knobs():
-    """SURVEY_DEPLOY must differ from the measured system in nothing else."""
+def test_survey_config_flips_exactly_the_three_authorised_knobs():
+    """SURVEY_DEPLOY must differ from PROPOSED_HYBRID in nothing beyond what was decided.
+
+    Was two knobs until 2026-08-04, when `llm_model` became the third: PROPOSED_HYBRID carries
+    `llama3.1:8b-instruct-q4_K_M` because that is the system submitted to LACCI, while every
+    summer experiment is `granite4.1:8b`. Running the surveys on llama would have measured a
+    system with no faithfulness evidence behind it (defect #12, ledger entry 24), so Enzo moved
+    the deployment to granite and PROPOSED_HYBRID deliberately stays as the paper's record.
+
+    The set stays CLOSED on purpose. This test firing is the intended behaviour for any further
+    drift; widening it is a decision to be made and written down, not a fix.
+    """
     from src.pipeline.pipeline_config import PROPOSED_HYBRID, SURVEY_DEPLOY, get_config
 
     a, b = PROPOSED_HYBRID.model_dump(), SURVEY_DEPLOY.model_dump()
     differing = {k for k in a if a[k] != b[k]}
-    assert differing == {"name", "prompt_routing", "balance_cross_cloud_providers"}, (
+    assert differing == {"name", "prompt_routing", "balance_cross_cloud_providers", "llm_model"}, (
         f"survey config drifted from the measured pipeline: {differing}")
     assert b["prompt_routing"] is True and b["balance_cross_cloud_providers"] is True
+    assert b["llm_model"] == "granite4.1:8b", "the surveys must run the measured generator"
+    assert a["llm_model"].startswith("llama3.1"), (
+        "PROPOSED_HYBRID must keep the LACCI-submitted generator; aligning it would make the "
+        "two agree by falsifying the record")
     # and it must not leak into the experiment configs
     assert get_config("hybrid").balance_cross_cloud_providers is False
     assert get_config("hybrid").prompt_routing is False
