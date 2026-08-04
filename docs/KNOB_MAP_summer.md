@@ -35,6 +35,26 @@ y en los runners de `scripts/`.
 | Denominador fidelidad | `scripts/compute_faithfulness_metrics.py:224-229` | familias v2/v3/v4 | `primary_answered` + 3 sensibilidades |
 | Umbral oráculo retrieval | `scripts/compute_retrieval_metrics.py:44-59` | métricas binarias | p50 primario (t0 legacy); NDCG graded = headline |
 
+## Estándar de verificación (formalizado 2026-08-04, ledger entrada 22)
+
+**Tres verificadores, DOS familias: NLI-small + NLI-base (entailment) + HHEM-2.1 (grounding).**
+La ortogonalidad de familia es lo que da valor a la triangulación; dos NLI de la misma familia dan
+votos correlacionados y HHEM aporta la señal independiente. **No existe ni existió un "trío NLI"**.
+
+`deberta-large` queda **RETIRADO**: se detuvo en 11/12 configs, el runner solo promueve
+`nli_probs__large.json.gz` al completar las 12, así que el artefacto nunca se escribió y **ninguna
+cifra reportada lo consumió**. Su `.partial` se conserva committeado como registro del intento.
+`compute_exp15_ensemble_sweep.py` declara `NLI_MEMBERS_EXPECTED = ("small", "base")` y ancla la
+etiqueta de `E2_vote` en `len(members) >= 3` — con dos miembros el voto es **unanimidad**, no mayoría,
+y el nombre emitido lo dice (`E2_vote[2m=unanimity]`).
+
+**Clases de declinación (defecto #7, misma entrada).** El valor serializado `pure_decline` mide un
+**prefijo** (marcador en los primeros 300 chars), **no** un rechazo: la mayoría de esas filas afirman
+claims igual. Se lee como `decline_prefix` (`DISPLAY_LABELS`) y se acompaña de `asserts_content`
+(¿hay claims genuinos?). Para cualquier argumento de abstención o usabilidad, la cifra correcta es
+`asserts_nothing_rate` de `guards.json`. El token de serialización **no se renombra**: vive en 7
+archivos de evidencia firmada de los que `verify_v4_offline.py` re-deriva cifras publicadas.
+
 ## Rutas canónicas (no negociables para exp15+)
 
 - **Prompt canónico** = `scripts/run_generation_matrix.py` (`build_prompt`, routing por query_type;

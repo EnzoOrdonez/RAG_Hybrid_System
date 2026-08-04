@@ -222,6 +222,22 @@ rechazo y **aun así afirman claims** y se puntúan normal (q002 declina, respon
 fidelidad 1,0 sobre 1 claim). El denominador decline-aware solo descarta las que no tienen **ningún**
 claim genuino (3/60). `hedged_partial` no es abstención.
 
+> **Corrección 2026-08-04 (defecto #7, ledger entrada 22): `pure_decline` TAMPOCO es abstención.**
+> Mide un **prefijo** (marcador en los primeros 300 chars), no un rechazo. Sobre el baseline de exp18,
+> **84 de 89** filas así etiquetadas afirman claims genuinos (media 5,6) y llevan la **peor** tasa de
+> claims no soportables (0,471 vs 0,330 en `answered`). La forma dominante es *"I cannot find
+> sufficient information … **However, I can outline general steps**"* — memoria paramétrica tras el
+> prefijo. **La tasa real de respuestas que no afirman nada es 3,1 % (6/194), no 45,9 %.** Las tablas
+> de arriba siguen siendo correctas como **tasas de prefijo**; para cualquier argumento de abstención
+> o usabilidad usar `asserts_nothing_rate` de `guards.json`. Medido así, el negativo de exp16 se
+> **refuerza**: 6,7 % (baseline) → 15,0 % (`strict_abstain`) → 16,7 % (`anchored_cite`).
+>
+> Consecuencia sobre el denominador: la familia **PRIMARIA** de v4 excluye justo esas filas, lo que
+> sube el nivel reportado **+0,0914 (HHEM)** y **+0,0983 (small)** frente a `sens_c` — casi la banda
+> TOST entera. **Ninguna cifra publicada es errónea** (la familia la eligió Enzo el 2026-06-11 y
+> `sens_c` se publica al lado); el gap ahora se **declara** en la salida del script para que no se lea
+> como ruido.
+
 ## Gold humano — diseño de dos etapas (decisión de Enzo 2026-07-30)
 
 Los instrumentos no ven lo mismo que el anotador: NLI `vb_agree` lee los 5 chunks y HHEM puntúa
@@ -263,16 +279,71 @@ sobre el pool guardado de exp17 devuelve los `balanced_ids` exactos en **25/25**
 ## Reproducibilidad
 
 `REPRODUCE.md` (5 niveles) + `scripts/verify_summer_offline.py`, que re-deriva **cada** celda de Tier A
-/ exp16 / exp17 desde las probs persistidas y recomputa los contrastes pareados: **todo cuadra exacto,
-sin GPU**. Suite 71 tests (rápida: 68 en 1,6 s).
+/ exp16 / exp17 / **exp18** desde las probs persistidas y recomputa los contrastes pareados: **todo
+cuadra exacto, sin GPU**. Suite **130 tests, 0 fallos, 0 omitidos** (2026-08-04).
+
+## exp18 — la compuerta, CERRADA (2026-08-04)
+
+Análisis pre-registrado (ledger 19/20), sin desviaciones. Familia BH = 3 contrastes brazo-vs-baseline
+por verificador; TOST bilateral contra ±0,081; los 3 verificadores. Ancla HHEM 0,4638, dentro de la
+guarda de carga 0,40-0,55. Determinismo del re-puntuado: **bit-idéntico**.
+
+| Brazo | Δ fidelidad (HHEM) | d_z | p_BH | Veredicto |
+|---|---|---|---|---|
+| `evidence_swapped` | **−0,3185** | −0,857 (grande) | **0,000** | **sig. en los 3 verificadores** |
+| `oracle_evidence` | +0,0217 | 0,060 | 0,288 | **TOST EQUIVALENTE** (HHEM p=0,012 · small 0,0009 · base 0,023) |
+| `final_top_k_10` | +0,0161 | 0,050 | 0,477 | n.s. (no truncadas +0,0259; truncadas +0,0005) |
+
+**1. El generador SÍ usa el contexto.** Con la evidencia de otra consulta: `answered` 38,7 % →
+**1,7 % (1 de 60)**, claims 10,6 → 4,8, jaccard-5grama 0,036, **reaparición de claims del baseline
+0,0009**. Diverge casi por completo y **se calla en vez de fabricar**. Descarta la fila 4 de la matriz.
+
+**2. Seleccionar óptimo por relevancia tópica NO compra fidelidad.** Equivalencia positiva dentro de
+±0,081 con oráculo independiente (`bge-reranker-large`). El claim-level da un positivo pequeño bajo
+GLMM que el bootstrap de cluster no confirma (HHEM p=0,114) — mismo patrón que exp17.
+
+**3. Más evidencia compra COBERTURA, no anclaje.** k=10: `answered` 38,7 % → **67,0 %**, claims 10,6 →
+**15,0**, "no afirma nada" 3,1 % → **0,5 %**; fidelidad plana. Costo: latencia p50 **49,0 s → 79,0 s
+(+61 %)**, 90,4 s en el estrato truncado, **74/194 prompts (38 %) en el límite de 4 096**.
+
+**Cota de selección** (n=188): baseline 0,4552 · alcanzable k=5 **0,5834** · superior 0,5879. Validada
+contra el scorer canónico con **0,0000 de discrepancia en 188 queries**, bracket sin violaciones.
+
+> **La cota NO es un objetivo.** Mantiene la respuesta fija y solo reordena chunks. Un selector real
+> cambia la respuesta —el propio brazo de oráculo da reaparición de claims 0,0132, ~99 % de lo afirmado
+> cambia— así que **no acota a un selector real** y "% de los +0,128 recuperado" sería una cifra
+> fabricada. Lo que sí establece: **el pool k=50 respalda el 58,3 % de los claims que el baseline
+> escribió, y los 5 elegidos solo el 45,5 %**. El ranking tópico deja anclaje sobre la mesa.
+
+**Lectura conjunta = fila 3 de la matriz pre-registrada:** hay margen, el ranking tópico no lo
+encuentra, falta un **selector guiado por anclaje** — método **local y sin gasto**.
+
+### Nube: **NO-GO por la vía de la selección**
+
+exp18 cerró todas las vías por las que el gasto podía justificarse como diagnóstico del techo de
+selección. **Caveat honesto: exp18 no testea capacidad de generación directamente.** Un modelo mayor
+podría anclar mejor; esa pregunta queda **abierta**, no resuelta. Cero gasto ejecutado.
 
 ## En curso / pendiente
 
-- **exp18 (compuerta)** — infra escrita, sin correr. 4 brazos: `oracle_evidence` (techo de selección,
-  oráculo **independiente** bge-reranker-large), `evidence_swapped` (¿el generador lee el contexto?),
-  `final_top_k_10` (sonda del límite de truncamiento, analizada partida). Su resultado decide si
-  exp19/exp20 valen la pena y si la nube está justificada.
-- **deberta-large** — corriendo, completa el 3.er voto NLI (8/12 → 12/12).
+- **exp19** — selector guiado por anclaje. Primaria = Δ fidelidad + TOST ±0,081 en los 3 verificadores;
+  la cota solo como motivación. Selector = rerank claim-level sobre borrador con ms-marco-L12, **sin
+  ningún verificador en el bucle**, para que los tres queden evaluadores limpios y `bge-reranker-large`
+  siga siendo el oráculo independiente. Precede una sonda **offline de coste cero** que puede matar el
+  experimento antes de gastar GPU.
+- **Config de encuestas (congela a mediados de agosto)** — k=5 vs k=10 sobre claims, cobertura y
+  latencia, confirmado por la **ruta de despliegue** (`SURVEY_DEPLOY`, recuperación en vivo), no por
+  los contextos congelados de exp18. Decisión de Enzo.
+- **759 claims sin respaldo** — mejor score p50 0,226 (τ=0,5); 123 (16 %) a menos de 0,1 del umbral.
+  Taxonomía en curso desde artefactos persistidos: síntesis legítima vs memoria paramétrica vs
+  alucinación vs fallo del verificador.
+- **`deberta-large` — RETIRADO** (2026-08-04). Quedó en 11/12 configs y **nunca se usó para ninguna
+  cifra**: el runner solo promueve el artefacto al completar las 12. El estándar de la fase es
+  **NLI-small + NLI-base + HHEM: tres verificadores, dos familias** (dos NLI de entailment + un modelo
+  de grounding ortogonal). **Nunca hubo un "trío NLI"**; un tercer NLI habría sido un voto
+  correlacionado. Ninguna cifra publicada depende de él — ver ledger entrada 22 para la revisión
+  candidato por candidato.
 - **Nube** — `docs/CLOUD_EXPERIMENT_DESIGN.md`: A100 80 GB, 5-9 h ≈ USD 10-18, techo sugerido USD 50.
-  **Cero gasto sin OK y sin leer exp18 antes.**
+  **NO-GO por selección** tras exp18; sobrevive solo como test de **capacidad de generación**, y
+  **cero gasto sin OK explícito**.
 - **Gold humano** — etapas A y B listas para anotar (Enzo).

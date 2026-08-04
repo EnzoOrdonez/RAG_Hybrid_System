@@ -1127,3 +1127,176 @@ exp18/NLI = criterio de aceptacion del fix), 1 skip. `verify_summer_offline.py` 
 exp18** (sus 625 celdas HHEM re-agregan exacto desde los probs crudos). `git diff` vs
 `nota3-evidencia-2026-06-11`: **solo altas**. Snapshot de determinismo tomado para small y base:
 al relanzar, `baseline_repro` debe salir identico; si difiere, **parar**.
+
+---
+
+## Entrada 22 — exp18 CERRADO: el generador si usa el contexto · retiro de deberta-large · defecto #7 (2026-08-04)
+
+Cierra el analisis pre-registrado de exp18 (committeado en `f6816b4` sin entrada de ledger),
+formaliza el retiro de `deberta-large`, y registra un septimo defecto silencioso de la misma
+familia. **Report-before-prose: nada de A.3/LACCI tocado.**
+
+### Verificaciones previas al analisis, ambas verdes
+
+- **Determinismo:** `baseline_repro` re-puntuado sale **bit-identico** al anterior en small y base,
+  en filas, probs crudos y `claims_extraction.json`. Dos corridas independientes separadas por dias.
+- **Criterio de aceptacion:** `tests/test_scored_arms_complete.py` pasa (el fix de `pass_N` de la
+  entrada 21). Los cuatro brazos puntuados en los tres verificadores.
+
+### Resultado por brazo (HHEM primario; ancla 0,4638, dentro de la guarda 0,40-0,55)
+
+| Brazo | delta fidelidad | d_z | p_BH | Veredicto |
+|---|---|---|---|---|
+| `evidence_swapped` | **-0,3185** | -0,857 (grande) | **0,000** | **significativo en los 3 verificadores** |
+| `oracle_evidence` | +0,0217 | 0,060 | 0,288 | n.s.; **TOST EQUIVALENTE** |
+| `final_top_k_10` | +0,0161 | 0,050 | 0,477 | n.s. |
+
+**`evidence_swapped` — el generador SI usa la evidencia.** Con el contexto de otra consulta:
+declinacion por prefijo 45,9 % -> 88,3 %, `answered` 38,7 % -> **1,7 % (1 de 60)**, claims genuinos
+10,6 -> 4,8, jaccard-5grama 0,036 y **reaparicion de claims del baseline 0,0009**. No solo puntua bajo:
+**diverge casi por completo y se calla en vez de fabricar**. Esto **descarta la fila 4** de la matriz
+de la entrada 20 ("el modelo ignora el contexto"), que era la ultima via por la que exp18 podia
+justificar gasto en nube.
+
+**`oracle_evidence` — TOST EQUIVALENTE en los tres** (HHEM p=0,012 · small p=0,0009 · base p=0,023)
+dentro de la banda pre-registrada de +-0,081. No es "no significativo": es afirmacion **positiva** de
+equivalencia. Seleccionar optimo **por relevancia topica** con un oraculo independiente
+(`bge-reranker-large`) **no compra fidelidad**. El claim-level da un positivo pequeno bajo GLMM que el
+bootstrap de cluster **no confirma** (HHEM p=0,114) — mismo patron que exp17, el GLMM sobre-estima
+potencia; manda el endpoint primario.
+
+**`final_top_k_10` — plano en fidelidad, incluso sin truncar.** Split por truncacion observada
+(74 truncadas / 120 no): estrato no truncado +0,0259, truncado +0,0005. Pero las guardas muestran otra
+cosa: `answered` 38,7 % -> **67,0 %**, claims 10,6 -> **15,0**, y la tasa de respuestas que **no afirman
+nada** 3,1 % -> **0,5 %**. **Mas evidencia compra COBERTURA, no tasa de anclaje.** Util para despliegue;
+no es afirmacion de tesis. Costo medido: latencia p50 **49,0 s -> 79,0 s (+61 %)**, 90,4 s en el estrato
+truncado, y **74/194 prompts (38 %) en el limite de 4 096**.
+
+### Lectura conjunta: fila 3 de la matriz, y NO-GO de nube por la via de la seleccion
+
+swapped diverge (usa el contexto) + oraculo equivalente + **cota muy por encima del baseline**
+(0,5834 alcanzable vs 0,4552, +0,128 ~ 1,6x la banda) = **fila 3**: hay margen, el **ranking topico no
+lo encuentra**, y lo que falta es un **selector guiado por anclaje**, que es un metodo **local y sin
+gasto**.
+
+**Nube: NO-GO por la via de la seleccion.** Caveat honesto y explicito: **exp18 no testea capacidad de
+generacion directamente**. Un modelo mayor podria anclar mejor. Lo que exp18 establece es que el
+siguiente paso de mayor valor esperado es local, no que la nube valga cero. Esa pregunta queda
+**abierta**, y requiere OK y presupuesto de Enzo. Cero gasto ejecutado.
+
+### Retractacion de una afirmacion propia (entrada 21)
+
+La entrada 21 cerraba con: *"Su valor es logico: ningun selector no-circular puede superar
+`upper_bound`"*. **Es falso, y se retira.** La cota mantiene la RESPUESTA FIJA y solo reordena chunks
+bajo ella. Un selector real cambia la respuesta, y con ella numerador y denominador: el propio brazo de
+oraculo —un cambio suave de seleccion— ya da **reaparicion de claims 0,0132**, o sea que ~99 % de lo
+afirmado cambia. La cota **no acota** a un selector real, ni por arriba ni por abajo.
+
+Consecuencia operativa: **"que fraccion de los +0,128 recupera exp19" no es una cantidad bien definida**
+y no se reportara. Lo que la cota SI establece, y basta para motivar exp19: **el pool k=50 respalda el
+58,3 % de los claims que el baseline realmente escribio, mientras los 5 chunks elegidos respaldan el
+45,5 %**. El ranking topico deja anclaje sobre la mesa. Queda escrito en el propio artefacto
+(`selection_bound.json::not_a_target`) para que no se vuelva a leer como objetivo.
+
+**Decision de Enzo (2026-08-04):** la primaria de exp19 es delta fidelidad vs baseline en los 3
+verificadores con la **misma banda TOST +-0,081** y familia BH declarada; la cota entra solo como
+motivacion, fuera de BH y de TOST.
+
+### Retiro formal de `deberta-large`
+
+- Quedo en **11/12 configs** (falta `hibrido | qwen3.5-9b`); el `.partial` se conserva committeado como
+  registro del intento.
+- **Nunca se uso para ninguna cifra**: el runner solo promueve `nli_probs__large.json.gz` al completar
+  las 12, asi que ningun consumidor lo leyo jamas.
+- **El estandar de triangulacion de la fase es NLI-small + NLI-base + HHEM: tres verificadores, DOS
+  familias** (dos NLI de entailment + un modelo de grounding ortogonal). La ortogonalidad de familia es
+  lo que da valor a la triangulacion; un tercer NLI habria sido un voto correlacionado. **Nunca fue un
+  "trio NLI"**, y esa expresion queda retirada del vocabulario de la fase.
+
+**Impacto en cifras publicadas (S1 de la entrada 21, resuelto): NINGUNA cambia.**
+
+| Cifra reportada | Usa los ensembles del "trio" | Veredicto |
+|---|---|---|
+| front-runner `E5_base_and_hhem` 0,0025 | No (base + hhem) | **intacta** — la seleccion se sostiene |
+| **NLI 22 % falso-contradicted** | No (verificador unico) | **intacta** — la cifra mas citada de la fase |
+| `hhem` 0,0325 · `base` 0,215 · `small` 0,2375 | No | intactas |
+| `noisy_or` 0,55 RECHAZADO | No | intacta |
+| kappa 0,30-0,36 (Tier 0) | No (acuerdo small-vs-base) | intacta |
+| Tier A · exp16 · exp17 · exp18 | No | intactos: triangulan small + base + HHEM |
+| **`E1_mean` 0,09** (entrada 9) | Si | **valor correcto, etiqueta imprecisa**: media de **2**, no de 3. La afirmacion que lo acompana ("mitad del NLI solo") sigue siendo cierta |
+| `E2_vote` 0,1025 · `E3_conservative` 0,4125 | Si | computados con 2 miembros (**E2 = unanimidad, no mayoria**). **Nunca se reportaron** fuera del artefacto -> ninguna cifra publicada depende de ellos |
+
+**Codigo:** `NLI_TRIO_EXPECTED = (small, base, large)` -> `NLI_MEMBERS_EXPECTED = (small, base)`, y la
+etiqueta de `E2_vote` pasa a anclarse en `len(members) >= 3` (mayoria posible) **y no** en "degradado
+respecto de lo esperado". Con la regla vieja, retirar `large` habria devuelto `E2_vote[2m=unanimity]` a
+un `E2_vote` plano: el mismo estimador renombrado a una afirmacion que no sostiene.
+**Re-corrido el sweep: 10/10 candidatos con valores IDENTICOS**, ranking identico, front-runner
+identico. Solo cambian 3 etiquetas y la metadata.
+
+### DEFECTO #7 — `pure_decline` no significa rechazo (misma familia que los seis anteriores)
+
+`classify_response` etiqueta `pure_decline` cuando hay un marcador de rechazo en los **primeros 300
+chars**. Es un test de **prefijo**. Medido sobre el baseline de exp18:
+
+| clase | n | con claims genuinos | media claims | tasa no-soportables |
+|---|---|---|---|---|
+| `answered` | 75 | 75 | 16,6 | 0,330 |
+| `hedged_partial` | 30 | 29 | 11,7 | 0,376 |
+| **`pure_decline`** | **89** | **84** | **5,6** | **0,471** <- la peor |
+
+Forma dominante, q078 textual: *"I cannot find sufficient information ... **However, I can outline
+general steps that are typically involved**"* -> 11 claims, 3 137 chars. **No es declinar: es contestar
+de memoria parametrica con prefijo de declinacion.** La tasa real de respuestas que **no afirman nada**
+es **6/194 = 3,1 %**, no 45,9 %.
+
+**Familia:** identica a los seis defectos previos — una lista de trabajo (aqui el denominador primario)
+derivada de un **proxy comodo** (regex de prefijo) en vez de la **fuente de verdad** (afirma contenido o
+no), y consumida aguas abajo como si significara otra cosa.
+
+**Tres consecuencias.**
+
+1. **El argumento de la config de encuestas se apoyaba en la etiqueta rota.** "El 45,9 % de declinacion
+   hundiria la percepcion en SUS" es falso tal cual. El caso de k=10 se reconstruye sobre claims,
+   cobertura y latencia. **La eleccion de config sigue siendo de Enzo.**
+2. **La familia PRIMARIA publicada excluye justo esas filas.** Excluirlas sube el nivel **+0,0914
+   (HHEM)** y **+0,0983 (small)** — casi la banda TOST entera. **Ninguna cifra publicada es erronea**:
+   la familia la eligio Enzo el 2026-06-11 y `sens_c` esta publicada al lado. Pero la etiqueta puede
+   enganar a un revisor de LACCI, asi que el gap queda **declarado en la salida**
+   (`denominators::primary_vs_all_gap`), no implicito.
+3. **Es la mejor pista viva para los 759 claims sin respaldo**, y sale gratis de artefactos ya
+   persistidos: el orden de tasas (0,471 > 0,376 > 0,330) es consistente con **conocimiento
+   parametrico**, aunque el grueso (54 %, 410 claims) viene de `answered`, asi que es contribuyente y
+   no explicacion unica.
+
+**Implementacion, con un ajuste declarado:** el token `pure_decline` **se conserva** en la
+serializacion. Aparece en **7 archivos de evidencia firmada** (`exp12_matrix/faithfulness_metrics_v2..
+v4*.json`, `exp13_expansion`, `exp14_h5_replicas`) y `verify_v4_offline.py` re-deriva cifras publicadas
+desde ahi; renombrarlo desincronizaria el codigo de la evidencia. Se arregla lo que lee un humano:
+`DISPLAY_LABELS` (`pure_decline` -> `decline_prefix`), docstrings, y un campo nuevo **`asserts_content`**
+medido por contenido. Las guardas ganan `asserts_nothing_rate` y
+`n_decline_prefix_that_still_answers`.
+
+**Coherencia entre artefactos vecinos.** El propio `guards.md` emitia *"un brazo que sube
+`pure_decline` si esta callandose"* — **falso**, contradecia la tabla de al lado, y queda retirado del
+texto generado. Efecto lateral util: en exp16, la tasa medida por contenido sube de 6,7 % (baseline) a
+**15,0 % (`strict_abstain`) y 16,7 % (`anchored_cite`)**, o sea que el negativo de exp16 se **refuerza**
+al medirlo bien. Segunda nota: `arm_stats` de exp18 corre sobre **todas** las filas (n=191, 0,4638)
+mientras la PRIMARIA de v4 es `primary_answered`; cada artefacto declara ahora su denominador.
+
+### Persistencia de la matriz claim x pool
+
+`compute_exp18_selection_bound.py` calculaba la matriz HHEM claim x chunk y **la descartaba** tras tomar
+los agregados. Todo lo que pregunte algo mas fino que "cuantos claims superan tau" —la taxonomia de los
+759, la sonda de selector de exp19, la muestra de gold— la necesita, y re-derivarla cuesta otro pase
+completo de HHEM. Ahora se persiste por query (`selection_scores/` + indice con textos de claims y
+`pool_ids` en orden), con **gate de completitud**: si hay agregados sin matriz, aborta nombrando las
+queries. Verificado en smoke de 12 queries: agregados **identicos** a los committeados y re-derivacion
+desde `.npy` **exacta** en 10/10 con matriz.
+
+### Estado
+
+Suite **130 pasan, 0 fallan, 0 omitidas** (el test NLI softmax que estaba omitido ahora corre).
+`verify_summer_offline.py` **exit 0** cubriendo exp15..exp18. `git diff` contra
+`nota3-evidencia-2026-06-11` sobre `experiments/results`: **127 altas, 0 modificaciones**. Guardas de
+exp16/exp17/exp18 re-corridas **sin mover un solo valor previo**. Nada publicado: **43 commits siguen
+solo en el disco de Enzo**, a la espera del OK de push.
