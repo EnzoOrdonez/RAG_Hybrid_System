@@ -326,11 +326,19 @@ podría anclar mejor; esa pregunta queda **abierta**, no resuelta. Cero gasto ej
 
 ## En curso / pendiente
 
-- **exp19** — selector guiado por anclaje. Primaria = Δ fidelidad + TOST ±0,081 en los 3 verificadores;
-  la cota solo como motivación. Selector = rerank claim-level sobre borrador con ms-marco-L12, **sin
-  ningún verificador en el bucle**, para que los tres queden evaluadores limpios y `bge-reranker-large`
-  siga siendo el oráculo independiente. Precede una sonda **offline de coste cero** que puede matar el
-  experimento antes de gastar GPU.
+- **exp19a — compuerta offline: PASS** (n=188, cero generación). Reordenar el pool por
+  `(claim, chunk)` con ms-marco-L12 sube la cobertura de claims de **0,4552 a 0,4853** (diferencia
+  pareada +0,0300, IC95 [0,0156, 0,0448], **excluye 0**), o sea el **23,4 %** del margen hasta la
+  cota (0,5834). 59 queries mejoran, 22 empeoran, 107 igual. Sanity check perfecto: el rerank por
+  query reproduce el top-5 de exp18 en **188/188**.
+  **PASS significa lo que se declaró antes de correr y nada más:** el mecanismo no está muerto;
+  **no** predice ganancia de fidelidad, porque la respuesta cambia al cambiar la evidencia.
+  Lo importante para el diseño: **la higiene de instrumento no cuesta el experimento** — un reranker
+  de producción, sin ningún verificador en el bucle, ya recupera casi un cuarto del margen.
+- **exp19b — pendiente de decisión de Enzo.** Brazo generativo (borrador → claims → rerank por claim
+  → regenerar). Primaria = Δ fidelidad + TOST ±0,081 en los 3 verificadores, familia BH declarada;
+  la cota solo como motivación. Los tres verificadores quedan limpios y `bge-reranker-large` intacto
+  como oráculo independiente. Es una corrida de generación en la GPU de Enzo.
 - **Config de encuestas (congela a mediados de agosto)** — k=5 vs k=10 sobre claims, cobertura y
   latencia, confirmado por la **ruta de despliegue** (`SURVEY_DEPLOY`, recuperación en vivo), no por
   los contextos congelados de exp18. **El hueco de transferencia está cuantificado:** exp18 generó
