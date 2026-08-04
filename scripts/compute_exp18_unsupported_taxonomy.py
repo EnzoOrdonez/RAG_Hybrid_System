@@ -14,20 +14,33 @@ PRE-REGISTERED BEFORE LOOKING AT ANY OUTPUT (ledger entry 22). Two parts, and on
 is decidable from data:
 
 --- PART 1: the decidable test -------------------------------------------------------------
-If (b) drives a meaningful share, unsupportable claims should concentrate in the text the model
-writes AFTER its own decline marker -- the "...However, I can outline general steps..." tail,
-where it has explicitly said the context does not cover the question and answers anyway.
+If (b) drives a meaningful share, grounding should DEGRADE across the answer of a model that has
+just said the context does not cover the question -- the "...However, I can outline general
+steps..." tail, written from memory rather than from the evidence.
 
-  H1 (directional, declared): among `decline_prefix` queries, the unsupportable rate is HIGHER
-  for claims positioned after the decline marker than for claims before it.
+  H1 (v1, WITHDRAWN — degenerate by construction, never computed): "among decline-prefixed
+  answers, claims after the decline marker are less grounded than claims before it". Not
+  computable: `pure_decline` is DEFINED as a marker inside the first OPENING_WINDOW=300 chars,
+  so essentially no claim precedes it and the "before" stratum is empty. The script's own guard
+  ("a lopsided split must be visible") caught this and reported nothing rather than a spurious
+  number. The marker-offset distribution is emitted below as the evidence for the withdrawal.
 
-  Estimator: paired within query (each query contributes both strata, so query-level confounds
-  cancel), 95 % CI by cluster bootstrap over queries, seed 42. This is DESCRIPTIVE -- it enters
-  no BH family, because it is a mechanism probe, not an arm contrast.
+  H1 (v2, DECLARED before any position data was inspected): difference-in-differences on the
+  WITHIN-ANSWER position gradient.
 
-  Guard against the obvious artifact: a claim before the marker is usually a restatement of the
-  question, so `not_a_claim` artifacts are already excluded (only genuine claims are counted),
-  and the per-stratum claim counts are reported so a lopsided split is visible.
+      gradient(q)  = unsupportable_rate(second half of claims)
+                   - unsupportable_rate(first half of claims)
+      H1: mean gradient is MORE POSITIVE for decline-prefixed answers than for `answered` ones.
+
+  Why this shape. The within-query split controls for query difficulty (a hard query makes all
+  its claims hard). The `answered` arm controls for a generic "models drift as they write"
+  effect, which would raise the gradient everywhere and is not evidence of anything about
+  declining. Only the DIFFERENCE between the two is the parametric-fallback signature.
+
+  Estimator: cluster bootstrap over queries, seed 42, 95 % CI on the DiD. Queries with < 4
+  genuine claims are excluded (a 3-claim answer has no meaningful halves) and the exclusion
+  count is reported. DESCRIPTIVE -- enters no BH family, because it is a mechanism probe, not
+  an arm contrast.
 
 --- PART 2: the stratification for the human gold ------------------------------------------
 (a) vs (c) CANNOT be separated by a grounding model -- that is the whole reason the human gold
@@ -76,29 +89,38 @@ def decline_marker_offset(answer, cfm):
     return min(hits) if hits else None
 
 
-def cluster_bootstrap_diff(per_query, n_boot=10000, seed=SEED):
-    """Paired within-query difference (after - before), resampling QUERIES."""
+def _gradients(position, klass_wanted):
+    """Within-answer gradient per query: unsupportable rate (2nd half - 1st half)."""
+    out = []
+    for q, v in position.items():
+        if v["klass"] != klass_wanted or v["n1"] < 2 or v["n2"] < 2:
+            continue
+        out.append((v["u2"] / v["n2"]) - (v["u1"] / v["n1"]))
+    return np.array(out, dtype=float)
+
+
+def did_bootstrap(position, n_boot=10000, seed=SEED):
+    """Difference-in-differences on the position gradient, resampling QUERIES in each arm."""
     rng = np.random.default_rng(seed)
-    qs = [q for q, v in per_query.items() if v["n_before"] and v["n_after"]]
-    if not qs:
-        return {"n_queries": 0}
-    arr = np.array([[per_query[q]["unsup_after"], per_query[q]["n_after"],
-                     per_query[q]["unsup_before"], per_query[q]["n_before"]] for q in qs],
-                   dtype=float)
-
-    def micro(a):
-        return (a[:, 0].sum() / a[:, 1].sum()) - (a[:, 2].sum() / a[:, 3].sum())
-
-    obs = micro(arr)
-    boot = np.array([micro(arr[rng.integers(0, len(arr), len(arr))]) for _ in range(n_boot)])
+    g_dec = _gradients(position, "pure_decline")
+    g_ans = _gradients(position, "answered")
+    if len(g_dec) < 5 or len(g_ans) < 5:
+        return {"n_decline": int(len(g_dec)), "n_answered": int(len(g_ans)),
+                "computable": False,
+                "why": "fewer than 5 queries with two usable halves in an arm"}
+    obs = float(g_dec.mean() - g_ans.mean())
+    boot = np.array([float(g_dec[rng.integers(0, len(g_dec), len(g_dec))].mean()
+                           - g_ans[rng.integers(0, len(g_ans), len(g_ans))].mean())
+                     for _ in range(n_boot)])
     return {
-        "n_queries": len(qs),
-        "rate_after": round(float(arr[:, 0].sum() / arr[:, 1].sum()), 4),
-        "rate_before": round(float(arr[:, 2].sum() / arr[:, 3].sum()), 4),
-        "diff_after_minus_before": round(float(obs), 4),
+        "computable": True,
+        "n_decline": int(len(g_dec)), "n_answered": int(len(g_ans)),
+        "gradient_decline_prefix": round(float(g_dec.mean()), 4),
+        "gradient_answered": round(float(g_ans.mean()), 4),
+        "did": round(obs, 4),
         "boot95": [round(float(np.percentile(boot, 2.5)), 4),
                    round(float(np.percentile(boot, 97.5)), 4)],
-        "n_claims_after": int(arr[:, 1].sum()), "n_claims_before": int(arr[:, 3].sum()),
+        "n_excluded_too_few_claims": None,   # filled by the caller
     }
 
 
@@ -123,6 +145,8 @@ def main():
     strata = {"d_threshold_artifact": [], "a_synthesis_cand": [],
               "b_parametric_cand": [], "c_unattributed_cand": []}
     position = {}
+    excluded_few_claims = []
+    marker_offsets = []
     n_claims_total = 0
 
     for qid, meta in sorted(index.items()):
@@ -132,34 +156,25 @@ def main():
         answer = results[qid].get("answer") or ""
         klass = classify_response(answer)
         marker = decline_marker_offset(answer, cfm) if klass == "pure_decline" else None
+        if marker is not None:
+            marker_offsets.append(marker)
 
         best = S.max(axis=1)
         n_soft = (S > SOFT_TAU).sum(axis=1)
         unsupportable = best <= args.tau
         n_claims_total += len(claims)
 
-        # --- Part 1: position split, only meaningful on decline-prefixed answers
-        if marker is not None:
-            before = after = ub = ua = 0
-            cursor = 0
-            for i, c in enumerate(claims):
-                # claims come out of _extract_claims in answer order; advance a cursor so a
-                # repeated sentence is located at its own occurrence, not the first one.
-                pos = answer.find(c[:60], cursor)
-                if pos >= 0:
-                    cursor = pos + 1
-                else:
-                    pos = answer.find(c[:30])
-                if pos < 0:
-                    continue                     # unlocatable; excluded from the split
-                if pos < marker:
-                    before += 1
-                    ub += int(unsupportable[i])
-                else:
-                    after += 1
-                    ua += int(unsupportable[i])
-            position[qid] = {"n_before": before, "n_after": after,
-                             "unsup_before": ub, "unsup_after": ua}
+        # --- Part 1: within-answer position gradient (claims arrive in answer order)
+        if klass in ("pure_decline", "answered") and len(claims) >= 4:
+            h = len(claims) // 2
+            position[qid] = {
+                "klass": klass, "n_claims": len(claims),
+                "n1": h, "n2": len(claims) - h,
+                "u1": int(unsupportable[:h].sum()), "u2": int(unsupportable[h:].sum()),
+                "marker_offset": marker,
+            }
+        elif klass in ("pure_decline", "answered"):
+            excluded_few_claims.append(qid)
 
         # --- Part 2: candidate strata for the unsupportable claims
         for i in np.nonzero(unsupportable)[0]:
@@ -179,7 +194,8 @@ def main():
             })
 
     total_unsup = sum(len(v) for v in strata.values())
-    pos_stats = cluster_bootstrap_diff(position)
+    pos_stats = did_bootstrap(position)
+    pos_stats["n_excluded_too_few_claims"] = len(excluded_few_claims)
 
     out = {
         "experiment_id": "exp18_evidence_ceiling",
@@ -189,10 +205,21 @@ def main():
         "n_unsupportable": total_unsup,
         "preregistration": "rule and H1 declared in this script's docstring before any output "
                            "was inspected; DESCRIPTIVE, enters no BH family",
-        "h1_position_split": {
-            "hypothesis": "among decline-prefixed answers, claims written AFTER the decline "
-                          "marker are less grounded than claims written before it",
-            "estimator": "paired within query; 95% CI by cluster bootstrap over queries, seed 42",
+        "h1_v1_withdrawn": {
+            "hypothesis": "claims after the decline marker vs before it",
+            "status": "WITHDRAWN, never computed — degenerate by construction",
+            "why": (f"`pure_decline` is DEFINED as a marker inside the first {cfm.OPENING_WINDOW} "
+                    f"chars, so the 'before' stratum is empty. Observed marker offsets over "
+                    f"{len(marker_offsets)} decline-prefixed answers: "
+                    f"p50={int(np.median(marker_offsets)) if marker_offsets else None}, "
+                    f"max={max(marker_offsets) if marker_offsets else None} chars."),
+        },
+        "h1_position_gradient_did": {
+            "hypothesis": "the within-answer unsupportable-rate gradient (2nd half - 1st half) "
+                          "is MORE POSITIVE for decline-prefixed answers than for `answered` "
+                          "ones — the signature of answering from memory after signalling a gap",
+            "estimator": "difference-in-differences; cluster bootstrap over queries, seed 42; "
+                         "queries with <4 genuine claims excluded",
             **pos_stats,
         },
         "strata": {k: {"n": len(v), "frac": round(len(v) / total_unsup, 4) if total_unsup else None,
@@ -225,22 +252,28 @@ def main():
         w.writeheader()
         w.writerows(sample)
 
-    h = out["h1_position_split"]
+    h = out["h1_position_gradient_did"]
     L = [f"# exp18 — por que {total_unsup} claims no los soporta ningun chunk del pool", "",
          f"Sobre {out['n_queries']} queries y {n_claims_total} claims genuinos. "
          f"tau={args.tau}, soft_tau={SOFT_TAU}. **Pre-registrado** en el docstring del script "
          f"antes de mirar salida; DESCRIPTIVO, fuera de la familia BH.", "",
-         "## H1 — ¿el modelo se desancla DESPUES de su propio marcador de declinacion?", ""]
-    if h.get("n_queries"):
-        L += [f"Pareado dentro de cada query, {h['n_queries']} queries con ambos estratos "
-              f"({h['n_claims_before']} claims antes / {h['n_claims_after']} despues).", "",
-              "| estrato | tasa no-soportable |", "|---|---|",
-              f"| antes del marcador | {h['rate_before']} |",
-              f"| **despues del marcador** | **{h['rate_after']}** |",
-              f"| **diferencia** | **{h['diff_after_minus_before']}** (IC95 "
-              f"{h['boot95'][0]} a {h['boot95'][1]}) |", ""]
+         "## H1 — ¿el modelo se desancla al avanzar, tras señalar que le falta contexto?", "",
+         "**H1 v1 retirada, nunca computada:** «claims despues del marcador vs antes» es "
+         "degenerada por construccion — " + out["h1_v1_withdrawn"]["why"], ""]
+    if h.get("computable"):
+        L += [f"Diferencia-en-diferencias sobre el gradiente intra-respuesta "
+              f"(2.ª mitad − 1.ª mitad de los claims). {h['n_decline']} respuestas con prefijo "
+              f"de declinacion vs {h['n_answered']} `answered`; "
+              f"{h['n_excluded_too_few_claims']} excluidas por <4 claims.", "",
+              "| grupo | gradiente |", "|---|---|",
+              f"| `answered` (control) | {h['gradient_answered']} |",
+              f"| **prefijo de declinacion** | **{h['gradient_decline_prefix']}** |",
+              f"| **DiD** | **{h['did']}** (IC95 {h['boot95'][0]} a {h['boot95'][1]}) |", "",
+              "IC95 que cruza 0 = el gradiente no distingue a los dos grupos, y la hipotesis "
+              "de memoria parametrica **no** queda apoyada por esta via.", ""]
     else:
-        L += ["Sin queries con ambos estratos: el split no es computable.", ""]
+        L += [f"No computable: {h.get('why')} "
+              f"(decline={h.get('n_decline')}, answered={h.get('n_answered')}).", ""]
     L += ["## Estratos candidatos (NO son veredictos)", "",
           "| estrato | n | % | mejor score medio |", "|---|---|---|---|"]
     for k, s in out["strata"].items():
