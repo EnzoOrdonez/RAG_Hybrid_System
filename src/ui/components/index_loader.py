@@ -30,10 +30,12 @@ def load_pipeline(config_name: str, _hybrid_index=None, llm_model: str = ""):
     each (config, model) pair gets its own pipeline and cached pipelines are
     never mutated across sessions. Empty string = config default.
     """
-    from src.pipeline.pipeline_config import get_config
+    from src.pipeline.pipeline_config import SURVEY_DEPLOY, get_config
     from src.pipeline.rag_pipeline import RAGPipeline
 
-    config = get_config(config_name)
+    # UI-only mapping: experiments and CLI keep the measured `hybrid` config,
+    # while participant-facing Streamlit paths consume the summer deployment.
+    config = SURVEY_DEPLOY if config_name == "hybrid" else get_config(config_name)
 
     if _hybrid_index is None:
         _hybrid_index = load_hybrid_index()

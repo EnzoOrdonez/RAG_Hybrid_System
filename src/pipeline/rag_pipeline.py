@@ -411,10 +411,12 @@ class RAGPipeline:
             raise ValueError("query_stream is for RAG configs (demo)")
 
         with latency.measure("query_processing"):
-            if self.query_processor:
-                processed = self.query_processor.process(question)
+            qp = self.query_processor or self._routing_qp
+            if qp:
+                processed = qp.process(question)
                 query_type = processed.query_type
             else:
+                processed = None
                 query_type = "default"
 
         yield ("stage", "retrieval")
@@ -439,12 +441,21 @@ class RAGPipeline:
             return
 
         yield ("stage", "reranking")
+        balancing = (self.config.balance_cross_cloud_providers
+                     and query_type == "cross_cloud"
+                     and self.hybrid_index is not None)
+        rerank_k = self.config.retrieval_top_k if balancing else self.config.final_top_k
         with latency.measure("reranking"):
             if self.reranker is not None:
                 reranked = self.reranker.rerank(
-                    question, candidates, top_k=self.config.final_top_k)
+                    question, candidates, top_k=rerank_k)
             else:
-                reranked = candidates[: self.config.final_top_k]
+                reranked = candidates[:rerank_k]
+
+        if balancing:
+            reranked = self._balance_providers(question, processed, reranked)
+        else:
+            reranked = reranked[: self.config.final_top_k]
 
         chunk_dicts = []
         for r in reranked:

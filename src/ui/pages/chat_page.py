@@ -53,7 +53,7 @@ def render():
         st.subheader("Configuration")
 
         system_options = {
-            "RAG Hibrido Propuesto": "hybrid",
+            "RAG Híbrido (despliegue encuestas)": "hybrid",
             "RAG Lexico (BM25)": "lexical",
             "RAG Semantico (Dense)": "semantic",
         }
