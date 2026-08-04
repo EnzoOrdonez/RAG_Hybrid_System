@@ -1300,3 +1300,154 @@ Suite **130 pasan, 0 fallan, 0 omitidas** (el test NLI softmax que estaba omitid
 `nota3-evidencia-2026-06-11` sobre `experiments/results`: **127 altas, 0 modificaciones**. Guardas de
 exp16/exp17/exp18 re-corridas **sin mover un solo valor previo**. Nada publicado: **43 commits siguen
 solo en el disco de Enzo**, a la espera del OK de push.
+
+---
+
+## Entrada 23 — los 759 claims, el harness del gold, y tres defectos silenciosos mas (2026-08-04)
+
+Bloque posterior a la entrada 22, mismo dia. Cierra F5 (offline) y F4, deja exp19a corriendo, y
+registra los defectos #8, #9 y #10 de la misma familia. **Nada de A.3/LACCI tocado. Nada publicado.**
+
+### F5 — por que 759 claims no los soporta ningun chunk del pool
+
+Corrido sobre la matriz HHEM claim x chunk ya persistida (entrada 22), **cero generacion**.
+188 queries, 2 053 claims genuinos.
+
+**H1 v1 — RETIRADA SIN COMPUTAR.** La hipotesis pre-registrada era *"entre respuestas con prefijo de
+declinacion, los claims escritos DESPUES del marcador estan menos anclados que los de antes"*. Es
+**degenerada por construccion**: `pure_decline` se define como marcador dentro de los primeros 300
+chars, asi que el estrato "antes" queda vacio. Medido para documentar la retirada: offset del
+marcador **p50 = 0, max = 253 chars** sobre 84 respuestas. La guarda del propio script ("un split
+desbalanceado tiene que ser visible") lo hizo fallar ruidoso en vez de emitir una cifra espuria.
+
+**H1 v2 — declarada antes de mirar un solo dato de posicion, y NO APOYADA.**
+Diferencia-en-diferencias sobre el gradiente intra-respuesta (2.ª mitad − 1.ª mitad de los claims),
+con `answered` como brazo de control. El split intra-query controla dificultad de la consulta; el
+control absorbe el efecto generico de "el modelo deriva al escribir". Solo la DIFERENCIA seria firma
+de memoria parametrica.
+
+| grupo | gradiente |
+|---|---|
+| `answered` (control) | 0,0834 |
+| prefijo de declinacion | 0,1275 |
+| **DiD** | **0,0442** (IC95 **−0,0694 a 0,1601**) |
+
+49 respuestas con prefijo vs 72 `answered`; 38 excluidas por <4 claims. **El IC cruza 0.** La
+hipotesis de memoria parametrica **no** queda apoyada por esta via.
+
+**Hallazgo lateral, no buscado:** AMBOS grupos degradan al avanzar (0,128 y 0,083). El desanclaje por
+posicion dentro de la respuesta existe y **no es propio de declinar**. Es una linea nueva, no una
+conclusion.
+
+**Lectura conservadora** de la diferencia entre-query ya conocida (tasa no-soportable 0,471 con
+prefijo vs 0,330 en `answered`, entrada 22): compatible con que el modelo **declina PORQUE la
+evidencia falta**, y entonces lo que diga no tiene con que anclarse. Consistente con
+`evidence_swapped`, y no exige invocar un defecto de memoria parametrica.
+
+**Estratos candidatos para el gold — NO son veredictos:**
+
+| estrato | n | % | mejor score medio sobre el pool |
+|---|---|---|---|
+| `d_threshold_artifact` (best > tau−0,1) | 123 | 16,2 % | 0,4501 |
+| `a_synthesis_cand` (>=2 chunks sobre 0,3) | 58 | 7,6 % | 0,3581 |
+| `b_parametric_cand` (query con prefijo) | 178 | 23,4 % | 0,1651 |
+| `c_unattributed_cand` (resto) | 400 | 52,7 % | 0,1893 |
+
+Sintesis legitima **(a)** y alucinacion **(c)** no las puede separar un modelo de grounding — para eso
+existe el gold humano. Muestra estratificada de 40 claims en
+`output/audit/unsupported_claims_sample.csv`.
+
+### F4 — el harness del gold, probado por fin
+
+`analyze_gold_v4.py` nunca habia corrido. Ahora `--simulate 0.15` corre de punta a punta y no escribe
+nada. El dia que Enzo termine de anotar, el analisis sale solo.
+
+### DEFECTO #8 — el rename de la entrada 22 dejo huerfano al harness del gold
+
+Retirar `deberta-large` renombro `NLI_TRIO` -> `NLI_MEMBERS`, y las **tres** referencias
+`ens.NLI_TRIO` de `analyze_gold_v4.py` quedaron como lookups muertos. **La suite entera siguio verde
+porque ningun test importaba el harness del gold.** Habria explotado con `AttributeError` el dia que
+Enzo terminara de anotar los 150 claims — despues de 4-5 horas de su tiempo.
+
+Familia: un simbolo cruzado entre modulos sin contrato, que cambia sin que nada registre quien
+dependia de el. Guarda: escaneo estatico de **todo** `ens.<attr>` bajo `scripts/` resuelto por
+`getattr` contra el modulo, parametrizado para que el fallo nombre archivo y atributo. Cubre la
+familia entera de renames, no este caso.
+
+### DEFECTO #9 — el selector de exp19a devolvia seleccion VACIA, y la compuerta leia FAIL
+
+`select_by_claims` arrancaba `best_so_far` en `-inf`, asi que la ganancia de todo chunk era `+inf`,
+`np.isfinite` la rechazaba y el bucle rompia **antes de elegir nada**. Recall salio **exactamente
+0,0** y la compuerta dijo FAIL. **Un bug habria matado un experimento valido** — el error inverso al
+habitual: un falso negativo que ahorra GPU y destruye el hallazgo.
+
+Lo que lo delato no fue una excepcion sino una **cifra implausible**: 0,0 exacto, con IC [0,0].
+Guarda: cinco casos con respuesta conocida por construccion, incluido el que separa seleccion por
+claim de ranking por score (claim A servido por los chunks 0 y 1, claim B solo por el 2 y mas debil:
+ordenar por score toma {0,1} y deja B sin nada; un selector por claim debe tomar {0,2}). A k=1 las
+dos reglas no pueden diferir, asi que el caso necesita k=2 para ser test.
+
+### DEFECTO #10 — la metrica primaria de exp19a SATURABA
+
+Era recall@5 del conjunto de chunks que anclan. Pero la mayoria de chunks del pool anclan **algun**
+claim (q001: **38 de 50**), asi que recall@5 vale ~5/|soportantes| para cualquier eleccion de cinco
+chunks soportantes, y es **ciega** a si se cubrieron los claims correctos. Daba diferencia 0,0 con IC
+[0,0] mientras las selecciones **si** diferian.
+
+Primaria nueva: **cobertura de claims a respuesta fija**, con la cota alcanzable k=5 como techo
+explicito. El recall de chunks queda como diagnostico con su motivo escrito.
+
+Declarado ademas un hecho del harness necesario para leer la tabla: **el pool se guarda en orden ya
+re-rankeado por produccion**, asi que reordenarlo por `(query, chunk)` devuelve los indices 0-4 = el
+top-5 del baseline. `query_rank` es un **control del harness**, no un segundo comparador; el
+contraste que importa es `claim_rank` vs baseline.
+
+`frac_of_headroom_closed` queda definida **solo** dentro del mundo de respuesta fija, y el artefacto
+lo dice: no es la fraccion de los +0,128 de exp18 que exp19b entregaria, porque un selector real
+cambia la respuesta (entrada 22).
+
+### Deuda de checkpoint, pagada
+
+El entorno mato la sonda **dos veces** y las dos perdio todo: no tenia checkpoint, contra la regla de
+la fase. Ahora hay checkpoint por query, verificado simulando una muerte a mitad (retoma y produce el
+mismo resultado). Y la misma familia cerrada de raiz: `rows` ya no se acumula en memoria durante el
+bucle, se **deriva del checkpoint en disco**, con gate que aborta si faltan queries. **Una compuerta
+leida sobre una muestra parcial es peor que no tener compuerta.**
+
+### Hueco de transferencia de exp18 a la config de encuestas, cuantificado
+
+Antes se afirmaba sin medir. `SURVEY_DEPLOY` lleva `balance_cross_cloud_providers=True` y exp18
+genero **sin** balanceo (verificado por grep sobre `run_exp18_ceiling.py`: cero referencias a
+`coverage_balancer`; el routing de prompt si coincide, via `rgm.build_prompt`). El balanceo solo actua
+sobre queries `cross_cloud`, que son **51 de 194 = 26,3 %** del set. No es despreciable. Segundo
+hueco: exp18 reporta tiempo **total** y la UI hace streaming (`chat_page.py:189` -> `query_stream`),
+asi que lo que percibe un encuestado es el **TTFT**.
+
+### exp19a — pre-registrado, corriendo, sin resultado en esta entrada
+
+Compuerta offline del selector de anclaje, **cero generacion**. Selector = ms-marco-MiniLM-L-12-v2
+sobre `(claim, chunk)`, greedy por claim. **Ningun verificador de fidelidad entra en el bucle**, asi
+que small, base y HHEM quedan los tres evaluadores limpios para exp19b; `bge-reranker-large` no se
+toca y sigue siendo el oraculo independiente (Flag 17). Fijado por
+`tests/test_selector_hygiene.py` (21 casos), que analiza **solo tokens ejecutables** — la prosa puede
+nombrar legitimamente lo que el codigo se prohibe alcanzar, y una guarda que se dispara con su propia
+documentacion ensena a debilitarla.
+
+Compuerta declarada antes de correr y deliberadamente **asimetrica**: FAIL mata exp19b (si el
+mecanismo no encuentra la evidencia en condiciones tan favorables, tampoco con un borrador real);
+PASS solo prueba que no esta muerto, **no** predice ganancia de fidelidad. Sanity check obligatorio:
+el rerank por query debe reproducir el top-5 real de exp18 (>=4/5) o no se lee nada — en todos los
+smokes dio **5,0/5**.
+
+**Preliminar sobre 25 queries, explicitamente NO el veredicto:** diferencia pareada +0,0008 (IC95
+−0,020 a 0,023), 0,6 % del margen. Si la corrida completa lo confirma, el resultado tiene una lectura
+de fondo: **la senal que encontraria los chunks que anclan es, por definicion, una senal de anclaje**,
+y cualquier modelo bastante fuerte para hallarla es un verificador cuyo uso contamina la evaluacion.
+La restriccion anti-circularidad y la potencia del selector estan en tension directa. Decision
+pendiente de Enzo.
+
+### Estado
+
+Suite **158 rapida / 4 excluidas**. `verify_summer_offline.py` **exit 0** cubriendo exp15..exp18.
+`git diff` contra `nota3-evidencia-2026-06-11` sobre `experiments/results`: **solo altas**.
+**Nada publicado**: los commits siguen solo en el disco de Enzo, a la espera del OK de push.
