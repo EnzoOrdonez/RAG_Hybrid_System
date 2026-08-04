@@ -75,7 +75,7 @@ _spec.loader.exec_module(ens)
 # gap is reported, never just absorbed.
 CANDIDATES_INTENDED = ["small", "base", "hhem", "E5_base_and_hhem", "E1_mean"]
 CANDIDATES = ["small", "base"] + (["hhem", "E5_base_and_hhem"] if ens.HAS_HHEM else [])
-if len(ens.NLI_TRIO) >= 2:
+if len(ens.NLI_MEMBERS) >= 2:
     CANDIDATES.append("E1_mean")
 CANDIDATES_MISSING = [c for c in CANDIDATES_INTENDED if c not in CANDIDATES]
 
@@ -270,7 +270,7 @@ def main():
               f"familia BH.", file=sys.stderr)
 
     meta = json.loads((AUDIT / "claim_audit_sample_v4_meta.json").read_text(encoding="utf-8"))
-    probs = {t: ens.load_nli(t) for t in ens.NLI_TRIO}
+    probs = {t: ens.load_nli(t) for t in ens.NLI_MEMBERS}
     hhem = ens.load_hhem() if ens.HAS_HHEM else {}
     claims = json.loads((OUT / "claims_extraction.json").read_text(encoding="utf-8"))["configs"]
 
@@ -278,7 +278,7 @@ def main():
     rows = []
     for m in meta["rows"]:
         cfg, qid, ci = m["config"], m["query_id"], m["claim_idx"]
-        members = {t: probs[t][cfg][qid][ci] for t in ens.NLI_TRIO}
+        members = {t: probs[t][cfg][qid][ci] for t in ens.NLI_MEMBERS}
         hh = hhem.get(cfg, {}).get(qid, [])
         hh = hh[ci] if ci < len(hh) else []
         labels = {c: ens.label_one(c, members, hh) for c in CANDIDATES}
