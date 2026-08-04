@@ -1491,3 +1491,134 @@ deja de ser necesaria para tener un exp19b con señal.
 Suite **158 rapida / 4 excluidas**. `verify_summer_offline.py` **exit 0** cubriendo exp15..exp18.
 `git diff` contra `nota3-evidencia-2026-06-11` sobre `experiments/results`: **solo altas**.
 **Nada publicado**: los commits siguen solo en el disco de Enzo, a la espera del OK de push.
+
+---
+
+## Entrada 24 — defecto #12, el push publicado, y la nube reencuadrada (2026-08-04)
+
+### DEFECTO #12 — la encuesta iba a correr un modelo sin evidencia
+
+```
+SURVEY_DEPLOY.llm_model  =  llama3.1:8b-instruct-q4_K_M
+evidencia de la fase     =  granite4.1:8b   (exp15 Tier A, exp16, exp17, exp18 — los cuatro)
+```
+
+La config sobre la que correrian las encuestas SUS/Likert —y sobre la que corre la demo Streamlit—
+usaba un generador **para el que no existe una sola cifra de fidelidad**. El ancla HHEM 0,4638, el
+efecto de balanceo de exp17 y los tres veredictos de exp18 son todos de granite.
+
+**Origen, confirmado por Enzo:** residuo de la configuracion experimental previa. El paper sometido a
+**LACCI describe Llama 3.1 8B Q4 sobre 200 queries**, y el despliegue **nunca se migro** cuando la fase
+de verano cambio de generador. No fue un error de codigo: fue un cambio de fase que dejo atras una
+herencia.
+
+**Como aparecio:** mi propia corrida de latencia modifico `data/llm_cache/llama3.1_*_cache.json`. Es
+decir, lo delato un **efecto lateral en disco**, no una excepcion ni un test. Consecuencia inmediata:
+las latencias que habia reportado (TTFT 26,0 s a k=5) eran de llama3.1 y **no comparaban** con los
+49,0 s p50 de exp18. Eso ademas **retira la hipotesis de contencion de VRAM** que habia ofrecido para
+explicar la "discrepancia 2x": era innecesaria, son modelos y cuantizaciones distintos.
+
+**Decision de Enzo: la encuesta corre granite4.1:8b.**
+
+`PROPOSED_HYBRID` **NO se toca**, a proposito: es el registro del sistema sometido a LACCI, y
+alinearlo con la encuesta seria hacer que coincidan **falsificando el registro** en vez de tomando una
+decision. `get_config("hybrid")` sigue devolviendo el sistema medido del paper. Hay test que fija las
+dos cosas.
+
+**Guardas anadidas** (la divergencia no puede volver a ser invisible):
+- el artefacto de latencia registra `llm_model_measured`, `llm_model_of_summer_evidence` —derivado de
+  los `results.json`, no de una lista paralela— y `model_divergence` con el aviso escrito;
+- `tests/test_deployment_generator.py`: la evidencia de verano debe ser de **un solo** generador, la
+  config debe declarar el suyo, y la encuesta debe correr el de la evidencia;
+- `test_survey_config_flips_exactly_two_knobs` se puso **rojo** al migrar, y tenia razon. Se actualiza
+  a tres perillas (`name`, `prompt_routing`, `balance_cross_cloud_providers`, `llm_model`), sigue
+  **cerrado**, y gana la asercion de que `PROPOSED_HYBRID` conserve el generador de LACCI.
+
+**Latencia re-medida con granite** (ruta de despliegue, n=12 por config, estratificada y seeded):
+
+| config | retrieval p50 | TTFT p50 | TTFT p90 | total p50 | palabras |
+|---|---|---|---|---|---|
+| k=5 | 5,1 s | **12,8 s** | 47,7 s | 179,8 s | 271 |
+| k=10 | 5,0 s | **15,2 s** | 34,6 s | 132,7 s | 254 |
+
+Frente a llama3.1 (supersedido, etiquetado, no borrado): granite tiene **mejor TTFT** (12,8 vs 26,0 s)
+y **peor tiempo total** (179,8 vs 94,1 s) con longitud de respuesta parecida.
+
+**Dos cosas que NO se afirman, a proposito.** Que k=10 sea mas rapido que k=5: el total sale menor
+(132,7 vs 179,8 s) pero la dispersion es enorme (TTFT sd 15,8 s a k=5, rango 7,3-55,2 s) con n=12 —
+es ruido hasta que se mida con potencia. Y que la subida de retrieval de ~1 a ~5 s sea causal:
+hipotesis no verificada de competencia por VRAM entre granite residente y los modelos de recuperacion.
+
+Lo que si sostiene la medicion: **la latencia del despliegue local es mala para una encuesta con
+cualquier modelo y cualquier k.**
+
+### PUSH PUBLICADO (autorizado por Enzo)
+
+`git push -u origin summer/mejoras` — **63 commits**, rama nueva, `main` intacto (`origin/main` sigue
+en `a524b0d`), sin PR y sin force. 13 dias de trabajo dejan de existir en un solo disco.
+
+Verificaciones previas: suite **177 pasan**; `verify_summer_offline.py` **exit 0**;
+`git diff --name-status nota3-evidencia-2026-06-11 -- experiments/results` = **322 altas, 0 M, 0 D**;
+`.env` no versionado (ignorado en `.gitignore:47`); **0** coincidencias de credencial.
+
+Nota de la compuerta: el escaneo dio **1 coincidencia de alta senal**, y se paro a inspeccionarla
+antes de publicar. Era la **linea 29 de `output/audit/push_inventory_2026-08-04.md`**, o sea la prosa
+del propio inventario listando los patrones que escanea. Mismo fenomeno que las guardas a nivel de
+fuente que se disparan con su propia documentacion. Benigna, verificada, y se publica.
+
+Entra tambien la **paridad de despliegue de UI** autorizada el 2026-08-03 y sin versionar desde
+entonces: Chat y Evaluation resuelven `hybrid` a `SURVEY_DEPLOY` por un mapeo exclusivo de Streamlit,
+y `query_stream()` pasa a respetar routing de prompts y balanceo cross-cloud igual que `query()` —
+antes divergian, asi que la demo mostraba un sistema distinto del medido.
+
+### La nube, reencuadrada: infraestructura de despliegue, no experimento de capacidad
+
+El **NO-GO sigue vigente** para la nube como experimento de capacidad (entrada 22). Lo que Enzo
+necesita ahora es otra cosa: **alojar el sistema ya medido** para que los participantes accedan en
+remoto sin que la lentitud contamine el SUS/Likert.
+
+**Causa del TTFT, medida** (log de Ollama de Tier A, no supuesta):
+
+```
+file type = Q4_K - Medium
+load_tensors: offloaded 30/41 layers to GPU          <- 11 capas en CPU
+llama_context: graph splits = 114 (with bs=512), 3 (with bs=1)
+msg="vram-based default context" total_vram="6.0 GiB" default_num_ctx=4096
+granite.context_length = 131072
+```
+
+El **prefill cruza la frontera CPU/GPU 114 veces**; el decode solo 3. El prefill *es* el TTFT.
+**No hace falta un modelo mayor ni una A100: hace falta que el modelo quepa.**
+
+Corolario: **el tope de 4096 es derivado de la VRAM, no del modelo** (granite declara 131072). Las
+74/194 queries que truncan a k=10 son artefacto de la laptop de 6 GB.
+
+**Diseno en `docs/CLOUD_DEPLOYMENT_SURVEY.md`** (documento nuevo; `CLOUD_EXPERIMENT_DESIGN.md` queda
+intacto como el experimento de capacidad). Decisiones de Enzo incorporadas:
+
+- **`num_ctx=4096` fijo.** Un solo cambio respecto a local: 41/41 capas en GPU en vez de 30/41.
+  Beneficio no previsto al preguntarlo: **conserva el estrato truncado**, asi que la evidencia de
+  fidelidad de exp18 para k=10 **transfiere tal cual** y la equivalencia mide un solo cambio.
+- **Exposicion bajo demanda, por sesiones.** ~15-20 h de GPU en todo el estudio.
+- **Si la equivalencia falla: parar y reportar.** No se despliega; la encuesta corre local a k=5; la
+  no-equivalencia se reporta como hallazgo (el sistema es sensible al reparto GPU/CPU).
+
+**GPU:** ~9 GiB de VRAM en total (granite 41/41 5,0 · KV 4096x4 slots 2,5 · bge-large 0,7 · ms-marco
+0,15 · NLI small 0,6 — la UI verifica en vivo). **16 GB bastan, 24 GB da margen.** RTX 4090 recomendada.
+**No hace falta A100 ni L40S.**
+
+**Coste: USD 6-14 esperado, techo sugerido USD 30.** Precios por hora estimados, a verificar al
+reservar. Dejar el pod encendido toda la ventana costaria USD 59-235 y es GPU ociosa.
+
+**Compuerta `exp21_hosted_equivalence`, pre-registrada:** digest del modelo verificado contra el local
+antes de generar; 194 queries sobre contextos congelados de exp18; sonda de determinismo 3x (H5);
+**solo vuelven JSON, la puntuacion se queda en local** con los 3 verificadores; **TOST banda ±0,081**
+en los tres; guarda del ancla HHEM en 0,40-0,55. **No se espera identidad bit a bit** —local corre
+30/41 capas en GPU, el alojado 41/41— y por eso el criterio es equivalencia declarada, no igualdad.
+
+**Cero gasto ejecutado.** El diseno no cuesta nada; la ejecucion requiere OK con el costo a la vista.
+
+### Estado
+
+Suite **177 pasan, 0 fallan, 0 omitidas**. `verify_summer_offline.py` exit 0. Evidencia firmada
+**322 altas, 0 M, 0 D**. **Todo publicado en `origin/summer/mejoras`.**

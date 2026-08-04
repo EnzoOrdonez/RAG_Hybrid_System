@@ -356,7 +356,33 @@ podría anclar mejor; esa pregunta queda **abierta**, no resuelta. Cero gasto ej
   de grounding ortogonal). **Nunca hubo un "trío NLI"**; un tercer NLI habría sido un voto
   correlacionado. Ninguna cifra publicada depende de él — ver ledger entrada 22 para la revisión
   candidato por candidato.
-- **Nube** — `docs/CLOUD_EXPERIMENT_DESIGN.md`: A100 80 GB, 5-9 h ≈ USD 10-18, techo sugerido USD 50.
-  **NO-GO por selección** tras exp18; sobrevive solo como test de **capacidad de generación**, y
-  **cero gasto sin OK explícito**.
+- **Nube, dos propósitos distintos:**
+  - **Capacidad** (`docs/CLOUD_EXPERIMENT_DESIGN.md`, A100 80 GB) — **NO-GO** tras exp18. Sobrevive
+    solo como test de capacidad de generación, y **cero gasto sin OK explícito**.
+  - **Infraestructura de despliegue** (`docs/CLOUD_DEPLOYMENT_SURVEY.md`, **nuevo**) — para que los
+    participantes accedan en remoto sin que la lentitud contamine el SUS/Likert. **Mismo modelo**
+    (granite4.1:8b), misma cuantización, mismo motor, misma ventana 4096: el único cambio es
+    **41/41 capas en GPU en vez de 30/41**. Causa medida del TTFT: el prefill cruza la frontera
+    CPU/GPU **114 veces** (`graph splits = 114 (with bs=512), 3 (with bs=1)`). ~9 GiB de VRAM →
+    **16 GB bastan**, RTX 4090 recomendada; **no hace falta A100**. **USD 6-14**, techo USD 30.
+    Compuerta obligatoria `exp21_hosted_equivalence`: TOST ±0,081 en los 3 verificadores contra el
+    granite local; **si no equivale, no se despliega**. Cero gasto ejecutado.
+
+## Config de encuestas — el generador (defecto #12, resuelto 2026-08-04)
+
+`SURVEY_DEPLOY` generaba con `llama3.1:8b-instruct-q4_K_M` mientras **toda** la evidencia de la fase
+es `granite4.1:8b`. Origen: residuo de la configuración previa — el paper sometido a LACCI describe
+Llama 3.1 8B Q4 sobre 200 queries y el despliegue nunca se migró. **Decisión de Enzo: la encuesta
+corre granite.** `PROPOSED_HYBRID` conserva llama3.1 a propósito: es el registro de lo sometido.
+
+Latencia re-medida con granite en la ruta de despliegue (n=12 por config):
+
+| config | retrieval p50 | **TTFT p50** | TTFT p90 | total p50 |
+|---|---|---|---|---|
+| k=5 | 5,1 s | **12,8 s** | 47,7 s | 179,8 s |
+| k=10 | 5,0 s | **15,2 s** | 34,6 s | 132,7 s |
+
+No se afirma que k=10 sea más rápido (dispersión enorme, n=12: ruido). Lo que sí sostiene: **la
+latencia local es mala para una encuesta con cualquier modelo y cualquier k** — de ahí el bloque de
+nube como infraestructura.
 - **Gold humano** — etapas A y B listas para anotar (Enzo).
