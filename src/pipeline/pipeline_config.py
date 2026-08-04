@@ -148,13 +148,25 @@ LLM_ONLY_NO_RAG = PipelineConfig(
 #                                       all 3 verifiers up; declination 56%->32%, more
 #                                       claims, no extra copying). Pilot n=25, not
 #                                       significant -- a deployment choice, not a claim.
+#   llm_model="granite4.1:8b"           DEFECT #12, fixed 2026-08-04 (ledger entry 24).
+#                                       This inherited `llama3.1:8b-instruct-q4_K_M` from
+#                                       PROPOSED_HYBRID, a leftover of the earlier
+#                                       experimental setup: the LACCI submission describes
+#                                       Llama 3.1 8B Q4 over 200 queries and the deployment
+#                                       was never migrated. But exp15 Tier A, exp16, exp17
+#                                       and exp18 are ALL granite4.1:8b, so the surveys
+#                                       would have measured a system with not one
+#                                       faithfulness number behind it.
 #
-# Kept OUT of PIPELINE_CONFIGS on purpose: `get_config("hybrid")` must keep returning the
-# measured system so nothing in the experiment paths picks this up by accident.
+# PROPOSED_HYBRID keeps llama3.1 ON PURPOSE: it is the record of the system submitted to
+# LACCI, and editing it would falsify that record. Kept OUT of PIPELINE_CONFIGS for the same
+# reason -- `get_config("hybrid")` must keep returning the measured system so nothing in the
+# experiment paths picks this up by accident.
 SURVEY_DEPLOY = PROPOSED_HYBRID.model_copy(update={
     "name": "RAG Hibrido (despliegue encuestas)",
     "prompt_routing": True,
     "balance_cross_cloud_providers": True,
+    "llm_model": "granite4.1:8b",
 })
 
 
