@@ -72,14 +72,14 @@ def select_by_claims(R, k):
     is the failure mode of query-level ranking that this whole experiment exists to escape.
     Serving each claim by its own best chunk is what "grounding-guided" has to mean.
     """
-    n_claims = R.shape[0]
-    chosen, best_so_far = [], np.full(n_claims, -np.inf)
+    chosen, best_so_far = [], np.full(R.shape[0], -np.inf)
     for _ in range(min(k, R.shape[1])):
-        gains = np.maximum(R, best_so_far[:, None]).sum(axis=0) - best_so_far.sum()
-        gains[chosen] = -np.inf
-        j = int(np.argmax(gains))
-        if not np.isfinite(gains[j]):
-            break
+        # Total coverage if chunk j were added. Ranking by coverage is equivalent to ranking by
+        # gain (they differ by a constant) and avoids the -inf arithmetic that an explicit gain
+        # needs on the first step, where `best_so_far` is still -inf everywhere.
+        coverage = np.maximum(R, best_so_far[:, None]).sum(axis=0)
+        coverage[chosen] = -np.inf
+        j = int(np.argmax(coverage))
         chosen.append(j)
         best_so_far = np.maximum(best_so_far, R[:, j])
     return chosen
@@ -108,6 +108,8 @@ def main():
     index = json.loads(index_path.read_text(encoding="utf-8"))
     ids_doc = json.loads((EXP18 / "retrieval_ids.json").read_text(encoding="utf-8"))["ids"]
     chunk_map = json.loads(CHUNK_MAP.read_text(encoding="utf-8"))
+    bound = json.loads((EXP18 / f"selection_bound{args.suffix}.json")
+                       .read_text(encoding="utf-8"))["per_query"]
 
     qids = sorted(index)[: args.max_queries] if args.max_queries else sorted(index)
     print(f"loading ms-marco-L12 ... ({len(qids)} queries)", flush=True)
@@ -140,17 +142,22 @@ def main():
         R = np.array(cs).reshape(len(claims), len(pool_ids))
         c_top = select_by_claims(R, FINAL_K)
 
-        # ground truth: chunks that actually support at least one claim (HHEM)
+        # Chunk-level recall is kept only as a diagnostic: it SATURATES. Most chunks in the pool
+        # support some claim (q001: 38 of 50), so recall@5 is ~5/|supporting| for any selection
+        # of five supporting chunks and says nothing about whether the RIGHT claims got covered.
         supporting = set(np.nonzero(sup.any(axis=0))[0].tolist())
         rec = (lambda idx: len(set(idx) & supporting) / len(supporting)) if supporting else (lambda idx: None)
         rows.append({
             "qid": qid, "n_claims": len(claims), "n_pool": len(pool_ids),
             "n_supporting_chunks": len(supporting),
-            "recall5_query_rank": rec(q_top), "recall5_claim_rank": rec(c_top),
-            "recall5_baseline": rec(base_idx),
+            # PRIMARY: claim coverage of the fixed answer, with the bound as ceiling
+            "faith_baseline": faith_of(sup, base_idx),
             "faith_query_rank": faith_of(sup, q_top),
             "faith_claim_rank": faith_of(sup, c_top),
-            "faith_baseline": faith_of(sup, base_idx),
+            "achievable_k5": bound.get(qid, {}).get("achievable_k5"),
+            # diagnostic only
+            "recall5_query_rank": rec(q_top), "recall5_claim_rank": rec(c_top),
+            "recall5_baseline": rec(base_idx),
             "top5_overlap_with_baseline": overlap,
         })
         if n % 10 == 0:
@@ -162,12 +169,13 @@ def main():
         return round(float(np.mean(xs)), 4) if xs else None
 
     rng = np.random.default_rng(SEED)
-    paired = np.array([[r["recall5_claim_rank"], r["recall5_query_rank"]] for r in rows
-                       if r["recall5_claim_rank"] is not None])
+    paired = np.array([[r["faith_claim_rank"], r["faith_baseline"], r["achievable_k5"]]
+                       for r in rows if r["achievable_k5"] is not None])
     diff = float(np.mean(paired[:, 0] - paired[:, 1])) if len(paired) else 0.0
     boot = np.array([float(np.mean(d[:, 0] - d[:, 1])) for d in
                      (paired[rng.integers(0, len(paired), len(paired))] for _ in range(10000))]) \
         if len(paired) else np.array([0.0])
+    headroom = float(np.mean(paired[:, 2] - paired[:, 1])) if len(paired) else 0.0
 
     mean_ov = round(float(np.mean(sanity["mean_overlap"])), 3)
     sanity_ok = mean_ov >= 4.0
@@ -188,20 +196,35 @@ def main():
             "why": ("below ~4/5 mean overlap the harness is not scoring what exp18 scored and "
                     "every comparison here is meaningless"),
         },
-        "recall_of_supporting_chunks@5": {
-            "baseline_selection": mean("recall5_baseline"),
-            "query_rank": mean("recall5_query_rank"),
-            "claim_rank": mean("recall5_claim_rank"),
-            "paired_diff_claim_minus_query": round(diff, 4),
-            "boot95": [round(float(np.percentile(boot, 2.5)), 4),
-                       round(float(np.percentile(boot, 97.5)), 4)],
-        },
-        "fixed_answer_faithfulness": {
+        "fixed_answer_claim_coverage": {
+            "_primary": True,
             "baseline_selection": mean("faith_baseline"),
             "query_rank": mean("faith_query_rank"),
             "claim_rank": mean("faith_claim_rank"),
-            "caveat": ("CIRCULAR: computed against the very claims the baseline wrote. A real "
+            "achievable_k5_ceiling": mean("achievable_k5"),
+            "paired_diff_claim_minus_baseline": round(diff, 4),
+            "boot95": [round(float(np.percentile(boot, 2.5)), 4),
+                       round(float(np.percentile(boot, 97.5)), 4)],
+            "headroom_available": round(headroom, 4),
+            "frac_of_headroom_closed": round(diff / headroom, 4) if headroom > 0 else None,
+            "note_query_rank_equals_baseline": (
+                "the pool is stored in production-reranked order, so re-ranking it by (query, "
+                "chunk) returns indices 0-4 = the baseline's own top-5. `query_rank` is therefore "
+                "a harness check, not a second comparator; the contrast that matters is "
+                "claim_rank vs baseline."),
+            "caveat": ("CIRCULAR: computed against the very claims the baseline wrote, so this is "
+                       "a statement about RETRIEVAL under a fixed answer. `frac_of_headroom_closed` "
+                       "is well defined ONLY inside that fixed-answer world -- it is NOT the "
+                       "fraction of exp18's +0.128 that exp19b would deliver, because a real "
                        "selector changes the answer. Never an effect estimate."),
+        },
+        "recall_of_supporting_chunks@5_DIAGNOSTIC": {
+            "baseline_selection": mean("recall5_baseline"),
+            "query_rank": mean("recall5_query_rank"),
+            "claim_rank": mean("recall5_claim_rank"),
+            "why_not_primary": ("it saturates: most pool chunks support SOME claim (q001: 38 of "
+                                "50), so recall@5 is ~5/|supporting| for any five supporting "
+                                "chunks and is blind to whether the right claims got covered"),
         },
         "gate": {
             "result": "PASS" if passed else "FAIL",
@@ -215,22 +238,29 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "probe.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
 
-    r5, ff = out["recall_of_supporting_chunks@5"], out["fixed_answer_faithfulness"]
+    ff = out["fixed_answer_claim_coverage"]
+    r5 = out["recall_of_supporting_chunks@5_DIAGNOSTIC"]
     L = [f"# exp19a — sonda offline del selector (n={len(rows)}, tau {args.tau})", "",
          "Pregunta: reordenar por `(claim, chunk)` con ms-marco-L12, ¿encuentra los chunks que "
-         "anclan mejor que reordenar por `(query, chunk)`? **Cero generacion.**", "",
+         "anclan los claims mejor que el ranking de produccion? **Cero generacion.**", "",
          f"**Sanity check:** solape medio con el top-5 real de exp18 = **{mean_ov}/5** "
          f"({'OK' if sanity_ok else 'FALLA — no leer nada de abajo'}).", "",
-         "| seleccion | recall@5 de chunks que anclan | fidelidad a respuesta fija |",
-         "|---|---|---|",
-         f"| baseline (top-5 de exp18) | {r5['baseline_selection']} | {ff['baseline_selection']} |",
-         f"| rerank por query | {r5['query_rank']} | {ff['query_rank']} |",
-         f"| **rerank por claim** | **{r5['claim_rank']}** | **{ff['claim_rank']}** |",
-         "",
-         f"Diferencia pareada (claim − query): **{r5['paired_diff_claim_minus_query']}** "
-         f"(IC95 {r5['boot95'][0]} a {r5['boot95'][1]}).", "",
+         "## Primaria — cobertura de claims a respuesta fija", "",
+         "| seleccion | cobertura de claims |", "|---|---|",
+         f"| baseline (top-5 de exp18) | {ff['baseline_selection']} |",
+         f"| rerank por query (control del harness) | {ff['query_rank']} |",
+         f"| **rerank por claim** | **{ff['claim_rank']}** |",
+         f"| cota alcanzable k=5 (techo) | {ff['achievable_k5_ceiling']} |", "",
+         f"Diferencia pareada (claim − baseline): **{ff['paired_diff_claim_minus_baseline']}** "
+         f"(IC95 {ff['boot95'][0]} a {ff['boot95'][1]}). Margen disponible: "
+         f"{ff['headroom_available']}. Fraccion del margen cerrada: "
+         f"**{ff['frac_of_headroom_closed']}**.", "",
+         ff["note_query_rank_equals_baseline"], "",
          f"## COMPUERTA: **{out['gate']['result']}**", "", out["gate"]["rule"], "",
-         ff["caveat"], "", out["verifier_hygiene"]]
+         ff["caveat"], "",
+         f"Diagnostico (no primaria): recall@5 de chunks que anclan — baseline "
+         f"{r5['baseline_selection']}, claim {r5['claim_rank']}. " + r5["why_not_primary"], "",
+         out["verifier_hygiene"]]
     (OUT_DIR / "probe.md").write_text("\n".join(L), encoding="utf-8")
     print("\n".join(L))
 

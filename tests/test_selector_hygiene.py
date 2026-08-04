@@ -111,3 +111,69 @@ def test_the_circular_metric_is_labelled_as_such(name, src):
     assert "CIRCULAR" in src, f"{name} reports a fixed-answer metric without labelling it circular"
     assert "no BH family" in src or "not_in_any_family" in src, \
         f"{name} must state that the probe enters no BH family"
+
+
+# ------------------------------------------------------- the selector, on known-answer cases
+# `select_by_claims` returned an EMPTY selection on its first smoke run: `best_so_far` started
+# at -inf, so the gain of every chunk was +inf, `np.isfinite` rejected it, and the loop broke
+# before choosing anything. Recall came out as exactly 0.0 and the gate read FAIL -- which would
+# have killed a valid experiment on a bug. Implausible-but-directional output is the dangerous
+# kind, so the selector now has cases whose right answer is known by construction.
+@pytest.fixture(scope="module")
+def probe():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "probe_t", PROJECT_ROOT / "scripts" / "compute_exp19a_selector_probe.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_selector_returns_exactly_k_chunks(probe):
+    import numpy as np
+    R = np.random.default_rng(0).random((7, 20))
+    assert len(probe.select_by_claims(R, 5)) == 5
+    assert len(set(probe.select_by_claims(R, 5))) == 5, "no chunk may be picked twice"
+
+
+def test_selector_never_returns_empty(probe):
+    """The bug. Any finite score matrix must yield a selection."""
+    import numpy as np
+    for R in (np.zeros((3, 10)), np.full((3, 10), -5.0), np.ones((1, 2))):
+        assert probe.select_by_claims(R, 5), f"empty selection for shape {R.shape}"
+
+
+def test_selector_has_diminishing_returns_on_an_already_served_claim(probe):
+    """The property that separates claim-level selection from score-ranking, known by hand.
+
+    Claim A is served well by chunks 0 and 1; claim B only by chunk 2, and less strongly. Ranking
+    chunks by their score (9 > 8 > 7 — identical to ranking by mean or by sum over claims) takes
+    {0, 1} and leaves claim B with nothing. A selector that serves each claim by its own best
+    chunk must take {0, 2}, because once claim A is served, chunk 1 adds nothing.
+
+    At k=1 the two rules cannot differ (argmax of a sum is argmax of a mean), so the case needs
+    k=2 to be a real test.
+    """
+    import numpy as np
+    R = np.array([[9.0, 8.0, 0.0],      # claim A: chunks 0 and 1
+                  [0.0, 0.0, 7.0]])     # claim B: chunk 2 only
+    assert set(probe.select_by_claims(R, 2)) == {0, 2}
+    assert list(np.argsort(-R.sum(axis=0))[:2]) == [0, 1], \
+        "the case must actually distinguish the two rules"
+
+
+def test_selector_picks_the_single_useful_chunk_first(probe):
+    import numpy as np
+    R = np.array([[0.1, 0.1, 8.0, 0.1]])
+    assert probe.select_by_claims(R, 1) == [2]
+
+
+def test_fixed_answer_faithfulness_matches_hand_count(probe):
+    import numpy as np
+    sup = np.array([[True, False, False],
+                    [False, False, False],
+                    [False, True, False]])
+    assert probe.faith_of(sup, [0]) == pytest.approx(1 / 3)
+    assert probe.faith_of(sup, [0, 1]) == pytest.approx(2 / 3)
+    assert probe.faith_of(sup, [2]) == 0.0
+    assert probe.faith_of(sup, []) == 0.0
