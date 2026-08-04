@@ -1446,6 +1446,46 @@ y cualquier modelo bastante fuerte para hallarla es un verificador cuyo uso cont
 La restriccion anti-circularidad y la potencia del selector estan en tension directa. Decision
 pendiente de Enzo.
 
+### exp19a — COMPUERTA: **PASS** (resultado, cerrado el mismo dia)
+
+n=188, cero generacion. **Sanity check perfecto:** reordenar el pool por `(query, chunk)` reproduce
+el top-5 real de exp18 en **188/188** (solape 5,0/5, coincidencia exacta 1,0), y el baseline
+calculado aqui, **0,4552**, coincide con el de la cota al cuarto decimal.
+
+| seleccion | cobertura de claims a respuesta fija |
+|---|---|
+| baseline (top-5 de exp18) | 0,4552 |
+| rerank por query (control del harness) | 0,4552 |
+| **rerank por claim** | **0,4853** |
+| cota alcanzable k=5 (techo) | 0,5834 |
+
+Diferencia pareada **+0,0300**, IC95 **[0,0156, 0,0448]** — excluye 0. Cierra el **23,4 %** del
+margen disponible (0,1282). **59 queries mejoran, 22 empeoran, 107 quedan igual.**
+
+**PASS con el significado declarado antes de correr y ningun otro:** el mecanismo **no esta
+muerto**. **NO** predice ganancia de fidelidad, porque la respuesta cambia cuando cambia la
+evidencia (entrada 22). `frac_of_headroom_closed` vive solo dentro del mundo de respuesta fija.
+
+**EL PRELIMINAR ERA FALSO, Y SE REPORTO COMO PRELIMINAR ANTES DE SABERLO.** Sobre las primeras 25
+queries por qid la diferencia era +0,0008 y la compuerta leia **FAIL**; sobre las 188 es +0,0300 y
+lee **PASS**. Las primeras 25 no eran representativas. **El gate de completitud anadido horas antes
+es lo que impidio publicar ese FAIL como veredicto**: se nego a emitir resultado con muestra
+incompleta. El escenario que motivo la guarda ocurrio de verdad, el mismo dia, y en la direccion
+cara — un falso negativo que habria matado un experimento valido y ahorrado GPU por el motivo
+equivocado.
+
+**Correccion de una lectura propia.** Con el FAIL preliminar se argumento que *"la senal que
+encontraria los chunks que anclan es, por definicion, una senal de anclaje, y cualquier modelo
+bastante fuerte para hallarla es un verificador que contamina la evaluacion"*. Con el resultado
+completo esa tension queda **debilitada, no confirmada**: un reranker de **produccion**, sin ningun
+verificador en el bucle, recupera casi una cuarta parte del margen. **La higiene de instrumento no
+cuesta el experimento.** La opcion de seleccionar con HHEM (que contaminaria a HHEM como evaluador)
+deja de ser necesaria para tener un exp19b con señal.
+
+**Siguiente paso, y sigue requiriendo decision de Enzo:** exp19b, el brazo generativo
+(borrador -> claims -> rerank por claim -> regenerar), con primaria = Δ fidelidad vs baseline en los
+3 verificadores, familia BH declarada y TOST ±0,081. Es una corrida de generacion en la GPU de Enzo.
+
 ### Estado
 
 Suite **158 rapida / 4 excluidas**. `verify_summer_offline.py` **exit 0** cubriendo exp15..exp18.
