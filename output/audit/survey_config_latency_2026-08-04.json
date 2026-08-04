@@ -1,0 +1,299 @@
+{
+ "generated": "2026-08-04",
+ "config": "SURVEY_DEPLOY (prompt_routing + balance_cross_cloud_providers), live retrieval",
+ "seed": 42,
+ "n_queries": 12,
+ "strata": {
+  "cross_cloud|no_trunc": [
+   "q135",
+   "q185"
+  ],
+  "cross_cloud|trunc": [
+   "q146",
+   "q150"
+  ],
+  "procedural|no_trunc": [
+   "q105",
+   "q080"
+  ],
+  "procedural|trunc": [
+   "q064",
+   "q085"
+  ],
+  "single_provider|no_trunc": [
+   "q057",
+   "q059"
+  ],
+  "single_provider|trunc": [
+   "q027",
+   "q128"
+  ]
+ },
+ "summary": {
+  "k=5": {
+   "n": 12,
+   "retrieval_ms_p50": 1044.4,
+   "ttft_ms_p50": 25985.0,
+   "ttft_ms_p90": 33942.8,
+   "total_ms_p50": 94075.1,
+   "total_ms_p90": 114906.2,
+   "words_mean": 258,
+   "n_chunks_mean": 5
+  },
+  "k=10": {
+   "n": 12,
+   "retrieval_ms_p50": 1343.4,
+   "ttft_ms_p50": 47197.8,
+   "ttft_ms_p90": 50803.6,
+   "total_ms_p50": 113257.9,
+   "total_ms_p90": 137057.6,
+   "words_mean": 234.7,
+   "n_chunks_mean": 10
+  }
+ },
+ "rows": {
+  "k5|q135": {
+   "qid": "q135",
+   "k": 5,
+   "ttft_ms": 174748.6,
+   "retrieval_ms": 14893.0,
+   "total_ms": 242664.2,
+   "chars": 2459,
+   "words": 354,
+   "n_chunks": 5
+  },
+  "k5|q185": {
+   "qid": "q185",
+   "k": 5,
+   "ttft_ms": 22157.8,
+   "retrieval_ms": 3400.1,
+   "total_ms": 86716.2,
+   "chars": 2388,
+   "words": 336,
+   "n_chunks": 5
+  },
+  "k5|q146": {
+   "qid": "q146",
+   "k": 5,
+   "ttft_ms": 30630.4,
+   "retrieval_ms": 1104.8,
+   "total_ms": 96849.0,
+   "chars": 1851,
+   "words": 286,
+   "n_chunks": 5
+  },
+  "k5|q150": {
+   "qid": "q150",
+   "k": 5,
+   "ttft_ms": 20155.7,
+   "retrieval_ms": 1035.8,
+   "total_ms": 67971.3,
+   "chars": 1557,
+   "words": 251,
+   "n_chunks": 5
+  },
+  "k5|q105": {
+   "qid": "q105",
+   "k": 5,
+   "ttft_ms": 14465.3,
+   "retrieval_ms": 1044.4,
+   "total_ms": 61536.7,
+   "chars": 1901,
+   "words": 271,
+   "n_chunks": 5
+  },
+  "k5|q080": {
+   "qid": "q080",
+   "k": 5,
+   "ttft_ms": 33942.8,
+   "retrieval_ms": 21056.5,
+   "total_ms": 96312.7,
+   "chars": 2450,
+   "words": 349,
+   "n_chunks": 5
+  },
+  "k5|q064": {
+   "qid": "q064",
+   "k": 5,
+   "ttft_ms": 29591.7,
+   "retrieval_ms": 880.5,
+   "total_ms": 114906.2,
+   "chars": 2328,
+   "words": 322,
+   "n_chunks": 5
+  },
+  "k5|q085": {
+   "qid": "q085",
+   "k": 5,
+   "ttft_ms": 21167.4,
+   "retrieval_ms": 1026.2,
+   "total_ms": 94075.1,
+   "chars": 2376,
+   "words": 362,
+   "n_chunks": 5
+  },
+  "k5|q057": {
+   "qid": "q057",
+   "k": 5,
+   "ttft_ms": 25985.0,
+   "retrieval_ms": 901.1,
+   "total_ms": 52996.1,
+   "chars": 877,
+   "words": 128,
+   "n_chunks": 5
+  },
+  "k5|q059": {
+   "qid": "q059",
+   "k": 5,
+   "ttft_ms": 15181.8,
+   "retrieval_ms": 984.1,
+   "total_ms": 27773.9,
+   "chars": 534,
+   "words": 85,
+   "n_chunks": 5
+  },
+  "k5|q027": {
+   "qid": "q027",
+   "k": 5,
+   "ttft_ms": 31348.3,
+   "retrieval_ms": 954.4,
+   "total_ms": 113581.9,
+   "chars": 1895,
+   "words": 232,
+   "n_chunks": 5
+  },
+  "k5|q128": {
+   "qid": "q128",
+   "k": 5,
+   "ttft_ms": 20839.5,
+   "retrieval_ms": 19878.7,
+   "total_ms": 54491.0,
+   "chars": 766,
+   "words": 120,
+   "n_chunks": 5
+  },
+  "k10|q135": {
+   "qid": "q135",
+   "k": 10,
+   "ttft_ms": 35331.9,
+   "retrieval_ms": 3721.2,
+   "total_ms": 124425.3,
+   "chars": 2555,
+   "words": 381,
+   "n_chunks": 10
+  },
+  "k10|q185": {
+   "qid": "q185",
+   "k": 10,
+   "ttft_ms": 37197.1,
+   "retrieval_ms": 1343.4,
+   "total_ms": 117843.2,
+   "chars": 2348,
+   "words": 327,
+   "n_chunks": 10
+  },
+  "k10|q146": {
+   "qid": "q146",
+   "k": 10,
+   "ttft_ms": 53756.9,
+   "retrieval_ms": 1116.2,
+   "total_ms": 141739.2,
+   "chars": 2345,
+   "words": 329,
+   "n_chunks": 10
+  },
+  "k10|q150": {
+   "qid": "q150",
+   "k": 10,
+   "ttft_ms": 50803.6,
+   "retrieval_ms": 1039.3,
+   "total_ms": 104665.8,
+   "chars": 1434,
+   "words": 175,
+   "n_chunks": 10
+  },
+  "k10|q105": {
+   "qid": "q105",
+   "k": 10,
+   "ttft_ms": 23947.7,
+   "retrieval_ms": 23042.8,
+   "total_ms": 81453.6,
+   "chars": 1964,
+   "words": 293,
+   "n_chunks": 10
+  },
+  "k10|q080": {
+   "qid": "q080",
+   "k": 10,
+   "ttft_ms": 29993.8,
+   "retrieval_ms": 1767.1,
+   "total_ms": 113257.9,
+   "chars": 2462,
+   "words": 342,
+   "n_chunks": 10
+  },
+  "k10|q064": {
+   "qid": "q064",
+   "k": 10,
+   "ttft_ms": 47197.8,
+   "retrieval_ms": 1005.8,
+   "total_ms": 135283.1,
+   "chars": 2301,
+   "words": 288,
+   "n_chunks": 10
+  },
+  "k10|q085": {
+   "qid": "q085",
+   "k": 10,
+   "ttft_ms": 49305.0,
+   "retrieval_ms": 1018.6,
+   "total_ms": 137057.6,
+   "chars": 2022,
+   "words": 287,
+   "n_chunks": 10
+  },
+  "k10|q057": {
+   "qid": "q057",
+   "k": 10,
+   "ttft_ms": 45503.6,
+   "retrieval_ms": 988.5,
+   "total_ms": 74952.5,
+   "chars": 796,
+   "words": 118,
+   "n_chunks": 10
+  },
+  "k10|q059": {
+   "qid": "q059",
+   "k": 10,
+   "ttft_ms": 26462.6,
+   "retrieval_ms": 25022.9,
+   "total_ms": 41463.5,
+   "chars": 450,
+   "words": 71,
+   "n_chunks": 10
+  },
+  "k10|q027": {
+   "qid": "q027",
+   "k": 10,
+   "ttft_ms": 48553.2,
+   "retrieval_ms": 1369.4,
+   "total_ms": 75596.7,
+   "chars": 790,
+   "words": 124,
+   "n_chunks": 10
+  },
+  "k10|q128": {
+   "qid": "q128",
+   "k": 10,
+   "ttft_ms": 47424.3,
+   "retrieval_ms": 1120.6,
+   "total_ms": 68311.4,
+   "chars": 576,
+   "words": 81,
+   "n_chunks": 10
+  }
+ },
+ "why": "exp18's k=10 arm used FROZEN contexts and no provider balancing, and reports TOTAL generation time; the UI streams, so the survey-relevant latency is TTFT. These numbers are the deployment-path counterpart.",
+ "not_measured": "faithfulness \u2014 that stays with the offline scorers on exp18",
+ "generated_by": "scripts/measure_survey_config_latency.py"
+}
