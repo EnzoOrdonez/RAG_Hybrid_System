@@ -93,8 +93,10 @@ def main():
     ap.add_argument("--tau", type=float, default=0.5)
     ap.add_argument("--max-queries", type=int, default=None,
                     help="smoke mode; writes to a __smokeN file that cannot overwrite the real one")
+    ap.add_argument("--out-suffix", default="",
+                    help="write selection_bound<suffix>.json instead of overwriting the committed one")
     args = ap.parse_args()
-    suffix = f"__smoke{args.max_queries}" if args.max_queries else ""
+    suffix = f"__smoke{args.max_queries}" if args.max_queries else args.out_suffix
 
     ids_doc = json.loads((EXP_DIR / "retrieval_ids.json").read_text(encoding="utf-8"))["ids"]
     results = json.loads((EXP_DIR / "results.json").read_text(encoding="utf-8"))["configs"]
@@ -108,8 +110,23 @@ def main():
     print(f"loading HHEM-2.1 ... ({len(rows)} queries)", flush=True)
     model = load_hhem()
 
+    # The claim x chunk score matrix is the expensive part of this script and, until now, it
+    # was thrown away after the aggregates were taken. Everything downstream that asks a
+    # finer question than "how many claims clear tau" -- the unsupported-claim taxonomy, the
+    # exp19 selector probe, the gold sample -- needs the matrix itself, and re-deriving it
+    # costs another full HHEM pass. It is persisted per query so a resumed run keeps it too.
+    scores_dir = EXP_DIR / f"selection_scores{suffix}"
+    scores_dir.mkdir(exist_ok=True)
+    index_path = EXP_DIR / f"selection_scores{suffix}_index.json"
+    score_index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {}
+
     part = EXP_DIR / f"selection_bound{suffix}.partial.json"
     per_query = json.loads(part.read_text(encoding="utf-8")) if part.exists() else {}
+    # A query counts as done only if BOTH its aggregates and its matrix are on disk. Resuming
+    # on the aggregates alone would silently produce an index with holes -- the same shape of
+    # defect as the pass_N failure: a work list derived from the convenient artifact.
+    per_query = {q: v for q, v in per_query.items()
+                 if v.get("genuine") in (0, None) or q in score_index}
     if per_query:
         print(f"resuming: {len(per_query)} queries done", flush=True)
 
@@ -142,6 +159,9 @@ def main():
             with torch.no_grad():
                 scores.extend(float(x) for x in model.predict(pairs[i:i + BATCH]))
         S = np.array(scores).reshape(len(genuine), len(pool_ids))   # claim x chunk
+        np.save(scores_dir / f"{qid}.npy", S.astype(np.float32))
+        score_index[qid] = {"pool_ids": pool_ids, "claims": genuine,
+                            "shape": [len(genuine), len(pool_ids)]}
 
         sup = S > args.tau
         # strict upper bound: any chunk in the pool may support the claim
@@ -171,9 +191,19 @@ def main():
         }
         if n % 10 == 0:
             part.write_text(json.dumps(per_query), encoding="utf-8")
+            index_path.write_text(json.dumps(score_index), encoding="utf-8")
             print(f"  [{n}/{len(rows)}] {qid} base={per_query[qid]['baseline_faith']} "
                   f"k5={per_query[qid]['achievable_k5']} upper={per_query[qid]['upper_bound']} "
                   f"({time.time()-t0:.0f}s)", flush=True)
+
+    index_path.write_text(json.dumps(score_index), encoding="utf-8")
+    # Record what was actually persisted, and refuse to publish an index with holes.
+    scored_with_claims = {q for q, v in per_query.items() if v.get("genuine")}
+    missing = sorted(scored_with_claims - set(score_index))
+    if missing:
+        sys.exit(f"INCOMPLETE score index: {len(missing)} queries have aggregates but no "
+                 f"matrix on disk ({missing[:5]}...). Delete "
+                 f"{part.name} and re-run so the two stay in step.")
 
     vals = [v for v in per_query.values() if v.get("upper_bound") is not None]
     all_unsup = [s for v in vals for s in v["unsupportable_best_score"]]
@@ -208,6 +238,24 @@ def main():
                     "and is reachable with 5 chunks, so the oracle's null means relevance "
                     "ranking cannot find it and the missing piece is a grounding-guided "
                     "selector, which is LOCAL."),
+        # Added 2026-08-04 (ledger entry 22), before exp19 is designed around this number.
+        "not_a_target": (
+            "This bound holds the ANSWER FIXED and only re-picks chunks under it. A real "
+            "selector changes the answer, hence both numerator and denominator: exp18's own "
+            "oracle arm -- a mild selection change -- already shows baseline_claim_reappearance "
+            "0.0132, i.e. ~99 % of claims differ. So the gap achievable_k5 - baseline does NOT "
+            "bound, and is not a target for, any non-circular selector; reporting a 'fraction "
+            "of the gap recovered' would be a fabricated quantity. What the bound does "
+            "establish is factual and enough to motivate exp19: the k=50 pool supports "
+            "achievable_k5 of the claims the baseline actually wrote while the 5 selected "
+            "chunks support only baseline_mean."),
+        "score_matrix": {
+            "dir": scores_dir.name,
+            "index": index_path.name,
+            "layout": "one float32 .npy per query, shape [genuine_claims x pool_chunks]; the "
+                      "index gives the claim texts and the pool_ids in matching order",
+            "n_queries": len(score_index),
+        },
         "per_query": per_query,
         "generated_by": "scripts/compute_exp18_selection_bound.py",
     }
