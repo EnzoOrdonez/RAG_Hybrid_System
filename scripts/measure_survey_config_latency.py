@@ -138,8 +138,25 @@ def main():
             if any(x["n_chunks"] for x in v) else None,
         }
 
+    # Record the GENERATOR, not just the retrieval knobs. The first run of this script did not,
+    # and that omission hid the thing that matters most: SURVEY_DEPLOY generates with
+    # llama3.1:8b-instruct-q4_K_M while every summer experiment is granite4.1:8b, so these
+    # latencies are not comparable to exp18's and the survey would ship an unmeasured model.
+    evidence_models = sorted({
+        c.get("model")
+        for p in (PROJECT_ROOT / "experiments/results").glob("exp1[5-8]*/results.json")
+        for c in json.loads(p.read_text(encoding="utf-8"))["configs"].values()
+        if c.get("model")})
     out = {"generated": str(date.today()), "config": "SURVEY_DEPLOY (prompt_routing + "
            "balance_cross_cloud_providers), live retrieval", "seed": SEED,
+           "llm_model_measured": SURVEY_DEPLOY.llm_model,
+           "llm_model_of_summer_evidence": evidence_models,
+           "model_divergence": (
+               None if [SURVEY_DEPLOY.llm_model] == evidence_models else
+               f"DIVERGENCIA: la ruta desplegada genera con {SURVEY_DEPLOY.llm_model} y toda la "
+               f"evidencia de la fase es {evidence_models}. Estas latencias NO son comparables "
+               f"con las de exp18, y la config de encuestas correria un modelo sin evidencia de "
+               f"fidelidad. Decision de Enzo."),
            "n_queries": len(qids), "strata": strata, "summary": summary, "rows": rows,
            "why": ("exp18's k=10 arm used FROZEN contexts and no provider balancing, and reports "
                    "TOTAL generation time; the UI streams, so the survey-relevant latency is "
@@ -151,7 +168,11 @@ def main():
     ck.unlink(missing_ok=True)
 
     L = [f"# Config de encuestas — latencia en la RUTA DE DESPLIEGUE ({date.today()})", "",
-         out["why"], "",
+         f"**Generador medido: `{out['llm_model_measured']}`.** Evidencia de la fase: "
+         f"`{', '.join(evidence_models)}`.", ""]
+    if out["model_divergence"]:
+        L += [f"> **{out['model_divergence']}**", ""]
+    L += [out["why"], "",
          "| config | n | retrieval p50 | **TTFT p50** | TTFT p90 | total p50 | total p90 | palabras | chunks |",
          "|---|---|---|---|---|---|---|---|---|"]
     for k, s in summary.items():
