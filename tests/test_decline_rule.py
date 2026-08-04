@@ -153,3 +153,80 @@ def test_guards_artifacts_declare_the_rule_they_used():
         doc = json.loads(p.read_text(encoding="utf-8"))
         assert "classify_response" in doc.get("decline_rule", ""), exp
         assert "decline_phrase" not in doc, f"{exp} still carries the old single-phrase field"
+
+
+# ------------------------------------------- defect #7: the class name overstates the rule
+# `pure_decline` tests a PREFIX. It was being read, in the survey-config argument and in the
+# ledger prose, as "the model refused" -- and most such rows answer anyway, from parametric
+# knowledge, with the worst grounding of the three classes. Same family as the previous six
+# defects: a work list (here the primary denominator) derived from a convenient proxy rather
+# than from the source of truth, then consumed as if it meant something else.
+def test_asserts_content_is_about_content_not_prefix(cfm):
+    """The content-based counterpart must ignore how the answer opened."""
+    assert cfm.asserts_content(11) is True
+    assert cfm.asserts_content(1) is True
+    assert cfm.asserts_content(0) is False
+    assert cfm.asserts_content(None) is False
+
+
+def test_a_decline_prefix_can_still_assert_content(cfm):
+    """The exact shape found in exp18 q078: refuse, then answer from memory anyway."""
+    answer = ("Based on the available documentation, I cannot find sufficient information to "
+              "fully answer this question regarding setting up AWS CloudWatch. However, I can "
+              "outline general steps that are typically involved. " +
+              "You create a log group, then attach a metric filter. " * 12)
+    assert cfm.classify_response(answer) == "pure_decline"
+    assert cfm.asserts_content(11) is True, "the class says nothing about whether it answered"
+
+
+def test_display_label_renames_the_misleading_class(cfm):
+    """The wire value lies; the human-facing one must not."""
+    assert cfm.DISPLAY_LABELS["pure_decline"] == "decline_prefix"
+    for klass in ("pure_decline", "hedged_partial", "answered"):
+        assert klass in cfm.DISPLAY_LABELS, f"{klass} has no display label"
+
+
+def test_the_wire_value_is_NOT_renamed(cfm):
+    """It is serialised inside signed evidence; renaming it would desync code from evidence.
+
+    verify_v4_offline.py re-derives published numbers from those files, so the emitted
+    string has to stay put no matter how misleading the word is.
+    """
+    assert cfm.classify_response("I cannot find sufficient information.") == "pure_decline"
+    signed = list((RESULTS / "exp12_matrix").glob("faithfulness_metrics_v*.json"))
+    if not signed:
+        pytest.skip("signed artifacts not present")
+    assert any("pure_decline" in p.read_text(encoding="utf-8") for p in signed), \
+        "signed evidence no longer carries the token this test protects"
+
+
+def test_the_primary_vs_all_gap_is_declared_in_the_output(cfm):
+    """Excluding pure_decline drops the worst-grounded rows; that must not read as noise."""
+    src = METRICS.read_text(encoding="utf-8")
+    assert "primary_vs_all_gap" in src, "the denominator gap is no longer declared"
+    assert "defect_7_note" in src, "the class-name caveat is no longer emitted"
+
+
+@pytest.mark.needs_artifacts
+def test_most_pure_decline_rows_actually_assert_claims():
+    """The measurement behind defect #7, pinned against the real exp18 artifacts.
+
+    If a future change to the marker set made `pure_decline` mean what its name says, this
+    goes red and the ledger entry needs revisiting -- that would be good news, not a bug.
+    """
+    cfm = _load("cfm_defect7", METRICS)
+    exp = RESULTS / "exp18_evidence_ceiling"
+    rpath, fpath = exp / "results.json", exp / "faithfulness_rows__hhem.json"
+    if not rpath.exists() or not fpath.exists():
+        pytest.skip("exp18 artifacts not present")
+    key = "baseline_repro | granite4.1-8b"
+    rows = json.loads(fpath.read_text(encoding="utf-8"))["configs"][key]
+    results = json.loads(rpath.read_text(encoding="utf-8"))["configs"][key]["results"]
+
+    labelled = [r for r in results if cfm.classify_response(r.get("answer") or "") == "pure_decline"]
+    asserting = [r for r in labelled
+                 if cfm.asserts_content((rows.get(r["query_id"]) or {}).get("genuine"))]
+    assert len(labelled) >= 80, f"only {len(labelled)} rows carry a decline prefix"
+    assert len(asserting) / len(labelled) > 0.9, (
+        f"{len(asserting)}/{len(labelled)} decline-prefixed rows assert claims; the class "
+        f"name may now be accurate -- re-read ledger entry 22 before relaxing this")

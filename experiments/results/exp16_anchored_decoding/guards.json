@@ -2,6 +2,7 @@
  "experiment_id": "exp16_anchored_decoding",
  "rows_verifier": "small",
  "decline_rule": "scripts/compute_faithfulness_metrics.classify_response \u2014 the SAME function the faithfulness metric uses (14 canonical DECLINE_PATTERNS + 14 EXTENDED_REFUSAL_PATTERNS, case-insensitive; pure_decline = marker within the first 300 chars)",
+ "decline_prefix_caveat": "READ `pure_decline` AS `decline_prefix`. It is a PREFIX test, not a refusal: most rows so labelled go on to assert claims from parametric knowledge (\"...However, I can outline general steps...\"). Use `asserts_nothing_rate` for any usability or abstention argument. Defect #7, ledger entry 22.",
  "overlap": "mean frac of answer word-5-grams in chunks",
  "arms": [
   {
@@ -18,6 +19,9 @@
     "answered": 24,
     "empty": 0
    },
+   "asserts_nothing_rate": 0.0667,
+   "n_asserts_nothing": 4,
+   "n_decline_prefix_that_still_answers": 24,
    "mean_answer_chars": 2497.9,
    "mean_answer_words": 351.7,
    "mean_genuine_claims": 11.95,
@@ -37,6 +41,9 @@
     "answered": 17,
     "empty": 0
    },
+   "asserts_nothing_rate": 0.1667,
+   "n_asserts_nothing": 10,
+   "n_decline_prefix_that_still_answers": 29,
    "mean_answer_chars": 1545.5,
    "mean_answer_words": 222.9,
    "mean_genuine_claims": 7.55,
@@ -56,6 +63,9 @@
     "answered": 14,
     "empty": 0
    },
+   "asserts_nothing_rate": 0.15,
+   "n_asserts_nothing": 9,
+   "n_decline_prefix_that_still_answers": 32,
    "mean_answer_chars": 1323.8,
    "mean_answer_words": 190.8,
    "mean_genuine_claims": 5.267,

@@ -2,6 +2,20 @@
  "selection_criterion": "negative-control false-contradicted / false-grounded rate (lower=better); downstream is DESCRIPTIVE ONLY",
  "hhem_tau": 0.5,
  "ent_t": 0.7,
+ "nli_members_expected": [
+  "small",
+  "base"
+ ],
+ "nli_members_used": [
+  "small",
+  "base"
+ ],
+ "nli_members_retired": [
+  "large"
+ ],
+ "majority_vote_possible": false,
+ "verifier_standard": "NLI-small + NLI-base + HHEM: three verifiers, TWO families (two entailment NLI plus one orthogonal grounding model). deberta-large retired 2026-08-04 at 11/12 configs and never consumed by any reported number; there was never an 'NLI trio'.",
+ "members_note": "E1/E2/E3 are built from 2 NLI members, so they are NOT the three-member estimators their plain names describe. E2_vote needs >=2 agreeing labels, which is a MAJORITY with three members and UNANIMITY with two. Affected candidates are renamed in this report.",
  "candidates": {
   "small": {
    "neg_control_bad_rate": 0.2375,
@@ -27,19 +41,19 @@
    "downstream_granite_d_z": -0.2386,
    "downstream_granite_p_bh": 0.222036
   },
-  "E1_mean": {
+  "E1_mean[2m]": {
    "neg_control_bad_rate": 0.09,
    "downstream_sig_rag_12": 0,
    "downstream_granite_d_z": -0.2039,
    "downstream_granite_p_bh": 0.488688
   },
-  "E2_vote": {
+  "E2_vote[2m=unanimity]": {
    "neg_control_bad_rate": 0.1025,
    "downstream_sig_rag_12": 0,
    "downstream_granite_d_z": -0.1658,
    "downstream_granite_p_bh": 0.544029
   },
-  "E3_conservative": {
+  "E3_conservative[2m]": {
    "neg_control_bad_rate": 0.4125,
    "downstream_sig_rag_12": 0,
    "downstream_granite_d_z": -0.1116,
@@ -68,12 +82,12 @@
  "ranking_by_selection_criterion": [
   "E5_base_and_hhem",
   "hhem",
-  "E1_mean",
-  "E2_vote",
+  "E1_mean[2m]",
+  "E2_vote[2m=unanimity]",
   "base",
   "E4_sym_base",
   "small",
-  "E3_conservative",
+  "E3_conservative[2m]",
   "agg:small:noisy_or",
   "agg:base:noisy_or"
  ]

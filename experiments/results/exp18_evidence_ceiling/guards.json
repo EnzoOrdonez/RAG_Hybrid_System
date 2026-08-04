@@ -2,6 +2,7 @@
  "experiment_id": "exp18_evidence_ceiling",
  "rows_verifier": "small",
  "decline_rule": "scripts/compute_faithfulness_metrics.classify_response \u2014 the SAME function the faithfulness metric uses (14 canonical DECLINE_PATTERNS + 14 EXTENDED_REFUSAL_PATTERNS, case-insensitive; pure_decline = marker within the first 300 chars)",
+ "decline_prefix_caveat": "READ `pure_decline` AS `decline_prefix`. It is a PREFIX test, not a refusal: most rows so labelled go on to assert claims from parametric knowledge (\"...However, I can outline general steps...\"). Use `asserts_nothing_rate` for any usability or abstention argument. Defect #7, ledger entry 22.",
  "overlap": "mean frac of answer word-5-grams in chunks",
  "arms": [
   {
@@ -18,6 +19,9 @@
     "answered": 75,
     "empty": 0
    },
+   "asserts_nothing_rate": 0.0309,
+   "n_asserts_nothing": 6,
+   "n_decline_prefix_that_still_answers": 84,
    "mean_answer_chars": 2390.4,
    "mean_answer_words": 332.6,
    "mean_genuine_claims": 10.582,
@@ -37,6 +41,9 @@
     "answered": 82,
     "empty": 0
    },
+   "asserts_nothing_rate": 0.0361,
+   "n_asserts_nothing": 7,
+   "n_decline_prefix_that_still_answers": 80,
    "mean_answer_chars": 2470.7,
    "mean_answer_words": 339.8,
    "mean_genuine_claims": 10.737,
@@ -56,6 +63,9 @@
     "answered": 1,
     "empty": 0
    },
+   "asserts_nothing_rate": 0.05,
+   "n_asserts_nothing": 3,
+   "n_decline_prefix_that_still_answers": 50,
    "mean_answer_chars": 1132.2,
    "mean_answer_words": 159.7,
    "mean_genuine_claims": 4.833,
@@ -75,6 +85,9 @@
     "answered": 130,
     "empty": 0
    },
+   "asserts_nothing_rate": 0.0052,
+   "n_asserts_nothing": 1,
+   "n_decline_prefix_that_still_answers": 43,
    "mean_answer_chars": 2895.8,
    "mean_answer_words": 397.3,
    "mean_genuine_claims": 14.985,

@@ -96,6 +96,18 @@ def main():
         # "any refusal marker" = pure + hedged; kept because it is the quantity the ledger
         # historically quoted, now computed with the canonical rule.
         any_refusal = klass["pure_decline"] + klass["hedged_partial"]
+        # DEFECT #7 (ledger entry 22): the class rates above are PREFIX rates. Most rows
+        # labelled pure_decline still assert claims, so quoting `pure_decline_rate` as "how
+        # often the system refused" overstates abstention by an order of magnitude. The
+        # content-based rate is measured here from the same rows the metric scores, so any
+        # downstream argument about usability reads the right number.
+        arm_rows = rows.get(cname, {})
+        silent = [r["query_id"] for r in c["results"]
+                  if not _cfm.asserts_content((arm_rows.get(r["query_id"]) or {}).get("genuine"))]
+        decline_prefix_but_answers = sum(
+            1 for r in c["results"]
+            if classify_response(r.get("answer") or "") == "pure_decline"
+            and _cfm.asserts_content((arm_rows.get(r["query_id"]) or {}).get("genuine")))
         arms.append({
             "config": cname,
             "scenario": c.get("scenario", cname.split(" | ")[0]),
@@ -105,6 +117,11 @@ def main():
             "answered_rate": round(klass["answered"] / answers, 4) if answers else None,
             "any_refusal_rate": round(any_refusal / answers, 4) if answers else None,
             "n_by_class": klass,
+            # content-based, not prefix-based (defect #7)
+            "asserts_nothing_rate": (round(len(silent) / answers, 4)
+                                     if (answers and arm_rows) else None),
+            "n_asserts_nothing": len(silent) if arm_rows else None,
+            "n_decline_prefix_that_still_answers": decline_prefix_but_answers if arm_rows else None,
             "mean_answer_chars": round(float(np.mean(chars)), 1) if chars else None,
             "mean_answer_words": round(float(np.mean(words)), 1) if words else None,
             "mean_genuine_claims": round(float(np.mean(gvals)), 3) if gvals else None,
@@ -116,6 +133,11 @@ def main():
                             "function the faithfulness metric uses (14 canonical "
                             "DECLINE_PATTERNS + 14 EXTENDED_REFUSAL_PATTERNS, case-insensitive; "
                             "pure_decline = marker within the first 300 chars)"),
+           "decline_prefix_caveat": (
+               "READ `pure_decline` AS `decline_prefix`. It is a PREFIX test, not a refusal: "
+               "most rows so labelled go on to assert claims from parametric knowledge "
+               "(\"...However, I can outline general steps...\"). Use `asserts_nothing_rate` "
+               "for any usability or abstention argument. Defect #7, ledger entry 22."),
            "overlap": "mean frac of answer word-5-grams in chunks",
            "arms": arms, "generated_by": "scripts/compute_exp16_guards.py"}
     (exp_dir / "guards.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
@@ -123,21 +145,30 @@ def main():
     L = [f"# {exp_dir.name} — anti-gaming guards (rows: {args.rows_verifier})", "",
          "Regla de declinación = `classify_response` de `compute_faithfulness_metrics.py`, "
          "la MISMA que usa la métrica de fidelidad (28 patrones, case-insensitive).", "",
-         "| Arm | n | pure_decline | hedged | answered | any refusal | words | genuine claims | overlap 5gram |",
-         "|---|---|---|---|---|---|---|---|---|"]
+         "**`decline_prefix` (antes `pure_decline`) mide un PREFIJO, no un rechazo.** La mayoría "
+         "de esas filas sí afirman claims (memoria paramétrica tras el prefijo). Para cualquier "
+         "argumento de usabilidad usar **`no afirma nada`**. Defecto #7, entrada 22.", "",
+         "| Arm | n | decline_prefix | hedged | answered | any refusal | **no afirma nada** | "
+         "prefijo pero contesta | words | genuine claims | overlap 5gram |",
+         "|---|---|---|---|---|---|---|---|---|---|---|"]
     for a in arms:
         k = a["n_by_class"]
         L.append(f"| {a['scenario']} | {a['n']} | {a['pure_decline_rate']} ({k['pure_decline']}) | "
                  f"{a['hedged_partial_rate']} ({k['hedged_partial']}) | "
                  f"{a['answered_rate']} ({k['answered']}) | {a['any_refusal_rate']} | "
+                 f"**{a['asserts_nothing_rate']}** ({a['n_asserts_nothing']}) | "
+                 f"{a['n_decline_prefix_that_still_answers']} | "
                  f"{a['mean_answer_words']} | {a['mean_genuine_claims']} | "
                  f"{a['verbatim_overlap_5gram']} |")
     L += ["", "Leer JUNTO a la fidelidad de arm_stats: una mejora real sube la fidelidad sin "
               "disparar el solape ni colapsar palabras/claims. Solape alto o declinación alta "
               "junto a una ganancia de fidelidad = gaming del instrumento, no mejora.", "",
-          "`hedged_partial` no es abstención: esas respuestas llevan una frase de rechazo y aun "
-          "así afirman claims, y se puntúan normal. Un brazo que sube `pure_decline` sí está "
-          "callándose; uno que sube solo `hedged` está hedgeando mientras responde."]
+          "**Ni `hedged_partial` ni `decline_prefix` son abstención.** Ambas clases llevan una "
+          "frase de rechazo y aun así afirman claims, y se puntúan normal. La afirmación previa "
+          "de este mismo archivo —«un brazo que sube `pure_decline` sí está callándose»— era "
+          "**falsa** y queda retirada (defecto #7): la mayoría de esas filas contestan de memoria "
+          "paramétrica tras el prefijo. El brazo que de verdad se calla es el que sube "
+          "**`no afirma nada`**, que es la columna medida por contenido."]
     (exp_dir / "guards.md").write_text("\n".join(L), encoding="utf-8")
     print("\n".join(L))
 

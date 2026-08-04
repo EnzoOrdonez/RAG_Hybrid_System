@@ -31,13 +31,29 @@ sensitivity. Because `is_honest_decline` itself mislabels in both directions
 v2 re-classifies every response at the ANALYSIS layer into:
 
   * pure_decline   — refusal marker inside the first OPENING_WINDOW chars
-                     (the model led with a refusal);
+                     (read as `decline_prefix`: the model OPENED with a refusal
+                     marker, which is not the same as refusing — see below);
   * hedged_partial — refusal marker only later in the text (substantive
                      attempt that hedges mid-answer);
   * answered       — no refusal marker anywhere.
 
+DEFECT #7 (ledger entry 22, 2026-08-04). `pure_decline` is a PREFIX test and its
+name overstates it. On exp18's baseline, 84 of 89 rows so labelled go on to
+assert genuine claims (mean 5.6) and carry the WORST unsupportable rate of the
+three classes (0.471 vs 0.330 for `answered`); the dominant shape is "I cannot
+find sufficient information ... However, I can outline general steps", i.e. a
+parametric-knowledge answer behind a decline prefix. Answers that truly assert
+nothing are 5/194 = 2.6 %. The wire value is kept (it is serialised inside signed
+evidence) and `asserts_content` is emitted alongside for content-based reads.
+
 PRIMARY metric `faithfulness_answered` = mean over answered + hedged_partial
-(i.e. excludes only pure_decline). Sensitivities: (a) exclude v1 flag,
+(i.e. excludes only pure_decline). Consequence of the above: the primary family
+drops precisely the worst-grounded rows, which raises the reported level by
++0.0914 (HHEM) / +0.0983 (NLI-small) versus sens_c — about the whole
+pre-registered TOST band. The family was Enzo's call (2026-06-11) and sens_c is
+published beside it, so no reported number is wrong; the gap is declared in the
+output so it is never read as noise.
+Sensitivities: (a) exclude v1 flag,
 (b) exclude any-marker (strict), (c) v1 all-with-claims (published).
 Paired tests run on the INTERSECTION of non-excluded rows per pair; per-pair n
 is reported, with a power note when n < 60.
@@ -120,8 +136,31 @@ def _refusal_markers():
     return _REFUSAL_MARKERS
 
 
+# The wire value stays `pure_decline` because it is serialised inside SIGNED evidence
+# (exp12_matrix/faithfulness_metrics_v2..v4*.json, exp13_expansion, exp14_h5_replicas) and
+# verify_v4_offline.py re-derives numbers from those files. Renaming it would desync code
+# from evidence. What IS fixed here is the human-facing label, because the name lies.
+DISPLAY_LABELS = {
+    "pure_decline": "decline_prefix",
+    "hedged_partial": "hedged_partial",
+    "answered": "answered",
+}
+
+
 def classify_response(answer: str):
-    """'pure_decline' | 'hedged_partial' | 'answered' (None for empty text)."""
+    """'pure_decline' | 'hedged_partial' | 'answered' (None for empty text).
+
+    `pure_decline` means ONLY "a refusal marker appears in the first OPENING_WINDOW chars".
+    It does NOT mean the model refused. Measured on exp18's baseline (defect #7, ledger
+    entry 22): 84 of 89 rows so labelled go on to assert genuine claims (mean 5.6), and they
+    carry the WORST unsupportable rate of the three classes (0.471 vs 0.330 for `answered`).
+    The dominant shape is "I cannot find sufficient information ... However, I can outline
+    general steps that are typically involved" -- a parametric-knowledge answer wearing a
+    decline prefix. The rate of answers that truly assert nothing is 5/194 = 2.6 %.
+
+    Read it as `decline_prefix` (see DISPLAY_LABELS) and pair it with `asserts_content`
+    whenever a decision depends on whether the model actually said something.
+    """
     if not answer or not answer.strip():
         return None
     low = answer.lower()
@@ -131,6 +170,15 @@ def classify_response(answer: str):
     if any(rx.search(low) for rx in _refusal_markers()):
         return "hedged_partial"
     return "answered"
+
+
+def asserts_content(genuine_claims) -> bool:
+    """Did the answer actually assert something, regardless of how it opened?
+
+    The content-based counterpart to classify_response, which only reads the prefix.
+    `genuine_claims` is the row's genuine-claim count (total minus format artifacts).
+    """
+    return bool(genuine_claims)
 
 
 def parse_config(name: str):
@@ -196,6 +244,11 @@ def load_per_config(results_path: Path, faith_override: dict = None,
                 "class_v2": classify_response(r.get("answer")),
                 "pure_decline": (classify_response(r.get("answer")) == "pure_decline"
                                  if (r.get("answer") or "").strip() else None),
+                # Content-based counterpart to class_v2, which only reads the prefix.
+                # Most `pure_decline` rows assert content anyway (defect #7, entry 22).
+                "asserts_content": asserts_content(
+                    o.get("genuine") if (o and "genuine" in o)
+                    else (hm.get("total_claims") or 0)),
                 "total_claims": (o["total_claims"] if o else (hm.get("total_claims") or 0)),
                 "supported_claims": (o["supported"] if o else (hm.get("supported_claims") or 0)),
                 "contradicted_claims": (o["contradicted"] if o else (hm.get("contradicted_claims") or 0)),
@@ -509,17 +562,32 @@ def main():
             "canonical_patterns": list(_canon),
             "extended_patterns": EXTENDED_REFUSAL_PATTERNS,
             "classes": {
-                "pure_decline": "refusal marker within the first "
-                                f"{OPENING_WINDOW} chars (model led with refusal)",
+                "pure_decline": "wire value; READ AS `decline_prefix`. Refusal marker within "
+                                f"the first {OPENING_WINDOW} chars. This is a PREFIX test, not "
+                                "a refusal: on exp18's baseline 84/89 such rows still assert "
+                                "genuine claims (mean 5.6). Pair with `asserts_content`.",
                 "hedged_partial": "refusal marker only after the opening window",
                 "answered": "no refusal marker anywhere",
             },
+            "display_labels": DISPLAY_LABELS,
+            "defect_7_note": (
+                "The class name overstates what the rule measures; the rate of answers that "
+                "truly assert nothing is 5/194 = 2.6 %, not the pure_decline rate. Ledger "
+                "entry 22."),
         },
         "denominators": {
             "primary_answered": "mean over answered+hedged_partial (excludes pure_decline only) — PRIMARY",
             "sens_a_v1flag": "sensitivity (a): excludes runtime is_honest_decline",
             "sens_b_strict": "sensitivity (b): excludes any refusal marker (answered only)",
             "sens_c_published": "sensitivity (c): v1 all-with-claims (published Tabla 6)",
+            "primary_vs_all_gap": (
+                "The primary family drops the rows with the WORST grounding: on exp18's "
+                "baseline the excluded `pure_decline` rows have an unsupportable rate of "
+                "0.471 vs 0.330 for `answered`, so excluding them RAISES the reported level "
+                "by +0.0914 (HHEM) / +0.0983 (NLI-small) -- about the whole pre-registered "
+                "TOST band of 0.081. The family was chosen deliberately (Enzo, 2026-06-11) "
+                "and sens_c is published alongside, so no reported number is wrong; this "
+                "field exists so the gap is never read as noise. Ledger entry 22."),
         },
         "pairing_rule": "paired tests on the intersection of non-excluded rows in both arms; "
                         "power_note attached when n<60",

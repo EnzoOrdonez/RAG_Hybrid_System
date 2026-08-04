@@ -2,6 +2,7 @@
  "experiment_id": "exp17_crosscloud_balanced",
  "rows_verifier": "small",
  "decline_rule": "scripts/compute_faithfulness_metrics.classify_response \u2014 the SAME function the faithfulness metric uses (14 canonical DECLINE_PATTERNS + 14 EXTENDED_REFUSAL_PATTERNS, case-insensitive; pure_decline = marker within the first 300 chars)",
+ "decline_prefix_caveat": "READ `pure_decline` AS `decline_prefix`. It is a PREFIX test, not a refusal: most rows so labelled go on to assert claims from parametric knowledge (\"...However, I can outline general steps...\"). Use `asserts_nothing_rate` for any usability or abstention argument. Defect #7, ledger entry 22.",
  "overlap": "mean frac of answer word-5-grams in chunks",
  "arms": [
   {
@@ -18,6 +19,9 @@
     "answered": 5,
     "empty": 0
    },
+   "asserts_nothing_rate": 0.0,
+   "n_asserts_nothing": 0,
+   "n_decline_prefix_that_still_answers": 14,
    "mean_answer_chars": 2563.2,
    "mean_answer_words": 349.4,
    "mean_genuine_claims": 11.48,
@@ -37,6 +41,9 @@
     "answered": 12,
     "empty": 0
    },
+   "asserts_nothing_rate": 0.0,
+   "n_asserts_nothing": 0,
+   "n_decline_prefix_that_still_answers": 9,
    "mean_answer_chars": 3127.0,
    "mean_answer_words": 427.4,
    "mean_genuine_claims": 14.88,

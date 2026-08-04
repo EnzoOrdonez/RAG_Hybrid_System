@@ -1,8 +1,8 @@
 """Tier 3 · Block B — ensemble & guard sweep with a negative-control criterion.
 
-Consumes the persisted real probs of all four verifiers (small/base/large NLI +
-HHEM grounding) and the negative-control scores, and evaluates every candidate
-instrument on TWO axes:
+Consumes the persisted real probs of the phase's verifiers (NLI-small + NLI-base
+entailment, HHEM grounding) and the negative-control scores, and evaluates every
+candidate instrument on TWO axes:
 
   (1) SELECTION criterion (anti-p-hacking, pre-registered): the negative-control
       false-contradicted rate (NLI) / false-grounded rate (HHEM) on 400 random
@@ -13,11 +13,13 @@ instrument on TWO axes:
       used to choose the instrument (rigor rule: no tuning toward hybrid-favoring
       outcomes).
 
-Candidates: small/base/large (vb_agree@0.7), HHEM (tau 0.5), and ensembles over
-the NLI trio — E1 prob-mean, E2 majority-vote (disagree->unsupported), E4
-symmetric guard on base (supported also needs >=2 chunks or a margin), E5
-cross-family base AND HHEM. Aggregator max vs noisy_or reported for the NLI ones
-(Block A gate A-G1).
+Candidates: small/base (vb_agree@0.7), HHEM (tau 0.5), and ensembles over the NLI
+members — E1 prob-mean, E2 vote (disagree->unsupported), E4 symmetric guard on
+base (supported also needs >=2 chunks or a margin), E5 cross-family base AND
+HHEM. Aggregator max vs noisy_or reported for the NLI ones (Block A gate A-G1).
+
+deberta-large is RETIRED (see NLI_MEMBERS_EXPECTED below), so with two members the
+vote ensemble is UNANIMITY, not majority, and says so in its emitted name.
 
 Outputs (experiments/results/exp15_ablation_nli/):
   ensemble_sweep_results.json, ensemble_summary.md
@@ -47,35 +49,39 @@ _spec.loader.exec_module(sweep)
 
 ENT_T = CONTR_T = 0.7
 HHEM_TAU = 0.5
-# NLI members actually present on disk (large may still be scoring); ensembles
-# use whatever is available (>=2 needed for E1-E3).
-NLI_TRIO_EXPECTED = ("small", "base", "large")
-NLI_TRIO = [t for t in NLI_TRIO_EXPECTED
-            if (Path(__file__).resolve().parent.parent
-                / "experiments/results/exp15_ablation_nli" / f"nli_probs__{t}.json.gz").exists()]
 
-# A work list derived from FILE EXISTENCE silently changes what the estimators mean.
-# deberta-large stopped at 11/12 configs, so nli_probs__large.json.gz was never written and
-# this "trio" has been TWO members. That is not a smaller trio, it is a different estimator:
-# E2_vote requires n>=2 agreeing labels, which with three members is a MAJORITY and with two
-# is UNANIMITY. The committed ensemble_sweep_results.json recorded no field saying how many
-# members were used, so the numbers read as majority-of-three when they are not. Everything
-# below therefore reports the member list, and any candidate whose semantics change is
-# renamed rather than emitted under a name that no longer describes it.
-DEGRADED = len(NLI_TRIO) < len(NLI_TRIO_EXPECTED)
+# The phase's verifier standard, made formal 2026-08-04 (ledger entry 22):
+# NLI-small + NLI-base + HHEM = THREE verifiers, TWO families (two entailment NLI plus one
+# orthogonal grounding model). deberta-large is RETIRED: it stopped at 11/12 configs, the
+# runner only promotes `nli_probs__large.json.gz` once all 12 finish so the file was never
+# written, and no number in the phase ever consumed it. There was never an "NLI trio" -- a
+# third same-family NLI would have been a correlated vote, and the orthogonality of HHEM is
+# what makes the triangulation worth anything.
+NLI_MEMBERS_EXPECTED = ("small", "base")
+NLI_MEMBERS_RETIRED = ("large",)
+NLI_MEMBERS = [t for t in NLI_MEMBERS_EXPECTED if (OUT / f"nli_probs__{t}.json.gz").exists()]
+
+# Whether a real MAJORITY vote is possible is a property of the member COUNT, not of a
+# comparison against some expectation. That distinction matters: while `large` was expected,
+# the label was driven by "degraded vs expected", so retiring it would have silently turned
+# `E2_vote[2m=unanimity]` back into a plain `E2_vote` -- the same estimator, renamed into a
+# claim it does not support. E2_vote needs >=2 agreeing labels, which is a MAJORITY with
+# three members and UNANIMITY with two.
+MAJORITY_POSSIBLE = len(NLI_MEMBERS) >= 3
 
 
 def candidate_label(cand):
     """Name that still describes what was computed, given the members available."""
-    if not DEGRADED:
+    if MAJORITY_POSSIBLE:
         return cand
     if cand == "E2_vote":
-        return f"E2_vote[{len(NLI_TRIO)}m=unanimity]"
+        return f"E2_vote[{len(NLI_MEMBERS)}m=unanimity]"
     if cand in ("E1_mean", "E3_conservative"):
-        return f"{cand}[{len(NLI_TRIO)}m]"
+        return f"{cand}[{len(NLI_MEMBERS)}m]"
     return cand
-HAS_HHEM = (Path(__file__).resolve().parent.parent
-            / "experiments/results/exp15_ablation_nli/grounding_probs__hhem.json.gz").exists()
+
+
+HAS_HHEM = (OUT / "grounding_probs__hhem.json.gz").exists()
 
 
 def load_nli(tag):
@@ -115,20 +121,20 @@ def decide_single_nli(chunk_probs, variant="vb_agree", agg="max"):
 
 
 def decide_ensemble(per_chunk_by_member, kind):
-    """per_chunk_by_member: {member: [[c,e,n],...]} aligned by chunk for NLI trio."""
+    """per_chunk_by_member: {member: [[c,e,n],...]} aligned by chunk, over NLI_MEMBERS."""
     if kind == "E1_mean":
-        arrs = [np.array(per_chunk_by_member[m]) for m in NLI_TRIO]
+        arrs = [np.array(per_chunk_by_member[m]) for m in NLI_MEMBERS]
         mean = np.mean(arrs, axis=0)
         return decide_single_nli(mean.tolist(), variant="vb_agree")
     if kind == "E2_vote":
-        labels = [decide_single_nli(per_chunk_by_member[m]) for m in NLI_TRIO]
+        labels = [decide_single_nli(per_chunk_by_member[m]) for m in NLI_MEMBERS]
         from collections import Counter
         c = Counter(labels)
         top, n = c.most_common(1)[0]
         return top if n >= 2 else "unsupported"
     if kind == "E3_conservative":
         # contr=max, ent=min across members, per chunk
-        arrs = [np.array(per_chunk_by_member[m]) for m in NLI_TRIO]
+        arrs = [np.array(per_chunk_by_member[m]) for m in NLI_MEMBERS]
         contr = np.max([a[:, 0] for a in arrs], axis=0)
         ent = np.min([a[:, 1] for a in arrs], axis=0)
         merged = [[contr[i], ent[i], 0.0] for i in range(len(contr))]
@@ -151,7 +157,7 @@ def rows_for_candidate(cand, nli, hhem, claims):
             total = len(meta["claims"])
             n_art = sum(1 for a in meta["artifact"] if a)
             g = total - n_art
-            per_claim_members = {m: nli[m][cfg][qid] for m in NLI_TRIO}
+            per_claim_members = {m: nli[m][cfg][qid] for m in NLI_MEMBERS}
             hh = hhem[cfg][qid]
             if g == 0:
                 per[qid] = {"total_claims": total, "not_a_claim": n_art, "genuine": 0,
@@ -160,7 +166,7 @@ def rows_for_candidate(cand, nli, hhem, claims):
                 continue
             agg = {"supported": 0, "contradicted": 0, "unsupported": 0}
             for ci in range(g):
-                lbl = label_one(cand, {m: per_claim_members[m][ci] for m in NLI_TRIO},
+                lbl = label_one(cand, {m: per_claim_members[m][ci] for m in NLI_MEMBERS},
                                 hh[ci] if ci < len(hh) else [])
                 agg[lbl] += 1
             per[qid] = {"total_claims": total, "not_a_claim": n_art, "genuine": g,
@@ -171,7 +177,7 @@ def rows_for_candidate(cand, nli, hhem, claims):
 
 def label_one(cand, members_chunkprobs, hhem_chunkscores):
     """One claim's label under a candidate. members_chunkprobs: {member:[[c,e,n]..]}."""
-    if cand in ("small", "base", "large"):
+    if cand in NLI_MEMBERS:
         return decide_single_nli(members_chunkprobs[cand])
     if cand.startswith("agg:"):
         _, tag, agg = cand.split(":")
@@ -206,7 +212,7 @@ def negative_control(cand, nc):
     n = nc["n"]
     bad = 0
     for i in range(n):
-        members = {m: nc["verifiers"][m]["scores"][i] for m in NLI_TRIO
+        members = {m: nc["verifiers"][m]["scores"][i] for m in NLI_MEMBERS
                    if m in nc["verifiers"]}
         hh = nc["verifiers"]["hhem"]["scores"][i] if "hhem" in nc["verifiers"] else []
         lbl = label_one(cand, members, hh)
@@ -221,36 +227,42 @@ def negative_control(cand, nc):
 
 
 def main():
-    nli = {t: load_nli(t) for t in NLI_TRIO}
+    nli = {t: load_nli(t) for t in NLI_MEMBERS}
     hhem = load_hhem() if HAS_HHEM else None
     claims = json.loads((OUT / "claims_extraction.json").read_text(encoding="utf-8"))["configs"]
     nc = json.loads((OUT / "negative_control_scores.json").read_text(encoding="utf-8"))
 
-    candidates = list(NLI_TRIO)
-    candidates += [f"agg:{t}:noisy_or" for t in NLI_TRIO if t in ("small", "base")]
-    if len(NLI_TRIO) >= 2:
+    candidates = list(NLI_MEMBERS)
+    candidates += [f"agg:{t}:noisy_or" for t in NLI_MEMBERS if t in ("small", "base")]
+    if len(NLI_MEMBERS) >= 2:
         candidates += ["E1_mean", "E2_vote", "E3_conservative"]
-    if "base" in NLI_TRIO:
+    if "base" in NLI_MEMBERS:
         candidates.append("E4_sym_base")
     if HAS_HHEM:
         candidates.append("hhem")
-        if "base" in NLI_TRIO:
+        if "base" in NLI_MEMBERS:
             candidates.append("E5_base_and_hhem")
-    print(f"NLI members: {NLI_TRIO} | HHEM: {HAS_HHEM} | candidates: {candidates}", flush=True)
+    print(f"NLI members: {NLI_MEMBERS} | HHEM: {HAS_HHEM} | candidates: {candidates}", flush=True)
 
     report = {"selection_criterion": "negative-control false-contradicted / false-grounded rate "
               "(lower=better); downstream is DESCRIPTIVE ONLY",
               "hhem_tau": HHEM_TAU, "ent_t": ENT_T,
               # Recorded so a reader never has to guess what the ensembles were built from.
-              "nli_members_expected": list(NLI_TRIO_EXPECTED),
-              "nli_members_used": list(NLI_TRIO),
-              "nli_trio_degraded": DEGRADED,
-              "degraded_note": (
-                  f"Only {len(NLI_TRIO)} of {len(NLI_TRIO_EXPECTED)} NLI members were "
-                  f"available, so E1/E2/E3 are NOT the three-member estimators their plain "
-                  f"names describe. In particular E2_vote needs >=2 agreeing labels, which "
-                  f"is a MAJORITY with three members and UNANIMITY with two. Affected "
-                  f"candidates are renamed in this report." if DEGRADED else None),
+              "nli_members_expected": list(NLI_MEMBERS_EXPECTED),
+              "nli_members_used": list(NLI_MEMBERS),
+              "nli_members_retired": list(NLI_MEMBERS_RETIRED),
+              "majority_vote_possible": MAJORITY_POSSIBLE,
+              "verifier_standard": (
+                  "NLI-small + NLI-base + HHEM: three verifiers, TWO families (two entailment "
+                  "NLI plus one orthogonal grounding model). deberta-large retired 2026-08-04 "
+                  "at 11/12 configs and never consumed by any reported number; there was never "
+                  "an 'NLI trio'."),
+              "members_note": (
+                  f"E1/E2/E3 are built from {len(NLI_MEMBERS)} NLI members, so they are NOT the "
+                  f"three-member estimators their plain names describe. E2_vote needs >=2 "
+                  f"agreeing labels, which is a MAJORITY with three members and UNANIMITY with "
+                  f"two. Affected candidates are renamed in this report."
+                  if not MAJORITY_POSSIBLE else None),
               "candidates": {}}
     for cand in candidates:
         nc_rate = negative_control(cand, nc)
