@@ -333,7 +333,12 @@ podría anclar mejor; esa pregunta queda **abierta**, no resuelta. Cero gasto ej
   experimento antes de gastar GPU.
 - **Config de encuestas (congela a mediados de agosto)** — k=5 vs k=10 sobre claims, cobertura y
   latencia, confirmado por la **ruta de despliegue** (`SURVEY_DEPLOY`, recuperación en vivo), no por
-  los contextos congelados de exp18. Decisión de Enzo.
+  los contextos congelados de exp18. **El hueco de transferencia está cuantificado:** exp18 generó
+  con `rgm.build_prompt` (mismo routing de prompt) pero **sin** `balance_cross_cloud_providers`, y
+  el balanceo solo actúa sobre queries `cross_cloud`, que son **51 de 194 = 26,3 %** del set. No es
+  despreciable. Además exp18 reporta tiempo **total** mientras la UI hace streaming
+  (`chat_page.py:189` → `query_stream`), así que lo que percibe un encuestado es el **TTFT**.
+  Decisión de Enzo.
 - **759 claims sin respaldo** — mejor score p50 0,226 (τ=0,5); 123 (16 %) a menos de 0,1 del umbral.
   Taxonomía en curso desde artefactos persistidos: síntesis legítima vs memoria paramétrica vs
   alucinación vs fallo del verificador.
