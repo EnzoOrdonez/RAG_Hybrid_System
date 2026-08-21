@@ -25,7 +25,13 @@ tests/test_exp19b_runner.py pins that.
 Estimators are imported, never reimplemented: `paired_comparison`, `cohens_d` and the BH
 correction come from src/evaluation/statistical_analysis.py, the signed v4 building blocks.
 
+REUSED BY exp21. The arms are parameters with exp19b's pre-registration as their defaults, so
+the hosted-equivalence gate answers equivalence with this same band, family and estimators
+instead of growing a second copy of them:
+    compute_exp19b_stats.py --exp-dir <exp21 dir> --arm hosted --baseline-arm baseline_local
+
 Usage: python scripts/compute_exp19b_stats.py [--exp-dir DIR] [--smoke]
+                                              [--arm NAME] [--baseline-arm NAME]
 Env:   HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42
 Writes <exp dir>/equivalence__{small,base,hhem}.{json,md}
 """
@@ -60,12 +66,16 @@ _spec.loader.exec_module(_diag)
 tost = _diag.tost
 
 
-def declared_family():
-    """The BH family for exp19b, written down before the numbers exist."""
+def declared_family(arm=ARM, baseline_arm=BASELINE_ARM):
+    """The BH family for exp19b, written down before the numbers exist.
+
+    Parametrised by arm so exp21's hosted-vs-local contrast reuses this exact declaration
+    instead of growing a second copy of it. The defaults ARE exp19b's pre-registration.
+    """
     return {
         "scope": "per_verifier",
         "size": 1,
-        "contrasts": [f"{ARM} vs {BASELINE_ARM}"],
+        "contrasts": [f"{arm} vs {baseline_arm}"],
         "note": ("one contrast per verifier, so BH is the identity and p_BH == p_raw; "
                  "declared explicitly rather than reported as if a correction had been "
                  "applied. The three verifiers are triangulation, not a family."),
@@ -91,7 +101,7 @@ def rows_path(exp_dir, verifier):
             else exp_dir / f"faithfulness_rows__{verifier}__vb_agree.json")
 
 
-def paired_faithfulness(exp_dir, verifier):
+def paired_faithfulness(exp_dir, verifier, arm=ARM, baseline_arm=BASELINE_ARM):
     """(qids, baseline, arm, dropped) — decline-aware pairing, the v4-consistent rule.
 
     A query whose faithfulness is None on either side (the model declined, so there is no
@@ -105,14 +115,16 @@ def paired_faithfulness(exp_dir, verifier):
     by_arm = {}
     for cname, per_q in cfgs.items():
         by_arm[cname.split(" | ")[0]] = per_q
-    if BASELINE_ARM not in by_arm or ARM not in by_arm:
+    if baseline_arm not in by_arm or arm not in by_arm:
         return None
-    base, arm = by_arm[BASELINE_ARM], by_arm[ARM]
+    # Deliberately NOT rebinding `arm`: it is the arm NAME, and shadowing it with the arm's
+    # rows is how the name ended up serialised as a list of scores once already.
+    base, treat = by_arm[baseline_arm], by_arm[arm]
     qids, a, b, dropped = [], [], [], []
     for qid in base:
-        if qid not in arm:
+        if qid not in treat:
             continue
-        fb, fa = base[qid].get("faithfulness"), arm[qid].get("faithfulness")
+        fb, fa = base[qid].get("faithfulness"), treat[qid].get("faithfulness")
         if fb is None or fa is None:
             dropped.append(qid)
             continue
@@ -122,34 +134,34 @@ def paired_faithfulness(exp_dir, verifier):
     return qids, a, b, dropped
 
 
-def analyse(exp_dir, verifier, selection):
-    got = paired_faithfulness(exp_dir, verifier)
+def analyse(exp_dir, verifier, selection, arm=ARM, baseline_arm=BASELINE_ARM):
+    got = paired_faithfulness(exp_dir, verifier, arm, baseline_arm)
     if got is None:
         return None
-    qids, base, arm, dropped = got
+    qids, base_scores, arm_scores, dropped = got
     if len(qids) < 3:
         return {"verifier": verifier, "n_paired": len(qids), "error": "too few pairs"}
 
-    diffs = np.array(arm, float) - np.array(base, float)
-    test = paired_comparison(base, arm)
-    d, d_label = cohens_d(base, arm)
+    diffs = np.array(arm_scores, float) - np.array(base_scores, float)
+    test = paired_comparison(base_scores, arm_scores)
+    d, d_label = cohens_d(base_scores, arm_scores)
     rng = np.random.default_rng(SEED)
     boot = np.array([float(diffs[rng.integers(0, len(diffs), len(diffs))].mean())
                      for _ in range(BOOT)])
     eq = tost(diffs, band=TOST_BAND, alpha=TOST_ALPHA)
-    fam = declared_family()
+    fam = declared_family(arm, baseline_arm)
     p_raw = test.get("p_value")
     p_bh = bh_adjust([p_raw])[0] if p_raw is not None else None
 
     return {
-        "verifier": verifier, "arm": ARM, "baseline": BASELINE_ARM,
+        "verifier": verifier, "arm": arm, "baseline": baseline_arm,
         "n_paired": len(qids), "n_dropped_decline_aware": len(dropped),
         "qids_dropped": dropped,
         # Means over the PAIRED set only, so they decompose exactly into mean_paired_diff.
         # compute_tierA_arm_stats.py reports per-arm means over every non-None query instead;
         # the two answer different questions and the names say which is which.
-        "mean_baseline_paired": round(float(np.mean(base)), 4),
-        "mean_arm_paired": round(float(np.mean(arm)), 4),
+        "mean_baseline_paired": round(float(np.mean(base_scores)), 4),
+        "mean_arm_paired": round(float(np.mean(arm_scores)), 4),
         "mean_paired_diff": round(float(diffs.mean()), 4),
         "boot95": [round(float(np.percentile(boot, 2.5)), 4),
                    round(float(np.percentile(boot, 97.5)), 4)],
@@ -197,6 +209,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--exp-dir", default=None)
     ap.add_argument("--smoke", action="store_true")
+    # exp21 reuses this analysis with a different pair of arms. Same band, same declared
+    # family, same estimators -- a second script would be a second place for them to drift.
+    ap.add_argument("--arm", default=ARM, help="treatment arm (default: exp19b's)")
+    ap.add_argument("--baseline-arm", default=BASELINE_ARM,
+                    help="anchor arm (default: exp19b's)")
     args = ap.parse_args()
     exp_dir = Path(args.exp_dir) if args.exp_dir else (
         EXP_DIR / "_smoke" if args.smoke else EXP_DIR)
@@ -206,7 +223,7 @@ def main():
 
     wrote = 0
     for v in VERIFIERS:
-        res = analyse(exp_dir, v, selection)
+        res = analyse(exp_dir, v, selection, args.arm, args.baseline_arm)
         if res is None:
             print(f"[{v}] no paired rows yet ({rows_path(exp_dir, v).name} missing) — skipped")
             continue

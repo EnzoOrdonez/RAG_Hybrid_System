@@ -206,6 +206,51 @@ def test_bh_still_corrects_when_a_family_is_larger(stats):
     assert out[1] == pytest.approx(0.04) and out[0] == pytest.approx(0.02)
 
 
+def _write_rows(exp_dir, arms, n=20):
+    """Synthetic decline-aware faithfulness rows for two arms, one verifier.
+
+    The values must VARY across queries: a constant column has zero paired variance, and TOST
+    then returns its degenerate branch, which reports no band at all.
+    """
+    import random
+    cfgs = {}
+    for i, arm in enumerate(arms):
+        rng = random.Random(100 + i)
+        cfgs[f"{arm} | granite4.1-8b"] = {
+            f"q{j:03d}": {"genuine": 5,
+                          "faithfulness": None if j % 7 == 0
+                          else round(min(1.0, max(0.0, rng.gauss(0.4 + 0.02 * i, 0.15))), 4)}
+            for j in range(1, n + 1)}
+    (exp_dir / "faithfulness_rows__hhem.json").write_text(
+        json.dumps({"model": "hhem", "configs": cfgs}), encoding="utf-8")
+
+
+def test_the_analysis_is_reusable_with_another_pair_of_arms(stats, tmp_path):
+    """exp21 answers equivalence with THIS code; a second copy is a second place to drift."""
+    _write_rows(tmp_path, ["baseline_local", "hosted"])
+    res = stats.analyse(tmp_path, "hhem", {}, arm="hosted", baseline_arm="baseline_local")
+    assert res is not None and res["n_paired"] > 0
+    assert res["equivalence_tost"]["band"] == 0.081, "the band travels with the analysis"
+    assert res["bh_family"]["contrasts"] == ["hosted vs baseline_local"]
+
+
+def test_the_arm_name_is_serialised_as_a_name_not_as_its_scores(stats, tmp_path):
+    """Regression: the arm parameter was shadowed by the unpacked score list, so the artifact
+    would have recorded a list of floats where the reader expects the arm's name."""
+    _write_rows(tmp_path, ["baseline_local", "hosted"])
+    res = stats.analyse(tmp_path, "hhem", {}, arm="hosted", baseline_arm="baseline_local")
+    assert res["arm"] == "hosted" and res["baseline"] == "baseline_local"
+    assert isinstance(res["arm"], str) and isinstance(res["baseline"], str)
+
+
+def test_the_defaults_are_still_exp19b_pre_registration(stats, tmp_path):
+    """Parametrising must not quietly change what exp19b itself declares."""
+    _write_rows(tmp_path, ["baseline_repro", "claim_selected"])
+    res = stats.analyse(tmp_path, "hhem", {})
+    assert res["arm"] == "claim_selected" and res["baseline"] == "baseline_repro"
+    assert stats.declared_family()["contrasts"] == ["claim_selected vs baseline_repro"]
+
+
 def test_the_selection_bound_is_never_used_as_a_denominator(stats):
     """exp18 pre-registered the bound as motivation only; a percent-of-headroom is fabricated."""
     src = (PROJECT_ROOT / "scripts" / "compute_exp19b_stats.py").read_text(encoding="utf-8")
