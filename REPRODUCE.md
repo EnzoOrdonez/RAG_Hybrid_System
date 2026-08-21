@@ -21,11 +21,17 @@ $env:PYTHONHASHSEED = 42     # determinismo de hashing (semilla global = 42)
 $env:PYTHONUTF8 = 1          # OBLIGATORIA en consola cp1252 (ver nota abajo)
 ```
 
-> **`PYTHONUTF8=1` no es opcional en Windows.** La consola por defecto es `cp1252` y
-> `verify_v4_offline.py` imprime `≈` en su reporte: sin esta variable el verificador muere con
+> **`PYTHONUTF8=1` — depende de la consola, y por eso conviene fijarla siempre.**
+> `verify_v4_offline.py` imprime caracteres no-ASCII (`≈`) en su reporte. Si la consola está en
+> `cp1252` —Windows PowerShell 5.1 o `conhost` heredado— el verificador muere con
 > `UnicodeEncodeError` **después** de haber recomputado todo, así que parece un fallo de las
-> cifras cuando es de codificación de salida. Con la variable pasa completo. Esta receta la
-> omitía; añadida por Claude Code el 2026-08-21 07:35 (hora local).
+> cifras cuando es de codificación de salida. Con `PYTHONUTF8=1` pasa siempre.
+>
+> **Medido el 2026-08-21 por Claude Code:** en PowerShell **7.6.5** con `chcp 65001` (UTF-8, el
+> defecto de PS7) el verificador da **exit 0 sin** la variable — `sys.stdout.encoding` ya es
+> `utf-8`. O sea que el fallo histórico documentado en `CLAUDE.md` es real pero **condicional a
+> la consola**, no universal. Fijar la variable hace la receta determinista en cualquiera de las
+> dos, que es justo lo que una receta de reproducibilidad tiene que garantizar.
 >
 > Distinción deliberada: este `$PY` 3.14 es el **entorno reproducible**, no el soporte del
 > paquete. `setup.py` y el README declaran **3.11+** como soporte de instalación; las dos cosas
