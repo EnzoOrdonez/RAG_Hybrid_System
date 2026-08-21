@@ -193,3 +193,157 @@ por ahora, (b) separar soporte de paquete (3.11+) de entorno reproducible (3.14)
 autorice Ejecución sobre README/setup.py, (c) no commitear la paridad sin OK explícito.
 Pendiente de Ejecución: fijar texto canónico de la contradicción de prompts y las ediciones
 de versionado de Python.
+
+[Kimi Work] — 2026-08-06 23:10 — Modo: Sondeo + recopilación
+
+Qué hice: auditoría de solo lectura del estado del proyecto y del paquete gold v4; documento
+unificado nuevo en `docs/ESTADO_PROYECTO_UNIFICADO_2026-08-06.md`. No toqué código, evidencia
+ni documentos existentes (solo esta entrada de log).
+
+Verificaciones ejecutadas:
+- Integridad del gold v4 (9/9 OK): v4 disjunto de v3; estratos = objetivo (30/40/50/30);
+  flags stage_b del meta == stage_a_idx de la etapa B (50/50); claims B == claims A; sin
+  duplicados; idx contiguos; longitudes según diseño. juicio_humano 0/150 (A) y 0/50 (B).
+- `scripts/analyze_gold_v4.py --simulate 0.15` corre de punta a punta con el intérprete 3.14
+  (PYTHONUTF8=1) y no escribe nada → el análisis post-anotación no será cuello de botella.
+- git: rama `summer/mejoras`, worktree limpio; push del 2026-08-04 publicado (63 commits).
+
+Secciones vivas de ESTE archivo que quedaron desactualizadas (registro, no reescritura —
+pendiente de OK de Enzo para actualizarlas):
+- "Estado actual" y "Contradicciones sin resolver" dicen que SUMMER_RESULTS.md marca exp18
+  como pendiente: ya no, lo declara CERRADA el 2026-08-04.
+- Línea base de tests 121/123: el ledger entrada 24 reporta 177 pasan, 0 fallos, 0 omitidas.
+- La entrada [Kimi Code] del 2026-08-04 reporta la paridad de despliegue sin commit: ya está
+  commiteada y publicada en origin/summer/mejoras.
+- La verificación "SUMMER_RESULTS.md:271 describe exp18 como pendiente (sigue así)" de la
+  entrada previa también quedó obsoleta.
+
+Cuellos de botella vigentes (detalle en el documento unificado): G1 gold humano v4 A+B
+(~8 h de anotador, el más antiguo); G2 congelar config de encuestas (vence ~mediados de
+agosto); G3 decisión nube-infraestructura + compuerta exp21 (cero gasto ejecutado); G4
+decisión exp19b; G6 taxonomía de 759 claims; G7 confirmatorio exp17 (opcional).
+
+[Claude Code] — 2026-08-21 15:50 — Modo: Auditoría de ramas (solo lectura) + runner de exp19b (G4)
+
+Rama: `summer/exp19b`, creada desde `summer/mejoras` en `89dc654`. Sin commit y sin push.
+
+**Paquete 0 — auditoría de ramas (solo lectura, nada borrado).** 10 ramas locales, 7 remotas.
+Totalmente fusionadas en `summer/mejoras` y sin contenido único: `codex/plan-a-thesis-safe`,
+`fase-2.5-recompute-retrieval-stats`, `fix/phase-1-no-rerun`, `fix/phase-2-nli-and-seeds`,
+`pre-corpus-rebuild-2026-05-21`, `summer/ablacion`. Con commits NO fusionados: solo dos.
+`fase-3-regenerate-figures` (3 commits, publicados en origin, trae `generate_phase3_artifacts.py`
+y 20 artefactos `_phase3` ausentes de `summer/mejoras`) y
+`fase-3.5-nli-recompute-saved-answers` (9 commits, de los cuales **6 existen solo en este disco**:
+`origin/…` está en `c119c99`, local en `e8d2e2e`; incluye el commit de anti-circularidad
+Flag 17/142 y los scripts `recompute_nli_over_saved.py` y `build_annotation_pool.py`). Los 5 tags
+están contenidos en `main`, `summer/ablacion` y `summer/mejoras`: ningún borrado de rama los
+huerfanaría. `main` local va 2 commits por delante de `origin/main`. La eliminación queda a
+decisión de Enzo, rama por rama.
+
+**Paquete 1 — runner de exp19b, entregado sin corrida.** Diseño y pre-registro completos en la
+entrada 25 de `paper/summer_ablation_log.md`. Cuatro decisiones de Enzo tomadas antes de escribir
+código: borrador regenerado en sesión (el borrador ES el brazo `baseline_repro`), n=194, familia BH
+= 1 contraste por verificador con `p_BH == p_raw` declarado, y separación en cuatro scripts para
+que el selector no pueda alcanzar un verificador. Archivos nuevos: `scripts/run_exp19b_generation.py`,
+`scripts/extract_exp19b_claims.py`, `scripts/select_exp19b_evidence.py`,
+`scripts/compute_exp19b_stats.py`, `tests/test_exp19b_runner.py`. Modificado:
+`tests/test_selector_hygiene.py` (las prohibiciones universales pasan a cubrir los dos selectores;
+solo las dos aserciones propias de una sonda se estrecharon a exp19a).
+
+**Validado.** Extracción de claims sobre las 194 respuestas reales del baseline de exp18:
+2 053 claims genuinos y **6 queries sin ninguno** — exactamente las 6 de 194 que declara la entrada
+21 del ledger. Selector: sanity check 5,0/5 contra el top-5 real de exp18, y los tres caminos
+ejercitados (swap real, reorden puro, fallback). Estadística: primaria, bootstrap, d_z, BH y TOST
+±0,081 corren de punta a punta (sobre filas sintéticas de scratchpad; las cifras no significan nada,
+solo el plumbing). Defecto propio cazado antes de la GPU: el script de estadística volcaba el dict
+crudo de `paired_comparison` y moría con `TypeError: Object of type bool is not JSON serializable`
+—habría muerto al final de una corrida de 5 h con los brazos ya generados—; corregido extrayendo
+escalares, como ya hacía `compute_tierA_arm_stats.py`.
+
+**NO verificado.** Las dos etapas de generación (`--stage draft` y `--stage regen`) no se ejecutaron:
+el servidor de Ollama no estaba escuchando en 11434 durante la sesión. Al buscar el binario se lanzó
+sin querer el proceso `ollama app` (PID 17412), que no llegó a levantar el servidor; queda a decisión
+de Enzo cerrarlo. Pendiente por tanto: el smoke de 3 queries de generación, y la corrida real.
+
+**Estado de auditoría.** Suite **206 pasan, 0 fallan, 0 omitidas** (línea base 177 confirmada al
+iniciar). `verify_summer_offline.py` **exit 0** con `PYTHONUTF8=1`. Evidencia firmada contra
+`nota3-evidencia-2026-06-11`: **322 altas, 0 modificaciones, 0 borrados**; `git status` sobre
+`experiments/` vacío. Nada bajo `experiments/results/` fue creado ni tocado: el directorio
+`exp19b_anchored_selector` aún no existe y lo creará la primera corrida.
+
+**Deuda detectada, no tocada (requiere decisión).** `src/utils/signed_evidence.py` protege
+`exp3..exp14` y `exp8b`, pero **no** `exp15..exp19a`, que las reglas de trabajo declaran igualmente
+intocables. Hoy esa protección depende solo de disciplina humana. No se modificó porque cambia una
+guarda existente y su test.
+
+[Claude Code] — 2026-08-21 02:30 — Modo: smoke de exp19b + guarda de evidencia + tag de rescate
+
+Continuación de la entrada anterior. Rama `summer/exp19b`, ahora con **3 commits**. Sin push.
+
+**Ollama.** El proceso colgado ya no era el PID 17412 (había muerto); el vivo era `ollama app`
+**PID 26360**, cerrado con `taskkill`. Servidor levantado con la ruta completa
+(`%LOCALAPPDATA%\Programs\Ollama\ollama.exe serve`), versión **0.22.1**, `granite4.1:8b`
+presente. Ollama reporta actualización disponible a 0.32.15, **no aplicada**.
+
+**Smoke de 3 queries: PASA las 4 etapas.** Determinismo 3x **bit-idéntico en ambos brazos**
+(`all_arms_bit_deterministic: True`). Selector: sanity check **5,0/5**, `n_fallback=2`.
+`results.json` con dos configs, cada una con `scenario`. Todo bajo
+`experiments/results/exp19b_anchored_selector/_smoke/`, invisible al descubrimiento por forma.
+Resume verificado: relanzar draft con el checkpoint completo no regeneró ninguna query.
+
+**Hallazgo 1 — el borrador fresco NO reproduce las respuestas guardadas de exp18.** 1 de 3
+idénticas; las otras dos divergen fuerte (jaccard-5grama **0,086** y **0,204**, ratio de
+caracteres 0,27 y 0,36). Diagnóstico limpio: **`tokens_in` idéntico en 3/3** (1844 / 1925 / 790)
+→ el prompt se reproduce **byte a byte**; `tokens_out` difiere (302→235, 211→134) → la
+divergencia es **enteramente del runtime de generación** entre el 2026-07-31 y hoy. exp18 ya
+registra `all_arms_bit_deterministic: False`: misma familia H5, compuerta relajada por diseño.
+**Consecuencia para leer exp19b:** su brazo baseline no reproducirá las cifras de exp18, así que
+solo vale el contraste pareado **dentro** de exp19b — que es exactamente lo que dice el
+pre-registro. La guarda del ancla HHEM en 0,40-0,55 pasa a ser el control que importa. Y valida
+la decisión Q1: releer el baseline de exp18 habría metido esta deriva dentro del pareado.
+
+**Hallazgo 2 — defecto propio, cazado por el smoke.** `--stage regen` reconstruye `results.json`
+y perdía `draft_vs_exp18_identical`, que solo calcula `--stage draft`: el sanity check corría, se
+logueaba, y dejaba de existir donde alguien lo leería después. Corregido con `carry_forward()` y
+dos tests; probado de punta a punta re-corriendo draft→regen sobre el artefacto real.
+
+**Guarda de evidencia — registro invertido** (deuda de la entrada anterior, aprobada por Enzo).
+Antes era una lista de lo-que-proteger, el mismo patrón que ya costó dos defectos a esta fase.
+Ahora **todo dir `expN*` bajo `experiments/results/` está protegido contra sobrescritura salvo
+los declarados en `LIVE_EXPERIMENTS`** (hoy `exp19b`). Una entrada LIVE obsoleta cuesta un
+rechazo falso: ruidoso e inofensivo. La lista vieja costaba evidencia pisada: silenciosa y
+permanente. `SIGNED_EXPERIMENTS` se conserva aparte y sigue significando *firmado*, porque el
+mensaje de error cita el motivo real de cada dir (tag `nota3-evidencia` vs congelado por regla de
+fase). **`guard_write` no cambia de semántica**: sigue lanzando solo si el archivo YA existe, así
+que los runners de verano pueden seguir creando artefactos nuevos bajo exp15+; hay test propio
+para esa propiedad. Verificado en vivo: exp19b escribible, exp18 y exp12 bloqueados con motivos
+distintos y correctos.
+
+**Limitación declarada:** los runners de verano no llaman a `guard_write`, así que la guarda no
+los alcanza. Cubre los dos scripts que escriben en sitio y cualquier llamador futuro; ninguno de
+los dos había escrito nunca bajo exp15..exp19a (cero archivos `faithfulness_metrics*` /
+`retrieval_metrics*` allí), por lo que el cambio no altera ningún flujo existente. Proteger a los
+runners exigiría decidir qué artefactos de verano son congelados y cuáles reescribibles: decisión
+mayor, fuera de este alcance.
+
+**Ramas.** Creado el tag `rescue/fase-3.5-pre-cleanup-2026-08-21` sobre `e8d2e2e`, punta de
+`fase-3.5-nli-recompute-saved-answers`; rescata exactamente los **6 commits que solo existen en
+este disco**. Sin push. **Ninguna rama borrada**: la tabla del Paquete 0 sigue esperando decisión
+de Enzo rama por rama.
+
+**Commits en `summer/exp19b`** (ninguno publicado):
+1. `feat(verano): runner de exp19b — selector guiado por anclaje (G4)`
+2. `ee9bd90 fix(guard): proteger exp15..exp19a invirtiendo el registro de evidencia`
+3. esta entrada de log.
+
+**Estado de auditoría.** Suite **218 pasan, 0 fallan, 0 omitidas** (177 → 206 → 208 → 218; +18
+exp19b, +20 higiene de selector, +10 guarda). `verify_summer_offline.py` **exit 0**. Evidencia
+firmada contra `nota3-evidencia-2026-06-11`: **322 altas, 0 modificaciones, 0 borrados**.
+
+**Falta / no verificado.** (a) La corrida real de exp19b, ~5,3 h de GPU: la autoriza Enzo aparte,
+y solo ella ejercita las etapas de puntuación (`--pass N`, HHEM, arm_stats, guards, diagnosis) que
+aquí no se han corrido sobre datos reales. (b) El push: la compuerta sigue vigente. (c) El
+directorio `experiments/results/exp19b_anchored_selector/_smoke/` queda **sin versionar** — son
+respuestas desechables, no evidencia; borrarlo es decisión de Enzo. (d) Los 4 documentos sin
+rastrear de Kimi Work siguen sin versionar, por decisión de Enzo. (e) El servidor de Ollama quedó
+**corriendo**; ciérralo si no lo necesitas.
