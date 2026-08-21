@@ -66,6 +66,18 @@ archivos de evidencia firmada de los que `verify_v4_offline.py` re-deriva cifras
   contexto**: `rgm` recibe `retrieved_ids` firmados de exp11, `RAGPipeline` recupera en vivo. Sigue
   vigente la regla operativa: para **brazos comparables** usar `rgm` (contexto congelado); `RAGPipeline`
   es la ruta de **despliegue**. La paridad de prompt debe quedar cubierta por test antes de empaquetar.
+  **[TEXTO CANÓNICO — fijado 2026-08-21 07:40 por Claude Code, idéntico en
+  `docs/TRACEABILITY_nota3.md`]** Esta entrada y la de `TRACEABILITY_nota3.md` parecían
+  contradecirse; la re-auditoría del 2026-08-04 (entrada [Kimi Code] en `CLAUDE.md`) mostró que
+  **ambas son correctas en su contexto y que la contradicción era de redacción, no de código**. La
+  **construcción** del prompt es la misma en las dos rutas. Lo que difiere es el **origen del
+  `query_type`**: el ruteo es una perilla **opt-in**, `prompt_routing`
+  (`src/pipeline/pipeline_config.py:49`, por defecto `False`), y sin ella el pipeline asigna
+  `query_type = "default"` a todo (`rag_pipeline.py:251-254` en `query()` y `417-420` en
+  `query_stream()`). `TRACEABILITY_nota3.md` describe **la config legacy que se evaluó** (perilla
+  apagada); esta entrada describe **la ruta con `prompt_routing=True`**, que es la que lleva
+  `SURVEY_DEPLOY`. La segunda diferencia —el **origen del contexto**— sigue vigente en ambos
+  contextos y es la que manda la regla operativa de arriba.
 - **Contextos exp12** = `retrieved_ids` de exp11 (top-5 post-rerank, orden exp11); el retrieval no
   se re-ejecuta en generación. exp11 también guarda el orden pre-rerank RRF (top-5) por query.
 - **Caché LLM** `data/llm_cache/{model}_cache.json`, key = sha256(config_name ‖ prompt ‖ system ‖

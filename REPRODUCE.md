@@ -18,7 +18,18 @@ $PY = "C:\Users\enziz\AppData\Local\Python\pythoncore-3.14-64\python.exe"
 $env:HF_HUB_OFFLINE = 1      # ningún script debe salir a la red
 $env:TRANSFORMERS_OFFLINE = 1
 $env:PYTHONHASHSEED = 42     # determinismo de hashing (semilla global = 42)
+$env:PYTHONUTF8 = 1          # OBLIGATORIA en consola cp1252 (ver nota abajo)
 ```
+
+> **`PYTHONUTF8=1` no es opcional en Windows.** La consola por defecto es `cp1252` y
+> `verify_v4_offline.py` imprime `≈` en su reporte: sin esta variable el verificador muere con
+> `UnicodeEncodeError` **después** de haber recomputado todo, así que parece un fallo de las
+> cifras cuando es de codificación de salida. Con la variable pasa completo. Esta receta la
+> omitía; añadida por Claude Code el 2026-08-21 07:35 (hora local).
+>
+> Distinción deliberada: este `$PY` 3.14 es el **entorno reproducible**, no el soporte del
+> paquete. `setup.py` y el README declaran **3.11+** como soporte de instalación; las dos cosas
+> se declaran por separado a propósito.
 
 Comprobación rápida: `& $PY -c "import torch,transformers,scipy,statsmodels;print(torch.__version__, torch.cuda.is_available())"`
 

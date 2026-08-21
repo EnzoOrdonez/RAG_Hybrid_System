@@ -18,18 +18,25 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 - Las rutas Streamlit de Chat y Evaluation resuelven el brazo `hybrid` a `SURVEY_DEPLOY`. El registro
   experimental conserva `get_config("hybrid") == PROPOSED_HYBRID`. `query_stream()` aplica el mismo
   routing de prompts y balanceo cross-cloud que `query()` cuando esas perillas están activas.
-- `exp18` ya tiene resultados y análisis committeados en `f6816b4`, pero el resumen vivo
-  `SUMMER_RESULTS.md` aún lo describe como pendiente. La autoridad documental sigue por confirmar.
-- La rama activa observada el 2026-08-03 es `summer/mejoras`, con worktree limpio al iniciar esta
-  exploración. No hay configuración de CI versionada bajo `.github/` ni ADRs formales. El remoto de
-  GitHub no tiene issues ni PRs, abiertos o cerrados; el seguimiento real vive en documentos y ledgers.
-- Línea base previa del 2026-08-03 con Python 3.14.3, modo offline y seed 42: suite rápida
-  `115 passed, 3 deselected`; suite completa `117 passed, 1 skipped`. Tras la paridad de despliegue:
-  `121 passed, 3 deselected` y `123 passed, 1 skipped`, sin fallos. No hay medición de coverage
-  configurada.
-- Verificación offline del 2026-08-03: Nota 3 v4 y fase de verano pasan con `PYTHONUTF8=1`; ninguna
-  evidencia bajo `experiments/` cambió. La comprobación v4 creó
-  `output/audit/v4_offline_check_2026-08-03.md`, aún sin versionar.
+- `exp18` está **CERRADA**: resultados y análisis committeados en `f6816b4`, y `SUMMER_RESULTS.md`
+  la declara cerrada desde el 2026-08-04. La contradicción documental que había aquí quedó resuelta.
+- `exp19a` (sonda offline del selector) cerró en **PASS**. `exp19b`, el brazo generativo, tiene
+  runner, pre-registro (ledger entrada 25) y smoke validado; su corrida real arrancó el 2026-08-21.
+- Rama activa: **`summer/exp19b`**, publicada en `origin/summer/exp19b` el 2026-08-21 con 3 commits
+  (runner de exp19b, guarda de evidencia invertida, log). `summer/mejoras` sigue publicada y es su
+  base. No hay CI versionada bajo `.github/` ni ADRs formales; el remoto no tiene issues ni PRs, así
+  que el seguimiento real vive en documentos, ledgers y tests.
+- Línea base de tests con el intérprete 3.14, modo offline y seed 42: **218 pasan, 0 fallan, 0
+  omitidas** (suite rápida `-m "not slow and not gpu"` para trabajo con la GPU ocupada). Trayectoria:
+  115/117 → 121/123 (paridad de despliegue) → 177 → 206 (runner exp19b) → 218 (guarda invertida).
+  No hay medición de coverage configurada.
+- Verificación offline: `verify_v4_offline.py` y `verify_summer_offline.py` pasan con
+  `PYTHONUTF8=1`, variable ya documentada en `REPRODUCE.md §0`. Ninguna evidencia bajo
+  `experiments/` ha cambiado: **322 altas, 0 modificaciones, 0 borrados** contra
+  `nota3-evidencia-2026-06-11`.
+- La guarda de evidencia (`src/utils/signed_evidence.py`) protege por **defecto** todo dir `expN*`
+  bajo `experiments/results/` contra sobrescritura, salvo los declarados en `LIVE_EXPERIMENTS`
+  (hoy `exp19b`). Crear artefactos nuevos sigue permitido.
 - Health check local aprobado: 24.481 chunks, FAISS y BM25 cargan 24.481 entradas, Ollama responde con
   Llama 3.1 disponible y el snapshot NLI local carga correctamente.
 
@@ -40,8 +47,10 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 - `paper/audit_findings.md` y `paper/audit_outputs/exp8_stats_corrected.csv`: inmutables.
 - `paper/overleaf_ready/main.tex` y la prosa A.3: cualquier corrección requiere aprobación explícita
   frase por frase.
-- `experiments/results/exp15..exp18`: evidencia de verano ya committeada. No regenerar, sobrescribir
-  ni reinterpretar sin fijar antes el alcance y revisar el ledger.
+- `experiments/results/exp15..exp19a`: evidencia de verano ya committeada. No regenerar, sobrescribir
+  ni reinterpretar sin fijar antes el alcance y revisar el ledger. Desde el 2026-08-21 esto lo hace
+  cumplir el código: `src/utils/signed_evidence.py` protege por defecto y solo `LIVE_EXPERIMENTS`
+  (hoy `exp19b`) queda sobrescribible.
 - `.env`: existe localmente, está ignorado y puede contener secretos. No leer, imprimir ni versionar.
 
 ## Problemas conocidos abiertos
@@ -49,41 +58,51 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 - El gold humano de dos etapas sigue pendiente de anotación real.
 - La decisión sobre experimentos de nube y gasto está bloqueada hasta interpretar `exp18` y recibir
   aprobación explícita.
-- La documentación de estado no está sincronizada con el cierre de `exp18`.
 - No hay CI versionada; la protección depende de pruebas y verificadores locales.
-- La receta PowerShell de `verify_v4_offline.py` falla con `UnicodeEncodeError` bajo la consola
-  `cp1252` al imprimir `≈`. El verificador pasa completo al fijar `PYTHONUTF8=1`, variable ausente de
-  `REPRODUCE.md`.
 - La instalación declarada no reproduce todos los flujos. `requirements.txt` omite Streamlit, Plotly
   y pytest; `setup.py` omite buena parte del stack de retrieval y evaluación. No existe lockfile.
-- La prueba crítica `test_nli_output_is_softmax_probabilities` se omite en modo offline aunque el modelo
-  local existe. La prueba carga el ID de Hugging Face directamente y no comparte el fallback local de
-  `HallucinationDetector`. La aserción manual contra el snapshot local sí pasó: suma 1,0 y probabilidad
-  de entailment 0,9982 frente al umbral 0,7.
+  Propuesta escrita en `docs/MANIFESTS_PROPOSAL_2026-08-21.md`, pendiente de OK de Enzo.
+- `test_nli_output_is_softmax_probabilities` **hoy no se omite**: con `HF_HUB_OFFLINE=1` la suite da
+  218 pasan y 0 omitidas (verificado el 2026-08-21). Carga porque el tag
+  `cross-encoder/nli-deberta-v3-small` **está en el caché de Hugging Face**, no porque el test use el
+  fallback local. El hueco estructural sigue abierto: el test pide el ID de HF directamente y no
+  comparte el fallback a `data/models/nli-deberta-v3-small/` de `HallucinationDetector`
+  (`hallucination_detector.py:219-220`), así que si ese caché se purga el test **se omitiría en
+  silencio** mientras el detector seguiría funcionando. Hilo separado, no tocado aquí.
+
+> Cerrados el 2026-08-21 (mantenimiento P-DOC): el cierre de `exp18` ya está sincronizado en la
+> documentación de estado, y `PYTHONUTF8=1` quedó documentada en la receta de `REPRODUCE.md §0`
+> junto con la causa del `UnicodeEncodeError` en consola `cp1252`.
 
 ## Contradicciones sin resolver
 
-- `docs/TRACEABILITY_nota3.md` dice que `RAGPipeline.query()` no replica el ruteo de prompts de exp12.
-  `docs/KNOB_MAP_summer.md`, re-verificado después, dice que esa afirmación era imprecisa y que el prompt
-  sí coincide, aunque cambia el origen del contexto. Pregunta pendiente: cuál descripción debe quedar
-  como canónica antes de tocar el pipeline o sus pruebas de paridad.
-- `SUMMER_RESULTS.md` marca `exp18` como pendiente. Git, el ledger y
-  `output/audit/summer_offline_check_2026-08-03.md` muestran artefactos completos y verificación offline
-  aprobada. Pregunta pendiente: si se actualiza el resumen y qué texto se autoriza.
-- El soporte de Python difiere: README dice 3.10+, `setup.py` exige 3.11+ y `REPRODUCE.md` fija el entorno
-  experimental local en 3.14. Pregunta pendiente: distinguir soporte del paquete de entorno reproducible
-  o unificar la versión declarada.
+> Cerradas el 2026-08-21 por Claude Code (mantenimiento P-DOC del playbook de gates), con las
+> decisiones que Enzo ya había registrado el 2026-08-04:
+>
+> - **Ruteo de prompts** — texto canónico fijado, idéntico, en `docs/TRACEABILITY_nota3.md` y
+>   `docs/KNOB_MAP_summer.md`. Ambas descripciones eran correctas en su contexto: la construcción
+>   del prompt coincide, y lo que cambia es el origen del `query_type` (`prompt_routing`,
+>   `pipeline_config.py:49`, por defecto `False`) y el origen del contexto. No se tocó código.
+> - **exp18 pendiente en `SUMMER_RESULTS.md`** — obsoleta: la declara cerrada desde el 2026-08-04.
+> - **Versión de Python** — ejecutada la separación ya decidida: README y `setup.py` declaran
+>   **soporte del paquete 3.11+** (badge corregido, decía 3.14); `REPRODUCE.md §0` declara el
+>   **entorno reproducible 3.14**. No se eligió versión nueva.
+> - **`PYTHONUTF8=1` ausente de `REPRODUCE.md`** — añadida a la receta con la explicación del
+>   `UnicodeEncodeError` en consola `cp1252`.
+
 - README presenta 12 experimentos de `exp3..exp13` más `exp8b`, pero el repo ya contiene la fase
-  `exp15..exp18`. Pregunta pendiente: si README debe describir solo Nota 3 o también el estado de verano.
-- `REPRODUCE.md` afirma que los niveles 1 y 2 pasan y da comandos PowerShell, pero el comando v4 falla
-  en la consola local por codificación salvo que se agregue `PYTHONUTF8=1`. Pregunta pendiente: corregir
-  el script para salida tolerante, documentar la variable, o hacer ambas cosas.
+  `exp15..exp19b`. Pregunta pendiente: si README debe describir solo Nota 3 o también el estado de
+  verano. **Fuera del alcance de P-DOC**, que no lo autoriza.
 - README indica instalar `requirements.txt` y luego lanzar Streamlit, pero Streamlit y Plotly no están
   declarados allí. `setup.py` expone otro conjunto más corto. Pregunta pendiente: cuál manifiesto es
-  canónico y si UI, pruebas y ML deben separarse en extras o instalarse juntos.
+  canónico y si UI, pruebas y ML deben separarse en extras o instalarse juntos. **Propuesta escrita
+  en `docs/MANIFESTS_PROPOSAL_2026-08-21.md`, a la espera de OK; el lockfile no se genera sin él.**
 - La suite completa se reporta verde con una omisión, pero la prueba omitida es una guarda NLI central y
   el modelo local sí está presente. Pregunta pendiente: si la prueba debe resolverse mediante el mismo
-  cargador del detector o mediante una ruta local explícita.
+  cargador del detector o mediante una ruta local explícita. **Hilo separado a propósito**: P-DOC lo
+  excluye. (Nota: con `HF_HUB_OFFLINE=1` la suite hoy da 218 pasan y 0 omitidas — la omisión que
+  describe esta línea ya no se observa; queda por confirmar si el test resuelve por el fallback local
+  o por otra vía antes de cerrarla.)
 
 ## Próximos pasos
 
