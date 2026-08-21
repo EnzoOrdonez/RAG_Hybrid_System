@@ -27,7 +27,22 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-SELECTOR_SCRIPTS = ["compute_exp19a_selector_probe.py"]
+# Every module allowed to CHOOSE evidence for exp19. The verifier/oracle bans below apply to
+# all of them, because the constraint is about what a selector may reach, not about which
+# experiment happens to call it.
+#
+# Split added by Claude Code, 2026-08-21 15:10: exp19b's selector produces a SCORED arm, so it
+# needs these bans more than exp19a's probe did. But two of the assertions here are specific to
+# a probe -- "declares its gate" and "the circular metric is labelled" -- and exp19b is neither
+# gated nor circular: it enters a BH family and its metric compares two real answers. Applying
+# probe assertions to it would have forced false prose into the runner, which is how a guard
+# starts teaching people to lie to it. The bans stayed universal; only the probe-shaped
+# assertions were narrowed.
+SELECTOR_SCRIPTS = ["compute_exp19a_selector_probe.py", "select_exp19b_evidence.py"]
+
+# Selectors that are also PROBES: they exist to answer a pre-declared gate with a deliberately
+# circular fixed-answer metric. Those two properties are what the last two tests check.
+PROBE_SCRIPTS = ["compute_exp19a_selector_probe.py"]
 
 # Anything that produces a faithfulness label or score. If the selector can reach one of these,
 # the arm it produces cannot be scored by that verifier without circularity.
@@ -39,13 +54,21 @@ VERIFIER_TOKENS = [
 ORACLE_TOKENS = ["bge-reranker-large", "bge_reranker_large"]
 
 
-def _sources():
+def _read(names):
     out = []
-    for name in SELECTOR_SCRIPTS:
+    for name in names:
         p = PROJECT_ROOT / "scripts" / name
         if p.exists():
             out.append((name, p.read_text(encoding="utf-8")))
     return out
+
+
+def _sources():
+    return _read(SELECTOR_SCRIPTS)
+
+
+def _probe_sources():
+    return _read(PROBE_SCRIPTS)
 
 
 def _code_only(src):
@@ -55,7 +78,11 @@ def _code_only(src):
 
 
 def test_the_selector_scripts_exist():
-    assert _sources(), f"none of {SELECTOR_SCRIPTS} found — did a rename orphan this guard?"
+    found = {n for n, _ in _sources()}
+    assert found == set(SELECTOR_SCRIPTS), (
+        f"missing {sorted(set(SELECTOR_SCRIPTS) - found)} — a selector that is not on disk is a "
+        f"guard that silently covers nothing; did a rename orphan it?")
+    assert {n for n, _ in _probe_sources()} == set(PROBE_SCRIPTS)
 
 
 @pytest.mark.parametrize("name,token", [(n, t) for n, _ in _sources() for t in VERIFIER_TOKENS])
@@ -79,7 +106,7 @@ def test_the_selector_uses_the_production_reranker(name, src):
     assert "ms-marco" in src, f"{name} does not name the reranker it selects with"
 
 
-@pytest.mark.parametrize("name,src", _sources())
+@pytest.mark.parametrize("name,src", _probe_sources())
 def test_the_probe_declares_its_gate_before_running(name, src):
     """A gate chosen after seeing the numbers is not a gate."""
     low = src.lower()
@@ -88,7 +115,7 @@ def test_the_probe_declares_its_gate_before_running(name, src):
     assert "fail" in low and "pass" in low, f"{name} does not state both gate outcomes"
 
 
-@pytest.mark.parametrize("name,src", _sources())
+@pytest.mark.parametrize("name,src", _probe_sources())
 def test_the_circular_metric_is_labelled_as_such(name, src):
     """Fixed-answer faithfulness is computed against the claims the baseline already wrote."""
     assert "CIRCULAR" in src, f"{name} reports a fixed-answer metric without labelling it circular"

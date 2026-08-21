@@ -1622,3 +1622,131 @@ en los tres; guarda del ancla HHEM en 0,40-0,55. **No se espera identidad bit a 
 
 Suite **177 pasan, 0 fallan, 0 omitidas**. `verify_summer_offline.py` exit 0. Evidencia firmada
 **322 altas, 0 M, 0 D**. **Todo publicado en `origin/summer/mejoras`.**
+
+---
+
+## Entrada 25 — exp19b: PRE-REGISTRO y runner entregado, sin corrida (2026-08-21)
+
+> Seccion de **Claude Code** — 2026-08-21 15:40 (hora local). Rama `summer/exp19b` desde
+> `summer/mejoras`. **Ninguna generacion ejecutada.** Nada escrito bajo `experiments/results/`.
+
+### Que decidio Enzo antes de escribir una linea de codigo
+
+Cuatro ambiguedades del pre-registro de la entrada 23 se resolvieron **antes** del codigo, no
+despues de ver numeros:
+
+| # | Pregunta | Decision |
+|---|---|---|
+| Q1 | "baseline de exp18, pareado within-session": ¿regenerar o releer? | **Regenerar el borrador en sesion**; ese borrador ES el brazo `baseline_repro`. La respuesta guardada de exp18 se compara byte a byte y se REPORTA (`draft_vs_exp18_identical`), pero es sanity check del entorno, **nunca evidencia y nunca compuerta** — la propia sonda de exp18 corrio con compuerta relajada |
+| Q2 | ¿n? | **194**, el alcance `all` de exp18. Regla de fallback declarada abajo |
+| Q3 | ¿familia BH con un solo brazo? | **1 contraste por verificador.** BH es la identidad y **p_BH == p_raw**, y eso se escribe en el artefacto en vez de reportar un "p_BH" que no corrigio nada. Los 3 verificadores son **triangulacion, no familia** — el estandar de la fase desde exp17, conservado para que exp19b siga siendo comparable con exp17 y exp18 |
+| Q4 | El runner necesita el extractor de claims, que la guarda de higiene prohibe al selector | **Cuatro scripts separados.** El selector queda literalmente incapaz de importar un verificador, en vez de solo prometer no hacerlo |
+
+### El pre-registro, fijado en codigo antes de generar
+
+**Primaria:** diferencia pareada de fidelidad `claim_selected − baseline_repro`, por query,
+decline-aware (una query con fidelidad `None` en cualquiera de los dos lados sale del par y se
+cuenta), en **NLI-small, NLI-base y HHEM**.
+
+**TOST bilateral, banda ±0,081, α=0,05.** La banda es el efecto HHEM del balanceo de exp17:
+cantidad **preexistente**, de otro experimento, ciega a este contraste. `tost` se **importa** de
+`compute_exp18_diagnosis.py`; los estimadores pareados se importan de
+`src/evaluation/statistical_analysis.py`. Nada reimplementado.
+
+**Regla de fallback, declarada antes de correr:** un borrador sin ningun claim genuino no le da al
+selector nada sobre lo que condicionar. Esa query **conserva el top-5 del baseline**, aporta una
+diferencia de exactamente cero y se cuenta en `n_fallback`. La alternativa —seleccion vacia— habria
+generado **sin contexto** y puntuado como un triunfo espectacular sobre cero claims.
+
+**La cota de seleccion NO es denominador.** Motivo exp19b y nada mas: mantiene la respuesta fija
+mientras un selector real la cambia. Ningun "% del margen recuperado" se produce, y
+`tests/test_exp19b_runner.py` lo fija leyendo el codigo ejecutable del script de estadistica.
+
+**Guardas anti-gaming**, mismo patron que exp16/exp17, sobre el mismo directorio:
+`compute_exp16_guards.py` (declinacion en 3 clases con `classify_response`, palabras, claims
+genuinos, solape verbatim de 5-gramas) y `compute_exp18_diagnosis.py` (jaccard-5grama,
+`token_jaccard`, `identical_rate` y **reaparicion de claims del borrador**).
+
+**Determinismo:** granite4.1:8b, temp 0, seed 42, modo offline, sonda 3x por brazo con compuerta
+relajada (como exp18). **Cache del LLM apagada en las dos etapas de generacion**, para que borrador y
+regeneracion salgan de la MISMA sesion; los checkpoints por query siguen reanudando, que es el unico
+reuso que este diseno admite.
+
+### Que se entrego
+
+Cuatro scripts nuevos, ninguno de ellos ejecutado contra la GPU:
+
+```
+scripts/run_exp19b_generation.py    --stage draft | regen   (generacion; ningun verificador)
+scripts/extract_exp19b_claims.py    borrador -> draft_claims.json (extractor, cero puntuacion)
+scripts/select_exp19b_evidence.py   (claim, chunk) -> selection_ids.json   [SCRIPT SELECTOR]
+scripts/compute_exp19b_stats.py     primaria + TOST + familia BH declarada
+```
+
+El brazo ancla se llama `baseline_repro` **a proposito**: `verify_summer_offline.py` descubre el ancla
+como el brazo `baseline*` y `compute_exp18_diagnosis.py` la tiene fijada por ese nombre. Renombrarla
+habria dejado exp19b **silenciosamente sin verificar** — la familia de defectos de la entrada 21.
+
+El greedy por claim se **importa** de `compute_exp19a_selector_probe.py`, no se copia: si la compuerta
+offline y el brazo generativo no seleccionan identicamente, el PASS de exp19a no dice nada sobre
+exp19b. Un test compara el bytecode de las dos referencias.
+
+### La guarda de higiene, partida en dos (y por que no aflojada)
+
+`tests/test_selector_hygiene.py` aplicaba **cinco** grupos de aserciones a un unico script. Dos de
+ellos son propios de una **sonda**: "declara su compuerta antes de correr" y "la metrica circular esta
+etiquetada como tal, y no entra en ninguna familia BH". exp19b **no es circular** y **si** entra en una
+familia BH. Aplicarle esas dos aserciones habria obligado a escribir prosa falsa dentro del runner
+para que el test pasara — que es exactamente como una guarda empieza a ensenar a mentirle.
+
+Se partio la lista: `SELECTOR_SCRIPTS` (prohibiciones **universales**: ningun verificador, ningun
+oraculo independiente, debe nombrar el reranker de produccion) ahora cubre **los dos** selectores, y
+`PROBE_SCRIPTS` (las dos aserciones de sonda) cubre solo exp19a. **Las prohibiciones se ampliaron; solo
+se estrecho lo que era especifico de una sonda.** El selector que de verdad produce el brazo puntuado
+pasa a estar guardado, cosa que antes no ocurria.
+
+### Validacion en seco: tres hallazgos, ninguno cosmetico
+
+Sin Ollama disponible (ver Estado), se validaron las etapas que no generan, sobre las **respuestas
+reales del baseline de exp18** copiadas a un directorio temporal fuera del repo. exp18 no se abrio para
+escritura en ningun momento.
+
+1. **El extractor reproduce exactamente el corte de la fase.** Sobre las 194 respuestas del baseline:
+   **2 053 claims genuinos y 6 queries sin ninguno** — las mismas **6 de 194** que la entrada 21
+   declara al construir la cota (n=188). Media de ~10,9 claims genuinos por query, contra los 10,6 que
+   reporta exp18. El extractor de exp19b **es** el de Pass N, no una segunda copia.
+2. **El sanity check del harness pasa: 5,0/5.** Reordenar el pool por `(query, chunk)` reproduce el
+   top-5 real de exp18, igual que exp19a en 188/188. Si no lo hiciera, la seleccion no significaria nada.
+3. **Un defecto propio, cazado antes de la GPU.** `compute_exp19b_stats.py` volcaba el dict crudo de
+   `paired_comparison`, que trae escalares de numpy: `TypeError: Object of type bool is not JSON
+   serializable`. Habria muerto **al final** de una corrida de 5 horas, con los brazos ya generados y
+   ningun artefacto de analisis escrito. Corregido extrayendo escalares, como ya hacia
+   `compute_tierA_arm_stats.py`.
+
+### Senal preliminar sobre la dilucion — y por que NO se lee como resultado
+
+Sobre las **primeras 6 queries** (seleccion offline desde las respuestas de exp18, cero generacion):
+2 de 6 cambian el **conjunto** de chunks, 4 conservan el mismo conjunto (2 de ellas con la seleccion
+identica tambien en orden), media de 0,5 chunks cambiados de 5. Si eso se sostuviera, gran parte del
+set aportaria diferencia ~0 y **diluiria la primaria**.
+
+**No se lee como resultado, y la razon esta escrita en la entrada 23 de este mismo ledger:** el
+preliminar de exp19a sobre 25 queries daba +0,0008 y **leia FAIL**; sobre 188 dio +0,0300 y leyo PASS.
+Seis queries no son una muestra. Se registra como lo que es —una senal de diseno para calibrar
+expectativas antes de gastar la GPU— y por eso el artefacto del selector ahora persiste
+`n_same_set_as_baseline` y `n_identical_selection`: **la dilucion se mide, no se implica**.
+
+Un corolario que si es de diseno: una query cuya seleccion coincide en conjunto pero no en orden
+difiere del baseline **solo por el orden**, y Tier A encontro el orden nulo en 3 instrumentos. Esas
+queries son casi-no-ops del brazo, y ahora se cuentan.
+
+### Estado
+
+Suite **206 pasan, 0 fallan, 0 omitidas** (177 antes; +17 casos nuevos de exp19b y +12
+parametrizaciones de la guarda de higiene ampliada). `verify_summer_offline.py` **exit 0**.
+Evidencia firmada contra `nota3-evidencia-2026-06-11`: **322 altas, 0 M, 0 D**;
+`git status` sobre `experiments/` **vacio**.
+
+**Sin corrida y sin push.** Falta ejecutar el smoke de 3 queries de las dos etapas de generacion:
+requiere el servidor de Ollama con granite4.1:8b, que no estaba levantado en esta sesion. Las etapas
+de extraccion, seleccion y estadistica **si** quedaron validadas de punta a punta.
