@@ -430,3 +430,63 @@ terminal propia. (c) El checkpoint huerfano de 70 queries queda en disco sin ver
 es reanudable en silencio; borrarlo o conservarlo es decision de Enzo. (d) El suelo de ruido de
 exp21 es una cuestion de diseno abierta, anterior a cualquier gasto. (e) Los 7 commits nuevos
 **no estan publicados**: la compuerta de push sigue vigente.
+
+[Claude Code] — 2026-08-21 14:05 — Modo: push + lanzador de exp19b + probe de suelo de ruido
+
+**Push hecho.** Los 7 commits publicados en `origin/summer/exp19b` (`5bf3739..8f38f34`) tras
+reconfirmar evidencia 322 A / 0 M / 0 D y cero secretos. Quedan **3 commits nuevos sin publicar**.
+
+**Checkpoint huérfano: movido, no borrado** (decisión de Enzo). Era dos cosas a la vez —trampa de
+resume y muestra ya pagada—. Va a `experiments/probes/runtime_noise/state_A_2026-08-21.json`,
+**fuera de `experiments/results/`**: no lo descubre `verify_summer_offline.py` ni
+`test_scored_arms_complete.py`, no entra en ninguna familia BH, y el README del directorio lo
+declara explícitamente como no-evidencia. `experiments/results/exp19b_anchored_selector/` queda
+vacío. Conservarlo ahorra ~70 min de GPU en el probe de ruido.
+
+**Lanzador entregado.** `scripts/launch_exp19b_full.ps1` (preflight fino: Ollama arriba,
+`granite4.1:8b` presente, avisos de enchufe/suspensión/no-reiniciar) +
+`scripts/run_exp19b_pipeline.py` (17 etapas como datos, compuerta, logging, exit codes). **La
+compuerta es el motivo de todo:** entre `draft` y `regen` hay un hueco de CPU —extracción de
+claims y ~40 min de rerank— que es exactamente donde una máquina se suspende o alguien reinicia
+Ollama. La huella se toma tras el draft y se **re-toma justo antes de regen**; si cambió, aborta
+con `RUNTIME_STATE_CHANGED` y **no puntúa nada**. El fallo caro aquí no es un crash: es terminar
+bien y reportar una cifra construida sobre dos estados del generador. 13 tests con runner y
+huella inyectados. Verificado con `--dry-run`. **La corrida real NO se lanzó desde esta sesión.**
+
+**Suelo de ruido del runtime — diseño aprobado y herramienta entregada.** La pregunta correcta no
+es el ruido por query sino si un cambio de estado del runtime desplaza la **media**: la primaria
+es la media pareada sobre ~190 queries, con SE ≈0,015, así que la banda ±0,081 está bien **si el
+ruido tiene media cero**. exp21 compara 30/41 capas contra 41/41 —un cambio de estado— y exp14 no
+puede responder eso porque corrió en un solo runtime.
+
+**T0 ejecutado aquí** (offline, sin Ollama): re-puntuadas las 140 réplicas de `exp14_h5_replicas`
+con **HHEM**, el instrumento de exp21 (sus cifras eran NLI). Sobre 120 pares de réplicas de la
+misma query, **dentro del mismo runtime**:
+
+| | NLI | HHEM |
+|---|---|---|
+| \|Δ fidelidad\| media | 0,0983 | **0,0616** |
+| p90 | 0,2895 | **0,2005** |
+| pares que superan ±0,081 | 28,1 % | **23,3 %** |
+
+Esto reconcilia con la medición de ayer: 3× **seguidas** sobre el mismo prompt sí es bit-idéntico;
+réplicas separadas por otras generaciones, no. **La sonda de determinismo de los runners mide el
+caso más favorable**, y por eso decía `determinism=True` mientras el ruido real por query es este.
+
+**Regla de veredicto declarada en código antes de que existan datos**, con tres ramas porque el
+desenlace peligroso es un resultado inconcluyente leído como aprobado: (b) banda sobrevive si el
+IC95 cabe en ±0,0203 (un cuarto de la banda); (a) sesgo sistemático si el IC excluye 0 y se pasa
+de ese límite; (c) **infrapotenciado, que NO es un aprobado**. Los tests atacan sobre todo (c).
+
+**Estado de auditoría.** Suite **268 pasan, 0 fallan, 0 omitidas** (243 → 268: +13 pipeline,
++12 probe, +3 previos). `verify_summer_offline.py` exit 0. Evidencia firmada **322 A / 0 M / 0 D**;
+`git status` sobre `experiments/results/` vacío — `exp14` se leyó, no se tocó.
+
+**Falta / no verificado.** (a) exp19b **sigue sin veredicto**: la corrida la lanza Enzo con el
+lanzador; nada del pipeline de puntuación se ha ejecutado sobre datos reales. (b) T1 del probe de
+ruido (estado B, ~25 min) y T2 si T1 no concluye: los lanza Enzo, requieren reiniciar Ollama a
+propósito. (c) **P-G6, taxonomía de los 759 claims: NO iniciada** — era la tarea de menor
+prioridad y no se empezó para no dejarla a medias. (d) Los 3 commits nuevos **no están
+publicados**: la compuerta de push sigue vigente. (e) El `.ps1` no se ejecutó de punta a punta —
+sus tests son source-level y de la lógica en Python; el preflight real (levantar Ollama, detectar
+`granite4.1:8b`) solo se prueba de verdad cuando Enzo lo corra.
