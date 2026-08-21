@@ -1,0 +1,13 @@
+{
+ "source": "exp14_h5_replicas (read-only)",
+ "verifier": "hhem-2.1",
+ "tau": 0.5,
+ "n_rows_scored": 140,
+ "n_replica_pairs": 120,
+ "mean_abs_delta": 0.0616,
+ "median_abs_delta": 0.0,
+ "p90_abs_delta": 0.2005,
+ "frac_exceeding_band": 0.2333,
+ "what_this_is": "within-runtime run-to-run noise per query. NOT the runtime-state shift exp21 needs: exp14 ran in a single runtime",
+ "generated_by": "scripts/run_runtime_noise_probe.py"
+}
