@@ -170,6 +170,49 @@ def test_a_fresh_draft_check_is_never_overwritten_by_a_stale_one(generation):
     assert doc["draft_vs_exp18_identical"]["rate"] == 1.0
 
 
+# ------------------------------------------------- 5b. the generator-state guard (2026-08-21)
+# Measured during the real run, after it was killed at query 79 of 194:
+#   * inside one WARMED session granite is bit-identical (3x, 1684 chars);
+#   * the first COLD call after a load differs (1733 vs 1684) -- what the warmup absorbs;
+#   * after an Ollama restart the same byte-identical prompt gives a DIFFERENT answer
+#     (q001 vs the checkpoint: jaccard-5gram 0.0705).
+# So resuming across a restart puts two generator states inside ONE arm, and the difference
+# is larger than any effect this phase has measured. It would be read as a selector effect.
+def test_the_fingerprint_tracks_the_answer_not_the_clock(generation):
+    a = generation.session_fingerprint("some warmup answer")
+    assert a == generation.session_fingerprint("some warmup answer"), "must be stable"
+    assert a != generation.session_fingerprint("some warmup answer.")
+    assert len(a) == 16
+
+
+def test_resume_is_allowed_only_within_the_same_generator_state(generation):
+    ok, why = generation.resume_decision({"session_fingerprint": "abc"}, "abc")
+    assert ok and "same generator state" in why
+
+
+def test_resume_is_refused_after_the_generator_state_moved(generation):
+    ok, why = generation.resume_decision({"session_fingerprint": "abc"}, "xyz")
+    assert not ok and "abc" in why and "xyz" in why
+
+
+def test_a_checkpoint_without_a_fingerprint_is_refused_not_trusted(generation):
+    """Checkpoints written before this guard cannot prove which state produced them, and
+    silently trusting them is the exact failure the guard exists to prevent."""
+    ok, why = generation.resume_decision({"completed_ids": ["q001"]}, "abc")
+    assert not ok and "predates" in why
+
+
+def test_a_fresh_start_needs_no_fingerprint(generation):
+    ok, _ = generation.resume_decision(None, "abc")
+    assert ok
+
+
+def test_the_operator_can_override_but_must_ask_for_it(generation):
+    ok, why = generation.resume_decision({"session_fingerprint": "abc"}, "xyz",
+                                         allow_session_change=True)
+    assert ok and "explicitly allowed" in why
+
+
 def test_smoke_output_is_invisible_to_shape_based_discovery(generation):
     """A 3-query smoke has no faithfulness rows; discovered, it would redden the suite."""
     results_root = PROJECT_ROOT / "experiments" / "results"

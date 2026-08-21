@@ -35,6 +35,7 @@ Usage:
 Env: HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42
 """
 import argparse
+import hashlib
 import importlib.util
 import json
 import logging
@@ -140,6 +141,42 @@ def build_results_doc(exp_dir, label, probe_report, qids, model_tag=MODEL_TAG):
     }
 
 
+def session_fingerprint(warmup_answer):
+    """Identify the generator STATE, using the sharpest probe available: its own warmup answer.
+
+    Measured on 2026-08-21, and it is why this guard exists at all:
+
+      * inside one warmed server session, granite at temp 0 seed 42 is BIT-IDENTICAL (3x);
+      * the first COLD call after a load differs (1733 vs 1684 chars), which is what the
+        warmup absorbs;
+      * across an Ollama restart, the same byte-identical prompt yields a DIFFERENT answer --
+        q001 came back at jaccard-5gram 0.0705 against the checkpoint, i.e. a different answer.
+
+    So a checkpoint resumed after a restart produces an arm whose early queries come from one
+    generator state and whose later queries come from another. That heterogeneity is larger
+    than any effect this phase has ever measured, it is invisible in the artifact, and it would
+    be attributed to the selector. Ollama exposes no session id, so the warmup answer is the
+    identifier: if the state moved, the hash moves.
+    """
+    return hashlib.sha256((warmup_answer or "").encode("utf-8")).hexdigest()[:16]
+
+
+def resume_decision(checkpoint, current_fp, allow_session_change=False):
+    """(may_resume, reason). Pure, so the rule is testable without a server."""
+    if checkpoint is None:
+        return True, "no checkpoint: fresh start"
+    stored = checkpoint.get("session_fingerprint")
+    if allow_session_change:
+        return True, "session change explicitly allowed by the operator"
+    if stored is None:
+        return False, ("checkpoint predates the session guard, so the generator state that "
+                       "produced it cannot be verified")
+    if stored != current_fp:
+        return False, (f"generator state changed ({stored} -> {current_fp}): resuming would "
+                       f"mix two states inside one arm")
+    return True, "same generator state"
+
+
 def carry_forward(doc, prior_doc):
     """Keep the fields only one stage can produce when a later stage rewrites results.json.
 
@@ -185,6 +222,9 @@ def main():
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--max-queries", type=int, default=None)
     ap.add_argument("--no-resume", action="store_true")
+    ap.add_argument("--allow-session-change", action="store_true",
+                    help="resume even though the generator state moved. Mixes two states "
+                         "inside one arm; only with a ledger entry saying so.")
     ap.add_argument("--smoke", action="store_true",
                     help="write under <exp dir>/_smoke so a partial run is invisible to the "
                          "shape-based discovery in tests and verifiers")
@@ -224,8 +264,9 @@ def main():
     q0 = qids[0]
     pr0, sp0, _ = rgm.build_prompt("hibrido", questions[q0], ctx[q0], index, qtype[q0], P)
     llm_nc = LLMManager(provider="ollama", model=MODEL_TAG, cache_enabled=False, seed=SEED)
-    llm_nc.generate(prompt=pr0, system_prompt=sp0, temperature=0.0, config_name="warmup")
-    logger.info("warmup generation done")
+    warm = llm_nc.generate(prompt=pr0, system_prompt=sp0, temperature=0.0, config_name="warmup")
+    session_fp = session_fingerprint(warm.text)
+    logger.info("warmup generation done — session fingerprint %s", session_fp)
 
     outs = [llm_nc.generate(prompt=pr0, system_prompt=sp0, temperature=0.0,
                             config_name=f"detprobe|{arm}|{label}").text for _ in range(3)]
@@ -240,8 +281,19 @@ def main():
     results, done = [], set()
     if not args.no_resume and cpath.exists():
         ck = json.loads(cpath.read_text(encoding="utf-8"))
+        may, why = resume_decision(ck, session_fp, args.allow_session_change)
+        if not may:
+            sys.exit(
+                f"REFUSING to resume {cpath.name}: {why}.\n"
+                f"  Measured 2026-08-21: an Ollama restart changes the answer to a "
+                f"byte-identical prompt (q001 jaccard-5gram 0.0705), while inside one warmed "
+                f"session the model is bit-identical. Resuming would put two generator states "
+                f"in one arm and the difference would be read as a selector effect.\n"
+                f"  Options: re-run the arm from scratch with --no-resume (the checkpoint is "
+                f"kept), or accept the mix with --allow-session-change and record it in the "
+                f"ledger.")
         results, done = ck["results"], set(ck["completed_ids"])
-        logger.info("[%s] resume: %d done", config_name, len(done))
+        logger.info("[%s] resume: %d done (%s)", config_name, len(done), why)
     todo = [q for q in qids if q not in done]
 
     for i, qid in enumerate(todo):
@@ -264,8 +316,9 @@ def main():
         done.add(qid)
         if (i + 1) % CHECKPOINT_EVERY == 0 or (i + 1) == len(todo):
             cpath.write_text(json.dumps(
-                {"config_name": config_name, "completed_ids": sorted(done),
-                 "results": results}, ensure_ascii=False), encoding="utf-8")
+                {"config_name": config_name, "session_fingerprint": session_fp,
+                 "completed_ids": sorted(done), "results": results},
+                ensure_ascii=False), encoding="utf-8")
             logger.info("[%s] %d/%d", config_name, len(done), len(qids))
 
     rj = exp_dir / "results.json"
