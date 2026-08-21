@@ -1750,3 +1750,76 @@ Evidencia firmada contra `nota3-evidencia-2026-06-11`: **322 altas, 0 M, 0 D**;
 **Sin corrida y sin push.** Falta ejecutar el smoke de 3 queries de las dos etapas de generacion:
 requiere el servidor de Ollama con granite4.1:8b, que no estaba levantado en esta sesion. Las etapas
 de extraccion, seleccion y estadistica **si** quedaron validadas de punta a punta.
+
+---
+
+## Entrada 26 — exp19b: corrida ABORTADA, y el motivo es un hallazgo (2026-08-21)
+
+> Seccion de **Claude Code** — 2026-08-21 09:15 (hora local). Rama `summer/exp19b`.
+> **NO hay veredicto de exp19b.** Esta entrada no reporta Δ fidelidad, TOST ni familia BH,
+> porque la corrida no llego a puntuarse. Reporta por que se paro y lo que se midio al pararla.
+
+### Lo que se ejecuto y donde murio
+
+Push autorizado y publicado (`origin/summer/exp19b`, 3 commits). Ollama levantado, smoke
+borrado, etapa `draft` lanzada sobre las 194 queries a las 07:25. Murio a las 08:48 en la query
+**79 de 194**: proceso terminado desde fuera, **sin traza de Python** — el log del runner y el
+de Ollama acaban los dos en `[killed]`. **70 quedaron en checkpoint**; las 9 posteriores al
+ultimo checkpoint se perdieron.
+
+Ritmo real observado: **~61 s/query**, no los ~33 s del smoke — las queries largas cuestan
+hasta 160 s. La corrida completa (194 draft + 194 regen) es de **~6,6 h**, no 5,3.
+
+### Por que NO se reanudo: el generador cambia de estado al reiniciar
+
+La regla de la fase dice reanudar por checkpoint. Antes de hacerlo se midio si reanudar era
+legitimo, con prompts **byte-identicos** (`tokens_in` coincide 3/3):
+
+| condicion | resultado |
+|---|---|
+| dentro de una sesion **ya calentada** | **bit-identico** 3x (1684 chars) |
+| primera llamada **en frio** tras cargar | difiere (1733 vs 1684) |
+| **tras reiniciar el servidor de Ollama** | **otra respuesta**: q001 vs checkpoint, jaccard-5grama **0,0705** |
+
+Reanudar habria puesto las queries 1-70 (estado A) y 71-194 (estado B) **en el mismo brazo**.
+Esa heterogeneidad es **mayor que cualquier efecto medido en toda la fase** (el mayor es el
++0,081 de exp17), es invisible en el artefacto, y se habria atribuido al selector. Se paro.
+
+**Tres lecturas que esto cambia, y ninguna es comoda:**
+
+1. **La divergencia reportada en la entrada 25 queda reencuadrada.** Alli se atribuyo a deriva
+   de runtime entre el 2026-07-31 y hoy. No hace falta tanto: **un reinicio la produce**. La
+   explicacion es mas simple y mas incomoda.
+2. **`all_arms_bit_deterministic: false` de exp18 encaja aqui.** exp18 corrio con compuerta
+   relajada y lo dejo escrito; ahora se sabe con que magnitud.
+3. **exp21 hereda un suelo de ruido.** Un brazo local y uno alojado **no pueden** compartir
+   sesion de servidor por definicion. Asi que la banda TOST ±0,081 de exp21 no separa
+   "alojamiento" de "cambio de estado del generador": el suelo de ruido de un reinicio ya es
+   del orden del efecto que se quiere descartar. **Esto hay que resolverlo antes de gastar en
+   la nube**, y no se resuelve con mas queries.
+
+### Lo que exige el diseno de exp19b a partir de ahora
+
+Los **388 generaciones (~6,6 h) tienen que caer dentro de UNA sola sesion de servidor
+calentada**, o el pareado mezcla estados. No es una preferencia: es la condicion bajo la cual
+el contraste significa lo que dice el pre-registro.
+
+### Defecto propio, y su guarda
+
+El runner reanudaba **sin comprobar nada**. Corregido: se persiste una **huella de sesion** =
+hash de la respuesta de warmup — Ollama no expone id de sesion, y si el estado se mueve la
+respuesta se mueve, asi que la sonda mas afilada es la que ya se pagaba. Al reanudar se
+compara; si no coincide, o si el checkpoint **no la lleva** (como el de esta corrida), se
+**rechaza** en vez de asumirse bueno. Salidas explicitas: `--no-resume` rehace el brazo, o
+`--allow-session-change` acepta la mezcla **dejandola escrita aqui**. Verificado en vivo: el
+runner rechaza el checkpoint huerfano de 70 queries con exit 1. Tests 21 -> 27, todos sobre
+funciones puras.
+
+### Estado
+
+Suite **completa en verde**; `verify_summer_offline.py` exit 0; `verify_v4_offline.py` exit 0.
+Evidencia firmada contra `nota3-evidencia-2026-06-11`: **322 altas, 0 M, 0 D**. El checkpoint
+huerfano de 70 queries queda en disco **sin versionar** y ya no es reanudable en silencio.
+
+**Pendiente de decision de Enzo, y es de diseno, no de ejecucion:** como se garantiza una
+ventana de ~7 h sin reinicio, y que se hace con el suelo de ruido de exp21.

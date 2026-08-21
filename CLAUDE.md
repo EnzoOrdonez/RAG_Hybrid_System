@@ -366,3 +366,67 @@ directorio `experiments/results/exp19b_anchored_selector/_smoke/` queda **sin ve
 respuestas desechables, no evidencia; borrarlo es decisión de Enzo. (d) Los 4 documentos sin
 rastrear de Kimi Work siguen sin versionar, por decisión de Enzo. (e) El servidor de Ollama quedó
 **corriendo**; ciérralo si no lo necesitas.
+
+[Claude Code] — 2026-08-21 09:08 — Modo: push + corrida real de exp19b (ABORTADA) + P-DOC + harness exp21
+
+**Push publicado.** `origin/summer/exp19b` creada con los 3 commits previos, tras confirmar
+evidencia 322 A / 0 M / 0 D y cero secretos. La rama lleva ahora **7 commits mas sin publicar**.
+
+**Corrida real de exp19b: ABORTADA en la query 79 de 194, y el motivo es un hallazgo.**
+Lanzada a las 07:25 tras borrar el smoke; murio a las 08:48 con el proceso terminado desde
+fuera (sin traza de Python; los logs del runner y de Ollama acaban los dos en `[killed]`).
+70 queries quedaron en checkpoint. Antes de reanudar se midio si reanudar era legitimo:
+
+| condicion | resultado (prompts byte-identicos, `tokens_in` coincide 3/3) |
+|---|---|
+| sesion **ya calentada** | **bit-identico** 3x (1684 chars) |
+| primera llamada **en frio** | difiere (1733 vs 1684) — lo absorbe el warmup del runner |
+| **tras reiniciar Ollama** | **otra respuesta**: q001 vs checkpoint, jaccard-5grama **0,0705** |
+
+Reanudar habria puesto dos estados del generador dentro del MISMO brazo, con heterogeneidad
+mayor que cualquier efecto de la fase, invisible en el artefacto y atribuible al selector. Se
+paro. Detalle completo en la **entrada 26** del ledger. Tres consecuencias: reencuadra el
+hallazgo de la entrada 25 (no hace falta deriva de semanas, basta un reinicio); explica el
+`all_arms_bit_deterministic: false` de exp18; y deja a **exp21 con un suelo de ruido del orden
+de su propia banda TOST**, porque un brazo local y uno alojado no pueden compartir sesion.
+
+**Defecto propio corregido:** el runner reanudaba sin comprobar nada. Ahora persiste una huella
+de sesion (hash de la respuesta de warmup — Ollama no expone id de sesion) y **rechaza** un
+checkpoint de otro estado, o sin huella. Verificado en vivo contra el checkpoint huerfano.
+
+**Ritmo real: ~61 s/query**, no ~33 s. La corrida completa son **~6,6 h**, no 5,3, y **deben
+caer dentro de UNA sola sesion de servidor calentada**.
+
+**P-DOC ejecutado** (commit `docs()` propio): texto canonico de prompt routing fijado identico
+en `TRACEABILITY_nota3.md` y `KNOB_MAP_summer.md`; separacion soporte-de-paquete (3.11+, badge
+corregido) vs entorno reproducible (3.14); `PYTHONUTF8=1` documentada en `REPRODUCE.md §0`;
+propuesta de manifiestos en `docs/MANIFESTS_PROPOSAL_2026-08-21.md` **sin ejecutar y sin
+lockfile**. Secciones vivas de este archivo actualizadas; el log append-only intacto.
+
+**Harness de exp21 entregado** (P-G3): `scripts/run_exp21_hosted_equivalence.py` + 16 tests con
+endpoint **mock**. Cero corridas, cero gasto. El endpoint solo por `EXP21_OLLAMA_HOST`, sin
+valor por defecto, y jamas serializado: results.json guarda solo un prefijo sha256.
+
+**Documentos de [Kimi Work]** versionados en un commit `docs()` aparte, sin editarlos.
+
+**Dos defectos mios mas, cazados releyendo lo commiteado:** el docstring de exp21 prometia un
+flag `--arm` que no existia (parametrizado, para que exp21 reuse banda/familia/estimadores en
+vez de duplicarlos), y al parametrizar el desempaquetado pisaba el nombre del brazo con la
+lista de scores (test de regresion). Ademas corregi una afirmacion mia en `REPRODUCE.md`: dije
+que sin `PYTHONUTF8=1` el verificador v4 muere, y lo medi despues — en PowerShell 7.6.5 con
+`chcp 65001` da exit 0 sin la variable. El fallo `cp1252` es real pero **condicional a la
+consola**.
+
+**Estado de auditoria.** Suite **243 pasan, 0 fallan, 0 omitidas** (218 -> 243).
+`verify_summer_offline.py` exit 0; `verify_v4_offline.py` exit 0. Evidencia firmada contra
+`nota3-evidencia-2026-06-11`: **322 altas, 0 modificaciones, 0 borrados**.
+
+**Falta / no verificado.** (a) exp19b **sin veredicto**: no hay Δ fidelidad, ni TOST, ni familia
+BH, porque la generacion no llego a puntuarse. Nada del pipeline de puntuacion se ejecuto sobre
+datos reales. (b) La corrida necesita una ventana de ~7 h sin reinicio; **las tres tareas en
+segundo plano lanzadas en esta sesion fueron terminadas desde fuera**, asi que no puedo
+garantizar esa ventana desde aqui — probablemente convenga que Enzo lance las etapas en una
+terminal propia. (c) El checkpoint huerfano de 70 queries queda en disco sin versionar y ya no
+es reanudable en silencio; borrarlo o conservarlo es decision de Enzo. (d) El suelo de ruido de
+exp21 es una cuestion de diseno abierta, anterior a cualquier gasto. (e) Los 7 commits nuevos
+**no estan publicados**: la compuerta de push sigue vigente.
