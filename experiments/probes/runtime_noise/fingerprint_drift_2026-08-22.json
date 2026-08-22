@@ -1,0 +1,23 @@
+{
+ "probe": "exp19b Ollama session fingerprint drift while idle",
+ "generated_by": "scripts/probe_fingerprint_drift.py",
+ "n": 2,
+ "interval_min": 0.0,
+ "transitions_total": 1,
+ "transitions_changed": 1,
+ "verdict": "huella deriva en idle",
+ "captures": [
+  {
+   "timestamp": "2026-08-22T10:04:20.557928-05:00",
+   "fingerprint": "0f245681c7821ee0",
+   "identical_to_previous": false,
+   "tokens_out": 262
+  },
+  {
+   "timestamp": "2026-08-22T10:05:02.492586-05:00",
+   "fingerprint": "65521bbfc4b16690",
+   "identical_to_previous": false,
+   "tokens_out": 388
+  }
+ ]
+}
