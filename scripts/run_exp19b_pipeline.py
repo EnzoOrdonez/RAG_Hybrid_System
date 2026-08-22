@@ -27,6 +27,7 @@ Exit: 0 all stages passed · 2 a stage failed · 3 RUNTIME_STATE_CHANGED
 import argparse
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from datetime import date, datetime
@@ -50,8 +51,20 @@ _spec.loader.exec_module(_gen)
 session_fingerprint = _gen.session_fingerprint
 
 
+class StageCommand(list):
+    """List-compatible argv carrying environment overrides for the real subprocess runner."""
+
+    def __init__(self, argv, env=None):
+        super().__init__(argv)
+        self.env = dict(env or {})
+
+
 def build_stages(py=None, exp_dir=None, max_queries=None):
-    """The pipeline, as data. Order is the contract; the gate is a stage like any other."""
+    """Build the stage contract.
+
+    Invariant: draft -> [extract, select on CPU] -> fingerprint gate -> regen; the GPU is
+    untouched until regen finishes. Order and per-stage environment are both testable data.
+    """
     py = py or sys.executable
     exp_dir = str(exp_dir or EXP_DIR)
     mq = ["--max-queries", str(max_queries)] if max_queries else []
@@ -62,8 +75,11 @@ def build_stages(py=None, exp_dir=None, max_queries=None):
         # claim-conditioned selection checkpoint, even if that checkpoint is otherwise intact.
         ("draft", [py, f"{S}/run_exp19b_generation.py", "--stage", "draft", "--no-cache",
                    "--no-resume", *mq]),
-        ("extract", [py, f"{S}/extract_exp19b_claims.py"]),
-        ("select", [py, f"{S}/select_exp19b_evidence.py", "--no-resume", *mq]),
+        ("extract", StageCommand(
+            [py, f"{S}/extract_exp19b_claims.py"], env={"CUDA_VISIBLE_DEVICES": ""})),
+        ("select", StageCommand(
+            [py, f"{S}/select_exp19b_evidence.py", "--no-resume", *mq],
+            env={"CUDA_VISIBLE_DEVICES": ""})),
         # THE GATE. Everything above ran before a long CPU stretch; everything below writes the
         # second arm. If the generator moved in between, nothing below may run.
         ("fingerprint_recheck", None),
@@ -127,7 +143,12 @@ def _live_warmup():
 
 def run_pipeline(stages, runner=None, fingerprint_fn=None, log=print):
     """Execute stages in order, stopping at the first failure. Returns (exit_code, report)."""
-    runner = runner or (lambda argv: subprocess.run(argv).returncode)
+    def subprocess_runner(argv):
+        env = os.environ.copy()
+        env.update(getattr(argv, "env", {}))
+        return subprocess.run(list(argv), env=env).returncode
+
+    runner = runner or subprocess_runner
     fingerprint_fn = fingerprint_fn or (lambda: capture_fingerprint(_live_warmup))
 
     report, fp_start = [], None

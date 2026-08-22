@@ -29,6 +29,11 @@ SANITY CHECK, mandatory before any selection is used. Ranking the same pool by (
 with this same model must reproduce exp18's baseline top-5 (exp19a got 5.0/5 on 188/188). If
 it does not, this harness is not scoring what exp18 scored and the selection is meaningless.
 
+GPU ISOLATION. This selector runs between the draft and regeneration. Loading its cross-encoder
+on CUDA rearranges Granite's Ollama GPU state and correctly trips the session-fingerprint gate,
+so the reranker is pinned to CPU even when CUDA is available. Nothing may touch the GPU between
+the two generative arms.
+
 Usage: python scripts/select_exp19b_evidence.py [--smoke] [--exp-dir DIR] [--max-queries N]
 Env:   HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42
 Writes <exp dir>/selection_ids.json
@@ -97,9 +102,9 @@ def unlink_with_retry(path, missing_ok=False, retries=IO_RETRIES,
 
 
 def load_reranker():
-    """The production cross-encoder, and nothing else."""
+    """The production cross-encoder on CPU, so it cannot perturb Ollama's GPU state."""
     from sentence_transformers import CrossEncoder
-    return CrossEncoder(str(RERANKER), max_length=512)
+    return CrossEncoder(str(RERANKER), max_length=512, device="cpu")
 
 
 def selection_for_query(pool_ids, R, baseline_ids, k=FINAL_K):
