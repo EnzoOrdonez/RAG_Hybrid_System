@@ -36,7 +36,9 @@ Writes <exp dir>/selection_ids.json
 import argparse
 import importlib.util
 import json
+import os
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -52,12 +54,46 @@ RERANKER = PROJECT_ROOT / "data/models/ms-marco-MiniLM-L-12-v2"
 FINAL_K = 5
 BATCH = 64
 SANITY_MIN_OVERLAP = 4.0
+IO_RETRIES = 3
+IO_RETRY_DELAY_SECONDS = 2
 
 _spec = importlib.util.spec_from_file_location(
     "exp19a_probe", PROJECT_ROOT / "scripts/compute_exp19a_selector_probe.py")
 _probe = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_probe)
 select_by_claims = _probe.select_by_claims
+
+
+def atomic_write_text(path, text, encoding="utf-8", retries=IO_RETRIES,
+                      delay_seconds=IO_RETRY_DELAY_SECONDS, sleep_fn=None):
+    """Write beside the destination, then atomically replace it with Windows retries."""
+    path = Path(path)
+    temporary = path.with_name(f".{path.name}.tmp")
+    sleeper = sleep_fn or time.sleep
+    for attempt in range(retries):
+        try:
+            temporary.write_text(text, encoding=encoding)
+            os.replace(temporary, path)
+            return
+        except OSError:
+            if attempt == retries - 1:
+                raise
+            sleeper(delay_seconds)
+
+
+def unlink_with_retry(path, missing_ok=False, retries=IO_RETRIES,
+                      delay_seconds=IO_RETRY_DELAY_SECONDS, sleep_fn=None):
+    """Unlink with the same transient-Windows-failure policy as checkpoint replacement."""
+    path = Path(path)
+    sleeper = sleep_fn or time.sleep
+    for attempt in range(retries):
+        try:
+            path.unlink(missing_ok=missing_ok)
+            return
+        except OSError:
+            if attempt == retries - 1:
+                raise
+            sleeper(delay_seconds)
 
 
 def load_reranker():
@@ -143,7 +179,7 @@ def main():
             "same_set_as_baseline": set(sel_ids) == set(baseline_ids),
             "same_order_as_baseline": list(sel_ids) == list(baseline_ids),
         }
-        ckpt.write_text(json.dumps(done), encoding="utf-8")
+        atomic_write_text(ckpt, json.dumps(done))
         if n % 10 == 0:
             print(f"  [{n}/{len(todo)}] {qid} changed={done[qid]['n_changed_vs_baseline']}/5",
                   flush=True)
@@ -185,9 +221,9 @@ def main():
         "generated_by": "scripts/select_exp19b_evidence.py",
         "per_query": {r["qid"]: r for r in rows},
     }
-    (exp_dir / "selection_ids.json").write_text(
-        json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
-    ckpt.unlink(missing_ok=True)
+    atomic_write_text(exp_dir / "selection_ids.json",
+                      json.dumps(doc, indent=1, ensure_ascii=False))
+    unlink_with_retry(ckpt, missing_ok=True)
 
     print(f"wrote {exp_dir / 'selection_ids.json'}: n={len(rows)}, sanity overlap {mean_ov}/5 "
           f"({'OK' if sanity_ok else 'FAILED — do not regenerate'}), fallback {n_fallback}, "

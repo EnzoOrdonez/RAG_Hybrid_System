@@ -11,7 +11,7 @@ byte-identical prompt (q001 jaccard-5gram 0.0705). So the properties pinned here
      machine sleeps or a driver resets is exactly there;
   2. a changed fingerprint stops the pipeline and NOTHING gets scored;
   3. a failing stage stops everything after it, with a non-zero exit;
-  4. the draft never resumes, because the only checkpoint that existed came from another state.
+  4. a fresh draft implies a fresh selection, so their checkpoints can never be mixed.
 
 Nothing here starts a server or a subprocess: both are injected.
 
@@ -76,11 +76,12 @@ def test_the_primary_and_the_offline_verifier_come_last(pipe, stages):
     assert n.index("guards") < n.index("primary_tost")
 
 
-def test_the_draft_never_resumes(pipe, stages):
-    argv = dict(stages)["draft"]
-    assert "--no-resume" in argv, \
-        "the only checkpoint this arm ever had came from another generator state"
-    assert "--no-cache" in argv
+def test_a_fresh_draft_always_implies_a_fresh_selection(pipe, stages):
+    stage_argv = dict(stages)
+    assert "--no-resume" in stage_argv["draft"]
+    assert "--no-cache" in stage_argv["draft"]
+    assert "--no-resume" in stage_argv["select"], \
+        "select must not mix claims from a fresh draft with an older selection checkpoint"
 
 
 # ------------------------------------------------------------------ 2. the gate

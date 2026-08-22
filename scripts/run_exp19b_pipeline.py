@@ -58,12 +58,12 @@ def build_stages(py=None, exp_dir=None, max_queries=None):
     S = str(PROJECT_ROOT / "scripts")
 
     stages = [
-        # --no-resume is not optional: the only checkpoint that ever existed for this arm came
-        # from a different generator state and was moved out to experiments/probes/.
+        # --no-resume is not optional for either derived stage: a fresh draft invalidates every
+        # claim-conditioned selection checkpoint, even if that checkpoint is otherwise intact.
         ("draft", [py, f"{S}/run_exp19b_generation.py", "--stage", "draft", "--no-cache",
                    "--no-resume", *mq]),
         ("extract", [py, f"{S}/extract_exp19b_claims.py"]),
-        ("select", [py, f"{S}/select_exp19b_evidence.py", *mq]),
+        ("select", [py, f"{S}/select_exp19b_evidence.py", "--no-resume", *mq]),
         # THE GATE. Everything above ran before a long CPU stretch; everything below writes the
         # second arm. If the generator moved in between, nothing below may run.
         ("fingerprint_recheck", None),
