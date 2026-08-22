@@ -64,6 +64,7 @@ Writes experiments/results/exp18_evidence_ceiling/unsupported_taxonomy<out-suffi
 """
 import argparse
 import csv
+import io
 import json
 import sys
 from pathlib import Path
@@ -83,6 +84,79 @@ SOFT_TAU = 0.3          # "partially supports" — deliberately well below tau
 NEAR_TAU_BAND = 0.1     # same band the bound already reports
 SEED = 42
 SAMPLE_PER_STRATUM = 10
+
+
+def artifact_paths(out_suffix):
+    """Return every output path from one suffix so they cannot drift independently."""
+    return {
+        "json": EXP_DIR / f"unsupported_taxonomy{out_suffix}.json",
+        "md": EXP_DIR / f"unsupported_taxonomy{out_suffix}.md",
+        "csv": AUDIT_DIR / f"unsupported_claims_sample{out_suffix}.csv",
+    }
+
+
+def build_calibration_sample(strata, sample_per_stratum=SAMPLE_PER_STRATUM, seed=SEED):
+    """Draw the human-calibration sample and describe its stratified design."""
+    sample_rng = np.random.default_rng(seed)
+    representative_rng = np.random.default_rng(seed)
+    sample = []
+    summary = {"n": 0, "seed": seed, "sample_per_stratum": sample_per_stratum,
+               "kish_n_eff": 0.0, "strata": {}}
+
+    for k, v in strata.items():
+        stratum_size = len(v)
+        if not v:
+            continue
+        take = min(sample_per_stratum, stratum_size)
+        inclusion_prob = take / stratum_size
+        for i in sample_rng.choice(stratum_size, take, replace=False):
+            sample.append({
+                "stratum": k,
+                "stratum_size": stratum_size,
+                "inclusion_prob": inclusion_prob,
+                **v[int(i)],
+                "human_verdict": "",
+                "human_notes": "",
+            })
+
+        scores = np.asarray([row["best_over_pool"] for row in v], dtype=float)
+        median = float(np.median(scores))
+        # Shuffle first so exact distance ties have a deterministic seed-42 resolution.
+        candidates = representative_rng.permutation(stratum_size).tolist()
+        candidates.sort(key=lambda i: abs(float(scores[i]) - median))
+        representatives = [
+            {"query_id": v[i]["query_id"], "claim_idx": v[i]["claim_idx"],
+             "claim": v[i]["claim"], "best_over_pool": v[i]["best_over_pool"]}
+            for i in candidates[:min(2, stratum_size)]
+        ]
+        summary["strata"][k] = {
+            "stratum_size": stratum_size,
+            "sample_n": take,
+            "inclusion_prob": inclusion_prob,
+            "median_best_over_pool": round(median, 4),
+            "representative_examples": representatives,
+        }
+
+    weights = np.asarray([1.0 / row["inclusion_prob"] for row in sample], dtype=float)
+    summary["n"] = len(sample)
+    summary["kish_n_eff"] = round(
+        float(weights.sum() ** 2 / (weights ** 2).sum()) if len(weights) else 0.0, 1)
+    return sample, summary
+
+
+def sample_csv_text(sample):
+    """Render a sample deterministically while leaving human judgement columns blank."""
+    if not sample:
+        return ""
+    buf = io.StringIO(newline="")
+    writer = csv.DictWriter(buf, fieldnames=list(sample[0].keys()))
+    writer.writeheader()
+    writer.writerows(sample)
+    return buf.getvalue()
+
+
+def _markdown_cell(value):
+    return str(value).replace("|", "\\|").replace("\r", " ").replace("\n", " ")
 
 
 def decline_marker_offset(answer, cfm):
@@ -134,6 +208,7 @@ def main():
                     help="suffix for every output artifact (for example, _v2)")
     ap.add_argument("--tau", type=float, default=0.5)
     args = ap.parse_args()
+    paths = artifact_paths(args.out_suffix)
 
     scores_dir = EXP_DIR / f"selection_scores{args.suffix}"
     index_path = EXP_DIR / f"selection_scores{args.suffix}_index.json"
@@ -237,26 +312,11 @@ def main():
             "be the overclaim this phase keeps catching."),
         "generated_by": "scripts/compute_exp18_unsupported_taxonomy.py",
     }
-    taxonomy_json = guard_write(EXP_DIR / f"unsupported_taxonomy{args.out_suffix}.json")
-    taxonomy_json.write_text(
-        json.dumps({**out, "claims_by_stratum": strata}, indent=1, ensure_ascii=False),
-        encoding="utf-8")
+    taxonomy_json_text = json.dumps(
+        {**out, "claims_by_stratum": strata}, indent=1, ensure_ascii=False)
 
-    # stratified sample for the human gold (proportional floor, capped per stratum)
-    rng = np.random.default_rng(SEED)
-    sample = []
-    for k, v in strata.items():
-        if not v:
-            continue
-        take = min(SAMPLE_PER_STRATUM, len(v))
-        for i in rng.choice(len(v), take, replace=False):
-            sample.append({"stratum": k, **v[int(i)], "human_verdict": "",
-                           "human_notes": ""})
-    sample_csv = guard_write(AUDIT_DIR / f"unsupported_claims_sample{args.out_suffix}.csv")
-    with sample_csv.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(sample[0].keys()))
-        w.writeheader()
-        w.writerows(sample)
+    sample, sample_summary = build_calibration_sample(strata)
+    calibration_csv_text = sample_csv_text(sample)
 
     h = out["h1_position_gradient_did"]
     L = [f"# exp18 — por que {total_unsup} claims no los soporta ningun chunk del pool", "",
@@ -285,10 +345,35 @@ def main():
     for k, s in out["strata"].items():
         L.append(f"| `{k}` | {s['n']} | {(s['frac'] or 0)*100:.1f} % | {s['mean_best_over_pool']} |")
     L += ["", out["strata_are_candidates_not_verdicts"], "",
-          f"Muestra estratificada para anotacion humana: "
-          f"`output/audit/unsupported_claims_sample.csv` ({len(sample)} claims)."]
-    taxonomy_md = guard_write(EXP_DIR / f"unsupported_taxonomy{args.out_suffix}.md")
-    taxonomy_md.write_text("\n".join(L), encoding="utf-8")
+          "## Muestra de calibracion humana", "",
+          f"Muestreo estratificado con seed {sample_summary['seed']}: "
+          f"`output/audit/{paths['csv'].name}` ({len(sample)} claims; "
+          f"{SAMPLE_PER_STRATUM} por estrato). Cada fila incluye `stratum_size` e "
+          "`inclusion_prob`; el peso Horvitz-Thompson es `1 / inclusion_prob`.", "",
+          f"**n efectivo de Kish = {sample_summary['kish_n_eff']:.1f}**.", "",
+          "Las columnas `human_verdict` y `human_notes` se dejan vacias para juicio humano.", "",
+          "### Ejemplos representativos", "",
+          "Dos por estrato: los scores `best_over_pool` mas cercanos a la mediana del "
+          "estrato; empates resueltos reproduciblemente con seed 42.", "",
+          "| estrato | mediana | query | claim_idx | score | claim |",
+          "|---|---:|---|---:|---:|---|"]
+    for k, summary in sample_summary["strata"].items():
+        for example in summary["representative_examples"]:
+            L.append(
+                f"| `{k}` | {summary['median_best_over_pool']} | "
+                f"{example['query_id']} | {example['claim_idx']} | "
+                f"{example['best_over_pool']} | {_markdown_cell(example['claim'])} |")
+    taxonomy_md_text = "\n".join(L)
+
+    # Validate every destination before the first write. In particular, this refuses the
+    # historical names when --out-suffix is omitted and avoids leaving partial artifacts if
+    # a destination already exists.
+    taxonomy_json = guard_write(paths["json"])
+    sample_csv = guard_write(paths["csv"])
+    taxonomy_md = guard_write(paths["md"])
+    taxonomy_json.write_text(taxonomy_json_text, encoding="utf-8")
+    sample_csv.write_text(calibration_csv_text, encoding="utf-8", newline="")
+    taxonomy_md.write_text(taxonomy_md_text, encoding="utf-8")
     print("\n".join(L))
 
 
