@@ -1,0 +1,6038 @@
+{
+ "experiment_id": "exp19b_anchored_selector",
+ "final_k": 5,
+ "n_queries": 194,
+ "selector": "ms-marco-MiniLM-L-12-v2 over (claim, chunk); greedy max over claims",
+ "greedy_source": "imported from scripts/compute_exp19a_selector_probe.py",
+ "hygiene": "no faithfulness verifier is reachable from this module, so the three evaluators stay clean for the scored arm; the independent retrieval oracle is untouched",
+ "sanity_check": {
+  "what": "(query, chunk) ranking with this model must reproduce exp18's baseline top-5",
+  "mean_overlap_at_5": 5.0,
+  "threshold": 4.0,
+  "passed": true,
+  "why": "below ~4/5 the harness is not scoring what exp18 scored and the whole selection is meaningless"
+ },
+ "n_fallback": 7,
+ "fallback_rule": "no genuine claim in the draft -> keep the baseline top-5 -> exact zero difference for that query; declared before running",
+ "mean_chunks_changed_vs_baseline": 1.923,
+ "n_same_set_as_baseline": 39,
+ "n_identical_selection": 18,
+ "dilution_note": "queries with the same SET differ from the baseline by order only, and Tier A found context order null; queries with an identical ORDERED selection are exact no-ops. Both counts bound how much of the arm could have moved at all",
+ "generated_by": "scripts/select_exp19b_evidence.py",
+ "per_query": {
+  "q001": {
+   "qid": "q001",
+   "n_pool": 38,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "047f886d-8090-4692-bc2c-6151c47cfe91",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122"
+   ],
+   "claim_rank_ids": [
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "537a1ea9-f4f1-4146-a889-f6dee4d05b2a",
+    "055ccb10-9a52-44ad-875b-b5cea5d54ab3",
+    "047f886d-8090-4692-bc2c-6151c47cfe91",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227"
+   ],
+   "query_rank_ids": [
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "047f886d-8090-4692-bc2c-6151c47cfe91",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q002": {
+   "qid": "q002",
+   "n_pool": 32,
+   "n_genuine_claims": 0,
+   "baseline_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2",
+    "71678cdc-0f41-43c3-9414-926af9d9da5b"
+   ],
+   "claim_rank_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2",
+    "71678cdc-0f41-43c3-9414-926af9d9da5b"
+   ],
+   "query_rank_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2",
+    "71678cdc-0f41-43c3-9414-926af9d9da5b"
+   ],
+   "fallback": "no_genuine_claims",
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q003": {
+   "qid": "q003",
+   "n_pool": 43,
+   "n_genuine_claims": 0,
+   "baseline_ids": [
+    "613ecf77-3fff-4d2a-9bd2-ba196880229f",
+    "7df17975-ea06-41a7-9734-b177eccf6d9e",
+    "0f8db67a-c7cd-4d10-b39a-f911e8f6d582",
+    "19346f63-f352-4c8d-9539-862d84aca1e7",
+    "a73f13a1-9a75-4442-886a-699ed8733f2e"
+   ],
+   "claim_rank_ids": [
+    "613ecf77-3fff-4d2a-9bd2-ba196880229f",
+    "7df17975-ea06-41a7-9734-b177eccf6d9e",
+    "0f8db67a-c7cd-4d10-b39a-f911e8f6d582",
+    "19346f63-f352-4c8d-9539-862d84aca1e7",
+    "a73f13a1-9a75-4442-886a-699ed8733f2e"
+   ],
+   "query_rank_ids": [
+    "613ecf77-3fff-4d2a-9bd2-ba196880229f",
+    "7df17975-ea06-41a7-9734-b177eccf6d9e",
+    "0f8db67a-c7cd-4d10-b39a-f911e8f6d582",
+    "19346f63-f352-4c8d-9539-862d84aca1e7",
+    "a73f13a1-9a75-4442-886a-699ed8733f2e"
+   ],
+   "fallback": "no_genuine_claims",
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q004": {
+   "qid": "q004",
+   "n_pool": 45,
+   "n_genuine_claims": 7,
+   "baseline_ids": [
+    "587899af-e910-4721-83be-4dd600ca38d9",
+    "54f3bd96-0917-448a-90db-ec764937168d",
+    "aee3ebc4-764b-4e25-930b-c6f1e1422136",
+    "331b415e-fe1f-4dd1-9eee-44dfc60940bc",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc"
+   ],
+   "claim_rank_ids": [
+    "587899af-e910-4721-83be-4dd600ca38d9",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "54f3bd96-0917-448a-90db-ec764937168d",
+    "aee3ebc4-764b-4e25-930b-c6f1e1422136",
+    "331b415e-fe1f-4dd1-9eee-44dfc60940bc"
+   ],
+   "query_rank_ids": [
+    "587899af-e910-4721-83be-4dd600ca38d9",
+    "54f3bd96-0917-448a-90db-ec764937168d",
+    "aee3ebc4-764b-4e25-930b-c6f1e1422136",
+    "331b415e-fe1f-4dd1-9eee-44dfc60940bc",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q005": {
+   "qid": "q005",
+   "n_pool": 50,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "d587a7d7-ae38-47b6-a3da-c42468a69b6d",
+    "e0d01b4d-fab2-4786-8999-2bc9098f13c7",
+    "010d5250-a9c2-45ed-8143-fa863e9e5581",
+    "7c4a9fa3-41d2-449c-962a-960a23505135",
+    "9d58f3b0-3531-4f4d-a664-db6e340362f0"
+   ],
+   "claim_rank_ids": [
+    "d587a7d7-ae38-47b6-a3da-c42468a69b6d",
+    "35b7ab54-fc7d-4231-90a0-0b31fc1873b1",
+    "e0d01b4d-fab2-4786-8999-2bc9098f13c7",
+    "010d5250-a9c2-45ed-8143-fa863e9e5581",
+    "7c4a9fa3-41d2-449c-962a-960a23505135"
+   ],
+   "query_rank_ids": [
+    "d587a7d7-ae38-47b6-a3da-c42468a69b6d",
+    "e0d01b4d-fab2-4786-8999-2bc9098f13c7",
+    "010d5250-a9c2-45ed-8143-fa863e9e5581",
+    "7c4a9fa3-41d2-449c-962a-960a23505135",
+    "9d58f3b0-3531-4f4d-a664-db6e340362f0"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q006": {
+   "qid": "q006",
+   "n_pool": 34,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "19a2a2bc-d9a3-4f5d-882c-65566269fb54",
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2"
+   ],
+   "claim_rank_ids": [
+    "19a2a2bc-d9a3-4f5d-882c-65566269fb54",
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2"
+   ],
+   "query_rank_ids": [
+    "19a2a2bc-d9a3-4f5d-882c-65566269fb54",
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q007": {
+   "qid": "q007",
+   "n_pool": 40,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "65b8a663-e530-4b33-96bc-82d858aa9e25",
+    "28ee74e9-50e3-41ff-96e7-02005cb7ee35",
+    "7ad946f7-91da-4e5c-a08a-28534319fc56",
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "ba6ad82a-a284-4ac2-8a89-d89b3be6cb56"
+   ],
+   "claim_rank_ids": [
+    "ba6ad82a-a284-4ac2-8a89-d89b3be6cb56",
+    "22c1b00d-589e-441d-9eb0-3bbba760063f",
+    "7ad946f7-91da-4e5c-a08a-28534319fc56",
+    "65b8a663-e530-4b33-96bc-82d858aa9e25",
+    "28ee74e9-50e3-41ff-96e7-02005cb7ee35"
+   ],
+   "query_rank_ids": [
+    "65b8a663-e530-4b33-96bc-82d858aa9e25",
+    "28ee74e9-50e3-41ff-96e7-02005cb7ee35",
+    "7ad946f7-91da-4e5c-a08a-28534319fc56",
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "ba6ad82a-a284-4ac2-8a89-d89b3be6cb56"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q008": {
+   "qid": "q008",
+   "n_pool": 36,
+   "n_genuine_claims": 0,
+   "baseline_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2",
+    "b80c5e7f-3e39-43f6-a1fb-1d196f227f86"
+   ],
+   "claim_rank_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2",
+    "b80c5e7f-3e39-43f6-a1fb-1d196f227f86"
+   ],
+   "query_rank_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2",
+    "b80c5e7f-3e39-43f6-a1fb-1d196f227f86"
+   ],
+   "fallback": "no_genuine_claims",
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q009": {
+   "qid": "q009",
+   "n_pool": 25,
+   "n_genuine_claims": 5,
+   "baseline_ids": [
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "2e106818-8b1d-4118-8cec-22999e08c9db",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "5dfba71d-8f81-41e5-96ce-3b937c5ce22a",
+    "357e5e2b-83ce-4707-897f-e55de5bb223c"
+   ],
+   "claim_rank_ids": [
+    "357e5e2b-83ce-4707-897f-e55de5bb223c",
+    "2e106818-8b1d-4118-8cec-22999e08c9db",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "5dfba71d-8f81-41e5-96ce-3b937c5ce22a"
+   ],
+   "query_rank_ids": [
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "2e106818-8b1d-4118-8cec-22999e08c9db",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "5dfba71d-8f81-41e5-96ce-3b937c5ce22a",
+    "357e5e2b-83ce-4707-897f-e55de5bb223c"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q010": {
+   "qid": "q010",
+   "n_pool": 36,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122"
+   ],
+   "claim_rank_ids": [
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122"
+   ],
+   "query_rank_ids": [
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q011": {
+   "qid": "q011",
+   "n_pool": 46,
+   "n_genuine_claims": 9,
+   "baseline_ids": [
+    "e432f40b-fa69-4f8e-9815-c426edd2c1eb",
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "40dc6919-6834-4dea-b5af-65a4562fcff9",
+    "65b8a663-e530-4b33-96bc-82d858aa9e25",
+    "69cded2b-90c2-4760-b833-776cd0f57cb8"
+   ],
+   "claim_rank_ids": [
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "b9d5f658-ba0d-4888-94e5-e0b8c21664e4",
+    "f4024ed1-6b3d-464d-848d-e2f2a948997c",
+    "64da268c-6764-455a-b170-fcddafd74a1c",
+    "ba6ad82a-a284-4ac2-8a89-d89b3be6cb56"
+   ],
+   "query_rank_ids": [
+    "e432f40b-fa69-4f8e-9815-c426edd2c1eb",
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "40dc6919-6834-4dea-b5af-65a4562fcff9",
+    "65b8a663-e530-4b33-96bc-82d858aa9e25",
+    "69cded2b-90c2-4760-b833-776cd0f57cb8"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q012": {
+   "qid": "q012",
+   "n_pool": 47,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "cb9e0cbd-f5bb-45d5-8571-e0c9f60d8ea7",
+    "1db01dc4-f6ea-42c9-9cd6-f03605f6c02b",
+    "60981f09-8ea8-443d-8dfc-e0da1c0f618f",
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "259d7352-7c34-4eec-a31a-96884e083d78"
+   ],
+   "claim_rank_ids": [
+    "0d64f298-608d-4fb9-8036-4475d8f70e9a",
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "60981f09-8ea8-443d-8dfc-e0da1c0f618f",
+    "cb9e0cbd-f5bb-45d5-8571-e0c9f60d8ea7",
+    "1db01dc4-f6ea-42c9-9cd6-f03605f6c02b"
+   ],
+   "query_rank_ids": [
+    "cb9e0cbd-f5bb-45d5-8571-e0c9f60d8ea7",
+    "1db01dc4-f6ea-42c9-9cd6-f03605f6c02b",
+    "60981f09-8ea8-443d-8dfc-e0da1c0f618f",
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "259d7352-7c34-4eec-a31a-96884e083d78"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q013": {
+   "qid": "q013",
+   "n_pool": 29,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "ce6d29d9-453e-4359-99bf-e7e40c56ee92",
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "d3221ff0-a97c-4d44-9330-5defef96ad43"
+   ],
+   "claim_rank_ids": [
+    "ce6d29d9-453e-4359-99bf-e7e40c56ee92",
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "d3221ff0-a97c-4d44-9330-5defef96ad43"
+   ],
+   "query_rank_ids": [
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "ce6d29d9-453e-4359-99bf-e7e40c56ee92",
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "d3221ff0-a97c-4d44-9330-5defef96ad43"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q014": {
+   "qid": "q014",
+   "n_pool": 37,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9"
+   ],
+   "claim_rank_ids": [
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9"
+   ],
+   "query_rank_ids": [
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q015": {
+   "qid": "q015",
+   "n_pool": 38,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "2163cb69-c381-43dd-8d3b-87268231dfa9",
+    "33d7a88a-2098-4b76-9209-b228b840e82b"
+   ],
+   "claim_rank_ids": [
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "2163cb69-c381-43dd-8d3b-87268231dfa9",
+    "33d7a88a-2098-4b76-9209-b228b840e82b"
+   ],
+   "query_rank_ids": [
+    "c428ae6e-47f1-4b21-8720-820fc64be7e0",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "2163cb69-c381-43dd-8d3b-87268231dfa9",
+    "33d7a88a-2098-4b76-9209-b228b840e82b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q016": {
+   "qid": "q016",
+   "n_pool": 45,
+   "n_genuine_claims": 15,
+   "baseline_ids": [
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122",
+    "30933df0-9429-4ccc-9966-3a6a231b1e48"
+   ],
+   "claim_rank_ids": [
+    "30933df0-9429-4ccc-9966-3a6a231b1e48",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "537a1ea9-f4f1-4146-a889-f6dee4d05b2a"
+   ],
+   "query_rank_ids": [
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122",
+    "30933df0-9429-4ccc-9966-3a6a231b1e48"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q017": {
+   "qid": "q017",
+   "n_pool": 30,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "b80c5e7f-3e39-43f6-a1fb-1d196f227f86",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2"
+   ],
+   "claim_rank_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "b80c5e7f-3e39-43f6-a1fb-1d196f227f86",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2"
+   ],
+   "query_rank_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "b80c5e7f-3e39-43f6-a1fb-1d196f227f86",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q018": {
+   "qid": "q018",
+   "n_pool": 49,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "fce4a0da-a6c2-4e9c-b683-d886cf345ebc",
+    "bf80bc38-289b-46a0-870b-391ba98ac4ef",
+    "933d47ae-b1da-4308-8190-96c36b15a116"
+   ],
+   "claim_rank_ids": [
+    "ef5c3d5c-7424-4160-9ecf-c05feb5b21ab",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "5ace2107-61d0-4242-a219-d2d5427da598",
+    "ce6d29d9-453e-4359-99bf-e7e40c56ee92",
+    "87542576-272a-48c8-94f3-46e82bd6a4fa"
+   ],
+   "query_rank_ids": [
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "fce4a0da-a6c2-4e9c-b683-d886cf345ebc",
+    "bf80bc38-289b-46a0-870b-391ba98ac4ef",
+    "933d47ae-b1da-4308-8190-96c36b15a116"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q019": {
+   "qid": "q019",
+   "n_pool": 40,
+   "n_genuine_claims": 14,
+   "baseline_ids": [
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122",
+    "2a225535-ef77-4e49-8595-78797ed445c2",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "63e9ff35-f4c4-4397-824a-b3af578ca38c"
+   ],
+   "claim_rank_ids": [
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "2a225535-ef77-4e49-8595-78797ed445c2",
+    "63e9ff35-f4c4-4397-824a-b3af578ca38c",
+    "faeae808-3cdc-4fe1-ba0a-7464be892e54"
+   ],
+   "query_rank_ids": [
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122",
+    "2a225535-ef77-4e49-8595-78797ed445c2",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "63e9ff35-f4c4-4397-824a-b3af578ca38c"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q020": {
+   "qid": "q020",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "0c985e7b-bd7f-4f98-9567-a7ae44dbd3ca",
+    "d2f89d1b-9cf2-4071-b0a3-2956319a96cd",
+    "9d58f3b0-3531-4f4d-a664-db6e340362f0",
+    "4a182fad-68e5-436c-9a84-1ba070ffc187",
+    "35b7ab54-fc7d-4231-90a0-0b31fc1873b1"
+   ],
+   "claim_rank_ids": [
+    "0c985e7b-bd7f-4f98-9567-a7ae44dbd3ca",
+    "d2f89d1b-9cf2-4071-b0a3-2956319a96cd",
+    "9d58f3b0-3531-4f4d-a664-db6e340362f0",
+    "4a182fad-68e5-436c-9a84-1ba070ffc187",
+    "35b7ab54-fc7d-4231-90a0-0b31fc1873b1"
+   ],
+   "query_rank_ids": [
+    "0c985e7b-bd7f-4f98-9567-a7ae44dbd3ca",
+    "d2f89d1b-9cf2-4071-b0a3-2956319a96cd",
+    "9d58f3b0-3531-4f4d-a664-db6e340362f0",
+    "4a182fad-68e5-436c-9a84-1ba070ffc187",
+    "35b7ab54-fc7d-4231-90a0-0b31fc1873b1"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q021": {
+   "qid": "q021",
+   "n_pool": 49,
+   "n_genuine_claims": 10,
+   "baseline_ids": [
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7",
+    "1d070e51-fcca-4e92-8735-0ccdbf043a5b",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "801bb66b-3c26-445b-9362-2b4d291334cf"
+   ],
+   "claim_rank_ids": [
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "1d070e51-fcca-4e92-8735-0ccdbf043a5b",
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7",
+    "3f0bb5f6-283c-4b68-84b2-2d458f4ef67f"
+   ],
+   "query_rank_ids": [
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7",
+    "1d070e51-fcca-4e92-8735-0ccdbf043a5b",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "801bb66b-3c26-445b-9362-2b4d291334cf"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q022": {
+   "qid": "q022",
+   "n_pool": 50,
+   "n_genuine_claims": 20,
+   "baseline_ids": [
+    "e0fc0fc1-4980-4838-84ee-23aad96d25f8",
+    "3f1f52bd-ca90-41f0-8672-878590ccd62f",
+    "6fb2af89-04f4-436f-a9c6-307656819a88",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac"
+   ],
+   "claim_rank_ids": [
+    "e0fc0fc1-4980-4838-84ee-23aad96d25f8",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "ff43d2df-713b-490c-9b1a-d286a5ff808b",
+    "5814e117-2645-403a-bc6f-a5938678deab",
+    "db3cf523-367a-4b29-9a43-9b71c1bea240"
+   ],
+   "query_rank_ids": [
+    "e0fc0fc1-4980-4838-84ee-23aad96d25f8",
+    "3f1f52bd-ca90-41f0-8672-878590ccd62f",
+    "6fb2af89-04f4-436f-a9c6-307656819a88",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q023": {
+   "qid": "q023",
+   "n_pool": 33,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122"
+   ],
+   "claim_rank_ids": [
+    "f9031fab-196c-4b93-a80e-2856777a50b4",
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9"
+   ],
+   "query_rank_ids": [
+    "b30b1f34-e36c-4fa2-a634-9ca10e113981",
+    "bdcad0ef-b404-407b-b731-e5a5b4f19227",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "7ab1f57d-33f4-49ce-ac07-ea15edd5c122"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q024": {
+   "qid": "q024",
+   "n_pool": 38,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "e8f7c82f-3b75-4c1e-b093-76ad5c33f241",
+    "ab9a2ba9-120c-4f9c-8d88-89f56d179286",
+    "c07195e2-aacd-4241-8648-67aa471b707e",
+    "aa3e5d18-a52d-40e7-906f-a37d3c726121",
+    "108ae891-0015-466e-ac89-5241f1215ad9"
+   ],
+   "claim_rank_ids": [
+    "e8f7c82f-3b75-4c1e-b093-76ad5c33f241",
+    "ab9a2ba9-120c-4f9c-8d88-89f56d179286",
+    "c07195e2-aacd-4241-8648-67aa471b707e",
+    "aa3e5d18-a52d-40e7-906f-a37d3c726121",
+    "108ae891-0015-466e-ac89-5241f1215ad9"
+   ],
+   "query_rank_ids": [
+    "e8f7c82f-3b75-4c1e-b093-76ad5c33f241",
+    "ab9a2ba9-120c-4f9c-8d88-89f56d179286",
+    "c07195e2-aacd-4241-8648-67aa471b707e",
+    "aa3e5d18-a52d-40e7-906f-a37d3c726121",
+    "108ae891-0015-466e-ac89-5241f1215ad9"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q025": {
+   "qid": "q025",
+   "n_pool": 31,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2",
+    "b80c5e7f-3e39-43f6-a1fb-1d196f227f86"
+   ],
+   "claim_rank_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2",
+    "b80c5e7f-3e39-43f6-a1fb-1d196f227f86"
+   ],
+   "query_rank_ids": [
+    "ea49f9f6-ffe8-4d68-9348-2e137f082730",
+    "f11dbe43-08c1-4f94-96de-7da11f4dae39",
+    "b998b95f-76d0-444d-b4ea-3e723d6a7060",
+    "8304d682-0afc-4144-8ef0-5a1135883aa2",
+    "b80c5e7f-3e39-43f6-a1fb-1d196f227f86"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q026": {
+   "qid": "q026",
+   "n_pool": 42,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "faeae808-3cdc-4fe1-ba0a-7464be892e54",
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "3a3e25f1-1193-4208-a903-4c86d467de82",
+    "91028f1b-11b5-4ff0-a3fb-cc5ea2a81ae0"
+   ],
+   "claim_rank_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "faeae808-3cdc-4fe1-ba0a-7464be892e54",
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "3a3e25f1-1193-4208-a903-4c86d467de82",
+    "91028f1b-11b5-4ff0-a3fb-cc5ea2a81ae0"
+   ],
+   "query_rank_ids": [
+    "e3547199-3ab8-4bcf-b571-fe20aa884ae9",
+    "faeae808-3cdc-4fe1-ba0a-7464be892e54",
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "3a3e25f1-1193-4208-a903-4c86d467de82",
+    "91028f1b-11b5-4ff0-a3fb-cc5ea2a81ae0"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q027": {
+   "qid": "q027",
+   "n_pool": 50,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "60981f09-8ea8-443d-8dfc-e0da1c0f618f",
+    "73c9f7eb-4784-4489-89ea-c4d731016e70",
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "77d5d1f2-92fd-459d-9a7b-78ccd4b14f00"
+   ],
+   "claim_rank_ids": [
+    "0d64f298-608d-4fb9-8036-4475d8f70e9a",
+    "66365773-575a-4e56-87c4-c9c71544f65a",
+    "77d5d1f2-92fd-459d-9a7b-78ccd4b14f00",
+    "88268694-2b68-44b9-a24f-89c7efb61356",
+    "9133b7e6-489e-476e-803a-66829b3575e0"
+   ],
+   "query_rank_ids": [
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "60981f09-8ea8-443d-8dfc-e0da1c0f618f",
+    "73c9f7eb-4784-4489-89ea-c4d731016e70",
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "77d5d1f2-92fd-459d-9a7b-78ccd4b14f00"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q028": {
+   "qid": "q028",
+   "n_pool": 50,
+   "n_genuine_claims": 0,
+   "baseline_ids": [
+    "35b7ab54-fc7d-4231-90a0-0b31fc1873b1",
+    "d2f89d1b-9cf2-4071-b0a3-2956319a96cd",
+    "9d58f3b0-3531-4f4d-a664-db6e340362f0",
+    "4a182fad-68e5-436c-9a84-1ba070ffc187",
+    "8e0bf9dd-6ccb-4c71-aaa6-58459e539315"
+   ],
+   "claim_rank_ids": [
+    "35b7ab54-fc7d-4231-90a0-0b31fc1873b1",
+    "d2f89d1b-9cf2-4071-b0a3-2956319a96cd",
+    "9d58f3b0-3531-4f4d-a664-db6e340362f0",
+    "4a182fad-68e5-436c-9a84-1ba070ffc187",
+    "8e0bf9dd-6ccb-4c71-aaa6-58459e539315"
+   ],
+   "query_rank_ids": [
+    "35b7ab54-fc7d-4231-90a0-0b31fc1873b1",
+    "d2f89d1b-9cf2-4071-b0a3-2956319a96cd",
+    "9d58f3b0-3531-4f4d-a664-db6e340362f0",
+    "4a182fad-68e5-436c-9a84-1ba070ffc187",
+    "8e0bf9dd-6ccb-4c71-aaa6-58459e539315"
+   ],
+   "fallback": "no_genuine_claims",
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q029": {
+   "qid": "q029",
+   "n_pool": 49,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "e432f40b-fa69-4f8e-9815-c426edd2c1eb",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "bf80bc38-289b-46a0-870b-391ba98ac4ef",
+    "2e106818-8b1d-4118-8cec-22999e08c9db"
+   ],
+   "claim_rank_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "846336ff-c6ac-4e37-b11a-df9a37220739",
+    "2e106818-8b1d-4118-8cec-22999e08c9db",
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "e432f40b-fa69-4f8e-9815-c426edd2c1eb"
+   ],
+   "query_rank_ids": [
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "e432f40b-fa69-4f8e-9815-c426edd2c1eb",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "bf80bc38-289b-46a0-870b-391ba98ac4ef",
+    "2e106818-8b1d-4118-8cec-22999e08c9db"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q030": {
+   "qid": "q030",
+   "n_pool": 50,
+   "n_genuine_claims": 13,
+   "baseline_ids": [
+    "be8239f9-dcfe-40a0-8698-3dece9ef16d5",
+    "667d4687-b4a0-4aba-87a7-2b5232fc630e",
+    "e09a6f50-7751-4a28-a8c2-715702043551",
+    "1c3433f0-3744-4c17-a259-a6a2d7f2667c",
+    "44b62a4f-b63f-45ce-9ec8-5347b7da92d8"
+   ],
+   "claim_rank_ids": [
+    "be8239f9-dcfe-40a0-8698-3dece9ef16d5",
+    "44b62a4f-b63f-45ce-9ec8-5347b7da92d8",
+    "e09a6f50-7751-4a28-a8c2-715702043551",
+    "667d4687-b4a0-4aba-87a7-2b5232fc630e",
+    "1c3433f0-3744-4c17-a259-a6a2d7f2667c"
+   ],
+   "query_rank_ids": [
+    "be8239f9-dcfe-40a0-8698-3dece9ef16d5",
+    "667d4687-b4a0-4aba-87a7-2b5232fc630e",
+    "e09a6f50-7751-4a28-a8c2-715702043551",
+    "1c3433f0-3744-4c17-a259-a6a2d7f2667c",
+    "44b62a4f-b63f-45ce-9ec8-5347b7da92d8"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q031": {
+   "qid": "q031",
+   "n_pool": 50,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "d69bd827-371b-4b9e-98f0-710077a506f2",
+    "dfc56fb6-6786-4d9f-b27b-5106fec2981a",
+    "3b43345b-dd8a-4d7d-a96a-27df1b6dce40",
+    "f2f120d9-050f-4cf1-9ac6-42f30997b92d",
+    "857319ea-155d-4efd-a369-939f83e83568"
+   ],
+   "claim_rank_ids": [
+    "9f6a44f6-0f3a-42f0-838c-b0740e6f56e9",
+    "d69bd827-371b-4b9e-98f0-710077a506f2",
+    "dfc56fb6-6786-4d9f-b27b-5106fec2981a",
+    "3b43345b-dd8a-4d7d-a96a-27df1b6dce40",
+    "f2f120d9-050f-4cf1-9ac6-42f30997b92d"
+   ],
+   "query_rank_ids": [
+    "d69bd827-371b-4b9e-98f0-710077a506f2",
+    "dfc56fb6-6786-4d9f-b27b-5106fec2981a",
+    "3b43345b-dd8a-4d7d-a96a-27df1b6dce40",
+    "f2f120d9-050f-4cf1-9ac6-42f30997b92d",
+    "857319ea-155d-4efd-a369-939f83e83568"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q032": {
+   "qid": "q032",
+   "n_pool": 50,
+   "n_genuine_claims": 17,
+   "baseline_ids": [
+    "b86111f0-ceca-4b17-8777-f0491931b022",
+    "7b2741a4-fd41-4eed-8b8a-908a902fa066",
+    "81d70f2b-954a-42aa-9a18-1eb15b3c38c3",
+    "454dc3f4-fbdc-41a4-9e4e-5ffe5d0ad210",
+    "3a968a60-9fc2-40c8-a48b-0eda64ef0619"
+   ],
+   "claim_rank_ids": [
+    "81d70f2b-954a-42aa-9a18-1eb15b3c38c3",
+    "454dc3f4-fbdc-41a4-9e4e-5ffe5d0ad210",
+    "ee9f9009-662a-4f21-8b61-5234d9b22e47",
+    "e3271353-423d-41a5-a94f-e15d0708aa1b",
+    "5d28ec01-1430-470e-89e1-5947b69333e3"
+   ],
+   "query_rank_ids": [
+    "b86111f0-ceca-4b17-8777-f0491931b022",
+    "7b2741a4-fd41-4eed-8b8a-908a902fa066",
+    "81d70f2b-954a-42aa-9a18-1eb15b3c38c3",
+    "454dc3f4-fbdc-41a4-9e4e-5ffe5d0ad210",
+    "3a968a60-9fc2-40c8-a48b-0eda64ef0619"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q033": {
+   "qid": "q033",
+   "n_pool": 47,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "44098680-dced-409a-af9b-6c38dcda8af9",
+    "4d9c750d-295a-4831-b47f-2743e6c775f0",
+    "95740955-47c5-4f85-9b62-8c39b698408b",
+    "ae1e366f-5105-4015-b951-68f658ccff7d",
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb"
+   ],
+   "claim_rank_ids": [
+    "44098680-dced-409a-af9b-6c38dcda8af9",
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb",
+    "c145940e-1bd9-4f2c-a242-2b87f9c75be3",
+    "4d9c750d-295a-4831-b47f-2743e6c775f0",
+    "95740955-47c5-4f85-9b62-8c39b698408b"
+   ],
+   "query_rank_ids": [
+    "44098680-dced-409a-af9b-6c38dcda8af9",
+    "4d9c750d-295a-4831-b47f-2743e6c775f0",
+    "95740955-47c5-4f85-9b62-8c39b698408b",
+    "ae1e366f-5105-4015-b951-68f658ccff7d",
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q034": {
+   "qid": "q034",
+   "n_pool": 50,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "e5f16001-7611-4273-a747-1ee68da466b5",
+    "fb344346-6282-4987-a422-b8e15af3ce15",
+    "67059d5d-4ca9-4e15-9b6d-f8379e9b7a4d",
+    "8f3411d9-61cd-47de-9afd-713544a928bf"
+   ],
+   "claim_rank_ids": [
+    "e5f16001-7611-4273-a747-1ee68da466b5",
+    "67059d5d-4ca9-4e15-9b6d-f8379e9b7a4d",
+    "d3a63297-f90c-46d8-ad79-6c2448785305",
+    "fb344346-6282-4987-a422-b8e15af3ce15",
+    "b3d2bd39-dc32-46b9-9606-22fb8ea3e3fe"
+   ],
+   "query_rank_ids": [
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "e5f16001-7611-4273-a747-1ee68da466b5",
+    "fb344346-6282-4987-a422-b8e15af3ce15",
+    "67059d5d-4ca9-4e15-9b6d-f8379e9b7a4d",
+    "8f3411d9-61cd-47de-9afd-713544a928bf"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q035": {
+   "qid": "q035",
+   "n_pool": 47,
+   "n_genuine_claims": 7,
+   "baseline_ids": [
+    "21611bc9-7be0-4ed4-b424-756b6847d176",
+    "51810c2e-a117-4327-abcf-4344c8eb04ce",
+    "4d9c750d-295a-4831-b47f-2743e6c775f0",
+    "de418ed2-5e0d-4845-9518-100578394615",
+    "0a848066-8d2d-435f-89c6-e5232f21d96f"
+   ],
+   "claim_rank_ids": [
+    "21611bc9-7be0-4ed4-b424-756b6847d176",
+    "51810c2e-a117-4327-abcf-4344c8eb04ce",
+    "5a005114-db3f-47a8-a631-b344fd884c75",
+    "4d9c750d-295a-4831-b47f-2743e6c775f0",
+    "de418ed2-5e0d-4845-9518-100578394615"
+   ],
+   "query_rank_ids": [
+    "21611bc9-7be0-4ed4-b424-756b6847d176",
+    "51810c2e-a117-4327-abcf-4344c8eb04ce",
+    "4d9c750d-295a-4831-b47f-2743e6c775f0",
+    "de418ed2-5e0d-4845-9518-100578394615",
+    "0a848066-8d2d-435f-89c6-e5232f21d96f"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q036": {
+   "qid": "q036",
+   "n_pool": 50,
+   "n_genuine_claims": 13,
+   "baseline_ids": [
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "0a3aaa53-159a-43f3-8cd0-506519ebe5c9",
+    "b0a95d1f-e003-428c-8266-95a8fa36eea4",
+    "a454ee26-08ee-4ed8-8c97-1326e004cc22",
+    "762cd7ac-ba54-4128-be75-7a761847f8c3"
+   ],
+   "claim_rank_ids": [
+    "0a3aaa53-159a-43f3-8cd0-506519ebe5c9",
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "a454ee26-08ee-4ed8-8c97-1326e004cc22",
+    "b0a95d1f-e003-428c-8266-95a8fa36eea4",
+    "f0728ed1-201a-48a6-bdfa-193cfc94f54e"
+   ],
+   "query_rank_ids": [
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "0a3aaa53-159a-43f3-8cd0-506519ebe5c9",
+    "b0a95d1f-e003-428c-8266-95a8fa36eea4",
+    "a454ee26-08ee-4ed8-8c97-1326e004cc22",
+    "762cd7ac-ba54-4128-be75-7a761847f8c3"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q037": {
+   "qid": "q037",
+   "n_pool": 47,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "5df5d6b9-873c-4a99-947f-fb8046d69b4d",
+    "f9dca429-c7a0-4568-9f0a-122784ee6148",
+    "3e9cd008-8eeb-4723-a610-2b983f94f9e8",
+    "888aa1cf-8a45-42ab-816b-db89aad49e46",
+    "232118d3-df1c-4527-9f98-c19f9c7c460d"
+   ],
+   "claim_rank_ids": [
+    "c463514a-cad6-47ff-9e77-055486829387",
+    "5df5d6b9-873c-4a99-947f-fb8046d69b4d",
+    "f9dca429-c7a0-4568-9f0a-122784ee6148",
+    "3e9cd008-8eeb-4723-a610-2b983f94f9e8",
+    "888aa1cf-8a45-42ab-816b-db89aad49e46"
+   ],
+   "query_rank_ids": [
+    "5df5d6b9-873c-4a99-947f-fb8046d69b4d",
+    "f9dca429-c7a0-4568-9f0a-122784ee6148",
+    "3e9cd008-8eeb-4723-a610-2b983f94f9e8",
+    "888aa1cf-8a45-42ab-816b-db89aad49e46",
+    "232118d3-df1c-4527-9f98-c19f9c7c460d"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q038": {
+   "qid": "q038",
+   "n_pool": 50,
+   "n_genuine_claims": 7,
+   "baseline_ids": [
+    "7d4c473c-4542-45e7-85b0-59ed85529bd3",
+    "67f728c8-d620-456b-8d14-f7608974a0ca",
+    "c50fa780-97bc-42e1-8f4c-54eba104e219",
+    "cc6e0d1c-41c9-4119-bb82-9a761e13a022",
+    "4786893f-82b3-455b-b453-1356b5ae9821"
+   ],
+   "claim_rank_ids": [
+    "c50fa780-97bc-42e1-8f4c-54eba104e219",
+    "4786893f-82b3-455b-b453-1356b5ae9821",
+    "7d4c473c-4542-45e7-85b0-59ed85529bd3",
+    "cc6e0d1c-41c9-4119-bb82-9a761e13a022",
+    "f5c3457e-ef23-4ad2-b817-321ac261928b"
+   ],
+   "query_rank_ids": [
+    "7d4c473c-4542-45e7-85b0-59ed85529bd3",
+    "67f728c8-d620-456b-8d14-f7608974a0ca",
+    "c50fa780-97bc-42e1-8f4c-54eba104e219",
+    "cc6e0d1c-41c9-4119-bb82-9a761e13a022",
+    "4786893f-82b3-455b-b453-1356b5ae9821"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q039": {
+   "qid": "q039",
+   "n_pool": 47,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "a7709836-e775-4fc2-ae2f-71b7ce2cc526",
+    "5af19400-7b6d-4e67-9005-f00439b50512",
+    "3e9cd008-8eeb-4723-a610-2b983f94f9e8",
+    "6a4748b5-e4c3-48e1-a697-8bf1a904ea48",
+    "07841065-477e-400a-be26-ed1521498887"
+   ],
+   "claim_rank_ids": [
+    "a62fc9f9-1864-4e72-bdbd-98a622bcf533",
+    "3e9cd008-8eeb-4723-a610-2b983f94f9e8",
+    "fe815c2c-f2fc-4702-84fd-32af48f32af7",
+    "07841065-477e-400a-be26-ed1521498887",
+    "d25f8371-1dfa-45b4-a0c7-4c338e7b869f"
+   ],
+   "query_rank_ids": [
+    "a7709836-e775-4fc2-ae2f-71b7ce2cc526",
+    "5af19400-7b6d-4e67-9005-f00439b50512",
+    "3e9cd008-8eeb-4723-a610-2b983f94f9e8",
+    "6a4748b5-e4c3-48e1-a697-8bf1a904ea48",
+    "07841065-477e-400a-be26-ed1521498887"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q040": {
+   "qid": "q040",
+   "n_pool": 49,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "f2ec6464-f312-4953-9bc6-03c38fd1ce98",
+    "719ed4d8-3786-4b25-b3de-e62bc6b0c585",
+    "4077d50c-b36b-4834-9901-55d8b43573a0",
+    "6c1920ed-9b14-4594-9368-7b6018a38f49",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3"
+   ],
+   "claim_rank_ids": [
+    "4077d50c-b36b-4834-9901-55d8b43573a0",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3",
+    "f2ec6464-f312-4953-9bc6-03c38fd1ce98",
+    "719ed4d8-3786-4b25-b3de-e62bc6b0c585",
+    "6c1920ed-9b14-4594-9368-7b6018a38f49"
+   ],
+   "query_rank_ids": [
+    "f2ec6464-f312-4953-9bc6-03c38fd1ce98",
+    "719ed4d8-3786-4b25-b3de-e62bc6b0c585",
+    "4077d50c-b36b-4834-9901-55d8b43573a0",
+    "6c1920ed-9b14-4594-9368-7b6018a38f49",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q041": {
+   "qid": "q041",
+   "n_pool": 49,
+   "n_genuine_claims": 22,
+   "baseline_ids": [
+    "d61efb21-2676-4bc0-8cd5-03c152aba335",
+    "93dd242a-70e1-4cd7-a632-0c0f249b49f9",
+    "3e10b9c8-6406-4be0-8e0d-c64e43dc113b",
+    "161fdbe5-d050-4c51-b560-508ec4991956",
+    "6157003f-9982-492a-acfd-0a2ffeba840f"
+   ],
+   "claim_rank_ids": [
+    "6157003f-9982-492a-acfd-0a2ffeba840f",
+    "33a3e7bc-d8fe-4ac6-8441-aee964f5fe7c",
+    "3e10b9c8-6406-4be0-8e0d-c64e43dc113b",
+    "d61efb21-2676-4bc0-8cd5-03c152aba335",
+    "93dd242a-70e1-4cd7-a632-0c0f249b49f9"
+   ],
+   "query_rank_ids": [
+    "d61efb21-2676-4bc0-8cd5-03c152aba335",
+    "93dd242a-70e1-4cd7-a632-0c0f249b49f9",
+    "3e10b9c8-6406-4be0-8e0d-c64e43dc113b",
+    "161fdbe5-d050-4c51-b560-508ec4991956",
+    "6157003f-9982-492a-acfd-0a2ffeba840f"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q042": {
+   "qid": "q042",
+   "n_pool": 33,
+   "n_genuine_claims": 0,
+   "baseline_ids": [
+    "bfcad1d0-ff37-410f-ae2c-a989048f39f7",
+    "46c8e45e-4ac1-4387-98a2-341653a7c965",
+    "451a8467-4ead-472b-91a9-28d4a49a2b4f",
+    "b398cc2f-6f01-4448-b955-a66270a7bb21",
+    "dcbba11d-fb06-48dd-a01a-d415610be37f"
+   ],
+   "claim_rank_ids": [
+    "bfcad1d0-ff37-410f-ae2c-a989048f39f7",
+    "46c8e45e-4ac1-4387-98a2-341653a7c965",
+    "451a8467-4ead-472b-91a9-28d4a49a2b4f",
+    "b398cc2f-6f01-4448-b955-a66270a7bb21",
+    "dcbba11d-fb06-48dd-a01a-d415610be37f"
+   ],
+   "query_rank_ids": [
+    "bfcad1d0-ff37-410f-ae2c-a989048f39f7",
+    "46c8e45e-4ac1-4387-98a2-341653a7c965",
+    "451a8467-4ead-472b-91a9-28d4a49a2b4f",
+    "b398cc2f-6f01-4448-b955-a66270a7bb21",
+    "dcbba11d-fb06-48dd-a01a-d415610be37f"
+   ],
+   "fallback": "no_genuine_claims",
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q043": {
+   "qid": "q043",
+   "n_pool": 50,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "f35d8334-f0f4-4056-85a1-6f867beddefa",
+    "d27c140d-74e4-4593-b9b6-023f6cfff0c0",
+    "988d2d3b-5563-4042-b903-90514643bbf0",
+    "45053f87-c7ae-439b-bf88-7f0f8623603f",
+    "f9dca429-c7a0-4568-9f0a-122784ee6148"
+   ],
+   "claim_rank_ids": [
+    "988d2d3b-5563-4042-b903-90514643bbf0",
+    "f35d8334-f0f4-4056-85a1-6f867beddefa",
+    "45053f87-c7ae-439b-bf88-7f0f8623603f",
+    "d27c140d-74e4-4593-b9b6-023f6cfff0c0",
+    "f9dca429-c7a0-4568-9f0a-122784ee6148"
+   ],
+   "query_rank_ids": [
+    "f35d8334-f0f4-4056-85a1-6f867beddefa",
+    "d27c140d-74e4-4593-b9b6-023f6cfff0c0",
+    "988d2d3b-5563-4042-b903-90514643bbf0",
+    "45053f87-c7ae-439b-bf88-7f0f8623603f",
+    "f9dca429-c7a0-4568-9f0a-122784ee6148"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q044": {
+   "qid": "q044",
+   "n_pool": 50,
+   "n_genuine_claims": 13,
+   "baseline_ids": [
+    "328749dc-9cbe-4581-833e-aa149e2bab4b",
+    "451a8467-4ead-472b-91a9-28d4a49a2b4f",
+    "02b6d1a7-10ab-450a-8924-1ad886f7151b",
+    "0edcdcf5-321b-4c97-9094-3189038d5886",
+    "55fc92bb-34ff-4d59-b109-f4ae14627a28"
+   ],
+   "claim_rank_ids": [
+    "55fc92bb-34ff-4d59-b109-f4ae14627a28",
+    "02b6d1a7-10ab-450a-8924-1ad886f7151b",
+    "451a8467-4ead-472b-91a9-28d4a49a2b4f",
+    "590a4003-84e2-423f-a6bb-1eb14dc1fb4b",
+    "d2c26024-6c2a-4d2c-884b-0d070960a9a2"
+   ],
+   "query_rank_ids": [
+    "328749dc-9cbe-4581-833e-aa149e2bab4b",
+    "451a8467-4ead-472b-91a9-28d4a49a2b4f",
+    "02b6d1a7-10ab-450a-8924-1ad886f7151b",
+    "0edcdcf5-321b-4c97-9094-3189038d5886",
+    "55fc92bb-34ff-4d59-b109-f4ae14627a28"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q045": {
+   "qid": "q045",
+   "n_pool": 37,
+   "n_genuine_claims": 0,
+   "baseline_ids": [
+    "0f4a4c32-b9bc-4242-9162-2893791d531b",
+    "d61efb21-2676-4bc0-8cd5-03c152aba335",
+    "93dd242a-70e1-4cd7-a632-0c0f249b49f9",
+    "ff953d71-08a4-4cab-8c6d-b616000abfda",
+    "97d52be9-d484-4da8-b47c-67d003cd8337"
+   ],
+   "claim_rank_ids": [
+    "0f4a4c32-b9bc-4242-9162-2893791d531b",
+    "d61efb21-2676-4bc0-8cd5-03c152aba335",
+    "93dd242a-70e1-4cd7-a632-0c0f249b49f9",
+    "ff953d71-08a4-4cab-8c6d-b616000abfda",
+    "97d52be9-d484-4da8-b47c-67d003cd8337"
+   ],
+   "query_rank_ids": [
+    "0f4a4c32-b9bc-4242-9162-2893791d531b",
+    "d61efb21-2676-4bc0-8cd5-03c152aba335",
+    "93dd242a-70e1-4cd7-a632-0c0f249b49f9",
+    "ff953d71-08a4-4cab-8c6d-b616000abfda",
+    "97d52be9-d484-4da8-b47c-67d003cd8337"
+   ],
+   "fallback": "no_genuine_claims",
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q046": {
+   "qid": "q046",
+   "n_pool": 50,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "b0a95d1f-e003-428c-8266-95a8fa36eea4",
+    "4d9c750d-295a-4831-b47f-2743e6c775f0",
+    "642e5b67-733f-493e-8c05-8dc386eb7307",
+    "727ca84d-4ce3-40ee-b8e1-8a16de96c381",
+    "287e89d8-ed22-4868-8681-5335f6de1f89"
+   ],
+   "claim_rank_ids": [
+    "1c045e96-68c0-475b-ac83-bff85da91c0d",
+    "4d9c750d-295a-4831-b47f-2743e6c775f0",
+    "287e89d8-ed22-4868-8681-5335f6de1f89",
+    "b0a95d1f-e003-428c-8266-95a8fa36eea4",
+    "642e5b67-733f-493e-8c05-8dc386eb7307"
+   ],
+   "query_rank_ids": [
+    "b0a95d1f-e003-428c-8266-95a8fa36eea4",
+    "4d9c750d-295a-4831-b47f-2743e6c775f0",
+    "642e5b67-733f-493e-8c05-8dc386eb7307",
+    "727ca84d-4ce3-40ee-b8e1-8a16de96c381",
+    "287e89d8-ed22-4868-8681-5335f6de1f89"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q047": {
+   "qid": "q047",
+   "n_pool": 45,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "719ed4d8-3786-4b25-b3de-e62bc6b0c585",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3",
+    "f2ec6464-f312-4953-9bc6-03c38fd1ce98",
+    "6c1920ed-9b14-4594-9368-7b6018a38f49",
+    "456f05ad-11ed-476a-8175-2f7baae05ca1"
+   ],
+   "claim_rank_ids": [
+    "584086b2-c4b7-4aac-9f8a-d5ddeba15256",
+    "719ed4d8-3786-4b25-b3de-e62bc6b0c585",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3",
+    "f2ec6464-f312-4953-9bc6-03c38fd1ce98",
+    "6c1920ed-9b14-4594-9368-7b6018a38f49"
+   ],
+   "query_rank_ids": [
+    "719ed4d8-3786-4b25-b3de-e62bc6b0c585",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3",
+    "f2ec6464-f312-4953-9bc6-03c38fd1ce98",
+    "6c1920ed-9b14-4594-9368-7b6018a38f49",
+    "456f05ad-11ed-476a-8175-2f7baae05ca1"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q048": {
+   "qid": "q048",
+   "n_pool": 50,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "7d57aac6-5431-4a96-8e5c-72ca9dff7ffb",
+    "bbe8bf90-83ba-41ba-8dd3-dbf0121ac7a1",
+    "c37eec21-f621-4d51-b73e-8d98049374ef",
+    "6e58aff8-7a9d-4a78-9308-7f0f53170ae7",
+    "32704786-c1a8-40d3-88b0-6b753e2a2902"
+   ],
+   "claim_rank_ids": [
+    "6e58aff8-7a9d-4a78-9308-7f0f53170ae7",
+    "c37eec21-f621-4d51-b73e-8d98049374ef",
+    "32704786-c1a8-40d3-88b0-6b753e2a2902",
+    "0a58ae66-9121-41c4-8fd0-cdc6fb9f1990",
+    "eed5d09f-4a29-4a49-8006-93ada249b0da"
+   ],
+   "query_rank_ids": [
+    "7d57aac6-5431-4a96-8e5c-72ca9dff7ffb",
+    "bbe8bf90-83ba-41ba-8dd3-dbf0121ac7a1",
+    "c37eec21-f621-4d51-b73e-8d98049374ef",
+    "6e58aff8-7a9d-4a78-9308-7f0f53170ae7",
+    "32704786-c1a8-40d3-88b0-6b753e2a2902"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q049": {
+   "qid": "q049",
+   "n_pool": 44,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "4cf8c32b-71a2-4b86-8883-a535372421f3",
+    "3c302f0b-1213-4b0b-8dd5-bcf0962fb659",
+    "c4670f35-e3de-4ae2-8f28-efa6447568c1",
+    "dd8111c9-6ff9-4663-978e-5d070ef07b2e",
+    "ddac29d3-116a-4801-96de-e743512cae38"
+   ],
+   "claim_rank_ids": [
+    "c4670f35-e3de-4ae2-8f28-efa6447568c1",
+    "3c302f0b-1213-4b0b-8dd5-bcf0962fb659",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3",
+    "dd8111c9-6ff9-4663-978e-5d070ef07b2e",
+    "ddac29d3-116a-4801-96de-e743512cae38"
+   ],
+   "query_rank_ids": [
+    "4cf8c32b-71a2-4b86-8883-a535372421f3",
+    "3c302f0b-1213-4b0b-8dd5-bcf0962fb659",
+    "c4670f35-e3de-4ae2-8f28-efa6447568c1",
+    "dd8111c9-6ff9-4663-978e-5d070ef07b2e",
+    "ddac29d3-116a-4801-96de-e743512cae38"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q050": {
+   "qid": "q050",
+   "n_pool": 50,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "d28008e6-b86f-44f6-b8f9-69a3edd3d24f",
+    "39a1f32b-bccf-4715-aa50-fbea3fd05692",
+    "6f7e1f51-8d7d-484c-af38-242521aa260f",
+    "447cb945-5266-4254-ae43-c3c93b660e09",
+    "13307267-f54e-4124-8570-800ce5c41f29"
+   ],
+   "claim_rank_ids": [
+    "b6e6f538-7fd2-4a9e-a175-afeaa14a9e8a",
+    "447cb945-5266-4254-ae43-c3c93b660e09",
+    "13307267-f54e-4124-8570-800ce5c41f29",
+    "77e718b0-630d-4355-9a8b-03594643bbd9",
+    "d28008e6-b86f-44f6-b8f9-69a3edd3d24f"
+   ],
+   "query_rank_ids": [
+    "d28008e6-b86f-44f6-b8f9-69a3edd3d24f",
+    "39a1f32b-bccf-4715-aa50-fbea3fd05692",
+    "6f7e1f51-8d7d-484c-af38-242521aa260f",
+    "447cb945-5266-4254-ae43-c3c93b660e09",
+    "13307267-f54e-4124-8570-800ce5c41f29"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q051": {
+   "qid": "q051",
+   "n_pool": 50,
+   "n_genuine_claims": 5,
+   "baseline_ids": [
+    "93bf2aff-4c7c-4888-b75e-2d40d70162d7",
+    "5c3b60f9-aaf4-4da0-b456-ca8e9d7b726f",
+    "d56a2a09-97eb-4698-9bae-416443d64c79",
+    "69cf366e-36fe-4b2b-9207-d9074cd4dfd1",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "claim_rank_ids": [
+    "e75a4d4b-624d-4d96-981a-6c92d574c274",
+    "93bf2aff-4c7c-4888-b75e-2d40d70162d7",
+    "69cf366e-36fe-4b2b-9207-d9074cd4dfd1",
+    "d56a2a09-97eb-4698-9bae-416443d64c79",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "query_rank_ids": [
+    "93bf2aff-4c7c-4888-b75e-2d40d70162d7",
+    "5c3b60f9-aaf4-4da0-b456-ca8e9d7b726f",
+    "d56a2a09-97eb-4698-9bae-416443d64c79",
+    "69cf366e-36fe-4b2b-9207-d9074cd4dfd1",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q052": {
+   "qid": "q052",
+   "n_pool": 50,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "b7331f75-8113-44c5-9630-609cccc6beb8",
+    "49384010-bcde-473b-b5a7-b7f4e4a0b1db",
+    "bf9d3e72-09dc-4f38-a186-7c99aa563be9",
+    "ed9eb21e-b1df-4bad-b4c3-377006899dae",
+    "c47ce948-0809-46b7-b1b7-27588a7341c5"
+   ],
+   "claim_rank_ids": [
+    "49384010-bcde-473b-b5a7-b7f4e4a0b1db",
+    "88ce17f4-cf2d-4ba0-8ed9-8682d16f1287",
+    "b7331f75-8113-44c5-9630-609cccc6beb8",
+    "bf9d3e72-09dc-4f38-a186-7c99aa563be9",
+    "ed9eb21e-b1df-4bad-b4c3-377006899dae"
+   ],
+   "query_rank_ids": [
+    "b7331f75-8113-44c5-9630-609cccc6beb8",
+    "49384010-bcde-473b-b5a7-b7f4e4a0b1db",
+    "bf9d3e72-09dc-4f38-a186-7c99aa563be9",
+    "ed9eb21e-b1df-4bad-b4c3-377006899dae",
+    "c47ce948-0809-46b7-b1b7-27588a7341c5"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q053": {
+   "qid": "q053",
+   "n_pool": 46,
+   "n_genuine_claims": 5,
+   "baseline_ids": [
+    "93bf2aff-4c7c-4888-b75e-2d40d70162d7",
+    "6fa77e2d-c499-43ac-9317-78322448e06f",
+    "5c3b60f9-aaf4-4da0-b456-ca8e9d7b726f",
+    "69cf366e-36fe-4b2b-9207-d9074cd4dfd1",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "claim_rank_ids": [
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4",
+    "93bf2aff-4c7c-4888-b75e-2d40d70162d7",
+    "914003a8-831e-455d-a876-e6dc1394cd8c",
+    "4f528fcc-e34a-4fba-9cb7-cd156957ae21",
+    "ad1b1c58-c446-4457-bf99-fbea86a5525a"
+   ],
+   "query_rank_ids": [
+    "93bf2aff-4c7c-4888-b75e-2d40d70162d7",
+    "6fa77e2d-c499-43ac-9317-78322448e06f",
+    "5c3b60f9-aaf4-4da0-b456-ca8e9d7b726f",
+    "69cf366e-36fe-4b2b-9207-d9074cd4dfd1",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q054": {
+   "qid": "q054",
+   "n_pool": 50,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "49384010-bcde-473b-b5a7-b7f4e4a0b1db",
+    "88ce17f4-cf2d-4ba0-8ed9-8682d16f1287",
+    "bf9d3e72-09dc-4f38-a186-7c99aa563be9",
+    "1b77228c-a238-40ce-a0db-c75495a5f13c",
+    "f4592403-75c4-4c79-82db-c9faefea196d"
+   ],
+   "claim_rank_ids": [
+    "ff1e1568-f97c-4482-8e21-5bc7fa895fac",
+    "ba96a794-f6ef-4633-bf78-0166608759e1",
+    "49384010-bcde-473b-b5a7-b7f4e4a0b1db",
+    "88ce17f4-cf2d-4ba0-8ed9-8682d16f1287",
+    "bf9d3e72-09dc-4f38-a186-7c99aa563be9"
+   ],
+   "query_rank_ids": [
+    "49384010-bcde-473b-b5a7-b7f4e4a0b1db",
+    "88ce17f4-cf2d-4ba0-8ed9-8682d16f1287",
+    "bf9d3e72-09dc-4f38-a186-7c99aa563be9",
+    "1b77228c-a238-40ce-a0db-c75495a5f13c",
+    "f4592403-75c4-4c79-82db-c9faefea196d"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q055": {
+   "qid": "q055",
+   "n_pool": 47,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "93bf2aff-4c7c-4888-b75e-2d40d70162d7",
+    "65a07988-6127-4224-b4e7-9179eecd967e",
+    "e9f32202-2918-4209-aa2a-be5351f03ff1",
+    "69cf366e-36fe-4b2b-9207-d9074cd4dfd1",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "claim_rank_ids": [
+    "65a07988-6127-4224-b4e7-9179eecd967e",
+    "93bf2aff-4c7c-4888-b75e-2d40d70162d7",
+    "e9f32202-2918-4209-aa2a-be5351f03ff1",
+    "69cf366e-36fe-4b2b-9207-d9074cd4dfd1",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "query_rank_ids": [
+    "93bf2aff-4c7c-4888-b75e-2d40d70162d7",
+    "65a07988-6127-4224-b4e7-9179eecd967e",
+    "e9f32202-2918-4209-aa2a-be5351f03ff1",
+    "69cf366e-36fe-4b2b-9207-d9074cd4dfd1",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q056": {
+   "qid": "q056",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "40b96cee-8bd7-42ad-8fad-7e74c05e779d",
+    "ba692bf6-fe57-4e05-bcc8-e18b3dbd6a55",
+    "60de18b5-f089-4e85-bcbc-6505ae2cf197",
+    "e5f971b5-8f16-48ba-9c97-592280aad25f",
+    "e2e2d4c2-446e-42eb-b73c-ac2296eb13f2"
+   ],
+   "claim_rank_ids": [
+    "40b96cee-8bd7-42ad-8fad-7e74c05e779d",
+    "ba692bf6-fe57-4e05-bcc8-e18b3dbd6a55",
+    "60de18b5-f089-4e85-bcbc-6505ae2cf197",
+    "e5f971b5-8f16-48ba-9c97-592280aad25f",
+    "e2e2d4c2-446e-42eb-b73c-ac2296eb13f2"
+   ],
+   "query_rank_ids": [
+    "40b96cee-8bd7-42ad-8fad-7e74c05e779d",
+    "ba692bf6-fe57-4e05-bcc8-e18b3dbd6a55",
+    "60de18b5-f089-4e85-bcbc-6505ae2cf197",
+    "e5f971b5-8f16-48ba-9c97-592280aad25f",
+    "e2e2d4c2-446e-42eb-b73c-ac2296eb13f2"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q057": {
+   "qid": "q057",
+   "n_pool": 48,
+   "n_genuine_claims": 14,
+   "baseline_ids": [
+    "d02346e2-73e9-4947-ad3f-5b0061e98b66",
+    "abefad99-08b2-4c4c-97ad-e7353bbff809",
+    "9a9815d4-826e-4b0a-a3a9-56ff4c8dea5f",
+    "454d9e6b-b27c-40f7-ae5b-1b3c5361d565",
+    "7b087ab0-9804-487a-be4a-d32e108299b8"
+   ],
+   "claim_rank_ids": [
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "2cf12d70-6b91-4ae7-808a-ff097db03eb5",
+    "7a6d5760-f6cb-4db2-be46-96e0abfb5850",
+    "1489c445-d6ac-4cb5-8036-31b7d0f1d4dd",
+    "a8233df3-409c-4b2a-ab27-95e0e16b054f"
+   ],
+   "query_rank_ids": [
+    "d02346e2-73e9-4947-ad3f-5b0061e98b66",
+    "abefad99-08b2-4c4c-97ad-e7353bbff809",
+    "9a9815d4-826e-4b0a-a3a9-56ff4c8dea5f",
+    "454d9e6b-b27c-40f7-ae5b-1b3c5361d565",
+    "7b087ab0-9804-487a-be4a-d32e108299b8"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q058": {
+   "qid": "q058",
+   "n_pool": 44,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "454d9e6b-b27c-40f7-ae5b-1b3c5361d565",
+    "63dc043d-b035-4b64-9011-3873949d3087",
+    "b60e6636-f554-4587-82df-ed2c9ad9767f",
+    "65ac54f6-7978-4c24-a6a3-7887730f97ee",
+    "10dcbcdd-c38b-4801-bb07-03ced151654b"
+   ],
+   "claim_rank_ids": [
+    "b60e6636-f554-4587-82df-ed2c9ad9767f",
+    "454d9e6b-b27c-40f7-ae5b-1b3c5361d565",
+    "4a00183e-2b2a-4615-93ed-965a770b7964",
+    "63dc043d-b035-4b64-9011-3873949d3087",
+    "65ac54f6-7978-4c24-a6a3-7887730f97ee"
+   ],
+   "query_rank_ids": [
+    "454d9e6b-b27c-40f7-ae5b-1b3c5361d565",
+    "63dc043d-b035-4b64-9011-3873949d3087",
+    "b60e6636-f554-4587-82df-ed2c9ad9767f",
+    "65ac54f6-7978-4c24-a6a3-7887730f97ee",
+    "10dcbcdd-c38b-4801-bb07-03ced151654b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q059": {
+   "qid": "q059",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "ba692bf6-fe57-4e05-bcc8-e18b3dbd6a55",
+    "60de18b5-f089-4e85-bcbc-6505ae2cf197",
+    "a6f08ade-ba0c-44d4-a40f-bf999d4b25f0",
+    "c7ab9cfd-2c26-43c8-8154-53a8588ca464",
+    "e2e2d4c2-446e-42eb-b73c-ac2296eb13f2"
+   ],
+   "claim_rank_ids": [
+    "60de18b5-f089-4e85-bcbc-6505ae2cf197",
+    "ba692bf6-fe57-4e05-bcc8-e18b3dbd6a55",
+    "a6f08ade-ba0c-44d4-a40f-bf999d4b25f0",
+    "c7ab9cfd-2c26-43c8-8154-53a8588ca464",
+    "e2e2d4c2-446e-42eb-b73c-ac2296eb13f2"
+   ],
+   "query_rank_ids": [
+    "ba692bf6-fe57-4e05-bcc8-e18b3dbd6a55",
+    "60de18b5-f089-4e85-bcbc-6505ae2cf197",
+    "a6f08ade-ba0c-44d4-a40f-bf999d4b25f0",
+    "c7ab9cfd-2c26-43c8-8154-53a8588ca464",
+    "e2e2d4c2-446e-42eb-b73c-ac2296eb13f2"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q060": {
+   "qid": "q060",
+   "n_pool": 43,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "49384010-bcde-473b-b5a7-b7f4e4a0b1db",
+    "bf9d3e72-09dc-4f38-a186-7c99aa563be9",
+    "89728732-8f15-46c8-b16c-3d85ed20256a",
+    "b7331f75-8113-44c5-9630-609cccc6beb8",
+    "1b77228c-a238-40ce-a0db-c75495a5f13c"
+   ],
+   "claim_rank_ids": [
+    "ff1e1568-f97c-4482-8e21-5bc7fa895fac",
+    "49384010-bcde-473b-b5a7-b7f4e4a0b1db",
+    "bf9d3e72-09dc-4f38-a186-7c99aa563be9",
+    "89728732-8f15-46c8-b16c-3d85ed20256a",
+    "b7331f75-8113-44c5-9630-609cccc6beb8"
+   ],
+   "query_rank_ids": [
+    "49384010-bcde-473b-b5a7-b7f4e4a0b1db",
+    "bf9d3e72-09dc-4f38-a186-7c99aa563be9",
+    "89728732-8f15-46c8-b16c-3d85ed20256a",
+    "b7331f75-8113-44c5-9630-609cccc6beb8",
+    "1b77228c-a238-40ce-a0db-c75495a5f13c"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q061": {
+   "qid": "q061",
+   "n_pool": 43,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "d02346e2-73e9-4947-ad3f-5b0061e98b66",
+    "abefad99-08b2-4c4c-97ad-e7353bbff809",
+    "7c611757-df63-4858-b2c9-113305901ee6",
+    "f950a2cf-c90b-4ef1-ae38-f95d2a0e2c84",
+    "686d6f2c-b5ba-4a56-ace9-7d186745258e"
+   ],
+   "claim_rank_ids": [
+    "7c611757-df63-4858-b2c9-113305901ee6",
+    "d02346e2-73e9-4947-ad3f-5b0061e98b66",
+    "abefad99-08b2-4c4c-97ad-e7353bbff809",
+    "f950a2cf-c90b-4ef1-ae38-f95d2a0e2c84",
+    "686d6f2c-b5ba-4a56-ace9-7d186745258e"
+   ],
+   "query_rank_ids": [
+    "d02346e2-73e9-4947-ad3f-5b0061e98b66",
+    "abefad99-08b2-4c4c-97ad-e7353bbff809",
+    "7c611757-df63-4858-b2c9-113305901ee6",
+    "f950a2cf-c90b-4ef1-ae38-f95d2a0e2c84",
+    "686d6f2c-b5ba-4a56-ace9-7d186745258e"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q062": {
+   "qid": "q062",
+   "n_pool": 50,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "c0f8b197-ae02-4ffd-8940-5eadacafc11d",
+    "18d12cc1-645e-4d69-bbf1-df11d37aadf3",
+    "4da89237-76bb-4fe6-92c0-04844ca06c3e",
+    "c30f2d86-19d9-439a-b713-c1469eba5434",
+    "34d24dea-92d5-4810-a288-07891e9d1dc2"
+   ],
+   "claim_rank_ids": [
+    "31695b4d-b3d3-4d81-8e84-80d4aa820e50",
+    "4da89237-76bb-4fe6-92c0-04844ca06c3e",
+    "023adfe9-f9c8-4d61-9015-2948c9155f0a",
+    "c0f8b197-ae02-4ffd-8940-5eadacafc11d",
+    "09b0de10-e0e2-428c-8a1f-e612e0bce4c5"
+   ],
+   "query_rank_ids": [
+    "c0f8b197-ae02-4ffd-8940-5eadacafc11d",
+    "18d12cc1-645e-4d69-bbf1-df11d37aadf3",
+    "4da89237-76bb-4fe6-92c0-04844ca06c3e",
+    "c30f2d86-19d9-439a-b713-c1469eba5434",
+    "34d24dea-92d5-4810-a288-07891e9d1dc2"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q063": {
+   "qid": "q063",
+   "n_pool": 50,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "8e17bee3-42d4-4856-bafe-d7b1a772fc0a",
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "db06d1cc-d99b-41db-aba3-c5f0256cc0b8",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "f8571f5d-ecaa-4673-a627-a63f4400c93a"
+   ],
+   "claim_rank_ids": [
+    "8e17bee3-42d4-4856-bafe-d7b1a772fc0a",
+    "450227a9-2243-4cb4-a1b3-6fa2ad4b0b25",
+    "997d0e2f-fb85-48c0-9182-5543ee090b87",
+    "e574ee1f-7ea2-43b5-854d-b06ad97be760",
+    "62ddc461-ea76-40aa-ae89-4419f75b9845"
+   ],
+   "query_rank_ids": [
+    "8e17bee3-42d4-4856-bafe-d7b1a772fc0a",
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "db06d1cc-d99b-41db-aba3-c5f0256cc0b8",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "f8571f5d-ecaa-4673-a627-a63f4400c93a"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q064": {
+   "qid": "q064",
+   "n_pool": 50,
+   "n_genuine_claims": 19,
+   "baseline_ids": [
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "980da360-c69f-4d5a-9a67-8de597472206",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "e574ee1f-7ea2-43b5-854d-b06ad97be760",
+    "26d30892-c754-456e-b290-e7ce69e41b5a"
+   ],
+   "claim_rank_ids": [
+    "711c7690-e491-4a92-9dcd-598b0d273428",
+    "acaf6465-17c2-41e2-9bb6-cdd2eb396a52",
+    "e9c6aad6-7e55-4efd-b871-f5139c9a590a",
+    "3b3a55fd-6f4c-4831-aafb-714f564c90b0",
+    "ee4ac7b2-da93-4ca4-81a4-328cf4325ed2"
+   ],
+   "query_rank_ids": [
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "980da360-c69f-4d5a-9a67-8de597472206",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "e574ee1f-7ea2-43b5-854d-b06ad97be760",
+    "26d30892-c754-456e-b290-e7ce69e41b5a"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 5,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q065": {
+   "qid": "q065",
+   "n_pool": 50,
+   "n_genuine_claims": 30,
+   "baseline_ids": [
+    "b0b431f3-498f-4c0d-9610-b347cba787d4",
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "77d5d1f2-92fd-459d-9a7b-78ccd4b14f00",
+    "205553e0-c941-454c-9f65-c07f171e8f85",
+    "b577f625-bb11-4685-851f-1a58c47433d5"
+   ],
+   "claim_rank_ids": [
+    "b577f625-bb11-4685-851f-1a58c47433d5",
+    "b0b431f3-498f-4c0d-9610-b347cba787d4",
+    "2a69c5b2-9cb6-458d-a715-b590383bcd0d",
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "0958f35d-1514-43c0-a184-c443796692e4"
+   ],
+   "query_rank_ids": [
+    "b0b431f3-498f-4c0d-9610-b347cba787d4",
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "77d5d1f2-92fd-459d-9a7b-78ccd4b14f00",
+    "205553e0-c941-454c-9f65-c07f171e8f85",
+    "b577f625-bb11-4685-851f-1a58c47433d5"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q066": {
+   "qid": "q066",
+   "n_pool": 50,
+   "n_genuine_claims": 7,
+   "baseline_ids": [
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "ee0e7653-b220-4a72-bc49-5da7463b0f8e",
+    "6cca9d47-4e4d-4ad4-b23a-b1cd593142aa",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "32aea7eb-0699-4782-a1c2-2eafd227b3ac"
+   ],
+   "claim_rank_ids": [
+    "4ff805ff-78c5-44bb-a0e5-e7ec0951fd18",
+    "4906052a-3599-4db3-9d69-abf9a085f6c6",
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "50cdbd28-4897-47f6-9c27-d3c6fa634f85",
+    "42842f59-78f1-478c-b33e-c81984d8d752"
+   ],
+   "query_rank_ids": [
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "ee0e7653-b220-4a72-bc49-5da7463b0f8e",
+    "6cca9d47-4e4d-4ad4-b23a-b1cd593142aa",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "32aea7eb-0699-4782-a1c2-2eafd227b3ac"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q067": {
+   "qid": "q067",
+   "n_pool": 50,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "ee0e7653-b220-4a72-bc49-5da7463b0f8e",
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "6cca9d47-4e4d-4ad4-b23a-b1cd593142aa",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d"
+   ],
+   "claim_rank_ids": [
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "b577f625-bb11-4685-851f-1a58c47433d5",
+    "ee0e7653-b220-4a72-bc49-5da7463b0f8e",
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "6cca9d47-4e4d-4ad4-b23a-b1cd593142aa"
+   ],
+   "query_rank_ids": [
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "ee0e7653-b220-4a72-bc49-5da7463b0f8e",
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "6cca9d47-4e4d-4ad4-b23a-b1cd593142aa",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q068": {
+   "qid": "q068",
+   "n_pool": 50,
+   "n_genuine_claims": 22,
+   "baseline_ids": [
+    "10f29eea-cf58-4a1d-a551-a73250f016fd",
+    "95ddf340-777a-4a23-8f34-0c2c622dcbbe",
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "22c1b00d-589e-441d-9eb0-3bbba760063f",
+    "bbebad97-021b-47d4-acc7-30a40b208138"
+   ],
+   "claim_rank_ids": [
+    "bbebad97-021b-47d4-acc7-30a40b208138",
+    "95ddf340-777a-4a23-8f34-0c2c622dcbbe",
+    "2143c830-aabc-412a-a220-2fb39c72f4f5",
+    "439008af-17bd-43e1-a2be-531b6348aa46",
+    "22c1b00d-589e-441d-9eb0-3bbba760063f"
+   ],
+   "query_rank_ids": [
+    "10f29eea-cf58-4a1d-a551-a73250f016fd",
+    "95ddf340-777a-4a23-8f34-0c2c622dcbbe",
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "22c1b00d-589e-441d-9eb0-3bbba760063f",
+    "bbebad97-021b-47d4-acc7-30a40b208138"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q069": {
+   "qid": "q069",
+   "n_pool": 50,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "18d12cc1-645e-4d69-bbf1-df11d37aadf3",
+    "3ff5fdc1-eeeb-4406-972d-fea0cb04efe5",
+    "550efc81-629f-4fb3-905d-2e053196bdfe",
+    "c30f2d86-19d9-439a-b713-c1469eba5434",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc"
+   ],
+   "claim_rank_ids": [
+    "550efc81-629f-4fb3-905d-2e053196bdfe",
+    "17673ff4-7551-4f1b-adb0-05a654d59994",
+    "18d12cc1-645e-4d69-bbf1-df11d37aadf3",
+    "3ff5fdc1-eeeb-4406-972d-fea0cb04efe5",
+    "c30f2d86-19d9-439a-b713-c1469eba5434"
+   ],
+   "query_rank_ids": [
+    "18d12cc1-645e-4d69-bbf1-df11d37aadf3",
+    "3ff5fdc1-eeeb-4406-972d-fea0cb04efe5",
+    "550efc81-629f-4fb3-905d-2e053196bdfe",
+    "c30f2d86-19d9-439a-b713-c1469eba5434",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q070": {
+   "qid": "q070",
+   "n_pool": 50,
+   "n_genuine_claims": 32,
+   "baseline_ids": [
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "da9a7739-385d-471d-8c16-8b86f9fbb480",
+    "10f29eea-cf58-4a1d-a551-a73250f016fd",
+    "9c888322-e057-420b-9615-37119414b85d",
+    "8e17bee3-42d4-4856-bafe-d7b1a772fc0a"
+   ],
+   "claim_rank_ids": [
+    "8e17bee3-42d4-4856-bafe-d7b1a772fc0a",
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "22c1b00d-589e-441d-9eb0-3bbba760063f",
+    "9c888322-e057-420b-9615-37119414b85d",
+    "711c7690-e491-4a92-9dcd-598b0d273428"
+   ],
+   "query_rank_ids": [
+    "62ddc461-ea76-40aa-ae89-4419f75b9845",
+    "da9a7739-385d-471d-8c16-8b86f9fbb480",
+    "10f29eea-cf58-4a1d-a551-a73250f016fd",
+    "9c888322-e057-420b-9615-37119414b85d",
+    "8e17bee3-42d4-4856-bafe-d7b1a772fc0a"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q071": {
+   "qid": "q071",
+   "n_pool": 50,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "0319832d-035c-490f-b564-49bfe523a0fc",
+    "621adfd5-7e38-4ce5-b6a1-4ebb1b09f558",
+    "fadd4c26-e917-488d-803b-32022b0a89f6",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7",
+    "668d959b-6eb9-43c1-87bf-1fbf15909679"
+   ],
+   "claim_rank_ids": [
+    "65d53437-8f99-4a09-be62-80d1dafbeb98",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7",
+    "0319832d-035c-490f-b564-49bfe523a0fc",
+    "621adfd5-7e38-4ce5-b6a1-4ebb1b09f558"
+   ],
+   "query_rank_ids": [
+    "0319832d-035c-490f-b564-49bfe523a0fc",
+    "621adfd5-7e38-4ce5-b6a1-4ebb1b09f558",
+    "fadd4c26-e917-488d-803b-32022b0a89f6",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7",
+    "668d959b-6eb9-43c1-87bf-1fbf15909679"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q072": {
+   "qid": "q072",
+   "n_pool": 50,
+   "n_genuine_claims": 19,
+   "baseline_ids": [
+    "7374e3f2-6d01-4d73-abb7-322d298fe181",
+    "c4f2fa5c-939c-4a1b-a625-4848087c4d91",
+    "23fc0b94-049d-4825-b8e9-750175ced6cf",
+    "60ee48de-5f48-4a22-a2be-f14647413b36",
+    "53254280-70f4-4a0b-8f5c-e635202c6439"
+   ],
+   "claim_rank_ids": [
+    "53254280-70f4-4a0b-8f5c-e635202c6439",
+    "c4f2fa5c-939c-4a1b-a625-4848087c4d91",
+    "19f00210-ef3c-4bd3-8737-cd6958478314",
+    "00cf8776-7bb7-4e22-958a-3097ff6c903b",
+    "cae213b4-079f-412f-b20e-c93f944dfd89"
+   ],
+   "query_rank_ids": [
+    "7374e3f2-6d01-4d73-abb7-322d298fe181",
+    "c4f2fa5c-939c-4a1b-a625-4848087c4d91",
+    "23fc0b94-049d-4825-b8e9-750175ced6cf",
+    "60ee48de-5f48-4a22-a2be-f14647413b36",
+    "53254280-70f4-4a0b-8f5c-e635202c6439"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q073": {
+   "qid": "q073",
+   "n_pool": 50,
+   "n_genuine_claims": 26,
+   "baseline_ids": [
+    "8061ae47-22f4-4761-b3e4-937a1f9f4218",
+    "31fdd8bc-4a2e-4f6d-bddf-2eb1b2793d5d",
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "c0f8b197-ae02-4ffd-8940-5eadacafc11d",
+    "c7b92cfb-30f5-4f15-a080-af77e8d61288"
+   ],
+   "claim_rank_ids": [
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "0319832d-035c-490f-b564-49bfe523a0fc",
+    "c0f8b197-ae02-4ffd-8940-5eadacafc11d",
+    "c7b92cfb-30f5-4f15-a080-af77e8d61288",
+    "8061ae47-22f4-4761-b3e4-937a1f9f4218"
+   ],
+   "query_rank_ids": [
+    "8061ae47-22f4-4761-b3e4-937a1f9f4218",
+    "31fdd8bc-4a2e-4f6d-bddf-2eb1b2793d5d",
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "c0f8b197-ae02-4ffd-8940-5eadacafc11d",
+    "c7b92cfb-30f5-4f15-a080-af77e8d61288"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q074": {
+   "qid": "q074",
+   "n_pool": 50,
+   "n_genuine_claims": 14,
+   "baseline_ids": [
+    "c0f8b197-ae02-4ffd-8940-5eadacafc11d",
+    "7b93bfbd-f752-4657-9b1d-d56e213efda2",
+    "c94829fe-c468-407f-894e-35bbd83fd380",
+    "05dafa29-9376-4320-a361-4fa8807a5eb9",
+    "18d12cc1-645e-4d69-bbf1-df11d37aadf3"
+   ],
+   "claim_rank_ids": [
+    "c94829fe-c468-407f-894e-35bbd83fd380",
+    "c0f8b197-ae02-4ffd-8940-5eadacafc11d",
+    "05dafa29-9376-4320-a361-4fa8807a5eb9",
+    "f147f97f-2ac0-4f5a-9bcc-6871b0cb986d",
+    "7b93bfbd-f752-4657-9b1d-d56e213efda2"
+   ],
+   "query_rank_ids": [
+    "c0f8b197-ae02-4ffd-8940-5eadacafc11d",
+    "7b93bfbd-f752-4657-9b1d-d56e213efda2",
+    "c94829fe-c468-407f-894e-35bbd83fd380",
+    "05dafa29-9376-4320-a361-4fa8807a5eb9",
+    "18d12cc1-645e-4d69-bbf1-df11d37aadf3"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q075": {
+   "qid": "q075",
+   "n_pool": 50,
+   "n_genuine_claims": 13,
+   "baseline_ids": [
+    "fadd4c26-e917-488d-803b-32022b0a89f6",
+    "9d00c15e-5fa4-4670-b278-f775499280b4",
+    "621adfd5-7e38-4ce5-b6a1-4ebb1b09f558",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7",
+    "3b336f5d-2aae-48a1-92b2-f67fa7239ef9"
+   ],
+   "claim_rank_ids": [
+    "c2067777-a1fd-4bcc-89c2-99b44f878d63",
+    "3b336f5d-2aae-48a1-92b2-f67fa7239ef9",
+    "136ffc84-809a-4cf8-a89b-35578ee743c9",
+    "cb50e139-7839-491d-8807-9161936967ec",
+    "83b2752c-d358-4f3f-a3e5-21f16b254238"
+   ],
+   "query_rank_ids": [
+    "fadd4c26-e917-488d-803b-32022b0a89f6",
+    "9d00c15e-5fa4-4670-b278-f775499280b4",
+    "621adfd5-7e38-4ce5-b6a1-4ebb1b09f558",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7",
+    "3b336f5d-2aae-48a1-92b2-f67fa7239ef9"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q076": {
+   "qid": "q076",
+   "n_pool": 50,
+   "n_genuine_claims": 9,
+   "baseline_ids": [
+    "ee0e7653-b220-4a72-bc49-5da7463b0f8e",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "6cca9d47-4e4d-4ad4-b23a-b1cd593142aa",
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "3b3a55fd-6f4c-4831-aafb-714f564c90b0"
+   ],
+   "claim_rank_ids": [
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "3b3a55fd-6f4c-4831-aafb-714f564c90b0",
+    "6cca9d47-4e4d-4ad4-b23a-b1cd593142aa",
+    "7a774ae5-1667-4ad3-b028-d14c39c9dc52"
+   ],
+   "query_rank_ids": [
+    "ee0e7653-b220-4a72-bc49-5da7463b0f8e",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "6cca9d47-4e4d-4ad4-b23a-b1cd593142aa",
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "3b3a55fd-6f4c-4831-aafb-714f564c90b0"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q077": {
+   "qid": "q077",
+   "n_pool": 50,
+   "n_genuine_claims": 18,
+   "baseline_ids": [
+    "4a86978f-4323-4890-8404-12d6ed387267",
+    "32d5e42a-3e7b-4c26-998d-2ba1106f27be",
+    "639f3603-4ea8-410b-91a5-eccab40afe96",
+    "6d92af20-ff01-4f95-bd73-0de60ddb961e",
+    "19d8e10d-ed29-40d3-a126-53f3e2b7e0ee"
+   ],
+   "claim_rank_ids": [
+    "6d92af20-ff01-4f95-bd73-0de60ddb961e",
+    "0319832d-035c-490f-b564-49bfe523a0fc",
+    "639f3603-4ea8-410b-91a5-eccab40afe96",
+    "a47cf6a2-04cb-49b3-846e-5f6b0175c75e",
+    "9dfeddd7-ce96-488c-ad5c-bb09680f5e6c"
+   ],
+   "query_rank_ids": [
+    "4a86978f-4323-4890-8404-12d6ed387267",
+    "32d5e42a-3e7b-4c26-998d-2ba1106f27be",
+    "639f3603-4ea8-410b-91a5-eccab40afe96",
+    "6d92af20-ff01-4f95-bd73-0de60ddb961e",
+    "19d8e10d-ed29-40d3-a126-53f3e2b7e0ee"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q078": {
+   "qid": "q078",
+   "n_pool": 50,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "51c65b5e-94bf-416e-a733-af2ea3e1397f",
+    "51f6322c-c623-4dfd-8dd5-36f8669b3c72",
+    "0ad61aec-b9e0-46ee-b2e1-17399009d5fe",
+    "32d5e42a-3e7b-4c26-998d-2ba1106f27be",
+    "7222f1e6-53c9-4da6-b9c8-792354279519"
+   ],
+   "claim_rank_ids": [
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "ad4766fa-e3f8-4baa-9cd5-ae29645cb1b7",
+    "0f8a5a3d-0f2b-48b2-ae6c-00cdd3de2a2c",
+    "08ea7d1f-a5ce-4790-96e5-0d4379809167",
+    "3f0bb5f6-283c-4b68-84b2-2d458f4ef67f"
+   ],
+   "query_rank_ids": [
+    "51c65b5e-94bf-416e-a733-af2ea3e1397f",
+    "51f6322c-c623-4dfd-8dd5-36f8669b3c72",
+    "0ad61aec-b9e0-46ee-b2e1-17399009d5fe",
+    "32d5e42a-3e7b-4c26-998d-2ba1106f27be",
+    "7222f1e6-53c9-4da6-b9c8-792354279519"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 5,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q079": {
+   "qid": "q079",
+   "n_pool": 50,
+   "n_genuine_claims": 24,
+   "baseline_ids": [
+    "c30f2d86-19d9-439a-b713-c1469eba5434",
+    "e6988c58-e1ee-4118-9596-1cfbce827607",
+    "34d24dea-92d5-4810-a288-07891e9d1dc2",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "eade3219-4e24-46bf-9abd-b8de2e65874e"
+   ],
+   "claim_rank_ids": [
+    "34d24dea-92d5-4810-a288-07891e9d1dc2",
+    "eade3219-4e24-46bf-9abd-b8de2e65874e",
+    "e6988c58-e1ee-4118-9596-1cfbce827607",
+    "e7b633b6-f98d-478f-984a-23e43ace9eab",
+    "2175ccf0-29a9-4d04-a48f-23ca9f00cbcc"
+   ],
+   "query_rank_ids": [
+    "c30f2d86-19d9-439a-b713-c1469eba5434",
+    "e6988c58-e1ee-4118-9596-1cfbce827607",
+    "34d24dea-92d5-4810-a288-07891e9d1dc2",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "eade3219-4e24-46bf-9abd-b8de2e65874e"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q080": {
+   "qid": "q080",
+   "n_pool": 50,
+   "n_genuine_claims": 24,
+   "baseline_ids": [
+    "90cad7b0-5e6f-442b-958a-1d157d59d591",
+    "3763fa33-4a7b-4fb3-b960-9940e4a49381",
+    "443af52a-1921-461b-8455-719f96e7430c",
+    "25a6a4da-e189-4dd9-91ce-1590bf9bffee",
+    "efd0a710-5d4c-4a23-936a-e336cadb0ce0"
+   ],
+   "claim_rank_ids": [
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb",
+    "33fee809-c2a4-4264-90a1-ad5ff76c85c0",
+    "efda6fb4-2b65-4a9d-b74c-0d723af651fe",
+    "955a5779-7cac-4728-aaae-9a228b24263c",
+    "4c713496-e06f-4411-94fb-3b13d38db1e0"
+   ],
+   "query_rank_ids": [
+    "90cad7b0-5e6f-442b-958a-1d157d59d591",
+    "3763fa33-4a7b-4fb3-b960-9940e4a49381",
+    "443af52a-1921-461b-8455-719f96e7430c",
+    "25a6a4da-e189-4dd9-91ce-1590bf9bffee",
+    "efd0a710-5d4c-4a23-936a-e336cadb0ce0"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 5,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q081": {
+   "qid": "q081",
+   "n_pool": 50,
+   "n_genuine_claims": 17,
+   "baseline_ids": [
+    "af37707c-912c-4b52-bb24-b773306f7182",
+    "4328ee27-c85d-4279-8478-98475fef3b80",
+    "452b8be7-8925-444a-9b03-6904139182d8",
+    "5ecab3c3-8451-4ec1-9ac7-9180429e50e9",
+    "c397fe59-dbf5-4a56-93a1-fd409eca0529"
+   ],
+   "claim_rank_ids": [
+    "af37707c-912c-4b52-bb24-b773306f7182",
+    "4328ee27-c85d-4279-8478-98475fef3b80",
+    "c397fe59-dbf5-4a56-93a1-fd409eca0529",
+    "46cb05c0-bea8-497e-8bb6-fd1d4c3efe63",
+    "0b83ead8-c551-4fab-b020-b21cffd2356c"
+   ],
+   "query_rank_ids": [
+    "af37707c-912c-4b52-bb24-b773306f7182",
+    "4328ee27-c85d-4279-8478-98475fef3b80",
+    "452b8be7-8925-444a-9b03-6904139182d8",
+    "5ecab3c3-8451-4ec1-9ac7-9180429e50e9",
+    "c397fe59-dbf5-4a56-93a1-fd409eca0529"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q082": {
+   "qid": "q082",
+   "n_pool": 50,
+   "n_genuine_claims": 19,
+   "baseline_ids": [
+    "32965be5-85a2-4674-bc96-384783fa3fc6",
+    "c6ac4430-5048-487e-bc9f-8b11da0318de",
+    "856fabea-ff3b-45a1-bb1b-4036d58625a7",
+    "099dd2c0-879d-4c7a-ba58-20009886b584",
+    "3e976220-a1b7-43b4-b214-0541b6c7ee00"
+   ],
+   "claim_rank_ids": [
+    "856fabea-ff3b-45a1-bb1b-4036d58625a7",
+    "32965be5-85a2-4674-bc96-384783fa3fc6",
+    "8db6e474-fd90-4330-bd4e-2d37ae2c13da",
+    "16d07647-4e52-41a4-a6f4-fff858f0c72f",
+    "574b614d-0fc4-47bf-bbcc-77a059217bc1"
+   ],
+   "query_rank_ids": [
+    "32965be5-85a2-4674-bc96-384783fa3fc6",
+    "c6ac4430-5048-487e-bc9f-8b11da0318de",
+    "856fabea-ff3b-45a1-bb1b-4036d58625a7",
+    "099dd2c0-879d-4c7a-ba58-20009886b584",
+    "3e976220-a1b7-43b4-b214-0541b6c7ee00"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q083": {
+   "qid": "q083",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "fb129442-5df8-4472-af85-e314febc369a",
+    "8f5c65d5-fa93-4c0e-969e-9292dc4a8f72",
+    "fb344346-6282-4987-a422-b8e15af3ce15",
+    "450e6bb5-df73-4e8b-a5b1-b883346322e7",
+    "d1f6e3c3-9b58-41d9-b646-c8fb149ec164"
+   ],
+   "claim_rank_ids": [
+    "a0c01bc7-7f71-47e1-99a2-b770380faa31",
+    "fb129442-5df8-4472-af85-e314febc369a",
+    "8f5c65d5-fa93-4c0e-969e-9292dc4a8f72",
+    "fb344346-6282-4987-a422-b8e15af3ce15",
+    "450e6bb5-df73-4e8b-a5b1-b883346322e7"
+   ],
+   "query_rank_ids": [
+    "fb129442-5df8-4472-af85-e314febc369a",
+    "8f5c65d5-fa93-4c0e-969e-9292dc4a8f72",
+    "fb344346-6282-4987-a422-b8e15af3ce15",
+    "450e6bb5-df73-4e8b-a5b1-b883346322e7",
+    "d1f6e3c3-9b58-41d9-b646-c8fb149ec164"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q084": {
+   "qid": "q084",
+   "n_pool": 50,
+   "n_genuine_claims": 17,
+   "baseline_ids": [
+    "d414e800-9bbe-411c-a990-7270a72ae84e",
+    "3763fa33-4a7b-4fb3-b960-9940e4a49381",
+    "31b95d2f-0247-4100-bb7a-c4c35f8cfb02",
+    "e383017f-ae23-4dcf-bb4c-3be9192fd8b0",
+    "443af52a-1921-461b-8455-719f96e7430c"
+   ],
+   "claim_rank_ids": [
+    "443af52a-1921-461b-8455-719f96e7430c",
+    "ec79842c-73ed-420c-8868-5e7ca0a645d3",
+    "90cad7b0-5e6f-442b-958a-1d157d59d591",
+    "955a5779-7cac-4728-aaae-9a228b24263c",
+    "ae1e366f-5105-4015-b951-68f658ccff7d"
+   ],
+   "query_rank_ids": [
+    "d414e800-9bbe-411c-a990-7270a72ae84e",
+    "3763fa33-4a7b-4fb3-b960-9940e4a49381",
+    "31b95d2f-0247-4100-bb7a-c4c35f8cfb02",
+    "e383017f-ae23-4dcf-bb4c-3be9192fd8b0",
+    "443af52a-1921-461b-8455-719f96e7430c"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q085": {
+   "qid": "q085",
+   "n_pool": 50,
+   "n_genuine_claims": 26,
+   "baseline_ids": [
+    "c5ef785b-e9d0-4b81-97ae-35a73e86d92a",
+    "3a3ef600-7969-4096-b1e8-079d80db2d7f",
+    "4b60227a-3c6d-4fc2-a861-fc1f041ef31b",
+    "aa4ecae1-26da-4a72-b084-caf473b475ea",
+    "099dd2c0-879d-4c7a-ba58-20009886b584"
+   ],
+   "claim_rank_ids": [
+    "3a3ef600-7969-4096-b1e8-079d80db2d7f",
+    "099dd2c0-879d-4c7a-ba58-20009886b584",
+    "80df0059-2451-4f76-a354-6dad905308a3",
+    "f2b8b959-f769-4599-a4fe-ccaa776c4908",
+    "a87cfdf3-8c7e-41ca-a6e6-532006fdf5ab"
+   ],
+   "query_rank_ids": [
+    "c5ef785b-e9d0-4b81-97ae-35a73e86d92a",
+    "3a3ef600-7969-4096-b1e8-079d80db2d7f",
+    "4b60227a-3c6d-4fc2-a861-fc1f041ef31b",
+    "aa4ecae1-26da-4a72-b084-caf473b475ea",
+    "099dd2c0-879d-4c7a-ba58-20009886b584"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q086": {
+   "qid": "q086",
+   "n_pool": 50,
+   "n_genuine_claims": 25,
+   "baseline_ids": [
+    "44098680-dced-409a-af9b-6c38dcda8af9",
+    "ed8c3a22-7af7-4490-b5d5-77ab466314e4",
+    "c3c461ea-22d5-4c11-9556-77ba69c9afce",
+    "bbacebc2-0555-4663-a314-13bfc98959bc",
+    "ec45d2cf-565c-4094-90ed-0504610ba8fb"
+   ],
+   "claim_rank_ids": [
+    "44098680-dced-409a-af9b-6c38dcda8af9",
+    "33fee809-c2a4-4264-90a1-ad5ff76c85c0",
+    "316c67b1-ef5b-4e79-b6c8-ddeefeee8cf2",
+    "443af52a-1921-461b-8455-719f96e7430c",
+    "ed49e118-117e-4cd7-8ff4-f2f2f2c2f9cd"
+   ],
+   "query_rank_ids": [
+    "44098680-dced-409a-af9b-6c38dcda8af9",
+    "ed8c3a22-7af7-4490-b5d5-77ab466314e4",
+    "c3c461ea-22d5-4c11-9556-77ba69c9afce",
+    "bbacebc2-0555-4663-a314-13bfc98959bc",
+    "ec45d2cf-565c-4094-90ed-0504610ba8fb"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q087": {
+   "qid": "q087",
+   "n_pool": 50,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "44bbef24-2780-409b-85c5-2f33f8217681",
+    "7b79e6d6-677d-47fb-b599-744f4b2adcf3",
+    "88671bcb-33eb-4741-a7e5-01c47882d22d",
+    "a502900f-59d7-4840-81aa-525f5dadd935",
+    "e511a28f-f25b-4ad3-b646-1fce69db129e"
+   ],
+   "claim_rank_ids": [
+    "44bbef24-2780-409b-85c5-2f33f8217681",
+    "24f33a86-7c33-4c85-97c6-f32cc496a428",
+    "1b961c94-5d6c-4c6a-aff2-a35dd769cd10",
+    "b22730c9-575f-427d-91c2-fdae33156044",
+    "7b79e6d6-677d-47fb-b599-744f4b2adcf3"
+   ],
+   "query_rank_ids": [
+    "44bbef24-2780-409b-85c5-2f33f8217681",
+    "7b79e6d6-677d-47fb-b599-744f4b2adcf3",
+    "88671bcb-33eb-4741-a7e5-01c47882d22d",
+    "a502900f-59d7-4840-81aa-525f5dadd935",
+    "e511a28f-f25b-4ad3-b646-1fce69db129e"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q088": {
+   "qid": "q088",
+   "n_pool": 50,
+   "n_genuine_claims": 20,
+   "baseline_ids": [
+    "937d2fb9-7861-4ebe-aed2-12689d3d1fff",
+    "56c3c944-8cf8-4a43-850c-1fd055e614a2",
+    "68801ed3-aa38-4c6c-b0f1-54e9d348d6b5",
+    "6aa2119c-3ae4-4bde-a399-a0d01bd56ecf",
+    "517dab59-7a9e-4f41-b9bd-b2c675bb91da"
+   ],
+   "claim_rank_ids": [
+    "937d2fb9-7861-4ebe-aed2-12689d3d1fff",
+    "68801ed3-aa38-4c6c-b0f1-54e9d348d6b5",
+    "d1bde23f-4721-4586-8c18-877007a0a5c7",
+    "cfea166a-127d-4cc7-8eee-3282154f55cb",
+    "53e56480-4d4d-43bf-976c-a245c0cf8a2d"
+   ],
+   "query_rank_ids": [
+    "937d2fb9-7861-4ebe-aed2-12689d3d1fff",
+    "56c3c944-8cf8-4a43-850c-1fd055e614a2",
+    "68801ed3-aa38-4c6c-b0f1-54e9d348d6b5",
+    "6aa2119c-3ae4-4bde-a399-a0d01bd56ecf",
+    "517dab59-7a9e-4f41-b9bd-b2c675bb91da"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q089": {
+   "qid": "q089",
+   "n_pool": 50,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "3117ce0e-9f89-44e5-9ac6-ff64f961952a",
+    "67b25ff5-2f24-439e-a940-d12101fa589b",
+    "f54185fa-efb8-4bdc-84d7-2aa965fcab2c",
+    "788a9d41-2abc-4b39-8705-dcd8bb6ec617",
+    "c6ac4430-5048-487e-bc9f-8b11da0318de"
+   ],
+   "claim_rank_ids": [
+    "82e58b57-1e66-4fb5-843a-8b484f497558",
+    "67b25ff5-2f24-439e-a940-d12101fa589b",
+    "3117ce0e-9f89-44e5-9ac6-ff64f961952a",
+    "52bbebd9-d184-46a5-86c6-a5dccfcd1208",
+    "f54185fa-efb8-4bdc-84d7-2aa965fcab2c"
+   ],
+   "query_rank_ids": [
+    "3117ce0e-9f89-44e5-9ac6-ff64f961952a",
+    "67b25ff5-2f24-439e-a940-d12101fa589b",
+    "f54185fa-efb8-4bdc-84d7-2aa965fcab2c",
+    "788a9d41-2abc-4b39-8705-dcd8bb6ec617",
+    "c6ac4430-5048-487e-bc9f-8b11da0318de"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q090": {
+   "qid": "q090",
+   "n_pool": 50,
+   "n_genuine_claims": 22,
+   "baseline_ids": [
+    "3f0d0a71-6e63-40b8-921f-81e70dd7f733",
+    "33d41897-3593-4654-b786-14762bbabde2",
+    "dc90c5b3-0d09-4fe3-96d5-de7add9d2781",
+    "df28caba-6430-4126-9a09-748897f363a0",
+    "c1256a39-e455-4415-a9fb-d6d125a285a1"
+   ],
+   "claim_rank_ids": [
+    "dc90c5b3-0d09-4fe3-96d5-de7add9d2781",
+    "023332eb-5d85-42f8-bced-d44eb057383c",
+    "3f0d0a71-6e63-40b8-921f-81e70dd7f733",
+    "91ee21d0-067c-4d9f-a521-87c8630f6fcb",
+    "01ab5923-2723-4bd7-acd8-84dc8ae609e9"
+   ],
+   "query_rank_ids": [
+    "3f0d0a71-6e63-40b8-921f-81e70dd7f733",
+    "33d41897-3593-4654-b786-14762bbabde2",
+    "dc90c5b3-0d09-4fe3-96d5-de7add9d2781",
+    "df28caba-6430-4126-9a09-748897f363a0",
+    "c1256a39-e455-4415-a9fb-d6d125a285a1"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q091": {
+   "qid": "q091",
+   "n_pool": 50,
+   "n_genuine_claims": 24,
+   "baseline_ids": [
+    "d414e800-9bbe-411c-a990-7270a72ae84e",
+    "2af6431a-4fbb-4ed5-9143-fddafafc3877",
+    "3763fa33-4a7b-4fb3-b960-9940e4a49381",
+    "443af52a-1921-461b-8455-719f96e7430c",
+    "25a6a4da-e189-4dd9-91ce-1590bf9bffee"
+   ],
+   "claim_rank_ids": [
+    "d414e800-9bbe-411c-a990-7270a72ae84e",
+    "443af52a-1921-461b-8455-719f96e7430c",
+    "efd0a710-5d4c-4a23-936a-e336cadb0ce0",
+    "2af6431a-4fbb-4ed5-9143-fddafafc3877",
+    "1d1e027a-5d30-4266-8ff8-7be7d69b2a82"
+   ],
+   "query_rank_ids": [
+    "d414e800-9bbe-411c-a990-7270a72ae84e",
+    "2af6431a-4fbb-4ed5-9143-fddafafc3877",
+    "3763fa33-4a7b-4fb3-b960-9940e4a49381",
+    "443af52a-1921-461b-8455-719f96e7430c",
+    "25a6a4da-e189-4dd9-91ce-1590bf9bffee"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q092": {
+   "qid": "q092",
+   "n_pool": 50,
+   "n_genuine_claims": 28,
+   "baseline_ids": [
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4",
+    "068c4b75-6164-4178-b5ef-919abeb7272f",
+    "a70c6671-6c4f-48c1-9250-37cfc29a8daa"
+   ],
+   "claim_rank_ids": [
+    "1666595e-e9d5-4584-8a82-c79a760edc75",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4",
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "33f8e1d7-983b-4d16-b1ea-ecb746181e99",
+    "a3001428-b634-4282-91fa-926028fec427"
+   ],
+   "query_rank_ids": [
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4",
+    "068c4b75-6164-4178-b5ef-919abeb7272f",
+    "a70c6671-6c4f-48c1-9250-37cfc29a8daa"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q093": {
+   "qid": "q093",
+   "n_pool": 50,
+   "n_genuine_claims": 14,
+   "baseline_ids": [
+    "a70c6671-6c4f-48c1-9250-37cfc29a8daa",
+    "8ebfd7ad-758b-4ac0-a5d4-30581b0babed",
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4"
+   ],
+   "claim_rank_ids": [
+    "a70c6671-6c4f-48c1-9250-37cfc29a8daa",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2",
+    "21f1d151-a51f-4dd6-b67a-6da91f03707e",
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "b3e0bed3-cacd-4b08-a5d6-e3306dfccd95"
+   ],
+   "query_rank_ids": [
+    "a70c6671-6c4f-48c1-9250-37cfc29a8daa",
+    "8ebfd7ad-758b-4ac0-a5d4-30581b0babed",
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q094": {
+   "qid": "q094",
+   "n_pool": 50,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "078abcb1-5811-410c-93d1-fe7dccb80d59",
+    "745918ff-6593-4598-8683-562261bfc70f",
+    "92adb29a-ebfd-4af2-a2e7-1b5fda26c74a",
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "cea3ac2b-2f8e-4b37-8b65-d10fe6599352"
+   ],
+   "claim_rank_ids": [
+    "745918ff-6593-4598-8683-562261bfc70f",
+    "9b5f64ab-5dad-4b60-b822-df8c82d1595f",
+    "92adb29a-ebfd-4af2-a2e7-1b5fda26c74a",
+    "cea3ac2b-2f8e-4b37-8b65-d10fe6599352",
+    "078abcb1-5811-410c-93d1-fe7dccb80d59"
+   ],
+   "query_rank_ids": [
+    "078abcb1-5811-410c-93d1-fe7dccb80d59",
+    "745918ff-6593-4598-8683-562261bfc70f",
+    "92adb29a-ebfd-4af2-a2e7-1b5fda26c74a",
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "cea3ac2b-2f8e-4b37-8b65-d10fe6599352"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q095": {
+   "qid": "q095",
+   "n_pool": 50,
+   "n_genuine_claims": 21,
+   "baseline_ids": [
+    "e383017f-ae23-4dcf-bb4c-3be9192fd8b0",
+    "31b95d2f-0247-4100-bb7a-c4c35f8cfb02",
+    "bc73313d-5909-4278-af8c-515998800e4f",
+    "d414e800-9bbe-411c-a990-7270a72ae84e",
+    "95740955-47c5-4f85-9b62-8c39b698408b"
+   ],
+   "claim_rank_ids": [
+    "e383017f-ae23-4dcf-bb4c-3be9192fd8b0",
+    "95740955-47c5-4f85-9b62-8c39b698408b",
+    "bc73313d-5909-4278-af8c-515998800e4f",
+    "ec79842c-73ed-420c-8868-5e7ca0a645d3",
+    "5f277845-6045-4dd3-a403-90039b8ff61f"
+   ],
+   "query_rank_ids": [
+    "e383017f-ae23-4dcf-bb4c-3be9192fd8b0",
+    "31b95d2f-0247-4100-bb7a-c4c35f8cfb02",
+    "bc73313d-5909-4278-af8c-515998800e4f",
+    "d414e800-9bbe-411c-a990-7270a72ae84e",
+    "95740955-47c5-4f85-9b62-8c39b698408b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q096": {
+   "qid": "q096",
+   "n_pool": 50,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "fd6d6cbd-6d3c-49b1-b27f-eb2ebe3a6881",
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "e87c539d-f961-4ca8-a591-dde8fb67d860",
+    "5dbe3475-4446-4832-a906-fef10acae756",
+    "1c3433f0-3744-4c17-a259-a6a2d7f2667c"
+   ],
+   "claim_rank_ids": [
+    "fd6d6cbd-6d3c-49b1-b27f-eb2ebe3a6881",
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "1036e46a-7910-4bf8-91d5-17a95caea80b",
+    "1f6f354c-7ba2-4e82-9cac-611428104d86",
+    "ccbf29f1-6ea2-463e-9ce9-10feea6badb7"
+   ],
+   "query_rank_ids": [
+    "fd6d6cbd-6d3c-49b1-b27f-eb2ebe3a6881",
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "e87c539d-f961-4ca8-a591-dde8fb67d860",
+    "5dbe3475-4446-4832-a906-fef10acae756",
+    "1c3433f0-3744-4c17-a259-a6a2d7f2667c"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q097": {
+   "qid": "q097",
+   "n_pool": 50,
+   "n_genuine_claims": 15,
+   "baseline_ids": [
+    "e4cd5f6e-2c1d-4341-ac09-f5cebbd92fab",
+    "9ffc333d-a05b-4c22-bfa1-e9050955f2f9",
+    "defed66f-9dcc-4d00-8507-108a4c191a35",
+    "5df62b03-5c58-4a78-ad34-60078baf470b",
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969"
+   ],
+   "claim_rank_ids": [
+    "6651f9a1-eb12-4cc1-94c5-1dea3a3a2dd2",
+    "defed66f-9dcc-4d00-8507-108a4c191a35",
+    "c3994a1f-b8fd-45e0-9fdd-ce4862b42dc6",
+    "c8bce649-3975-485b-a68c-3ef0eb67ad05",
+    "b2d9b180-f12d-4090-b9b8-0121fd350f1a"
+   ],
+   "query_rank_ids": [
+    "e4cd5f6e-2c1d-4341-ac09-f5cebbd92fab",
+    "9ffc333d-a05b-4c22-bfa1-e9050955f2f9",
+    "defed66f-9dcc-4d00-8507-108a4c191a35",
+    "5df62b03-5c58-4a78-ad34-60078baf470b",
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q098": {
+   "qid": "q098",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "a70c6671-6c4f-48c1-9250-37cfc29a8daa",
+    "8ebfd7ad-758b-4ac0-a5d4-30581b0babed",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4"
+   ],
+   "claim_rank_ids": [
+    "b4be2a94-6482-450e-8087-de692bdc8bb4",
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "a70c6671-6c4f-48c1-9250-37cfc29a8daa",
+    "8ebfd7ad-758b-4ac0-a5d4-30581b0babed",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2"
+   ],
+   "query_rank_ids": [
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "a70c6671-6c4f-48c1-9250-37cfc29a8daa",
+    "8ebfd7ad-758b-4ac0-a5d4-30581b0babed",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q099": {
+   "qid": "q099",
+   "n_pool": 50,
+   "n_genuine_claims": 16,
+   "baseline_ids": [
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4",
+    "a5befecc-03b2-4a01-8233-27c0e1ccc75b",
+    "2518fb80-62c9-4a45-a72b-9d0c37490115"
+   ],
+   "claim_rank_ids": [
+    "2518fb80-62c9-4a45-a72b-9d0c37490115",
+    "a5befecc-03b2-4a01-8233-27c0e1ccc75b",
+    "396a964f-f5fd-4905-a165-3e33da58d3b3",
+    "7db0a58f-b14a-4cf2-8692-9eb4a2ca3aba",
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d"
+   ],
+   "query_rank_ids": [
+    "563c76ef-61a8-4fe3-8d4e-f60b6b46d78d",
+    "79978ccd-f82c-48c2-a861-66bd88a28ba2",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4",
+    "a5befecc-03b2-4a01-8233-27c0e1ccc75b",
+    "2518fb80-62c9-4a45-a72b-9d0c37490115"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q100": {
+   "qid": "q100",
+   "n_pool": 50,
+   "n_genuine_claims": 10,
+   "baseline_ids": [
+    "2cf12d70-6b91-4ae7-808a-ff097db03eb5",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "a3e1db88-5bea-4dec-b918-1df69d8d0ba1"
+   ],
+   "claim_rank_ids": [
+    "2cf12d70-6b91-4ae7-808a-ff097db03eb5",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "cf42a3a5-99c2-4f69-9820-2ab8c0053a8e",
+    "5b773931-dd65-4849-b530-0cc00616a6a4",
+    "bd0ae553-ff6a-4d40-a07a-84b21b8059f0"
+   ],
+   "query_rank_ids": [
+    "2cf12d70-6b91-4ae7-808a-ff097db03eb5",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "a3e1db88-5bea-4dec-b918-1df69d8d0ba1"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q101": {
+   "qid": "q101",
+   "n_pool": 50,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "c0d1ef89-1581-4241-8f55-f6a79b8e3bf1",
+    "e19ca5a4-dba9-4cd5-ae20-223824109ae2",
+    "301fef32-9619-4b24-9234-8cad04085626",
+    "8d68d64b-c609-4adc-8908-ce84a7f3bab8",
+    "65574d2a-0adc-4fa8-bc87-289e2ce7f237"
+   ],
+   "claim_rank_ids": [
+    "57862fd3-3243-4885-b483-7c30d7d0c227",
+    "7af2c76f-5d8a-43cf-b8ef-df48eba359e7",
+    "e75a4d4b-624d-4d96-981a-6c92d574c274",
+    "06cce26a-d77d-4dbe-b28b-8104a6874831",
+    "b4e2c0bc-3837-46de-9a5c-ed43eff5d730"
+   ],
+   "query_rank_ids": [
+    "c0d1ef89-1581-4241-8f55-f6a79b8e3bf1",
+    "e19ca5a4-dba9-4cd5-ae20-223824109ae2",
+    "301fef32-9619-4b24-9234-8cad04085626",
+    "8d68d64b-c609-4adc-8908-ce84a7f3bab8",
+    "65574d2a-0adc-4fa8-bc87-289e2ce7f237"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 5,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q102": {
+   "qid": "q102",
+   "n_pool": 50,
+   "n_genuine_claims": 16,
+   "baseline_ids": [
+    "9642163c-35aa-4139-924c-0a1ab4d72d4e",
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2",
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "b5bc0e55-dc44-4fac-89c0-a3599343ed4b",
+    "9b3e428e-289a-4529-8020-303e4a61b8f3"
+   ],
+   "claim_rank_ids": [
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2",
+    "9642163c-35aa-4139-924c-0a1ab4d72d4e",
+    "b5bc0e55-dc44-4fac-89c0-a3599343ed4b",
+    "9b3e428e-289a-4529-8020-303e4a61b8f3",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7"
+   ],
+   "query_rank_ids": [
+    "9642163c-35aa-4139-924c-0a1ab4d72d4e",
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2",
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "b5bc0e55-dc44-4fac-89c0-a3599343ed4b",
+    "9b3e428e-289a-4529-8020-303e4a61b8f3"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q103": {
+   "qid": "q103",
+   "n_pool": 50,
+   "n_genuine_claims": 20,
+   "baseline_ids": [
+    "e9149e2b-ae06-49eb-9601-95e1a53aa60a",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582",
+    "458da14c-87df-4420-aba9-738a732d3715",
+    "1f4af3e6-eb02-483a-af23-d3f67679241b"
+   ],
+   "claim_rank_ids": [
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "8ecd12f7-7cc3-4799-aefd-4283a6970aff",
+    "a5aaf59b-b251-4d98-bfa0-250e7506ad54",
+    "6b3a8b56-76ee-4771-afd9-244083e8e2d6",
+    "e9149e2b-ae06-49eb-9601-95e1a53aa60a"
+   ],
+   "query_rank_ids": [
+    "e9149e2b-ae06-49eb-9601-95e1a53aa60a",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582",
+    "458da14c-87df-4420-aba9-738a732d3715",
+    "1f4af3e6-eb02-483a-af23-d3f67679241b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q104": {
+   "qid": "q104",
+   "n_pool": 50,
+   "n_genuine_claims": 16,
+   "baseline_ids": [
+    "f8bf806d-293d-4f51-9b24-f4adc57ccf47",
+    "69e1c029-5a51-4ef3-b759-286e2353f4a2",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "fd21d35d-1d1b-4b0c-8919-859c0a99154b",
+    "6356cd59-beb7-4283-bb9c-82f5dc170d62"
+   ],
+   "claim_rank_ids": [
+    "69e1c029-5a51-4ef3-b759-286e2353f4a2",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "47e449b8-4ec7-47af-93bc-6e53503b9f5b",
+    "431f8b58-9eea-4c59-a69f-3f85de2d5b1f",
+    "493ebae2-82ee-429e-afc6-1338d1338582"
+   ],
+   "query_rank_ids": [
+    "f8bf806d-293d-4f51-9b24-f4adc57ccf47",
+    "69e1c029-5a51-4ef3-b759-286e2353f4a2",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "fd21d35d-1d1b-4b0c-8919-859c0a99154b",
+    "6356cd59-beb7-4283-bb9c-82f5dc170d62"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q105": {
+   "qid": "q105",
+   "n_pool": 50,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "c0d1ef89-1581-4241-8f55-f6a79b8e3bf1",
+    "301fef32-9619-4b24-9234-8cad04085626",
+    "e19ca5a4-dba9-4cd5-ae20-223824109ae2",
+    "7af2c76f-5d8a-43cf-b8ef-df48eba359e7",
+    "8d68d64b-c609-4adc-8908-ce84a7f3bab8"
+   ],
+   "claim_rank_ids": [
+    "7af2c76f-5d8a-43cf-b8ef-df48eba359e7",
+    "87557d66-55d2-434f-80ff-ee351bdd45c1",
+    "6dc993e1-7d35-405a-b40e-37616d5a9647",
+    "8d8a9aaa-a64b-4ecc-b0bf-299c5d03e708",
+    "3406a6da-a317-40d5-9ec6-b20d5a3081e3"
+   ],
+   "query_rank_ids": [
+    "c0d1ef89-1581-4241-8f55-f6a79b8e3bf1",
+    "301fef32-9619-4b24-9234-8cad04085626",
+    "e19ca5a4-dba9-4cd5-ae20-223824109ae2",
+    "7af2c76f-5d8a-43cf-b8ef-df48eba359e7",
+    "8d68d64b-c609-4adc-8908-ce84a7f3bab8"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q106": {
+   "qid": "q106",
+   "n_pool": 50,
+   "n_genuine_claims": 7,
+   "baseline_ids": [
+    "f925cda0-798a-4150-a309-79b8dc9fb5bf",
+    "914003a8-831e-455d-a876-e6dc1394cd8c",
+    "2037f002-0180-4829-9f97-cda9aadd1838",
+    "ba79b50b-aa0e-437d-a2e3-69a7748d605a",
+    "23b9f749-c93a-4a81-b208-0dc066f60fd2"
+   ],
+   "claim_rank_ids": [
+    "96c5bc40-f756-4905-899e-518dc6c513d7",
+    "90bf2c75-1a32-4eca-9e77-14494e527e53",
+    "13686c5f-9b8f-4e87-bf4f-1673f9883531",
+    "c7fb2707-ed45-414f-8b93-9680502043c0",
+    "f158a5c8-1f47-486f-be09-1d08d0620287"
+   ],
+   "query_rank_ids": [
+    "f925cda0-798a-4150-a309-79b8dc9fb5bf",
+    "914003a8-831e-455d-a876-e6dc1394cd8c",
+    "2037f002-0180-4829-9f97-cda9aadd1838",
+    "ba79b50b-aa0e-437d-a2e3-69a7748d605a",
+    "23b9f749-c93a-4a81-b208-0dc066f60fd2"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 5,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q107": {
+   "qid": "q107",
+   "n_pool": 50,
+   "n_genuine_claims": 14,
+   "baseline_ids": [
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2",
+    "b5bc0e55-dc44-4fac-89c0-a3599343ed4b",
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "9642163c-35aa-4139-924c-0a1ab4d72d4e",
+    "b6d5d228-6e7b-4a00-ae70-198dcf0de529"
+   ],
+   "claim_rank_ids": [
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2",
+    "9642163c-35aa-4139-924c-0a1ab4d72d4e",
+    "c0d8d714-a049-4aa5-bd22-e4b5474bb5d5",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7",
+    "31eb5e88-039f-456c-8ccd-34062d5ed7dd"
+   ],
+   "query_rank_ids": [
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2",
+    "b5bc0e55-dc44-4fac-89c0-a3599343ed4b",
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "9642163c-35aa-4139-924c-0a1ab4d72d4e",
+    "b6d5d228-6e7b-4a00-ae70-198dcf0de529"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q108": {
+   "qid": "q108",
+   "n_pool": 50,
+   "n_genuine_claims": 9,
+   "baseline_ids": [
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "b5bc0e55-dc44-4fac-89c0-a3599343ed4b",
+    "9642163c-35aa-4139-924c-0a1ab4d72d4e",
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2",
+    "1d704db2-2d13-4dab-a4c4-623ed3ef23c3"
+   ],
+   "claim_rank_ids": [
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2",
+    "9642163c-35aa-4139-924c-0a1ab4d72d4e",
+    "f24247b7-8d8c-4377-88c3-eb34bf5246f2",
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "f70f760d-bc3e-47b5-8bc6-81992d210fbb"
+   ],
+   "query_rank_ids": [
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "b5bc0e55-dc44-4fac-89c0-a3599343ed4b",
+    "9642163c-35aa-4139-924c-0a1ab4d72d4e",
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2",
+    "1d704db2-2d13-4dab-a4c4-623ed3ef23c3"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q109": {
+   "qid": "q109",
+   "n_pool": 50,
+   "n_genuine_claims": 17,
+   "baseline_ids": [
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "cf76b187-2168-4428-9c70-08b8b223b4dc"
+   ],
+   "claim_rank_ids": [
+    "7ef4c4fa-7ff1-4530-b096-6ccc96afacb6",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "37ecf834-b35a-4672-bec4-2cb6a08adf9d",
+    "65ff82e6-3e6f-4ecb-8819-4e02313aab0e"
+   ],
+   "query_rank_ids": [
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "cf76b187-2168-4428-9c70-08b8b223b4dc"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q110": {
+   "qid": "q110",
+   "n_pool": 50,
+   "n_genuine_claims": 19,
+   "baseline_ids": [
+    "27b98b17-1ba4-42a5-a4c9-2fb6f8b7de97",
+    "a8c325d6-85fc-4746-b76e-a041980b57b1",
+    "a300bd6c-2447-459c-8943-02c476e8af90",
+    "c2df8fa4-d43b-45a6-a0ba-e9f6eef7cffe",
+    "18b91147-1abb-417b-a0a5-c4a781925d52"
+   ],
+   "claim_rank_ids": [
+    "d9f5bdde-1fa2-4f70-a1a5-9bcf782e1905",
+    "18b91147-1abb-417b-a0a5-c4a781925d52",
+    "81501d6f-53af-4165-be81-4930cfbd2183",
+    "27b98b17-1ba4-42a5-a4c9-2fb6f8b7de97",
+    "a300bd6c-2447-459c-8943-02c476e8af90"
+   ],
+   "query_rank_ids": [
+    "27b98b17-1ba4-42a5-a4c9-2fb6f8b7de97",
+    "a8c325d6-85fc-4746-b76e-a041980b57b1",
+    "a300bd6c-2447-459c-8943-02c476e8af90",
+    "c2df8fa4-d43b-45a6-a0ba-e9f6eef7cffe",
+    "18b91147-1abb-417b-a0a5-c4a781925d52"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q111": {
+   "qid": "q111",
+   "n_pool": 50,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "6e3dc8b6-a174-4898-977f-c092a1c52396",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "cf76b187-2168-4428-9c70-08b8b223b4dc"
+   ],
+   "claim_rank_ids": [
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "ced87851-8a26-41c1-a557-6f9e99a1542a",
+    "0a8d4e80-c83d-4296-b4e2-b76d059d56cc",
+    "ef451d76-9a01-45a9-ac7e-397305e982aa"
+   ],
+   "query_rank_ids": [
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "6e3dc8b6-a174-4898-977f-c092a1c52396",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "cf76b187-2168-4428-9c70-08b8b223b4dc"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q112": {
+   "qid": "q112",
+   "n_pool": 50,
+   "n_genuine_claims": 9,
+   "baseline_ids": [
+    "c0d1ef89-1581-4241-8f55-f6a79b8e3bf1",
+    "e19ca5a4-dba9-4cd5-ae20-223824109ae2",
+    "301fef32-9619-4b24-9234-8cad04085626",
+    "8d68d64b-c609-4adc-8908-ce84a7f3bab8",
+    "65574d2a-0adc-4fa8-bc87-289e2ce7f237"
+   ],
+   "claim_rank_ids": [
+    "7ef4c4fa-7ff1-4530-b096-6ccc96afacb6",
+    "7af2c76f-5d8a-43cf-b8ef-df48eba359e7",
+    "914003a8-831e-455d-a876-e6dc1394cd8c",
+    "7a6d5760-f6cb-4db2-be46-96e0abfb5850",
+    "43f64b71-5a1f-410a-8404-1241bc27be03"
+   ],
+   "query_rank_ids": [
+    "c0d1ef89-1581-4241-8f55-f6a79b8e3bf1",
+    "e19ca5a4-dba9-4cd5-ae20-223824109ae2",
+    "301fef32-9619-4b24-9234-8cad04085626",
+    "8d68d64b-c609-4adc-8908-ce84a7f3bab8",
+    "65574d2a-0adc-4fa8-bc87-289e2ce7f237"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 5,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q113": {
+   "qid": "q113",
+   "n_pool": 50,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "2c1f6c66-8bb5-490b-a044-c69a3046923f",
+    "b7b1c9b8-ecb4-462f-87dc-726027a8781b",
+    "2037f002-0180-4829-9f97-cda9aadd1838",
+    "2fde9a04-61e5-49d7-bd32-ee8ede703754",
+    "335e57dc-1c26-4616-bff6-71a6098e6b5b"
+   ],
+   "claim_rank_ids": [
+    "335e57dc-1c26-4616-bff6-71a6098e6b5b",
+    "2037f002-0180-4829-9f97-cda9aadd1838",
+    "2c1f6c66-8bb5-490b-a044-c69a3046923f",
+    "b7b1c9b8-ecb4-462f-87dc-726027a8781b",
+    "2fde9a04-61e5-49d7-bd32-ee8ede703754"
+   ],
+   "query_rank_ids": [
+    "2c1f6c66-8bb5-490b-a044-c69a3046923f",
+    "b7b1c9b8-ecb4-462f-87dc-726027a8781b",
+    "2037f002-0180-4829-9f97-cda9aadd1838",
+    "2fde9a04-61e5-49d7-bd32-ee8ede703754",
+    "335e57dc-1c26-4616-bff6-71a6098e6b5b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q114": {
+   "qid": "q114",
+   "n_pool": 50,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582",
+    "b395fc98-3369-4dff-b536-418e604e409b",
+    "ec035375-b6a5-4726-b555-fb3851053d0f"
+   ],
+   "claim_rank_ids": [
+    "ef1fe16e-c25c-43f5-a7e6-10872233b724",
+    "1dfeb19c-f658-4a7c-98d6-936365d95c1b",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582"
+   ],
+   "query_rank_ids": [
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582",
+    "b395fc98-3369-4dff-b536-418e604e409b",
+    "ec035375-b6a5-4726-b555-fb3851053d0f"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q115": {
+   "qid": "q115",
+   "n_pool": 50,
+   "n_genuine_claims": 10,
+   "baseline_ids": [
+    "2cf12d70-6b91-4ae7-808a-ff097db03eb5",
+    "13686c5f-9b8f-4e87-bf4f-1673f9883531",
+    "b7b1c9b8-ecb4-462f-87dc-726027a8781b",
+    "cbc4da05-62c6-4f53-a962-05973f441f32",
+    "494fc02d-bcc1-43c2-8350-ec63b605f921"
+   ],
+   "claim_rank_ids": [
+    "2cf12d70-6b91-4ae7-808a-ff097db03eb5",
+    "13686c5f-9b8f-4e87-bf4f-1673f9883531",
+    "c2df8fa4-d43b-45a6-a0ba-e9f6eef7cffe",
+    "cbc4da05-62c6-4f53-a962-05973f441f32",
+    "494fc02d-bcc1-43c2-8350-ec63b605f921"
+   ],
+   "query_rank_ids": [
+    "2cf12d70-6b91-4ae7-808a-ff097db03eb5",
+    "13686c5f-9b8f-4e87-bf4f-1673f9883531",
+    "b7b1c9b8-ecb4-462f-87dc-726027a8781b",
+    "cbc4da05-62c6-4f53-a962-05973f441f32",
+    "494fc02d-bcc1-43c2-8350-ec63b605f921"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q116": {
+   "qid": "q116",
+   "n_pool": 50,
+   "n_genuine_claims": 21,
+   "baseline_ids": [
+    "0d29d559-7d81-4d90-ba63-4e2b7ea042e2",
+    "c619cd5a-3757-4c6a-9aad-fff23b326e40",
+    "f176da80-999d-4c2b-90e2-38974af6cf24",
+    "21ef6ddb-d7e8-4d0d-a6cf-06596b551764",
+    "0d505ef0-71c0-4cbf-b0f7-ee5441da6526"
+   ],
+   "claim_rank_ids": [
+    "c619cd5a-3757-4c6a-9aad-fff23b326e40",
+    "0a3cd5ef-2bb0-4825-88f2-825906bf80da",
+    "f176da80-999d-4c2b-90e2-38974af6cf24",
+    "c5329cff-9042-4245-a1a7-cdb37ec823f3",
+    "28e5b732-f096-4da4-a517-323639059ba7"
+   ],
+   "query_rank_ids": [
+    "0d29d559-7d81-4d90-ba63-4e2b7ea042e2",
+    "c619cd5a-3757-4c6a-9aad-fff23b326e40",
+    "f176da80-999d-4c2b-90e2-38974af6cf24",
+    "21ef6ddb-d7e8-4d0d-a6cf-06596b551764",
+    "0d505ef0-71c0-4cbf-b0f7-ee5441da6526"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q117": {
+   "qid": "q117",
+   "n_pool": 50,
+   "n_genuine_claims": 25,
+   "baseline_ids": [
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "57862fd3-3243-4885-b483-7c30d7d0c227",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d"
+   ],
+   "claim_rank_ids": [
+    "0a8d4e80-c83d-4296-b4e2-b76d059d56cc",
+    "9a9815d4-826e-4b0a-a3a9-56ff4c8dea5f",
+    "e75a4d4b-624d-4d96-981a-6c92d574c274",
+    "a8194678-c939-4488-99bd-b8f56b74443b",
+    "57862fd3-3243-4885-b483-7c30d7d0c227"
+   ],
+   "query_rank_ids": [
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "57862fd3-3243-4885-b483-7c30d7d0c227",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q118": {
+   "qid": "q118",
+   "n_pool": 50,
+   "n_genuine_claims": 21,
+   "baseline_ids": [
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "b998f780-5814-410d-89b6-467f39c051cf",
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7"
+   ],
+   "claim_rank_ids": [
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "8ee549d8-bfde-4634-971f-bef4cbfc5c25",
+    "97fb33ec-7dfe-4777-bf88-95944b12cc71",
+    "7c0a29c2-7ddf-4edc-85dc-ca9ea252d21a",
+    "5ae11712-7683-4c83-990f-acfe4c62b92d"
+   ],
+   "query_rank_ids": [
+    "daab45d4-2e79-4d5f-8229-c0793cd9fa05",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "b998f780-5814-410d-89b6-467f39c051cf",
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q119": {
+   "qid": "q119",
+   "n_pool": 50,
+   "n_genuine_claims": 15,
+   "baseline_ids": [
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "b395fc98-3369-4dff-b536-418e604e409b",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582",
+    "bd7540e9-7436-4ab8-b656-e1d320b287e6"
+   ],
+   "claim_rank_ids": [
+    "bd7540e9-7436-4ab8-b656-e1d320b287e6",
+    "46ff5f2a-9baf-416e-879a-68103da4b21d",
+    "0cf8f14b-cce0-41e5-80d3-d13d283b9eb9",
+    "e75a4d4b-624d-4d96-981a-6c92d574c274",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582"
+   ],
+   "query_rank_ids": [
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "b395fc98-3369-4dff-b536-418e604e409b",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582",
+    "bd7540e9-7436-4ab8-b656-e1d320b287e6"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q120": {
+   "qid": "q120",
+   "n_pool": 50,
+   "n_genuine_claims": 36,
+   "baseline_ids": [
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "4a2a38fc-d0d0-4a52-a7ed-baa6a2049d0b",
+    "2838ea0c-7471-4c08-8537-0ba47b99202d",
+    "b395fc98-3369-4dff-b536-418e604e409b"
+   ],
+   "claim_rank_ids": [
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "2838ea0c-7471-4c08-8537-0ba47b99202d",
+    "efe8def0-7f36-4d7e-a06f-921b61133386"
+   ],
+   "query_rank_ids": [
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "4a2a38fc-d0d0-4a52-a7ed-baa6a2049d0b",
+    "2838ea0c-7471-4c08-8537-0ba47b99202d",
+    "b395fc98-3369-4dff-b536-418e604e409b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q121": {
+   "qid": "q121",
+   "n_pool": 50,
+   "n_genuine_claims": 29,
+   "baseline_ids": [
+    "b395fc98-3369-4dff-b536-418e604e409b",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582"
+   ],
+   "claim_rank_ids": [
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "2bf117a8-20c8-46c6-8d45-323c68eabc7b",
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "ef1fe16e-c25c-43f5-a7e6-10872233b724"
+   ],
+   "query_rank_ids": [
+    "b395fc98-3369-4dff-b536-418e604e409b",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "4845996b-8fb4-44cd-a439-cc09a9d43582"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q122": {
+   "qid": "q122",
+   "n_pool": 50,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "6e3dc8b6-a174-4898-977f-c092a1c52396",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "cf76b187-2168-4428-9c70-08b8b223b4dc"
+   ],
+   "claim_rank_ids": [
+    "454d9e6b-b27c-40f7-ae5b-1b3c5361d565",
+    "6e3dc8b6-a174-4898-977f-c092a1c52396",
+    "ebca485e-c6e3-4f47-8e9c-e787919cffd0",
+    "b7b1c9b8-ecb4-462f-87dc-726027a8781b",
+    "381199ea-6c7e-4576-b8de-990e10794704"
+   ],
+   "query_rank_ids": [
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "6e3dc8b6-a174-4898-977f-c092a1c52396",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d",
+    "cf76b187-2168-4428-9c70-08b8b223b4dc"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q123": {
+   "qid": "q123",
+   "n_pool": 50,
+   "n_genuine_claims": 20,
+   "baseline_ids": [
+    "c0d1ef89-1581-4241-8f55-f6a79b8e3bf1",
+    "4a2a38fc-d0d0-4a52-a7ed-baa6a2049d0b",
+    "301fef32-9619-4b24-9234-8cad04085626",
+    "b4e2c0bc-3837-46de-9a5c-ed43eff5d730",
+    "216cfab7-71ec-4ec3-bacd-ac5d9bb3ce24"
+   ],
+   "claim_rank_ids": [
+    "7af2c76f-5d8a-43cf-b8ef-df48eba359e7",
+    "4a2a38fc-d0d0-4a52-a7ed-baa6a2049d0b",
+    "301fef32-9619-4b24-9234-8cad04085626",
+    "1831de61-4af7-421f-9ccb-92fd5625d15b",
+    "b4e2c0bc-3837-46de-9a5c-ed43eff5d730"
+   ],
+   "query_rank_ids": [
+    "c0d1ef89-1581-4241-8f55-f6a79b8e3bf1",
+    "4a2a38fc-d0d0-4a52-a7ed-baa6a2049d0b",
+    "301fef32-9619-4b24-9234-8cad04085626",
+    "b4e2c0bc-3837-46de-9a5c-ed43eff5d730",
+    "216cfab7-71ec-4ec3-bacd-ac5d9bb3ce24"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q124": {
+   "qid": "q124",
+   "n_pool": 50,
+   "n_genuine_claims": 18,
+   "baseline_ids": [
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "9ecc6f33-02fb-4445-95c4-5af1d1994a69",
+    "b395fc98-3369-4dff-b536-418e604e409b",
+    "2bf117a8-20c8-46c6-8d45-323c68eabc7b"
+   ],
+   "claim_rank_ids": [
+    "ec035375-b6a5-4726-b555-fb3851053d0f",
+    "37ecf834-b35a-4672-bec4-2cb6a08adf9d",
+    "1dfeb19c-f658-4a7c-98d6-936365d95c1b",
+    "2838ea0c-7471-4c08-8537-0ba47b99202d",
+    "7a6d5760-f6cb-4db2-be46-96e0abfb5850"
+   ],
+   "query_rank_ids": [
+    "43b8f4e8-0b8b-4ba0-97aa-3e5ba5777896",
+    "648ce4b0-85c2-42e1-8792-e73e957e6b24",
+    "9ecc6f33-02fb-4445-95c4-5af1d1994a69",
+    "b395fc98-3369-4dff-b536-418e604e409b",
+    "2bf117a8-20c8-46c6-8d45-323c68eabc7b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 5,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q125": {
+   "qid": "q125",
+   "n_pool": 50,
+   "n_genuine_claims": 14,
+   "baseline_ids": [
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "6e3dc8b6-a174-4898-977f-c092a1c52396",
+    "cf76b187-2168-4428-9c70-08b8b223b4dc",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d"
+   ],
+   "claim_rank_ids": [
+    "7c611757-df63-4858-b2c9-113305901ee6",
+    "97fb33ec-7dfe-4777-bf88-95944b12cc71",
+    "8d8a9aaa-a64b-4ecc-b0bf-299c5d03e708",
+    "1d4dc983-8abe-4c2a-9cef-24f9d9fc6474",
+    "e719a308-1b7c-4aa2-aa8f-bc36beacc7d0"
+   ],
+   "query_rank_ids": [
+    "3b69ddd9-fb5b-4aa6-93b4-3b158d7a455b",
+    "62c61c35-5796-4ccc-b0e7-f54f0eb217f7",
+    "6e3dc8b6-a174-4898-977f-c092a1c52396",
+    "cf76b187-2168-4428-9c70-08b8b223b4dc",
+    "9012933e-731f-4dd8-9931-5d61bebd9b3d"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 5,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q127": {
+   "qid": "q127",
+   "n_pool": 50,
+   "n_genuine_claims": 6,
+   "baseline_ids": [
+    "3bd58219-e0e1-485e-a054-77904ec15686",
+    "d3221ff0-a97c-4d44-9330-5defef96ad43",
+    "ee966536-831b-4be5-994b-52429e8d8915",
+    "19f00210-ef3c-4bd3-8737-cd6958478314",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d"
+   ],
+   "claim_rank_ids": [
+    "3bd58219-e0e1-485e-a054-77904ec15686",
+    "ce6d29d9-453e-4359-99bf-e7e40c56ee92",
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "d3221ff0-a97c-4d44-9330-5defef96ad43",
+    "ee966536-831b-4be5-994b-52429e8d8915"
+   ],
+   "query_rank_ids": [
+    "3bd58219-e0e1-485e-a054-77904ec15686",
+    "d3221ff0-a97c-4d44-9330-5defef96ad43",
+    "ee966536-831b-4be5-994b-52429e8d8915",
+    "19f00210-ef3c-4bd3-8737-cd6958478314",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q128": {
+   "qid": "q128",
+   "n_pool": 50,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "49c79783-2d45-4b8a-a3ca-d96a5fb612f2",
+    "b0b431f3-498f-4c0d-9610-b347cba787d4",
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "b1629999-1610-4d8b-aace-9bb6693d7f58",
+    "2143c830-aabc-412a-a220-2fb39c72f4f5"
+   ],
+   "claim_rank_ids": [
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "db2d0411-3e83-4b00-a79e-a5dfdded391e",
+    "cb9e0cbd-f5bb-45d5-8571-e0c9f60d8ea7",
+    "66365773-575a-4e56-87c4-c9c71544f65a",
+    "543f812f-6e8e-4222-a6de-212ac9216627"
+   ],
+   "query_rank_ids": [
+    "49c79783-2d45-4b8a-a3ca-d96a5fb612f2",
+    "b0b431f3-498f-4c0d-9610-b347cba787d4",
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "b1629999-1610-4d8b-aace-9bb6693d7f58",
+    "2143c830-aabc-412a-a220-2fb39c72f4f5"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q129": {
+   "qid": "q129",
+   "n_pool": 48,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "a9017e20-2d56-4766-bf17-b00d4e69eb60",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "b6f76d3a-0a62-489a-bcb1-ac144567192e"
+   ],
+   "claim_rank_ids": [
+    "a9017e20-2d56-4766-bf17-b00d4e69eb60",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "b6f76d3a-0a62-489a-bcb1-ac144567192e",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8"
+   ],
+   "query_rank_ids": [
+    "a9017e20-2d56-4766-bf17-b00d4e69eb60",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "b6f76d3a-0a62-489a-bcb1-ac144567192e"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q130": {
+   "qid": "q130",
+   "n_pool": 50,
+   "n_genuine_claims": 19,
+   "baseline_ids": [
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "9cccd2d7-f6ab-41f1-a0f9-eb3bd4a6a540",
+    "ef5f1e77-8ac9-4063-ba8f-120d4c641cf0",
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "06e5ac69-c286-47ed-bdd2-1e7462553ec6"
+   ],
+   "claim_rank_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "e0d01b4d-fab2-4786-8999-2bc9098f13c7",
+    "9cccd2d7-f6ab-41f1-a0f9-eb3bd4a6a540"
+   ],
+   "query_rank_ids": [
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "9cccd2d7-f6ab-41f1-a0f9-eb3bd4a6a540",
+    "ef5f1e77-8ac9-4063-ba8f-120d4c641cf0",
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "06e5ac69-c286-47ed-bdd2-1e7462553ec6"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q131": {
+   "qid": "q131",
+   "n_pool": 50,
+   "n_genuine_claims": 32,
+   "baseline_ids": [
+    "afd59cde-4041-4dba-aa54-6ef7c27c370d",
+    "5e30ecce-8ddb-4d77-9a69-75e1e406d3d8",
+    "6bc167ee-af33-4b59-a117-5f041316f4ff",
+    "4ff805ff-78c5-44bb-a0e5-e7ec0951fd18",
+    "d5a242e7-0ed1-4676-a721-30a8d13014ab"
+   ],
+   "claim_rank_ids": [
+    "4ff805ff-78c5-44bb-a0e5-e7ec0951fd18",
+    "2bcbbda2-75af-4d42-b1ae-edb21d6c1567",
+    "afd59cde-4041-4dba-aa54-6ef7c27c370d",
+    "5814e117-2645-403a-bc6f-a5938678deab",
+    "db3cf523-367a-4b29-9a43-9b71c1bea240"
+   ],
+   "query_rank_ids": [
+    "afd59cde-4041-4dba-aa54-6ef7c27c370d",
+    "5e30ecce-8ddb-4d77-9a69-75e1e406d3d8",
+    "6bc167ee-af33-4b59-a117-5f041316f4ff",
+    "4ff805ff-78c5-44bb-a0e5-e7ec0951fd18",
+    "d5a242e7-0ed1-4676-a721-30a8d13014ab"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q132": {
+   "qid": "q132",
+   "n_pool": 50,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "0c91b24b-9f98-4a7c-809a-c6510bf08898",
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "158cd28f-044c-42dd-8779-bc628d60dafb",
+    "bf05da18-4a4b-4f7e-bfce-239d04bf8027",
+    "95f14e9b-14b5-436b-b83b-24446cd54223"
+   ],
+   "claim_rank_ids": [
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "0c91b24b-9f98-4a7c-809a-c6510bf08898",
+    "b6f76d3a-0a62-489a-bcb1-ac144567192e",
+    "158cd28f-044c-42dd-8779-bc628d60dafb",
+    "bf05da18-4a4b-4f7e-bfce-239d04bf8027"
+   ],
+   "query_rank_ids": [
+    "0c91b24b-9f98-4a7c-809a-c6510bf08898",
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "158cd28f-044c-42dd-8779-bc628d60dafb",
+    "bf05da18-4a4b-4f7e-bfce-239d04bf8027",
+    "95f14e9b-14b5-436b-b83b-24446cd54223"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q133": {
+   "qid": "q133",
+   "n_pool": 50,
+   "n_genuine_claims": 18,
+   "baseline_ids": [
+    "3767c2d6-7b64-4d22-90eb-51619fe11220",
+    "9987558a-182b-43f6-b58e-ab8c31866bed",
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "e875e74a-938c-45e0-83d2-a709a672e132",
+    "0d64f298-608d-4fb9-8036-4475d8f70e9a"
+   ],
+   "claim_rank_ids": [
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "6cc70182-1e5e-41c3-b2ee-127ce9951a58",
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "e875e74a-938c-45e0-83d2-a709a672e132",
+    "1d070e51-fcca-4e92-8735-0ccdbf043a5b"
+   ],
+   "query_rank_ids": [
+    "3767c2d6-7b64-4d22-90eb-51619fe11220",
+    "9987558a-182b-43f6-b58e-ab8c31866bed",
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "e875e74a-938c-45e0-83d2-a709a672e132",
+    "0d64f298-608d-4fb9-8036-4475d8f70e9a"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q134": {
+   "qid": "q134",
+   "n_pool": 50,
+   "n_genuine_claims": 0,
+   "baseline_ids": [
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "3a85589f-ef18-45e9-9efb-7faa3d4af248",
+    "371d6698-753c-4854-82ea-584ed5e07b3c",
+    "f2eacfa9-df10-4aa5-8c47-04f13bc920d4",
+    "f2d0e219-a2ac-4a0b-b1ee-9c1f96216004"
+   ],
+   "claim_rank_ids": [
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "3a85589f-ef18-45e9-9efb-7faa3d4af248",
+    "371d6698-753c-4854-82ea-584ed5e07b3c",
+    "f2eacfa9-df10-4aa5-8c47-04f13bc920d4",
+    "f2d0e219-a2ac-4a0b-b1ee-9c1f96216004"
+   ],
+   "query_rank_ids": [
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "3a85589f-ef18-45e9-9efb-7faa3d4af248",
+    "371d6698-753c-4854-82ea-584ed5e07b3c",
+    "f2eacfa9-df10-4aa5-8c47-04f13bc920d4",
+    "f2d0e219-a2ac-4a0b-b1ee-9c1f96216004"
+   ],
+   "fallback": "no_genuine_claims",
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q135": {
+   "qid": "q135",
+   "n_pool": 50,
+   "n_genuine_claims": 24,
+   "baseline_ids": [
+    "b6f76d3a-0a62-489a-bcb1-ac144567192e",
+    "db3cf523-367a-4b29-9a43-9b71c1bea240",
+    "56fa918e-4b4b-4a1f-925a-be3fa2e32258",
+    "ef5c3d5c-7424-4160-9ecf-c05feb5b21ab",
+    "ece3a8c4-57c3-47b0-a442-7de830cec888"
+   ],
+   "claim_rank_ids": [
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "ece3a8c4-57c3-47b0-a442-7de830cec888",
+    "6f4e33a3-a350-4c0d-ae7d-ca7745cce7c7",
+    "d2f2feab-01d9-47db-b73b-ae56ba3e7f22"
+   ],
+   "query_rank_ids": [
+    "b6f76d3a-0a62-489a-bcb1-ac144567192e",
+    "db3cf523-367a-4b29-9a43-9b71c1bea240",
+    "56fa918e-4b4b-4a1f-925a-be3fa2e32258",
+    "ef5c3d5c-7424-4160-9ecf-c05feb5b21ab",
+    "ece3a8c4-57c3-47b0-a442-7de830cec888"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q136": {
+   "qid": "q136",
+   "n_pool": 50,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "8c3febb3-6bc8-4d1d-816f-267ab7257638",
+    "65d53437-8f99-4a09-be62-80d1dafbeb98",
+    "cb50e139-7839-491d-8807-9161936967ec",
+    "af309912-a337-4445-95cf-bf0c286632b9",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6"
+   ],
+   "claim_rank_ids": [
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "54f3bd96-0917-448a-90db-ec764937168d",
+    "a2216c32-c103-4195-b73a-1ff3ce00a3aa",
+    "8c3febb3-6bc8-4d1d-816f-267ab7257638",
+    "259d6c4a-fcdf-47fc-bde5-97b72cb159d9"
+   ],
+   "query_rank_ids": [
+    "8c3febb3-6bc8-4d1d-816f-267ab7257638",
+    "65d53437-8f99-4a09-be62-80d1dafbeb98",
+    "cb50e139-7839-491d-8807-9161936967ec",
+    "af309912-a337-4445-95cf-bf0c286632b9",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q137": {
+   "qid": "q137",
+   "n_pool": 49,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "e15cef54-8166-46cf-8c47-2f759429f914",
+    "1c320f56-b230-4e1a-9307-6da4fd384ad7",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "51f6322c-c623-4dfd-8dd5-36f8669b3c72"
+   ],
+   "claim_rank_ids": [
+    "e15cef54-8166-46cf-8c47-2f759429f914",
+    "1c320f56-b230-4e1a-9307-6da4fd384ad7",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "51f6322c-c623-4dfd-8dd5-36f8669b3c72"
+   ],
+   "query_rank_ids": [
+    "e15cef54-8166-46cf-8c47-2f759429f914",
+    "1c320f56-b230-4e1a-9307-6da4fd384ad7",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "51f6322c-c623-4dfd-8dd5-36f8669b3c72"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q138": {
+   "qid": "q138",
+   "n_pool": 50,
+   "n_genuine_claims": 5,
+   "baseline_ids": [
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "9cccd2d7-f6ab-41f1-a0f9-eb3bd4a6a540",
+    "ef5f1e77-8ac9-4063-ba8f-120d4c641cf0",
+    "06e5ac69-c286-47ed-bdd2-1e7462553ec6",
+    "9133b7e6-489e-476e-803a-66829b3575e0"
+   ],
+   "claim_rank_ids": [
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "8f3cf657-7df8-4943-9d5c-d112c83d025a",
+    "9cccd2d7-f6ab-41f1-a0f9-eb3bd4a6a540",
+    "ef5f1e77-8ac9-4063-ba8f-120d4c641cf0"
+   ],
+   "query_rank_ids": [
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "9cccd2d7-f6ab-41f1-a0f9-eb3bd4a6a540",
+    "ef5f1e77-8ac9-4063-ba8f-120d4c641cf0",
+    "06e5ac69-c286-47ed-bdd2-1e7462553ec6",
+    "9133b7e6-489e-476e-803a-66829b3575e0"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q139": {
+   "qid": "q139",
+   "n_pool": 50,
+   "n_genuine_claims": 6,
+   "baseline_ids": [
+    "6caa890a-df98-4897-84d5-20e320872255",
+    "e875e74a-938c-45e0-83d2-a709a672e132",
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "dfa87e82-4749-49c4-998b-45b64a6b25b2",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c"
+   ],
+   "claim_rank_ids": [
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "b7c9a37e-10e0-4b91-a98d-2f89544e8309",
+    "4ff805ff-78c5-44bb-a0e5-e7ec0951fd18",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "06e5ac69-c286-47ed-bdd2-1e7462553ec6"
+   ],
+   "query_rank_ids": [
+    "6caa890a-df98-4897-84d5-20e320872255",
+    "e875e74a-938c-45e0-83d2-a709a672e132",
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "dfa87e82-4749-49c4-998b-45b64a6b25b2",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q140": {
+   "qid": "q140",
+   "n_pool": 48,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "613ecf77-3fff-4d2a-9bd2-ba196880229f",
+    "7df17975-ea06-41a7-9734-b177eccf6d9e",
+    "0f8db67a-c7cd-4d10-b39a-f911e8f6d582",
+    "5814e117-2645-403a-bc6f-a5938678deab",
+    "406ddced-7eeb-4b13-8f08-b5569a9735f7"
+   ],
+   "claim_rank_ids": [
+    "613ecf77-3fff-4d2a-9bd2-ba196880229f",
+    "41ab175d-c371-4848-89d7-e246e5922861",
+    "5814e117-2645-403a-bc6f-a5938678deab",
+    "19346f63-f352-4c8d-9539-862d84aca1e7",
+    "f2d0e219-a2ac-4a0b-b1ee-9c1f96216004"
+   ],
+   "query_rank_ids": [
+    "613ecf77-3fff-4d2a-9bd2-ba196880229f",
+    "7df17975-ea06-41a7-9734-b177eccf6d9e",
+    "0f8db67a-c7cd-4d10-b39a-f911e8f6d582",
+    "5814e117-2645-403a-bc6f-a5938678deab",
+    "406ddced-7eeb-4b13-8f08-b5569a9735f7"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q141": {
+   "qid": "q141",
+   "n_pool": 50,
+   "n_genuine_claims": 6,
+   "baseline_ids": [
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "a1cae735-3edf-44c6-81e2-59ff1a4606a6",
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "68a10624-9423-4f80-9b78-95ff54e55ecb",
+    "270229b9-fc1e-4896-943e-eb93492bd058"
+   ],
+   "claim_rank_ids": [
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "5709f832-e087-4ae4-b6c9-c1b76e8d72b0",
+    "dfc8116a-ecb4-4fd6-b69e-83a6aac626a9",
+    "ab9a2ba9-120c-4f9c-8d88-89f56d179286",
+    "a1cae735-3edf-44c6-81e2-59ff1a4606a6"
+   ],
+   "query_rank_ids": [
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "a1cae735-3edf-44c6-81e2-59ff1a4606a6",
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "68a10624-9423-4f80-9b78-95ff54e55ecb",
+    "270229b9-fc1e-4896-943e-eb93492bd058"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q142": {
+   "qid": "q142",
+   "n_pool": 50,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "66365773-575a-4e56-87c4-c9c71544f65a",
+    "49c79783-2d45-4b8a-a3ca-d96a5fb612f2",
+    "65b8a663-e530-4b33-96bc-82d858aa9e25",
+    "543f812f-6e8e-4222-a6de-212ac9216627"
+   ],
+   "claim_rank_ids": [
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "0d64f298-608d-4fb9-8036-4475d8f70e9a",
+    "1db01dc4-f6ea-42c9-9cd6-f03605f6c02b",
+    "d1c9e218-46e5-4bf2-a36b-2797a4fe7d92",
+    "353d135f-4064-4353-b7eb-3b8fea63e8a2"
+   ],
+   "query_rank_ids": [
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "66365773-575a-4e56-87c4-c9c71544f65a",
+    "49c79783-2d45-4b8a-a3ca-d96a5fb612f2",
+    "65b8a663-e530-4b33-96bc-82d858aa9e25",
+    "543f812f-6e8e-4222-a6de-212ac9216627"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q143": {
+   "qid": "q143",
+   "n_pool": 50,
+   "n_genuine_claims": 16,
+   "baseline_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "ef5f1e77-8ac9-4063-ba8f-120d4c641cf0",
+    "8c3febb3-6bc8-4d1d-816f-267ab7257638",
+    "1fa1f8c7-21ca-48fc-83eb-99d96a2c6ada",
+    "52759940-71e9-4297-8e51-8da18009d98b"
+   ],
+   "claim_rank_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "52759940-71e9-4297-8e51-8da18009d98b",
+    "7399fe13-0468-4e8a-b75f-571171aa30f2"
+   ],
+   "query_rank_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "ef5f1e77-8ac9-4063-ba8f-120d4c641cf0",
+    "8c3febb3-6bc8-4d1d-816f-267ab7257638",
+    "1fa1f8c7-21ca-48fc-83eb-99d96a2c6ada",
+    "52759940-71e9-4297-8e51-8da18009d98b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q144": {
+   "qid": "q144",
+   "n_pool": 48,
+   "n_genuine_claims": 5,
+   "baseline_ids": [
+    "19346f63-f352-4c8d-9539-862d84aca1e7",
+    "a73f13a1-9a75-4442-886a-699ed8733f2e",
+    "b6203c88-b1d8-4026-89a1-3400e27e9947",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "0f8db67a-c7cd-4d10-b39a-f911e8f6d582"
+   ],
+   "claim_rank_ids": [
+    "0f8db67a-c7cd-4d10-b39a-f911e8f6d582",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "19346f63-f352-4c8d-9539-862d84aca1e7",
+    "a73f13a1-9a75-4442-886a-699ed8733f2e",
+    "b6203c88-b1d8-4026-89a1-3400e27e9947"
+   ],
+   "query_rank_ids": [
+    "19346f63-f352-4c8d-9539-862d84aca1e7",
+    "a73f13a1-9a75-4442-886a-699ed8733f2e",
+    "b6203c88-b1d8-4026-89a1-3400e27e9947",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "0f8db67a-c7cd-4d10-b39a-f911e8f6d582"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q145": {
+   "qid": "q145",
+   "n_pool": 50,
+   "n_genuine_claims": 6,
+   "baseline_ids": [
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "4bc6c5b0-9cea-430c-842a-aa9497d33602",
+    "0b265db4-d7fd-4522-9b1c-2c142e36125e",
+    "c98a24ea-2b8b-4d48-9a27-0c652892feb8",
+    "19a2a2bc-d9a3-4f5d-882c-65566269fb54"
+   ],
+   "claim_rank_ids": [
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "0b265db4-d7fd-4522-9b1c-2c142e36125e",
+    "4bc6c5b0-9cea-430c-842a-aa9497d33602",
+    "c98a24ea-2b8b-4d48-9a27-0c652892feb8",
+    "19a2a2bc-d9a3-4f5d-882c-65566269fb54"
+   ],
+   "query_rank_ids": [
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "4bc6c5b0-9cea-430c-842a-aa9497d33602",
+    "0b265db4-d7fd-4522-9b1c-2c142e36125e",
+    "c98a24ea-2b8b-4d48-9a27-0c652892feb8",
+    "19a2a2bc-d9a3-4f5d-882c-65566269fb54"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q146": {
+   "qid": "q146",
+   "n_pool": 50,
+   "n_genuine_claims": 16,
+   "baseline_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "8c3febb3-6bc8-4d1d-816f-267ab7257638",
+    "ef5f1e77-8ac9-4063-ba8f-120d4c641cf0",
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "52759940-71e9-4297-8e51-8da18009d98b"
+   ],
+   "claim_rank_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "4ff805ff-78c5-44bb-a0e5-e7ec0951fd18",
+    "e4e3a644-fc83-4fbc-a818-23aefc3f712a",
+    "801bb66b-3c26-445b-9362-2b4d291334cf"
+   ],
+   "query_rank_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "8c3febb3-6bc8-4d1d-816f-267ab7257638",
+    "ef5f1e77-8ac9-4063-ba8f-120d4c641cf0",
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "52759940-71e9-4297-8e51-8da18009d98b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q147": {
+   "qid": "q147",
+   "n_pool": 50,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "6a1caf77-3388-421f-8e82-845b482aac5b",
+    "2e106818-8b1d-4118-8cec-22999e08c9db",
+    "f2eacfa9-df10-4aa5-8c47-04f13bc920d4"
+   ],
+   "claim_rank_ids": [
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "e328ad28-cb13-4690-a232-6a9cfdd48f67",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "6a1caf77-3388-421f-8e82-845b482aac5b",
+    "2e106818-8b1d-4118-8cec-22999e08c9db"
+   ],
+   "query_rank_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "6a1caf77-3388-421f-8e82-845b482aac5b",
+    "2e106818-8b1d-4118-8cec-22999e08c9db",
+    "f2eacfa9-df10-4aa5-8c47-04f13bc920d4"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q148": {
+   "qid": "q148",
+   "n_pool": 50,
+   "n_genuine_claims": 15,
+   "baseline_ids": [
+    "40dc6919-6834-4dea-b5af-65a4562fcff9",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac"
+   ],
+   "claim_rank_ids": [
+    "40dc6919-6834-4dea-b5af-65a4562fcff9",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "2e106818-8b1d-4118-8cec-22999e08c9db"
+   ],
+   "query_rank_ids": [
+    "40dc6919-6834-4dea-b5af-65a4562fcff9",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q149": {
+   "qid": "q149",
+   "n_pool": 50,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "ece3a8c4-57c3-47b0-a442-7de830cec888",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "57bae04c-4f77-4509-828b-e902b9f6d986",
+    "933d47ae-b1da-4308-8190-96c36b15a116"
+   ],
+   "claim_rank_ids": [
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "ca80bcdb-330d-4db0-8cec-bf8f3cd1b758",
+    "57bae04c-4f77-4509-828b-e902b9f6d986",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "87542576-272a-48c8-94f3-46e82bd6a4fa"
+   ],
+   "query_rank_ids": [
+    "ece3a8c4-57c3-47b0-a442-7de830cec888",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "57bae04c-4f77-4509-828b-e902b9f6d986",
+    "933d47ae-b1da-4308-8190-96c36b15a116"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q150": {
+   "qid": "q150",
+   "n_pool": 50,
+   "n_genuine_claims": 6,
+   "baseline_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "af309912-a337-4445-95cf-bf0c286632b9",
+    "8c3febb3-6bc8-4d1d-816f-267ab7257638",
+    "a11d0626-1c47-4cc3-943c-3624da3046f9"
+   ],
+   "claim_rank_ids": [
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "1d070e51-fcca-4e92-8735-0ccdbf043a5b",
+    "270229b9-fc1e-4896-943e-eb93492bd058",
+    "4debc826-2139-4a54-a32e-9e8f7119bf05",
+    "dfc8116a-ecb4-4fd6-b69e-83a6aac626a9"
+   ],
+   "query_rank_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "05a7f541-2322-4079-8933-fd100ae0f6b2",
+    "af309912-a337-4445-95cf-bf0c286632b9",
+    "8c3febb3-6bc8-4d1d-816f-267ab7257638",
+    "a11d0626-1c47-4cc3-943c-3624da3046f9"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q151": {
+   "qid": "q151",
+   "n_pool": 50,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "e15cef54-8166-46cf-8c47-2f759429f914",
+    "e875e74a-938c-45e0-83d2-a709a672e132",
+    "0d64f298-608d-4fb9-8036-4475d8f70e9a",
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4"
+   ],
+   "claim_rank_ids": [
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "ace8dd1d-d2e4-440e-9c32-1637658d8b51",
+    "e875e74a-938c-45e0-83d2-a709a672e132",
+    "f4e9c4db-92cc-442f-acfb-a056286531c8",
+    "66365773-575a-4e56-87c4-c9c71544f65a"
+   ],
+   "query_rank_ids": [
+    "e15cef54-8166-46cf-8c47-2f759429f914",
+    "e875e74a-938c-45e0-83d2-a709a672e132",
+    "0d64f298-608d-4fb9-8036-4475d8f70e9a",
+    "259d7352-7c34-4eec-a31a-96884e083d78",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q152": {
+   "qid": "q152",
+   "n_pool": 50,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "d3221ff0-a97c-4d44-9330-5defef96ad43",
+    "3bd58219-e0e1-485e-a054-77904ec15686",
+    "9028248b-7002-40a4-b822-ab8695d81795",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "ce6d29d9-453e-4359-99bf-e7e40c56ee92"
+   ],
+   "claim_rank_ids": [
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "4ff805ff-78c5-44bb-a0e5-e7ec0951fd18",
+    "9028248b-7002-40a4-b822-ab8695d81795",
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "d3221ff0-a97c-4d44-9330-5defef96ad43"
+   ],
+   "query_rank_ids": [
+    "d3221ff0-a97c-4d44-9330-5defef96ad43",
+    "3bd58219-e0e1-485e-a054-77904ec15686",
+    "9028248b-7002-40a4-b822-ab8695d81795",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "ce6d29d9-453e-4359-99bf-e7e40c56ee92"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q153": {
+   "qid": "q153",
+   "n_pool": 50,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "56fa918e-4b4b-4a1f-925a-be3fa2e32258",
+    "b6f76d3a-0a62-489a-bcb1-ac144567192e"
+   ],
+   "claim_rank_ids": [
+    "9133b7e6-489e-476e-803a-66829b3575e0",
+    "56fa918e-4b4b-4a1f-925a-be3fa2e32258",
+    "d76fcbee-9b79-4aad-8f78-c3902153f7a7",
+    "bf80bc38-289b-46a0-870b-391ba98ac4ef",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc"
+   ],
+   "query_rank_ids": [
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "56fa918e-4b4b-4a1f-925a-be3fa2e32258",
+    "b6f76d3a-0a62-489a-bcb1-ac144567192e"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q154": {
+   "qid": "q154",
+   "n_pool": 45,
+   "n_genuine_claims": 3,
+   "baseline_ids": [
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "51f6322c-c623-4dfd-8dd5-36f8669b3c72",
+    "071864cd-44c0-4cf2-be11-f3953c2aaf34",
+    "51c65b5e-94bf-416e-a733-af2ea3e1397f"
+   ],
+   "claim_rank_ids": [
+    "56fa918e-4b4b-4a1f-925a-be3fa2e32258",
+    "a73f13a1-9a75-4442-886a-699ed8733f2e",
+    "33a48262-d674-4750-92cf-a70c0a41ee56",
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc"
+   ],
+   "query_rank_ids": [
+    "0c4a008f-a5d5-460b-9688-1593f62209d4",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "51f6322c-c623-4dfd-8dd5-36f8669b3c72",
+    "071864cd-44c0-4cf2-be11-f3953c2aaf34",
+    "51c65b5e-94bf-416e-a733-af2ea3e1397f"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q155": {
+   "qid": "q155",
+   "n_pool": 49,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "e6ee2d75-6750-4771-a972-fa948d93a0ff",
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "d1289fdd-69da-41e4-a478-3dcd10a07a50",
+    "5f49d237-85e1-40a2-a6e9-4788475a2076",
+    "51b5de40-82d2-47a9-829f-53b2f072ccc0"
+   ],
+   "claim_rank_ids": [
+    "24f33a86-7c33-4c85-97c6-f32cc496a428",
+    "e6ee2d75-6750-4771-a972-fa948d93a0ff",
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "d1289fdd-69da-41e4-a478-3dcd10a07a50",
+    "5f49d237-85e1-40a2-a6e9-4788475a2076"
+   ],
+   "query_rank_ids": [
+    "e6ee2d75-6750-4771-a972-fa948d93a0ff",
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "d1289fdd-69da-41e4-a478-3dcd10a07a50",
+    "5f49d237-85e1-40a2-a6e9-4788475a2076",
+    "51b5de40-82d2-47a9-829f-53b2f072ccc0"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q156": {
+   "qid": "q156",
+   "n_pool": 50,
+   "n_genuine_claims": 8,
+   "baseline_ids": [
+    "ecb9ec0a-991b-445c-8a31-ab598bb98e13",
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "4a2ec109-757b-41bc-8f33-9e37b7550189",
+    "74d79a54-9ca9-4710-800a-32ade95f93f4",
+    "1e263dd9-c7ba-4816-91a6-a8ab67233879"
+   ],
+   "claim_rank_ids": [
+    "ecb9ec0a-991b-445c-8a31-ab598bb98e13",
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "b3e1de2e-b304-44c4-a181-199cacaa1d11",
+    "1e263dd9-c7ba-4816-91a6-a8ab67233879",
+    "4a2ec109-757b-41bc-8f33-9e37b7550189"
+   ],
+   "query_rank_ids": [
+    "ecb9ec0a-991b-445c-8a31-ab598bb98e13",
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "4a2ec109-757b-41bc-8f33-9e37b7550189",
+    "74d79a54-9ca9-4710-800a-32ade95f93f4",
+    "1e263dd9-c7ba-4816-91a6-a8ab67233879"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q157": {
+   "qid": "q157",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "24735e7a-d207-46ea-bc09-9d1359915c3d",
+    "d8573098-d556-4021-8910-6e48970faa95",
+    "83253ca0-7f60-460c-9993-81480b4b13bd",
+    "eed5d09f-4a29-4a49-8006-93ada249b0da",
+    "3736f9d8-a8f0-467d-bd65-643ea9a0a8e8"
+   ],
+   "claim_rank_ids": [
+    "d8573098-d556-4021-8910-6e48970faa95",
+    "24735e7a-d207-46ea-bc09-9d1359915c3d",
+    "83253ca0-7f60-460c-9993-81480b4b13bd",
+    "eed5d09f-4a29-4a49-8006-93ada249b0da",
+    "3736f9d8-a8f0-467d-bd65-643ea9a0a8e8"
+   ],
+   "query_rank_ids": [
+    "24735e7a-d207-46ea-bc09-9d1359915c3d",
+    "d8573098-d556-4021-8910-6e48970faa95",
+    "83253ca0-7f60-460c-9993-81480b4b13bd",
+    "eed5d09f-4a29-4a49-8006-93ada249b0da",
+    "3736f9d8-a8f0-467d-bd65-643ea9a0a8e8"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q158": {
+   "qid": "q158",
+   "n_pool": 50,
+   "n_genuine_claims": 10,
+   "baseline_ids": [
+    "443af52a-1921-461b-8455-719f96e7430c",
+    "c3994a1f-b8fd-45e0-9fdd-ce4862b42dc6",
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb",
+    "4c713496-e06f-4411-94fb-3b13d38db1e0",
+    "5a8a9c94-18a5-432d-8e5b-69438cf85c4d"
+   ],
+   "claim_rank_ids": [
+    "8da80ed5-fcec-401a-84a6-9fbd7f2156e6",
+    "4c713496-e06f-4411-94fb-3b13d38db1e0",
+    "b2d9b180-f12d-4090-b9b8-0121fd350f1a",
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb",
+    "c3994a1f-b8fd-45e0-9fdd-ce4862b42dc6"
+   ],
+   "query_rank_ids": [
+    "443af52a-1921-461b-8455-719f96e7430c",
+    "c3994a1f-b8fd-45e0-9fdd-ce4862b42dc6",
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb",
+    "4c713496-e06f-4411-94fb-3b13d38db1e0",
+    "5a8a9c94-18a5-432d-8e5b-69438cf85c4d"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q159": {
+   "qid": "q159",
+   "n_pool": 50,
+   "n_genuine_claims": 14,
+   "baseline_ids": [
+    "24f33a86-7c33-4c85-97c6-f32cc496a428",
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "3a0f085d-8f65-4da6-82ab-bdb1f8ab7d69",
+    "4478ef7a-95f9-477b-b298-0f39800ef725",
+    "287e89d8-ed22-4868-8681-5335f6de1f89"
+   ],
+   "claim_rank_ids": [
+    "24f33a86-7c33-4c85-97c6-f32cc496a428",
+    "287e89d8-ed22-4868-8681-5335f6de1f89",
+    "4478ef7a-95f9-477b-b298-0f39800ef725",
+    "0a25f0da-1c78-4b4d-a750-352cf7d3ba8e",
+    "3a0f085d-8f65-4da6-82ab-bdb1f8ab7d69"
+   ],
+   "query_rank_ids": [
+    "24f33a86-7c33-4c85-97c6-f32cc496a428",
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "3a0f085d-8f65-4da6-82ab-bdb1f8ab7d69",
+    "4478ef7a-95f9-477b-b298-0f39800ef725",
+    "287e89d8-ed22-4868-8681-5335f6de1f89"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q160": {
+   "qid": "q160",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "eed5d09f-4a29-4a49-8006-93ada249b0da",
+    "c828d2d9-257b-47e8-8418-cb894baa7db9",
+    "fc571a04-43c3-4766-bd1e-dcfdc55a6fea",
+    "6e58aff8-7a9d-4a78-9308-7f0f53170ae7",
+    "4e35b0b4-6419-4832-82dd-4d9444f8f181"
+   ],
+   "claim_rank_ids": [
+    "eed5d09f-4a29-4a49-8006-93ada249b0da",
+    "c828d2d9-257b-47e8-8418-cb894baa7db9",
+    "fc571a04-43c3-4766-bd1e-dcfdc55a6fea",
+    "6e58aff8-7a9d-4a78-9308-7f0f53170ae7",
+    "4e35b0b4-6419-4832-82dd-4d9444f8f181"
+   ],
+   "query_rank_ids": [
+    "eed5d09f-4a29-4a49-8006-93ada249b0da",
+    "c828d2d9-257b-47e8-8418-cb894baa7db9",
+    "fc571a04-43c3-4766-bd1e-dcfdc55a6fea",
+    "6e58aff8-7a9d-4a78-9308-7f0f53170ae7",
+    "4e35b0b4-6419-4832-82dd-4d9444f8f181"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q161": {
+   "qid": "q161",
+   "n_pool": 45,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "e6ee2d75-6750-4771-a972-fa948d93a0ff",
+    "d1289fdd-69da-41e4-a478-3dcd10a07a50",
+    "5f49d237-85e1-40a2-a6e9-4788475a2076",
+    "ecb983bb-4f78-4056-a4db-1446b8a5978b"
+   ],
+   "claim_rank_ids": [
+    "e6ee2d75-6750-4771-a972-fa948d93a0ff",
+    "5f49d237-85e1-40a2-a6e9-4788475a2076",
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "16d07647-4e52-41a4-a6f4-fff858f0c72f",
+    "0744c0b7-e42e-4d1e-a0a2-dccea6095cb5"
+   ],
+   "query_rank_ids": [
+    "83e36281-0e1f-496b-a2bd-124c06a92a11",
+    "e6ee2d75-6750-4771-a972-fa948d93a0ff",
+    "d1289fdd-69da-41e4-a478-3dcd10a07a50",
+    "5f49d237-85e1-40a2-a6e9-4788475a2076",
+    "ecb983bb-4f78-4056-a4db-1446b8a5978b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q162": {
+   "qid": "q162",
+   "n_pool": 50,
+   "n_genuine_claims": 7,
+   "baseline_ids": [
+    "919dd97b-72dc-40f2-bdbe-b116c5fdf689",
+    "8da946f6-5728-485b-a45d-0cc890d084db",
+    "550098c5-e29d-4aa2-9324-55740757b440",
+    "e0fd0da0-96be-4f2c-bafa-4915d1b6b2e1",
+    "66a21f00-8ca1-411b-b2dd-5c6b7b4aa2b8"
+   ],
+   "claim_rank_ids": [
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "919dd97b-72dc-40f2-bdbe-b116c5fdf689",
+    "ad6e6f99-e77a-40dd-aaa7-f77d1821643b",
+    "84f0aed4-4903-435b-9d62-af9f56b4db48",
+    "f018a771-bef1-46da-a625-cc67369d5e14"
+   ],
+   "query_rank_ids": [
+    "919dd97b-72dc-40f2-bdbe-b116c5fdf689",
+    "8da946f6-5728-485b-a45d-0cc890d084db",
+    "550098c5-e29d-4aa2-9324-55740757b440",
+    "e0fd0da0-96be-4f2c-bafa-4915d1b6b2e1",
+    "66a21f00-8ca1-411b-b2dd-5c6b7b4aa2b8"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q163": {
+   "qid": "q163",
+   "n_pool": 50,
+   "n_genuine_claims": 31,
+   "baseline_ids": [
+    "0a3aaa53-159a-43f3-8cd0-506519ebe5c9",
+    "37e564e6-5ff7-4266-9590-afc9b5f535eb",
+    "11f6665c-6a98-4d47-81e5-0493e702fc67",
+    "d9d4925e-d8df-454d-879a-8a02bda45aa2",
+    "83677684-d454-42c9-96c3-5324539d88f7"
+   ],
+   "claim_rank_ids": [
+    "0a3aaa53-159a-43f3-8cd0-506519ebe5c9",
+    "d9d4925e-d8df-454d-879a-8a02bda45aa2",
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "0b802b38-63ce-48dc-9da8-f3d9a900a2aa",
+    "5e78681f-666e-4f28-bc5d-7752123ca881"
+   ],
+   "query_rank_ids": [
+    "0a3aaa53-159a-43f3-8cd0-506519ebe5c9",
+    "37e564e6-5ff7-4266-9590-afc9b5f535eb",
+    "11f6665c-6a98-4d47-81e5-0493e702fc67",
+    "d9d4925e-d8df-454d-879a-8a02bda45aa2",
+    "83677684-d454-42c9-96c3-5324539d88f7"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q164": {
+   "qid": "q164",
+   "n_pool": 50,
+   "n_genuine_claims": 6,
+   "baseline_ids": [
+    "43065510-86db-4222-b2e7-2ef5399cc729",
+    "dfc56fb6-6786-4d9f-b27b-5106fec2981a",
+    "46f68c15-dbca-4a48-b210-41fe70104fc8",
+    "43c5b3ef-9f5d-48fb-a1dd-f5d32c5e3b6b",
+    "c58f0d69-6350-4ef8-86fe-a9a57a03e214"
+   ],
+   "claim_rank_ids": [
+    "46f68c15-dbca-4a48-b210-41fe70104fc8",
+    "b578265b-da91-40d1-bd69-b9cc465dde42",
+    "43065510-86db-4222-b2e7-2ef5399cc729",
+    "dfc56fb6-6786-4d9f-b27b-5106fec2981a",
+    "43c5b3ef-9f5d-48fb-a1dd-f5d32c5e3b6b"
+   ],
+   "query_rank_ids": [
+    "43065510-86db-4222-b2e7-2ef5399cc729",
+    "dfc56fb6-6786-4d9f-b27b-5106fec2981a",
+    "46f68c15-dbca-4a48-b210-41fe70104fc8",
+    "43c5b3ef-9f5d-48fb-a1dd-f5d32c5e3b6b",
+    "c58f0d69-6350-4ef8-86fe-a9a57a03e214"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q165": {
+   "qid": "q165",
+   "n_pool": 50,
+   "n_genuine_claims": 5,
+   "baseline_ids": [
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "51810c2e-a117-4327-abcf-4344c8eb04ce",
+    "78b4de10-4b6c-4eca-aad4-8373970778a3",
+    "712addde-e1ec-4555-98d5-379bfdb4c84f",
+    "ff6191bd-8571-45f3-9de4-7cda217c3b49"
+   ],
+   "claim_rank_ids": [
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "2a0c17b1-11a0-4678-b584-b0b3b4aef6aa",
+    "78b4de10-4b6c-4eca-aad4-8373970778a3",
+    "51810c2e-a117-4327-abcf-4344c8eb04ce",
+    "712addde-e1ec-4555-98d5-379bfdb4c84f"
+   ],
+   "query_rank_ids": [
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "51810c2e-a117-4327-abcf-4344c8eb04ce",
+    "78b4de10-4b6c-4eca-aad4-8373970778a3",
+    "712addde-e1ec-4555-98d5-379bfdb4c84f",
+    "ff6191bd-8571-45f3-9de4-7cda217c3b49"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q166": {
+   "qid": "q166",
+   "n_pool": 50,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "1c3433f0-3744-4c17-a259-a6a2d7f2667c",
+    "e1029b77-3379-4cb2-a811-0d2a1f26da2c",
+    "e09a6f50-7751-4a28-a8c2-715702043551",
+    "faeeccfe-775e-4efe-89bd-ecc50c296e7f",
+    "c39710ee-e270-413e-ad43-fcb28d4aea55"
+   ],
+   "claim_rank_ids": [
+    "83e8b8c4-cc69-4cd6-b7df-f1bc3ba4b46f",
+    "c39710ee-e270-413e-ad43-fcb28d4aea55",
+    "68ca4a60-c002-491b-9ccf-9af2aebf8898",
+    "1c3433f0-3744-4c17-a259-a6a2d7f2667c",
+    "e1029b77-3379-4cb2-a811-0d2a1f26da2c"
+   ],
+   "query_rank_ids": [
+    "1c3433f0-3744-4c17-a259-a6a2d7f2667c",
+    "e1029b77-3379-4cb2-a811-0d2a1f26da2c",
+    "e09a6f50-7751-4a28-a8c2-715702043551",
+    "faeeccfe-775e-4efe-89bd-ecc50c296e7f",
+    "c39710ee-e270-413e-ad43-fcb28d4aea55"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q167": {
+   "qid": "q167",
+   "n_pool": 50,
+   "n_genuine_claims": 13,
+   "baseline_ids": [
+    "fd6d6cbd-6d3c-49b1-b27f-eb2ebe3a6881",
+    "1036e46a-7910-4bf8-91d5-17a95caea80b",
+    "86419e23-1cbc-475a-a27e-7386b0eef088",
+    "287e89d8-ed22-4868-8681-5335f6de1f89",
+    "fd83a971-788a-4f12-a124-3d530af8c753"
+   ],
+   "claim_rank_ids": [
+    "0a28217d-25c7-4932-946c-467d3dfe1495",
+    "fd6d6cbd-6d3c-49b1-b27f-eb2ebe3a6881",
+    "fd83a971-788a-4f12-a124-3d530af8c753",
+    "287e89d8-ed22-4868-8681-5335f6de1f89",
+    "1036e46a-7910-4bf8-91d5-17a95caea80b"
+   ],
+   "query_rank_ids": [
+    "fd6d6cbd-6d3c-49b1-b27f-eb2ebe3a6881",
+    "1036e46a-7910-4bf8-91d5-17a95caea80b",
+    "86419e23-1cbc-475a-a27e-7386b0eef088",
+    "287e89d8-ed22-4868-8681-5335f6de1f89",
+    "fd83a971-788a-4f12-a124-3d530af8c753"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q168": {
+   "qid": "q168",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "43c5b3ef-9f5d-48fb-a1dd-f5d32c5e3b6b",
+    "37d17004-c1da-4b9e-8fc5-12b36eb2aecf",
+    "c397fe59-dbf5-4a56-93a1-fd409eca0529",
+    "10b34b5e-28e1-4cf1-8a5e-845dfbac0c64",
+    "0cf83e2c-464c-4cd3-b65e-0c2feff7b105"
+   ],
+   "claim_rank_ids": [
+    "447cb945-5266-4254-ae43-c3c93b660e09",
+    "43c5b3ef-9f5d-48fb-a1dd-f5d32c5e3b6b",
+    "37d17004-c1da-4b9e-8fc5-12b36eb2aecf",
+    "c397fe59-dbf5-4a56-93a1-fd409eca0529",
+    "10b34b5e-28e1-4cf1-8a5e-845dfbac0c64"
+   ],
+   "query_rank_ids": [
+    "43c5b3ef-9f5d-48fb-a1dd-f5d32c5e3b6b",
+    "37d17004-c1da-4b9e-8fc5-12b36eb2aecf",
+    "c397fe59-dbf5-4a56-93a1-fd409eca0529",
+    "10b34b5e-28e1-4cf1-8a5e-845dfbac0c64",
+    "0cf83e2c-464c-4cd3-b65e-0c2feff7b105"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q169": {
+   "qid": "q169",
+   "n_pool": 50,
+   "n_genuine_claims": 21,
+   "baseline_ids": [
+    "c9aeab92-4b0f-44d3-9a0d-112a88f9f7ea",
+    "a4a3c47a-7827-42a6-b2b4-c3a58107962c",
+    "3202068f-fcf7-41ae-8a06-7ee7427fe67b",
+    "f48af967-4e3a-44c0-b305-1a9f12d6853d",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3"
+   ],
+   "claim_rank_ids": [
+    "3202068f-fcf7-41ae-8a06-7ee7427fe67b",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3",
+    "c9aeab92-4b0f-44d3-9a0d-112a88f9f7ea",
+    "f48af967-4e3a-44c0-b305-1a9f12d6853d",
+    "b2d10df4-fd59-403d-8416-fa6ab624d23d"
+   ],
+   "query_rank_ids": [
+    "c9aeab92-4b0f-44d3-9a0d-112a88f9f7ea",
+    "a4a3c47a-7827-42a6-b2b4-c3a58107962c",
+    "3202068f-fcf7-41ae-8a06-7ee7427fe67b",
+    "f48af967-4e3a-44c0-b305-1a9f12d6853d",
+    "4cf8c32b-71a2-4b86-8883-a535372421f3"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q170": {
+   "qid": "q170",
+   "n_pool": 50,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "eed5d09f-4a29-4a49-8006-93ada249b0da",
+    "f8c2a8c4-8410-4deb-8dff-145d4b6d9eec",
+    "fc571a04-43c3-4766-bd1e-dcfdc55a6fea",
+    "c828d2d9-257b-47e8-8418-cb894baa7db9",
+    "c37eec21-f621-4d51-b73e-8d98049374ef"
+   ],
+   "claim_rank_ids": [
+    "eed5d09f-4a29-4a49-8006-93ada249b0da",
+    "c828d2d9-257b-47e8-8418-cb894baa7db9",
+    "c37eec21-f621-4d51-b73e-8d98049374ef",
+    "f0728ed1-201a-48a6-bdfa-193cfc94f54e",
+    "4010f73b-de38-4e8c-b5f5-77188c79fec6"
+   ],
+   "query_rank_ids": [
+    "eed5d09f-4a29-4a49-8006-93ada249b0da",
+    "f8c2a8c4-8410-4deb-8dff-145d4b6d9eec",
+    "fc571a04-43c3-4766-bd1e-dcfdc55a6fea",
+    "c828d2d9-257b-47e8-8418-cb894baa7db9",
+    "c37eec21-f621-4d51-b73e-8d98049374ef"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q171": {
+   "qid": "q171",
+   "n_pool": 50,
+   "n_genuine_claims": 7,
+   "baseline_ids": [
+    "17fcb1c3-8b1a-423f-bccb-ad3e2e41c1b3",
+    "8c377c33-b065-40df-a4d8-27e94a1e9533",
+    "6f64b10d-0af4-4d57-b18e-992575d64f09",
+    "e347e6f7-f052-499c-bada-850793baebd4",
+    "0e523c25-aad4-4fcf-be01-ba7fcce4e067"
+   ],
+   "claim_rank_ids": [
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "b6f76d3a-0a62-489a-bcb1-ac144567192e",
+    "e347e6f7-f052-499c-bada-850793baebd4",
+    "7ea8c573-7f79-496d-85f4-3c24a42f1cd9",
+    "17fcb1c3-8b1a-423f-bccb-ad3e2e41c1b3"
+   ],
+   "query_rank_ids": [
+    "17fcb1c3-8b1a-423f-bccb-ad3e2e41c1b3",
+    "8c377c33-b065-40df-a4d8-27e94a1e9533",
+    "6f64b10d-0af4-4d57-b18e-992575d64f09",
+    "e347e6f7-f052-499c-bada-850793baebd4",
+    "0e523c25-aad4-4fcf-be01-ba7fcce4e067"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q172": {
+   "qid": "q172",
+   "n_pool": 50,
+   "n_genuine_claims": 13,
+   "baseline_ids": [
+    "1b06429b-9fe2-4a13-97ab-5947b2e039c5",
+    "67059d5d-4ca9-4e15-9b6d-f8379e9b7a4d",
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "b6c021f2-6603-4ce9-a69b-1fbaceb06f00",
+    "543f812f-6e8e-4222-a6de-212ac9216627"
+   ],
+   "claim_rank_ids": [
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "e5f16001-7611-4273-a747-1ee68da466b5",
+    "1b06429b-9fe2-4a13-97ab-5947b2e039c5",
+    "f377ad2a-6319-4b58-81d6-97fe8482c484",
+    "67059d5d-4ca9-4e15-9b6d-f8379e9b7a4d"
+   ],
+   "query_rank_ids": [
+    "1b06429b-9fe2-4a13-97ab-5947b2e039c5",
+    "67059d5d-4ca9-4e15-9b6d-f8379e9b7a4d",
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "b6c021f2-6603-4ce9-a69b-1fbaceb06f00",
+    "543f812f-6e8e-4222-a6de-212ac9216627"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q173": {
+   "qid": "q173",
+   "n_pool": 50,
+   "n_genuine_claims": 26,
+   "baseline_ids": [
+    "417e8043-fc2a-4459-be5f-564e59ec47a7",
+    "c9aeab92-4b0f-44d3-9a0d-112a88f9f7ea",
+    "a4a3c47a-7827-42a6-b2b4-c3a58107962c",
+    "216cfab7-71ec-4ec3-bacd-ac5d9bb3ce24",
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb"
+   ],
+   "claim_rank_ids": [
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb",
+    "216cfab7-71ec-4ec3-bacd-ac5d9bb3ce24",
+    "c9aeab92-4b0f-44d3-9a0d-112a88f9f7ea",
+    "b4e2c0bc-3837-46de-9a5c-ed43eff5d730",
+    "417e8043-fc2a-4459-be5f-564e59ec47a7"
+   ],
+   "query_rank_ids": [
+    "417e8043-fc2a-4459-be5f-564e59ec47a7",
+    "c9aeab92-4b0f-44d3-9a0d-112a88f9f7ea",
+    "a4a3c47a-7827-42a6-b2b4-c3a58107962c",
+    "216cfab7-71ec-4ec3-bacd-ac5d9bb3ce24",
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q174": {
+   "qid": "q174",
+   "n_pool": 50,
+   "n_genuine_claims": 15,
+   "baseline_ids": [
+    "d2b3431c-850a-40ab-b4b4-9a526adcc830",
+    "93830d22-63a6-4ead-b001-2e86f57ab283",
+    "cf7f2789-8d44-41e1-88ca-d005e8dded69",
+    "0f71cadc-7d55-4131-870c-9f452f9c0612",
+    "61e57c94-b4f9-4596-8282-be109abe0d5e"
+   ],
+   "claim_rank_ids": [
+    "93830d22-63a6-4ead-b001-2e86f57ab283",
+    "9338c5ca-1446-427c-a2ce-5778f6ea2f9a",
+    "4d09c350-1e14-4994-8edd-bd7c3e6b4c2b",
+    "cae149d9-db82-4ade-a276-3298ef213beb",
+    "d2b3431c-850a-40ab-b4b4-9a526adcc830"
+   ],
+   "query_rank_ids": [
+    "d2b3431c-850a-40ab-b4b4-9a526adcc830",
+    "93830d22-63a6-4ead-b001-2e86f57ab283",
+    "cf7f2789-8d44-41e1-88ca-d005e8dded69",
+    "0f71cadc-7d55-4131-870c-9f452f9c0612",
+    "61e57c94-b4f9-4596-8282-be109abe0d5e"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q175": {
+   "qid": "q175",
+   "n_pool": 50,
+   "n_genuine_claims": 10,
+   "baseline_ids": [
+    "137e882c-74bb-4f4b-8f45-d50149f98ea6",
+    "0a8d4e80-c83d-4296-b4e2-b76d059d56cc",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "997d0e2f-fb85-48c0-9182-5543ee090b87",
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d"
+   ],
+   "claim_rank_ids": [
+    "f61268d8-7d1b-455f-9c1f-c36a37f6af38",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "5d132eb8-91ec-444a-b7d1-9a9713d89887",
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d",
+    "e28dd1e0-c0a2-4bed-8d1d-d1bf08186758"
+   ],
+   "query_rank_ids": [
+    "137e882c-74bb-4f4b-8f45-d50149f98ea6",
+    "0a8d4e80-c83d-4296-b4e2-b76d059d56cc",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "997d0e2f-fb85-48c0-9182-5543ee090b87",
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q176": {
+   "qid": "q176",
+   "n_pool": 50,
+   "n_genuine_claims": 25,
+   "baseline_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "57862fd3-3243-4885-b483-7c30d7d0c227",
+    "992017a0-3136-4519-85a5-d10750c46101",
+    "44d95eee-7c5d-4c78-86ea-a03b916a40bb",
+    "26c1cfaa-4a97-45a4-a801-30a69d5e51f3"
+   ],
+   "claim_rank_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "57862fd3-3243-4885-b483-7c30d7d0c227",
+    "44d95eee-7c5d-4c78-86ea-a03b916a40bb",
+    "e75a4d4b-624d-4d96-981a-6c92d574c274",
+    "5a1e06cd-c70d-4d4d-9702-6d02782a81da"
+   ],
+   "query_rank_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "57862fd3-3243-4885-b483-7c30d7d0c227",
+    "992017a0-3136-4519-85a5-d10750c46101",
+    "44d95eee-7c5d-4c78-86ea-a03b916a40bb",
+    "26c1cfaa-4a97-45a4-a801-30a69d5e51f3"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q177": {
+   "qid": "q177",
+   "n_pool": 50,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "c6a33739-819a-4965-93f2-5d680f5c0ad4",
+    "dc919700-d2b8-49cb-b0c5-9744d52169c9",
+    "0cb1ca48-e28d-441e-9650-e15c8e922bf4",
+    "c8bce649-3975-485b-a68c-3ef0eb67ad05",
+    "550098c5-e29d-4aa2-9324-55740757b440"
+   ],
+   "claim_rank_ids": [
+    "dc919700-d2b8-49cb-b0c5-9744d52169c9",
+    "e28dd1e0-c0a2-4bed-8d1d-d1bf08186758",
+    "c6a33739-819a-4965-93f2-5d680f5c0ad4",
+    "352bc8c2-dc52-479f-a52d-257b59870300",
+    "e347e6f7-f052-499c-bada-850793baebd4"
+   ],
+   "query_rank_ids": [
+    "c6a33739-819a-4965-93f2-5d680f5c0ad4",
+    "dc919700-d2b8-49cb-b0c5-9744d52169c9",
+    "0cb1ca48-e28d-441e-9650-e15c8e922bf4",
+    "c8bce649-3975-485b-a68c-3ef0eb67ad05",
+    "550098c5-e29d-4aa2-9324-55740757b440"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q178": {
+   "qid": "q178",
+   "n_pool": 50,
+   "n_genuine_claims": 16,
+   "baseline_ids": [
+    "98d5f4e0-136f-429e-8179-7a15dfce4d4c",
+    "1da54e67-6549-4410-8cd3-2283161d4952",
+    "6b6a4f5c-68b4-4370-923d-9b7ef4be7edf",
+    "7c0a29c2-7ddf-4edc-85dc-ca9ea252d21a",
+    "e70379ae-e93a-4461-90f0-3b8778edbb87"
+   ],
+   "claim_rank_ids": [
+    "98d5f4e0-136f-429e-8179-7a15dfce4d4c",
+    "9a6c17a7-ce1d-4e90-9b48-a3e514844df0",
+    "e70379ae-e93a-4461-90f0-3b8778edbb87",
+    "7c0a29c2-7ddf-4edc-85dc-ca9ea252d21a",
+    "1da54e67-6549-4410-8cd3-2283161d4952"
+   ],
+   "query_rank_ids": [
+    "98d5f4e0-136f-429e-8179-7a15dfce4d4c",
+    "1da54e67-6549-4410-8cd3-2283161d4952",
+    "6b6a4f5c-68b4-4370-923d-9b7ef4be7edf",
+    "7c0a29c2-7ddf-4edc-85dc-ca9ea252d21a",
+    "e70379ae-e93a-4461-90f0-3b8778edbb87"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q179": {
+   "qid": "q179",
+   "n_pool": 50,
+   "n_genuine_claims": 11,
+   "baseline_ids": [
+    "deaf6cd8-8a84-4e57-91a6-ce15a490dcc7",
+    "34ce40a3-3f82-4360-aaf9-38f435f53885",
+    "3dd371e4-f0da-4d86-9563-535d60f0211d",
+    "0b7e8afd-5dd8-4526-a805-4c06ecc68ce0",
+    "57cb5cfb-308f-41f6-a177-d18ac55ee565"
+   ],
+   "claim_rank_ids": [
+    "34ce40a3-3f82-4360-aaf9-38f435f53885",
+    "deaf6cd8-8a84-4e57-91a6-ce15a490dcc7",
+    "57cb5cfb-308f-41f6-a177-d18ac55ee565",
+    "a705f97f-ddd5-41c1-8306-55f45d75a1bb",
+    "3dd371e4-f0da-4d86-9563-535d60f0211d"
+   ],
+   "query_rank_ids": [
+    "deaf6cd8-8a84-4e57-91a6-ce15a490dcc7",
+    "34ce40a3-3f82-4360-aaf9-38f435f53885",
+    "3dd371e4-f0da-4d86-9563-535d60f0211d",
+    "0b7e8afd-5dd8-4526-a805-4c06ecc68ce0",
+    "57cb5cfb-308f-41f6-a177-d18ac55ee565"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q180": {
+   "qid": "q180",
+   "n_pool": 50,
+   "n_genuine_claims": 2,
+   "baseline_ids": [
+    "e36b93bd-cd65-4414-bd93-ad4b0ff79813",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "3acc0829-f11b-40f5-b07c-88530ac2d34a"
+   ],
+   "claim_rank_ids": [
+    "3acc0829-f11b-40f5-b07c-88530ac2d34a",
+    "e36b93bd-cd65-4414-bd93-ad4b0ff79813",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a"
+   ],
+   "query_rank_ids": [
+    "e36b93bd-cd65-4414-bd93-ad4b0ff79813",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "3acc0829-f11b-40f5-b07c-88530ac2d34a"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q181": {
+   "qid": "q181",
+   "n_pool": 50,
+   "n_genuine_claims": 4,
+   "baseline_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "65d53437-8f99-4a09-be62-80d1dafbeb98",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "9f22e59b-ab3b-4e4b-8d90-b539f604cabd",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7"
+   ],
+   "claim_rank_ids": [
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "c3994a1f-b8fd-45e0-9fdd-ce4862b42dc6",
+    "1d070e51-fcca-4e92-8735-0ccdbf043a5b",
+    "cb50e139-7839-491d-8807-9161936967ec",
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144"
+   ],
+   "query_rank_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "65d53437-8f99-4a09-be62-80d1dafbeb98",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "9f22e59b-ab3b-4e4b-8d90-b539f604cabd",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q182": {
+   "qid": "q182",
+   "n_pool": 50,
+   "n_genuine_claims": 6,
+   "baseline_ids": [
+    "6e07fe9a-4232-4aef-a3df-5c19da1aac40",
+    "1ae6fddc-1674-4184-adb6-9be2063f64c0",
+    "ee1d4f2e-6aed-4b30-8779-03dbc8e444d2",
+    "fc8e2035-f80b-4fa4-ab17-66928e98acd9",
+    "d9f4ce0c-fdd3-4619-9a1b-3b03f7fb66f6"
+   ],
+   "claim_rank_ids": [
+    "6e07fe9a-4232-4aef-a3df-5c19da1aac40",
+    "fc8e2035-f80b-4fa4-ab17-66928e98acd9",
+    "4cfd9bcf-bd4d-417a-82ca-af8fd98f41e0",
+    "62dc46bc-d322-49f6-b85a-eb5373d7cb08",
+    "d9f4ce0c-fdd3-4619-9a1b-3b03f7fb66f6"
+   ],
+   "query_rank_ids": [
+    "6e07fe9a-4232-4aef-a3df-5c19da1aac40",
+    "1ae6fddc-1674-4184-adb6-9be2063f64c0",
+    "ee1d4f2e-6aed-4b30-8779-03dbc8e444d2",
+    "fc8e2035-f80b-4fa4-ab17-66928e98acd9",
+    "d9f4ce0c-fdd3-4619-9a1b-3b03f7fb66f6"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q183": {
+   "qid": "q183",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "fbfb6c00-371b-4da2-a590-07ddb65c60f2",
+    "f018a771-bef1-46da-a625-cc67369d5e14",
+    "1422628f-1526-44a3-b159-474905bdf1e6",
+    "24735e7a-d207-46ea-bc09-9d1359915c3d",
+    "725a6028-8ded-4842-8e03-93e1c9609a68"
+   ],
+   "claim_rank_ids": [
+    "fbfb6c00-371b-4da2-a590-07ddb65c60f2",
+    "f018a771-bef1-46da-a625-cc67369d5e14",
+    "1422628f-1526-44a3-b159-474905bdf1e6",
+    "24735e7a-d207-46ea-bc09-9d1359915c3d",
+    "725a6028-8ded-4842-8e03-93e1c9609a68"
+   ],
+   "query_rank_ids": [
+    "fbfb6c00-371b-4da2-a590-07ddb65c60f2",
+    "f018a771-bef1-46da-a625-cc67369d5e14",
+    "1422628f-1526-44a3-b159-474905bdf1e6",
+    "24735e7a-d207-46ea-bc09-9d1359915c3d",
+    "725a6028-8ded-4842-8e03-93e1c9609a68"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q184": {
+   "qid": "q184",
+   "n_pool": 50,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "b7e24f1a-5872-4c5e-8d7e-0673a868cda9",
+    "be6f44cc-5fd8-45a9-acb8-5d60ccd3d883",
+    "ef243105-f293-4856-9158-524cfc6d788b",
+    "4cc53296-3f23-43aa-b9c7-e3a271a916d4",
+    "1990a4d3-32a9-4fbb-a724-ae19f63e6968"
+   ],
+   "claim_rank_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "2e271fd6-55f4-404a-9fbd-f3471980c5ac",
+    "4cc53296-3f23-43aa-b9c7-e3a271a916d4",
+    "b7e24f1a-5872-4c5e-8d7e-0673a868cda9",
+    "ce932bd0-27a9-48c7-947c-d3539cc4ccfa"
+   ],
+   "query_rank_ids": [
+    "b7e24f1a-5872-4c5e-8d7e-0673a868cda9",
+    "be6f44cc-5fd8-45a9-acb8-5d60ccd3d883",
+    "ef243105-f293-4856-9158-524cfc6d788b",
+    "4cc53296-3f23-43aa-b9c7-e3a271a916d4",
+    "1990a4d3-32a9-4fbb-a724-ae19f63e6968"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q185": {
+   "qid": "q185",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "1878ab27-9dd4-4f3c-aa8d-c993fa0c07e1",
+    "7f8871fc-84e8-4b4c-895f-0bf292670e2e",
+    "04ede408-85c5-4d3d-812e-bfb21f146137",
+    "5a402437-60a2-4675-b1bf-40894c2947b6",
+    "eed5d09f-4a29-4a49-8006-93ada249b0da"
+   ],
+   "claim_rank_ids": [
+    "1878ab27-9dd4-4f3c-aa8d-c993fa0c07e1",
+    "7f8871fc-84e8-4b4c-895f-0bf292670e2e",
+    "04ede408-85c5-4d3d-812e-bfb21f146137",
+    "5a402437-60a2-4675-b1bf-40894c2947b6",
+    "eed5d09f-4a29-4a49-8006-93ada249b0da"
+   ],
+   "query_rank_ids": [
+    "1878ab27-9dd4-4f3c-aa8d-c993fa0c07e1",
+    "7f8871fc-84e8-4b4c-895f-0bf292670e2e",
+    "04ede408-85c5-4d3d-812e-bfb21f146137",
+    "5a402437-60a2-4675-b1bf-40894c2947b6",
+    "eed5d09f-4a29-4a49-8006-93ada249b0da"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": true
+  },
+  "q187": {
+   "qid": "q187",
+   "n_pool": 50,
+   "n_genuine_claims": 15,
+   "baseline_ids": [
+    "f950a2cf-c90b-4ef1-ae38-f95d2a0e2c84",
+    "475e4fbe-9595-4045-97ba-b0fbf942449f",
+    "59d16d28-16e5-47de-b703-60af4f78ec7d",
+    "5e71d84e-1a24-4482-81a4-df5dfc5e31c7",
+    "a4dbcbe7-cc75-4cae-acec-9f1bc2b4fcf1"
+   ],
+   "claim_rank_ids": [
+    "475e4fbe-9595-4045-97ba-b0fbf942449f",
+    "59d16d28-16e5-47de-b703-60af4f78ec7d",
+    "c0f0bbf7-13f9-4dbd-aaf4-034cf14e20c0",
+    "a4dbcbe7-cc75-4cae-acec-9f1bc2b4fcf1",
+    "5e71d84e-1a24-4482-81a4-df5dfc5e31c7"
+   ],
+   "query_rank_ids": [
+    "f950a2cf-c90b-4ef1-ae38-f95d2a0e2c84",
+    "475e4fbe-9595-4045-97ba-b0fbf942449f",
+    "59d16d28-16e5-47de-b703-60af4f78ec7d",
+    "5e71d84e-1a24-4482-81a4-df5dfc5e31c7",
+    "a4dbcbe7-cc75-4cae-acec-9f1bc2b4fcf1"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q189": {
+   "qid": "q189",
+   "n_pool": 50,
+   "n_genuine_claims": 17,
+   "baseline_ids": [
+    "efb64c40-89f4-4ad9-bfc7-1d7e3bcd962c",
+    "1831de61-4af7-421f-9ccb-92fd5625d15b",
+    "70a3155d-5c49-4ca3-a118-90d534429bb2",
+    "9c16ee1f-6cf6-46c7-b32d-ded77c546fc4",
+    "975b748a-c474-437c-859e-452251714a5c"
+   ],
+   "claim_rank_ids": [
+    "70a3155d-5c49-4ca3-a118-90d534429bb2",
+    "efb64c40-89f4-4ad9-bfc7-1d7e3bcd962c",
+    "975b748a-c474-437c-859e-452251714a5c",
+    "9c16ee1f-6cf6-46c7-b32d-ded77c546fc4",
+    "80215a19-3126-488f-98c0-3ebcaf061eeb"
+   ],
+   "query_rank_ids": [
+    "efb64c40-89f4-4ad9-bfc7-1d7e3bcd962c",
+    "1831de61-4af7-421f-9ccb-92fd5625d15b",
+    "70a3155d-5c49-4ca3-a118-90d534429bb2",
+    "9c16ee1f-6cf6-46c7-b32d-ded77c546fc4",
+    "975b748a-c474-437c-859e-452251714a5c"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q190": {
+   "qid": "q190",
+   "n_pool": 50,
+   "n_genuine_claims": 22,
+   "baseline_ids": [
+    "87b3f114-e351-4f1c-b0a1-49b104534ad4",
+    "1da5f6bb-ea9d-43f9-ba62-0d05fa9c9cec",
+    "24cb3582-490b-468a-8240-19082870d1d3",
+    "d8c66abd-f095-4d03-841d-ad9333486719",
+    "fa9d1643-ca09-4063-b550-54e9f15c82ed"
+   ],
+   "claim_rank_ids": [
+    "f94546f0-6c9e-4b64-b0ef-d1813dfd4b8b",
+    "87b3f114-e351-4f1c-b0a1-49b104534ad4",
+    "d8c66abd-f095-4d03-841d-ad9333486719",
+    "244ef877-1a7d-421d-a5aa-f02b9c26fada",
+    "926a6053-7ed1-41a7-8f91-80d3ba639f08"
+   ],
+   "query_rank_ids": [
+    "87b3f114-e351-4f1c-b0a1-49b104534ad4",
+    "1da5f6bb-ea9d-43f9-ba62-0d05fa9c9cec",
+    "24cb3582-490b-468a-8240-19082870d1d3",
+    "d8c66abd-f095-4d03-841d-ad9333486719",
+    "fa9d1643-ca09-4063-b550-54e9f15c82ed"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q191": {
+   "qid": "q191",
+   "n_pool": 50,
+   "n_genuine_claims": 1,
+   "baseline_ids": [
+    "762e6d9f-46d4-4314-a95c-248e5ef804a5",
+    "340076ee-39d4-4a4b-a663-cd41d9e365b3",
+    "99bd5d08-e831-4911-a43b-28c3590d140e",
+    "03fee50a-e02c-455d-9838-5b9ae632681a",
+    "4162d31f-1c12-4bcc-814b-ef692192eb99"
+   ],
+   "claim_rank_ids": [
+    "99bd5d08-e831-4911-a43b-28c3590d140e",
+    "762e6d9f-46d4-4314-a95c-248e5ef804a5",
+    "340076ee-39d4-4a4b-a663-cd41d9e365b3",
+    "03fee50a-e02c-455d-9838-5b9ae632681a",
+    "4162d31f-1c12-4bcc-814b-ef692192eb99"
+   ],
+   "query_rank_ids": [
+    "762e6d9f-46d4-4314-a95c-248e5ef804a5",
+    "340076ee-39d4-4a4b-a663-cd41d9e365b3",
+    "99bd5d08-e831-4911-a43b-28c3590d140e",
+    "03fee50a-e02c-455d-9838-5b9ae632681a",
+    "4162d31f-1c12-4bcc-814b-ef692192eb99"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 0,
+   "same_set_as_baseline": true,
+   "same_order_as_baseline": false
+  },
+  "q192": {
+   "qid": "q192",
+   "n_pool": 50,
+   "n_genuine_claims": 21,
+   "baseline_ids": [
+    "f290bde2-67f0-4417-a3e9-913c733787d4",
+    "2d747818-9586-4c39-a02b-77efff1f95ef",
+    "0bfc934b-33fb-44d7-88a8-390982cbed7c",
+    "4a2a38fc-d0d0-4a52-a7ed-baa6a2049d0b",
+    "0cf8f14b-cce0-41e5-80d3-d13d283b9eb9"
+   ],
+   "claim_rank_ids": [
+    "f290bde2-67f0-4417-a3e9-913c733787d4",
+    "70086bc8-1b77-4399-97b0-f7b152f5d483",
+    "4a2a38fc-d0d0-4a52-a7ed-baa6a2049d0b",
+    "0bacc8cf-a85e-450b-95f1-526a8d03d308",
+    "4f55fa7e-b5f7-4453-b214-7fee03076126"
+   ],
+   "query_rank_ids": [
+    "f290bde2-67f0-4417-a3e9-913c733787d4",
+    "2d747818-9586-4c39-a02b-77efff1f95ef",
+    "0bfc934b-33fb-44d7-88a8-390982cbed7c",
+    "4a2a38fc-d0d0-4a52-a7ed-baa6a2049d0b",
+    "0cf8f14b-cce0-41e5-80d3-d13d283b9eb9"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q193": {
+   "qid": "q193",
+   "n_pool": 50,
+   "n_genuine_claims": 5,
+   "baseline_ids": [
+    "df0c8ed0-c628-404b-bfae-10355d2e6642",
+    "27c4966b-9a90-498f-8d8f-827d2df5b6bd",
+    "f388b7f5-ecf7-4f5e-ad79-4c8b43d1bb1d",
+    "d933f423-4863-41c5-b4d3-d6a5b2698a38",
+    "69a64226-09b5-49fa-a0ce-0e85855477f5"
+   ],
+   "claim_rank_ids": [
+    "df0c8ed0-c628-404b-bfae-10355d2e6642",
+    "0f82bcff-8e1f-4565-9d17-e3273f96d4df",
+    "1349cc71-778c-4e2c-9813-4cb3ec302da0",
+    "f388b7f5-ecf7-4f5e-ad79-4c8b43d1bb1d",
+    "27c4966b-9a90-498f-8d8f-827d2df5b6bd"
+   ],
+   "query_rank_ids": [
+    "df0c8ed0-c628-404b-bfae-10355d2e6642",
+    "27c4966b-9a90-498f-8d8f-827d2df5b6bd",
+    "f388b7f5-ecf7-4f5e-ad79-4c8b43d1bb1d",
+    "d933f423-4863-41c5-b4d3-d6a5b2698a38",
+    "69a64226-09b5-49fa-a0ce-0e85855477f5"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 2,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q195": {
+   "qid": "q195",
+   "n_pool": 50,
+   "n_genuine_claims": 15,
+   "baseline_ids": [
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "1570f7a2-447a-4d14-a12b-f3e2ba144242",
+    "cdd460a8-21d2-4125-b0ab-5356de6758fc",
+    "1e213a63-f9ef-4ffc-9745-61a61a62dff8",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "claim_rank_ids": [
+    "1e213a63-f9ef-4ffc-9745-61a61a62dff8",
+    "cdd460a8-21d2-4125-b0ab-5356de6758fc",
+    "4da89237-76bb-4fe6-92c0-04844ca06c3e",
+    "1570f7a2-447a-4d14-a12b-f3e2ba144242",
+    "7b087ab0-9804-487a-be4a-d32e108299b8"
+   ],
+   "query_rank_ids": [
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "1570f7a2-447a-4d14-a12b-f3e2ba144242",
+    "cdd460a8-21d2-4125-b0ab-5356de6758fc",
+    "1e213a63-f9ef-4ffc-9745-61a61a62dff8",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q196": {
+   "qid": "q196",
+   "n_pool": 50,
+   "n_genuine_claims": 22,
+   "baseline_ids": [
+    "d3a63297-f90c-46d8-ad79-6c2448785305",
+    "f7136bfc-1821-4063-b40c-b5f3d4a4d897",
+    "6e2989df-53e6-4501-aa34-4dd20efac460",
+    "08b72103-c4e9-466b-8e41-e95b2573f0a2",
+    "a6682bd7-b813-4120-a827-1d708a8a5e6b"
+   ],
+   "claim_rank_ids": [
+    "6e6042af-723f-41a9-8ec8-3981d50aa52a",
+    "fb129442-5df8-4472-af85-e314febc369a",
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "a868585e-bceb-447c-a1a8-a2f75f1f7381",
+    "d3a63297-f90c-46d8-ad79-6c2448785305"
+   ],
+   "query_rank_ids": [
+    "d3a63297-f90c-46d8-ad79-6c2448785305",
+    "f7136bfc-1821-4063-b40c-b5f3d4a4d897",
+    "6e2989df-53e6-4501-aa34-4dd20efac460",
+    "08b72103-c4e9-466b-8e41-e95b2573f0a2",
+    "a6682bd7-b813-4120-a827-1d708a8a5e6b"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 4,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q197": {
+   "qid": "q197",
+   "n_pool": 50,
+   "n_genuine_claims": 12,
+   "baseline_ids": [
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "9e33025b-4726-4248-8803-8c07f88f510e",
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "179123fc-7fde-4842-bd5b-040ddf6442f3",
+    "22e94669-e308-4f23-aa83-4568ffe03eb2"
+   ],
+   "claim_rank_ids": [
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "7932fda7-dd17-4b5b-b86c-dad9a27998d9",
+    "179123fc-7fde-4842-bd5b-040ddf6442f3",
+    "22e94669-e308-4f23-aa83-4568ffe03eb2",
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969"
+   ],
+   "query_rank_ids": [
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "9e33025b-4726-4248-8803-8c07f88f510e",
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "179123fc-7fde-4842-bd5b-040ddf6442f3",
+    "22e94669-e308-4f23-aa83-4568ffe03eb2"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 1,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  },
+  "q198": {
+   "qid": "q198",
+   "n_pool": 50,
+   "n_genuine_claims": 15,
+   "baseline_ids": [
+    "f37c1ebe-5331-4cb8-a8a6-cac7731194cc",
+    "44d95eee-7c5d-4c78-86ea-a03b916a40bb",
+    "7fa44556-726a-4ac1-aef6-72d89e9e4622",
+    "03efb14d-dce0-4570-b7c1-bafcc4275e6c",
+    "3bb3b867-4a24-4902-b093-c0003968f053"
+   ],
+   "claim_rank_ids": [
+    "03efb14d-dce0-4570-b7c1-bafcc4275e6c",
+    "66eeca24-f620-42b3-9cbb-a72cc7fbf703",
+    "3d57f46b-dc8f-4f3d-8d1a-07bdf73e7eb5",
+    "7fa44556-726a-4ac1-aef6-72d89e9e4622",
+    "89592eb4-3cd4-4914-9f1d-396050d4d408"
+   ],
+   "query_rank_ids": [
+    "f37c1ebe-5331-4cb8-a8a6-cac7731194cc",
+    "44d95eee-7c5d-4c78-86ea-a03b916a40bb",
+    "7fa44556-726a-4ac1-aef6-72d89e9e4622",
+    "03efb14d-dce0-4570-b7c1-bafcc4275e6c",
+    "3bb3b867-4a24-4902-b093-c0003968f053"
+   ],
+   "fallback": null,
+   "top5_overlap_with_baseline": 5,
+   "n_changed_vs_baseline": 3,
+   "same_set_as_baseline": false,
+   "same_order_as_baseline": false
+  }
+ }
+}
