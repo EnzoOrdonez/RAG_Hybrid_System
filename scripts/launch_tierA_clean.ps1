@@ -1,4 +1,4 @@
-# Tier A overnight launcher (summer phase) — run AFTER a clean reboot.
+﻿# Tier A overnight launcher (summer phase) — run AFTER a clean reboot.
 #
 # Why: granite4.1:8b @ num_ctx 4096 needs ~5.4 GB fully-on-GPU; with the normal
 # desktop stack (~1.7 GB VRAM baseline) Ollama splits CPU/GPU and generation is

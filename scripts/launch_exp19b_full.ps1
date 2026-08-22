@@ -1,4 +1,4 @@
-<#
+﻿<#
     exp19b — lanzador para la terminal de Enzo.
 
     Seccion de Claude Code — 2026-08-21 14:15 (hora local).
