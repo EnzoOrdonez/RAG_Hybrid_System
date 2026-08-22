@@ -56,9 +56,11 @@ sample to annotate. Rule, declared in advance:
 phase keeps catching.
 
 Usage: python scripts/compute_exp18_unsupported_taxonomy.py [--suffix _v2] [--tau 0.5]
+       [--out-suffix _v2]
 Env:   HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42
-Writes experiments/results/exp18_evidence_ceiling/unsupported_taxonomy.{json,md}
-       + output/audit/unsupported_claims_sample.csv (stratified, for the human gold)
+Writes experiments/results/exp18_evidence_ceiling/unsupported_taxonomy<out-suffix>.{json,md}
+       + output/audit/unsupported_claims_sample<out-suffix>.csv
+       (stratified, for the human gold)
 """
 import argparse
 import csv
@@ -72,6 +74,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.compute_faithfulness_metrics import classify_response  # noqa: E402
+from src.utils.signed_evidence import guard_write  # noqa: E402
 
 EXP_DIR = PROJECT_ROOT / "experiments/results/exp18_evidence_ceiling"
 AUDIT_DIR = PROJECT_ROOT / "output/audit"
@@ -127,6 +130,8 @@ def did_bootstrap(position, n_boot=10000, seed=SEED):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--suffix", default="_v2", help="which selection_scores<suffix> to read")
+    ap.add_argument("--out-suffix", default="",
+                    help="suffix for every output artifact (for example, _v2)")
     ap.add_argument("--tau", type=float, default=0.5)
     args = ap.parse_args()
 
@@ -232,7 +237,8 @@ def main():
             "be the overclaim this phase keeps catching."),
         "generated_by": "scripts/compute_exp18_unsupported_taxonomy.py",
     }
-    (EXP_DIR / "unsupported_taxonomy.json").write_text(
+    taxonomy_json = guard_write(EXP_DIR / f"unsupported_taxonomy{args.out_suffix}.json")
+    taxonomy_json.write_text(
         json.dumps({**out, "claims_by_stratum": strata}, indent=1, ensure_ascii=False),
         encoding="utf-8")
 
@@ -246,8 +252,8 @@ def main():
         for i in rng.choice(len(v), take, replace=False):
             sample.append({"stratum": k, **v[int(i)], "human_verdict": "",
                            "human_notes": ""})
-    AUDIT_DIR.mkdir(parents=True, exist_ok=True)
-    with (AUDIT_DIR / "unsupported_claims_sample.csv").open("w", newline="", encoding="utf-8") as f:
+    sample_csv = guard_write(AUDIT_DIR / f"unsupported_claims_sample{args.out_suffix}.csv")
+    with sample_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(sample[0].keys()))
         w.writeheader()
         w.writerows(sample)
@@ -281,7 +287,8 @@ def main():
     L += ["", out["strata_are_candidates_not_verdicts"], "",
           f"Muestra estratificada para anotacion humana: "
           f"`output/audit/unsupported_claims_sample.csv` ({len(sample)} claims)."]
-    (EXP_DIR / "unsupported_taxonomy.md").write_text("\n".join(L), encoding="utf-8")
+    taxonomy_md = guard_write(EXP_DIR / f"unsupported_taxonomy{args.out_suffix}.md")
+    taxonomy_md.write_text("\n".join(L), encoding="utf-8")
     print("\n".join(L))
 
 
