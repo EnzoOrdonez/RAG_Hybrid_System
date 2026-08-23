@@ -166,3 +166,25 @@ perillas cambiadas, ambas justificadas por la fase:
 
 Está **fuera** de `PIPELINE_CONFIGS` a propósito, para que `get_config("hybrid")` siga
 devolviendo el sistema medido. Fijado por `test_coverage_balancer.py`.
+
+---
+
+## Actualización exp19b (2026-08-22)
+
+Esta nota reemplaza operativamente el aviso H5 anterior para exp19b. La huella del warmup
+discriminó tres modos de carga de Ollama, pero dos drafts completos separados por 4,7 h
+resultaron **194/194 bit-idénticos**. Por eso la huella queda como log informativo y la
+compuerta real es `draft_replay_check`: antes de regen reproduce cinco respuestas archivadas
+por el mismo camino de generación y exige 5/5 identidades. Un fallo termina con
+`RUNTIME_STATE_CHANGED` (exit 3) antes de puntuar.
+
+En Windows PowerShell 5.1 el lanzador completo se invoca con `powershell`, no con `pwsh`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\launch_exp19b_full.ps1
+```
+
+El orden protegido es `draft -> extract/select en CPU -> draft_replay_check -> regen`.
+`select_exp19b_evidence.py` fija el CrossEncoder en `device="cpu"` y el lanzador oculta CUDA
+a extract/select; la GPU no se toca entre draft y el final de regen. Draft y select arrancan
+con `--no-resume`, y draft/regen mantienen la caché LLM desactivada.

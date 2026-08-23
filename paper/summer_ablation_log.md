@@ -1823,3 +1823,42 @@ huerfano de 70 queries queda en disco **sin versionar** y ya no es reanudable en
 
 **Pendiente de decision de Enzo, y es de diseno, no de ejecucion:** como se garantiza una
 ventana de ~7 h sin reinicio, y que se hace con el suelo de ruido de exp21.
+
+---
+
+## Entrada 27 — exp19b CERRADO: mejora HHEM pequeña y equivalencia práctica (2026-08-23)
+
+> Sección de **Codex** — 2026-08-23 (hora local). Evidencia ya congelada en
+> `experiments/results/exp19b_anchored_selector/`. Esta entrada registra el veredicto y la
+> validación metodológica declarada antes de puntuar; no recalcula ningún artefacto.
+
+### Veredicto
+
+Contraste pareado `claim_selected` vs `baseline_repro`, **n=186** (8 declinaciones excluidas;
+7 queries en fallback). HHEM sube de **0,4562** a **0,5014**: **Δ=+0,0451**, IC95 bootstrap
+[0,0076, 0,0817], **p=0,01798** (BH identidad, una comparación por verificador) y
+**d_z=0,1727**, tamaño negligible. El TOST dentro de la banda preregistrada **±0,081** declara
+equivalencia práctica: p_TOST=0,03135 e IC90 [0,0134, 0,0768].
+
+Los verificadores de triangulación no muestran una mejora confirmatoria: small
+**Δ=-0,0021, p=0,94206** y base **Δ=+0,0258, p=0,09958**; ambos efectos son negligible y ambos
+cumplen TOST en ±0,081. La lectura cerrada es, por tanto, una mejora HHEM estadísticamente
+detectable pero pequeña, con small/base nulos y equivalencia práctica en los tres
+instrumentos; no se convierte la cota de selección de exp18 en denominador.
+
+### Nota metodológica del 2026-08-22: el proxy warmup falló su validación
+
+La compuerta basada en la huella del warmup distinguió tres estados de carga de Ollama
+(`6283a007`, `e1042620`, `0f245681`), pero esos estados **no distinguieron las respuestas que
+importaban**. Dos corridas completas del draft, separadas por **4,7 h** y por cambios de carga,
+produjeron **194/194 respuestas bit-idénticas**, verificadas por hash y comparación de textos.
+La huella era un proxy con falsos positivos estructurales y falló la validación contra la
+medida directa.
+
+Antes de puntuar se reemplazó como compuerta por `draft_replay_check`: reejecuta cinco qids
+fijos del propio checkpoint por el mismo camino de generación (prompt híbrido, mismos
+`baseline_repro_ids`, temperatura 0, seed 42 y caché desactivada) y exige **5/5** respuestas
+bit-idénticas. El warmup se conserva solo como log informativo. Si el replay difiere, el
+pipeline termina con `RUNTIME_STATE_CHANGED`/exit 3 y nada posterior se puntúa. Además,
+extract y select se aíslan de CUDA y el cross-encoder de select corre en CPU, de modo que la
+GPU no se toca entre draft y regen.
