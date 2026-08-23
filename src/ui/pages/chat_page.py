@@ -64,14 +64,14 @@ def render():
         )
         config_key = system_options[selected_system]
 
-        # LLM model selection (wired: injected into the pipeline below).
-        # Default llama3.1 q4: the only model that fits the 6 GB GPU whole
-        # (gemma4:e4b is 9.6 GB -> permanent CPU offload on this machine).
+        # The default comes from SURVEY_DEPLOY, so the UI cannot silently drift
+        # from the Granite generator measured by exp19b.
         ollama_ok = check_ollama()
         if ollama_ok:
             models = get_ollama_models()
             if models:
-                default_model = "llama3.1:8b-instruct-q4_K_M"
+                from src.pipeline.pipeline_config import SURVEY_DEPLOY
+                default_model = SURVEY_DEPLOY.llm_model
                 model_idx = 0
                 for i, m in enumerate(models):
                     if default_model in m or m in default_model:
@@ -106,7 +106,10 @@ def render():
                 value=False,  # OFF por defecto: N4 — la expansión no aporta (exp13)
             )
             alpha = st.slider("Hybrid Alpha", 0.0, 1.0, 0.5, 0.1)
-            max_tokens = st.slider("Max tokens (demo)", 128, 1024, 512, 64)
+            from src.ui.components.index_loader import UI_MAX_TOKENS
+            max_tokens = st.slider(
+                "Max tokens (demo)", 128, 1024, value=UI_MAX_TOKENS, step=64
+            )
 
         if st.button("Clear Chat History"):
             st.session_state.pop("chat_messages", None)

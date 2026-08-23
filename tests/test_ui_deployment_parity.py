@@ -1,5 +1,7 @@
 """Behavioral coverage for the survey deployment path consumed by Streamlit."""
 
+import importlib.util
+import sys
 from types import SimpleNamespace
 
 import pytest
@@ -8,10 +10,24 @@ from src.pipeline.pipeline_config import PROPOSED_HYBRID, SURVEY_DEPLOY, get_con
 from src.retrieval.bm25_retriever import RetrievalResult
 
 
-def test_ui_hybrid_uses_survey_deploy_without_changing_experiment_registry(monkeypatch):
-    """Streamlit gets the survey config; experiment callers keep the signed behavior."""
+if importlib.util.find_spec("streamlit") is None:
+    def _cache_resource(*args, **kwargs):
+        def decorate(function):
+            function.clear = lambda: None
+            return function
+        return decorate
+
+    sys.modules["streamlit"] = SimpleNamespace(cache_resource=_cache_resource)
+
+
+class _LLMProbe:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+def _patch_pipeline_construction(monkeypatch):
+    import src.generation.llm_manager as llm_manager
     import src.pipeline.rag_pipeline as rag_pipeline
-    from src.ui.components import index_loader
 
     class PipelineProbe:
         def __init__(self, config, hybrid_index, llm_manager=None):
@@ -19,7 +35,15 @@ def test_ui_hybrid_uses_survey_deploy_without_changing_experiment_registry(monke
             self.hybrid_index = hybrid_index
             self.llm_manager = llm_manager
 
+    monkeypatch.setattr(llm_manager, "LLMManager", _LLMProbe)
     monkeypatch.setattr(rag_pipeline, "RAGPipeline", PipelineProbe)
+
+
+def test_ui_hybrid_uses_survey_deploy_without_changing_experiment_registry(monkeypatch):
+    """Streamlit gets the survey config; experiment callers keep the signed behavior."""
+    from src.ui.components import index_loader
+
+    _patch_pipeline_construction(monkeypatch)
     index_loader.load_pipeline.clear()
 
     pipeline = index_loader.load_pipeline("hybrid", _hybrid_index=object())
@@ -27,6 +51,12 @@ def test_ui_hybrid_uses_survey_deploy_without_changing_experiment_registry(monke
     assert pipeline.config == SURVEY_DEPLOY
     assert pipeline.config.prompt_routing is True
     assert pipeline.config.balance_cross_cloud_providers is True
+    assert pipeline.config.temperature == 0.0
+    assert pipeline.config.retrieval_top_k == 50
+    assert pipeline.config.final_top_k == 5
+    assert pipeline.llm_manager.model == SURVEY_DEPLOY.llm_model
+    assert pipeline.llm_manager.seed == 42
+    assert pipeline.llm_manager.cache_enabled is False
     assert get_config("hybrid") == PROPOSED_HYBRID
     assert get_config("hybrid").prompt_routing is False
     assert get_config("hybrid").balance_cross_cloud_providers is False
@@ -36,22 +66,53 @@ def test_ui_hybrid_uses_survey_deploy_without_changing_experiment_registry(monke
 
 @pytest.mark.parametrize("config_name", ["lexical", "semantic"])
 def test_ui_keeps_control_configs_unchanged(monkeypatch, config_name):
-    """Only the participant-facing hybrid arm gets the summer deployment mapping."""
-    import src.pipeline.rag_pipeline as rag_pipeline
+    """Control retrieval stays intact while the UI generator matches exp19b."""
     from src.ui.components import index_loader
 
-    class PipelineProbe:
-        def __init__(self, config, hybrid_index, llm_manager=None):
-            self.config = config
-
-    monkeypatch.setattr(rag_pipeline, "RAGPipeline", PipelineProbe)
+    _patch_pipeline_construction(monkeypatch)
     index_loader.load_pipeline.clear()
 
     pipeline = index_loader.load_pipeline(config_name, _hybrid_index=object())
 
-    assert pipeline.config == get_config(config_name)
+    expected = get_config(config_name).model_copy(
+        update={"llm_model": SURVEY_DEPLOY.llm_model}
+    )
+    assert pipeline.config == expected
+    assert pipeline.llm_manager.model == SURVEY_DEPLOY.llm_model
+    assert pipeline.llm_manager.seed == 42
+    assert pipeline.llm_manager.cache_enabled is False
 
     index_loader.load_pipeline.clear()
+
+
+def test_ui_explicit_model_override_is_visible_in_config(monkeypatch):
+    from src.ui.components import index_loader
+
+    _patch_pipeline_construction(monkeypatch)
+    index_loader.load_pipeline.clear()
+
+    pipeline = index_loader.load_pipeline(
+        "hybrid", _hybrid_index=object(), llm_model="alternate:model"
+    )
+
+    assert pipeline.config.llm_model == "alternate:model"
+    assert pipeline.llm_manager.model == "alternate:model"
+    index_loader.load_pipeline.clear()
+
+
+def test_chat_defaults_follow_experimental_generation_recipe():
+    from pathlib import Path
+
+    root = Path(__file__).parents[1]
+    source = (root / "src/ui/pages/chat_page.py").read_text(
+        encoding="utf-8"
+    )
+    loader_source = (root / "src/ui/components/index_loader.py").read_text(
+        encoding="utf-8"
+    )
+    assert "default_model = SURVEY_DEPLOY.llm_model" in source
+    assert "UI_MAX_TOKENS = 1024" in loader_source
+    assert "value=UI_MAX_TOKENS" in source
 
 
 def test_survey_stream_routes_cross_cloud_prompt(monkeypatch):

@@ -9,6 +9,11 @@ import streamlit as st
 
 logger = logging.getLogger(__name__)
 
+# UI/deployment defaults mirror the exp19b generation recipe. The immutable
+# configurations used by experiments remain untouched.
+UI_GENERATOR_SEED = 42
+UI_MAX_TOKENS = 1024
+
 
 @st.cache_resource(show_spinner="Loading indices...")
 def load_hybrid_index():
@@ -25,29 +30,32 @@ def load_hybrid_index():
 def load_pipeline(config_name: str, _hybrid_index=None, llm_model: str = ""):
     """Build a RAGPipeline with a given config.
 
-    `llm_model` (demo): overrides the LLM via an injected LLMManager so the
-    sidebar model selector actually takes effect. Part of the cache key, so
-    each (config, model) pair gets its own pipeline and cached pipelines are
-    never mutated across sessions. Empty string = config default.
+    Streamlit fixes its defaults to exp19b's Granite model, seed 42 and
+    cache-off recipe. ``llm_model`` may explicitly override the model from the
+    chat selector. Each (config, model) pair has its own cached pipeline; the
+    experiment registry itself remains unchanged.
     """
     from src.pipeline.pipeline_config import SURVEY_DEPLOY, get_config
     from src.pipeline.rag_pipeline import RAGPipeline
 
-    # UI-only mapping: experiments and CLI keep the measured `hybrid` config,
-    # while participant-facing Streamlit paths consume the summer deployment.
-    config = SURVEY_DEPLOY if config_name == "hybrid" else get_config(config_name)
+    # UI-only mapping: hybrid consumes the full summer deployment; controls keep
+    # their retrieval recipe but share its measured generator. Experiment and CLI
+    # configs remain unchanged.
+    base_config = SURVEY_DEPLOY if config_name == "hybrid" else get_config(config_name)
+    effective_model = llm_model or SURVEY_DEPLOY.llm_model
+    config = base_config.model_copy(update={"llm_model": effective_model})
 
     if _hybrid_index is None:
         _hybrid_index = load_hybrid_index()
 
-    llm = None
-    if llm_model:
-        from src.generation.llm_manager import LLMManager
-        # cache_enabled=False (N7/I7): SUS/B.4 sessions need perceptually
-        # consistent latency — a repeated question answered instantly from
-        # cache biases the user's latency perception. Cost: re-asking the
-        # same question regenerates (~40 s), acceptable for demo use.
-        llm = LLMManager(provider="ollama", model=llm_model, cache_enabled=False)
+    from src.generation.llm_manager import LLMManager
+    # Cache-off both avoids latency bias between participants and matches exp19b.
+    llm = LLMManager(
+        provider="ollama",
+        model=effective_model,
+        cache_enabled=False,
+        seed=UI_GENERATOR_SEED,
+    )
     return RAGPipeline(config=config, hybrid_index=_hybrid_index, llm_manager=llm)
 
 
