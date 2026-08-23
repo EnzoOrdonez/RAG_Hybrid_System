@@ -83,6 +83,36 @@ def test_a_fresh_draft_always_implies_a_fresh_selection(pipe, stages):
         "select must not mix claims from a fresh draft with an older selection checkpoint"
 
 
+# --------------------------------------------------------- explicit artifact-backed resumption
+def test_start_from_skips_completed_stages(pipe, stages, tmp_path):
+    resumed = pipe.stages_from(stages, "select", tmp_path)
+
+    assert names(resumed)[0] == "select"
+    assert "draft" not in names(resumed) and "extract" not in names(resumed)
+
+
+@pytest.mark.parametrize("start_from", ["draft_replay_check", "regen"])
+def test_start_from_gate_or_regen_lists_every_missing_artifact(
+        pipe, stages, tmp_path, start_from):
+    with pytest.raises(ValueError) as exc:
+        pipe.stages_from(stages, start_from, tmp_path)
+
+    message = str(exc.value)
+    assert start_from in message
+    for required in pipe.RESUME_ARTIFACTS:
+        assert required in message
+
+
+def test_start_from_regen_rechecks_replay_gate_when_artifacts_exist(pipe, stages, tmp_path):
+    for required in pipe.RESUME_ARTIFACTS:
+        (tmp_path / required).write_text("{}", encoding="utf-8")
+
+    resumed = pipe.stages_from(stages, "regen", tmp_path)
+
+    assert names(resumed)[:2] == ["draft_replay_check", "regen"]
+    assert "draft" not in names(resumed) and "select" not in names(resumed)
+
+
 # ------------------------------------------------------------------ 2. the direct replay gate
 def _archived_rows():
     return [{"query_id": f"q{i:03d}", "answer": f"answer {i}"} for i in range(1, 6)]

@@ -19,8 +19,12 @@ warmup fingerprint remains in the log as diagnostic data, never as a decision ru
 The stage list is data, not prose, so tests can assert its order and that the gate sits where it
 has to sit. The subprocess runner is injected for the same reason.
 
+RESUMPTION. Without `--start-from`, every full run starts at a fresh draft (`--no-cache` and
+`--no-resume`). `--start-from` is only for an explicitly resumed run whose prior artifacts
+already exist; starting at regen still re-runs the mandatory direct replay gate first.
+
 Usage (normally via scripts/launch_exp19b_full.ps1):
-  python scripts/run_exp19b_pipeline.py [--dry-run] [--max-queries N]
+  python scripts/run_exp19b_pipeline.py [--dry-run] [--max-queries N] [--start-from STAGE]
 Env: HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42 PYTHONUTF8=1
 Exit: 0 all stages passed · 2 a stage failed · 3 RUNTIME_STATE_CHANGED
 """
@@ -41,6 +45,7 @@ EXP_DIR = PROJECT_ROOT / "experiments/results" / EXP_ID
 LOG_DIR = PROJECT_ROOT / "logs"
 VERIFIERS = ["small", "base", "hhem"]
 DRAFT_REPLAY_N = 5
+RESUME_ARTIFACTS = ("results.json", "draft_claims.json", "selection_ids.json")
 
 EXIT_OK, EXIT_STAGE_FAILED, EXIT_STATE_CHANGED = 0, 2, 3
 STATE_CHANGED_MARKER = "RUNTIME_STATE_CHANGED"
@@ -101,6 +106,31 @@ def build_stages(py=None, exp_dir=None, max_queries=None):
 
 def gate_index(stages):
     return [n for n, _ in stages].index("draft_replay_check")
+
+
+def stages_from(stages, start_from=None, exp_dir=EXP_DIR):
+    """Slice an explicitly resumed run while preserving the mandatory pre-regen replay gate."""
+    if start_from is None:
+        return stages
+    names = [name for name, _command in stages]
+    if start_from not in names:
+        raise ValueError(f"unknown --start-from stage {start_from!r}; choose from {names}")
+
+    requested_index = names.index(start_from)
+    replay_index = names.index("draft_replay_check")
+    if requested_index >= replay_index:
+        exp_dir = Path(exp_dir)
+        missing = [name for name in RESUME_ARTIFACTS if not (exp_dir / name).exists()]
+        if missing:
+            raise ValueError(
+                f"cannot --start-from {start_from}: missing required artifacts: "
+                + ", ".join(missing))
+
+    # Regen may never bypass the direct replay gate. Asking to resume at regen means that the
+    # earlier draft/extract/select stages are complete, then replay is rechecked before regen.
+    if start_from == "regen":
+        requested_index = replay_index
+    return stages[requested_index:]
 
 
 def draft_replay_check(archived_rows, generate_fn, n=DRAFT_REPLAY_N):
@@ -246,9 +276,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true", help="print the stages and exit 0")
     ap.add_argument("--max-queries", type=int, default=None)
+    ap.add_argument("--start-from", default=None,
+                    help="explicitly resume at STAGE; completed artifacts must already exist")
     args = ap.parse_args()
 
     stages = build_stages(max_queries=args.max_queries)
+    try:
+        stages = stages_from(stages, args.start_from, EXP_DIR)
+    except ValueError as exc:
+        ap.error(str(exc))
     if args.dry_run:
         for i, (name, argv) in enumerate(stages):
             print(f"{i:>2}. {name:<22} {'<direct draft replay gate>' if argv is None else ' '.join(argv[1:])}")
