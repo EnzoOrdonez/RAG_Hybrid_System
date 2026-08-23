@@ -34,7 +34,9 @@ def test_ci_runs_redacting_secret_scan_before_tests():
     steps = doc["jobs"]["test"]["steps"]
     commands = [step.get("run", "") for step in steps]
 
-    scan_index = commands.index("python scripts/scan_secrets.py")
+    scan_index = commands.index(
+        "python scripts/scan_secrets.py --baseline secrets_baseline.json"
+    )
     test_index = commands.index('python -m pytest tests/ -q -m "not slow and not gpu"')
     assert scan_index < test_index
 

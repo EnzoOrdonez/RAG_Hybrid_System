@@ -6,6 +6,9 @@ import pytest
 from scripts import scan_secrets
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
 @pytest.fixture
 def synthetic_credentials() -> dict[str, str]:
     return {
@@ -106,3 +109,54 @@ def test_findings_produce_exit_one(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(scan_secrets, "scan_repository", lambda root: [finding])
 
     assert scan_secrets.main(["--root", "."]) == 1
+
+
+def test_versioned_baseline_declares_public_corpus_and_signed_evidence() -> None:
+    exclusions = scan_secrets.load_baseline(PROJECT_ROOT / "secrets_baseline.json")
+
+    assert {exclusion.category for exclusion in exclusions} == {
+        "corpus",
+        "evidencia_firmada",
+    }
+    assert {exclusion.reason for exclusion in exclusions} == {
+        "corpus público descargado de la documentación oficial",
+        "evidencia firmada que cita el corpus",
+    }
+
+
+def test_only_baselined_corpus_findings_exit_zero(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    finding = scan_secrets.Finding(
+        "aws_access_key_id",
+        Path("data/raw/aws/example.json"),
+        12,
+        "AKIA",
+    )
+    monkeypatch.setattr(scan_secrets, "scan_repository", lambda root: [finding])
+
+    exit_code = scan_secrets.main(
+        ["--root", str(PROJECT_ROOT), "--baseline", "secrets_baseline.json"]
+    )
+    report = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "1 excluidos por baseline: corpus" in report
+    assert "data/raw" not in report
+
+
+def test_finding_outside_baseline_exits_one(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    finding = scan_secrets.Finding("sk_token", Path("src/service.py"), 7, "sk-x")
+    monkeypatch.setattr(scan_secrets, "scan_repository", lambda root: [finding])
+
+    exit_code = scan_secrets.main(
+        ["--root", str(PROJECT_ROOT), "--baseline", "secrets_baseline.json"]
+    )
+    report = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "src\\service.py:7" in report or "src/service.py:7" in report

@@ -40,7 +40,7 @@ jobs:
           python -m ruff check .
 
       - name: Scan repository for secrets
-        run: python scripts/scan_secrets.py
+        run: python scripts/scan_secrets.py --baseline secrets_baseline.json
 
       - name: Run CPU-only test suite
         run: python -m pytest tests/ -q -m "not slow and not gpu"

@@ -10,6 +10,8 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 from dataclasses import dataclass
+import fnmatch
+import json
 import os
 from pathlib import Path
 import re
@@ -29,6 +31,16 @@ class Finding:
     path: Path
     line: int
     preview: str
+
+
+@dataclass(frozen=True)
+class BaselineExclusion:
+    category: str
+    path_pattern: str
+    reason: str
+
+    def matches(self, path: Path) -> bool:
+        return fnmatch.fnmatchcase(path.as_posix(), self.path_pattern)
 
 
 PATTERNS = (
@@ -221,13 +233,79 @@ def scan_repository(root: Path) -> list[Finding]:
     return findings
 
 
-def format_report(findings: Sequence[Finding]) -> str:
+def load_baseline(path: Path) -> tuple[BaselineExclusion, ...]:
+    """Load and validate a declared JSON baseline."""
+
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"No se pudo cargar el baseline {path}: {exc}") from exc
+    if document.get("version") != 1:
+        raise RuntimeError("El baseline debe declarar version=1")
+
+    exclusions: list[BaselineExclusion] = []
+    reasons_by_category: dict[str, str] = {}
+    for index, item in enumerate(document.get("exclusions", []), start=1):
+        try:
+            exclusion = BaselineExclusion(
+                category=item["category"].strip(),
+                path_pattern=item["path"].strip(),
+                reason=item["reason"].strip(),
+            )
+        except (KeyError, AttributeError) as exc:
+            raise RuntimeError(f"Exclusión inválida en posición {index}") from exc
+        if not all((exclusion.category, exclusion.path_pattern, exclusion.reason)):
+            raise RuntimeError(f"Exclusión vacía en posición {index}")
+        previous_reason = reasons_by_category.setdefault(exclusion.category, exclusion.reason)
+        if previous_reason != exclusion.reason:
+            raise RuntimeError(
+                f"La categoría {exclusion.category!r} declara razones distintas"
+            )
+        exclusions.append(exclusion)
+    if not exclusions:
+        raise RuntimeError("El baseline no contiene exclusiones")
+    return tuple(exclusions)
+
+
+def apply_baseline(
+    findings: Sequence[Finding],
+    exclusions: Sequence[BaselineExclusion],
+) -> tuple[list[Finding], Counter[str]]:
+    """Split active findings from declared baseline matches."""
+
+    active: list[Finding] = []
+    excluded_counts: Counter[str] = Counter()
+    for finding in findings:
+        exclusion = next(
+            (candidate for candidate in exclusions if candidate.matches(finding.path)),
+            None,
+        )
+        if exclusion is None:
+            active.append(finding)
+        else:
+            excluded_counts[exclusion.category] += 1
+    return active, excluded_counts
+
+
+def format_report(
+    findings: Sequence[Finding],
+    excluded_counts: Counter[str] | None = None,
+    baseline_reasons: dict[str, str] | None = None,
+) -> str:
     """Format aggregate counts and redacted locations without secret values."""
 
     counts = Counter(finding.pattern for finding in findings)
     lines = ["Conteo por patrón:"]
     for pattern in PATTERNS:
         lines.append(f"  {pattern.name}: {counts.get(pattern.name, 0)}")
+    if excluded_counts:
+        lines.append("Excluidos por baseline:")
+        for category in sorted(excluded_counts):
+            reason = (baseline_reasons or {}).get(category, "sin razón declarada")
+            lines.append(
+                f"  {excluded_counts[category]} excluidos por baseline: "
+                f"{category} ({reason})"
+            )
     lines.append("Hallazgos:")
     if not findings:
         lines.append("  ninguno")
@@ -248,6 +326,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path(__file__).resolve().parents[1],
         help="raíz del repositorio (por defecto, el padre de scripts/)",
     )
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        help="baseline JSON versionado; las rutas declaradas se agregan pero no bloquean",
+    )
     return parser
 
 
@@ -255,8 +338,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     root = args.root.resolve()
     findings = scan_repository(root)
-    print(format_report(findings))
-    return 1 if findings else 0
+    active_findings = findings
+    excluded_counts: Counter[str] = Counter()
+    baseline_reasons: dict[str, str] = {}
+    if args.baseline:
+        baseline_path = args.baseline
+        if not baseline_path.is_absolute():
+            baseline_path = root / baseline_path
+        exclusions = load_baseline(baseline_path)
+        active_findings, excluded_counts = apply_baseline(findings, exclusions)
+        baseline_reasons = {
+            exclusion.category: exclusion.reason for exclusion in exclusions
+        }
+    print(format_report(active_findings, excluded_counts, baseline_reasons))
+    return 1 if active_findings else 0
 
 
 if __name__ == "__main__":
