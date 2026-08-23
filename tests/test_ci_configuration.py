@@ -39,6 +39,19 @@ def test_ci_runs_redacting_secret_scan_before_tests():
     assert scan_index < test_index
 
 
+def test_ci_runs_pinned_ruff_as_informational_report_only():
+    doc = yaml.load(WORKFLOW.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    steps = doc["jobs"]["test"]["steps"]
+    ruff_step = next(step for step in steps if step.get("name") == "Report Ruff findings")
+    source = WORKFLOW.read_text(encoding="utf-8")
+
+    assert ruff_step["continue-on-error"] == "true"
+    assert "python -m pip install ruff==0.15.5" in ruff_step["run"]
+    assert "python -m ruff check ." in ruff_step["run"]
+    assert "--fix" not in ruff_step["run"]
+    assert "# informativo hasta post-entrega; no bloquea" in source
+
+
 def test_lockfile_is_pinned_and_alphabetized():
     lines = [
         line
