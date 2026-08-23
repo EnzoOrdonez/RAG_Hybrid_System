@@ -32,5 +32,8 @@ jobs:
           # pytest is a CI dependency; requirements.txt remains the editable runtime source.
           python -m pip install pytest
 
+      - name: Scan repository for secrets
+        run: python scripts/scan_secrets.py
+
       - name: Run CPU-only test suite
         run: python -m pytest tests/ -q -m "not slow and not gpu"

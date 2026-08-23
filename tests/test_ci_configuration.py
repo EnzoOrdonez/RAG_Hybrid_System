@@ -29,6 +29,16 @@ def test_ci_uses_python_314_and_cpu_only_test_expression():
     assert "cuda" not in source.lower()
 
 
+def test_ci_runs_redacting_secret_scan_before_tests():
+    doc = yaml.load(WORKFLOW.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    steps = doc["jobs"]["test"]["steps"]
+    commands = [step.get("run", "") for step in steps]
+
+    scan_index = commands.index("python scripts/scan_secrets.py")
+    test_index = commands.index('python -m pytest tests/ -q -m "not slow and not gpu"')
+    assert scan_index < test_index
+
+
 def test_lockfile_is_pinned_and_alphabetized():
     lines = [
         line
