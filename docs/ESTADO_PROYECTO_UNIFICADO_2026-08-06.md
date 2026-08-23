@@ -179,3 +179,89 @@ offline + ledgers. Riesgo conocido y aceptado hasta ahora.
 smoke test del analizador (OK, sin escritura), git branch/status, lectura completa de CLAUDE.md,
 SUMMER_RESULTS.md, NOTA3_NEXT_STEPS.md, cola del ledger y guías de anotación. No se modificó código,
 evidencia ni documentos existentes.*
+
+---
+
+## 10. Actualización 2026-08-23 — exp19b CERRADO, taxonomía preparada, app alineada
+
+> Sección de **[Kimi Work]** — 2026-08-23 (hora local). Todo lo afirmado aquí fue verificado
+> directamente contra el repo (git log, diffs, hashes SHA-256, tests corridos con el
+> intérprete 3.14 del proyecto), no tomado de reportes de otros agentes.
+
+### 10.1 Lo que pasó entre el 21 y el 23 de agosto
+
+**exp19b está CERRADO con veredicto** (rama `summer/taxonomia-759`, todo pusheado):
+- Contraste pareado `claim_selected` vs `baseline_repro`, n=186 (8 declinaciones, 7 fallback).
+- **HHEM: 0,4562 → 0,5014, Δ=+0,0451, IC95 [0,008; 0,082], p_BH=0,018 (significativo),
+  d_z=0,17 (pequeño), TOST: equivalente dentro de la banda ±0,081.**
+- small y base: sin diferencia (0/1). Lectura honesta: mejora real pero modesta, detectable
+  solo por el verificador más estricto y bajo el margen de relevancia provisional.
+- `verify_summer_offline`: todas las cifras de la fase se reproducen desde artefactos, sin GPU.
+
+**El incidente del 22-08 (material de tesis, no vergüenza):** dos corridas abortaron en la
+compuerta de huella (RUNTIME_STATE_CHANGED, nada puntuado). La investigación demostró:
+1. La huella del warmup discrimina 3 modos de CARGA de Ollama (`6283a007` recién cargado,
+   `e1042620` caliente post-draft, `0f245681` recargado tras idle; estable 4,6 h en idle).
+2. El primer cambio fue causado por `select` cargando el cross-encoder a la GPU; el segundo
+   ocurrió con select en CPU → la causa es la descarga/recarga del modelo, no solo la GPU.
+3. **Dos drafts completos separados por 4,7 h fueron 194/194 bit-idénticos** → el warmup era
+   un proxy con falsos positivos estructurales; se reemplazó por `draft_replay_check`
+   (5 respuestas archivadas re-generadas por el camino real, 5/5 requeridas), declarado
+   ANTES de puntuar. Documentado en `paper/summer_ablation_log.md` entrada 27 y REPRODUCE.md.
+
+**Fixes de ingeniería verificados:** checkpoints atómicos con retry (Errno 22 transitorio de
+Windows), `select` con `--no-resume` junto a `draft` (cierra mezcla de brazos), aislamiento
+GPU de extract/select (`device="cpu"` + `CUDA_VISIBLE_DEVICES=""`), `--start-from` con
+validación de artefactos, BOM UTF-8 en los .ps1 (PS 5.1), lanzador invocado con `powershell`.
+
+**P-G6 taxonomía de los 759 unsupported (exp18):** muestra de 40 claims con `inclusion_prob`
+y `stratum_size` (Horvitz-Thompson), n efectivo Kish 27,4, 2 ejemplos representativos por
+estrato, CSV `_v2` sin tocar el original, foot-gun de sobrescritura cerrado con guard_write.
+Analizador `scripts/analyze_taxonomy_calibration.py` listo (HT + κ Cohen test-retest +
+vocabulario estricto + bloqueo si >20 % vacío) — espera solo los juicios humanos.
+
+**App Streamlit alineada** con la receta experimental (Granite de SURVEY_DEPLOY por defecto,
+seed 42, caché off, 1024 tokens) + `docs/APP_VS_EXPERIMENTO.md`. Cierra la debilidad #8.
+
+### 10.2 Tablero frente a las debilidades de los evaluadores (Gemini 8 / Qwen 6)
+
+| # | Debilidad | Estado 2026-08-23 |
+|---|---|---|
+| 1 | Sin gold humano | ABIERTA — es de Enzo; todo lo instrumental está listo |
+| 2 | Circularidad de proxies | diseño cerrado; validación final depende del gold |
+| 3 | Calibración de verificadores | depende del gold (κ contra juicios) |
+| 4 | SESOI provisional ±0,081 | probe T0 hecho; T1/T2 pendientes (GPU, ~40 min, NO depende del gold) |
+| 5 | Cobertura del corpus | limitación declarada |
+| 6 | Selección de contexto / lost-in-the-middle | CERRADA con veredicto exp19b |
+| 7 | Reproducibilidad / ingeniería | CERRADA con evidencia dura |
+| 8 | App vs experimento | CERRADA (alineada + documentada) |
+
+### 10.3 Qué falta, en orden
+
+1. **G1 gold humano (Enzo)**: tanda 0 = los 40 claims de
+   `output/audit/unsupported_claims_sample_v2.csv` (escuela de calibración); luego el gold
+   oficial `claim_audit_sample_v4.csv` (150, etapa A) y `claim_audit_sample_v4_stageB.csv`
+   (50, etapa B), siguiendo `docs/GUIA_ANOTACION_GOLD_V4.md` y registrando en
+   `output/audit/gold_v4_tandas_enzo.md`. Reservar 8-10 claims para re-anotación en ciego
+   (κ test-retest intra-anotador).
+2. **Probe de ruido T1/T2** (Enzo, GPU libre): reiniciar Ollama a propósito →
+   `run_runtime_noise_probe.py --mode state-b --n 20` → `--mode analyze`. Re-ancla la SESOI.
+3. Cuando el gold esté: correr `analyze_taxonomy_calibration.py` y `analyze_gold_v4.py`,
+   y redactar la sección de validación humana de la tesis.
+
+### 10.4 Lecciones operativas (para cualquier agente futuro)
+
+- `pwsh` no existe en esta máquina: Windows PowerShell 5.1 + `-ExecutionPolicy Bypass`.
+- El alias `python` apunta a 3.11 sin NumPy; los experimentos usan
+  `C:\Users\enziz\AppData\Local\Python\pythoncore-3.14-64\python.exe`.
+- Ollama no está en PATH: `AppData\Local\Programs\Ollama\ollama.exe`; el lanzador lo
+  levanta solo. La app de escritorio de Ollama NO debe abrirse durante corridas (cargar
+  otro modelo cambia el estado del generador).
+- Los procesos largos lanzados desde entornos de agente mueren; las corridas largas las
+  lanza Enzo desde su PowerShell.
+- Verificadores offline requieren `PYTHONUTF8=1`.
+
+*Fin de la sección de [Kimi Work] 2026-08-23. Verificaciones: git log/status, diffs de cada
+commit de Codex, hashes SHA-256 de artefactos _v2 vs originales, comparación bit-a-bit de
+los dos drafts (194/194), tests nuevos corridos localmente (18+19+20+15 en verde), lectura
+de equivalence__hhem.md, arm_stats__hhem.md y la ficha/informes de deficiencias.*
