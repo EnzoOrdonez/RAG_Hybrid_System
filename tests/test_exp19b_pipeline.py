@@ -7,9 +7,8 @@ expensive failure is not a crash: it is finishing successfully with two arms gen
 different generator states. Measured 2026-08-21: an Ollama restart changes the answer to a
 byte-identical prompt (q001 jaccard-5gram 0.0705). So the properties pinned here are:
 
-  1. the fingerprint re-check sits between `select` and `regen` -- the CPU stretch where a
-     machine sleeps or a driver resets is exactly there;
-  2. a changed fingerprint stops the pipeline and NOTHING gets scored;
+  1. the direct draft replay sits between `select` and `regen`;
+  2. any replay mismatch stops the pipeline and NOTHING gets scored;
   3. a failing stage stops everything after it, with a non-zero exit;
   4. a fresh draft implies a fresh selection, so their checkpoints can never be mixed.
 
@@ -55,10 +54,10 @@ def test_generation_comes_before_any_scoring(pipe, stages):
     assert n.index("regen") < n.index("pass_n_small"), "scoring may not precede the second arm"
 
 
-def test_the_fingerprint_gate_sits_between_select_and_regen(pipe, stages):
+def test_the_draft_replay_gate_sits_between_select_and_regen(pipe, stages):
     n = names(stages)
-    assert n.index("select") < n.index("fingerprint_recheck") < n.index("regen")
-    assert n.index("fingerprint_recheck") == n.index("regen") - 1, \
+    assert n.index("select") < n.index("draft_replay_check") < n.index("regen")
+    assert n.index("draft_replay_check") == n.index("regen") - 1, \
         "nothing may run between the gate and the arm it protects"
 
 
@@ -84,26 +83,41 @@ def test_a_fresh_draft_always_implies_a_fresh_selection(pipe, stages):
         "select must not mix claims from a fresh draft with an older selection checkpoint"
 
 
-# ------------------------------------------------------------------ 2. the gate
-def test_an_unchanged_fingerprint_passes_the_gate(pipe):
-    ok, msg = pipe.fingerprint_gate("abc", "abc")
-    assert ok and "unchanged" in msg
+# ------------------------------------------------------------------ 2. the direct replay gate
+def _archived_rows():
+    return [{"query_id": f"q{i:03d}", "answer": f"answer {i}"} for i in range(1, 6)]
 
 
-def test_a_changed_fingerprint_is_loud_and_names_the_marker(pipe):
-    ok, msg = pipe.fingerprint_gate("abc", "xyz")
+def test_five_identical_draft_replays_pass(pipe):
+    expected = {row["query_id"]: row["answer"] for row in _archived_rows()}
+    ok, msg, detail = pipe.draft_replay_check(
+        _archived_rows(), generate_fn=lambda qid: expected[qid])
+
+    assert ok and "5/5 bit-identical" in msg
+    assert detail == {"checked": 5, "identical": 5, "mismatched_qids": []}
+
+
+def test_one_different_draft_replay_is_loud(pipe):
+    expected = {row["query_id"]: row["answer"] for row in _archived_rows()}
+    expected["q003"] = "different"
+    ok, msg, detail = pipe.draft_replay_check(
+        _archived_rows(), generate_fn=lambda qid: expected[qid])
+
     assert not ok
-    assert pipe.STATE_CHANGED_MARKER in msg and "abc" in msg and "xyz" in msg
-    assert "scored" in msg, "the message must say that nothing was scored"
+    assert pipe.STATE_CHANGED_MARKER in msg and "4/5" in msg and "nothing was scored" in msg
+    assert detail["mismatched_qids"] == ["q003"]
 
 
 def test_a_state_change_scores_absolutely_nothing(pipe, stages):
     """The expensive failure is a pipeline that finishes and reports a number anyway."""
     ran = []
-    fps = iter(["state_A", "state_B"])          # after draft, then at the gate
     code, report = pipe.run_pipeline(
         stages, runner=lambda argv: (ran.append(argv), 0)[1],
-        fingerprint_fn=lambda: next(fps), log=lambda m: None)
+        fingerprint_fn=lambda: "informational-only",
+        replay_check_fn=lambda: (
+            False, f"{pipe.STATE_CHANGED_MARKER}: 4/5; nothing was scored",
+            {"checked": 5, "identical": 4, "mismatched_qids": ["q003"]}),
+        log=lambda m: None)
 
     assert code == pipe.EXIT_STATE_CHANGED
     done = [r["stage"] for r in report]
@@ -115,6 +129,9 @@ def test_a_state_change_scores_absolutely_nothing(pipe, stages):
 def test_a_stable_state_runs_the_whole_pipeline(pipe, stages):
     code, report = pipe.run_pipeline(
         stages, runner=lambda argv: 0, fingerprint_fn=lambda: "same",
+        replay_check_fn=lambda: (
+            True, "draft replay 5/5 bit-identical",
+            {"checked": 5, "identical": 5, "mismatched_qids": []}),
         log=lambda m: None)
     assert code == pipe.EXIT_OK
     assert [r["stage"] for r in report][-1] == "verify_offline"
@@ -127,7 +144,9 @@ def test_a_failing_stage_stops_everything_after_it(pipe, stages):
         return 1 if "select_exp19b_evidence.py" in " ".join(argv) else 0
 
     code, report = pipe.run_pipeline(stages, runner=runner,
-                                     fingerprint_fn=lambda: "same", log=lambda m: None)
+                                     fingerprint_fn=lambda: "same",
+                                     replay_check_fn=lambda: (True, "ok", {}),
+                                     log=lambda m: None)
     assert code == pipe.EXIT_STAGE_FAILED
     done = [r["stage"] for r in report]
     assert done[-1] == "select" and not report[-1]["ok"]

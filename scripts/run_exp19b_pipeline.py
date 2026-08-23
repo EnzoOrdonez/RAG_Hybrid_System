@@ -9,12 +9,12 @@ generator states inside one arm and the difference gets read as a selector effec
 consecutive background processes were killed in the agent environment, so the run has to be
 started from a terminal a human keeps open, and it has to supervise itself.
 
-WHAT IT GUARDS, and why that is the whole point. Between `draft` and `regen` there is a CPU gap
-(claim extraction, then ~40 min of cross-encoder re-ranking). That gap is exactly where a
-machine sleeps, a driver resets, or someone restarts Ollama. So the session fingerprint is taken
-at the start and RE-TAKEN immediately before `regen`. If it moved, the pipeline stops with
-RUNTIME_STATE_CHANGED and **scores nothing**: a pipeline that scores two arms generated in
-different generator states produces a number that looks valid and is not.
+WHAT IT GUARDS, and why that is the whole point. On 2026-08-22 the warmup fingerprint was
+replaced as a gate: it distinguished three Ollama load states, yet two full drafts separated by
+4.7 hours and load-state changes produced 194/194 bit-identical answers. The proxy therefore had
+structural false positives. Immediately before `regen`, the pipeline now replays five archived
+draft queries through the real draft prompt/generation path and requires 5/5 byte identity. The
+warmup fingerprint remains in the log as diagnostic data, never as a decision rule.
 
 The stage list is data, not prose, so tests can assert its order and that the gate sits where it
 has to sit. The subprocess runner is injected for the same reason.
@@ -40,6 +40,7 @@ EXP_ID = "exp19b_anchored_selector"
 EXP_DIR = PROJECT_ROOT / "experiments/results" / EXP_ID
 LOG_DIR = PROJECT_ROOT / "logs"
 VERIFIERS = ["small", "base", "hhem"]
+DRAFT_REPLAY_N = 5
 
 EXIT_OK, EXIT_STAGE_FAILED, EXIT_STATE_CHANGED = 0, 2, 3
 STATE_CHANGED_MARKER = "RUNTIME_STATE_CHANGED"
@@ -62,7 +63,7 @@ class StageCommand(list):
 def build_stages(py=None, exp_dir=None, max_queries=None):
     """Build the stage contract.
 
-    Invariant: draft -> [extract, select on CPU] -> fingerprint gate -> regen; the GPU is
+    Invariant: draft -> [extract, select on CPU] -> direct draft replay gate -> regen; the GPU is
     untouched until regen finishes. Order and per-stage environment are both testable data.
     """
     py = py or sys.executable
@@ -80,9 +81,8 @@ def build_stages(py=None, exp_dir=None, max_queries=None):
         ("select", StageCommand(
             [py, f"{S}/select_exp19b_evidence.py", "--no-resume", *mq],
             env={"CUDA_VISIBLE_DEVICES": ""})),
-        # THE GATE. Everything above ran before a long CPU stretch; everything below writes the
-        # second arm. If the generator moved in between, nothing below may run.
-        ("fingerprint_recheck", None),
+        # THE GATE. Replay the first five archived draft qids; a mismatch blocks the second arm.
+        ("draft_replay_check", None),
         ("regen", [py, f"{S}/run_exp19b_generation.py", "--stage", "regen", "--no-cache", *mq]),
     ]
     stages += [(f"pass_n_{v}", [py, f"{S}/run_exp15_ablation.py", "--exp-id", EXP_ID,
@@ -100,17 +100,29 @@ def build_stages(py=None, exp_dir=None, max_queries=None):
 
 
 def gate_index(stages):
-    return [n for n, _ in stages].index("fingerprint_recheck")
+    return [n for n, _ in stages].index("draft_replay_check")
 
 
-def fingerprint_gate(before, after):
-    """(ok, message). Pure, so the rule is testable without a server."""
-    if before == after:
-        return True, f"generator state unchanged ({before})"
-    return False, (f"{STATE_CHANGED_MARKER}: {before} -> {after}. The generator moved between "
-                   f"the draft and the regeneration, so the two arms would come from different "
-                   f"states and the difference would be read as a selector effect. Nothing was "
-                   f"scored. Re-run the whole pipeline in one uninterrupted session.")
+def draft_replay_check(archived_rows, generate_fn, n=DRAFT_REPLAY_N):
+    """Compare the first fixed checkpoint rows with freshly generated draft answers."""
+    rows = list(archived_rows)[:n]
+    if len(rows) != n:
+        detail = {"checked": len(rows), "identical": 0, "mismatched_qids": [],
+                  "why": f"checkpoint has fewer than the required {n} replay rows"}
+        return False, (f"{STATE_CHANGED_MARKER}: draft replay unavailable "
+                       f"({len(rows)}/{n}); nothing was scored"), detail
+
+    mismatched = []
+    for row in rows:
+        qid = row["query_id"]
+        if generate_fn(qid) != (row.get("answer") or ""):
+            mismatched.append(qid)
+    identical = n - len(mismatched)
+    detail = {"checked": n, "identical": identical, "mismatched_qids": mismatched}
+    if mismatched:
+        return False, (f"{STATE_CHANGED_MARKER}: draft replay {identical}/{n} bit-identical; "
+                       f"mismatches={mismatched}; nothing was scored"), detail
+    return True, f"draft replay {n}/{n} bit-identical", detail
 
 
 def capture_fingerprint(generate_fn):
@@ -118,30 +130,65 @@ def capture_fingerprint(generate_fn):
     return session_fingerprint(generate_fn())
 
 
-def _live_warmup():
-    """One warmup generation on the first query's real prompt, exactly as the runner does."""
-    from src.generation.llm_manager import LLMManager
+def _draft_runtime(exp_dir=EXP_DIR):
+    """Load the draft plan and prompt machinery directly from the generation runner."""
     from src.retrieval.query_processor import QueryProcessor
     from src.generation import prompt_templates as PT
+
     P = {k: getattr(PT, k) for k in
          ("NO_RAG_PROMPT", "NO_RAG_SYSTEM_PROMPT", "SYSTEM_PROMPT", "build_context",
           "get_template")}
-    ids = json.loads((PROJECT_ROOT / "experiments/results/exp18_evidence_ceiling"
-                      / "retrieval_ids.json").read_text(encoding="utf-8"))["ids"]
-    chunk_map = json.loads((PROJECT_ROOT / "data/indices"
-                            / "chunk_map_bge-large_adaptive_500.json").read_text(
-                                encoding="utf-8"))
-    q0 = next(iter(ids))
-    qtype = QueryProcessor().process(ids[q0]["question"]).query_type
-    pr, sp, _ = _gen.rgm.build_prompt("hibrido", ids[q0]["question"],
-                                      ids[q0]["baseline_repro_ids"],
-                                      _gen.ChunkMapIndex(chunk_map), qtype, P)
+    args = type("DraftReplayArgs", (), {"max_queries": None})()
+    qids, context, questions, ids_doc = _gen._load_plan("draft", Path(exp_dir), args)
+    chunk_map = json.loads(_gen.CHUNK_MAP_PATH.read_text(encoding="utf-8"))
+    index = _gen.ChunkMapIndex(chunk_map)
+    processor = QueryProcessor()
+    query_types = {qid: processor.process(questions[qid]).query_type for qid in qids}
+    drift = [qid for qid in qids
+             if ids_doc[qid].get("routing_query_type") not in (None, query_types[qid])]
+    if drift:
+        raise RuntimeError(f"query_type drift before draft replay: {drift[:3]}")
+    return qids, context, questions, query_types, index, P
+
+
+def _draft_prompt(runtime, qid):
+    _qids, context, questions, query_types, index, templates = runtime
+    return _gen.rgm.build_prompt(
+        "hibrido", questions[qid], context[qid], index, query_types[qid], templates)[:2]
+
+
+def _live_warmup():
+    """One informational warmup generation on the real draft path; never a gate."""
+    from src.generation.llm_manager import LLMManager
+
+    runtime = _draft_runtime()
+    q0 = runtime[0][0]
+    pr, sp = _draft_prompt(runtime, q0)
     llm = LLMManager(provider="ollama", model=_gen.MODEL_TAG, cache_enabled=False, seed=42)
     return llm.generate(prompt=pr, system_prompt=sp, temperature=0.0,
                         config_name="pipeline_fingerprint").text
 
 
-def run_pipeline(stages, runner=None, fingerprint_fn=None, log=print):
+def _live_draft_replay(exp_dir=EXP_DIR):
+    """Replay the fixed first five archived draft rows through the real draft path."""
+    from src.generation.llm_manager import LLMManager
+
+    label = _gen.rgm.model_label(_gen.MODEL_TAG)
+    checkpoint = Path(exp_dir) / f"checkpoint__{label}__baseline_repro.json"
+    archived_rows = json.loads(checkpoint.read_text(encoding="utf-8"))["results"]
+    runtime = _draft_runtime(exp_dir)
+    llm = LLMManager(provider="ollama", model=_gen.MODEL_TAG,
+                     cache_enabled=False, seed=_gen.SEED)
+
+    def generate(qid):
+        prompt, system_prompt = _draft_prompt(runtime, qid)
+        return llm.generate(prompt=prompt, system_prompt=system_prompt, temperature=0.0,
+                            config_name="draft_replay_check").text
+
+    return draft_replay_check(archived_rows, generate)
+
+
+def run_pipeline(stages, runner=None, fingerprint_fn=None, replay_check_fn=None, log=print):
     """Execute stages in order, stopping at the first failure. Returns (exit_code, report)."""
     def subprocess_runner(argv):
         env = os.environ.copy()
@@ -150,15 +197,18 @@ def run_pipeline(stages, runner=None, fingerprint_fn=None, log=print):
 
     runner = runner or subprocess_runner
     fingerprint_fn = fingerprint_fn or (lambda: capture_fingerprint(_live_warmup))
+    replay_check_fn = replay_check_fn or _live_draft_replay
 
-    report, fp_start = [], None
+    report = []
     for name, argv in stages:
         t0 = datetime.now()
-        if name == "fingerprint_recheck":
-            fp_now = fingerprint_fn()
-            ok, msg = fingerprint_gate(fp_start, fp_now)
+        if name == "draft_replay_check":
+            fingerprint = fingerprint_fn()
+            log(f"[info] warmup fingerprint before replay (not a gate): {fingerprint}")
+            ok, msg, detail = replay_check_fn()
             log(f"[gate] {msg}")
-            report.append({"stage": name, "ok": ok, "detail": msg})
+            report.append({"stage": name, "ok": ok, "detail": msg, "replay": detail,
+                           "warmup_fingerprint_info_only": fingerprint})
             if not ok:
                 return EXIT_STATE_CHANGED, report
             continue
@@ -172,11 +222,10 @@ def run_pipeline(stages, runner=None, fingerprint_fn=None, log=print):
             log(f"[abort] {name} failed with rc={rc}; nothing after it ran")
             return EXIT_STAGE_FAILED, report
 
-        # The starting fingerprint is taken right after the draft: the draft's own warmup has
-        # already put the server in the state the arm was generated in.
+        # Retained as informative diagnostics only. Direct answer replay is the actual gate.
         if name == "draft":
-            fp_start = fingerprint_fn()
-            log(f"[gate] session fingerprint after draft: {fp_start}")
+            fingerprint = fingerprint_fn()
+            log(f"[info] warmup fingerprint after draft (not a gate): {fingerprint}")
     return EXIT_OK, report
 
 
@@ -202,7 +251,7 @@ def main():
     stages = build_stages(max_queries=args.max_queries)
     if args.dry_run:
         for i, (name, argv) in enumerate(stages):
-            print(f"{i:>2}. {name:<22} {'<fingerprint gate>' if argv is None else ' '.join(argv[1:])}")
+            print(f"{i:>2}. {name:<22} {'<direct draft replay gate>' if argv is None else ' '.join(argv[1:])}")
         return EXIT_OK
 
     LOG_DIR.mkdir(exist_ok=True)

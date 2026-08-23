@@ -40,7 +40,7 @@ def test_every_stage_between_draft_and_fingerprint_gate_hides_cuda():
     pipeline = _load_pipeline()
     stages = pipeline.build_stages(py="python")
     names = [name for name, _command in stages]
-    between = stages[names.index("draft") + 1:names.index("fingerprint_recheck")]
+    between = stages[names.index("draft") + 1:names.index("draft_replay_check")]
 
     assert [name for name, _command in between] == ["extract", "select"]
     for name, command in between:
@@ -59,6 +59,7 @@ def test_default_subprocess_runner_applies_the_cpu_only_environment(monkeypatch)
     monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
     code, _report = pipeline.run_pipeline(
         pipeline.build_stages(py="python"), fingerprint_fn=lambda: "stable",
+        replay_check_fn=lambda: (True, "draft replay 5/5 bit-identical", {}),
         log=lambda _message: None)
 
     assert code == pipeline.EXIT_OK
