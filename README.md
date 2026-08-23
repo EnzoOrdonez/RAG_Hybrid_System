@@ -1,3 +1,4 @@
+[![CI](https://github.com/EnzoOrdonez/RAG_Hybrid_System/actions/workflows/ci.yml/badge.svg)](https://github.com/EnzoOrdonez/RAG_Hybrid_System/actions/workflows/ci.yml)
 <h1 align="center">☁️ CloudRAG</h1>
 
 <p align="center">
