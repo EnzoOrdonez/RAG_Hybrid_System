@@ -1,0 +1,53 @@
+{
+  "generated_by": "scripts/run_gold_sensitivity.py",
+  "adjudicacion_disponible": false,
+  "idx_adjudicados": [
+    "A-007",
+    "A-008",
+    "A-023",
+    "A-027",
+    "A-029",
+    "A-071",
+    "A-109",
+    "A-130",
+    "A-140"
+  ],
+  "declaracion": "[PENDIENTE-ADJUDICACION] No existe JSON de adjudicación: se reporta solo la variante que excluye los nueve discordantes de tanda C; los deltas contra post-adjudicación no están disponibles.",
+  "variantes": {
+    "sin_adjudicados": {
+      "n_used": 126,
+      "candidates": {
+        "small": {
+          "kappa_weighted": 0.0844,
+          "kappa_anchor": 0.0156,
+          "delta_weighted": null,
+          "delta_anchor": null
+        },
+        "base": {
+          "kappa_weighted": 0.081,
+          "kappa_anchor": 0.078,
+          "delta_weighted": null,
+          "delta_anchor": null
+        },
+        "hhem": {
+          "kappa_weighted": 0.309,
+          "kappa_anchor": 0.3966,
+          "delta_weighted": null,
+          "delta_anchor": null
+        },
+        "E5_base_and_hhem": {
+          "kappa_weighted": 0.1571,
+          "kappa_anchor": 0.1702,
+          "delta_weighted": null,
+          "delta_anchor": null
+        },
+        "E1_mean": {
+          "kappa_weighted": -0.0307,
+          "kappa_anchor": -0.08,
+          "delta_weighted": null,
+          "delta_anchor": null
+        }
+      }
+    }
+  }
+}
