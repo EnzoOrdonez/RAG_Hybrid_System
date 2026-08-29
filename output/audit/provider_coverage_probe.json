@@ -1,0 +1,866 @@
+{
+  "generated_at": "2026-08-29T15:48:21-05:00",
+  "generated_by": "scripts/probe_provider_coverage.py",
+  "descriptive_only": true,
+  "bh_family": null,
+  "queries_source": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\data\\evaluation\\test_queries.json",
+  "retrieval_source": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\experiments\\results\\exp17_crosscloud_balanced\\retrieval_ids.json",
+  "retrieval_experiment": "exp17_crosscloud_balanced",
+  "n_multicloud_queries": 25,
+  "arms": {
+    "baseline": {
+      "queries_with_full_provider_coverage": 2,
+      "provider_coverage_fraction": 0.08,
+      "chunks_total": 125,
+      "chunks_outside_query_providers": 0,
+      "outside_provider_chunk_rate": 0.0
+    },
+    "balanced": {
+      "queries_with_full_provider_coverage": 20,
+      "provider_coverage_fraction": 0.8,
+      "chunks_total": 125,
+      "chunks_outside_query_providers": 0,
+      "outside_provider_chunk_rate": 0.0
+    }
+  },
+  "per_query": {
+    "baseline": [
+      {
+        "query_id": "q171",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q172",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q173",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "gcp",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q174",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q175",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "gcp",
+          "aws",
+          "aws",
+          "aws"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q176",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "gcp",
+          "aws",
+          "aws",
+          "gcp"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q177",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q178",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "aws",
+          "azure",
+          "aws",
+          "aws",
+          "azure"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q179",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "azure",
+          "gcp",
+          "gcp",
+          "gcp"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q180",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "aws",
+          "aws",
+          "aws"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q181",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "aws",
+          "aws",
+          "aws"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q182",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "aws",
+          "gcp",
+          "aws"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q183",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q184",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "gcp",
+          "gcp",
+          "aws",
+          "gcp"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q185",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q187",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "gcp",
+          "aws",
+          "gcp",
+          "gcp"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q189",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "gcp",
+          "gcp",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q190",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "aws",
+          "azure",
+          "aws"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q191",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q192",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "gcp",
+          "gcp",
+          "gcp",
+          "gcp"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q193",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "aws",
+          "aws",
+          "aws",
+          "aws"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q195",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "azure",
+          "gcp",
+          "azure",
+          "gcp"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q196",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q197",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "aws",
+          "aws",
+          "azure",
+          "aws"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q198",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "aws",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      }
+    ],
+    "balanced": [
+      {
+        "query_id": "q171",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "aws",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q172",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "aws",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q173",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "gcp",
+          "gcp",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q174",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "aws",
+          "aws",
+          "gcp"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q175",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "gcp",
+          "aws",
+          "aws",
+          "azure"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q176",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "gcp",
+          "aws",
+          "gcp",
+          "azure"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q177",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "aws",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q178",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "aws",
+          "azure",
+          "aws",
+          "aws",
+          "azure"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q179",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "azure",
+          "gcp",
+          "azure",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q180",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "aws",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q181",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "azure",
+          "azure",
+          "gcp"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q182",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "gcp",
+          "gcp",
+          "aws"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q183",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q184",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "gcp",
+          "aws",
+          "aws",
+          "gcp"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q185",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": false,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q187",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "gcp",
+          "aws",
+          "azure",
+          "azure"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q189",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "gcp",
+          "gcp",
+          "azure",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q190",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "azure",
+          "azure",
+          "gcp"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q191",
+        "mentioned_providers": [
+          "aws",
+          "azure"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "azure",
+          "aws",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q192",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "gcp",
+          "azure",
+          "azure",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q193",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "aws",
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q195",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "gcp",
+          "azure",
+          "gcp",
+          "azure",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q196",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "azure",
+          "aws",
+          "gcp",
+          "aws"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q197",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "azure",
+          "aws",
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      },
+      {
+        "query_id": "q198",
+        "mentioned_providers": [
+          "aws",
+          "azure",
+          "gcp"
+        ],
+        "chunk_providers": [
+          "aws",
+          "aws",
+          "azure",
+          "azure",
+          "gcp"
+        ],
+        "full_provider_coverage": true,
+        "chunks_outside_query_providers": 0
+      }
+    ]
+  }
+}
