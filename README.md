@@ -154,6 +154,11 @@ tag will mark the documentation-ready state.
 maps every cited table/figure to its experiment → script → output path, and lists the commands
 to regenerate only the report's artifacts (without re-running the full experiment suite).
 
+- [Guía de anotación del gold](docs/GUIA_ANOTACION_GOLD_V4.md)
+- [Validación con gold humano](docs/SECCION_VALIDACION_HUMANA.md)
+- [Reproducción de experimentos](REPRODUCE.md)
+- [Ledger de ablaciones de verano](paper/summer_ablation_log.md)
+
 ### Reproducing the Nota 3 report (evidence -> tables)
 
 The raw outputs (`experiments/results/exp9..13`) are versioned; every cited number is

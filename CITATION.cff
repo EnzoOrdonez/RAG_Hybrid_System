@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+title: "CloudRAG: Hybrid RAG System for Cloud Documentation"
+authors:
+  - family-names: "Ordoñez"
+    given-names: "Enzo"
+license: GPL-3.0-only
+repository-code: "https://github.com/EnzoOrdonez/RAG_Hybrid_System"
