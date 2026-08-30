@@ -1,6 +1,5 @@
 [![CI](https://github.com/EnzoOrdonez/RAG_Hybrid_System/actions/workflows/ci.yml/badge.svg)](https://github.com/EnzoOrdonez/RAG_Hybrid_System/actions/workflows/ci.yml)
 <h1 align="center">☁️ CloudRAG</h1>
-
 <p align="center">
   <strong>Hybrid RAG System for Cloud Documentation</strong>
 </p>
@@ -15,6 +14,17 @@
   <img src="https://img.shields.io/badge/Ollama-Local_LLM-green" alt="Ollama">
   <img src="https://img.shields.io/badge/Streamlit-UI-FF4B4B?logo=streamlit" alt="Streamlit">
 </p>
+
+---
+
+## Publication
+
+This system and its evaluation are described in the paper **"Hybrid Retrieval-Augmented
+Generation for Multi-Cloud Documentation: A Comparative Evaluation of Lexical, Semantic,
+and Hybrid Pipelines Against an LLM-Only Baseline"** (E. Ordonez Flores, W. L. Fuentes),
+**accepted at IEEE LACCI 2026** (Latin American Conference on Computational Intelligence,
+Lima, Peru, November 3-6, 2026). Camera-ready source: `docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex`;
+IEEE Xplore-compatible certified PDF: `docs/2026305869.pdf`. See `CITATION.cff`.
 
 ---
 
