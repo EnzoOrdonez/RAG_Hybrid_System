@@ -86,6 +86,15 @@ embedding:
       dimension: 768
       description: "Task-specific"
 
+# ############################################################
+# SECCION NO CONSUMIDA EN RUNTIME (verificado 2026-07-30).
+# Nada lee `retrieval:` de este archivo. Los valores vivos estan en
+# src/pipeline/pipeline_config.py y en los runners de scripts/.
+# CUIDADO — lo de abajo CONTRADICE lo que el sistema hace de verdad:
+#   query_expansion.enabled: true   -> vivo: False (retirada en N4/exp13, sin efecto)
+#   dense.top_k / bm25.top_k: 50    -> vivo: retrieval_top_k=50, final_top_k=5
+# No editar esperando cambiar el pipeline. Ver docs/KNOB_MAP_summer.md.
+# ############################################################
 retrieval:
   bm25:
     k1: 1.2
@@ -114,6 +123,14 @@ retrieval:
 
   top_k_values_to_evaluate: [5, 10, 20]
 
+# ############################################################
+# SECCION NO CONSUMIDA EN RUNTIME (verificado 2026-07-30).
+# CUIDADO — contradice el sistema real:
+#   default_model: "ms-marco-mini-6" -> vivo: cross-encoder/ms-marco-MiniLM-L-12-v2
+#                                       (pipeline_config.py:77 -> rag_pipeline.py:182-188)
+#   multidimensional / mmr_lambda    -> no se usa; el rerank vivo es cross-encoder puro
+# Ver docs/KNOB_MAP_summer.md.
+# ############################################################
 reranking:
   default_model: "ms-marco-mini-6"
   batch_size: 32

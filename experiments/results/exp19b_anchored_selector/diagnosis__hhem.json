@@ -1,0 +1,19 @@
+{
+ "experiment_id": "exp19b_anchored_selector",
+ "verifier": "hhem",
+ "baseline_arm": "baseline_repro",
+ "divergence_note": "Answer divergence vs baseline. LOW divergence on `evidence_swapped` means the generator does not track the evidence it is given -- which would explain the retrieval null directly. Faithfulness alone cannot distinguish that from the model correctly following wrong evidence, since both score low.",
+ "answer_divergence": [
+  {
+   "arm": "claim_selected",
+   "n_paired": 194,
+   "jaccard_5gram_vs_baseline": 0.1869,
+   "token_jaccard_vs_baseline": 0.4792,
+   "identical_answer_rate": 0.0722,
+   "baseline_claim_reappearance": 0.0763
+  }
+ ],
+ "preregistered_equivalence": null,
+ "truncation_split_final_top_k_10": null,
+ "generated_by": "scripts/compute_exp18_diagnosis.py"
+}

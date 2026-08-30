@@ -31,6 +31,8 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.utils.signed_evidence import guard_write  # noqa: E402
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -657,7 +659,7 @@ def main():
 
     # LaTeX table
     latex = generate_latex_table(aggregated, all_stats.get("ndcg@5", {}), exp_id, len(query_questions))
-    latex_path = OUTPUT_DIR / "tables" / f"table_retrieval_metrics_{exp_id}__{oracle_label}.tex"
+    latex_path = guard_write(OUTPUT_DIR / "tables" / f"table_retrieval_metrics_{exp_id}__{oracle_label}.tex")
     latex_path.write_text(latex, encoding="utf-8")
     logger.info("LaTeX table saved: %s", latex_path)
 
@@ -666,7 +668,7 @@ def main():
     generate_figure(aggregated, fig_path)
 
     # CSV
-    csv_path = OUTPUT_DIR / "csv" / f"{exp_id}__{oracle_label}_retrieval_metrics.csv"
+    csv_path = guard_write(OUTPUT_DIR / "csv" / f"{exp_id}__{oracle_label}_retrieval_metrics.csv")
     csv_lines = ["system,precision@1,precision@3,precision@5,recall@5,mrr,ndcg@5,avg_score@5"]
     for sname in system_names:
         a = aggregated[sname]
@@ -709,7 +711,7 @@ def main():
         a = {k: v for k, v in aggregated[sname].items() if not k.startswith("_")}
         json_output["systems"][sname] = a
 
-    json_path = results_out / f"retrieval_metrics__{oracle_label}.json"
+    json_path = guard_write(results_out / f"retrieval_metrics__{oracle_label}.json")
     json_path.write_text(
         # numpy-aware default: compare_systems emits numpy scalars (e.g.
         # is_normal_a as np.bool_) that the stdlib encoder rejects under

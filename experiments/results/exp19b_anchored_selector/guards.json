@@ -1,0 +1,54 @@
+{
+ "experiment_id": "exp19b_anchored_selector",
+ "rows_verifier": "small",
+ "decline_rule": "scripts/compute_faithfulness_metrics.classify_response \u2014 the SAME function the faithfulness metric uses (14 canonical DECLINE_PATTERNS + 14 EXTENDED_REFUSAL_PATTERNS, case-insensitive; pure_decline = marker within the first 300 chars)",
+ "decline_prefix_caveat": "READ `pure_decline` AS `decline_prefix`. It is a PREFIX test, not a refusal: most rows so labelled go on to assert claims from parametric knowledge (\"...However, I can outline general steps...\"). Use `asserts_nothing_rate` for any usability or abstention argument. Defect #7, ledger entry 22.",
+ "overlap": "mean frac of answer word-5-grams in chunks",
+ "arms": [
+  {
+   "config": "baseline_repro | granite4.1-8b",
+   "scenario": "baseline_repro",
+   "n": 194,
+   "pure_decline_rate": 0.4536,
+   "hedged_partial_rate": 0.1649,
+   "answered_rate": 0.3814,
+   "any_refusal_rate": 0.6186,
+   "n_by_class": {
+    "pure_decline": 88,
+    "hedged_partial": 32,
+    "answered": 74,
+    "empty": 0
+   },
+   "asserts_nothing_rate": 0.0361,
+   "n_asserts_nothing": 7,
+   "n_decline_prefix_that_still_answers": 82,
+   "mean_answer_chars": 2371.1,
+   "mean_answer_words": 329.7,
+   "mean_genuine_claims": 10.515,
+   "verbatim_overlap_5gram": 0.1058
+  },
+  {
+   "config": "claim_selected | granite4.1-8b",
+   "scenario": "claim_selected",
+   "n": 194,
+   "pure_decline_rate": 0.3969,
+   "hedged_partial_rate": 0.1186,
+   "answered_rate": 0.4845,
+   "any_refusal_rate": 0.5155,
+   "n_by_class": {
+    "pure_decline": 77,
+    "hedged_partial": 23,
+    "answered": 94,
+    "empty": 0
+   },
+   "asserts_nothing_rate": 0.0619,
+   "n_asserts_nothing": 12,
+   "n_decline_prefix_that_still_answers": 66,
+   "mean_answer_chars": 2581.1,
+   "mean_answer_words": 357.4,
+   "mean_genuine_claims": 11.603,
+   "verbatim_overlap_5gram": 0.1279
+  }
+ ],
+ "generated_by": "scripts/compute_exp16_guards.py"
+}

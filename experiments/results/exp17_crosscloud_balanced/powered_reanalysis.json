@@ -1,0 +1,75 @@
+{
+ "experiment_id": "exp17_crosscloud_balanced",
+ "analysis": "higher-power reanalysis of the same 25 queries at claim resolution",
+ "models": {
+  "glmm": "supported ~ arm + (1|query), binomial VB; keeps query pairing",
+  "cluster_bootstrap": "resample 25 queries; paired micro-faithfulness diff; seed 42"
+ },
+ "note": "claim-level is conditional on a genuine claim (declines/vacuous drop out).",
+ "verifiers": {
+  "small": {
+   "glmm": {
+    "arm_logodds_mean": 0.1408,
+    "arm_logodds_sd": 0.1368,
+    "odds_ratio": 1.1512,
+    "z": 1.029,
+    "p_one_sided_effect_gt0": 0.1517,
+    "n_claims": 659
+   },
+   "cluster_bootstrap": {
+    "micro_baseline": 0.2125,
+    "micro_balanced": 0.2473,
+    "micro_diff": 0.0348,
+    "boot95": [
+     -0.0954,
+     0.1647
+    ],
+    "p_one_sided_diff_le0": 0.302,
+    "n_boot": 10000
+   }
+  },
+  "base": {
+   "glmm": {
+    "arm_logodds_mean": 0.2139,
+    "arm_logodds_sd": 0.1345,
+    "odds_ratio": 1.2385,
+    "z": 1.59,
+    "p_one_sided_effect_gt0": 0.05591,
+    "n_claims": 659
+   },
+   "cluster_bootstrap": {
+    "micro_baseline": 0.1672,
+    "micro_balanced": 0.2097,
+    "micro_diff": 0.0424,
+    "boot95": [
+     -0.0389,
+     0.1195
+    ],
+    "p_one_sided_diff_le0": 0.1428,
+    "n_boot": 10000
+   }
+  },
+  "hhem": {
+   "glmm": {
+    "arm_logodds_mean": 0.2246,
+    "arm_logodds_sd": 0.1102,
+    "odds_ratio": 1.2519,
+    "z": 2.038,
+    "p_one_sided_effect_gt0": 0.02075,
+    "n_claims": 659
+   },
+   "cluster_bootstrap": {
+    "micro_baseline": 0.5714,
+    "micro_balanced": 0.6048,
+    "micro_diff": 0.0334,
+    "boot95": [
+     -0.0609,
+     0.1326
+    ],
+    "p_one_sided_diff_le0": 0.2329,
+    "n_boot": 10000
+   }
+  }
+ },
+ "generated_by": "scripts/compute_exp17_powered.py"
+}

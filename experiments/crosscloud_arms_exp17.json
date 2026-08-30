@@ -1,0 +1,19 @@
+{
+  "description": "exp17 cross-cloud provider-balanced pilot. Registry used by run_exp15_ablation --pass N (arm-name validation + args.arms default). Generation is done by scripts/run_exp17_crosscloud.py (not by pass_g); ids come from retrieval_ids.json, not exp11.",
+  "name": "exp17 provider-balanced vs baseline retrieval (cross-cloud comparative)",
+  "context_source": "exp17 retrieval_ids.json (same hybrid pool; baseline top-5 vs provider-balanced top-5)",
+  "model": "granite4.1:8b",
+  "queries": "data/evaluation/cross_cloud_subset.json",
+  "arms": {
+    "baseline": {
+      "tier": "5", "component": "retrieval_selection",
+      "transform": "identity", "passes": ["N"],
+      "hypothesis": "exp13 exp_off equivalent: rerank(hybrid pool)[:5], provider-imbalanced (2/25 cover all wanted providers)."
+    },
+    "balanced": {
+      "tier": "5", "component": "retrieval_selection",
+      "transform": "identity", "passes": ["N"],
+      "hypothesis": "ceil(5/|P|) per wanted provider from the SAME reranked pool -> covers all providers. Tests whether fixing content-selection (coverage) raises comparative faithfulness where lexical expansion (exp13) and prompt anchoring (exp16) did not."
+    }
+  }
+}

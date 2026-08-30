@@ -27,6 +27,10 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.generation.hallucination_detector import HallucinationDetector  # noqa: E402
 
+# Every test here loads a ~200MB cross-encoder: excluded from the fast suite via
+# `pytest -m "not slow"`.
+pytestmark = pytest.mark.slow
+
 # A single evidence chunk that clearly entails one claim and contradicts another.
 CHUNK = {
     "chunk_id": "test_chunk_1",

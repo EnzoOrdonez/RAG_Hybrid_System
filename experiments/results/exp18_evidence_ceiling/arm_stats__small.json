@@ -1,0 +1,83 @@
+{
+ "experiment_id": "exp18_evidence_ceiling",
+ "verifier": "small",
+ "variant": "vb_agree",
+ "thresholds": [
+  0.7,
+  0.7
+ ],
+ "baseline": "baseline_repro",
+ "n_queries_subset": 194,
+ "baseline_mean_faithfulness": 0.2415,
+ "baseline_n_scored": 191,
+ "bh_family": "3 arm-vs-baseline_repro contrasts (fdr_bh)",
+ "decline_rule": "None-faithfulness pairs dropped (decline-aware); vacuous kept as 1.0",
+ "bootstrap": {
+  "n_boot": 10000,
+  "seed": 42,
+  "ci": "percentile 95%"
+ },
+ "contrasts": [
+  {
+   "arm": "oracle_evidence",
+   "det_3x": false,
+   "n_paired": 190,
+   "n_common_qids": 194,
+   "n_decline_baseline": 3,
+   "n_decline_arm": 2,
+   "baseline_mean_ffn": 0.2415,
+   "arm_mean_ffn": 0.241,
+   "mean_diff_arm_minus_base": 0.0008,
+   "boot95_lo": -0.0494,
+   "boot95_hi": 0.0525,
+   "test": "wilcoxon_signed_rank",
+   "statistic": 4530.0,
+   "p_value": 0.89516,
+   "cohens_d_z": 0.0022,
+   "d_label": "negligible",
+   "p_bh": 0.89516,
+   "sig_bh": false
+  },
+  {
+   "arm": "evidence_swapped",
+   "det_3x": false,
+   "n_paired": 58,
+   "n_common_qids": 60,
+   "n_decline_baseline": 1,
+   "n_decline_arm": 1,
+   "baseline_mean_ffn": 0.2415,
+   "arm_mean_ffn": 0.072,
+   "mean_diff_arm_minus_base": -0.2221,
+   "boot95_lo": -0.3306,
+   "boot95_hi": -0.1086,
+   "test": "wilcoxon_signed_rank",
+   "statistic": 163.0,
+   "p_value": 0.00018,
+   "cohens_d_z": -0.5105,
+   "d_label": "medium",
+   "p_bh": 0.00054,
+   "sig_bh": true
+  },
+  {
+   "arm": "final_top_k_10",
+   "det_3x": true,
+   "n_paired": 190,
+   "n_common_qids": 194,
+   "n_decline_baseline": 3,
+   "n_decline_arm": 1,
+   "baseline_mean_ffn": 0.2415,
+   "arm_mean_ffn": 0.2511,
+   "mean_diff_arm_minus_base": 0.0123,
+   "boot95_lo": -0.0331,
+   "boot95_hi": 0.0602,
+   "test": "wilcoxon_signed_rank",
+   "statistic": 5186.0,
+   "p_value": 0.8335,
+   "cohens_d_z": 0.0381,
+   "d_label": "negligible",
+   "p_bh": 0.89516,
+   "sig_bh": false
+  }
+ ],
+ "generated_by": "scripts/compute_tierA_arm_stats.py"
+}

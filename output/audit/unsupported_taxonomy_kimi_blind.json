@@ -1,0 +1,206 @@
+{
+ "juez": "kimi-work",
+ "cegamiento": "sin acceso a juicios humanos ni de otros LLM",
+ "juicios": {
+  "T-01": {
+   "juicio": "correcto",
+   "comentario": "Subredes particionan el rango IP de la VPC: verdadero en GCP.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-02": {
+   "juicio": "correcto",
+   "comentario": "S3 es object storage duradero/escalable y fuente/trigger habitual de Lambda.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-03": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre el contexto ('no incluido en el contexto'); sin proposicion factual verificable.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-04": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado: 'Command to create an HPA:.' sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-05": {
+   "juicio": "correcto",
+   "comentario": "ACI con VNet asigna IP privada de la subred a cada container group: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-06": {
+   "juicio": "correcto",
+   "comentario": "Azure AD B2B/B2C permite a externos/clientes acceder con su identidad existente: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-07": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim ('not explicitly detailed in the context'); sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-08": {
+   "juicio": "incorrecto",
+   "comentario": "Citacion colgada 'evident from  and .'; afirmacion vaga sin contenido verificable.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-09": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento de instruccion con [CODE] redactado; no hay proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-10": {
+   "juicio": "correcto",
+   "comentario": "El consumo de bandwidth impacta el costo en Azure: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-11": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre documentacion faltante; sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-12": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre informacion ausente del contexto; sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-13": {
+   "juicio": "incorrecto",
+   "comentario": "Remision meta a documentacion; sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-14": {
+   "juicio": "correcto",
+   "comentario": "Una VPC sirve para aislar/gestionar servicios AWS en red privada: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-15": {
+   "juicio": "correcto",
+   "comentario": "El CNI plug-in de Azure VNet habilita contenedores (AKS) a usar la VNet: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-16": {
+   "juicio": "correcto",
+   "comentario": "Flujo ECS-on-EC2 (AMI, Docker, registro, task defs, services) descrito correctamente.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-17": {
+   "juicio": "correcto",
+   "comentario": "Azure Monitor alerts pueden disparar acciones de escalado en otros servicios: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-18": {
+   "juicio": "incorrecto",
+   "comentario": "Instruccion con [CODE] redactado y mezcla Cloud Run/Functions; no verificable como proposicion.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-19": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento meta con [CODE] redactados; sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-20": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre contexto adicional necesario; sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-21": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre lo que cubre el contexto; sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-22": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre documentacion requerida; sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-23": {
+   "juicio": "incorrecto",
+   "comentario": "Nombres de tiers incorrectos: Intelligent-Tiering usa Frequent/Infrequent Access, no 'Access Tier 1/2'.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-24": {
+   "juicio": "correcto",
+   "comentario": "En Compute Engine se crean VMs RHEL/SLES/Ubuntu Pro desde imagenes publicas: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-25": {
+   "juicio": "correcto",
+   "comentario": "Las acciones de escalado deben respetar cuotas regionales de suscripcion: verdadero (generico).",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-26": {
+   "juicio": "correcto",
+   "comentario": "EKS se crea por Consola, CLI o SDKs: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-27": {
+   "juicio": "correcto",
+   "comentario": "DynamoDB es NoSQL totalmente gestionado, baja latencia: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-28": {
+   "juicio": "correcto",
+   "comentario": "GCS integra con Compute Engine, BigQuery y Dataflow: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-29": {
+   "juicio": "correcto",
+   "comentario": "ACR es servicio gestionado: verdadero; la cola meta no falsea la proposicion central.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-30": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-descripcion de secciones del contexto; no proposicion sobre el mundo.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-31": {
+   "juicio": "correcto",
+   "comentario": "CodePipeline integra CodeBuild/CodeCommit/CodeDeploy para automatizar el release: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-32": {
+   "juicio": "correcto",
+   "comentario": "Consejo valido: storage providers custom (SQL Server) tienen requisitos propios de DR/geo.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-33": {
+   "juicio": "correcto",
+   "comentario": "S3 soporta versioning, lifecycle policies y CRR: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-34": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado: 'Set Name to [CODE].' sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-35": {
+   "juicio": "correcto",
+   "comentario": "RDS ofrece motores gestionados (MySQL, etc.) desplegables dentro de una VPC: verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-36": {
+   "juicio": "incorrecto",
+   "comentario": "Breadcrumb/markdown roto sin proposicion factual.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-37": {
+   "juicio": "dudoso",
+   "comentario": "Ruta del portal sospechosa ('Migration and Branch Management'); no puedo verificar la etiqueta exacta.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-38": {
+   "juicio": "incorrecto",
+   "comentario": "Nota editorial parentetica sin proposicion verificable.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-39": {
+   "juicio": "correcto",
+   "comentario": "ECS soporta deployment blue/green (via CodeDeploy): verdadero.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  },
+  "T-40": {
+   "juicio": "correcto",
+   "comentario": "Cloud Run escala a cero segun trafico: verdadero; la parte de 'Kubernetes Services' es vaga pero no central.",
+   "ts": "2026-08-29T19:12:55.363332+00:00"
+  }
+ }
+}

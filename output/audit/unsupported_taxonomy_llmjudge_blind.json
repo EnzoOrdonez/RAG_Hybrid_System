@@ -1,0 +1,165 @@
+{
+  "juez": "codex",
+  "juicios": {
+    "T-01": {
+      "juicio": "incorrecto",
+      "comentario": "En GCP la red VPC no posee un bloque IP global que las subredes particionen; cada subred define sus propios rangos."
+    },
+    "T-02": {
+      "juicio": "correcto",
+      "comentario": "Amazon S3 es almacenamiento de objetos durable y escalable, y puede actuar como origen de datos o disparador de Lambda."
+    },
+    "T-03": {
+      "juicio": "incorrecto",
+      "comentario": "Es un metacomentario sobre documentación ausente y no formula una proposición factual sobre Cloud SQL."
+    },
+    "T-04": {
+      "juicio": "incorrecto",
+      "comentario": "Es un encabezado incompleto sin comando ni proposición factual."
+    },
+    "T-05": {
+      "juicio": "incorrecto",
+      "comentario": "En ACI la dirección IP se asigna al grupo de contenedores; los contenedores del grupo comparten esa red, no reciben una IP privada individual."
+    },
+    "T-06": {
+      "juicio": "incorrecto",
+      "comentario": "B2B permite colaboración de usuarios externos, pero B2C gestiona acceso de clientes a aplicaciones, no acceso directo de clientes a recursos de Azure."
+    },
+    "T-07": {
+      "juicio": "incorrecto",
+      "comentario": "Contiene un marcador [CODE] y un metacomentario sobre el contexto, sin una configuración concreta verificable."
+    },
+    "T-08": {
+      "juicio": "incorrecto",
+      "comentario": "Es una cita degenerada con referencias ausentes y no contiene una afirmación factual completa."
+    },
+    "T-09": {
+      "juicio": "incorrecto",
+      "comentario": "La instrucción conserva dos marcadores [CODE], por lo que no identifica qué recurso ni módulo debe usarse."
+    },
+    "T-10": {
+      "juicio": "correcto",
+      "comentario": "El volumen y destino del tráfico de red influyen en los cargos de ancho de banda de Azure."
+    },
+    "T-11": {
+      "juicio": "incorrecto",
+      "comentario": "Solo declara que haría falta más documentación y no compara ni afirma un hecho sobre EKS o CloudWatch."
+    },
+    "T-12": {
+      "juicio": "incorrecto",
+      "comentario": "Es un metacomentario sobre información ausente, no una proposición sobre las políticas o niveles comparados."
+    },
+    "T-13": {
+      "juicio": "incorrecto",
+      "comentario": "Es una remisión vaga a otras guías y no contiene pasos ni una afirmación factual concreta."
+    },
+    "T-14": {
+      "juicio": "correcto",
+      "comentario": "Una VPC proporciona aislamiento y control de red para servicios como EC2 y RDS dentro de un espacio privado."
+    },
+    "T-15": {
+      "juicio": "correcto",
+      "comentario": "Azure CNI permite que cargas de Kubernetes usen direcciones y conectividad de una red virtual de Azure."
+    },
+    "T-16": {
+      "juicio": "correcto",
+      "comentario": "Ese es un flujo válido para ejecutar contenedores mediante ECS con instancias EC2 como capacidad subyacente."
+    },
+    "T-17": {
+      "juicio": "correcto",
+      "comentario": "Las métricas y alertas de Azure Monitor pueden alimentar reglas de escalado de servicios como VM Scale Sets o Kubernetes."
+    },
+    "T-18": {
+      "juicio": "incorrecto",
+      "comentario": "Incluye un marcador [CODE] y mezcla un rol de invocación de Cloud Run con la configuración IAM de una VPC."
+    },
+    "T-19": {
+      "juicio": "incorrecto",
+      "comentario": "La instrucción contiene tres marcadores [CODE] y no identifica operaciones ni filtros reales."
+    },
+    "T-20": {
+      "juicio": "incorrecto",
+      "comentario": "Es una evasión meta sobre contexto adicional y no establece cuándo elegir uno de los servicios."
+    },
+    "T-21": {
+      "juicio": "incorrecto",
+      "comentario": "La oración carece de sujeto y comenta la ausencia de contenido sobre EKS sin formular una comparación factual."
+    },
+    "T-22": {
+      "juicio": "incorrecto",
+      "comentario": "Describe documentación hipotéticamente necesaria, pero no afirma una diferencia factual entre EKS y ECS."
+    },
+    "T-23": {
+      "juicio": "incorrecto",
+      "comentario": "S3 Intelligent-Tiering no denomina sus niveles automáticos Access Tier 1 y Access Tier 2, y actualmente contempla más de dos niveles de acceso."
+    },
+    "T-24": {
+      "juicio": "correcto",
+      "comentario": "Compute Engine permite crear máquinas desde imágenes públicas de RHEL, SLES y Ubuntu Pro seleccionando la versión correspondiente."
+    },
+    "T-25": {
+      "juicio": "correcto",
+      "comentario": "Las acciones de escalado de recursos de Azure deben respetar cuotas regionales y de suscripción."
+    },
+    "T-26": {
+      "juicio": "correcto",
+      "comentario": "Un clúster de Amazon EKS puede crearse mediante la consola, AWS CLI o los SDK de AWS."
+    },
+    "T-27": {
+      "juicio": "correcto",
+      "comentario": "DynamoDB es una base NoSQL administrada apropiada para almacenar y recuperar grandes volúmenes con baja latencia."
+    },
+    "T-28": {
+      "juicio": "correcto",
+      "comentario": "Google Cloud Storage se integra con servicios de GCP como Compute Engine, BigQuery y Dataflow."
+    },
+    "T-29": {
+      "juicio": "incorrecto",
+      "comentario": "Aunque ACR sí es administrado, la segunda parte es un metacomentario sobre el contexto y no una propiedad factual del servicio."
+    },
+    "T-30": {
+      "juicio": "incorrecto",
+      "comentario": "Enumera el contenido de unas secciones en vez de proporcionar una afirmación factual sobre el SLA de EKS."
+    },
+    "T-31": {
+      "juicio": "correcto",
+      "comentario": "AWS CodePipeline se integra habitualmente con CodeCommit, CodeBuild y CodeDeploy para automatizar fases de entrega."
+    },
+    "T-32": {
+      "juicio": "correcto",
+      "comentario": "Un proveedor de almacenamiento alternativo, como SQL Server para ciertos escenarios de Durable Functions, requiere su propia estrategia de recuperación y distribución geográfica."
+    },
+    "T-33": {
+      "juicio": "correcto",
+      "comentario": "Amazon S3 admite versionado, reglas de ciclo de vida y replicación entre regiones."
+    },
+    "T-34": {
+      "juicio": "incorrecto",
+      "comentario": "La instrucción deja el nombre de la variable como [CODE] y por tanto es incompleta y no verificable."
+    },
+    "T-35": {
+      "juicio": "correcto",
+      "comentario": "Amazon RDS ofrece motores administrados como MySQL y sus instancias se despliegan dentro de una VPC."
+    },
+    "T-36": {
+      "juicio": "incorrecto",
+      "comentario": "Es un resto de ruta documental, HTML y numeración Markdown sin proposición factual."
+    },
+    "T-37": {
+      "juicio": "incorrecto",
+      "comentario": "“Migration and Branch Management” no es la ubicación de Azure Site Recovery en el portal; la ruta indicada está alucinada."
+    },
+    "T-38": {
+      "juicio": "incorrecto",
+      "comentario": "Es una nota meta sin sujeto que no atribuye una característica factual a ningún servicio."
+    },
+    "T-39": {
+      "juicio": "correcto",
+      "comentario": "ECS admite despliegues blue/green mediante CodeDeploy para controlar el tráfico y reducir interrupciones."
+    },
+    "T-40": {
+      "juicio": "incorrecto",
+      "comentario": "Cloud Run sí escala según tráfico, incluso a cero, pero su descubrimiento no se basa en una integración con objetos Service de Kubernetes."
+    }
+  }
+}

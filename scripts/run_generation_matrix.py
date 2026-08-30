@@ -96,8 +96,14 @@ def load_exp11_contexts():
     return ctx, questions
 
 
-def build_prompt(scenario, question, retrieved_ids, index, query_type, P):
-    """Return (prompt, system_prompt, chunk_dicts) replicating RAGPipeline."""
+def build_prompt(scenario, question, retrieved_ids, index, query_type, P, variant="baseline"):
+    """Return (prompt, system_prompt, chunk_dicts) replicating RAGPipeline.
+
+    variant selects an anchored-decoding prompt (exp16). variant="baseline" (default)
+    is byte-identical to the pre-exp16 path: canonical SYSTEM_PROMPT, no suffix. Non-
+    baseline variants swap the system prompt and append an anchoring suffix to the user
+    prompt (the per-query-type template is left intact so procedural/cross_cloud work).
+    """
     if scenario == "sin_rag":
         return P["NO_RAG_PROMPT"].format(question=question), P["NO_RAG_SYSTEM_PROMPT"], []
     chunk_dicts = [cd for cid in retrieved_ids if (cd := index.get_chunk(cid))]
@@ -107,7 +113,13 @@ def build_prompt(scenario, question, retrieved_ids, index, query_type, P):
         prompt = template.format(context_by_provider=context, question=question)
     else:
         prompt = template.format(context=context, question=question)
-    return prompt, P["SYSTEM_PROMPT"], chunk_dicts
+    system = P["SYSTEM_PROMPT"]
+    if variant != "baseline":
+        from src.generation.prompt_templates import variant_prompt
+        system, suffix = variant_prompt(variant)
+        if suffix:
+            prompt = prompt + suffix
+    return prompt, system, chunk_dicts
 
 
 def ckpt_path(exp_dir, label, scenario):

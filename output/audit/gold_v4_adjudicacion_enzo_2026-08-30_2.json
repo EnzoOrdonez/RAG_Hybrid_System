@@ -1,0 +1,63 @@
+{
+  "formato": "gold_v4_adjudicacion",
+  "version": 1,
+  "exportado": "2026-08-30T05:00:50.651Z",
+  "mapeo": {
+    "J-01": "A-007",
+    "J-02": "A-008",
+    "J-03": "A-023",
+    "J-04": "A-027",
+    "J-05": "A-029",
+    "J-06": "A-071",
+    "J-07": "A-109",
+    "J-08": "A-130",
+    "J-09": "A-140"
+  },
+  "juicios": {
+    "J-01": {
+      "juicio": "incorrecto",
+      "comentario": "Al releer, el chunk trata sobre restricciones de acceso en Azure Functions y no menciona nada sobre implementación automatizada ni creación de file shares.",
+      "ts": "2026-08-29T21:02:55.775Z"
+    },
+    "J-02": {
+      "juicio": "incorrecto",
+      "comentario": "Al releer, el chunk trata exclusivamente sobre AWS ECS Service Connect y silencia por completo a Azure, GCP y la comparativa de subredes.",
+      "ts": "2026-08-29T21:02:58.337Z"
+    },
+    "J-03": {
+      "juicio": "incorrecto",
+      "comentario": "Al releer, el chunk explica la configuración de CNI para Docker y no menciona Azure Bastion ni la conexión a máquinas virtuales.",
+      "ts": "2026-08-29T21:02:59.120Z"
+    },
+    "J-04": {
+      "juicio": "incorrecto",
+      "comentario": "El chunk es sobre GKE Multi-Cloud pero silencia los componentes del plano de control (API server, scheduler); por regla de guía, silenciar el dato concreto es incorrecto y no dudoso.",
+      "ts": "2026-08-29T21:03:02.466Z"
+    },
+    "J-05": {
+      "juicio": "incorrecto",
+      "comentario": "Al releer, el chunk trata sobre licencias y guías de contribución en GitHub para EKS, sin mencionar en ningún momento el lenguaje AsciiDoc.",
+      "ts": "2026-08-29T21:03:04.704Z"
+    },
+    "J-06": {
+      "juicio": "incorrecto",
+      "comentario": "El chunk contradice directamente el claim porque sí menciona a EKS (\"EKS Runtime Monitoring\") y no contiene información detallada sobre ECS.",
+      "ts": "2026-08-29T21:03:08.422Z"
+    },
+    "J-07": {
+      "juicio": "dudoso",
+      "comentario": "Chunk del tema correcto pero respaldado a medias: valida la distribución en múltiples zonas, pero se corta en coma justo antes de respaldar los fault domains.",
+      "ts": "2026-08-29T21:03:08.937Z"
+    },
+    "J-08": {
+      "juicio": "dudoso",
+      "comentario": "El claim es una frase rota sin sentido proposicional y el texto del chunk termina cortado abruptamente sin abordar consideraciones híbridas.",
+      "ts": "2026-08-29T21:03:34.877Z"
+    },
+    "J-09": {
+      "juicio": "dudoso",
+      "comentario": "Chunk del tema correcto truncado justo donde listarían los parámetros requeridos (se corta en \"resources creat\"), además de traer placeholders corruptos ([CODE]).",
+      "ts": "2026-08-29T21:05:46.780Z"
+    }
+  }
+}

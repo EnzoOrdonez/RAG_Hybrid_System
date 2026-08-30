@@ -1,0 +1,139 @@
+{
+  "date": "2026-07-22",
+  "purpose": "summer phase Tier B retrieval ablation (ledger entrada 0)",
+  "models": {
+    "BAAI/bge-large-en-v1.5": {
+      "local_dir": "data/models/bge-large-en-v1.5",
+      "revision": "d4aa6901d3a41ba39fb536a557fa166f842b0e09",
+      "files": {
+        ".gitattributes": {
+          "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+          "bytes": 1519
+        },
+        "1_Pooling/config.json": {
+          "sha256": "e54c164a07274f2eb45bb724f54a79d1efcc90c41573887cd9a29aeee0597352",
+          "bytes": 191
+        },
+        "config.json": {
+          "sha256": "446712fac367857b4b1302762fe1cd7bfa8b3c4b77b4dc5d77c4025407660896",
+          "bytes": 779
+        },
+        "config_sentence_transformers.json": {
+          "sha256": "940d5f50db195fa6e5e6a4f122c095f77880de259d74b14a65779ed48bdd7c56",
+          "bytes": 124
+        },
+        "model.safetensors": {
+          "sha256": "45e1954914e29bd74080e6c1510165274ff5279421c89f76c418878732f64ae7",
+          "bytes": 1340616616
+        },
+        "modules.json": {
+          "sha256": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+          "bytes": 349
+        },
+        "README.md": {
+          "sha256": "9ffeb4467f293416c1f7642e64ae0bd44778fa182ce1165196e8a0329a34fd80",
+          "bytes": 94607
+        },
+        "sentence_bert_config.json": {
+          "sha256": "84e39fda68ccbff05bfa723ae9c0e70e23e2ec373b76e0f8c6e71af72a693cbf",
+          "bytes": 52
+        },
+        "special_tokens_map.json": {
+          "sha256": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+          "bytes": 125
+        },
+        "tokenizer.json": {
+          "sha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+          "bytes": 711396
+        },
+        "tokenizer_config.json": {
+          "sha256": "9261e7d79b44c8195c1cada2b453e55b00aeb81e907a6664974b4d7776172ab3",
+          "bytes": 366
+        },
+        "vocab.txt": {
+          "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+          "bytes": 231508
+        }
+      },
+      "total_bytes": 1341657632
+    },
+    "cross-encoder/ms-marco-MiniLM-L-12-v2": {
+      "local_dir": "data/models/ms-marco-MiniLM-L-12-v2",
+      "revision": "7b0235231ca2674cb8ca8f022859a6eba2b1c968",
+      "files": {
+        ".gitattributes": {
+          "sha256": "63e367f7468466447415f35c52584a3c3f397fe638e2f985b25ec29ac25bde14",
+          "bytes": 790
+        },
+        "config.json": {
+          "sha256": "69a745055b0307584d2903ea5cf4e1899254e511834f358be80d049918b144d8",
+          "bytes": 791
+        },
+        "model.safetensors": {
+          "sha256": "1ed84b90cdf3518f76ec9bb93a16f97887eea7c4e7ee5dfb03cc297e394fbbc3",
+          "bytes": 133469020
+        },
+        "README.md": {
+          "sha256": "3efb007e589b9155d6977f548d9d7be1e7067adff595ce2c5defb33648b2d0e3",
+          "bytes": 3676
+        },
+        "special_tokens_map.json": {
+          "sha256": "3c3507f36dff57bce437223db3b3081d1e2b52ec3e56ee55438193ecb2c94dd6",
+          "bytes": 132
+        },
+        "tokenizer.json": {
+          "sha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+          "bytes": 711396
+        },
+        "tokenizer_config.json": {
+          "sha256": "a5c2e5a7b1a29a0702cd28c08a399b5ecc110c263009d17f7e3b415f25905fd8",
+          "bytes": 1330
+        },
+        "vocab.txt": {
+          "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+          "bytes": 231508
+        }
+      },
+      "total_bytes": 134418643
+    },
+    "BAAI/bge-reranker-large": {
+      "local_dir": "data/models/bge-reranker-large",
+      "revision": "55611d7bca2a7133960a6d3b71e083071bbfc312",
+      "files": {
+        ".gitattributes": {
+          "sha256": "7363a8ebd782ede400e72bb3e88c19248478eb6f280a7376d398fc2f22707b9a",
+          "bytes": 1627
+        },
+        "config.json": {
+          "sha256": "25dda0319f57e9de243c32eb7ecefa0768271afac6b5d8a94ba7f779198ab102",
+          "bytes": 801
+        },
+        "model.safetensors": {
+          "sha256": "c5ae4e262c60ed2fb507ec587358285377ec36ee0a2e6da029f0534272b06d36",
+          "bytes": 2239618772
+        },
+        "README.md": {
+          "sha256": "21e23fa63b74a594ce5aa91f70c133ad2cd81baa21168362bbbc634c8c183066",
+          "bytes": 34046
+        },
+        "sentencepiece.bpe.model": {
+          "sha256": "cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865",
+          "bytes": 5069051
+        },
+        "special_tokens_map.json": {
+          "sha256": "d5469a60db23249c7f8945013d78df30b44b6bf686c6bb4740f4223f77b1b535",
+          "bytes": 279
+        },
+        "tokenizer.json": {
+          "sha256": "9eb652ac4e40cc093272bbbe0f55d521cf67570060227109b5cdc20945a4489e",
+          "bytes": 17098107
+        },
+        "tokenizer_config.json": {
+          "sha256": "a1d6bc8734a6f635dc158508bef000f8e2e5a759c7d92f984b2c86e5ff53425b",
+          "bytes": 443
+        }
+      },
+      "total_bytes": 2261823126
+    }
+  }
+}

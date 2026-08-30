@@ -1,0 +1,1231 @@
+{
+ "experiment_id": "exp17_crosscloud_balanced",
+ "source": "cross_cloud_subset.json (25 q)",
+ "pool_k": 50,
+ "final_k": 5,
+ "retrieval": "PROPOSED_HYBRID (hybrid rrf) + ms-marco-L12 rerank (replicates exp13 exp_off)",
+ "oracle": "bge-reranker-large, sigmoid-graded NDCG@5 within pool",
+ "self_validation_baseline_vs_exp13_mean_overlap@5": 5.0,
+ "coverage": {
+  "baseline": "7/25",
+  "balanced": "25/25"
+ },
+ "ndcg@5_mean": {
+  "baseline": null,
+  "balanced": null
+ },
+ "per_query": [
+  {
+   "qid": "q171",
+   "wanted": [
+    "aws",
+    "azure"
+   ],
+   "base_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure"
+   ],
+   "bal_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "aws",
+    "aws"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q172",
+   "wanted": [
+    "aws",
+    "azure"
+   ],
+   "base_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "aws"
+   ],
+   "bal_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "aws",
+    "aws"
+   ],
+   "base_cov": true,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q173",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "gcp",
+    "azure"
+   ],
+   "bal_prov": [
+    "azure",
+    "azure",
+    "gcp",
+    "gcp",
+    "azure"
+   ],
+   "base_cov": true,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q174",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure"
+   ],
+   "bal_prov": [
+    "azure",
+    "azure",
+    "aws",
+    "aws",
+    "gcp"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q175",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "gcp",
+    "gcp",
+    "aws",
+    "aws",
+    "aws"
+   ],
+   "bal_prov": [
+    "gcp",
+    "gcp",
+    "aws",
+    "aws",
+    "azure"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q176",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "aws",
+    "gcp",
+    "aws",
+    "aws",
+    "gcp"
+   ],
+   "bal_prov": [
+    "aws",
+    "gcp",
+    "aws",
+    "gcp",
+    "azure"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q177",
+   "wanted": [
+    "aws",
+    "azure"
+   ],
+   "base_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure"
+   ],
+   "bal_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "aws",
+    "aws"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q178",
+   "wanted": [
+    "aws",
+    "azure"
+   ],
+   "base_prov": [
+    "aws",
+    "azure",
+    "aws",
+    "aws",
+    "azure"
+   ],
+   "bal_prov": [
+    "aws",
+    "azure",
+    "aws",
+    "aws",
+    "azure"
+   ],
+   "base_cov": true,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q179",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "gcp",
+    "azure",
+    "gcp",
+    "gcp",
+    "gcp"
+   ],
+   "bal_prov": [
+    "gcp",
+    "azure",
+    "gcp",
+    "azure",
+    "aws"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q180",
+   "wanted": [
+    "aws",
+    "azure"
+   ],
+   "base_prov": [
+    "aws",
+    "aws",
+    "aws",
+    "aws",
+    "aws"
+   ],
+   "bal_prov": [
+    "aws",
+    "aws",
+    "aws",
+    "azure",
+    "azure"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q181",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "aws",
+    "aws",
+    "aws",
+    "aws",
+    "aws"
+   ],
+   "bal_prov": [
+    "aws",
+    "aws",
+    "azure",
+    "azure",
+    "gcp"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q182",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "aws",
+    "aws",
+    "aws",
+    "gcp",
+    "aws"
+   ],
+   "bal_prov": [
+    "aws",
+    "aws",
+    "gcp",
+    "gcp",
+    "aws"
+   ],
+   "base_cov": true,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q183",
+   "wanted": [
+    "aws",
+    "azure"
+   ],
+   "base_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure"
+   ],
+   "bal_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure"
+   ],
+   "base_cov": true,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q184",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "gcp",
+    "gcp",
+    "gcp",
+    "aws",
+    "gcp"
+   ],
+   "bal_prov": [
+    "gcp",
+    "gcp",
+    "aws",
+    "aws",
+    "gcp"
+   ],
+   "base_cov": true,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q185",
+   "wanted": [
+    "aws",
+    "azure"
+   ],
+   "base_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure"
+   ],
+   "bal_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure"
+   ],
+   "base_cov": true,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q187",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "gcp",
+    "gcp",
+    "aws",
+    "gcp",
+    "gcp"
+   ],
+   "bal_prov": [
+    "gcp",
+    "gcp",
+    "aws",
+    "azure",
+    "azure"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q189",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "azure",
+    "gcp",
+    "gcp",
+    "azure",
+    "azure"
+   ],
+   "bal_prov": [
+    "azure",
+    "gcp",
+    "gcp",
+    "azure",
+    "aws"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q190",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "aws",
+    "aws",
+    "aws",
+    "azure",
+    "aws"
+   ],
+   "bal_prov": [
+    "aws",
+    "aws",
+    "azure",
+    "azure",
+    "gcp"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q191",
+   "wanted": [
+    "aws",
+    "azure"
+   ],
+   "base_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure"
+   ],
+   "bal_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "aws",
+    "aws"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q192",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "gcp",
+    "gcp",
+    "gcp",
+    "gcp",
+    "gcp"
+   ],
+   "bal_prov": [
+    "gcp",
+    "gcp",
+    "azure",
+    "azure",
+    "aws"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q193",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "azure",
+    "aws",
+    "aws",
+    "aws",
+    "aws"
+   ],
+   "bal_prov": [
+    "azure",
+    "aws",
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q195",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "gcp",
+    "azure",
+    "gcp",
+    "azure",
+    "gcp"
+   ],
+   "bal_prov": [
+    "gcp",
+    "azure",
+    "gcp",
+    "azure",
+    "aws"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q196",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure"
+   ],
+   "bal_prov": [
+    "azure",
+    "azure",
+    "aws",
+    "gcp",
+    "aws"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q197",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "azure",
+    "aws",
+    "aws",
+    "azure",
+    "aws"
+   ],
+   "bal_prov": [
+    "azure",
+    "aws",
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  },
+  {
+   "qid": "q198",
+   "wanted": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "base_prov": [
+    "aws",
+    "aws",
+    "aws",
+    "azure",
+    "azure"
+   ],
+   "bal_prov": [
+    "aws",
+    "aws",
+    "azure",
+    "azure",
+    "gcp"
+   ],
+   "base_cov": false,
+   "bal_cov": true,
+   "ndcg_base": null,
+   "ndcg_bal": null,
+   "exp13_overlap": 5
+  }
+ ],
+ "ids": {
+  "q171": {
+   "question": "Compare the serverless compute offerings between AWS Lambda and Azure Functions",
+   "wanted_providers": [
+    "aws",
+    "azure"
+   ],
+   "baseline_ids": [
+    "17fcb1c3-8b1a-423f-bccb-ad3e2e41c1b3",
+    "8c377c33-b065-40df-a4d8-27e94a1e9533",
+    "6f64b10d-0af4-4d57-b18e-992575d64f09",
+    "e347e6f7-f052-499c-bada-850793baebd4",
+    "0e523c25-aad4-4fcf-be01-ba7fcce4e067"
+   ],
+   "balanced_ids": [
+    "17fcb1c3-8b1a-423f-bccb-ad3e2e41c1b3",
+    "8c377c33-b065-40df-a4d8-27e94a1e9533",
+    "6f64b10d-0af4-4d57-b18e-992575d64f09",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac"
+   ]
+  },
+  "q172": {
+   "question": "What are the differences between AWS VPC and Azure Virtual Network?",
+   "wanted_providers": [
+    "aws",
+    "azure"
+   ],
+   "baseline_ids": [
+    "1b06429b-9fe2-4a13-97ab-5947b2e039c5",
+    "67059d5d-4ca9-4e15-9b6d-f8379e9b7a4d",
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "b6c021f2-6603-4ce9-a69b-1fbaceb06f00",
+    "543f812f-6e8e-4222-a6de-212ac9216627"
+   ],
+   "balanced_ids": [
+    "1b06429b-9fe2-4a13-97ab-5947b2e039c5",
+    "67059d5d-4ca9-4e15-9b6d-f8379e9b7a4d",
+    "09d62abe-c756-459b-b375-9f725d316206",
+    "543f812f-6e8e-4222-a6de-212ac9216627",
+    "65b8a663-e530-4b33-96bc-82d858aa9e25"
+   ]
+  },
+  "q173": {
+   "question": "How do managed Kubernetes services compare across AWS EKS, Azure AKS, and GKE?",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "417e8043-fc2a-4459-be5f-564e59ec47a7",
+    "c9aeab92-4b0f-44d3-9a0d-112a88f9f7ea",
+    "a4a3c47a-7827-42a6-b2b4-c3a58107962c",
+    "216cfab7-71ec-4ec3-bacd-ac5d9bb3ce24",
+    "f53dec76-b49c-4c30-9f76-5ed0ad122afb"
+   ],
+   "balanced_ids": [
+    "417e8043-fc2a-4459-be5f-564e59ec47a7",
+    "c9aeab92-4b0f-44d3-9a0d-112a88f9f7ea",
+    "216cfab7-71ec-4ec3-bacd-ac5d9bb3ce24",
+    "ae70c06c-f960-4659-b92b-dfe97138833b",
+    "a4a3c47a-7827-42a6-b2b4-c3a58107962c"
+   ]
+  },
+  "q174": {
+   "question": "Compare object storage services: AWS S3 vs Azure Blob Storage vs Google Cloud Storage",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "d2b3431c-850a-40ab-b4b4-9a526adcc830",
+    "93830d22-63a6-4ead-b001-2e86f57ab283",
+    "cf7f2789-8d44-41e1-88ca-d005e8dded69",
+    "0f71cadc-7d55-4131-870c-9f452f9c0612",
+    "61e57c94-b4f9-4596-8282-be109abe0d5e"
+   ],
+   "balanced_ids": [
+    "d2b3431c-850a-40ab-b4b4-9a526adcc830",
+    "93830d22-63a6-4ead-b001-2e86f57ab283",
+    "4d09c350-1e14-4994-8edd-bd7c3e6b4c2b",
+    "50cdbd28-4897-47f6-9c27-d3c6fa634f85",
+    "4a5772af-6740-4efa-8547-a31aa52010e9"
+   ]
+  },
+  "q175": {
+   "question": "What is the equivalent of AWS IAM in Azure and GCP?",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "137e882c-74bb-4f4b-8f45-d50149f98ea6",
+    "0a8d4e80-c83d-4296-b4e2-b76d059d56cc",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "997d0e2f-fb85-48c0-9182-5543ee090b87",
+    "56c0e48e-a5e7-437d-ac9d-674402a21a8d"
+   ],
+   "balanced_ids": [
+    "137e882c-74bb-4f4b-8f45-d50149f98ea6",
+    "0a8d4e80-c83d-4296-b4e2-b76d059d56cc",
+    "2ce05b19-8435-4259-9065-bc7dd9adb54d",
+    "997d0e2f-fb85-48c0-9182-5543ee090b87",
+    "e28dd1e0-c0a2-4bed-8d1d-d1bf08186758"
+   ]
+  },
+  "q176": {
+   "question": "Compare container orchestration options across AWS ECS, Azure Container Instances, and Google Cloud Run",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "57862fd3-3243-4885-b483-7c30d7d0c227",
+    "992017a0-3136-4519-85a5-d10750c46101",
+    "44d95eee-7c5d-4c78-86ea-a03b916a40bb",
+    "26c1cfaa-4a97-45a4-a801-30a69d5e51f3"
+   ],
+   "balanced_ids": [
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "57862fd3-3243-4885-b483-7c30d7d0c227",
+    "992017a0-3136-4519-85a5-d10750c46101",
+    "26c1cfaa-4a97-45a4-a801-30a69d5e51f3",
+    "73e16606-48cd-4cc6-8999-374d1c653237"
+   ]
+  },
+  "q177": {
+   "question": "What are the differences between AWS Lambda cold starts and Azure Functions cold starts?",
+   "wanted_providers": [
+    "aws",
+    "azure"
+   ],
+   "baseline_ids": [
+    "c6a33739-819a-4965-93f2-5d680f5c0ad4",
+    "dc919700-d2b8-49cb-b0c5-9744d52169c9",
+    "0cb1ca48-e28d-441e-9650-e15c8e922bf4",
+    "c8bce649-3975-485b-a68c-3ef0eb67ad05",
+    "550098c5-e29d-4aa2-9324-55740757b440"
+   ],
+   "balanced_ids": [
+    "c6a33739-819a-4965-93f2-5d680f5c0ad4",
+    "dc919700-d2b8-49cb-b0c5-9744d52169c9",
+    "0cb1ca48-e28d-441e-9650-e15c8e922bf4",
+    "580b2cf8-3ec7-490d-8c5d-56b978324a33",
+    "90bd2c5c-2ce2-4b8f-aef7-de676fa66a6c"
+   ]
+  },
+  "q178": {
+   "question": "How does auto-scaling work differently in AWS EC2 vs Azure Virtual Machine Scale Sets?",
+   "wanted_providers": [
+    "aws",
+    "azure"
+   ],
+   "baseline_ids": [
+    "98d5f4e0-136f-429e-8179-7a15dfce4d4c",
+    "1da54e67-6549-4410-8cd3-2283161d4952",
+    "6b6a4f5c-68b4-4370-923d-9b7ef4be7edf",
+    "7c0a29c2-7ddf-4edc-85dc-ca9ea252d21a",
+    "e70379ae-e93a-4461-90f0-3b8778edbb87"
+   ],
+   "balanced_ids": [
+    "98d5f4e0-136f-429e-8179-7a15dfce4d4c",
+    "1da54e67-6549-4410-8cd3-2283161d4952",
+    "6b6a4f5c-68b4-4370-923d-9b7ef4be7edf",
+    "7c0a29c2-7ddf-4edc-85dc-ca9ea252d21a",
+    "e70379ae-e93a-4461-90f0-3b8778edbb87"
+   ]
+  },
+  "q179": {
+   "question": "Compare the pricing models of AWS, Azure, and GCP for compute resources",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "deaf6cd8-8a84-4e57-91a6-ce15a490dcc7",
+    "34ce40a3-3f82-4360-aaf9-38f435f53885",
+    "3dd371e4-f0da-4d86-9563-535d60f0211d",
+    "0b7e8afd-5dd8-4526-a805-4c06ecc68ce0",
+    "57cb5cfb-308f-41f6-a177-d18ac55ee565"
+   ],
+   "balanced_ids": [
+    "deaf6cd8-8a84-4e57-91a6-ce15a490dcc7",
+    "34ce40a3-3f82-4360-aaf9-38f435f53885",
+    "3dd371e4-f0da-4d86-9563-535d60f0211d",
+    "47124575-c85b-4e58-be2e-4105c4c396d5",
+    "a2a02803-4a24-4bb8-9ce5-6cad59707e54"
+   ]
+  },
+  "q180": {
+   "question": "What are the main differences between AWS CloudFormation and Azure Resource Manager templates?",
+   "wanted_providers": [
+    "aws",
+    "azure"
+   ],
+   "baseline_ids": [
+    "e36b93bd-cd65-4414-bd93-ad4b0ff79813",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "797c14c1-7bf5-4e5d-9d1b-78715b969c2a",
+    "3acc0829-f11b-40f5-b07c-88530ac2d34a"
+   ],
+   "balanced_ids": [
+    "e36b93bd-cd65-4414-bd93-ad4b0ff79813",
+    "a750c78a-0bba-4dcd-b91e-af42f5e7feac",
+    "8080e3b6-131b-4d4e-b65e-b26770a8fae8",
+    "5ef8946c-cf4b-4d44-b811-8cf17374947c",
+    "b4be2a94-6482-450e-8087-de692bdc8bb4"
+   ]
+  },
+  "q181": {
+   "question": "Compare monitoring solutions: AWS CloudWatch vs Azure Monitor vs Google Cloud Monitoring",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "65d53437-8f99-4a09-be62-80d1dafbeb98",
+    "f5532901-53fe-4296-b96d-90dfd24b1cd6",
+    "9f22e59b-ab3b-4e4b-8d90-b539f604cabd",
+    "45ffe3d7-0170-4e12-bc9b-10e45abbc8d7"
+   ],
+   "balanced_ids": [
+    "76879bfd-1908-4e1d-bd57-bb0e1e84e144",
+    "65d53437-8f99-4a09-be62-80d1dafbeb98",
+    "c3994a1f-b8fd-45e0-9fdd-ce4862b42dc6",
+    "8e003d6d-c89c-4e33-acb6-3b4d83958a79",
+    "25756e05-6f50-45c1-8180-a8dc7b2644e2"
+   ]
+  },
+  "q182": {
+   "question": "How do load balancing services differ across AWS ELB, Azure Load Balancer, and Google Cloud Load Balancing?",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "6e07fe9a-4232-4aef-a3df-5c19da1aac40",
+    "1ae6fddc-1674-4184-adb6-9be2063f64c0",
+    "ee1d4f2e-6aed-4b30-8779-03dbc8e444d2",
+    "fc8e2035-f80b-4fa4-ab17-66928e98acd9",
+    "d9f4ce0c-fdd3-4619-9a1b-3b03f7fb66f6"
+   ],
+   "balanced_ids": [
+    "6e07fe9a-4232-4aef-a3df-5c19da1aac40",
+    "1ae6fddc-1674-4184-adb6-9be2063f64c0",
+    "fc8e2035-f80b-4fa4-ab17-66928e98acd9",
+    "35a7cf03-6e08-4a57-b5cd-0bf1f38d7d68",
+    "ee1d4f2e-6aed-4b30-8779-03dbc8e444d2"
+   ]
+  },
+  "q183": {
+   "question": "What are the differences between AWS DynamoDB and Azure Cosmos DB?",
+   "wanted_providers": [
+    "aws",
+    "azure"
+   ],
+   "baseline_ids": [
+    "fbfb6c00-371b-4da2-a590-07ddb65c60f2",
+    "f018a771-bef1-46da-a625-cc67369d5e14",
+    "1422628f-1526-44a3-b159-474905bdf1e6",
+    "24735e7a-d207-46ea-bc09-9d1359915c3d",
+    "725a6028-8ded-4842-8e03-93e1c9609a68"
+   ],
+   "balanced_ids": [
+    "fbfb6c00-371b-4da2-a590-07ddb65c60f2",
+    "f018a771-bef1-46da-a625-cc67369d5e14",
+    "1422628f-1526-44a3-b159-474905bdf1e6",
+    "24735e7a-d207-46ea-bc09-9d1359915c3d",
+    "725a6028-8ded-4842-8e03-93e1c9609a68"
+   ]
+  },
+  "q184": {
+   "question": "Compare the container registry services across AWS ECR, Azure Container Registry, and Google Artifact Registry",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "b7e24f1a-5872-4c5e-8d7e-0673a868cda9",
+    "be6f44cc-5fd8-45a9-acb8-5d60ccd3d883",
+    "ef243105-f293-4856-9158-524cfc6d788b",
+    "4cc53296-3f23-43aa-b9c7-e3a271a916d4",
+    "1990a4d3-32a9-4fbb-a724-ae19f63e6968"
+   ],
+   "balanced_ids": [
+    "b7e24f1a-5872-4c5e-8d7e-0673a868cda9",
+    "be6f44cc-5fd8-45a9-acb8-5d60ccd3d883",
+    "4cc53296-3f23-43aa-b9c7-e3a271a916d4",
+    "a5dbc1bd-2722-49a6-9590-1f1c23fba5bc",
+    "ef243105-f293-4856-9158-524cfc6d788b"
+   ]
+  },
+  "q185": {
+   "question": "How do serverless database offerings compare between AWS Aurora Serverless and Azure SQL Serverless?",
+   "wanted_providers": [
+    "aws",
+    "azure"
+   ],
+   "baseline_ids": [
+    "1878ab27-9dd4-4f3c-aa8d-c993fa0c07e1",
+    "7f8871fc-84e8-4b4c-895f-0bf292670e2e",
+    "04ede408-85c5-4d3d-812e-bfb21f146137",
+    "5a402437-60a2-4675-b1bf-40894c2947b6",
+    "eed5d09f-4a29-4a49-8006-93ada249b0da"
+   ],
+   "balanced_ids": [
+    "1878ab27-9dd4-4f3c-aa8d-c993fa0c07e1",
+    "7f8871fc-84e8-4b4c-895f-0bf292670e2e",
+    "04ede408-85c5-4d3d-812e-bfb21f146137",
+    "5a402437-60a2-4675-b1bf-40894c2947b6",
+    "eed5d09f-4a29-4a49-8006-93ada249b0da"
+   ]
+  },
+  "q187": {
+   "question": "Compare the machine learning platforms: AWS SageMaker vs Azure Machine Learning vs Google Vertex AI",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "f950a2cf-c90b-4ef1-ae38-f95d2a0e2c84",
+    "475e4fbe-9595-4045-97ba-b0fbf942449f",
+    "59d16d28-16e5-47de-b703-60af4f78ec7d",
+    "5e71d84e-1a24-4482-81a4-df5dfc5e31c7",
+    "a4dbcbe7-cc75-4cae-acec-9f1bc2b4fcf1"
+   ],
+   "balanced_ids": [
+    "f950a2cf-c90b-4ef1-ae38-f95d2a0e2c84",
+    "475e4fbe-9595-4045-97ba-b0fbf942449f",
+    "59d16d28-16e5-47de-b703-60af4f78ec7d",
+    "39aa3f8c-bb93-41cb-a4fd-bd06578181db",
+    "c0f0bbf7-13f9-4dbd-aaf4-034cf14e20c0"
+   ]
+  },
+  "q189": {
+   "question": "How do the Kubernetes managed services handle cluster upgrades in EKS vs AKS vs GKE?",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "efb64c40-89f4-4ad9-bfc7-1d7e3bcd962c",
+    "1831de61-4af7-421f-9ccb-92fd5625d15b",
+    "70a3155d-5c49-4ca3-a118-90d534429bb2",
+    "9c16ee1f-6cf6-46c7-b32d-ded77c546fc4",
+    "975b748a-c474-437c-859e-452251714a5c"
+   ],
+   "balanced_ids": [
+    "efb64c40-89f4-4ad9-bfc7-1d7e3bcd962c",
+    "1831de61-4af7-421f-9ccb-92fd5625d15b",
+    "70a3155d-5c49-4ca3-a118-90d534429bb2",
+    "9c16ee1f-6cf6-46c7-b32d-ded77c546fc4",
+    "c98a24ea-2b8b-4d48-9a27-0c652892feb8"
+   ]
+  },
+  "q190": {
+   "question": "Compare DNS services: AWS Route 53 vs Azure DNS vs Google Cloud DNS",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "87b3f114-e351-4f1c-b0a1-49b104534ad4",
+    "1da5f6bb-ea9d-43f9-ba62-0d05fa9c9cec",
+    "24cb3582-490b-468a-8240-19082870d1d3",
+    "d8c66abd-f095-4d03-841d-ad9333486719",
+    "fa9d1643-ca09-4063-b550-54e9f15c82ed"
+   ],
+   "balanced_ids": [
+    "87b3f114-e351-4f1c-b0a1-49b104534ad4",
+    "1da5f6bb-ea9d-43f9-ba62-0d05fa9c9cec",
+    "d8c66abd-f095-4d03-841d-ad9333486719",
+    "71fa2b28-6a4b-4e50-88f2-ed34b2d3f9e2",
+    "244ef877-1a7d-421d-a5aa-f02b9c26fada"
+   ]
+  },
+  "q191": {
+   "question": "What are the key differences between AWS S3 lifecycle policies and Azure Blob Storage tiering?",
+   "wanted_providers": [
+    "aws",
+    "azure"
+   ],
+   "baseline_ids": [
+    "762e6d9f-46d4-4314-a95c-248e5ef804a5",
+    "340076ee-39d4-4a4b-a663-cd41d9e365b3",
+    "99bd5d08-e831-4911-a43b-28c3590d140e",
+    "03fee50a-e02c-455d-9838-5b9ae632681a",
+    "4162d31f-1c12-4bcc-814b-ef692192eb99"
+   ],
+   "balanced_ids": [
+    "762e6d9f-46d4-4314-a95c-248e5ef804a5",
+    "340076ee-39d4-4a4b-a663-cd41d9e365b3",
+    "99bd5d08-e831-4911-a43b-28c3590d140e",
+    "9422efba-fd83-40f8-ae6f-9ada6a8b2d9b",
+    "c8894552-484f-4cd3-80b2-1ebdd1465cb5"
+   ]
+  },
+  "q192": {
+   "question": "Compare identity federation approaches across AWS, Azure, and GCP",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "f290bde2-67f0-4417-a3e9-913c733787d4",
+    "2d747818-9586-4c39-a02b-77efff1f95ef",
+    "0bfc934b-33fb-44d7-88a8-390982cbed7c",
+    "4a2a38fc-d0d0-4a52-a7ed-baa6a2049d0b",
+    "0cf8f14b-cce0-41e5-80d3-d13d283b9eb9"
+   ],
+   "balanced_ids": [
+    "f290bde2-67f0-4417-a3e9-913c733787d4",
+    "2d747818-9586-4c39-a02b-77efff1f95ef",
+    "943888bd-f11b-4b4e-acec-18e320a6f933",
+    "55951025-247b-4152-aafb-479a7f2404ba",
+    "0bacc8cf-a85e-450b-95f1-526a8d03d308"
+   ]
+  },
+  "q193": {
+   "question": "How do encryption at rest implementations differ between AWS KMS, Azure Key Vault, and GCP Cloud KMS?",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "df0c8ed0-c628-404b-bfae-10355d2e6642",
+    "27c4966b-9a90-498f-8d8f-827d2df5b6bd",
+    "f388b7f5-ecf7-4f5e-ad79-4c8b43d1bb1d",
+    "d933f423-4863-41c5-b4d3-d6a5b2698a38",
+    "69a64226-09b5-49fa-a0ce-0e85855477f5"
+   ],
+   "balanced_ids": [
+    "df0c8ed0-c628-404b-bfae-10355d2e6642",
+    "27c4966b-9a90-498f-8d8f-827d2df5b6bd",
+    "f388b7f5-ecf7-4f5e-ad79-4c8b43d1bb1d",
+    "1aef5686-237b-4100-8fe2-794c16e1ded1",
+    "1349cc71-778c-4e2c-9813-4cb3ec302da0"
+   ]
+  },
+  "q195": {
+   "question": "Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "1570f7a2-447a-4d14-a12b-f3e2ba144242",
+    "cdd460a8-21d2-4125-b0ab-5356de6758fc",
+    "1e213a63-f9ef-4ffc-9745-61a61a62dff8",
+    "964a4e7d-25aa-40ae-98f6-c8b100abc9d4"
+   ],
+   "balanced_ids": [
+    "7b087ab0-9804-487a-be4a-d32e108299b8",
+    "1570f7a2-447a-4d14-a12b-f3e2ba144242",
+    "cdd460a8-21d2-4125-b0ab-5356de6758fc",
+    "1e213a63-f9ef-4ffc-9745-61a61a62dff8",
+    "b18732fa-4a26-4a68-b43d-56c5e1130c6c"
+   ]
+  },
+  "q196": {
+   "question": "What are the equivalent networking concepts across AWS, Azure, and GCP for VPCs, subnets, and security groups?",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "d3a63297-f90c-46d8-ad79-6c2448785305",
+    "f7136bfc-1821-4063-b40c-b5f3d4a4d897",
+    "6e2989df-53e6-4501-aa34-4dd20efac460",
+    "08b72103-c4e9-466b-8e41-e95b2573f0a2",
+    "a6682bd7-b813-4120-a827-1d708a8a5e6b"
+   ],
+   "balanced_ids": [
+    "d3a63297-f90c-46d8-ad79-6c2448785305",
+    "f7136bfc-1821-4063-b40c-b5f3d4a4d897",
+    "40dc6919-6834-4dea-b5af-65a4562fcff9",
+    "6e6042af-723f-41a9-8ec8-3981d50aa52a",
+    "cec740a3-60bd-4151-9eb5-781169af98fd"
+   ]
+  },
+  "q197": {
+   "question": "Compare the event-driven architectures: AWS EventBridge vs Azure Event Grid vs Google Eventarc",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "9e33025b-4726-4248-8803-8c07f88f510e",
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "179123fc-7fde-4842-bd5b-040ddf6442f3",
+    "22e94669-e308-4f23-aa83-4568ffe03eb2"
+   ],
+   "balanced_ids": [
+    "f178f6cb-d788-4d62-a1c2-ecd05ecab969",
+    "9e33025b-4726-4248-8803-8c07f88f510e",
+    "801bb66b-3c26-445b-9362-2b4d291334cf",
+    "179123fc-7fde-4842-bd5b-040ddf6442f3",
+    "7932fda7-dd17-4b5b-b86c-dad9a27998d9"
+   ]
+  },
+  "q198": {
+   "question": "How does the concept of availability zones differ across AWS, Azure, and GCP?",
+   "wanted_providers": [
+    "aws",
+    "azure",
+    "gcp"
+   ],
+   "baseline_ids": [
+    "f37c1ebe-5331-4cb8-a8a6-cac7731194cc",
+    "44d95eee-7c5d-4c78-86ea-a03b916a40bb",
+    "7fa44556-726a-4ac1-aef6-72d89e9e4622",
+    "03efb14d-dce0-4570-b7c1-bafcc4275e6c",
+    "3bb3b867-4a24-4902-b093-c0003968f053"
+   ],
+   "balanced_ids": [
+    "f37c1ebe-5331-4cb8-a8a6-cac7731194cc",
+    "44d95eee-7c5d-4c78-86ea-a03b916a40bb",
+    "03efb14d-dce0-4570-b7c1-bafcc4275e6c",
+    "3bb3b867-4a24-4902-b093-c0003968f053",
+    "fd981146-07f9-46b2-bf77-928fb381df83"
+   ]
+  }
+ },
+ "generated_by": "scripts/build_balanced_retrieval_exp17.py"
+}

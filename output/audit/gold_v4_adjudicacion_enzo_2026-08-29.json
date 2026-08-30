@@ -1,0 +1,63 @@
+{
+  "formato": "gold_v4_adjudicacion",
+  "version": 1,
+  "exportado": "2026-08-29T21:05:53.486Z",
+  "mapeo": {
+    "J-01": "A-007",
+    "J-02": "A-008",
+    "J-03": "A-023",
+    "J-04": "A-027",
+    "J-05": "A-029",
+    "J-06": "A-071",
+    "J-07": "A-109",
+    "J-08": "A-130",
+    "J-09": "A-140"
+  },
+  "juicios": {
+    "J-01": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T21:02:55.775Z"
+    },
+    "J-02": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T21:02:58.337Z"
+    },
+    "J-03": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T21:02:59.120Z"
+    },
+    "J-04": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T21:03:02.466Z"
+    },
+    "J-05": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T21:03:04.704Z"
+    },
+    "J-06": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T21:03:08.422Z"
+    },
+    "J-07": {
+      "juicio": "dudoso",
+      "comentario": ": Respaldado a medias. El chunk valida que el modo Flexible permite distribuir instancias a través de múltiples zonas (\"spread across multiple zones,\"), pero la cita se interrumpe y omite la segunda mitad del claim relativa a los dominios de error dentro de una sola región.",
+      "ts": "2026-08-29T21:03:08.937Z"
+    },
+    "J-08": {
+      "juicio": "dudoso",
+      "comentario": "Frase truncada y sin respaldo suficiente. El claim es una cláusula incompleta sin predicado ni sentido proposicional autónomo (\"for hybrid deployment considerations..\"), y el chunk no incluye textualmente dicha consideración, limitándose a describir integración de observabilidad y despliegues con Cloud Deploy.",
+      "ts": "2026-08-29T21:03:34.877Z"
+    },
+    "J-09": {
+      "juicio": "dudoso",
+      "comentario": "El chunk es del tema correcto (parámetros requeridos por la plantilla azd), pero se corta a la mitad de una palabra (\"...resources creat\") justo en el punto donde la lista continuaría con el resto de entradas, entre ellas Location. Es un texto truncado justo donde estaría la respuesta.",
+      "ts": "2026-08-29T21:05:46.780Z"
+    }
+  }
+}

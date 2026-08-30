@@ -1,3 +1,4 @@
+[![CI](https://github.com/EnzoOrdonez/RAG_Hybrid_System/actions/workflows/ci.yml/badge.svg)](https://github.com/EnzoOrdonez/RAG_Hybrid_System/actions/workflows/ci.yml)
 <h1 align="center">☁️ CloudRAG</h1>
 
 <p align="center">
@@ -5,7 +6,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.14-blue?logo=python" alt="Python">
+  <!-- Package support, not the experimental environment. Corrected by Claude Code, 2026-08-21
+       07:30 local: the badge read 3.14, which is the REPRODUCIBLE ENVIRONMENT (REPRODUCE.md),
+       not what the package supports. setup.py has always said >=3.11. -->
+  <img src="https://img.shields.io/badge/Python-3.11+-blue?logo=python" alt="Python">
   <img src="https://img.shields.io/badge/PyTorch-CUDA-red?logo=pytorch" alt="PyTorch">
   <img src="https://img.shields.io/badge/FAISS-Vector_Search-orange" alt="FAISS">
   <img src="https://img.shields.io/badge/Ollama-Local_LLM-green" alt="Ollama">
@@ -110,9 +114,15 @@ Query → Normalization + Expansion
 ## Quick Start
 
 ### Requirements
-- Python 3.10+
+- Python 3.11+ — what the **package** supports (`setup.py: python_requires=">=3.11"`)
 - NVIDIA GPU with 6GB+ VRAM
 - [Ollama](https://ollama.com/download)
+
+> **Running the experiments is a different question.** The signed evidence was produced on a
+> specific interpreter, **Python 3.14** at
+> `C:\Users\enziz\AppData\Local\Python\pythoncore-3.14-64\python.exe`, which is the only one on
+> that machine carrying the ML stack. Package support and reproducible environment are separate
+> declarations and are kept separate on purpose — see `REPRODUCE.md §0`.
 
 ### Install
 
@@ -143,6 +153,11 @@ tag will mark the documentation-ready state.
 **Traceability + minimal repro recipes:** [docs/TRACEABILITY_nota3.md](docs/TRACEABILITY_nota3.md)
 maps every cited table/figure to its experiment → script → output path, and lists the commands
 to regenerate only the report's artifacts (without re-running the full experiment suite).
+
+- [Guía de anotación del gold](docs/GUIA_ANOTACION_GOLD_V4.md)
+- [Validación con gold humano](docs/SECCION_VALIDACION_HUMANA.md)
+- [Reproducción de experimentos](REPRODUCE.md)
+- [Ledger de ablaciones de verano](paper/summer_ablation_log.md)
 
 ### Reproducing the Nota 3 report (evidence -> tables)
 

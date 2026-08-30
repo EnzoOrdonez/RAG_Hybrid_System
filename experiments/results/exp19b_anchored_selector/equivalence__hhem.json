@@ -1,0 +1,55 @@
+{
+ "verifier": "hhem",
+ "arm": "claim_selected",
+ "baseline": "baseline_repro",
+ "n_paired": 186,
+ "n_dropped_decline_aware": 8,
+ "qids_dropped": [
+  "q002",
+  "q028",
+  "q042",
+  "q045",
+  "q047",
+  "q054",
+  "q061",
+  "q155"
+ ],
+ "mean_baseline_paired": 0.4562,
+ "mean_arm_paired": 0.5014,
+ "mean_paired_diff": 0.0451,
+ "boot95": [
+  0.0076,
+  0.0817
+ ],
+ "test": "wilcoxon_signed_rank",
+ "statistic": 4277.0,
+ "d_z": 0.1727,
+ "d_label": "negligible",
+ "p_raw": 0.01798,
+ "p_BH": 0.01798,
+ "bh_family": {
+  "scope": "per_verifier",
+  "size": 1,
+  "contrasts": [
+   "claim_selected vs baseline_repro"
+  ],
+  "note": "one contrast per verifier, so BH is the identity and p_BH == p_raw; declared explicitly rather than reported as if a correction had been applied. The three verifiers are triangulation, not a family."
+ },
+ "equivalence_tost": {
+  "n": 186,
+  "band": 0.081,
+  "alpha": 0.05,
+  "mean_diff": 0.0451,
+  "se": 0.0192,
+  "ci90": [
+   0.0134,
+   0.0768
+  ],
+  "p_tost": 0.03135,
+  "equivalent": true,
+  "reading": "EQUIVALENTE dentro de ±0.081: seleccionar con un oraculo de RELEVANCIA TOPICA no compra ni lo que compro balancear la cobertura. Esto descarta el margen alcanzable por ranking topico, NO el margen de seleccion en general -> leer junto a selection_bound.json (matriz, ledger entrada 20)."
+ },
+ "n_fallback_queries": 7,
+ "fallback_note": "queries whose draft asserted nothing keep the baseline top-5, so they contribute an exact zero difference and shrink the observable effect; the count is reported so the reader can see the dilution",
+ "bound_note": "exp18's selection bound motivated this arm and is NOT a denominator: it holds the answer fixed while a real selector changes it, so any percent-of-margin figure would be fabricated"
+}

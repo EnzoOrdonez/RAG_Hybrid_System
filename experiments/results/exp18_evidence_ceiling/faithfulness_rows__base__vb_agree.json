@@ -1,0 +1,6436 @@
+{
+ "verifier": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\data\\models\\nli-deberta-v3-base",
+ "variant": "vb_agree",
+ "margin": 0.0,
+ "generated_by": "scripts/run_exp15_ablation.py::pass_n",
+ "configs": {
+  "baseline_repro | granite4.1-8b": {
+   "q003": {
+    "total_claims": 1,
+    "not_a_claim": 1,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q008": {
+    "total_claims": 1,
+    "not_a_claim": 1,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q028": {
+    "total_claims": 0,
+    "not_a_claim": 0,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": null,
+    "method": "none"
+   },
+   "q042": {
+    "total_claims": 0,
+    "not_a_claim": 0,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": null,
+    "method": "none"
+   },
+   "q045": {
+    "total_claims": 0,
+    "not_a_claim": 0,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": null,
+    "method": "none"
+   },
+   "q134": {
+    "total_claims": 1,
+    "not_a_claim": 1,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q001": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.375,
+    "method": "nli"
+   },
+   "q002": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q004": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q005": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q006": {
+    "total_claims": 4,
+    "not_a_claim": 1,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q007": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q009": {
+    "total_claims": 5,
+    "not_a_claim": 1,
+    "genuine": 4,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q010": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q011": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.375,
+    "method": "nli"
+   },
+   "q012": {
+    "total_claims": 5,
+    "not_a_claim": 2,
+    "genuine": 3,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "nli"
+   },
+   "q013": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q014": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q015": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q016": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.4444,
+    "method": "nli"
+   },
+   "q017": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q018": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q019": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.3077,
+    "method": "nli"
+   },
+   "q020": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q021": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q022": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1818,
+    "method": "nli"
+   },
+   "q023": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q024": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q025": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q026": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q027": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.75,
+    "method": "nli"
+   },
+   "q029": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q030": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 9,
+    "contradicted": 1,
+    "unsupported": 3,
+    "faithfulness": 0.6923,
+    "method": "nli"
+   },
+   "q031": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q032": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 2,
+    "contradicted": 2,
+    "unsupported": 13,
+    "faithfulness": 0.1176,
+    "method": "nli"
+   },
+   "q033": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q034": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q035": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.4286,
+    "method": "nli"
+   },
+   "q036": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.0769,
+    "method": "nli"
+   },
+   "q037": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q038": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.5714,
+    "method": "nli"
+   },
+   "q039": {
+    "total_claims": 5,
+    "not_a_claim": 1,
+    "genuine": 4,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q040": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q041": {
+    "total_claims": 22,
+    "not_a_claim": 0,
+    "genuine": 22,
+    "supported": 1,
+    "contradicted": 6,
+    "unsupported": 15,
+    "faithfulness": 0.0455,
+    "method": "nli"
+   },
+   "q043": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.6667,
+    "method": "nli"
+   },
+   "q044": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.0769,
+    "method": "nli"
+   },
+   "q046": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q047": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q048": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q049": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q050": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.6667,
+    "method": "nli"
+   },
+   "q051": {
+    "total_claims": 5,
+    "not_a_claim": 0,
+    "genuine": 5,
+    "supported": 3,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.6,
+    "method": "nli"
+   },
+   "q052": {
+    "total_claims": 4,
+    "not_a_claim": 2,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q053": {
+    "total_claims": 5,
+    "not_a_claim": 0,
+    "genuine": 5,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.2,
+    "method": "nli"
+   },
+   "q054": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q055": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q056": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q057": {
+    "total_claims": 14,
+    "not_a_claim": 0,
+    "genuine": 14,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q058": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q059": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q060": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q061": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q062": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q063": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q064": {
+    "total_claims": 19,
+    "not_a_claim": 0,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q065": {
+    "total_claims": 30,
+    "not_a_claim": 0,
+    "genuine": 30,
+    "supported": 15,
+    "contradicted": 0,
+    "unsupported": 15,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q066": {
+    "total_claims": 8,
+    "not_a_claim": 1,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q067": {
+    "total_claims": 4,
+    "not_a_claim": 1,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q068": {
+    "total_claims": 22,
+    "not_a_claim": 0,
+    "genuine": 22,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 22,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q069": {
+    "total_claims": 13,
+    "not_a_claim": 5,
+    "genuine": 8,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.375,
+    "method": "nli"
+   },
+   "q070": {
+    "total_claims": 32,
+    "not_a_claim": 0,
+    "genuine": 32,
+    "supported": 17,
+    "contradicted": 0,
+    "unsupported": 15,
+    "faithfulness": 0.5312,
+    "method": "nli"
+   },
+   "q071": {
+    "total_claims": 4,
+    "not_a_claim": 1,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q072": {
+    "total_claims": 22,
+    "not_a_claim": 3,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q073": {
+    "total_claims": 29,
+    "not_a_claim": 3,
+    "genuine": 26,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 25,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q074": {
+    "total_claims": 18,
+    "not_a_claim": 4,
+    "genuine": 14,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q075": {
+    "total_claims": 14,
+    "not_a_claim": 1,
+    "genuine": 13,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.2308,
+    "method": "nli"
+   },
+   "q076": {
+    "total_claims": 11,
+    "not_a_claim": 2,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q077": {
+    "total_claims": 19,
+    "not_a_claim": 1,
+    "genuine": 18,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 17,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q078": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q079": {
+    "total_claims": 28,
+    "not_a_claim": 4,
+    "genuine": 24,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 24,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q080": {
+    "total_claims": 31,
+    "not_a_claim": 7,
+    "genuine": 24,
+    "supported": 5,
+    "contradicted": 2,
+    "unsupported": 17,
+    "faithfulness": 0.2083,
+    "method": "nli"
+   },
+   "q081": {
+    "total_claims": 19,
+    "not_a_claim": 2,
+    "genuine": 17,
+    "supported": 9,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.5294,
+    "method": "nli"
+   },
+   "q082": {
+    "total_claims": 20,
+    "not_a_claim": 1,
+    "genuine": 19,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.1579,
+    "method": "nli"
+   },
+   "q083": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q084": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.0588,
+    "method": "nli"
+   },
+   "q085": {
+    "total_claims": 26,
+    "not_a_claim": 0,
+    "genuine": 26,
+    "supported": 0,
+    "contradicted": 3,
+    "unsupported": 23,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q086": {
+    "total_claims": 26,
+    "not_a_claim": 1,
+    "genuine": 25,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 25,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q087": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 7,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q088": {
+    "total_claims": 25,
+    "not_a_claim": 5,
+    "genuine": 20,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.05,
+    "method": "nli"
+   },
+   "q089": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q090": {
+    "total_claims": 23,
+    "not_a_claim": 1,
+    "genuine": 22,
+    "supported": 9,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.4091,
+    "method": "nli"
+   },
+   "q091": {
+    "total_claims": 23,
+    "not_a_claim": 5,
+    "genuine": 18,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.1111,
+    "method": "nli"
+   },
+   "q092": {
+    "total_claims": 42,
+    "not_a_claim": 6,
+    "genuine": 36,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 34,
+    "faithfulness": 0.0556,
+    "method": "nli"
+   },
+   "q093": {
+    "total_claims": 14,
+    "not_a_claim": 0,
+    "genuine": 14,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q094": {
+    "total_claims": 12,
+    "not_a_claim": 1,
+    "genuine": 11,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q095": {
+    "total_claims": 24,
+    "not_a_claim": 1,
+    "genuine": 23,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 23,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q096": {
+    "total_claims": 15,
+    "not_a_claim": 2,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q097": {
+    "total_claims": 12,
+    "not_a_claim": 1,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q098": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q099": {
+    "total_claims": 21,
+    "not_a_claim": 4,
+    "genuine": 17,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q100": {
+    "total_claims": 24,
+    "not_a_claim": 4,
+    "genuine": 20,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.05,
+    "method": "nli"
+   },
+   "q101": {
+    "total_claims": 7,
+    "not_a_claim": 2,
+    "genuine": 5,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q102": {
+    "total_claims": 19,
+    "not_a_claim": 1,
+    "genuine": 18,
+    "supported": 9,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q103": {
+    "total_claims": 18,
+    "not_a_claim": 2,
+    "genuine": 16,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.375,
+    "method": "nli"
+   },
+   "q104": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q105": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q106": {
+    "total_claims": 18,
+    "not_a_claim": 0,
+    "genuine": 18,
+    "supported": 9,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q107": {
+    "total_claims": 18,
+    "not_a_claim": 2,
+    "genuine": 16,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q108": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q109": {
+    "total_claims": 15,
+    "not_a_claim": 2,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q110": {
+    "total_claims": 29,
+    "not_a_claim": 0,
+    "genuine": 29,
+    "supported": 12,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.4138,
+    "method": "nli"
+   },
+   "q111": {
+    "total_claims": 18,
+    "not_a_claim": 2,
+    "genuine": 16,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q112": {
+    "total_claims": 9,
+    "not_a_claim": 1,
+    "genuine": 8,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q113": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q114": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q115": {
+    "total_claims": 11,
+    "not_a_claim": 1,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q116": {
+    "total_claims": 21,
+    "not_a_claim": 0,
+    "genuine": 21,
+    "supported": 7,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q117": {
+    "total_claims": 30,
+    "not_a_claim": 5,
+    "genuine": 25,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 22,
+    "faithfulness": 0.12,
+    "method": "nli"
+   },
+   "q118": {
+    "total_claims": 21,
+    "not_a_claim": 0,
+    "genuine": 21,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 20,
+    "faithfulness": 0.0476,
+    "method": "nli"
+   },
+   "q119": {
+    "total_claims": 15,
+    "not_a_claim": 0,
+    "genuine": 15,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.0667,
+    "method": "nli"
+   },
+   "q120": {
+    "total_claims": 38,
+    "not_a_claim": 2,
+    "genuine": 36,
+    "supported": 14,
+    "contradicted": 0,
+    "unsupported": 22,
+    "faithfulness": 0.3889,
+    "method": "nli"
+   },
+   "q121": {
+    "total_claims": 30,
+    "not_a_claim": 1,
+    "genuine": 29,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 28,
+    "faithfulness": 0.0345,
+    "method": "nli"
+   },
+   "q122": {
+    "total_claims": 9,
+    "not_a_claim": 1,
+    "genuine": 8,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q123": {
+    "total_claims": 25,
+    "not_a_claim": 5,
+    "genuine": 20,
+    "supported": 8,
+    "contradicted": 1,
+    "unsupported": 11,
+    "faithfulness": 0.4,
+    "method": "nli"
+   },
+   "q124": {
+    "total_claims": 20,
+    "not_a_claim": 2,
+    "genuine": 18,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 18,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q125": {
+    "total_claims": 14,
+    "not_a_claim": 0,
+    "genuine": 14,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q127": {
+    "total_claims": 7,
+    "not_a_claim": 1,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q128": {
+    "total_claims": 13,
+    "not_a_claim": 1,
+    "genuine": 12,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q129": {
+    "total_claims": 5,
+    "not_a_claim": 1,
+    "genuine": 4,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q130": {
+    "total_claims": 19,
+    "not_a_claim": 0,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q131": {
+    "total_claims": 32,
+    "not_a_claim": 0,
+    "genuine": 32,
+    "supported": 2,
+    "contradicted": 4,
+    "unsupported": 26,
+    "faithfulness": 0.0625,
+    "method": "nli"
+   },
+   "q132": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q133": {
+    "total_claims": 19,
+    "not_a_claim": 1,
+    "genuine": 18,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 18,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q135": {
+    "total_claims": 24,
+    "not_a_claim": 0,
+    "genuine": 24,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 22,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q136": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.125,
+    "method": "nli"
+   },
+   "q137": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q138": {
+    "total_claims": 5,
+    "not_a_claim": 0,
+    "genuine": 5,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q139": {
+    "total_claims": 8,
+    "not_a_claim": 2,
+    "genuine": 6,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q140": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q141": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q142": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q143": {
+    "total_claims": 16,
+    "not_a_claim": 0,
+    "genuine": 16,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q144": {
+    "total_claims": 7,
+    "not_a_claim": 2,
+    "genuine": 5,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.4,
+    "method": "nli"
+   },
+   "q145": {
+    "total_claims": 8,
+    "not_a_claim": 2,
+    "genuine": 6,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q146": {
+    "total_claims": 16,
+    "not_a_claim": 0,
+    "genuine": 16,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q147": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q148": {
+    "total_claims": 16,
+    "not_a_claim": 1,
+    "genuine": 15,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 14,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q149": {
+    "total_claims": 6,
+    "not_a_claim": 2,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q150": {
+    "total_claims": 8,
+    "not_a_claim": 2,
+    "genuine": 6,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q151": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q152": {
+    "total_claims": 6,
+    "not_a_claim": 2,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q153": {
+    "total_claims": 10,
+    "not_a_claim": 2,
+    "genuine": 8,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q154": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q155": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q156": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 0,
+    "contradicted": 7,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q157": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q158": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q159": {
+    "total_claims": 14,
+    "not_a_claim": 0,
+    "genuine": 14,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.4286,
+    "method": "nli"
+   },
+   "q160": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q161": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q162": {
+    "total_claims": 8,
+    "not_a_claim": 1,
+    "genuine": 7,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.1429,
+    "method": "nli"
+   },
+   "q163": {
+    "total_claims": 35,
+    "not_a_claim": 4,
+    "genuine": 31,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 28,
+    "faithfulness": 0.0968,
+    "method": "nli"
+   },
+   "q164": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q165": {
+    "total_claims": 6,
+    "not_a_claim": 1,
+    "genuine": 5,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q166": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q167": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.4615,
+    "method": "nli"
+   },
+   "q168": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q169": {
+    "total_claims": 21,
+    "not_a_claim": 0,
+    "genuine": 21,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0952,
+    "method": "nli"
+   },
+   "q170": {
+    "total_claims": 14,
+    "not_a_claim": 2,
+    "genuine": 12,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 10,
+    "faithfulness": 0.0833,
+    "method": "nli"
+   },
+   "q171": {
+    "total_claims": 8,
+    "not_a_claim": 1,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q172": {
+    "total_claims": 14,
+    "not_a_claim": 1,
+    "genuine": 13,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.1538,
+    "method": "nli"
+   },
+   "q173": {
+    "total_claims": 26,
+    "not_a_claim": 0,
+    "genuine": 26,
+    "supported": 14,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.5385,
+    "method": "nli"
+   },
+   "q174": {
+    "total_claims": 18,
+    "not_a_claim": 3,
+    "genuine": 15,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 12,
+    "faithfulness": 0.1333,
+    "method": "nli"
+   },
+   "q175": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q176": {
+    "total_claims": 25,
+    "not_a_claim": 0,
+    "genuine": 25,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 25,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q177": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 4,
+    "contradicted": 1,
+    "unsupported": 7,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q178": {
+    "total_claims": 18,
+    "not_a_claim": 2,
+    "genuine": 16,
+    "supported": 3,
+    "contradicted": 2,
+    "unsupported": 11,
+    "faithfulness": 0.1875,
+    "method": "nli"
+   },
+   "q179": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1818,
+    "method": "nli"
+   },
+   "q180": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q181": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q182": {
+    "total_claims": 7,
+    "not_a_claim": 1,
+    "genuine": 6,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q183": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q184": {
+    "total_claims": 15,
+    "not_a_claim": 3,
+    "genuine": 12,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q185": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q187": {
+    "total_claims": 15,
+    "not_a_claim": 0,
+    "genuine": 15,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.4,
+    "method": "nli"
+   },
+   "q189": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 3,
+    "contradicted": 3,
+    "unsupported": 11,
+    "faithfulness": 0.1765,
+    "method": "nli"
+   },
+   "q190": {
+    "total_claims": 22,
+    "not_a_claim": 0,
+    "genuine": 22,
+    "supported": 4,
+    "contradicted": 3,
+    "unsupported": 15,
+    "faithfulness": 0.1818,
+    "method": "nli"
+   },
+   "q191": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q192": {
+    "total_claims": 21,
+    "not_a_claim": 0,
+    "genuine": 21,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 20,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q193": {
+    "total_claims": 5,
+    "not_a_claim": 0,
+    "genuine": 5,
+    "supported": 0,
+    "contradicted": 5,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q195": {
+    "total_claims": 16,
+    "not_a_claim": 1,
+    "genuine": 15,
+    "supported": 8,
+    "contradicted": 1,
+    "unsupported": 6,
+    "faithfulness": 0.5333,
+    "method": "nli"
+   },
+   "q196": {
+    "total_claims": 23,
+    "not_a_claim": 1,
+    "genuine": 22,
+    "supported": 2,
+    "contradicted": 6,
+    "unsupported": 14,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q197": {
+    "total_claims": 15,
+    "not_a_claim": 3,
+    "genuine": 12,
+    "supported": 0,
+    "contradicted": 11,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q198": {
+    "total_claims": 19,
+    "not_a_claim": 4,
+    "genuine": 15,
+    "supported": 1,
+    "contradicted": 13,
+    "unsupported": 1,
+    "faithfulness": 0.0667,
+    "method": "nli"
+   }
+  },
+  "oracle_evidence | granite4.1-8b": {
+   "q020": {
+    "total_claims": 0,
+    "not_a_claim": 0,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": null,
+    "method": "none"
+   },
+   "q023": {
+    "total_claims": 1,
+    "not_a_claim": 1,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q024": {
+    "total_claims": 1,
+    "not_a_claim": 1,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q042": {
+    "total_claims": 0,
+    "not_a_claim": 0,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": null,
+    "method": "none"
+   },
+   "q052": {
+    "total_claims": 2,
+    "not_a_claim": 2,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q133": {
+    "total_claims": 2,
+    "not_a_claim": 2,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q134": {
+    "total_claims": 1,
+    "not_a_claim": 1,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q001": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.1429,
+    "method": "nli"
+   },
+   "q002": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.2222,
+    "method": "nli"
+   },
+   "q003": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q004": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.2727,
+    "method": "nli"
+   },
+   "q005": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.625,
+    "method": "nli"
+   },
+   "q006": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q007": {
+    "total_claims": 4,
+    "not_a_claim": 2,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q008": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q009": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q010": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q011": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.3,
+    "method": "nli"
+   },
+   "q012": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q013": {
+    "total_claims": 3,
+    "not_a_claim": 2,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q014": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q015": {
+    "total_claims": 4,
+    "not_a_claim": 1,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q016": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1818,
+    "method": "nli"
+   },
+   "q017": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q018": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.1429,
+    "method": "nli"
+   },
+   "q019": {
+    "total_claims": 20,
+    "not_a_claim": 0,
+    "genuine": 20,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.2,
+    "method": "nli"
+   },
+   "q021": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q022": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 3,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q025": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q026": {
+    "total_claims": 12,
+    "not_a_claim": 1,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 10,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q027": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q028": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q029": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.4167,
+    "method": "nli"
+   },
+   "q030": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q031": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q032": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 6,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q033": {
+    "total_claims": 4,
+    "not_a_claim": 1,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q034": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q035": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q036": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q037": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q038": {
+    "total_claims": 26,
+    "not_a_claim": 0,
+    "genuine": 26,
+    "supported": 19,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.7308,
+    "method": "nli"
+   },
+   "q039": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q040": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q041": {
+    "total_claims": 61,
+    "not_a_claim": 0,
+    "genuine": 61,
+    "supported": 27,
+    "contradicted": 10,
+    "unsupported": 24,
+    "faithfulness": 0.4426,
+    "method": "nli"
+   },
+   "q043": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q044": {
+    "total_claims": 22,
+    "not_a_claim": 0,
+    "genuine": 22,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 19,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q045": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q046": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "nli"
+   },
+   "q047": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q048": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q049": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q050": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q051": {
+    "total_claims": 8,
+    "not_a_claim": 1,
+    "genuine": 7,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.7143,
+    "method": "nli"
+   },
+   "q053": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q054": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q055": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q056": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q057": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.125,
+    "method": "nli"
+   },
+   "q058": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q059": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q060": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q061": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q062": {
+    "total_claims": 11,
+    "not_a_claim": 1,
+    "genuine": 10,
+    "supported": 7,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.7,
+    "method": "nli"
+   },
+   "q063": {
+    "total_claims": 27,
+    "not_a_claim": 0,
+    "genuine": 27,
+    "supported": 10,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.3704,
+    "method": "nli"
+   },
+   "q064": {
+    "total_claims": 30,
+    "not_a_claim": 3,
+    "genuine": 27,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 27,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q065": {
+    "total_claims": 32,
+    "not_a_claim": 0,
+    "genuine": 32,
+    "supported": 26,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.8125,
+    "method": "nli"
+   },
+   "q066": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q067": {
+    "total_claims": 7,
+    "not_a_claim": 1,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 3,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q068": {
+    "total_claims": 27,
+    "not_a_claim": 0,
+    "genuine": 27,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 25,
+    "faithfulness": 0.0741,
+    "method": "nli"
+   },
+   "q069": {
+    "total_claims": 12,
+    "not_a_claim": 2,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q070": {
+    "total_claims": 16,
+    "not_a_claim": 2,
+    "genuine": 14,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0714,
+    "method": "nli"
+   },
+   "q071": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1818,
+    "method": "nli"
+   },
+   "q072": {
+    "total_claims": 20,
+    "not_a_claim": 4,
+    "genuine": 16,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.1875,
+    "method": "nli"
+   },
+   "q073": {
+    "total_claims": 21,
+    "not_a_claim": 5,
+    "genuine": 16,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q074": {
+    "total_claims": 28,
+    "not_a_claim": 3,
+    "genuine": 25,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 25,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q075": {
+    "total_claims": 22,
+    "not_a_claim": 1,
+    "genuine": 21,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.1905,
+    "method": "nli"
+   },
+   "q076": {
+    "total_claims": 23,
+    "not_a_claim": 6,
+    "genuine": 17,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.2353,
+    "method": "nli"
+   },
+   "q077": {
+    "total_claims": 17,
+    "not_a_claim": 1,
+    "genuine": 16,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q078": {
+    "total_claims": 19,
+    "not_a_claim": 6,
+    "genuine": 13,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.1538,
+    "method": "nli"
+   },
+   "q079": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q080": {
+    "total_claims": 34,
+    "not_a_claim": 8,
+    "genuine": 26,
+    "supported": 7,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.2692,
+    "method": "nli"
+   },
+   "q081": {
+    "total_claims": 19,
+    "not_a_claim": 7,
+    "genuine": 12,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q082": {
+    "total_claims": 22,
+    "not_a_claim": 5,
+    "genuine": 17,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.3529,
+    "method": "nli"
+   },
+   "q083": {
+    "total_claims": 25,
+    "not_a_claim": 8,
+    "genuine": 17,
+    "supported": 6,
+    "contradicted": 1,
+    "unsupported": 10,
+    "faithfulness": 0.3529,
+    "method": "nli"
+   },
+   "q084": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q085": {
+    "total_claims": 26,
+    "not_a_claim": 0,
+    "genuine": 26,
+    "supported": 4,
+    "contradicted": 2,
+    "unsupported": 20,
+    "faithfulness": 0.1538,
+    "method": "nli"
+   },
+   "q086": {
+    "total_claims": 14,
+    "not_a_claim": 1,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q087": {
+    "total_claims": 11,
+    "not_a_claim": 1,
+    "genuine": 10,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 8,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q088": {
+    "total_claims": 14,
+    "not_a_claim": 1,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q089": {
+    "total_claims": 20,
+    "not_a_claim": 4,
+    "genuine": 16,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.375,
+    "method": "nli"
+   },
+   "q090": {
+    "total_claims": 32,
+    "not_a_claim": 1,
+    "genuine": 31,
+    "supported": 8,
+    "contradicted": 0,
+    "unsupported": 23,
+    "faithfulness": 0.2581,
+    "method": "nli"
+   },
+   "q091": {
+    "total_claims": 32,
+    "not_a_claim": 0,
+    "genuine": 32,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 28,
+    "faithfulness": 0.125,
+    "method": "nli"
+   },
+   "q092": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q093": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q094": {
+    "total_claims": 13,
+    "not_a_claim": 2,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q095": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.1765,
+    "method": "nli"
+   },
+   "q096": {
+    "total_claims": 10,
+    "not_a_claim": 1,
+    "genuine": 9,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.2222,
+    "method": "nli"
+   },
+   "q097": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q098": {
+    "total_claims": 20,
+    "not_a_claim": 1,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q099": {
+    "total_claims": 24,
+    "not_a_claim": 7,
+    "genuine": 17,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 15,
+    "faithfulness": 0.1176,
+    "method": "nli"
+   },
+   "q100": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q101": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q102": {
+    "total_claims": 15,
+    "not_a_claim": 1,
+    "genuine": 14,
+    "supported": 7,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q103": {
+    "total_claims": 23,
+    "not_a_claim": 2,
+    "genuine": 21,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0952,
+    "method": "nli"
+   },
+   "q104": {
+    "total_claims": 11,
+    "not_a_claim": 1,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q105": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q106": {
+    "total_claims": 22,
+    "not_a_claim": 2,
+    "genuine": 20,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.15,
+    "method": "nli"
+   },
+   "q107": {
+    "total_claims": 17,
+    "not_a_claim": 2,
+    "genuine": 15,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.0667,
+    "method": "nli"
+   },
+   "q108": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q109": {
+    "total_claims": 20,
+    "not_a_claim": 2,
+    "genuine": 18,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 15,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q110": {
+    "total_claims": 26,
+    "not_a_claim": 0,
+    "genuine": 26,
+    "supported": 12,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.4615,
+    "method": "nli"
+   },
+   "q111": {
+    "total_claims": 9,
+    "not_a_claim": 1,
+    "genuine": 8,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.125,
+    "method": "nli"
+   },
+   "q112": {
+    "total_claims": 11,
+    "not_a_claim": 1,
+    "genuine": 10,
+    "supported": 5,
+    "contradicted": 2,
+    "unsupported": 3,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q113": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.2941,
+    "method": "nli"
+   },
+   "q114": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q115": {
+    "total_claims": 7,
+    "not_a_claim": 1,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q116": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.2222,
+    "method": "nli"
+   },
+   "q117": {
+    "total_claims": 14,
+    "not_a_claim": 3,
+    "genuine": 11,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.5455,
+    "method": "nli"
+   },
+   "q118": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q119": {
+    "total_claims": 18,
+    "not_a_claim": 4,
+    "genuine": 14,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0714,
+    "method": "nli"
+   },
+   "q120": {
+    "total_claims": 22,
+    "not_a_claim": 3,
+    "genuine": 19,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.1053,
+    "method": "nli"
+   },
+   "q121": {
+    "total_claims": 26,
+    "not_a_claim": 3,
+    "genuine": 23,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 23,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q122": {
+    "total_claims": 22,
+    "not_a_claim": 1,
+    "genuine": 21,
+    "supported": 21,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "nli"
+   },
+   "q123": {
+    "total_claims": 16,
+    "not_a_claim": 0,
+    "genuine": 16,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.1875,
+    "method": "nli"
+   },
+   "q124": {
+    "total_claims": 17,
+    "not_a_claim": 8,
+    "genuine": 9,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.2222,
+    "method": "nli"
+   },
+   "q125": {
+    "total_claims": 17,
+    "not_a_claim": 2,
+    "genuine": 15,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.0667,
+    "method": "nli"
+   },
+   "q127": {
+    "total_claims": 8,
+    "not_a_claim": 1,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q128": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.375,
+    "method": "nli"
+   },
+   "q129": {
+    "total_claims": 16,
+    "not_a_claim": 1,
+    "genuine": 15,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q130": {
+    "total_claims": 18,
+    "not_a_claim": 1,
+    "genuine": 17,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.2353,
+    "method": "nli"
+   },
+   "q131": {
+    "total_claims": 10,
+    "not_a_claim": 1,
+    "genuine": 9,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 6,
+    "faithfulness": 0.2222,
+    "method": "nli"
+   },
+   "q132": {
+    "total_claims": 14,
+    "not_a_claim": 0,
+    "genuine": 14,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q135": {
+    "total_claims": 27,
+    "not_a_claim": 3,
+    "genuine": 24,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 24,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q136": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q137": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 3,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q138": {
+    "total_claims": 21,
+    "not_a_claim": 0,
+    "genuine": 21,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0952,
+    "method": "nli"
+   },
+   "q139": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 7,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q140": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q141": {
+    "total_claims": 5,
+    "not_a_claim": 0,
+    "genuine": 5,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.4,
+    "method": "nli"
+   },
+   "q142": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q143": {
+    "total_claims": 25,
+    "not_a_claim": 0,
+    "genuine": 25,
+    "supported": 7,
+    "contradicted": 0,
+    "unsupported": 18,
+    "faithfulness": 0.28,
+    "method": "nli"
+   },
+   "q144": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q145": {
+    "total_claims": 13,
+    "not_a_claim": 1,
+    "genuine": 12,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q146": {
+    "total_claims": 10,
+    "not_a_claim": 1,
+    "genuine": 9,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.6667,
+    "method": "nli"
+   },
+   "q147": {
+    "total_claims": 14,
+    "not_a_claim": 0,
+    "genuine": 14,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q148": {
+    "total_claims": 20,
+    "not_a_claim": 0,
+    "genuine": 20,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 18,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q149": {
+    "total_claims": 5,
+    "not_a_claim": 1,
+    "genuine": 4,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q150": {
+    "total_claims": 4,
+    "not_a_claim": 1,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q151": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 9,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.75,
+    "method": "nli"
+   },
+   "q152": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q153": {
+    "total_claims": 22,
+    "not_a_claim": 0,
+    "genuine": 22,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 22,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q154": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q155": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q156": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q157": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q158": {
+    "total_claims": 16,
+    "not_a_claim": 1,
+    "genuine": 15,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.2667,
+    "method": "nli"
+   },
+   "q159": {
+    "total_claims": 17,
+    "not_a_claim": 1,
+    "genuine": 16,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q160": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q161": {
+    "total_claims": 10,
+    "not_a_claim": 1,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q162": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q163": {
+    "total_claims": 39,
+    "not_a_claim": 2,
+    "genuine": 37,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 35,
+    "faithfulness": 0.0541,
+    "method": "nli"
+   },
+   "q164": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q165": {
+    "total_claims": 4,
+    "not_a_claim": 1,
+    "genuine": 3,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q166": {
+    "total_claims": 23,
+    "not_a_claim": 1,
+    "genuine": 22,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 21,
+    "faithfulness": 0.0455,
+    "method": "nli"
+   },
+   "q167": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 2,
+    "contradicted": 3,
+    "unsupported": 2,
+    "faithfulness": 0.2857,
+    "method": "nli"
+   },
+   "q168": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q169": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q170": {
+    "total_claims": 4,
+    "not_a_claim": 1,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q171": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 3,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q172": {
+    "total_claims": 26,
+    "not_a_claim": 1,
+    "genuine": 25,
+    "supported": 0,
+    "contradicted": 25,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q173": {
+    "total_claims": 18,
+    "not_a_claim": 2,
+    "genuine": 16,
+    "supported": 9,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.5625,
+    "method": "nli"
+   },
+   "q174": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.2,
+    "method": "nli"
+   },
+   "q175": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q176": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.375,
+    "method": "nli"
+   },
+   "q177": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q178": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q179": {
+    "total_claims": 12,
+    "not_a_claim": 1,
+    "genuine": 11,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.4545,
+    "method": "nli"
+   },
+   "q180": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 3,
+    "contradicted": 5,
+    "unsupported": 5,
+    "faithfulness": 0.2308,
+    "method": "nli"
+   },
+   "q181": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q182": {
+    "total_claims": 15,
+    "not_a_claim": 0,
+    "genuine": 15,
+    "supported": 7,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.4667,
+    "method": "nli"
+   },
+   "q183": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q184": {
+    "total_claims": 7,
+    "not_a_claim": 1,
+    "genuine": 6,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 4,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q185": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q187": {
+    "total_claims": 21,
+    "not_a_claim": 2,
+    "genuine": 19,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.3158,
+    "method": "nli"
+   },
+   "q189": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q190": {
+    "total_claims": 14,
+    "not_a_claim": 1,
+    "genuine": 13,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 11,
+    "faithfulness": 0.0769,
+    "method": "nli"
+   },
+   "q191": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q192": {
+    "total_claims": 19,
+    "not_a_claim": 0,
+    "genuine": 19,
+    "supported": 5,
+    "contradicted": 1,
+    "unsupported": 13,
+    "faithfulness": 0.2632,
+    "method": "nli"
+   },
+   "q193": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q195": {
+    "total_claims": 22,
+    "not_a_claim": 0,
+    "genuine": 22,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 20,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q196": {
+    "total_claims": 19,
+    "not_a_claim": 0,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 18,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q197": {
+    "total_claims": 23,
+    "not_a_claim": 6,
+    "genuine": 17,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.0588,
+    "method": "nli"
+   },
+   "q198": {
+    "total_claims": 20,
+    "not_a_claim": 2,
+    "genuine": 18,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 15,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   }
+  },
+  "evidence_swapped | granite4.1-8b": {
+   "q010": {
+    "total_claims": 2,
+    "not_a_claim": 2,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q016": {
+    "total_claims": 0,
+    "not_a_claim": 0,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": null,
+    "method": "none"
+   },
+   "q189": {
+    "total_claims": 1,
+    "not_a_claim": 1,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "vacuous"
+   },
+   "q002": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q003": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q009": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q012": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q018": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q022": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q025": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q027": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q040": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q041": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q042": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q044": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q047": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q049": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q050": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q061": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q065": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q067": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q068": {
+    "total_claims": 31,
+    "not_a_claim": 0,
+    "genuine": 31,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 31,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q070": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q071": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q075": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q079": {
+    "total_claims": 26,
+    "not_a_claim": 1,
+    "genuine": 25,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 25,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q083": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q085": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q086": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q089": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q091": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q094": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q106": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q107": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q108": {
+    "total_claims": 20,
+    "not_a_claim": 2,
+    "genuine": 18,
+    "supported": 3,
+    "contradicted": 1,
+    "unsupported": 14,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q110": {
+    "total_claims": 17,
+    "not_a_claim": 1,
+    "genuine": 16,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 15,
+    "faithfulness": 0.0625,
+    "method": "nli"
+   },
+   "q112": {
+    "total_claims": 17,
+    "not_a_claim": 1,
+    "genuine": 16,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q117": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q119": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q128": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q129": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q131": {
+    "total_claims": 5,
+    "not_a_claim": 0,
+    "genuine": 5,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q132": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q133": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q135": {
+    "total_claims": 19,
+    "not_a_claim": 0,
+    "genuine": 19,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 17,
+    "faithfulness": 0.0526,
+    "method": "nli"
+   },
+   "q136": {
+    "total_claims": 25,
+    "not_a_claim": 0,
+    "genuine": 25,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 24,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q142": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q145": {
+    "total_claims": 7,
+    "not_a_claim": 1,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 3,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q146": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q147": {
+    "total_claims": 3,
+    "not_a_claim": 2,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q149": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q159": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q166": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q169": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q172": {
+    "total_claims": 19,
+    "not_a_claim": 0,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q173": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q174": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q175": {
+    "total_claims": 6,
+    "not_a_claim": 0,
+    "genuine": 6,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q177": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q179": {
+    "total_claims": 6,
+    "not_a_claim": 1,
+    "genuine": 5,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   }
+  },
+  "final_top_k_10 | granite4.1-8b": {
+   "q171": {
+    "total_claims": 0,
+    "not_a_claim": 0,
+    "genuine": 0,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": null,
+    "method": "none"
+   },
+   "q001": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q002": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q003": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q004": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q005": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q006": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q007": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q008": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q009": {
+    "total_claims": 5,
+    "not_a_claim": 2,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q010": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q011": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 7,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q012": {
+    "total_claims": 6,
+    "not_a_claim": 2,
+    "genuine": 4,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 0,
+    "faithfulness": 1.0,
+    "method": "nli"
+   },
+   "q013": {
+    "total_claims": 3,
+    "not_a_claim": 2,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q014": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q015": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q016": {
+    "total_claims": 15,
+    "not_a_claim": 0,
+    "genuine": 15,
+    "supported": 9,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.6,
+    "method": "nli"
+   },
+   "q017": {
+    "total_claims": 4,
+    "not_a_claim": 2,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q018": {
+    "total_claims": 16,
+    "not_a_claim": 0,
+    "genuine": 16,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.125,
+    "method": "nli"
+   },
+   "q019": {
+    "total_claims": 21,
+    "not_a_claim": 0,
+    "genuine": 21,
+    "supported": 12,
+    "contradicted": 1,
+    "unsupported": 8,
+    "faithfulness": 0.5714,
+    "method": "nli"
+   },
+   "q020": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q021": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q022": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.3846,
+    "method": "nli"
+   },
+   "q023": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q024": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q025": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q026": {
+    "total_claims": 2,
+    "not_a_claim": 1,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q027": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 9,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.9,
+    "method": "nli"
+   },
+   "q028": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q029": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0833,
+    "method": "nli"
+   },
+   "q030": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 6,
+    "contradicted": 1,
+    "unsupported": 3,
+    "faithfulness": 0.6,
+    "method": "nli"
+   },
+   "q031": {
+    "total_claims": 18,
+    "not_a_claim": 0,
+    "genuine": 18,
+    "supported": 1,
+    "contradicted": 17,
+    "unsupported": 0,
+    "faithfulness": 0.0556,
+    "method": "nli"
+   },
+   "q032": {
+    "total_claims": 19,
+    "not_a_claim": 0,
+    "genuine": 19,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 16,
+    "faithfulness": 0.1053,
+    "method": "nli"
+   },
+   "q033": {
+    "total_claims": 12,
+    "not_a_claim": 1,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q034": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.2,
+    "method": "nli"
+   },
+   "q035": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.3,
+    "method": "nli"
+   },
+   "q036": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 16,
+    "faithfulness": 0.0588,
+    "method": "nli"
+   },
+   "q037": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q038": {
+    "total_claims": 26,
+    "not_a_claim": 0,
+    "genuine": 26,
+    "supported": 20,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.7692,
+    "method": "nli"
+   },
+   "q039": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q040": {
+    "total_claims": 22,
+    "not_a_claim": 0,
+    "genuine": 22,
+    "supported": 0,
+    "contradicted": 11,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q041": {
+    "total_claims": 21,
+    "not_a_claim": 0,
+    "genuine": 21,
+    "supported": 0,
+    "contradicted": 21,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q042": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q043": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.625,
+    "method": "nli"
+   },
+   "q044": {
+    "total_claims": 15,
+    "not_a_claim": 0,
+    "genuine": 15,
+    "supported": 0,
+    "contradicted": 6,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q045": {
+    "total_claims": 6,
+    "not_a_claim": 1,
+    "genuine": 5,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.2,
+    "method": "nli"
+   },
+   "q046": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 8,
+    "faithfulness": 0.1818,
+    "method": "nli"
+   },
+   "q047": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q048": {
+    "total_claims": 10,
+    "not_a_claim": 0,
+    "genuine": 10,
+    "supported": 1,
+    "contradicted": 2,
+    "unsupported": 7,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q049": {
+    "total_claims": 9,
+    "not_a_claim": 1,
+    "genuine": 8,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.125,
+    "method": "nli"
+   },
+   "q050": {
+    "total_claims": 6,
+    "not_a_claim": 2,
+    "genuine": 4,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.5,
+    "method": "nli"
+   },
+   "q051": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 9,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.8182,
+    "method": "nli"
+   },
+   "q052": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q053": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 7,
+    "faithfulness": 0.1111,
+    "method": "nli"
+   },
+   "q054": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.1111,
+    "method": "nli"
+   },
+   "q055": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q056": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q057": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q058": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q059": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q060": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q061": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q062": {
+    "total_claims": 25,
+    "not_a_claim": 3,
+    "genuine": 22,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 21,
+    "faithfulness": 0.0455,
+    "method": "nli"
+   },
+   "q063": {
+    "total_claims": 25,
+    "not_a_claim": 0,
+    "genuine": 25,
+    "supported": 7,
+    "contradicted": 0,
+    "unsupported": 18,
+    "faithfulness": 0.28,
+    "method": "nli"
+   },
+   "q064": {
+    "total_claims": 11,
+    "not_a_claim": 5,
+    "genuine": 6,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q065": {
+    "total_claims": 10,
+    "not_a_claim": 1,
+    "genuine": 9,
+    "supported": 7,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.7778,
+    "method": "nli"
+   },
+   "q066": {
+    "total_claims": 23,
+    "not_a_claim": 0,
+    "genuine": 23,
+    "supported": 2,
+    "contradicted": 1,
+    "unsupported": 20,
+    "faithfulness": 0.087,
+    "method": "nli"
+   },
+   "q067": {
+    "total_claims": 35,
+    "not_a_claim": 3,
+    "genuine": 32,
+    "supported": 1,
+    "contradicted": 20,
+    "unsupported": 11,
+    "faithfulness": 0.0312,
+    "method": "nli"
+   },
+   "q068": {
+    "total_claims": 18,
+    "not_a_claim": 5,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q069": {
+    "total_claims": 15,
+    "not_a_claim": 4,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q070": {
+    "total_claims": 42,
+    "not_a_claim": 5,
+    "genuine": 37,
+    "supported": 8,
+    "contradicted": 0,
+    "unsupported": 29,
+    "faithfulness": 0.2162,
+    "method": "nli"
+   },
+   "q071": {
+    "total_claims": 24,
+    "not_a_claim": 4,
+    "genuine": 20,
+    "supported": 1,
+    "contradicted": 3,
+    "unsupported": 16,
+    "faithfulness": 0.05,
+    "method": "nli"
+   },
+   "q072": {
+    "total_claims": 14,
+    "not_a_claim": 1,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q073": {
+    "total_claims": 39,
+    "not_a_claim": 5,
+    "genuine": 34,
+    "supported": 5,
+    "contradicted": 1,
+    "unsupported": 28,
+    "faithfulness": 0.1471,
+    "method": "nli"
+   },
+   "q074": {
+    "total_claims": 24,
+    "not_a_claim": 3,
+    "genuine": 21,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 21,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q075": {
+    "total_claims": 24,
+    "not_a_claim": 3,
+    "genuine": 21,
+    "supported": 5,
+    "contradicted": 4,
+    "unsupported": 12,
+    "faithfulness": 0.2381,
+    "method": "nli"
+   },
+   "q076": {
+    "total_claims": 33,
+    "not_a_claim": 3,
+    "genuine": 30,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 26,
+    "faithfulness": 0.1333,
+    "method": "nli"
+   },
+   "q077": {
+    "total_claims": 33,
+    "not_a_claim": 6,
+    "genuine": 27,
+    "supported": 0,
+    "contradicted": 5,
+    "unsupported": 22,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q078": {
+    "total_claims": 24,
+    "not_a_claim": 2,
+    "genuine": 22,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 22,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q079": {
+    "total_claims": 36,
+    "not_a_claim": 4,
+    "genuine": 32,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 31,
+    "faithfulness": 0.0312,
+    "method": "nli"
+   },
+   "q080": {
+    "total_claims": 34,
+    "not_a_claim": 5,
+    "genuine": 29,
+    "supported": 9,
+    "contradicted": 2,
+    "unsupported": 18,
+    "faithfulness": 0.3103,
+    "method": "nli"
+   },
+   "q081": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 9,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q082": {
+    "total_claims": 28,
+    "not_a_claim": 3,
+    "genuine": 25,
+    "supported": 3,
+    "contradicted": 4,
+    "unsupported": 18,
+    "faithfulness": 0.12,
+    "method": "nli"
+   },
+   "q083": {
+    "total_claims": 46,
+    "not_a_claim": 6,
+    "genuine": 40,
+    "supported": 13,
+    "contradicted": 1,
+    "unsupported": 26,
+    "faithfulness": 0.325,
+    "method": "nli"
+   },
+   "q084": {
+    "total_claims": 10,
+    "not_a_claim": 1,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q085": {
+    "total_claims": 48,
+    "not_a_claim": 6,
+    "genuine": 42,
+    "supported": 1,
+    "contradicted": 11,
+    "unsupported": 30,
+    "faithfulness": 0.0238,
+    "method": "nli"
+   },
+   "q086": {
+    "total_claims": 28,
+    "not_a_claim": 0,
+    "genuine": 28,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 28,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q087": {
+    "total_claims": 15,
+    "not_a_claim": 1,
+    "genuine": 14,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 12,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q088": {
+    "total_claims": 24,
+    "not_a_claim": 6,
+    "genuine": 18,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 18,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q089": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 5,
+    "contradicted": 1,
+    "unsupported": 5,
+    "faithfulness": 0.4545,
+    "method": "nli"
+   },
+   "q090": {
+    "total_claims": 26,
+    "not_a_claim": 0,
+    "genuine": 26,
+    "supported": 16,
+    "contradicted": 1,
+    "unsupported": 9,
+    "faithfulness": 0.6154,
+    "method": "nli"
+   },
+   "q091": {
+    "total_claims": 28,
+    "not_a_claim": 7,
+    "genuine": 21,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 20,
+    "faithfulness": 0.0476,
+    "method": "nli"
+   },
+   "q092": {
+    "total_claims": 29,
+    "not_a_claim": 6,
+    "genuine": 23,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 20,
+    "faithfulness": 0.1304,
+    "method": "nli"
+   },
+   "q093": {
+    "total_claims": 13,
+    "not_a_claim": 3,
+    "genuine": 10,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q094": {
+    "total_claims": 13,
+    "not_a_claim": 6,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q095": {
+    "total_claims": 25,
+    "not_a_claim": 0,
+    "genuine": 25,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 24,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q096": {
+    "total_claims": 21,
+    "not_a_claim": 5,
+    "genuine": 16,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.125,
+    "method": "nli"
+   },
+   "q097": {
+    "total_claims": 27,
+    "not_a_claim": 0,
+    "genuine": 27,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 27,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q098": {
+    "total_claims": 7,
+    "not_a_claim": 0,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 6,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q099": {
+    "total_claims": 40,
+    "not_a_claim": 5,
+    "genuine": 35,
+    "supported": 4,
+    "contradicted": 0,
+    "unsupported": 31,
+    "faithfulness": 0.1143,
+    "method": "nli"
+   },
+   "q100": {
+    "total_claims": 16,
+    "not_a_claim": 4,
+    "genuine": 12,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q101": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q102": {
+    "total_claims": 23,
+    "not_a_claim": 0,
+    "genuine": 23,
+    "supported": 14,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.6087,
+    "method": "nli"
+   },
+   "q103": {
+    "total_claims": 15,
+    "not_a_claim": 0,
+    "genuine": 15,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.2,
+    "method": "nli"
+   },
+   "q104": {
+    "total_claims": 17,
+    "not_a_claim": 8,
+    "genuine": 9,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 8,
+    "faithfulness": 0.1111,
+    "method": "nli"
+   },
+   "q105": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q106": {
+    "total_claims": 15,
+    "not_a_claim": 1,
+    "genuine": 14,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 13,
+    "faithfulness": 0.0714,
+    "method": "nli"
+   },
+   "q107": {
+    "total_claims": 28,
+    "not_a_claim": 9,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q108": {
+    "total_claims": 15,
+    "not_a_claim": 4,
+    "genuine": 11,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q109": {
+    "total_claims": 29,
+    "not_a_claim": 8,
+    "genuine": 21,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 21,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q110": {
+    "total_claims": 23,
+    "not_a_claim": 5,
+    "genuine": 18,
+    "supported": 4,
+    "contradicted": 7,
+    "unsupported": 7,
+    "faithfulness": 0.2222,
+    "method": "nli"
+   },
+   "q111": {
+    "total_claims": 23,
+    "not_a_claim": 4,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q112": {
+    "total_claims": 5,
+    "not_a_claim": 0,
+    "genuine": 5,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q113": {
+    "total_claims": 24,
+    "not_a_claim": 4,
+    "genuine": 20,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.05,
+    "method": "nli"
+   },
+   "q114": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q115": {
+    "total_claims": 19,
+    "not_a_claim": 6,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 12,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q116": {
+    "total_claims": 19,
+    "not_a_claim": 0,
+    "genuine": 19,
+    "supported": 9,
+    "contradicted": 1,
+    "unsupported": 9,
+    "faithfulness": 0.4737,
+    "method": "nli"
+   },
+   "q117": {
+    "total_claims": 24,
+    "not_a_claim": 4,
+    "genuine": 20,
+    "supported": 6,
+    "contradicted": 0,
+    "unsupported": 14,
+    "faithfulness": 0.3,
+    "method": "nli"
+   },
+   "q118": {
+    "total_claims": 33,
+    "not_a_claim": 0,
+    "genuine": 33,
+    "supported": 2,
+    "contradicted": 4,
+    "unsupported": 27,
+    "faithfulness": 0.0606,
+    "method": "nli"
+   },
+   "q119": {
+    "total_claims": 38,
+    "not_a_claim": 4,
+    "genuine": 34,
+    "supported": 3,
+    "contradicted": 0,
+    "unsupported": 31,
+    "faithfulness": 0.0882,
+    "method": "nli"
+   },
+   "q120": {
+    "total_claims": 43,
+    "not_a_claim": 4,
+    "genuine": 39,
+    "supported": 9,
+    "contradicted": 8,
+    "unsupported": 22,
+    "faithfulness": 0.2308,
+    "method": "nli"
+   },
+   "q121": {
+    "total_claims": 20,
+    "not_a_claim": 4,
+    "genuine": 16,
+    "supported": 1,
+    "contradicted": 2,
+    "unsupported": 13,
+    "faithfulness": 0.0625,
+    "method": "nli"
+   },
+   "q122": {
+    "total_claims": 24,
+    "not_a_claim": 3,
+    "genuine": 21,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 20,
+    "faithfulness": 0.0476,
+    "method": "nli"
+   },
+   "q123": {
+    "total_claims": 22,
+    "not_a_claim": 3,
+    "genuine": 19,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.1053,
+    "method": "nli"
+   },
+   "q124": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 8,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q125": {
+    "total_claims": 23,
+    "not_a_claim": 6,
+    "genuine": 17,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q127": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q128": {
+    "total_claims": 8,
+    "not_a_claim": 0,
+    "genuine": 8,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 3,
+    "faithfulness": 0.625,
+    "method": "nli"
+   },
+   "q129": {
+    "total_claims": 12,
+    "not_a_claim": 1,
+    "genuine": 11,
+    "supported": 1,
+    "contradicted": 2,
+    "unsupported": 8,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q130": {
+    "total_claims": 37,
+    "not_a_claim": 6,
+    "genuine": 31,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 30,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q131": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 12,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q132": {
+    "total_claims": 21,
+    "not_a_claim": 0,
+    "genuine": 21,
+    "supported": 0,
+    "contradicted": 3,
+    "unsupported": 18,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q133": {
+    "total_claims": 19,
+    "not_a_claim": 0,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 19,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q134": {
+    "total_claims": 15,
+    "not_a_claim": 0,
+    "genuine": 15,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 15,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q135": {
+    "total_claims": 24,
+    "not_a_claim": 0,
+    "genuine": 24,
+    "supported": 0,
+    "contradicted": 7,
+    "unsupported": 17,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q136": {
+    "total_claims": 29,
+    "not_a_claim": 2,
+    "genuine": 27,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 25,
+    "faithfulness": 0.037,
+    "method": "nli"
+   },
+   "q137": {
+    "total_claims": 18,
+    "not_a_claim": 0,
+    "genuine": 18,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 16,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q138": {
+    "total_claims": 18,
+    "not_a_claim": 0,
+    "genuine": 18,
+    "supported": 0,
+    "contradicted": 3,
+    "unsupported": 15,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q139": {
+    "total_claims": 12,
+    "not_a_claim": 1,
+    "genuine": 11,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 10,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q140": {
+    "total_claims": 6,
+    "not_a_claim": 2,
+    "genuine": 4,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.25,
+    "method": "nli"
+   },
+   "q141": {
+    "total_claims": 21,
+    "not_a_claim": 1,
+    "genuine": 20,
+    "supported": 4,
+    "contradicted": 7,
+    "unsupported": 9,
+    "faithfulness": 0.2,
+    "method": "nli"
+   },
+   "q142": {
+    "total_claims": 23,
+    "not_a_claim": 1,
+    "genuine": 22,
+    "supported": 0,
+    "contradicted": 22,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q143": {
+    "total_claims": 30,
+    "not_a_claim": 0,
+    "genuine": 30,
+    "supported": 5,
+    "contradicted": 0,
+    "unsupported": 25,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q144": {
+    "total_claims": 1,
+    "not_a_claim": 0,
+    "genuine": 1,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q145": {
+    "total_claims": 22,
+    "not_a_claim": 1,
+    "genuine": 21,
+    "supported": 0,
+    "contradicted": 3,
+    "unsupported": 18,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q146": {
+    "total_claims": 31,
+    "not_a_claim": 0,
+    "genuine": 31,
+    "supported": 24,
+    "contradicted": 0,
+    "unsupported": 7,
+    "faithfulness": 0.7742,
+    "method": "nli"
+   },
+   "q147": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 0,
+    "contradicted": 2,
+    "unsupported": 11,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q148": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 4,
+    "contradicted": 1,
+    "unsupported": 12,
+    "faithfulness": 0.2353,
+    "method": "nli"
+   },
+   "q149": {
+    "total_claims": 23,
+    "not_a_claim": 3,
+    "genuine": 20,
+    "supported": 1,
+    "contradicted": 1,
+    "unsupported": 18,
+    "faithfulness": 0.05,
+    "method": "nli"
+   },
+   "q150": {
+    "total_claims": 13,
+    "not_a_claim": 2,
+    "genuine": 11,
+    "supported": 4,
+    "contradicted": 5,
+    "unsupported": 2,
+    "faithfulness": 0.3636,
+    "method": "nli"
+   },
+   "q151": {
+    "total_claims": 40,
+    "not_a_claim": 0,
+    "genuine": 40,
+    "supported": 18,
+    "contradicted": 1,
+    "unsupported": 21,
+    "faithfulness": 0.45,
+    "method": "nli"
+   },
+   "q152": {
+    "total_claims": 9,
+    "not_a_claim": 0,
+    "genuine": 9,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q153": {
+    "total_claims": 23,
+    "not_a_claim": 2,
+    "genuine": 21,
+    "supported": 3,
+    "contradicted": 3,
+    "unsupported": 15,
+    "faithfulness": 0.1429,
+    "method": "nli"
+   },
+   "q154": {
+    "total_claims": 14,
+    "not_a_claim": 1,
+    "genuine": 13,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.0769,
+    "method": "nli"
+   },
+   "q155": {
+    "total_claims": 18,
+    "not_a_claim": 0,
+    "genuine": 18,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 17,
+    "faithfulness": 0.0556,
+    "method": "nli"
+   },
+   "q156": {
+    "total_claims": 5,
+    "not_a_claim": 0,
+    "genuine": 5,
+    "supported": 0,
+    "contradicted": 3,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q157": {
+    "total_claims": 3,
+    "not_a_claim": 1,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q158": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 15,
+    "faithfulness": 0.1176,
+    "method": "nli"
+   },
+   "q159": {
+    "total_claims": 17,
+    "not_a_claim": 1,
+    "genuine": 16,
+    "supported": 3,
+    "contradicted": 1,
+    "unsupported": 12,
+    "faithfulness": 0.1875,
+    "method": "nli"
+   },
+   "q160": {
+    "total_claims": 6,
+    "not_a_claim": 2,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q161": {
+    "total_claims": 11,
+    "not_a_claim": 0,
+    "genuine": 11,
+    "supported": 0,
+    "contradicted": 3,
+    "unsupported": 8,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q162": {
+    "total_claims": 18,
+    "not_a_claim": 2,
+    "genuine": 16,
+    "supported": 1,
+    "contradicted": 3,
+    "unsupported": 12,
+    "faithfulness": 0.0625,
+    "method": "nli"
+   },
+   "q163": {
+    "total_claims": 23,
+    "not_a_claim": 1,
+    "genuine": 22,
+    "supported": 2,
+    "contradicted": 2,
+    "unsupported": 18,
+    "faithfulness": 0.0909,
+    "method": "nli"
+   },
+   "q164": {
+    "total_claims": 4,
+    "not_a_claim": 0,
+    "genuine": 4,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q165": {
+    "total_claims": 16,
+    "not_a_claim": 1,
+    "genuine": 15,
+    "supported": 2,
+    "contradicted": 2,
+    "unsupported": 11,
+    "faithfulness": 0.1333,
+    "method": "nli"
+   },
+   "q166": {
+    "total_claims": 23,
+    "not_a_claim": 1,
+    "genuine": 22,
+    "supported": 0,
+    "contradicted": 15,
+    "unsupported": 7,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q167": {
+    "total_claims": 20,
+    "not_a_claim": 0,
+    "genuine": 20,
+    "supported": 1,
+    "contradicted": 12,
+    "unsupported": 7,
+    "faithfulness": 0.05,
+    "method": "nli"
+   },
+   "q168": {
+    "total_claims": 8,
+    "not_a_claim": 1,
+    "genuine": 7,
+    "supported": 0,
+    "contradicted": 5,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q169": {
+    "total_claims": 17,
+    "not_a_claim": 0,
+    "genuine": 17,
+    "supported": 0,
+    "contradicted": 13,
+    "unsupported": 4,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q170": {
+    "total_claims": 2,
+    "not_a_claim": 0,
+    "genuine": 2,
+    "supported": 0,
+    "contradicted": 0,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q172": {
+    "total_claims": 12,
+    "not_a_claim": 0,
+    "genuine": 12,
+    "supported": 4,
+    "contradicted": 3,
+    "unsupported": 5,
+    "faithfulness": 0.3333,
+    "method": "nli"
+   },
+   "q173": {
+    "total_claims": 23,
+    "not_a_claim": 0,
+    "genuine": 23,
+    "supported": 6,
+    "contradicted": 10,
+    "unsupported": 7,
+    "faithfulness": 0.2609,
+    "method": "nli"
+   },
+   "q174": {
+    "total_claims": 20,
+    "not_a_claim": 1,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 6,
+    "unsupported": 13,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q175": {
+    "total_claims": 14,
+    "not_a_claim": 0,
+    "genuine": 14,
+    "supported": 2,
+    "contradicted": 0,
+    "unsupported": 12,
+    "faithfulness": 0.1429,
+    "method": "nli"
+   },
+   "q176": {
+    "total_claims": 26,
+    "not_a_claim": 1,
+    "genuine": 25,
+    "supported": 0,
+    "contradicted": 15,
+    "unsupported": 10,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q177": {
+    "total_claims": 16,
+    "not_a_claim": 1,
+    "genuine": 15,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 14,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q178": {
+    "total_claims": 19,
+    "not_a_claim": 1,
+    "genuine": 18,
+    "supported": 12,
+    "contradicted": 0,
+    "unsupported": 6,
+    "faithfulness": 0.6667,
+    "method": "nli"
+   },
+   "q179": {
+    "total_claims": 28,
+    "not_a_claim": 2,
+    "genuine": 26,
+    "supported": 0,
+    "contradicted": 25,
+    "unsupported": 1,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q180": {
+    "total_claims": 13,
+    "not_a_claim": 0,
+    "genuine": 13,
+    "supported": 1,
+    "contradicted": 7,
+    "unsupported": 5,
+    "faithfulness": 0.0769,
+    "method": "nli"
+   },
+   "q181": {
+    "total_claims": 22,
+    "not_a_claim": 0,
+    "genuine": 22,
+    "supported": 1,
+    "contradicted": 0,
+    "unsupported": 21,
+    "faithfulness": 0.0455,
+    "method": "nli"
+   },
+   "q182": {
+    "total_claims": 40,
+    "not_a_claim": 0,
+    "genuine": 40,
+    "supported": 1,
+    "contradicted": 5,
+    "unsupported": 34,
+    "faithfulness": 0.025,
+    "method": "nli"
+   },
+   "q183": {
+    "total_claims": 24,
+    "not_a_claim": 4,
+    "genuine": 20,
+    "supported": 2,
+    "contradicted": 12,
+    "unsupported": 6,
+    "faithfulness": 0.1,
+    "method": "nli"
+   },
+   "q184": {
+    "total_claims": 30,
+    "not_a_claim": 0,
+    "genuine": 30,
+    "supported": 5,
+    "contradicted": 2,
+    "unsupported": 23,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q185": {
+    "total_claims": 3,
+    "not_a_claim": 0,
+    "genuine": 3,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 2,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q187": {
+    "total_claims": 22,
+    "not_a_claim": 2,
+    "genuine": 20,
+    "supported": 7,
+    "contradicted": 3,
+    "unsupported": 10,
+    "faithfulness": 0.35,
+    "method": "nli"
+   },
+   "q189": {
+    "total_claims": 18,
+    "not_a_claim": 0,
+    "genuine": 18,
+    "supported": 3,
+    "contradicted": 2,
+    "unsupported": 13,
+    "faithfulness": 0.1667,
+    "method": "nli"
+   },
+   "q190": {
+    "total_claims": 22,
+    "not_a_claim": 0,
+    "genuine": 22,
+    "supported": 0,
+    "contradicted": 14,
+    "unsupported": 8,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q191": {
+    "total_claims": 11,
+    "not_a_claim": 1,
+    "genuine": 10,
+    "supported": 0,
+    "contradicted": 1,
+    "unsupported": 9,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q192": {
+    "total_claims": 21,
+    "not_a_claim": 2,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 16,
+    "unsupported": 3,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q193": {
+    "total_claims": 26,
+    "not_a_claim": 0,
+    "genuine": 26,
+    "supported": 0,
+    "contradicted": 26,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q195": {
+    "total_claims": 30,
+    "not_a_claim": 1,
+    "genuine": 29,
+    "supported": 7,
+    "contradicted": 3,
+    "unsupported": 19,
+    "faithfulness": 0.2414,
+    "method": "nli"
+   },
+   "q196": {
+    "total_claims": 26,
+    "not_a_claim": 2,
+    "genuine": 24,
+    "supported": 5,
+    "contradicted": 3,
+    "unsupported": 16,
+    "faithfulness": 0.2083,
+    "method": "nli"
+   },
+   "q197": {
+    "total_claims": 22,
+    "not_a_claim": 3,
+    "genuine": 19,
+    "supported": 0,
+    "contradicted": 19,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   },
+   "q198": {
+    "total_claims": 21,
+    "not_a_claim": 0,
+    "genuine": 21,
+    "supported": 0,
+    "contradicted": 21,
+    "unsupported": 0,
+    "faithfulness": 0.0,
+    "method": "nli"
+   }
+  }
+ }
+}

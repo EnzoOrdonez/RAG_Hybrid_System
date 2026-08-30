@@ -1,0 +1,237 @@
+## Dictamen ejecutivo
+
+El proyecto es defendible como estudio diagnóstico y metodológico de caso, pero todavía no como validación concluyente de un sistema de medición de fidelidad. El riesgo principal no es el tamaño del modelo ni el dominio limitado: es que la referencia humana es inestable y, aun así, varias conclusiones parecen tratar las puntuaciones automáticas como estimaciones del “nivel real” de fidelidad.
+
+La contribución más sólida es: “los verificadores de fidelidad discrepan sustancialmente y la cantidad de evidencia mostrada cambia con frecuencia el juicio”. La contribución más frágil es: “HHEM estima correctamente la fidelidad real y el selector la mejora”.
+
+## A. Qué falta o es frágil
+
+### 1. Definir con precisión el estimando y la unidad estadística
+
+**Severidad: bloqueante.**
+
+Los 2053 claims probablemente están anidados en respuestas, preguntas y quizá documentos. Tratarlos como 2053 observaciones independientes produciría intervalos y valores p demasiado optimistas. “n=186 pareado” tampoco aclara si son 186 preguntas, respuestas o claims.
+
+**Acción de 1–2 h:** añadir una tabla con:
+
+- unidad de generación;
+- unidad de extracción;
+- unidad de verificación;
+- unidad de muestreo humano;
+- unidad usada en cada contraste;
+- número de preguntas/respuestas/clusters únicos.
+
+Si los datos lo permiten, recalcular el IC de exp19b con bootstrap pareado agrupado por pregunta o respuesta. Si no, declarar explícitamente que la inferencia claim-level puede subestimar la incertidumbre.
+
+### 2. Separar score automático, soporte humano y verdad externa
+
+**Severidad: bloqueante.**
+
+“Sin soporte según verificador a τ=0.5”, “sin soporte según humano” y “falso en el mundo” son variables distintas. La narrativa actual parece cruzar esas fronteras.
+
+**Acción:** introducir tres términos fijos en todo el artículo:
+
+1. `unsupported@τ` para la clasificación automática;
+2. `human-judged unsupported` para el juicio sobre el pool mostrado;
+3. `externally incorrect/correct` para la taxonomía con comprobación externa.
+
+Revisar resumen, conclusiones, tablas y pies de figura para impedir que “759 claims no soportados” aparezca sin el calificador automático.
+
+### 3. Validez del extractor de claims
+
+**Severidad: bloqueante.**
+
+La pregunta central es claim-level, pero no se informa si el extractor:
+
+- omite afirmaciones;
+- divide una afirmación en varias;
+- mezcla afirmaciones verificables y no verificables;
+- produce claims dependientes o duplicados;
+- conserva negación, modalidad y condiciones.
+
+Si falla aquí, tanto el denominador 2053 como la tasa del 37% cambian.
+
+**Acción:** auditar manualmente 15–20 respuestas ya existentes y reportar, de manera descriptiva, cobertura, atomicidad y claims espurios. Si no hay tiempo, convertirlo en amenaza explícita a la validez de constructo y publicar ejemplos positivos y negativos.
+
+### 4. Aclarar qué “mejora” el selector de exp19b
+
+**Severidad: bloqueante.**
+
+Si la respuesta generada permanece fija y el selector solo cambia qué evidencia se entrega al verificador, no ha aumentado la fidelidad de la respuesta: ha aumentado su alineación o verificabilidad respecto del conjunto seleccionado.
+
+Además, si el selector fue diseñado o escogido usando señales próximas a HHEM, evaluar principalmente con HHEM introduce acoplamiento métrica–método. Que ambos NLI sean nulos hace esta objeción especialmente fuerte.
+
+**Acción:** añadir un diagrama de exp19b y una frase inequívoca:
+
+- si se regeneró la respuesta, se evalúa una intervención de generación;
+- si no se regeneró, se evalúa selección de evidencia/verificabilidad post hoc.
+
+Declarar también si HHEM intervino en diseño, ajuste o selección del método.
+
+### 5. No presentar los “240 juicios” como un gold homogéneo
+
+**Severidad: importante.**
+
+Son 150 juicios con un chunk, 50 con cinco chunks y 40 de taxonomía. Miden tareas y condiciones de información diferentes. Sumarlos sugiere un tamaño de gold mayor que el realmente disponible para cada afirmación.
+
+**Acción:** reemplazar “gold humano de 240 juicios” por una tabla de tres subconjuntos, con propósito, población objetivo, evidencia visible, muestreo, etiquetas y análisis correspondiente.
+
+### 6. Reportar incertidumbre de los titulares descriptivos
+
+**Severidad: importante.**
+
+Faltan intervalos para 37%, 53%, 45%, 2%, 32% y 55%. El 2% de una muestra ponderada con Kish 27.4 puede depender prácticamente de un solo caso y no debería parecer una estimación precisa.
+
+**Acción:** añadir IC95 compatibles con el diseño:
+
+- por clusters para claims;
+- ponderados/diseño-based para Horvitz–Thompson;
+- binomiales o bootstrap para retest y cambio de evidencia.
+
+Mostrar además conteos no ponderados detrás de 53/45/2.
+
+### 7. Justificar τ=0.5 y la banda TOST ±0.081
+
+**Severidad: importante.**
+
+Un evaluador preguntará por qué 0.5 define “ningún soporte” y por qué una diferencia de hasta 0.081 es prácticamente despreciable. La banda de equivalencia es casi el doble del efecto observado.
+
+**Acción:** añadir una sensibilidad ya calculable con τ=0.4/0.5/0.6 y una justificación sustantiva de ±0.081. Si el margen no tiene justificación externa, llamarlo “margen preespecificado” y no “umbral de irrelevancia práctica”.
+
+No hay contradicción necesaria entre superioridad y equivalencia: un efecto puede ser positivo pero estar contenido dentro de una banda considerada pequeña. Debe explicarse en una oración.
+
+### 8. El análisis de uno frente a cinco chunks no identifica por sí solo “sesgo”
+
+**Severidad: importante.**
+
+Que 16/50 juicios cambien demuestra sensibilidad al contexto mostrado. El saldo 11 versus 5 sugiere una dirección, pero es pequeño y no establece que la condición de un chunk produzca sistemáticamente errores. Además, podrían intervenir orden, longitud o carga cognitiva.
+
+**Acción:** cambiar “sesgo de evidencia” por “sensibilidad al conjunto de evidencia” y presentar una tabla de transición 2×2. Si procede, añadir McNemar exacto, sin venderlo como confirmatorio.
+
+### 9. Documentar el diseño del benchmark y posibles fugas
+
+**Severidad: importante.**
+
+Falta saber cómo se construyeron las preguntas, si fueron derivadas de los mismos documentos, si hubo selección manual de casos, cuántas son multi-hop/multi-nube y si se excluyeron preguntas o respuestas.
+
+**Acción:** incluir una ficha de dataset de media página: procedimiento de creación, inclusiones/exclusiones, distribuciones, versiones y relación entre preguntas y documentos. El checklist ACL espera estadísticas, particiones y preprocesamiento de los datos, no solo código ejecutable. [ACL Reproducibility Checklist](https://aclanthology.org/2023.acl-long.568.pdf)
+
+### 10. Mostrar las familias de hipótesis completas
+
+**Severidad: importante.**
+
+“Corrección BH” no basta si no se sabe qué contrastes formaron cada familia, cuál fue el primario y si la familia se definió antes de observar los resultados.
+
+**Acción:** añadir una tabla compacta con hipótesis, métrica, dirección, familia BH, p crudo, p ajustado, IC, tamaño de efecto y estatus preregistrado/exploratorio.
+
+### 11. Reproducibilidad externa, no solo repetibilidad interna
+
+**Severidad: importante.**
+
+331 tests, lockfile y replay bit-idéntico prueban buena repetibilidad del entorno congelado. No prueban que un tercero pueda reconstruir corpus, modelos, índices y resultados.
+
+**Acción:** publicar o documentar:
+
+- hash/commit del corpus y lista de documentos;
+- digest exacto del modelo Ollama;
+- embeddings, tokenizer y versiones;
+- configuración de chunking e índices;
+- hardware, temperatura, seeds y tiempo de ejecución;
+- comando único de reproducción y resultados esperados.
+
+ARR evalúa explícitamente si un tercero puede reproducir los resultados y construir sobre ellos. [Formulario de revisión ARR](https://aclrollingreview.org/reviewform)
+
+### 12. Recentrar la historia del artículo
+
+**Severidad: menor, pero de alto retorno.**
+
+Ahora parece haber demasiados mensajes: fallo de retrieval, mejora por selector, comparación de verificadores, taxonomía, validez del LLM-juez y protocolo de anotación.
+
+**Acción:** formular una sola contribución principal y dos secundarias. Mi recomendación:
+
+> Estudio claim-level de cómo la elección y cantidad de evidencia alteran la medición automática de fidelidad en un RAG local, mostrando desacuerdo sustancial entre verificadores y límites de una referencia humana pequeña.
+
+Eso está mejor respaldado que una historia de “mejora de fidelidad”.
+
+## B. Las cinco preguntas más incómodas
+
+### 1. “¿Cómo llaman gold a etiquetas de un anotador que solo se reproduce a sí mismo el 55% de las veces?”
+
+**Mejor respuesta honesta:**
+
+> No consideramos esas etiquetas un gold definitivo. Son una referencia humana piloto y ruidosa. Reportamos el desacuerdo preadjudicación, las nueve adjudicaciones con sus razones y un análisis que las excluye. La estabilidad del ordenamiento de los verificadores es evidencia de robustez cualitativa, pero las magnitudes absolutas de acuerdo siguen siendo inciertas.
+
+No responder que la adjudicación “solucionó” la confiabilidad.
+
+### 2. “¿El 37% es una tasa humana de falta de soporte o simplemente la tasa de error/decisión de su verificador a un umbral arbitrario?”
+
+**Respuesta:**
+
+> Es 759/2053 según la regla automática `max-support < 0.5` sobre el pool recuperado. No es una estimación gold de alucinación. La auditoría humana estratificada caracteriza una parte de esos casos, con alta incertidumbre y pesos de muestreo; por ello distinguimos explícitamente falta de soporte automática, falta de soporte humana y falsedad externa.
+
+### 3. “¿Por qué debería creer que el selector mejora la fidelidad si solo HHEM lo detecta y los dos NLI no?”
+
+**Respuesta:**
+
+> No afirmamos una mejora verificador-independiente. El efecto es pequeño y específico de HHEM: Δ=0.0451, IC95 [0.008, 0.082], mientras que la triangulación NLI es nula. Esto puede reflejar mayor sensibilidad de HHEM, pero también acoplamiento con la métrica. Por tanto, interpretamos exp19b como evidencia limitada de mejor alineación con HHEM, no como demostración general de mayor fidelidad.
+
+Si las respuestas no se regeneraron, sustituir “fidelidad” por “alineación de evidencia”.
+
+### 4. “¿Cómo saben que los claims verdaderos pero no recuperados vienen del conocimiento paramétrico?”
+
+**Respuesta:**
+
+> No podemos identificar causalmente su procedencia. Solo observamos que algunos claims juzgados correctos no están respaldados por el pool inspeccionado. Pueden provenir del modelo, de patrones generales, de información parcial del prompt o de evidencia que el retrieval omitió. Por eso la categoría correcta es “verdadero sin soporte en el pool”, no “conocimiento paramétrico demostrado”.
+
+### 5. “Con un solo modelo, una referencia humana débil y un efecto pequeño, ¿cuál es realmente la contribución?”
+
+**Respuesta:**
+
+> No proponemos una ley general sobre RAG ni un nuevo estado del arte. La contribución es un estudio reproducible de medición: muestra que la fidelidad claim-level depende fuertemente del verificador y de la evidencia disponible, cuantifica la discrepancia y documenta por qué un LLM-juez sin calibrar no reemplaza una auditoría humana. Las conclusiones sobre modelos, dominios y mejoras del selector son deliberadamente locales.
+
+## C. Confiabilidad del anotador
+
+**No es defendible tal cual si se denomina “gold humano” o si se usa para ubicar el “nivel real” de fidelidad. Sí es defendible como referencia humana piloto, siempre que la versión preadjudicación sea la principal y la incertidumbre quede visible.**
+
+Puntos clave:
+
+- El retest mide **confiabilidad intraanotador**, no interanotador.
+- 55% de acuerdo crudo y κ=0.268 incumplen la meta preregistrada del 85%.
+- En los rótulos de Landis–Koch, κ=0.268 cae en “fair” y κ≈0.303–0.397 también en “fair”; 0.42–0.71 va de “moderate” a “substantial”. Pero los propios autores describieron esos cortes como arbitrarios, por lo que no deben usarse como sello de aceptabilidad. [Landis y Koch, 1977](https://jjcurtin.github.io/book_iaml/pdfs/landis_1977_kappa.pdf)
+- En NLP, la medida y su interpretación deben corresponder al tipo de etiqueta, distribución marginal y propósito del corpus; κ no debería presentarse aisladamente. [Artstein y Poesio, 2008](https://aclanthology.org/J08-4004/)
+- La adjudicación es práctica normal para producir una etiqueta de consenso, pero normalmente sigue a anotaciones independientes y **no reemplaza** el reporte del acuerdo anterior a la adjudicación.
+- Que el mismo anotador reexamine sus nueve desacuerdos conociendo que son desacuerdos puede producir consistencia editorial, no evidencia independiente de validez.
+- El triple juez de la taxonomía no rescata automáticamente la etapa A: son otra tarea, otra muestra y otra estructura de etiquetas.
+- “Ninguna κ significativa tras BH” es secundario. El test contra κ=0 pregunta si existe algún acuerdo más allá del azar; no si la referencia es suficientemente fiable. Son más informativos el IC, la matriz de confusión y el criterio de confiabilidad previamente fijado.
+
+### Mínimo exigible antes de entregar
+
+En 1–2 horas:
+
+1. Dejar como primarios los resultados preadjudicación.
+2. Mostrar matriz de confusión del retest, acuerdo por clase y prevalencias.
+3. Añadir IC95 de acuerdo crudo y κ.
+4. Presentar la adjudicación como construcción de una versión reconciliada, no como aumento de confiabilidad.
+5. Mantener la sensibilidad excluyendo los nueve casos.
+6. Sustituir “gold” por “referencia humana” o “pilot human reference”.
+
+Con dos días, una segunda anotación independiente de una pequeña muestra sería deseable, pero no es imprescindible si el artículo reduce el alcance de sus afirmaciones. Lo imprescindible es no vender la evidencia existente como gold estable.
+
+## D. Frases que serían overclaiming
+
+| Formulación problemática | Problema | Reformulación defendible |
+|---|---|---|
+| “759/2053 claims no los soporta ningún chunk” | Convierte una decisión automática a τ=0.5 en hecho. | “759/2053 claims fueron clasificados como sin soporte en el pool por la regla automática a τ=0.5.” |
+| “53% son verdaderos (conocimiento paramétrico)” | La verdad no identifica el origen causal del contenido. | “La estimación HT sugiere que 53% fueron juzgados correctos pese a no tener soporte detectado en el pool; su procedencia no puede determinarse.” |
+| “El nivel real de fidelidad está más cerca de 0.55 que de 0.30” | κ mide acuerdo, no estima la prevalencia o nivel verdadero de fidelidad. | “En esta referencia humana, HHEM mostró mayor concordancia que los NLI; esto no identifica el nivel absoluto verdadero de fidelidad.” |
+| “El selector anclado mejora la fidelidad” | El efecto solo aparece en HHEM y es pequeño; quizá solo cambió la evidencia evaluada. | “El selector aumentó modestamente el score HHEM en el contraste preregistrado; el efecto no se replicó con los NLI.” |
+| “TOST demuestra que ambos métodos son equivalentes” | Depende de que ±0.081 sea un margen sustantivamente válido. | “La diferencia quedó dentro de la banda preespecificada ±0.081 según TOST, aunque el margen admite efectos mayores que el observado.” |
+| “32% de sesgo de evidencia” | Cambio de juicio no identifica sesgo causal ni dirección estable. | “El 32% cambió de etiqueta al ampliar la evidencia de uno a cinco chunks, mostrando sensibilidad al contexto presentado.” |
+| “La κ de etapa A es una cota inferior” | No está demostrado que cinco chunks sean el gold completo ni que todo cambio sea corrección. | “La condición de un chunk probablemente subestima algunos soportes; los datos observados son compatibles con esa interpretación, pero no establecen una cota formal.” |
+| “LLM-juez no sustituye gold humano” | Un humano inestable tampoco constituye gold; el resultado es local. | “En esta muestra y sin calibración específica, los LLM-jueces mostraron baja concordancia con la referencia humana y no ofrecen un reemplazo fiable.” |
+| “El ordenamiento se sostiene, por tanto el resultado es robusto” | Conservar el orden no valida magnitudes ni etiquetas. | “El ordenamiento fue estable en la sensibilidad, aunque la baja confiabilidad limita la interpretación de las magnitudes absolutas.” |
+| “Resultados reproducibles” | Replay bit-idéntico demuestra repetibilidad bajo el entorno congelado. | “Resultados computacionalmente repetibles en el entorno congelado; la reproducibilidad externa depende de la disponibilidad del corpus, modelos y configuración.” |
+| “39/40 de consenso valida la taxonomía” | Mayoría humano+dos LLM no equivale a verdad independiente y puede ocultar prevalencia. | “La taxonomía mostró alta estabilidad de mayoría en esta muestra, con concordancia pareada moderada a sustancial; no constituye validación externa.” |
+| “Los NLI no tienen acuerdo” porque p ajustado > .05 | No significación no prueba ausencia ni equivalencia. | “No se detectó acuerdo distinto de cero con la potencia disponible; los IC permiten cuantificar qué niveles siguen siendo compatibles con los datos.” |
+
+Mi recomendación final sería presentar el trabajo como una auditoría de la medición de fidelidad, no como la validación definitiva de un verificador o de una intervención que mejora RAG. Ese cambio de encuadre conserva casi todos los resultados y neutraliza las objeciones más peligrosas.

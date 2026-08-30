@@ -124,7 +124,21 @@ v4, añadir nota de instrumento; (c) los rescores NLI usan `data/models/nli-debe
 locales, no el hub de HF; (d) el camino CANÓNICO de los prompts de exp12 es
 `scripts/run_generation_matrix.py` (ruteo por query_type: 115/194 no-default vía QueryProcessor +
 build_prompt); `RAGPipeline.query()` con la config evaluada (query_expansion=OFF post-N4) NO lo
-replica — clasifica todo como default (`rag_pipeline.py:120-123,204-210`). Reproducir prompts =
-usar el runner, no el pipeline de la demo (hallazgo N9 #6); (e) figuras: f2 tiene variante v4
+replica — clasifica todo como default. Reproducir prompts = usar el runner, no el pipeline de la
+demo (hallazgo N9 #6);
+**[TEXTO CANÓNICO — fijado 2026-08-21 07:40 por Claude Code, idéntico en
+`docs/KNOB_MAP_summer.md`]** La frase anterior y la de `KNOB_MAP_summer.md` parecían
+contradecirse; la re-auditoría del 2026-08-04 (entrada [Kimi Code] en `CLAUDE.md`) mostró que
+**ambas son correctas en su contexto y que la contradicción era de redacción, no de código**. La
+**construcción** del prompt es la misma en las dos rutas: `build_context` → `get_template` → rama
+`cross_cloud` con `context_by_provider` → `SYSTEM_PROMPT`. Lo que difiere es el **origen del
+`query_type`**: el ruteo es una perilla **opt-in**, `prompt_routing`
+(`src/pipeline/pipeline_config.py:49`, por defecto `False`), y sin ella el pipeline asigna
+`query_type = "default"` a todo (`rag_pipeline.py:251-254` en `query()` y `417-420` en
+`query_stream()`). Esta línea describe **la config legacy que se evaluó** (perilla apagada);
+`KNOB_MAP_summer.md` describe **la ruta con `prompt_routing=True`**. Segunda diferencia, real y
+vigente en ambos contextos: el **origen del contexto** — `rgm` recibe `retrieved_ids` firmados de
+exp11, `RAGPipeline` recupera en vivo. Regla operativa sin cambios: brazos comparables con `rgm`;
+`RAGPipeline` es la ruta de despliegue; (e) figuras: f2 tiene variante v4
 (`f2_fidelidad_v4.png`, CITABLE); f3_census_declinacion_v2 sigue VIGENTE bajo v4 — el censo de
 declinación es idéntico entre v2 y v4 (verificado 16/16 configs, cierre N9) y no se regenera.

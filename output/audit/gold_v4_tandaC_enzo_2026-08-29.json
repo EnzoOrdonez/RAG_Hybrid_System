@@ -1,0 +1,129 @@
+{
+  "formato": "gold_v4_tandaC",
+  "version": 1,
+  "exportado": "2026-08-29T19:51:05.033Z",
+  "mapeo": {
+    "C-01": "A-007",
+    "C-02": "A-008",
+    "C-03": "A-009",
+    "C-04": "A-023",
+    "C-05": "A-024",
+    "C-06": "A-027",
+    "C-07": "A-029",
+    "C-08": "A-036",
+    "C-09": "A-051",
+    "C-10": "A-056",
+    "C-11": "A-057",
+    "C-12": "A-058",
+    "C-13": "A-060",
+    "C-14": "A-063",
+    "C-15": "A-071",
+    "C-16": "A-108",
+    "C-17": "A-109",
+    "C-18": "A-130",
+    "C-19": "A-140",
+    "C-20": "A-144"
+  },
+  "juicios": {
+    "C-01": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T19:46:00.166Z"
+    },
+    "C-02": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:46:27.208Z"
+    },
+    "C-03": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T19:48:05.748Z"
+    },
+    "C-04": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T19:48:07.100Z"
+    },
+    "C-05": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:48:10.517Z"
+    },
+    "C-06": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:48:11.855Z"
+    },
+    "C-07": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T19:48:17.780Z"
+    },
+    "C-08": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:48:21.593Z"
+    },
+    "C-09": {
+      "juicio": "dudoso",
+      "comentario": "Claim incompleto: no compara los servicios, tiene referencia ambigua (\"It\") e incluye texto residual de scraping web.",
+      "ts": "2026-08-29T19:48:28.207Z"
+    },
+    "C-10": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:48:45.835Z"
+    },
+    "C-11": {
+      "juicio": "dudoso",
+      "comentario": "Respuesta a medias: omite la comparación entre servicios e incluye meta-lenguaje de contexto.",
+      "ts": "2026-08-29T19:48:51.094Z"
+    },
+    "C-12": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T19:48:58.353Z"
+    },
+    "C-13": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:50:04.676Z"
+    },
+    "C-14": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:50:06.070Z"
+    },
+    "C-15": {
+      "juicio": "incorrecto",
+      "comentario": "",
+      "ts": "2026-08-29T19:50:14.398Z"
+    },
+    "C-16": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:50:24.169Z"
+    },
+    "C-17": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:50:30.507Z"
+    },
+    "C-18": {
+      "juicio": "dudoso",
+      "comentario": "Frase truncada e incompleta; no constituye un claim fáctico ni responde a la pregunta de autoescalado.",
+      "ts": "2026-08-29T19:50:49.308Z"
+    },
+    "C-19": {
+      "juicio": "dudoso",
+      "comentario": "Presenta placeholders sin procesar ([CODE]) y no explica el procedimiento de despliegue.",
+      "ts": "2026-08-29T19:50:54.962Z"
+    },
+    "C-20": {
+      "juicio": "correcto",
+      "comentario": "",
+      "ts": "2026-08-29T19:51:03.331Z"
+    }
+  }
+}

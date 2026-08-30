@@ -1,0 +1,133 @@
+{
+ "operating_point": "vb_agree ent0.7 contr0.7",
+ "analyses": {
+  "confusion": {
+   "matrix_small_rows_base_cols": {
+    "supported": {
+     "supported": 1708,
+     "contradicted": 54,
+     "unsupported": 1968
+    },
+    "contradicted": {
+     "supported": 132,
+     "contradicted": 501,
+     "unsupported": 1063
+    },
+    "unsupported": {
+     "supported": 1118,
+     "contradicted": 401,
+     "unsupported": 7524
+    }
+   },
+   "n": 14469,
+   "agreement": 0.6727,
+   "kappa": 0.3232
+  },
+  "disagreement_by_slice": {
+   "pooled": [
+    0.3273,
+    14469
+   ],
+   "model:gemma4-e4b": [
+    0.3477,
+    1044
+   ],
+   "model:granite4.1-8b": [
+    0.3102,
+    5731
+   ],
+   "model:mistral-7b-instruct": [
+    0.3216,
+    4415
+   ],
+   "model:qwen3.5-9b": [
+    0.3583,
+    3279
+   ],
+   "scen:denso": [
+    0.3175,
+    4888
+   ],
+   "scen:hibrido": [
+    0.3358,
+    4991
+   ],
+   "scen:lexico": [
+    0.3285,
+    4590
+   ],
+   "len:<10": [
+    0.3751,
+    3330
+   ],
+   "len:10-20": [
+    0.3162,
+    6683
+   ],
+   "len:20-35": [
+    0.3052,
+    4001
+   ],
+   "len:>=35": [
+    0.3363,
+    455
+   ]
+  },
+  "threshold_fragility": {
+   "small": {
+    "near_ent_gate": 613,
+    "ent_flip_pm05": 440,
+    "ent_fragile_pct_of_all": 3.04,
+    "near_contr_gate": 403,
+    "near_contr_pct_of_all": 2.79
+   },
+   "base": {
+    "near_ent_gate": 218,
+    "ent_flip_pm05": 172,
+    "ent_fragile_pct_of_all": 1.19,
+    "near_contr_gate": 173,
+    "near_contr_pct_of_all": 1.2
+   }
+  },
+  "false_contradicted": {
+   "count": 128,
+   "by_model": {
+    "granite4.1-8b": 52,
+    "qwen3.5-9b": 43,
+    "gemma4-e4b": 6,
+    "mistral-7b-instruct": 27
+   },
+   "by_scenario": {
+    "lexico": 55,
+    "denso": 36,
+    "hibrido": 37
+   }
+  },
+  "aggregation_sensitivity": {
+   "small_labelchange_mean_top2_vs_max": 0.3227,
+   "small_labelchange_noisy_or_vs_max": 0.0549,
+   "downstream_small": {
+    "max": {
+     "sig_rag_pairs": 0,
+     "granite_d_z": -0.3094,
+     "granite_p_bh": 0.084936
+    },
+    "mean_top2": {
+     "sig_rag_pairs": 1,
+     "granite_d_z": -0.2862,
+     "granite_p_bh": 0.191724
+    },
+    "noisy_or": {
+     "sig_rag_pairs": 1,
+     "granite_d_z": -0.4215,
+     "granite_p_bh": 0.009353
+    }
+   }
+  }
+ },
+ "n_genuine_claims": 14469,
+ "gates": {
+  "A_G1": "A-G1: agregación mueve >15% etiquetas o el 0/12 → decisión Enzo del agregador",
+  "A_G2_contradicted_oversample_size": 128
+ }
+}

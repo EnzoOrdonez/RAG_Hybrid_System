@@ -1,0 +1,43 @@
+{
+ "experiment_id": "exp19b_anchored_selector",
+ "verifier": "base",
+ "variant": "vb_agree",
+ "thresholds": [
+  0.7,
+  0.7
+ ],
+ "baseline": "baseline_repro",
+ "n_queries_subset": 194,
+ "baseline_mean_faithfulness": 0.1421,
+ "baseline_n_scored": 190,
+ "bh_family": "1 arm-vs-baseline_repro contrasts (fdr_bh)",
+ "decline_rule": "None-faithfulness pairs dropped (decline-aware); vacuous kept as 1.0",
+ "bootstrap": {
+  "n_boot": 10000,
+  "seed": 42,
+  "ci": "percentile 95%"
+ },
+ "contrasts": [
+  {
+   "arm": "claim_selected",
+   "det_3x": true,
+   "n_paired": 186,
+   "n_common_qids": 194,
+   "n_decline_baseline": 4,
+   "n_decline_arm": 8,
+   "baseline_mean_ffn": 0.1421,
+   "arm_mean_ffn": 0.171,
+   "mean_diff_arm_minus_base": 0.0258,
+   "boot95_lo": -0.0039,
+   "boot95_hi": 0.0567,
+   "test": "wilcoxon_signed_rank",
+   "statistic": 2846.0,
+   "p_value": 0.09958,
+   "cohens_d_z": 0.1232,
+   "d_label": "negligible",
+   "p_bh": 0.09958,
+   "sig_bh": false
+  }
+ ],
+ "generated_by": "scripts/compute_tierA_arm_stats.py"
+}

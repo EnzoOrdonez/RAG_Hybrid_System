@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "descriptive_only": true,
+    "bh_family": null,
+    "scope": "agregación CPU de artefactos persistidos; sin recomputar verificadores"
+  },
+  "evidence_set_sensitivity": {
+    "labels": [
+      "correcto",
+      "incorrecto",
+      "dudoso"
+    ],
+    "n": 50,
+    "matrix": [
+      [
+        27,
+        1,
+        2
+      ],
+      [
+        9,
+        3,
+        3
+      ],
+      [
+        3,
+        0,
+        2
+      ]
+    ],
+    "flip_count": 18,
+    "flip_rate": 0.36,
+    "flip_wilson95": [
+      0.24138749651846741,
+      0.49858983123887307
+    ],
+    "binary_correct_rest": {
+      "a_correct_b_correct": 27,
+      "a_correct_b_other": 3,
+      "a_other_b_correct": 12,
+      "a_other_b_other": 8
+    },
+    "mcnemar_exact_p": 0.03515625,
+    "all_flips_towards_correct": 12,
+    "all_flips_other_direction": 6,
+    "all_flips_direction_binomial_p": 0.237884521484375
+  },
+  "intra_annotator": {
+    "labels": [
+      "correcto",
+      "incorrecto",
+      "dudoso"
+    ],
+    "n": 20,
+    "matrix": [
+      [
+        7,
+        3,
+        1
+      ],
+      [
+        1,
+        2,
+        1
+      ],
+      [
+        2,
+        1,
+        2
+      ]
+    ],
+    "agreement_count": 11,
+    "raw_agreement": 0.55,
+    "cohen_kappa": 0.26829268292682934,
+    "original_marginals": {
+      "correcto": 11,
+      "incorrecto": 4,
+      "dudoso": 5
+    },
+    "retest_marginals": {
+      "incorrecto": 6,
+      "correcto": 10,
+      "dudoso": 4
+    },
+    "agreement_wilson95": [
+      0.34208534245034233,
+      0.7418021417443759
+    ]
+  },
+  "taxonomy": {
+    "n": 40,
+    "population": 759,
+    "counts": {
+      "correcto": 22,
+      "incorrecto": 17,
+      "dudoso": 1
+    },
+    "ht_totals": {
+      "correcto": 402.1,
+      "incorrecto": 344.6,
+      "dudoso": 12.3
+    },
+    "ht_rates": {
+      "correcto": 0.5297760210803689,
+      "incorrecto": 0.4540184453227932,
+      "dudoso": 0.016205533596837945
+    },
+    "kish_n_eff": 27.409326424870464,
+    "interpretive_note": "Con n efectivo de Kish reducido, una tasa HT pequeña puede depender de muy pocos casos observados; se reportan también los conteos no ponderados."
+  },
+  "threshold_sensitivity": {
+    "n_queries": 188,
+    "n_claims": 2053,
+    "comparator": "best_over_pool <= tau",
+    "counts": {
+      "0.4": 636,
+      "0.5": 759,
+      "0.6": 880
+    }
+  },
+  "sources": {
+    "stage_a": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\output\\audit\\claim_audit_sample_v4.csv",
+    "stage_b": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\output\\audit\\claim_audit_sample_v4_stageB.csv",
+    "retest": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\output\\audit\\gold_v4_tandaC_enzo_2026-08-29.json",
+    "retest_derived": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\output\\audit\\gold_v4_tandaC_resultado.json",
+    "taxonomy": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\output\\audit\\unsupported_claims_sample_v2.csv",
+    "exp18_index": "C:\\Users\\enziz\\Projects\\hybrid-rag-system\\experiments\\results\\exp18_evidence_ceiling\\selection_scores_v2_index.json"
+  }
+}

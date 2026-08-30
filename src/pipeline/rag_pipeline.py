@@ -116,11 +116,24 @@ class RAGPipeline:
         # Index (shared across pipeline calls)
         self.hybrid_index = hybrid_index
 
-        # Query processor
+        # Query processor (retrieval-side; gated on expansion, unchanged)
         self.query_processor = None
         if config.query_expansion:
             from src.retrieval.query_processor import QueryProcessor
             self.query_processor = QueryProcessor()
+
+        # Prompt-routing processor: separate object on purpose. Query-type routing is a
+        # PROMPT concern, but historically it rode on the query_expansion flag, so with
+        # expansion off (N4/exp13) query() has typed everything as "default". Opt-in via
+        # config.prompt_routing so legacy configs (exp8) reproduce byte-for-byte.
+        self._routing_qp = None
+        if config.prompt_routing and not self.query_processor:
+            from src.retrieval.query_processor import QueryProcessor
+            self._routing_qp = QueryProcessor()
+
+        # Lazily-built provider maps for exp17 coverage balancing (cross_cloud only)
+        self._service_index = None
+        self._corpus_providers = None
 
         # Retriever
         self.retriever = self._build_retriever()
@@ -187,6 +200,36 @@ class RAGPipeline:
         short_name = model_map.get(self.config.reranker, self.config.reranker)
         return CrossEncoderReranker(model_name=short_name)
 
+    def _balance_providers(self, question, processed, reranked):
+        """exp17 provider-balanced re-selection of the reranked pool (cross_cloud only).
+
+        Falls back to the plain top-k whenever balancing cannot mean anything: fewer
+        than two resolvable providers, or no chunk map to read providers from. Returns
+        RetrievalResult objects in the balanced order, so everything downstream
+        (context building, citations, latency) is unchanged.
+        """
+        from src.retrieval.coverage_balancer import (
+            balance, build_service_index, corpus_providers, resolve_wanted_providers)
+
+        chunk_map = getattr(self.hybrid_index, "chunk_map", None) or {}
+        if not chunk_map:
+            return reranked[: self.config.final_top_k]
+        if self._service_index is None:
+            self._service_index = build_service_index(chunk_map)
+            self._corpus_providers = corpus_providers(chunk_map)
+
+        detected = getattr(processed, "detected_providers", None) or []
+        wanted = resolve_wanted_providers(question, detected,
+                                          self._service_index, self._corpus_providers)
+        if len(wanted) < 2:
+            return reranked[: self.config.final_top_k]
+
+        by_id = {r.chunk_id: r for r in reranked}
+        picked = balance([r.chunk_id for r in reranked],
+                         lambda cid: (chunk_map.get(cid) or {}).get("cloud_provider"),
+                         wanted, self.config.final_top_k)
+        return [by_id[c] for c in picked]
+
     # ============================================================
     # Main query method
     # ============================================================
@@ -202,8 +245,9 @@ class RAGPipeline:
         try:
             # 1. Query Processing
             with latency.measure("query_processing"):
-                if self.query_processor:
-                    processed = self.query_processor.process(question)
+                qp = self.query_processor or self._routing_qp
+                if qp:
+                    processed = qp.process(question)
                     query_type = processed.query_type
                 else:
                     processed = None
@@ -242,13 +286,27 @@ class RAGPipeline:
                 )
 
             # 3. Reranking
+            # When balancing, rerank the whole POOL instead of straight to final_top_k:
+            # there has to be something left to re-select from. The cross-encoder already
+            # scores every candidate and truncates afterwards, so this costs nothing extra.
+            balancing = (self.config.balance_cross_cloud_providers
+                         and query_type == "cross_cloud"
+                         and self.hybrid_index is not None)
+            rerank_k = self.config.retrieval_top_k if balancing else self.config.final_top_k
             with latency.measure("reranking"):
                 if self.reranker is not None:
                     reranked = self.reranker.rerank(
-                        question, candidates, top_k=self.config.final_top_k
+                        question, candidates, top_k=rerank_k
                     )
                 else:
-                    reranked = candidates[: self.config.final_top_k]
+                    reranked = candidates[:rerank_k]
+
+            if balancing:
+                reranked = self._balance_providers(question, processed, reranked)
+            else:
+                # no-op when not balancing (rerank_k == final_top_k); keeps the legacy
+                # path byte-identical
+                reranked = reranked[: self.config.final_top_k]
 
             # Get full chunk data for context building
             chunk_dicts = []
@@ -353,10 +411,12 @@ class RAGPipeline:
             raise ValueError("query_stream is for RAG configs (demo)")
 
         with latency.measure("query_processing"):
-            if self.query_processor:
-                processed = self.query_processor.process(question)
+            qp = self.query_processor or self._routing_qp
+            if qp:
+                processed = qp.process(question)
                 query_type = processed.query_type
             else:
+                processed = None
                 query_type = "default"
 
         yield ("stage", "retrieval")
@@ -381,12 +441,21 @@ class RAGPipeline:
             return
 
         yield ("stage", "reranking")
+        balancing = (self.config.balance_cross_cloud_providers
+                     and query_type == "cross_cloud"
+                     and self.hybrid_index is not None)
+        rerank_k = self.config.retrieval_top_k if balancing else self.config.final_top_k
         with latency.measure("reranking"):
             if self.reranker is not None:
                 reranked = self.reranker.rerank(
-                    question, candidates, top_k=self.config.final_top_k)
+                    question, candidates, top_k=rerank_k)
             else:
-                reranked = candidates[: self.config.final_top_k]
+                reranked = candidates[:rerank_k]
+
+        if balancing:
+            reranked = self._balance_providers(question, processed, reranked)
+        else:
+            reranked = reranked[: self.config.final_top_k]
 
         chunk_dicts = []
         for r in reranked:
