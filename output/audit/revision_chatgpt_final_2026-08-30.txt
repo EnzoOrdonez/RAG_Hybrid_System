@@ -1,0 +1,268 @@
+## Dictamen ejecutivo
+
+**Sí, con condiciones.** El reencuadre como auditoría de medición es adecuado y reduce mucho el overclaiming anterior. Sin embargo, quedan **tres riesgos serios**:
+
+1. El `p=0,0352` de McNemar no concuerda con “18 flips, 12 hacia correcto” bajo la interpretación natural.
+2. `n=200` parece mezclar **150 claims únicos + 50 reevaluaciones de claims ya incluidos**; por tanto, son 200 juicios claim–condición, no necesariamente 200 observaciones independientes.
+3. El efecto de exp19b (`+0,0451`) es menor que la variación individual media de la sonda (`|Δ|=0,0616`), por lo que solo puede presentarse como un desplazamiento promedio condicionado a una ejecución congelada.
+
+Si estas tres cosas quedan claras y corregidas, el paquete es presentable para LACCI como estudio de medición.
+
+# 1. Verificación final de overclaiming
+
+### [BLOQUEANTE] “McNemar p=0,0352 demuestra una mejora al mostrar cinco chunks”
+
+Con 18 discordancias, 12 hacia correcto y 6 en sentido contrario, el McNemar exacto binario natural da aproximadamente `p=0,238`; sin corrección de continuidad, aproximadamente `p=0,157`, no `0,0352`.
+
+El `0,0352` solo podría ser correcto si:
+
+- el McNemar se calculó sobre una dicotomización con otro número de pares discordantes; o
+- algunos de los 18 flips de tres clases no entraron en la tabla binaria.
+
+**Reformulación propuesta:**
+
+> De los 50 claims reevaluados, 18 cambiaron de etiqueta de tres clases y 12 cambios tuvieron dirección favorable. La prueba binaria de McNemar se calculó sobre la tabla correcto/no correcto mostrada en la Tabla X; se reporta únicamente como análisis descriptivo no incluido en la familia confirmatoria.
+
+**Acción ≤1 h:** publicar la tabla 2×2 exacta, indicar los dos conteos discordantes usados y recalcular o corregir `p`.
+
+---
+
+### [BLOQUEANTE] “La referencia humana contiene n=200 ítems independientes”
+
+Si B contiene los mismos 50 claims que ya aparecieron en A, hay:
+
+- 150 claims únicos;
+- 200 juicios claim–condición;
+- 50 claims observados dos veces con distinta evidencia.
+
+Llamarlos simplemente “200 ítems” oculta la dependencia y puede afectar el IC de κ si se calculó suponiendo independencia.
+
+**Reformulación propuesta:**
+
+> La referencia piloto comprende 200 juicios claim–condición sobre 150 claims únicos: 150 juicios iniciales con un chunk y una segunda evaluación de un subconjunto pareado de 50 claims con cinco chunks.
+
+**Acción ≤1 h:** corregir todos los `n=200` ambiguos y declarar si los IC globales agrupan por claim. Si no lo hacen, etiquetarlos como IC que no modelan la dependencia o retirar el IC global y privilegiar los resultados estratificados.
+
+---
+
+### [BLOQUEANTE] “El selector anclado produce una mejora reproducible de fidelidad”
+
+La sonda de ruido cambia la interpretación:
+
+- efecto medio observado: `+0,0451`;
+- variación absoluta media entre réplicas: `0,0616`;
+- p90: `0,2005`;
+- 23,3% supera incluso ±0,081.
+
+El efecto promedio y la variación absoluta individual no son estadísticos directamente comparables, así que no existe contradicción aritmética. Pero tampoco hay evidencia de que el beneficio sea estable por claim o entre regeneraciones.
+
+**Reformulación propuesta:**
+
+> En la ejecución congelada, el selector produjo un desplazamiento promedio de `+0,0451` en HHEM. La variabilidad observada entre réplicas fue mayor a nivel individual, por lo que el resultado no demuestra una mejora estable por claim ni robustez entre regeneraciones.
+
+**Acción ≤1 h:** mover la sonda de ruido junto al resultado de exp19b, no dejarla aislada en limitaciones.
+
+---
+
+### [BLOQUEANTE] “El pipeline es determinista porque obtuvo replay bit-idéntico 5/5”
+
+Esto choca semánticamente —aunque no necesariamente técnicamente— con las 140 réplicas variables. Probablemente el replay verifica una fase congelada, mientras que la regeneración conserva ruido.
+
+**Reformulación propuesta:**
+
+> La evaluación sobre artefactos congelados fue bit-idéntica en 5/5 replays. Esto garantiza repetibilidad condicional de la fase de evaluación, no determinismo de nuevas generaciones, para las cuales observamos variabilidad no despreciable.
+
+**Acción ≤1 h:** definir exactamente qué entra y qué no entra en la compuerta de replay.
+
+---
+
+### [RECOMENDABLE] “Los jueces LLM son mutuamente reproducibles”
+
+κ alta entre dos modelos demuestra **concordancia intermodelo bajo este prompt**, no reproducibilidad del instrumento en sentido estricto. Ambos pueden compartir sesgos, datos de entrenamiento y convenciones.
+
+**Reformulación propuesta:**
+
+> Los dos jueces LLM mostraron alta concordancia intermodelo bajo el protocolo fijado (`κ_bin=0,754`), aunque este acuerdo no establece corrección ni estabilidad ante otros prompts, modelos o ejecuciones.
+
+**Acción ≤1 h:** sustituir “reproducible” por “altamente concordante” salvo que existan repeticiones del mismo juez.
+
+---
+
+### [RECOMENDABLE] “Los LLM son sistemáticamente más estrictos debido a claims multi-parte, meta-claims y fragmentos”
+
+Las distribuciones sí respaldan que los LLM asignan muchas menos etiquetas correctas, especialmente en A. Pero atribuir la causa a esos tres fenómenos exige una codificación de errores, no solo ejemplos.
+
+**Reformulación propuesta:**
+
+> Los LLM aplicaron un criterio empíricamente más estricto, especialmente con evidencia limitada. La inspección cualitativa sugiere que parte de la discrepancia se concentra en claims multi-parte, meta-claims y fragmentos; esta atribución no fue evaluada cuantitativamente.
+
+**Acción ≤1 h:** añadir “inspección cualitativa sugiere” y dos ejemplos representativos.
+
+---
+
+### [RECOMENDABLE] “La evidencia completa hace converger los criterios”
+
+Cinco chunks son evidencia ampliada, no necesariamente completa. Además, la convergencia solo es interpretable como efecto de evidencia si A y B se comparan sobre los mismos 50 claims.
+
+**Reformulación propuesta:**
+
+> En el subconjunto pareado de 50 claims, ampliar la evidencia visible de uno a cinco chunks elevó el acuerdo humano–LLM de 49% a 72% y κ binaria de aproximadamente 0,10 a 0,32.
+
+**Acción ≤1 h:** usar “evidencia ampliada” y confirmar explícitamente que ambos extremos provienen de los mismos 50 claims.
+
+---
+
+### [RECOMENDABLE] “HHEM es el verificador más fiable”
+
+HHEM tiene la mayor κ observada, pero su IC es enorme: `[0,0137; 0,5712]`. El orden estable ante adjudicación no demuestra que la diferencia frente al ensemble sea estadísticamente distinta.
+
+**Reformulación propuesta:**
+
+> HHEM obtuvo la mayor concordancia puntual con la referencia humana (`κ_w=0,315`), con incertidumbre amplia. El ordenamiento descriptivo fue estable ante las variantes de adjudicación.
+
+**Acción ≤1 h:** evitar “significativamente mejor”, “más fiable” o “validado” salvo que exista un contraste pareado directo entre κ.
+
+---
+
+### [RECOMENDABLE] “La triangulación valida la referencia humana”
+
+Los nuevos resultados no validan al humano. Revelan que humano y LLM operacionalizan el criterio de manera distinta. Con retest humano de 55%, tampoco hay base para declarar que el humano sea inequívocamente correcto en los desacuerdos.
+
+**Reformulación propuesta:**
+
+> La triangulación caracteriza la dependencia del juicio respecto del evaluador; no convierte a ninguno de los tres jueces en ground truth.
+
+**Acción ≤1 h:** usar el triple juez como resultado de validez de constructo, no como validación convergente exitosa.
+
+---
+
+### [RECOMENDABLE] “El juez LLM no sustituye la referencia humana”
+
+La conclusión de no intercambiabilidad es válida; afirmar superioridad humana no lo es.
+
+**Reformulación propuesta:**
+
+> Bajo este protocolo, los jueces LLM no son intercambiables con la referencia humana: presentan distribuciones y criterios sistemáticamente distintos. Esto no implica que todos los desacuerdos sean errores del LLM.
+
+**Acción ≤1 h:** añadir la segunda oración.
+
+---
+
+### [OPCIONAL] “La auditoría del extractor valida la extracción”
+
+Retener 121/127 claims muestra una tasa de descarte de 4,7%, pero no mide cobertura: podrían existir claims omitidos que nunca aparecen entre los 127.
+
+**Reformulación propuesta:**
+
+> En 15 respuestas auditadas, 121/127 claims producidos fueron retenidos tras aplicar los criterios de inclusión. Esta auditoría evalúa precisión aparente, no exhaustividad de la extracción.
+
+**Acción ≤1 h:** indicar los motivos de los seis descartes.
+
+# 2. Cómo presentar el triple juez
+
+Debe presentarse como **fortaleza diagnóstica del estudio**, pero no como validación del gold. En un artículo sobre auditoría de medición, descubrir que dos jueces automáticos concuerdan entre sí y discrepan del humano es un resultado valioso: muestra que la reproducibilidad entre modelos no implica validez respecto del criterio humano. El riesgo aparece únicamente si se intenta concluir que el humano es correcto y los LLM están sesgados.
+
+Párrafo propuesto:
+
+Como análisis de dependencia respecto del juez, anotamos a ciegas los mismos juicios claim–condición con un humano y dos LLM. Los jueces automáticos mostraron alta concordancia entre sí (κ binaria=0,754; acuerdo=89,8%), pero concordancia baja con la referencia humana (κ binaria=0,171–0,204; acuerdo≈55%). Las distribuciones revelan que, con un solo chunk, ambos LLM aplicaron un criterio considerablemente más estricto; en el subconjunto pareado evaluado con cinco chunks, el acuerdo humano–LLM aumentó de 49% a 72% y κ de aproximadamente 0,10 a 0,32. Interpretamos estos resultados como evidencia de que la evaluación depende tanto del juez como de la evidencia visible: la concordancia intermodelo no establece corrección y los LLM no son intercambiables con la referencia humana. Dada también la limitada estabilidad intraanotador, tratamos las etiquetas humanas como referencia piloto y no como ground truth definitivo.
+
+# 3. Coherencia interna de las cifras
+
+### [BLOQUEANTE] McNemar no es reproducible a partir de los conteos dados
+
+`18 flips = 12 favorables + 6 restantes` es aritméticamente coherente. `p=0,0352` no se deriva de esos dos conteos mediante McNemar binario estándar. Se necesita la tabla exacta.
+
+### [BLOQUEANTE] “200 ítems” versus “mismos 50 claims”
+
+Las distribuciones suman correctamente:
+
+- etapa A: 150 por juez;
+- etapa B: 50 por juez;
+- total: 200 juicios por juez.
+
+Pero, si B repite 50 claims de A, el total no representa 200 claims únicos. Esto debe reflejarse en denominadores, IC y descripción del muestreo.
+
+### [BLOQUEANTE] Pre-adjudicación principal versus cifras encabezadas como post-adjudicación
+
+El encuadre declara que la versión principal es preadjudicación, pero la cifra principal suministrada para HHEM (`κ=0,315`) está explícitamente marcada como post-adjudicación.
+
+La coherencia exige:
+
+- tabla principal: preadjudicación;
+- columna o tabla secundaria: reconciliada;
+- sensibilidad: exclusión de discordantes/otras variantes.
+
+No basta con decir que `Δκ≤0,012` si el número destacado sigue siendo post-adjudicación.
+
+### [RECOMENDABLE] Porcentajes globales incompatibles con incrementos de n=200
+
+Con 200 observaciones completas y pesos iguales, el acuerdo solo puede variar en incrementos de 0,5 puntos porcentuales. Por ello:
+
+- 54,5% es posible;
+- 89,8% y 54,8% no corresponden a conteos enteros sobre 200.
+
+Probablemente son estimaciones ponderadas, promedios no redondeados provenientes de otro denominador o resultados sobre casos válidos distintos.
+
+Debe declararse uno de estos tres:
+
+- acuerdo ponderado por diseño;
+- denominador efectivo después de faltantes;
+- conteo bruto exacto y porcentaje correspondiente.
+
+### [RECOMENDABLE] κ global mezcla dos condiciones de evidencia
+
+La κ global del triple juez combina 150 observaciones A y 50 B. Como el acuerdo cambia mucho entre condiciones, el valor global depende de la proporción arbitraria 3:1 entre A y B.
+
+Debe presentarse primero κ por condición; la global puede quedar como resumen secundario.
+
+### [RECOMENDABLE] IC de HHEM
+
+`κ=0,315 [0,0137; 0,5712]` es internamente posible, pero:
+
+- el IC es muy amplio;
+- si no agrupa los 50 claims repetidos, puede ser demasiado estrecho;
+- si es un IC puntual sin ajuste BH, no debe usarse para declarar significación dentro de la familia corregida.
+
+### [RECOMENDABLE] Replay y sonda de ruido
+
+No se contradicen si miden fases diferentes, pero parecen contradecirse sin explicación:
+
+- replay: repetición sobre artefactos congelados;
+- sonda: variación entre nuevas ejecuciones o inferencias.
+
+El manuscrito debe nombrar esas fases.
+
+### [OPCIONAL] Cifras que sí son coherentes
+
+- `636 < 759 < 880` al aumentar τ de 0,4 a 0,6: comportamiento monotónico esperado.
+- 18/50 = 36,0%; Wilson `[24,1%; 49,9%]`: coherente.
+- 11/20 = 55,0%; Wilson `[34,2%; 74,2%]`: coherente.
+- 127 brutos → 121 retenidos: retención de 95,3%.
+- κ binaria superior a κ de tres clases entre Kimi y Codex es esperable al colapsar la clase dudosa.
+- Mayor acuerdo humano–LLM en B es compatible con las distribuciones: las tasas de “correcto” convergen fuertemente al ampliar la evidencia.
+
+# 4. Veredicto final
+
+## Sí, con condiciones
+
+No exigiría nuevos experimentos, GPU ni nuevas anotaciones. Exigiría únicamente estas correcciones antes de entregar:
+
+1. **[BLOQUEANTE]** Publicar la tabla 2×2 que produce McNemar y corregir `p=0,0352` si corresponde.
+2. **[BLOQUEANTE]** Distinguir en todo el manuscrito `150 claims únicos` de `200 juicios claim–condición`, y advertir la dependencia de los 50 repetidos.
+3. **[BLOQUEANTE]** Hacer que la versión preadjudicación sea realmente la principal; dejar `κ=0,315` reconciliada como sensibilidad si esa cifra es post-adjudicación.
+4. **[BLOQUEANTE]** Reescribir exp19b como efecto promedio condicionado a la ejecución congelada e integrar inmediatamente la sonda de ruido.
+5. **[RECOMENDABLE]** Presentar el triple juez como evidencia de dependencia respecto del juez, no como validación del humano ni como reproducibilidad general de los LLM.
+6. **[RECOMENDABLE]** Explicar los porcentajes globales 89,8% y 54,8%: ponderación, faltantes o denominador real.
+7. **[RECOMENDABLE]** Sustituir “evidencia completa” por “evidencia ampliada” y confirmar que el cambio 49%→72% usa exactamente los mismos 50 claims.
+
+Con esas correcciones, la historia es coherente:
+
+> La medición claim-level de fidelidad es sensible al umbral, al conjunto de evidencia, al juez y al ruido de ejecución; la concordancia entre jueces automáticos no garantiza concordancia con una referencia humana, que a su vez presenta estabilidad limitada.
+
+Ese es un resultado defendible y relevante para un track de evaluación de LLM/RAG.
+
+# 5. Si solo pudiera exigir un cambio
+
+**[BLOQUEANTE] Exigiría reparar y hacer explícita toda la contabilidad de los 50 claims pareados: 150 claims únicos, 200 juicios claim–condición, tabla de transiciones y McNemar recalculado.**
+
+¿Por qué este y no otro? Porque una limitación humana o una sonda ruidosa pueden defenderse si están declaradas. Una prueba cuyo valor p no se deriva de los conteos publicados, junto con un `n=200` que puede ocultar observaciones repetidas, hace que el revisor deje de confiar en toda la capa estadística. Es además corregible con datos ya existentes en menos de una hora.

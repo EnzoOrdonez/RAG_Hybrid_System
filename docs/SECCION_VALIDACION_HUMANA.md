@@ -34,6 +34,12 @@ usa pesos Horvitz–Thompson; se informa el n efectivo de Kish para hacer visibl
 de precisión por pesos desiguales. El protocolo está en
 `docs/GUIA_ANOTACION_GOLD_V4.md`.
 
+Nota de unidad de análisis: A y B no son 200 observaciones independientes. Son 200
+juicios claim–condición sobre **150 claims únicos**: 150 juicios iniciales con un chunk
+y una segunda evaluación de un subconjunto pareado de 50 claims con cinco chunks. Los
+intervalos globales que agregan A y B no modelan esa dependencia; se priorizan los
+resultados estratificados por condición.
+
 ## Concordancia con la referencia piloto: resultado principal preadjudicación
 
 En A hubo 132 juicios binarios utilizables; los 18 `dudoso` se excluyeron de κ según la
@@ -63,11 +69,21 @@ independiente del verificador. El TOST ubicó la diferencia dentro de la banda
 preespecificada ±0,081 (p=0,03135; IC90 [0,0134; 0,0768]); esa banda admite efectos
 mayores que el observado y no está validada externamente como umbral de irrelevancia.
 
+La sonda de ruido de runtime acota además la estabilidad del efecto: al re-puntuar 140
+réplicas de exp14 con HHEM, la variación absoluta media entre réplicas fue 0,0616
+(p90=0,2005; 23,3 % de los pares superó la banda ±0,081 dentro del mismo runtime). El
+desplazamiento +0,0451 es, por tanto, un efecto promedio condicionado a la ejecución
+congelada: no demuestra una mejora estable por claim ni robustez entre regeneraciones.
+
 ## Sensibilidad al conjunto de evidencia
 
-Al ampliar de uno a cinco chunks, 16 de 50 etiquetas cambiaron (32,0%; IC95 Wilson
-[20,8%; 45,8%]). Esto demuestra sensibilidad al contexto presentado; no identifica por
-sí solo sesgo causal ni establece que A sea una cota inferior formal.
+La etapa B reevaluó en ciego un subconjunto pareado de 50 claims de A —los mismos 50
+claims en ambas condiciones—, esta vez con los cinco chunks de la fila (evidencia
+ampliada, no necesariamente completa). Se reportan ambas variantes de etiquetas con sus
+tablas exactas, para que cada p sea derivable de sus conteos.
+
+**Variante preadjudicación:** 16 de 50 etiquetas cambiaron (32,0 %; IC95 Wilson
+[20,8 %; 45,8 %]).
 
 | Juicio en A \ juicio en B | correcto | incorrecto | dudoso |
 |---|---:|---:|---:|
@@ -76,9 +92,29 @@ sí solo sesgo causal ni establece que A sea una cota inferior formal.
 | dudoso | 2 | 0 | 3 |
 
 En la reducción `correcto`/resto hubo 11 transiciones hacia `correcto` y 3 en sentido
-contrario. McNemar exacto dio p=0,057373. Entre todos los 16 flips, 11 fueron hacia
-`correcto` y 5 tuvieron otra dirección (binomial exacta p=0,210114); este segundo resumen
-no es McNemar. Ambos cálculos son descriptivos y están fuera de las familias BH.
+contrario (McNemar exacto p=0,057373). Como resumen direccional de los 16 flips, 11
+fueron hacia `correcto` y 5 tuvieron otra dirección (binomial exacta p=0,210114); este
+segundo resumen no es McNemar.
+
+**Variante reconciliada (post-adjudicación):** 18 de 50 etiquetas cambiaron (36,0 %;
+IC95 Wilson [24,1 %; 49,9 %]).
+
+| Juicio en A \ juicio en B | correcto | incorrecto | dudoso |
+|---|---:|---:|---:|
+| correcto | 27 | 1 | 2 |
+| incorrecto | 9 | 3 | 3 |
+| dudoso | 3 | 0 | 2 |
+
+En la reducción `correcto`/resto la tabla pareada es 27/3/12/8: 12 transiciones hacia
+`correcto` y 3 en sentido contrario (McNemar exacto p=0,035156; de los 18 flips de tres
+clases, 3 fueron intercambios `incorrecto`↔`dudoso` que no entran en la tabla binaria).
+Como resumen direccional de los 18 flips, 12 fueron hacia `correcto` y 6 tuvieron otra
+dirección (binomial exacta p=0,237885); este segundo resumen no es McNemar. Tablas y
+código: `output/audit/descriptive_cis.md` y `scripts/compute_descriptive_cis.py`.
+
+Esto demuestra sensibilidad a la evidencia visible; no identifica por sí solo sesgo
+causal ni establece que A sea una cota inferior formal. Todas las pruebas de esta
+sección son descriptivas y están fuera de las familias BH.
 
 ## Taxonomía de `unsupported@0.5`
 
@@ -95,10 +131,25 @@ Los estratos (`a_synthesis`, `b_parametric`, `c_unattributed` y
 
 La taxonomía tuvo tres jueces ciegos. La concordancia pareada fue κ=0,571 entre Enzo y
 Codex, κ=0,422 entre Enzo y Kimi y κ=0,712 entre Kimi y Codex; hubo mayoría de dos de tres
-en 39/40. Es estabilidad local de mayoría, no validación externa. En A y B los jueces LLM
-sin calibración específica mostraron baja concordancia con la referencia piloto
-(κ=0,055 y κ=0,204, respectivamente), por lo que no ofrecieron un reemplazo fiable en
-estas muestras.
+en 39/40. Es estabilidad local de mayoría, no validación externa.
+
+Como análisis de dependencia respecto del juez, los mismos 200 juicios claim–condición
+fueron anotados a ciegas por el humano y dos LLM independientes (protocolo y cifras
+completas en `output/audit/triple_judge_agreement.md`). Los jueces automáticos mostraron
+alta concordancia intermodelo bajo el protocolo fijado (κ binaria=0,754; acuerdo=89,8 %),
+que no establece corrección ni estabilidad ante otros prompts, modelos o ejecuciones. Su
+concordancia con la referencia piloto fue baja (κ binaria=0,171–0,204; acuerdo≈55 %): con
+un solo chunk ambos LLM aplicaron un criterio considerablemente más estricto (etapa A:
+13–18 % de `correcto` frente a 59 % humano). La inspección cualitativa sugiere que parte
+de la discrepancia se concentra en claims multi-parte parcialmente respaldados,
+meta-claims autorreferentes y fragmentos de encabezado/enlace; esta atribución no fue
+evaluada cuantitativamente. En el subconjunto pareado con evidencia ampliada, el acuerdo
+humano–LLM subió de 49 % a 72 % (κ binaria ≈0,10 → 0,32). Bajo este protocolo, los jueces
+LLM no son intercambiables con la referencia humana; esto no implica que todos los
+desacuerdos sean errores del LLM ni valida al humano como ground truth (recuérdese la
+estabilidad intra-anotador de 55 %). La triangulación caracteriza la dependencia del
+juicio respecto del evaluador y de la evidencia visible; no convierte a ninguno de los
+tres jueces en verdad de referencia.
 
 ## Confiabilidad intra-anotador y adjudicación
 

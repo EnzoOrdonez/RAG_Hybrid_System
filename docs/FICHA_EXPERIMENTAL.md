@@ -102,8 +102,13 @@ El repositorio aporta `requirements-lock.txt` generado con Python 3.14, CI sin G
 servicios, configuración y seeds, manifiestos con revisión y SHA-256 de los modelos
 Transformers (`output/audit/summer_models_manifest_2026-07-22.json` y
 `output/audit/verifier_models_manifest_2026-07-23.json`) y una compuerta de replay que
-exige 5/5 respuestas bit-idénticas antes de regenerar exp19b. Esto respalda repetibilidad
-computacional en el entorno congelado.
+exige 5/5 respuestas bit-idénticas antes de regenerar exp19b. La compuerta cubre
+únicamente la regeneración y evaluación sobre artefactos archivados dentro del mismo
+estado del runtime (replay de cinco respuestas archivadas contra cinco regeneraciones
+directas); no cubre ejecuciones nuevas entre estados distintos del runtime, para las
+cuales la sonda de ruido observó variabilidad no despreciable (|Δ| media 0,0616 entre
+réplicas). Esto respalda repetibilidad condicional en el entorno congelado, no
+determinismo general de nuevas generaciones.
 
 No demuestra por sí solo reproducibilidad externa. Git no contiene archivos bajo
 `data/raw`, `data/processed`, `data/chunks` ni `data/indices`; solo persiste la estadística

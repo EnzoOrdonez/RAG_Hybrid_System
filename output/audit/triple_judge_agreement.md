@@ -7,8 +7,11 @@
 
 ## Diseño
 
-- **Ítems**: los 200 del gold v4 — etapa A (150 claims, 1 chunk) y etapa B
-  (50 claims, los 5 chunks completos). Mismos ítems para los tres jueces.
+- **Ítems**: 200 juicios claim–condición sobre **150 claims únicos** del gold v4 —
+  etapa A (150 claims, 1 chunk) y etapa B (un subconjunto pareado de 50 de esos
+  claims, con los 5 chunks completos). La κ global mezcla dos condiciones de
+  evidencia; por eso se presentan primero los resultados por condición y la global
+  queda como resumen secundario.
 - **Jueces**:
   - *Humano* (Enzo): `claim_audit_sample_v4.csv` / `claim_audit_sample_v4_stageB.csv`
     (columna `juicio_humano`, versión fusionada post-adjudicación).
@@ -60,24 +63,26 @@
 
 ## Lectura
 
-1. **Los dos jueces LLM son mutuamente reproducibles pero sistemáticamente más
-   estrictos que el humano.** Kimi–Codex alcanzan κ₂ = 0,754 (casi 90 % de
-   acuerdo binario) sin haberse visto; ambos marcan como `incorrecto` la gran
-   mayoría de lo que el humano acepta (etapa A: humano 59 % correcto vs
-   LLMs 13–18 %). El sesgo se concentra en claims multi-parte parcialmente
-   respaldados, meta-claims autorreferentes y fragmentos de encabezado/enlace,
-   que los LLM rechazan por regla y el humano a menudo acepta por contexto.
-2. **La evidencia completa acerca al humano y a los LLM.** En etapa B (5 chunks)
-   el acuerdo binario humano–LLM sube de ~49 % a ~72 % y κ₂ humano–Kimi pasa de
-   0,102 a 0,322. Es consistente con la sensibilidad A→B ya reportada
-   (18/50 flips, 12 hacia `correcto`): con un solo chunk se subestima el soporte;
-   con el contexto completo los criterios convergen.
-3. **Consecuencia para el estudio**: el juicio LLM a nivel de afirmación es
-   *reproducible* (dos implementaciones independientes coinciden) pero *sesgado*
-   hacia el rechazo; no puede sustituir a la referencia humana. Esto refuerza el
-   encuadre de la entrada 28c (la referencia humana piloto es insustituible) y
-   añade una advertencia metodológica citable: usar LLM-as-judge para soporte
-   claim-a-chunk inflaría la tasa de `unsupported` respecto a un anotador humano.
+1. **Los dos jueces LLM son altamente concordantes entre sí bajo el protocolo fijado,
+   pero sistemáticamente más estrictos que el humano.** Kimi–Codex alcanzan κ₂ = 0,754
+   (89,8 % de acuerdo binario) sin haberse visto; esta concordancia intermodelo no
+   establece corrección ni estabilidad ante otros prompts, modelos o ejecuciones. Ambos
+   marcan como `incorrecto` la gran mayoría de lo que el humano acepta (etapa A: humano
+   59 % correcto vs LLMs 13–18 %). La inspección cualitativa sugiere que parte de la
+   discrepancia se concentra en claims multi-parte parcialmente respaldados, meta-claims
+   autorreferentes y fragmentos de encabezado/enlace; esta atribución no fue evaluada
+   cuantitativamente.
+2. **La evidencia ampliada acerca al humano y a los LLM.** En el subconjunto pareado de
+   50 claims (cinco chunks), el acuerdo binario humano–LLM sube de ~49 % a ~72 % y κ₂
+   humano–Kimi pasa de 0,102 a 0,322. Es consistente con la sensibilidad A→B ya
+   reportada (18/50 flips, 12 hacia `correcto`): con un solo chunk se subestima el
+   soporte; al ampliar la evidencia visible los criterios convergen.
+3. **Consecuencia para el estudio**: bajo este protocolo, los jueces LLM no son
+   intercambiables con la referencia humana —presentan distribuciones y criterios
+   sistemáticamente distintos—; esto no implica que todos los desacuerdos sean errores
+   del LLM ni convierte al humano en ground truth (su estabilidad intra-anotador es
+   55 %). La triangulación es evidencia de validez de constructo: la evaluación depende
+   tanto del juez como de la evidencia visible.
 4. **Nota de integridad**: los juicios LLM quedaron fijados *antes* de conocer
    cualquier juicio humano (cegamiento verificado por construcción: los archivos
    ciegos no contienen `juicio_humano`). Las divergencias no se "corrigieron"

@@ -369,3 +369,29 @@ Commit sugerido:
   git add -A
   git commit -m "data(gold): referencia humana completa y adjudicada - triple juez, sensibilidad, revision externa, cierre documental"
   git push
+
+
+---
+
+## 11.8 Cierre pre-entrega LACCI (2026-08-30, [Kimi Work])
+
+**Estado:** todo cerrado salvo el commit+push final de Enzo y el probe T1/T2 (opcional, GPU).
+
+1. **Gold humano completo y adjudicado** (240/240: A=150, B=50 pareados, taxonomía=40);
+   sensibilidad de 3 variantes con ordenamiento estable (Δκ ≤ 0,012).
+2. **Triple juez ciego completado** (humano / Codex / Kimi, cegamiento mutuo total):
+   Kimi–Codex κ₂=0,754 (89,8 %); humano–LLM κ₂=0,171–0,204 (~55 %); convergencia con
+   evidencia ampliada (49 %→72 %). Reporte: `output/audit/triple_judge_agreement.md`.
+3. **Revisión externa final de ChatGPT work** (`output/audit/revision_chatgpt_final_2026-08-30.txt`):
+   veredicto "sí, con condiciones". Sus 4 bloqueantes se resolvieron con correcciones
+   documentales el mismo día (ledger 28f): McNemar p=0,0352 verificado correcto
+   (b=12, c=3; tabla 2×2 publicada en SECCION y descriptive_cis); unidad de análisis
+   declarada (200 juicios claim–condición / 150 claims únicos); exp19b como efecto
+   promedio condicionado + sonda de ruido adyacente; triple juez reformulado como
+   dependencia del juez, sin "reproducibilidad" ni superioridad humana.
+4. **Archivos tocados hoy:** `docs/SECCION_VALIDACION_HUMANA.md`,
+   `docs/FICHA_EXPERIMENTAL.md`, `output/audit/triple_judge_agreement.md`,
+   `output/audit/extractor_audit_2026-08-29.md`, `paper/summer_ablation_log.md` (28e, 28f),
+   `output/audit/revision_chatgpt_final_2026-08-30.txt` (nuevo).
+5. **Pendiente para Enzo:** commit+push de esos archivos; si sobra tiempo GPU, probe T1/T2
+   (~40 min); si no, la banda ±0,081 ya está defendida con T0.

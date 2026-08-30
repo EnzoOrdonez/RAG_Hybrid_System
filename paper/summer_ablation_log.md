@@ -2099,3 +2099,51 @@ con las etiquetas finales.*
 *Fin de la sección de [Kimi Work] 2026-08-30. Verificación: cálculo por
 emparejamiento (query_id, claim), solo pares con juicio válido en ambos lados;
 distribuciones por juez y etapa en el reporte enlazado.*
+
+
+---
+
+## Entrada 28f — Revisión externa final (ChatGPT work) y resolución de sus bloqueantes (2026-08-30)
+
+> Sección de **[Kimi Work]** — 2026-08-30. Dictamen archivado en
+> `output/audit/revision_chatgpt_final_2026-08-30.txt`. Veredicto externo: **sí, con
+> condiciones** — sin nuevos experimentos ni anotaciones; solo correcciones de
+> presentación, todas ejecutadas hoy.
+
+### Bloqueantes del dictamen y su resolución
+
+1. **McNemar p=0,0352 no derivable de 12/6.** Falsa alarma aritmética, documentación
+   real: recalculé desde los CSV del gold — la tabla binaria es b=12 (no-correcto→correcto),
+   c=3 (correcto→no-correcto); 3 de los 18 flips de tres clases son intercambios
+   `incorrecto`↔`dudoso` que no entran en la tabla binaria. p=0,035156 es **correcto**.
+   La tabla 2×2 exacta ya estaba en `output/audit/descriptive_cis.md`; se añadió también
+   a `docs/SECCION_VALIDACION_HUMANA.md`, con ambas variantes (preadjudicación 16 flips /
+   reconciliada 18 flips) etiquetadas por separado.
+2. **n=200 oculta dependencia.** Correcto y ya subsanado: la sección declara ahora
+   "200 juicios claim–condición sobre 150 claims únicos", que los IC globales no modelan
+   la dependencia y que se priorizan los resultados estratificados.
+3. **Preadjudicación principal vs cifra destacada post.** Ya estaba resuelto: la tabla
+   principal de la sección es preadjudicación (κ HHEM 0,3033) y la reconciliada
+   (0,3150) figura como análisis secundario.
+4. **exp19b como efecto estable.** Redactado como efecto promedio condicionado a la
+   ejecución congelada, con la sonda de ruido (|Δ| media 0,0616, p90 0,2005, 23,3 % > ±0,081)
+   movida junto al resultado. La compuerta de replay quedó delimitada en
+   `docs/FICHA_EXPERIMENTAL.md` (cubre regeneración/evaluación sobre artefactos archivados
+   en el mismo estado del runtime; no determinismo general de nuevas generaciones).
+
+### Recomendables adoptados
+
+- Triple juez reformulado como **dependencia respecto del juez** (validez de constructo),
+  no como validación del humano ni "reproducibilidad" de los LLM: "alta concordancia
+  intermodelo bajo el protocolo fijado", "inspección cualitativa sugiere" para la
+  atribución del sesgo, "evidencia ampliada" en vez de "completa", y "no intercambiables"
+  sin afirmar superioridad humana (retest 55 % lo prohíbe). Aplicado en
+  `docs/SECCION_VALIDACION_HUMANA.md` y `output/audit/triple_judge_agreement.md`.
+- Extractor: se explicitó que 121/127 (95,3 %) es precisión aparente, no exhaustividad
+  (la auditoría ya medía cobertura: 16 unidades omitidas en 6/15 respuestas).
+- Porcentajes globales con denominador declarado (n=197 por claves duplicadas en el
+  emparejamiento) y κ global relegada a resumen secundario tras las κ por condición.
+
+*Fin de la sección de [Kimi Work] 2026-08-30. Verificación: McNemar recalculado desde
+`claim_audit_sample_v4.csv` y `claim_audit_sample_v4_stageB.csv` (tabla 27/3/12/8,
+p=0,035156); cambios solo documentales, sin tocar código ni datos.*

@@ -56,6 +56,12 @@ Las categorías no son excluyentes: un claim puede ser a la vez un merge y meta-
 | q181 | 4 | 0 | 4 | 0 | 3 | 1 |
 | **Total** | **127** | **6** | **121** | **16** | **54** | **29** |
 
+La retención de 121/127 (95,3 %) mide **precisión aparente** del extractor —lo retenido
+sí proviene de la respuesta—, no su exhaustividad: la cobertura se evalúa aparte en la
+sección siguiente (16 unidades omitidas en 6/15 respuestas). Los seis descartes fueron
+claims marcados con la bandera `artifact` (encabezados, fuentes o meta-texto), según el
+censo por fila de la tabla.
+
 ## Cobertura
 
 Se identificaron 16 unidades literales omitidas en 6/15 respuestas. Doce fueron ejemplos
