@@ -1,42 +1,44 @@
-# Validación con gold humano
+# Validación con referencia humana piloto
 
-> Borrador para adaptar al informe. Los resultados de esta sección provienen de las
-> entradas 28 y 28b de `paper/summer_ablation_log.md`; la entrada 27 documenta la
-> validación metodológica previa de exp19b. La sensibilidad post-adjudicación permanece
-> abierta mientras no exista el JSON final de adjudicación.
+> Borrador para adaptar al informe. La versión previa a la adjudicación es el resultado
+> principal. Las cifras proceden de las entradas 27, 28, 28b y 28c de
+> `paper/summer_ablation_log.md` y de los artefactos de auditoría citados al final.
 
-## Diseño del gold
+## Qué se midió
 
-La evaluación humana reunió 240 juicios en tres muestras complementarias. La etapa A
-contuvo 150 claims estratificados para arbitrar los verificadores automáticos a partir del
-mejor fragmento recuperado. La etapa B volvió a presentar 50 de esos claims con los cinco
-fragmentos disponibles, lo que permitió medir cuánto cambia el juicio al ampliar la
-evidencia. Una tercera muestra incluyó 40 claims no soportados de exp18 para calibrar su
-taxonomía y extrapolarla al universo de 759 claims.
+Esta evaluación separa tres variables que no son intercambiables:
 
-El muestreo de la etapa A sobrerrepresentó deliberadamente casos difíciles; por ello, los
-resultados poblacionales se estimaron con pesos de diseño de Horvitz–Thompson. También se
-reportó el estrato `random_anchor` sin ponderación como lectura menos dependiente del
-diseño. La muestra taxonómica se estratificó de forma análoga y conservó por fila el
-tamaño del estrato y su probabilidad de inclusión. En ambos análisis se informó el tamaño
-efectivo de Kish para hacer visible la pérdida de precisión causada por pesos desiguales.
+- `unsupported@τ`: decisión automática; el mejor score de soporte entre los chunks del
+  pool es menor o igual que el umbral τ.
+- `human-judged unsupported`: juicio humano sobre si la evidencia visible respalda el
+  claim.
+- `externally correct` / `externally incorrect`: juicio de corrección factual con
+  conocimiento externo, sin inferir de dónde obtuvo el generador la información.
 
-Los materiales se anotaron en interfaces HTML offline, con vocabulario controlado y
-comentarios obligatorios en los casos dudosos. El proceso mantuvo separados los juicios
-humanos y los de los jueces LLM durante la anotación. Los datos y procedimientos están
-documentados en `docs/GUIA_ANOTACION_GOLD_V4.md`, los CSV de
-`output/audit/claim_audit_sample_v4*.csv`, el analizador
-`scripts/analyze_gold_v4.py` y el reporte
-`output/audit/taxonomy_calibration_report.md`. El gold completo fue fusionado desde las
-exportaciones del anotador con `scripts/merge_gold_v4.py`, dejando respaldo previo en
-`output/audit/backups_pre_merge_2026-08-29/`.
+Por tanto, los 759 de 2053 claims de exp18 son `unsupported@0.5` según el verificador, no
+759 falsedades ni 759 alucinaciones verificadas por una persona.
 
-## Concordancia entre verificadores y gold humano
+La referencia piloto consta de tres subconjuntos con propósitos y condiciones distintas;
+no se suman como si fueran una muestra homogénea:
 
-En la etapa A hubo 132 juicios binarios utilizables; 18 casos `dudoso` se excluyeron de
-κ conforme a la regla declarada. La tabla presenta κ de Cohen ponderada por el diseño y,
-en la última columna, κ sin pesos dentro de `random_anchor`. El tamaño efectivo de Kish
-fue 38,8 sobre un universo ponderado de 14 409 claims.
+| Subconjunto | Propósito | Población objetivo | Evidencia visible | Muestreo | n |
+|---|---|---:|---|---|---:|
+| A | Concordancia entre verificadores y juicio humano de soporte | 14 409 claims del pool de arbitraje | Mejor chunk | Estratificado por celdas de desacuerdo y ancla aleatoria | 150 (132 binarios usados) |
+| B | Sensibilidad del juicio al conjunto de evidencia | Los 150 claims de A | Cinco chunks de la misma fila | Submuestra pareada de A | 50 |
+| Taxonomía exp18 | Corrección factual de casos `unsupported@0.5` | 759 claims | Pregunta y claim, sin chunks | 10 por cada uno de cuatro estratos candidatos | 40 |
+
+La anotación se hizo mediante interfaces HTML offline, con vocabulario controlado y
+comentario obligatorio en los casos dudosos. Los juicios humanos y los de los jueces LLM
+permanecieron cegados entre sí durante la anotación. El muestreo de A y de la taxonomía
+usa pesos Horvitz–Thompson; se informa el n efectivo de Kish para hacer visible la pérdida
+de precisión por pesos desiguales. El protocolo está en
+`docs/GUIA_ANOTACION_GOLD_V4.md`.
+
+## Concordancia con la referencia piloto: resultado principal preadjudicación
+
+En A hubo 132 juicios binarios utilizables; los 18 `dudoso` se excluyeron de κ según la
+regla declarada. El n efectivo de Kish fue 38,8. κ cuantifica concordancia con esta
+referencia bajo este diseño; no estima el nivel absoluto o «real» de fidelidad.
 
 | Verificador | κ ponderada | IC95 | p ajustada BH | κ `random_anchor` |
 |---|---:|---:|---:|---:|
@@ -46,96 +48,111 @@ fue 38,8 sobre un universo ponderado de 14 409 claims.
 | NLI base | 0,0829 | [-0,1961; 0,3418] | 0,6670 | 0,0919 |
 | E1 (media NLI) | -0,0278 | [-0,2866; 0,1936] | 0,8640 | -0,0662 |
 
-HHEM fue el candidato más alineado con el gold, pero ninguna κ alcanzó significación
-después del ajuste BH. Por tanto, estos datos respaldan una ordenación —HHEM por encima
-de los NLI—, no una diferencia confirmatoria entre instrumentos. La lectura sustantiva
-es que la fidelidad real está más cerca de 0,55 que de 0,30: los verificadores NLI
-subestimaron el soporte. La incertidumbre es amplia y el tamaño efectivo bajo, de modo
-que no debe atribuirse a estas κ una precisión que el diseño no ofrece.
+HHEM mostró mayor concordancia puntual que los NLI, pero ninguna κ fue distinta de cero
+tras el ajuste BH y los intervalos son amplios. El orden de los candidatos es informativo
+en esta muestra; no identifica una fidelidad verdadera de 0,55 frente a 0,30 ni confirma
+superioridad entre instrumentos.
 
-La etapa B mostró además un sesgo atribuible a la cantidad de evidencia visible. Al
-presentar los cinco chunks, cambiaron 16 de 50 juicios (32 %), y 11 de esos cambios fueron
-hacia `correcto`. En consecuencia, la concordancia de etapa A funciona como cota inferior
-para verificadores —como HHEM máximo sobre evidencia— que evalúan el conjunto completo de
-fragmentos.
+El contraste exp19b siguió el flujo `draft → extracción de claims → selección ms-marco →
+regeneración → verificador`: sí se generó una nueva respuesta con la evidencia
+seleccionada. HHEM no intervino en el selector, que usó el cross-encoder
+`ms-marco-MiniLM-L-12-v2`; sin embargo, el aumento apareció solo con HHEM
+(Δ=+0,0451, IC95 [0,0076; 0,0817], p=0,01798) y no con los dos NLI. Se interpreta, por
+ello, como una mejora local de alineación con HHEM, no como una mejora de fidelidad
+independiente del verificador. El TOST ubicó la diferencia dentro de la banda
+preespecificada ±0,081 (p=0,03135; IC90 [0,0134; 0,0768]); esa banda admite efectos
+mayores que el observado y no está validada externamente como umbral de irrelevancia.
 
-## Taxonomía de los claims no soportados de exp18
+## Sensibilidad al conjunto de evidencia
 
-La calibración humana de los 40 casos produjo un tamaño efectivo de Kish de 27,4. La
-extrapolación Horvitz–Thompson a los 759 claims no soportados estimó 53,0 % de claims
-correctos, 45,4 % incorrectos y 1,6 % dudosos. Así, “no soportado por el corpus” no equivale
-automáticamente a alucinación: aproximadamente la mitad corresponde a conocimiento
-paramétrico verdadero, aunque una fracción casi igual sí contiene errores.
+Al ampliar de uno a cinco chunks, 16 de 50 etiquetas cambiaron (32,0%; IC95 Wilson
+[20,8%; 45,8%]). Esto demuestra sensibilidad al contexto presentado; no identifica por
+sí solo sesgo causal ni establece que A sea una cota inferior formal.
 
-Los estratos también difirieron de manera informativa. `a_synthesis` y `b_parametric`
-alcanzaron aproximadamente 70 % de correctos, `c_unattributed` quedó en 50 %, y
-`d_threshold_artifact` solo en 30 % de correctos, con 60 % de incorrectos. El último
-estrato concentra, por tanto, claims genuinamente problemáticos además de posibles falsos
-negativos del umbral.
-
-La taxonomía tuvo tres jueces ciegos. La concordancia fue κ=0,571 entre Enzo y Codex,
-κ=0,422 entre Enzo y Kimi y κ=0,712 entre Kimi y Codex; hubo mayoría de dos de tres en
-39 de 40 casos. Esta triangulación es útil como control, pero no convierte al LLM en
-sustituto del gold humano: en la etapa A, Enzo–Codex obtuvo κ=0,055, y en la etapa B,
-κ=0,204.
-
-## Confiabilidad del anotador
-
-Una tanda C de test–retest volvió a presentar 20 ítems de la etapa A en ciego, con seed 42.
-El acuerdo crudo fue 11/20 (55 %) y κ de Cohen fue 0,268, por debajo de la meta
-prerregistrada de 85 %. Los nueve desacuerdos incluyeron cinco inversiones directas entre
-`correcto` e `incorrecto` y cuatro casos con `dudoso` en uno de los dos juicios. El retest
-se realizó el mismo día, después de unas cinco horas de anotación continua, aunque la guía
-había previsto hacerlo al día siguiente. Este contexto puede haber aumentado el ruido,
-pero no justifica descartarlo: incluso `random_anchor` mostró solo 1/3 acuerdos, con un n
-muy pequeño.
-
-Los nueve desacuerdos se resolverán mediante adjudicación razonada en
-`output/audit/adjudicacion_tandaC.html`. El procedimiento exige un comentario para cada
-veredicto final y deja trazabilidad en el comentario fusionado y en un backup del CSV. La
-κ test–retest cruda se conserva como resultado de confiabilidad; la adjudicación no la
-reemplaza ni la corrige retroactivamente.
-
-### Sensibilidad a la adjudicación
-
-Mientras no existe el JSON final, `scripts/run_gold_sensitivity.py` solo puede ejecutar la
-variante que excluye los nueve ítems discordantes, identificados por
-`output/audit/gold_v4_tandaC_resultado.json`. Quedan 126 juicios binarios utilizables. Los
-resultados registrados en `output/audit/gold_v4_sensitivity.json` y
-`output/audit/gold_v4_sensitivity.md` son:
-
-| Verificador | κ ponderada sin discordantes | κ anchor sin discordantes | Δ frente a post-adjudicación |
+| Juicio en A \ juicio en B | correcto | incorrecto | dudoso |
 |---|---:|---:|---:|
-| HHEM | 0,3090 | 0,3966 | [PENDIENTE-ADJUDICACION] |
-| E5 (`base AND HHEM`) | 0,1571 | 0,1702 | [PENDIENTE-ADJUDICACION] |
-| NLI small | 0,0844 | 0,0156 | [PENDIENTE-ADJUDICACION] |
-| NLI base | 0,0810 | 0,0780 | [PENDIENTE-ADJUDICACION] |
-| E1 (media NLI) | -0,0307 | -0,0800 | [PENDIENTE-ADJUDICACION] |
+| correcto | 28 | 1 | 2 |
+| incorrecto | 9 | 3 | 2 |
+| dudoso | 2 | 0 | 3 |
 
-La exclusión no altera el orden de los candidatos observado en el análisis original. Esta
-comparación es descriptiva y parcial: faltan las variantes con etiquetas post-adjudicación
-y pre-adjudicación reconstruida, además de sus deltas respecto de la primera.
+En la reducción `correcto`/resto hubo 11 transiciones hacia `correcto` y 3 en sentido
+contrario. McNemar exacto dio p=0,057373. Entre todos los 16 flips, 11 fueron hacia
+`correcto` y 5 tuvieron otra dirección (binomial exacta p=0,210114); este segundo resumen
+no es McNemar. Ambos cálculos son descriptivos y están fuera de las familias BH.
 
-- κ post-adjudicación: **[PENDIENTE-ADJUDICACION]**.
-- κ pre-adjudicación reconstruida: **[PENDIENTE-ADJUDICACION]**.
-- Deltas de ambas variantes: **[PENDIENTE-ADJUDICACION]**.
+## Taxonomía de `unsupported@0.5`
+
+En la muestra de 40, los conteos no ponderados fueron 22 `externally correct`, 17
+`externally incorrect` y 1 `dudoso`. La extrapolación Horvitz–Thompson a 759 fue 53,0%,
+45,4% y 1,6%, respectivamente, con n efectivo de Kish 27,4. La tasa pequeña de `dudoso`
+depende de un solo caso observado y no debe leerse como una estimación precisa.
+
+Que un claim sea juzgado correcto pese a ser `unsupported@0.5` no demuestra conocimiento
+paramétrico: también puede reflejar evidencia omitida por retrieval, información parcial
+del prompt o patrones generales. Su procedencia no puede determinarse con este diseño.
+Los estratos (`a_synthesis`, `b_parametric`, `c_unattributed` y
+`d_threshold_artifact`) fueron candidatos de muestreo, no veredictos causales.
+
+La taxonomía tuvo tres jueces ciegos. La concordancia pareada fue κ=0,571 entre Enzo y
+Codex, κ=0,422 entre Enzo y Kimi y κ=0,712 entre Kimi y Codex; hubo mayoría de dos de tres
+en 39/40. Es estabilidad local de mayoría, no validación externa. En A y B los jueces LLM
+sin calibración específica mostraron baja concordancia con la referencia piloto
+(κ=0,055 y κ=0,204, respectivamente), por lo que no ofrecieron un reemplazo fiable en
+estas muestras.
+
+## Confiabilidad intra-anotador y adjudicación
+
+La tanda C repitió en ciego 20 ítems de A, con seed 42. El acuerdo crudo fue 11/20 = 55%
+(IC95 Wilson [34,2%; 74,2%]) y κ de Cohen fue 0,268, por debajo de la meta
+prerregistrada de 85%. Esta κ mide confiabilidad **intra-anotador**, no acuerdo entre
+anotadores ni validez externa.
+
+| Juicio original \ retest | correcto | incorrecto | dudoso |
+|---|---:|---:|---:|
+| correcto | 7 | 3 | 1 |
+| incorrecto | 1 | 2 | 1 |
+| dudoso | 2 | 1 | 2 |
+
+El rótulo «fair» de Landis–Koch para κ=0,268 se menciona solo como convención histórica:
+los puntos de corte fueron propuestos como arbitrarios y no constituyen un sello de
+aceptabilidad ([Landis y Koch, 1977](https://jjcurtin.github.io/book_iaml/pdfs/landis_1977_kappa.pdf)).
+La interpretación de κ depende de las etiquetas, sus prevalencias y el propósito del
+corpus; no debe aislarse de la matriz y los marginales
+([Artstein y Poesio, 2008](https://aclanthology.org/J08-4004/)).
+
+Los nueve desacuerdos se adjudicaron con razones explícitas para construir una versión
+reconciliada. Esa edición aporta una etiqueta operativa final, pero no aumenta ni corrige
+retroactivamente la confiabilidad observada. La tabla siguiente conserva como principal
+la versión preadjudicación y muestra dos análisis secundarios.
+
+| Verificador | Pre: κ pond. / anchor | Reconciliada: κ pond. / anchor | Sin 9: κ pond. / anchor |
+|---|---:|---:|---:|
+| HHEM | 0,3033 / 0,3491 | 0,3150 / 0,3966 | 0,3090 / 0,3966 |
+| E5 (`base AND HHEM`) | 0,1583 / 0,1748 | 0,1601 / 0,1702 | 0,1571 / 0,1702 |
+| NLI small | 0,0860 / 0,0397 | 0,0916 / 0,0156 | 0,0844 / 0,0156 |
+| NLI base | 0,0829 / 0,0919 | 0,0839 / 0,0780 | 0,0810 / 0,0780 |
+| E1 (media NLI) | -0,0278 / -0,0662 | -0,0288 / -0,0800 | -0,0307 / -0,0800 |
+
+El ordenamiento puntual fue estable, pero la baja confiabilidad y los intervalos amplios
+limitan la interpretación de las magnitudes absolutas. La reconciliación no convierte la
+referencia piloto en una verdad independiente.
 
 ## Limitaciones
 
-El gold depende de un único anotador humano y su test–retest quedó lejos de la meta
-prerregistrada. El muestreo estratificado priorizó casos difíciles y redujo el tamaño
-efectivo, por lo que los intervalos de κ son amplios. La adjudicación post-hoc mejora la
-consistencia operativa del gold, pero no elimina esa limitación. Por ello, la evidencia
-permite sostener el ordenamiento general HHEM > NLI y describir la composición de los
-claims no soportados; no permite defender diferencias pequeñas ni una precisión fina de
-las tasas.
+La referencia depende de un solo anotador y sobremuestrea casos difíciles. Los claims
+están anidados en respuestas y queries; una inferencia que los trate como independientes
+puede subestimar la incertidumbre. La condición B cambia simultáneamente cantidad, orden
+y longitud de evidencia. La taxonomía usa una muestra pequeña con pesos desiguales y la
+corrección externa no identifica el origen del contenido. Finalmente, la concordancia
+con una referencia inestable no valida por sí sola ningún verificador.
 
 ## Trazabilidad
 
-- `paper/summer_ablation_log.md`, entradas 27, 28 y 28b.
+- `paper/summer_ablation_log.md`, entradas 27, 28, 28b y 28c.
 - `output/audit/gold_v4_analysis.json` y `output/audit/gold_v4_analysis.md`.
+- `output/audit/descriptive_cis.json` y `output/audit/descriptive_cis.md`.
 - `output/audit/taxonomy_calibration_report.md`.
 - `output/audit/gold_v4_tandaC_resultado.json`.
 - `output/audit/gold_v4_sensitivity.json` y `output/audit/gold_v4_sensitivity.md`.
-- `scripts/analyze_gold_v4.py`, `scripts/analyze_taxonomy_calibration.py`,
-  `scripts/merge_adjudicacion_tandaC.py` y `scripts/run_gold_sensitivity.py`.
+- `scripts/analyze_gold_v4.py`, `scripts/analyze_taxonomy_calibration.py` y
+  `scripts/run_gold_sensitivity.py`.
