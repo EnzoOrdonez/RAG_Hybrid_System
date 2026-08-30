@@ -35,7 +35,7 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 - **Hallucination detection**: NLI-based faithfulness scoring with DeBERTa v3
 - **Local LLMs**: Runs entirely on your machine with Ollama (demo: Llama 3.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see MODELS.md)
 - **Streamlit UI**: 5-page web interface with chat, metrics dashboard, and evaluation tools
-- **Benchmarking suite**: 12 versioned experiments (exp3-exp13 + exp8b) with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
+- **Benchmarking suite**: 19 versioned experiments (exp3-exp19b + exp8b) with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
 
 ---
 
@@ -161,7 +161,7 @@ to regenerate only the report's artifacts (without re-running the full experimen
 
 ### Reproducing the Nota 3 report (evidence -> tables)
 
-The raw outputs (`experiments/results/exp9..13`) are versioned; every cited number is
+The raw outputs (`experiments/results/exp9..19b`) are versioned; every cited number is
 re-derivable offline from them. Citable artifacts and estimated runtimes:
 
 | What | Command (see TRACEABILITY for flags) | Est. time / hardware |
@@ -273,10 +273,12 @@ cloudrag/
 
 ## Experiments
 
-12 versioned experiments (exp3-exp13 + exp8b) covering retrieval strategies, re-ranking,
+19 versioned experiments (exp3-exp19b + exp8b) covering retrieval strategies, re-ranking,
 LLM comparison, ablation, and cross-cloud evaluation. exp3-8/8b ran on the pre-rebuild
 corpus/oracle and are kept as history; the paper's evidence is the final round (exp10-13
-on the curated 194-query set + exp9 control on the pre-curation 200-query set):
+on the curated 194-query set + exp9 control on the pre-curation 200-query set); exp14-19b are
+post-paper audit and validation experiments (runtime-noise floor, verifier ablations, evidence
+ceiling, anchored selection), complemented by the claim-level human gold (v4):
 
 | Experiment | What it tests | Key finding |
 |------------|--------------|-------------|
@@ -284,6 +286,13 @@ on the curated 194-query set + exp9 control on the pre-curation 200-query set):
 | exp10-11 | Retrieval, multi-oracle (D12 fix) | Hybrid>Dense real (d_z +0.45) but inflated under circular oracle (0.995 vs 0.740); edge lives in the rerank stage |
 | exp12 | Faithfulness matrix (4 LLMs × 4 scenarios × 194) | RAG ≫ no-RAG; retrieval method n.s. on faithfulness — robust under metrics v2/v3/v4 (ledgers N5/N8/N9), 2 verifiers × 4 denominators |
 | exp13 | Cross-cloud expansion ON vs OFF (D11 fix) | Expansion does NOT help; the earlier exp7 "+16.8%" claim is **retired** (its arms ran identical retrieval — N1/N4) |
+| exp14 | H5 replicas, runtime-noise floor | Re-scoring 140 replicas under the same runtime: \|Δ\| mean 0.0616, p90 0.2005, 23.3% beyond the ±0.081 band — noise quantified, not hidden |
+| exp15 | Verifier ablations (NLI variants, tier-A) | Sensitivity of faithfulness to verifier choice and claim pool |
+| exp16 | Anchored decoding probe | Determinism probe: 3× back-to-back is bit-identical; replicas separated by other generations are not |
+| exp17 | Cross-cloud balanced arm | Provider-coverage probe (descriptive): strict coverage 8% baseline vs 80% balanced, 0/125 foreign-provider chunks |
+| exp18 | Evidence ceiling + unsupported-claim taxonomy | 759 unsupported claims taxonomized; stratified sample with Horvitz-Thompson weights, Kish n_eff = 27.4 |
+| exp19b | Anchored evidence selector, paired + replay-gated | HHEM Δ=+0.0451 (CI95 [0.0076; 0.0817], p=0.018), TOST within ±0.081; verdict: verifier-aligned local improvement, not verifier-independent |
+| gold v4 | Claim-level human validation (150 claims, 200 claim-condition judgments, blinded LLM judges) | Best verifier κ=0.30 (weighted, CI crosses 0) vs pilot human reference; LLM judges κ₂=0.754 between them but 0.17-0.20 vs human; labels = pilot reference, not ground truth |
 
 Paired stats throughout: Wilcoxon signed-rank + Cohen's d_z + bootstrap CI, BH/Holm
 corrected per research-question family.
