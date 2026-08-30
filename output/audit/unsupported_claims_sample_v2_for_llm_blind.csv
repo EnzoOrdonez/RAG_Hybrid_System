@@ -1,0 +1,45 @@
+key;query_id;question;claim
+T-01;q196;What are the equivalent networking concepts across AWS, Azure, and GCP for VPCs, subnets, and security groups?;GCP: Subnetworks within a VPC network allow you to partition the VPC's IP address range into more manageable sections..
+T-02;q131;What are the differences between AWS Lambda and AWS S3?;AWS S3 is an object storage service designed for durable, scalable data storage and retrieval, often serving as the data source or trigger for Lambda functions..
+T-03;q055;What are the best practices for Google Cloud Cloud SQL?;Since the direct documentation on Cloud SQL best practices is not included in the provided context, we can infer that detailed best practices would be found elsewhere in Google Cloud's official documentation outside of this excerpt.
+T-04;q118;How to implement auto-scaling with Google Cloud VPC?;Command to create an HPA:.
+T-05;q094;How to configure networking for Azure Container Instances?;For ACI, each container instance receives its own private IP from the subnet..
+T-06;q192;Compare identity federation approaches across AWS, Azure, and GCP;Azure Active Directory (Azure AD) B2B/B2C: Service: Azure AD enables external users (B2B) or customers (B2C) to access Azure resources using their existing identity..
+T-07;q124;How to deploy a workload on Google Cloud Cloud Build?;Cloud Build Configuration: While not explicitly detailed in the context, standard practices for configuring [CODE] are derived from general GCP documentation on Cloud Build..
+T-08;q057;What is Google Cloud Cloud Build and what problems does it solve?;Citation: The relevance of Cloud Build within the CI/CD context for GKE and its role in automated builds and deployments is evident from  and .
+T-09;q074;How to deploy a containerized application on AWS IAM?;Modify the stack file to include an [CODE] from the [CODE] module.
+T-10;q163;Compare Azure Virtual Machines and Azure Virtual Network in terms of capabilities and pricing;*Key Point*: Emphasizes that bandwidth usage directly impacts costs..
+T-11;q136;What are the differences between AWS CloudWatch and AWS EKS?;For a comprehensive comparison, additional documentation specifically covering AWS EKS would be required.
+T-12;q191;What are the key differences between AWS S3 lifecycle policies and Azure Blob Storage tiering?;To accurately compare AWS S3 lifecycle policies with Azure Blob Storage tiering, information specific to AWS S3 would be required, which is absent from the given documentation context.
+T-13;q089;How to configure networking for Azure Blob Storage?;For detailed steps on each of these configurations, refer to the Azure portal documentation or specific service guides within the Azure Blob Storage section of the provided context.
+T-14;q128;When should you use AWS VPC instead of AWS RDS?;A VPC is essential when you need to isolate and manage multiple types of AWS services (e.g., EC2, RDS) securely within a private network space.
+T-15;q161;When should you choose Azure Virtual Network over Azure Container Instances?;"[Azure > Virtual Network > Enable containers to use Azure Virtual Network capabilities]
+
+These sections describe how the Azure Virtual Network CNI plug-in enables containers (running in AKS or other Kubernetes clusters) to utilize Azure Virtual Network capabilities, such as direct IP assignment and connectivity to virtual network resources."
+T-16;q079;How to deploy a containerized application on AWS EC2?;This process involves launching an EC2 instance with an appropriate AMI, installing Docker, registering the instance with ECS, and creating task definitions and services to manage your containers effectively.
+T-17;q097;How to scale Azure Monitor horizontally?;Leverage Azure Monitor Metrics and Alerts: Use these insights to trigger scaling actions in other services (e.g., Kubernetes, VM Scale Sets)..
+T-18;q106;How to configure IAM permissions for Google Cloud VPC?;Grant the Cloud Run Invoker role ([CODE]) to your function's service account..
+T-19;q116;How to set up logging and monitoring for Google Cloud Cloud Functions?;Identify Relevant Methods: For operations like [CODE], [CODE], and [CODE], use specific filter queries to monitor admin activities..
+T-20;q164;When should you choose Azure Blob Storage over Azure Entra ID?;For a comprehensive decision on choosing between Azure Blob Storage and Azure Entra ID, additional context regarding security policies, application architecture, compliance requirements, or specific use cases would be necessary.
+T-21;q145;Compare the pricing models of AWS S3 vs AWS EKS;provides some insight into S3 costs but lacks any reference to EKS.
+T-22;q147;What are the differences between AWS EKS and AWS ECS?;To accurately compare AWS EKS and AWS ECS, additional documentation specific to AWS EKS would be required, which details its architecture, Kubernetes integration, service discovery mechanisms, and any unique features or limitations compared to ECS.
+T-23;q066;How to configure auto-scaling in AWS S3?;S3 Intelligent-Tiering: Automatically moves objects between two tiers (Access Tier 1 and Access Tier 2) based on access frequency, optimizing storage costs without manual intervention..
+T-24;q112;How to migrate an on-premises application to Google Cloud Cloud Build?;For RHEL, SLES, or Ubuntu Pro: Use the Linux VM guide when creating a VM in Compute Engine and select the appropriate version from the public images tab..
+T-25;q097;How to scale Azure Monitor horizontally?;Review Regional Quotas and Limits: Ensure that any scaling actions respect regional subscription quotas, especially if distributing data across multiple regions or workspaces..
+T-26;q064;How to set up AWS EKS for a production workload?;Use the AWS Management Console, AWS CLI, or AWS SDKs to create an EKS cluster..
+T-27;q140;When should you use AWS DynamoDB instead of AWS Lambda?;Use DynamoDB when you need a fully managed NoSQL database service for storing and retrieving large amounts of data with low latency.
+T-28;q174;Compare object storage services: AWS S3 vs Azure Blob Storage vs Google Cloud Storage;Integration with GCP Services: Seamlessly integrates with other Google Cloud services such as Compute Engine, BigQuery, and Dataflow..
+T-29;q184;Compare the container registry services across AWS ECR, Azure Container Registry, and Google Artifact Registry;Azure Container Registry is similarly a managed service but lacks detailed documentation in the provided context..
+T-30;q015;What is the SLA for AWS EKS?;The sections listed focus on using service-linked roles for ECS, an overview of ECS features, Fargate throttling quotas, and the Code of Conduct for EKS.
+T-31;q195;Compare the CI/CD pipeline offerings: AWS CodePipeline vs Azure DevOps vs Google Cloud Build;General Expectation: Typically, AWS CodePipeline integrates with other AWS services (e.g., CodeBuild, CodeCommit, CodeDeploy) to automate the build, test, and deploy phases of your software release process.
+T-32;q099;How to implement backup and disaster recovery for Azure Functions?;Assess the need for non-default storage providers: If using a custom storage provider like SQL Server, understand its unique DR and geo-distribution requirements..
+T-33;q131;What are the differences between AWS Lambda and AWS S3?;It also supports versioning, lifecycle policies, and cross-region replication..
+T-34;q088;How to deploy an application using Azure Blob Storage?;Add Environment Variable: Set Name to [CODE]..
+T-35;q128;When should you use AWS VPC instead of AWS RDS?;RDS (Relational Database Service) provides managed database services (e.g., MySQL) that can be deployed within a VPC to ensure secure access..
+T-36;q131;What are the differences between AWS Lambda and AWS S3?;"AWS > EC2 > Use Amazon S3 with Amazon EC2 <a name=""AmazonS3""></a>
+  
+### 5."
+T-37;q092;How to implement backup and disaster recovery for Azure Virtual Machines?;In the Azure portal, navigate to Site Recovery under Migration and Branch Management..
+T-38;q176;Compare container orchestration options across AWS ECS, Azure Container Instances, and Google Cloud Run;*(Note: The focus is on quick provisioning rather than intricate service discovery.)*.
+T-39;q070;How to set up AWS ECS for a production workload?;Configure Service Settings: When creating a service, select the Blue/Green deployment type for robust traffic management and minimal downtime..
+T-40;q176;Compare container orchestration options across AWS ECS, Azure Container Instances, and Google Cloud Run;Google Cloud Run: Offers built-in service discovery through its integration with Kubernetes concepts like Services, and automatically scales to zero or up based on traffic, making it highly efficient for stateless workloads..

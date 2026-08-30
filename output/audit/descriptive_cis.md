@@ -4,23 +4,23 @@ Todos los resultados de este documento son **descriptivos y están fuera de las 
 
 ## Sensibilidad al conjunto de evidencia (etapas A → B)
 
-- Flips: 16/50 (32.0%); IC95 Wilson [20.8%, 45.8%].
+- Flips: 18/50 (36.0%); IC95 Wilson [24.1%, 49.9%].
 
 | original \ segunda | correcto | incorrecto | dudoso |
 |---|---:|---:|---:|
-| correcto | 28 | 1 | 2 |
-| incorrecto | 9 | 3 | 2 |
-| dudoso | 2 | 0 | 3 |
+| correcto | 27 | 1 | 2 |
+| incorrecto | 9 | 3 | 3 |
+| dudoso | 3 | 0 | 2 |
 
 Al reducir `correcto` frente a las demás categorías, la tabla pareada es:
 
 | | B correcto | B otro |
 |---|---:|---:|
-| A correcto | 28 | 3 |
-| A otro | 11 | 8 |
+| A correcto | 27 | 3 |
+| A otro | 12 | 8 |
 
-McNemar exacto correcto/resto (discordantes 11 vs 3): p=0.057373.
-Como resumen direccional de **todos** los flips, 11 fueron hacia `correcto` y 5 tuvieron otra dirección; binomial exacta p=0.210114. Esta última no es McNemar ni una prueba confirmatoria.
+McNemar exacto correcto/resto (discordantes 12 vs 3): p=0.035156.
+Como resumen direccional de **todos** los flips, 12 fueron hacia `correcto` y 6 tuvieron otra dirección; binomial exacta p=0.237885. Esta última no es McNemar ni una prueba confirmatoria.
 
 ## Confiabilidad intra-anotador
 

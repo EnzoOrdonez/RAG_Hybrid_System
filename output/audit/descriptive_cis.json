@@ -13,37 +13,37 @@
     "n": 50,
     "matrix": [
       [
-        28,
+        27,
         1,
         2
       ],
       [
         9,
         3,
-        2
+        3
       ],
       [
-        2,
+        3,
         0,
-        3
+        2
       ]
     ],
-    "flip_count": 16,
-    "flip_rate": 0.32,
+    "flip_count": 18,
+    "flip_rate": 0.36,
     "flip_wilson95": [
-      0.20758216260656845,
-      0.45810297308144077
+      0.24138749651846741,
+      0.49858983123887307
     ],
     "binary_correct_rest": {
-      "a_correct_b_correct": 28,
+      "a_correct_b_correct": 27,
       "a_correct_b_other": 3,
-      "a_other_b_correct": 11,
+      "a_other_b_correct": 12,
       "a_other_b_other": 8
     },
-    "mcnemar_exact_p": 0.057373046875,
-    "all_flips_towards_correct": 11,
-    "all_flips_other_direction": 5,
-    "all_flips_direction_binomial_p": 0.210113525390625
+    "mcnemar_exact_p": 0.03515625,
+    "all_flips_towards_correct": 12,
+    "all_flips_other_direction": 6,
+    "all_flips_direction_binomial_p": 0.237884521484375
   },
   "intra_annotator": {
     "labels": [

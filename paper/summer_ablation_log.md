@@ -1862,3 +1862,202 @@ bit-idénticas. El warmup se conserva solo como log informativo. Si el replay di
 pipeline termina con `RUNTIME_STATE_CHANGED`/exit 3 y nada posterior se puntúa. Además,
 extract y select se aíslan de CUDA y el cross-encoder de select corre en CPU, de modo que la
 GPU no se toca entre draft y regen.
+
+---
+
+## Entrada 28 — Gold humano v4 COMPLETO: arbitraje humano del verificador y taxonomía (2026-08-29)
+
+> Sección de **[Kimi Work]** — 2026-08-29 (hora local). El gold humano (240/240 juicios) se
+> recibió como export JSON del anotador HTML offline y se fusionó con
+> `scripts/merge_gold_v4.py` (backups en `output/audit/backups_pre_merge_2026-08-29/`).
+> Verificación previa: claves exactas 40T+150A+50B, vocabulario controlado sin excepciones,
+> todo `dudoso` con comentario. Esta entrada registra resultados ya computados por
+> `scripts/analyze_gold_v4.py` y `scripts/analyze_taxonomy_calibration.py`; no recalcula nada.
+
+### Arbitraje humano del verificador (etapa A, 150 claims; 132 usados, 18 dudosos excluidos por regla)
+
+κ de Cohen design-weighted (HT sobre pool de 14 409 claims, n efectivo de Kish = 38,8) y
+κ sin pesos sobre el estrato `random_anchor` (lectura sin supuestos):
+
+| Candidato | κ ponderado | IC95 | p_BH | κ anchor |
+|---|---|---|---|---|
+| **hhem** | **0,3033** | [-0,0206; 0,5622] | 0,322 | **0,3491** |
+| E5_base_and_hhem | 0,1583 | [-0,0849; 0,3851] | 0,4955 | 0,1748 |
+| small | 0,0860 | [-0,1964; 0,3518] | 0,667 | 0,0397 |
+| base | 0,0829 | [-0,1961; 0,3418] | 0,667 | 0,0919 |
+| E1_mean | -0,0278 | [-0,2866; 0,1936] | 0,864 | -0,0662 |
+
+Lectura: el humano se alinea con HHEM y no con los NLI — el nivel real de fidelidad está
+**más cerca de 0,55 que de 0,30**; NLI subestimaba. Ninguna κ alcanza significancia tras BH
+(varianza alta por diseño estratificado, Kish 38,8): la tabla es evidencia de ordenación, no
+de superioridad confirmatoria. La promoción del verificador primario sigue decidiéndola el
+control negativo preregistrado (`ensemble_sweep_results.json`), ciego al contraste.
+
+**Sesgo de evidencia (etapa B, 50 claims juzgados dos veces):** 16/50 juicios cambian al ver
+los 5 chunks (tasa **0,32**), 11 hacia `correcto`. La κ de etapa A es, por construcción, una
+**cota inferior** para cualquier verificador que lee los 5 chunks (HHEM max sobre evidencia).
+
+### Taxonomía exp18 calibrada por humano (40/40, Kish n_eff = 27,4)
+
+Extrapolación Horvitz–Thompson a los 759 claims no soportados: **53,0 % correctos**
+(conocimiento paramétrico legítimo), **45,4 % incorrectos**, 1,6 % dudosos. Por estrato:
+`a_synthesis` y `b_parametric` ≈ 70 % correctos; `c_unattributed` 50 %; `d_threshold_artifact`
+solo 30 % correctos (60 % incorrectos) — confirma que el artefacto de umbral concentra claims
+genuinamente malos, no falsos negativos del verificador.
+
+### Triple juez ciego (nadie vio a nadie; Codex commiteado antes del gold, Kimi antes del merge)
+
+- Taxonomía (40): Enzo–Codex κ=0,571 · Enzo–Kimi κ=0,422 · Kimi–Codex κ=0,712 · consenso
+  mayoritario 2-de-3 en **39/40**.
+- Etapa A (150): Enzo–Codex κ=0,055 (Codex marcó 109/150 `incorrecto` — un LLM-juez sin
+  calibración NO sustituye al gold humano; hallazgo reportable por sí mismo).
+- Etapa B (50): Enzo–Codex κ=0,204.
+
+### Pendiente de esta línea
+
+- Tanda C (auto-acuerdo intra-anotador, 20 idx seed 42, meta ≥85 %): anotador ciego generado
+  (`output/audit/anotador_tandaC.html`); el % se reporta junto al análisis como
+  confiabilidad del gold.
+- Probe de ruido T1/T2 (re-anclaje de la SESOI): sin cambios, lo lanza Enzo con GPU libre.
+
+*Fin de la sección de [Kimi Work] 2026-08-29. Verificaciones: conteo y vocabulario del JSON
+de entrada sin leer juicios durante la anotación propia, ejecución real de ambos analizadores,
+cálculo de κ par a par sobre los tres archivos ciegos.*
+
+---
+
+## Entrada 28b — Confiabilidad del gold: test-retest y adjudicación (2026-08-29)
+
+> Sección de **[Kimi Work]** — 2026-08-29. Resultado de la tanda C (20 idx aleatorios de la
+> etapa A, seed 42, re-anotación ciega el mismo día tras ~5 h de anotación continua).
+
+### Resultado crudo
+
+**Auto-acuerdo 11/20 = 55 %** (κ test-retest = 0,268), bajo la meta preregistrada de ≥85 %.
+Por estrato del retest: `near_threshold` 7/7, `false_contr` 2/7, `disagreement` 1/3,
+`random_anchor` 1/3. Los 9 discordantes: 5 inversiones duras correcto↔incorrecto y 4 con
+`dudoso` de por medio. No se oculta: el gold tiene ruido de anotador y el paper lo reporta.
+
+Contexto atenuante declarado: el retest se hizo **el mismo día** (la guía pedía día
+siguiente) tras una sesión larga, y la muestra v4 sobremuestrea celdas difíciles por diseño.
+Aun así, `random_anchor` —la celda no sesgada— también cayó (1/3, n muy pequeño), así que el
+atenuante no alcanza para ignorar el problema.
+
+### Procedimiento de resolución (declarado antes de ejecutarse)
+
+1. **Adjudicación post-hoc de los 9 discordantes**: Enzo revisa cada ítem con ambos juicios
+   a la vista (`output/audit/adjudicacion_tandaC.html`), elige el veredicto final y escribe
+   la razón. El merge marca esos comentarios con `adjudicado`.
+2. El análisis de verificadores se **re-ejecuta** con las etiquetas adjudicadas.
+3. El paper reporta: κ crudo (0,268), distribución de discordantes por estrato, proceso de
+   adjudicación, y una prueba de sensibilidad (resultados con y sin los 9 ítems).
+4. Limitación explícita: con un solo anotador y κ<0,85, las κ de la tabla de verificadores
+   llevan la salvedad de ruido del gold; el ordenamiento HHEM > NLI se sostiene por
+   magnitud, no por precisión fina.
+
+*Fin de la sección de [Kimi Work] 2026-08-29.*
+
+---
+
+## Entrada 28c — Revisión externa (ChatGPT work) y decisiones adoptadas (2026-08-29)
+
+> Sección de **[Kimi Work]** — 2026-08-29. Revisión crítica recibida y archivada en
+> `output/audit/revision_chatgpt_2026-08-29.txt`. Esta entrada registra QUÉ se acepta y
+> QUÉ no, antes de ejecutar los cambios documentales.
+
+### Veredicto de la revisión (resumen fiel)
+
+Defendible como **estudio diagnóstico/metodológico de la medición**, no como validación
+concluyente de un verificador ni como "mejora de fidelidad". Cuatro bloqueantes:
+(1) estimando y unidad estadística sin definir (anidamiento de claims en queries);
+(2) confusión entre score automático `unsupported@τ`, juicio humano y verdad externa;
+(3) validez del extractor de claims no auditada; (4) exp19b debe declarar si hubo
+regeneración y el posible acoplamiento métrica-método (HHEM evalúa un selector que pudo
+diseñarse con señales HHEM). Importantes: "240 juicios" no es un gold homogéneo; faltan
+IC95 de los titulares descriptivos; justificar τ=0.5 y la banda ±0.081; "sesgo de
+evidencia" → "sensibilidad al conjunto de evidencia" (+tabla 2×2, McNemar descriptivo);
+ficha de dataset; tabla de familia BH completa; reproducibilidad externa vs
+repetibilidad interna.
+
+### Decisiones (todas en versión documental; NADA reabre experimentos)
+
+1. **Aceptado — terminología**: tres términos fijos (`unsupported@τ` / `human-judged` /
+   `externally incorrect`); "referencia humana piloto" reemplaza a "gold" en el texto del
+   paper (los nombres de archivo se quedan). Versión pre-adjudicación = principal;
+   adjudicación = versión reconciliada documentada, no aumento de confiabilidad.
+2. **Aceptado — estadísticos ligeros**: IC95 Wilson para flips (16/50) y retest (11/20),
+   matriz de confusión del retest, McNemar exacto declarado descriptivo, conteos no
+   ponderados junto a tasas HT, y sensibilidad de conteos a τ ∈ {0.4, 0.5, 0.6} con datos
+   persistidos (o bloqueo declarado).
+3. **Aceptado — encuadre exp19b**: frase inequívoca sobre regeneración + declaración de
+   acoplamiento métrica-método. El κ test-retest se reporta como confiabilidad
+   INTRA-anotador; Landis-Koch solo como rótulo arbitrario (con Artstein & Poesio 2008).
+4. **Aceptado — fichas**: tabla de unidades/estimandos, familia BH completa, ficha de
+   dataset, párrafo de reproducibilidad externa (qué prueba el repo y qué no).
+5. **Aceptado con matiz — auditoría del extractor**: se hace descriptiva con LLM (15
+   respuestas, seed 42, ejemplos literales), declarada como amenaza a validez de
+   constructo con evidencia acotada; NO se vende como auditoría humana.
+6. **No aplica por tiempo**: segunda anotadora humana independiente. El dictamen mismo la
+   marca "deseable, no imprescindible" si se reduce el alcance de las afirmaciones — que
+   es exactamente el encuadre adoptado ("auditoría de la medición de fidelidad").
+
+### Lo que esto NO cambia
+
+Los resultados congelados (entradas 27, 28, 28b) siguen siendo los datos; esta entrada
+solo cambia cómo se presentan. La sensibilidad sin los 9 discordantes (κ HHEM 0,309
+ponderada / 0,397 anchor) ya mostraba que el ordenamiento no depende de la adjudicación.
+
+*Fin de la sección de [Kimi Work] 2026-08-29.*
+
+---
+
+## Entrada 28d — CIERRE de la referencia humana: adjudicación fusionada y cifras finales (2026-08-30)
+
+> Sección de **[Kimi Work]** — 2026-08-30. La adjudicación de Enzo llegó completa
+> (9/9, vocabulario válido, razón escrita en las nueve; export
+> `output/audit/gold_v4_adjudicacion_enzo_2026-08-30_2.json`). Merge real ejecutado con
+> `scripts/merge_adjudicacion_tandaC.py` (backup en
+> `output/audit/backups_adjudicacion_2026-08-30/`). Con esto quedan cerradas las entradas
+> 28/28b/28c.
+
+### Veredictos adjudicados (con razón registrada en el CSV, marca `adjudicado:`)
+
+Los 6 flips duros quedaron en `incorrecto` (A-007, A-008, A-023, A-027, A-029, A-071) y 3 en
+`dudoso` (A-109, A-130, A-140). Nota de convergencia: 5 de los 6 `incorrecto` coinciden con
+la anotación ciega independiente de Kimi (que no había visto ningún juicio humano), y las 3
+dudoso-adjudicadas eran casos de truncamiento/frase rota.
+
+### Cifras finales (post-adjudicación) y sensibilidad
+
+| Candidato | κ ponderada | IC95 | κ anchor |
+|---|---|---|---|
+| **hhem** | **0,315** | [0,0137; 0,5712] | **0,3966** |
+| E5_base_and_hhem | 0,160 | — | 0,170 |
+| small | 0,092 | — | 0,016 |
+| base | 0,084 | — | 0,078 |
+| E1_mean | -0,029 | — | -0,080 |
+
+**Sensibilidad a la adjudicación (3 variantes):** el ordenamiento es idéntico en
+post-adjudicación, sin-los-9 y pre-adjudicación; Δκ ponderada máximo 0,012. La conclusión
+no depende de los 9 ítems adjudicados. Detalle: `output/audit/gold_v4_sensitivity.md`.
+
+### Sensibilidad al conjunto de evidencia (cifra final, A adjudicada vs B)
+
+18/50 juicios cambian (36,0 %; IC95 Wilson [24,1 %; 49,9 %]); 12 hacia `correcto` vs 6 en
+otra dirección (McNemar exacto correcto/resto p=0,0352 — descriptivo, fuera de BH). La
+lectura prudente se mantiene: la condición de un chunk subestima soportes que el contexto
+completo sí muestra; no es una cota formal.
+
+### Paquete de confiabilidad reportable
+
+- Auto-acuerdo crudo 11/20 (55,0 %; IC95 Wilson [34,2 %; 74,2 %]), κ=0,2683
+  (INTRA-anotador; meta 85 % incumplida y así se declara).
+- Matriz de confusión del retest y conteos no ponderados de la taxonomía:
+  `output/audit/descriptive_cis.md`.
+- Sensibilidad de umbral: `unsupported@τ` = 636/759/880 claims para τ = 0.4/0.5/0.6.
+- Encuadre del paper (entrada 28c): referencia humana piloto, pre-adjudicación como
+  versión principal, adjudicación como reconciliación documentada.
+
+*Fin de la sección de [Kimi Work] 2026-08-30. Verificaciones: merge script con sus tests,
+sensibilidad de 3 variantes, re-ejecución de analyze_gold_v4.py y compute_descriptive_cis.py
+con las etiquetas finales.*

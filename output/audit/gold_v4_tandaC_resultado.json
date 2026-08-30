@@ -1,0 +1,63 @@
+{
+ "n": 20,
+ "acuerdo": 11,
+ "tasa": 0.55,
+ "kappa": 0.2683,
+ "discordantes": [
+  {
+   "tandaC": "C-01",
+   "ref": "A-007",
+   "gold": "correcto",
+   "retest": "incorrecto"
+  },
+  {
+   "tandaC": "C-02",
+   "ref": "A-008",
+   "gold": "incorrecto",
+   "retest": "correcto"
+  },
+  {
+   "tandaC": "C-04",
+   "ref": "A-023",
+   "gold": "correcto",
+   "retest": "incorrecto"
+  },
+  {
+   "tandaC": "C-06",
+   "ref": "A-027",
+   "gold": "dudoso",
+   "retest": "correcto"
+  },
+  {
+   "tandaC": "C-07",
+   "ref": "A-029",
+   "gold": "correcto",
+   "retest": "incorrecto"
+  },
+  {
+   "tandaC": "C-15",
+   "ref": "A-071",
+   "gold": "dudoso",
+   "retest": "incorrecto"
+  },
+  {
+   "tandaC": "C-17",
+   "ref": "A-109",
+   "gold": "dudoso",
+   "retest": "correcto"
+  },
+  {
+   "tandaC": "C-18",
+   "ref": "A-130",
+   "gold": "correcto",
+   "retest": "dudoso"
+  },
+  {
+   "tandaC": "C-19",
+   "ref": "A-140",
+   "gold": "incorrecto",
+   "retest": "dudoso"
+  }
+ ],
+ "fuente": "2026-08-29T19:51:05.033Z"
+}

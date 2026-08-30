@@ -265,3 +265,107 @@ seed 42, caché off, 1024 tokens) + `docs/APP_VS_EXPERIMENTO.md`. Cierra la debi
 commit de Codex, hashes SHA-256 de artefactos _v2 vs originales, comparación bit-a-bit de
 los dos drafts (194/194), tests nuevos corridos localmente (18+19+20+15 en verde), lectura
 de equivalence__hhem.md, arm_stats__hhem.md y la ficha/informes de deficiencias.*
+
+---
+
+## 11. Cierre del gold humano y arbitraje del verificador — 2026-08-29 [Kimi Work]
+
+> Deadline LACCI: 31 de agosto. Esta sección sustituye al punto 10.3.1: **G1 está hecho**.
+
+### 11.1 Lo que se cerró hoy
+
+1. **Gold humano completo (240/240)** recibido como JSON del anotador HTML offline
+   (`output/audit/anotador_gold.html`, generado por `scripts/build_anotador_gold.py`;
+   todo en español, localStorage + export/import, ciego por construcción: sin scores,
+   estratos, configs ni juicios LLM embebidos — verificado por script).
+2. **Merge validado** a los 3 CSV con `scripts/merge_gold_v4.py` (backups en
+   `output/audit/backups_pre_merge_2026-08-29/`). Los CSV ya NO se editan a mano.
+3. **`analyze_gold_v4.py` real ejecutado**: HHEM κ ponderado 0,303 / κ anchor 0,349 — el
+   humano se alinea con HHEM; fidelidad real más cerca de 0,55 que de 0,30. Etapa B:
+   16/50 flips (32 %, 11 hacia correcto) → κ de etapa A = cota inferior.
+4. **Taxonomía exp18 calibrada**: 53 % de los 759 claims no soportados son verdaderos
+   (paramétricos), 45 % incorrectos. `d_threshold_artifact` solo 30 % correctos.
+5. **Triple juez ciego completo en taxonomía** (Codex entregó
+   `unsupported_taxonomy_llmjudge_blind.json` hoy): consenso 2-de-3 en 39/40;
+   κ Enzo–Codex 0,571 / Enzo–Kimi 0,422 / Kimi–Codex 0,712. En A/B: Enzo–Codex κ 0,055
+   (A) y 0,204 (B) — el LLM-juez sin calibrar no sustituye al gold (reportable).
+6. Detalle completo de cifras: `paper/summer_ablation_log.md` **entrada 28** y
+   `output/audit/taxonomy_calibration_report.md` + `output/audit/gold_v4_analysis.{json,md}`.
+
+### 11.2 Lo que falta hasta el 31 (en orden)
+
+1. **Tanda C (Enzo, ~45 min desde el teléfono)**: `output/audit/anotador_tandaC.html` —
+   20 idx aleatorios de A (seed 42), re-anotación ciega; exportar y entregar el JSON para
+   calcular el auto-acuerdo (meta ≥85 %). Generador: `scripts/build_anotador_tandaC.py`.
+2. **Mi anotación ciega A/B (Kimi, por lotes)** desde `output/audit/gold_v4_blind_items.json`
+   — no bloquea la entrega; enriquece el análisis de jueces.
+3. **Probe de ruido T1/T2 (Enzo, GPU, ~40 min)** si hay hueco; si no, la SESOI queda
+   con la banda preregistrada ±0,081 (ya defendida en la entrada 27).
+4. **Commit + push** de todo lo nuevo (ver §11.3) y, si se quiere, merge de
+   `summer/taxonomia-759` a la rama principal de entrega.
+
+### 11.3 Archivos nuevos/modificados hoy (para el commit)
+
+- Modificados: `output/audit/claim_audit_sample_v4.csv`,
+  `output/audit/claim_audit_sample_v4_stageB.csv`,
+  `output/audit/unsupported_claims_sample_v2.csv` (gold fusionado),
+  `paper/summer_ablation_log.md` (entrada 28), este documento (sección 11).
+- Nuevos: `scripts/build_anotador_gold.py`, `scripts/merge_gold_v4.py`,
+  `scripts/build_anotador_tandaC.py`, `output/audit/anotador_gold.html`,
+  `output/audit/anotador_tandaC.html`, `output/audit/gold_v4_juicios_enzo_2026-08-29.json`,
+  `output/audit/gold_v4_blind_items.json`,
+  `output/audit/unsupported_claims_sample_v2_for_llm_blind.csv`,
+  `output/audit/unsupported_taxonomy_kimi_blind.json`,
+  `output/audit/unsupported_taxonomy_llmjudge_blind.json`,
+  `output/audit/taxonomy_calibration_report.md`, `output/audit/gold_v4_analysis.{json,md}`,
+  `output/audit/backups_pre_merge_2026-08-29/` (3 CSV).
+
+### 11.4 Mejoras identificadas durante la anotación (NO se implementan antes del 31)
+
+Enzo observó: chunks de carpeta/proveedor equivocado y preguntas multi-nube sin cobertura
+de todas las nubes. Son problemas de **retrieval** (routing por metadatos de proveedor y
+descomposición de consultas multi-nube), no del generador. La vía de grafo de tripletas
+(p. ej. LadybugDB embebido) es técnicamente viable pero desviaría el alcance en fase de
+cierre: se documentan como **limitaciones medidas** (el 32 % de flips A→B es la evidencia)
+y **trabajo futuro** concreto. Posible probe descriptivo post-entrega: cobertura por
+proveedor en queries multi-nube, sin tocar el pipeline.
+
+*Fin de la sección de [Kimi Work] 2026-08-29.*
+
+### 11.5 Tanda C: resultado y adjudicación (2026-08-29, [Kimi Work])
+
+- Auto-acuerdo crudo **11/20 (55 %)**, κ=0,268 — bajo la meta de 85 %. Detalle y plan en
+  `paper/summer_ablation_log.md` entrada 28b.
+- **Acción inmediata de Enzo (descansado, ~20 min)**: abrir
+  `output/audit/adjudicacion_tandaC.html`, resolver los 9 discordantes con razón escrita,
+  exportar el JSON. Con eso se re-corre `analyze_gold_v4.py` y el asunto queda cerrado y
+  reportable. El HTML fue generado por `scripts/build_adjudicacion_tandaC.py`; el resultado
+  crudo quedó en `output/audit/gold_v4_tandaC_resultado.json`.
+
+### 11.6 Revisión externa y pulido documental (2026-08-29, [Kimi Work])
+
+- Dictamen de ChatGPT work archivado en `output/audit/revision_chatgpt_2026-08-29.txt`;
+  decisiones adoptadas en `paper/summer_ablation_log.md` entrada 28c. Encuadre final del
+  paper: **auditoría de la medición de fidelidad**, no validación de verificador.
+- Codex completó el pulido base: probe de cobertura por proveedor (exp17: baseline 8 % vs
+  balanced 80 % de cobertura estricta multi-nube, 0/125 chunks de proveedor ajeno),
+  `docs/LIMITACIONES_Y_TRABAJO_FUTURO.md`, CITATION.cff, enlaces en README; 333 tests OK.
+- Prompt de cierre documental para Codex: `output/audit/PROMPT_CODEX_CIERRE_DOC_2026-08-29.md`
+  (reescritura de la sección de validación con terminología corregida, ICs descriptivos,
+  ficha experimental, auditoría descriptiva del extractor).
+- Sigue bloqueante y solo humano: **adjudicación de los 9 discordantes**
+  (`output/audit/adjudicacion_tandaC.html`) → luego Codex ejecuta merge + sensibilidad
+  completa + relleno de marcadores (fase 2 del prompt anterior).
+
+### 11.7 Cierre de la referencia humana (2026-08-30, [Kimi Work])
+
+Adjudicación fusionada (9/9 con razones) y cifras finales en la entrada 28d del ledger:
+HHEM κ 0,315/0,397 con ordenamiento estable en las 3 variantes (Δκ ≤ 0,012); flips A→B
+finales 18/50 (36 %). Todo el material del paper está computado. **Solo falta el
+commit+push** (comando sugerido abajo) y, opcional, el probe T1/T2 y mi etapa B ciega
+(enriquecen, no bloquean).
+
+Commit sugerido:
+  git add -A
+  git commit -m "data(gold): referencia humana completa y adjudicada - triple juez, sensibilidad, revision externa, cierre documental"
+  git push

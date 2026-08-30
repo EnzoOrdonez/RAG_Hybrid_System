@@ -1,0 +1,607 @@
+{
+ "juez": "kimi-work",
+ "cegamiento": "sin acceso a gold humano ni otros LLM; guia v4 aplicada claim<->chunk",
+ "juicios": {
+  "A-001": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de AWS ECS; el claim es de Azure: provider swap."
+  },
+  "A-002": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk sobre capabilities CMK de Cosmos for MongoDB; nada de aceleracion hardware."
+  },
+  "A-003": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado (titulo con parentesis vacio); chunk de migracion Cassandra."
+  },
+  "A-004": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk respalda sample-apps genericas; la lista concreta de lenguajes no aparece."
+  },
+  "A-005": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de upgrades AKS (surge zones); el claim es de EKS: provider swap."
+  },
+  "A-006": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk GKE/Cloud Run y Cloud Deploy; nada de VMs Ubuntu Pro."
+  },
+  "A-007": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de access restrictions/service endpoints; no menciona crear file share."
+  },
+  "A-008": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk solo de AWS (Service Connect/VPC SG); el claim afirma los tres proveedores."
+  },
+  "A-009": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk sobre contribuir a docs EKS en GitHub; silencia el reporte de vulnerabilidades."
+  },
+  "A-010": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado (fragmento de lista); chunk de plantilla de funcion Lambda."
+  },
+  "A-011": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de Accelerated Networking en VMSS; nada de AKS APIs ni zero-node."
+  },
+  "A-012": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento sin proposicion; chunk de tiers de Reserved Instances EC2, no S3."
+  },
+  "A-013": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk del plugin Cloud Code/IDE; no menciona GKE Multi-Cloud ni attached clusters."
+  },
+  "A-014": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk lista metodos de Admin activity audit logs; no menciona habilitar Data Access logs."
+  },
+  "A-015": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de targets de escalabilidad/SLA de page blobs; silencia el criterio de uso del claim."
+  },
+  "A-016": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de connection tracking de security groups (AWS); claim de Windows DNS/Azure DNS."
+  },
+  "A-017": {
+   "juicio": "incorrecto",
+   "comentario": "Claim con [CODE] redactado; chunk de private site access, sin app settings de file share."
+  },
+  "A-018": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; chunk de GKE Sandbox/observabilidad, sin Terraform."
+  },
+  "A-019": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de monitoreo de Capacity Reservations; no menciona DLM policies."
+  },
+  "A-020": {
+   "juicio": "dudoso",
+   "comentario": "Chunk muestra acceso a logs por consola y un logName de cloudbuild truncado; parte [CODE] ilegible y no queda claro que sean build logs."
+  },
+  "A-021": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento de tabla; chunk de capabilities Cosmos, nada de compute service/networking."
+  },
+  "A-022": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de private endpoint/DNS para Blob y BlobFuse; no contiene el paso 'Create virtual network'."
+  },
+  "A-023": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de crear resource group para CNI en Docker host; no menciona Bastion."
+  },
+  "A-024": {
+   "juicio": "correcto",
+   "comentario": "El chunk configura capabilities de Cosmos for MongoDB y muestra EnableMongo como la capability habilitada; se sigue directamente."
+  },
+  "A-025": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de continuous deployment de Azure Functions; claim sobre Cloud Build/GKE: provider swap."
+  },
+  "A-026": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de release notes GKE (Windows nodes); claim de parametro de metricas de Auto Scaling AWS."
+  },
+  "A-027": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de GKE Multi-Cloud fuera de Google Cloud; no afirma que el usuario no gestione el control plane."
+  },
+  "A-028": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre donde buscar el SLA; chunk de metricas ENA Express (EC2)."
+  },
+  "A-029": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de contribucion/licencias de docs EKS; no menciona AsciiDoc."
+  },
+  "A-030": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de EnableMongo; no menciona multi-modelo ni API for Table."
+  },
+  "A-031": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; chunk del patron Monitor (Durable Functions), no de metricas."
+  },
+  "A-032": {
+   "juicio": "incorrecto",
+   "comentario": "La lista de regiones del chunk es del routing appliance (preview), no de Virtual Network TAP: entidad cambiada."
+  },
+  "A-033": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de workload identity en GKE y metricas HPA; no respalda el claim general sobre control de acceso IAM en GCP."
+  },
+  "A-034": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado ('AWS ECS -.'); chunk de listeners blue/green."
+  },
+  "A-035": {
+   "juicio": "correcto",
+   "comentario": "El chunk describe exactamente ASG capacity provider + managed scaling para ECS."
+  },
+  "A-036": {
+   "juicio": "correcto",
+   "comentario": "Chunk: Cloud Run es serverless/pay-per-use sin control de Kubernetes: se sigue que la infraestructura la gestiona la plataforma."
+  },
+  "A-037": {
+   "juicio": "correcto",
+   "comentario": "El chunk contiene literalmente esa viñeta (virtual network integration)."
+  },
+  "A-038": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk del FAQ de VNet/Web Apps; no contiene el paso de portal Settings>Networking."
+  },
+  "A-039": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de cuotas de Reserved Instances; no menciona reglas de Fleet/Spot Fleet."
+  },
+  "A-040": {
+   "juicio": "incorrecto",
+   "comentario": "Claim truncado; chunk de ubicaciones TPU de GCP, sin NVIDIA."
+  },
+  "A-041": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado ('serve different purposes:.'); chunk de RBAC Entra para blobs."
+  },
+  "A-042": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de monitoreo de politicas DLM (namespace EBS); no de RDS ni creacion de alarmas RDS."
+  },
+  "A-043": {
+   "juicio": "correcto",
+   "comentario": "Chunk: mayor throughput usando mas clientes, escalado lineal hasta el limite de la cuenta: respaldo directo."
+  },
+  "A-044": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de roles IAM para tutorial FSx; no menciona acceso de red al endpoint ECS."
+  },
+  "A-045": {
+   "juicio": "dudoso",
+   "comentario": "Chunk on-topic (despliegue de paquete a Blob) pero se corta justo donde iria el paso de portal del claim."
+  },
+  "A-046": {
+   "juicio": "incorrecto",
+   "comentario": "Parte 1 respaldada literalmente; pero 'Standard default para Automatic SKU' no aparece en el chunk: multi-parte con un hecho no mencionado."
+  },
+  "A-047": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de 'What is Amazon EC2' (features de EC2), no describe ECS; ademas cola de Sources degenerada."
+  },
+  "A-048": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim que remite a documentacion externa; chunk de IAM de Compute Engine, no Pub/Sub."
+  },
+  "A-049": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk compara Autopilot vs Standard; no menciona el Custom Metrics Stackdriver Adapter."
+  },
+  "A-050": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de herramientas de monitoreo de ECS; no menciona RDS ni el paso 'Create Alarm' para RDS."
+  },
+  "A-051": {
+   "juicio": "correcto",
+   "comentario": "Chunk: best practice CI/CD con Cloud Build, Cloud Deploy y Artifact Registry: respaldo directo."
+  },
+  "A-052": {
+   "juicio": "correcto",
+   "comentario": "Chunk: 'Both standard and premium storage are durable... replicated to ensure durability and high availability': respaldo casi literal."
+  },
+  "A-053": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; chunk de herramientas ECS/CloudWatch alarms, sin grafos de recursos."
+  },
+  "A-054": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; chunk de metricas CloudWatch de EC2, no ECS."
+  },
+  "A-055": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado (link de ancla); aunque el chunk contiene esa seccion, no hay proposicion factual."
+  },
+  "A-056": {
+   "juicio": "correcto",
+   "comentario": "Chunk: rollout desde septiembre 2025 habilita cuota de clusters por region para todos los clientes: literal."
+  },
+  "A-057": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre el contexto; el chunk lista CloudWatch Alarms, no Logs para contenedores."
+  },
+  "A-058": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de auto scaling de AWS ECS; el claim es de GKE Autopilot: provider swap."
+  },
+  "A-059": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de escalado de Spot Fleet; no menciona precios maximos ajustables ni interruption behaviors."
+  },
+  "A-060": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de capacity providers (weights/tipos); no menciona crear un servicio ECS."
+  },
+  "A-061": {
+   "juicio": "correcto",
+   "comentario": "El chunk son pasos para crear una base RDS: 'RDS provee hosting de BD' se sigue directamente."
+  },
+  "A-062": {
+   "juicio": "incorrecto",
+   "comentario": "El chunk solo dice que se muestran metricas y el numero de running tasks; no el filtrado por dimensiones que afirma el claim ([CODE] redactados)."
+  },
+  "A-063": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de integraciones ECS (ECR, Outposts, App Mesh); no menciona ECS Anywhere."
+  },
+  "A-064": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado (solo un link); el chunk lista metodos de audit logging."
+  },
+  "A-065": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de features de EC2; la descripcion de alarmas CloudWatch no aparece."
+  },
+  "A-066": {
+   "juicio": "incorrecto",
+   "comentario": "El chunk crea una VNet con region East US de ejemplo; no lista regiones del routing appliance preview."
+  },
+  "A-067": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado; chunk de tutoriales AI/ML en GKE."
+  },
+  "A-068": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de MIGs/autoscaling de Compute Engine; no de BigQuery."
+  },
+  "A-069": {
+   "juicio": "incorrecto",
+   "comentario": "El chunk menciona ALB/NLB solo en consideraciones para ECS; no las caracteriza como el claim."
+  },
+  "A-070": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de overview de monitoreo AKS (insights); no contiene el paso de crear workspace Log Analytics."
+  },
+  "A-071": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre que contiene la documentacion; chunk de instance identity roles de EC2."
+  },
+  "A-072": {
+   "juicio": "incorrecto",
+   "comentario": "La mitad ECS-especifica se respalda ('only supported with ASG capacity providers') pero 'no aplicable a EC2 sin configuracion adicional' no aparece."
+  },
+  "A-073": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de lista de tutoriales GKE; no contiene el paso 'Create an Autopilot cluster'."
+  },
+  "A-074": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de Service Connect (AWS ECS); la definicion de VPC de GCP no esta: provider swap."
+  },
+  "A-075": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de GKE Multi-Cloud; el claim es de AKS: provider swap."
+  },
+  "A-076": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de autoscaling/load balancing de Compute Engine; no menciona Cloud DNS geolocation routing."
+  },
+  "A-077": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de roles requeridos para GKE (clusterViewer); no de Compute Engine ni del principio de menor privilegio."
+  },
+  "A-078": {
+   "juicio": "correcto",
+   "comentario": "Chunk lista literalmente 'built-in redundancy options (locally redundant storage, and zone-redundant storage)'."
+  },
+  "A-079": {
+   "juicio": "correcto",
+   "comentario": "Aunque el claim esta cortado, lo afirmado coincide con el tutorial del chunk (analizar datasets en GKE con BigQuery para storage/processing)."
+  },
+  "A-080": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento sobre Azure; chunk de GKE/GCP: provider swap."
+  },
+  "A-081": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk del tutorial ECS (AWS); el claim de YAML/kubectl no aparece: provider swap."
+  },
+  "A-082": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de cuotas de Reserved Instances; no menciona target capacity 10000 de fleets."
+  },
+  "A-083": {
+   "juicio": "dudoso",
+   "comentario": "El chunk muestra la tabla de features de AKS cortada justo antes de la fila de networking; no se puede descartar truncamiento."
+  },
+  "A-084": {
+   "juicio": "incorrecto",
+   "comentario": "Claim meta/declinacion sobre el contexto; chunk de EventBridge para EC2 Fleet."
+  },
+  "A-085": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de secured storage para Functions/app routing; no contiene el paso 'Next, Next, Create'."
+  },
+  "A-086": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado/meta ('the context provides details regarding:.'); chunk de pricing CloudWatch/Container Insights."
+  },
+  "A-087": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre lo que se puede comparar; chunk del FAQ de escalado de Cosmos for Table."
+  },
+  "A-088": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk del aviso de repo archivado de RDS; no menciona Multi-AZ."
+  },
+  "A-089": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de VMs B-series (creditos CPU); no menciona Start/Stop VMs v2."
+  },
+  "A-090": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado truncado; chunk de limpieza de recursos GKE/Logging."
+  },
+  "A-091": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de features de EC2; el claim es del proceso de contribucion de docs EKS."
+  },
+  "A-092": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre SKUs de Bastion; chunk de opciones de storage en AKS."
+  },
+  "A-093": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; el chunk menciona 'national clouds' en general pero no 21Vianet."
+  },
+  "A-094": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk introduce el registro de task definitions pero no contiene el paso 'Configure via JSON'."
+  },
+  "A-095": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre documentacion necesaria; chunk de recursos del repo Lambda."
+  },
+  "A-096": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre las secciones; chunk de best practices de costo en AKS (Azure)."
+  },
+  "A-097": {
+   "juicio": "correcto",
+   "comentario": "El chunk configura 'Engine type: MySQL' al crear la RDS; la accion de elegir motor queda respaldada (solo MySQL ejemplificado)."
+  },
+  "A-098": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado/meta ('What the documentation does mention:.')."
+  },
+  "A-099": {
+   "juicio": "correcto",
+   "comentario": "La seccion del chunk trata de restringir servicios Azure con service endpoints: respaldo directo de la idea del claim."
+  },
+  "A-100": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de AZ IDs de AWS; claim de Azure availability sets: provider swap (y mezcla sets con zones)."
+  },
+  "A-101": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de Ultra Disks; no menciona despliegue de VMs en VNet/NSGs."
+  },
+  "A-102": {
+   "juicio": "incorrecto",
+   "comentario": "El chunk lista la referencia, pero no afirma que mencione 'replication options': meta sin respaldo."
+  },
+  "A-103": {
+   "juicio": "correcto",
+   "comentario": "Oracion literal en el chunk ('Azure automatically creates and configures a control plane for you at no cost')."
+  },
+  "A-104": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de task placement de ECS; no de integracion con registries."
+  },
+  "A-105": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento sin proposicion; chunk de ClassicLink."
+  },
+  "A-106": {
+   "juicio": "correcto",
+   "comentario": "Literal: 'IAM is an AWS service that you can use with no additional charge.'"
+  },
+  "A-107": {
+   "juicio": "incorrecto",
+   "comentario": "Claim meta/instruccional vacio; chunk de instance groups y free tier de Compute Engine."
+  },
+  "A-108": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de features de EC2; Lambda ni se menciona."
+  },
+  "A-109": {
+   "juicio": "correcto",
+   "comentario": "El chunk afirma directamente que con Flexible orchestration eliges si las instancias se reparten entre zonas (cortado justo despues del punto clave)."
+  },
+  "A-110": {
+   "juicio": "correcto",
+   "comentario": "Literal en el chunk ('Clone existing volumes to create new persistent volumes with the same data')."
+  },
+  "A-111": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento de tabla sobre AsciiDoc; chunk de contribucion/licencia, sin AsciiDoc."
+  },
+  "A-112": {
+   "juicio": "correcto",
+   "comentario": "Nota literal en el chunk."
+  },
+  "A-113": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; chunk de observabilidad de clusters GKE, no Cloud SQL."
+  },
+  "A-114": {
+   "juicio": "correcto",
+   "comentario": "'Reduce prediction latency' aparece literal en la lista de usos de GPUs en Vertex AI."
+  },
+  "A-115": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de integraciones ECS; ECS Anywhere no aparece (Outposts si)."
+  },
+  "A-116": {
+   "juicio": "incorrecto",
+   "comentario": "El chunk configura service endpoints, no Private Link/private endpoint: metodo distinto al citado."
+  },
+  "A-117": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; el chunk no nombra Cloud Build en el texto visible."
+  },
+  "A-118": {
+   "juicio": "incorrecto",
+   "comentario": "Claim meta sobre la comparacion; chunk de casos de uso/service discovery de ECS, sin caracterizar VPC."
+  },
+  "A-119": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; chunk de monitoreo de ECS, no EC2."
+  },
+  "A-120": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim sobre presencia en la documentacion; chunk de tabla Gen1/Gen2 de VMs."
+  },
+  "A-121": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento-titulo sobre EKS; chunk de herramientas de monitoreo de ECS."
+  },
+  "A-122": {
+   "juicio": "incorrecto",
+   "comentario": "Cierre meta ('by following these steps...'); chunk de listeners blue/green de ECS."
+  },
+  "A-123": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento-etiqueta sin proposicion; aunque el chunk si trata forwarding rules de VMs."
+  },
+  "A-124": {
+   "juicio": "incorrecto",
+   "comentario": "Meta-claim pidiendo contexto; chunk de tutoriales GKE."
+  },
+  "A-125": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de IAM de Compute Engine (roles, autenticacion); no contiene el paso del body del request."
+  },
+  "A-126": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de overview de datos de monitoreo AKS; no menciona Metrics Explorer ni crear metric alerts."
+  },
+  "A-127": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de monitoreo de ciclo de vida de snapshots (DLM); el paso para DynamoDB no esta."
+  },
+  "A-128": {
+   "juicio": "correcto",
+   "comentario": "El chunk instruye esperar el deployment e ir a la pagina Deployment details de la app: respaldo directo ([CODE]=nombre de la app)."
+  },
+  "A-129": {
+   "juicio": "incorrecto",
+   "comentario": "El best practice del chunk es elegir GKE (control/portabilidad), no Vertex AI: no coincide."
+  },
+  "A-130": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento sin proposicion ('for hybrid deployment considerations..')."
+  },
+  "A-131": {
+   "juicio": "incorrecto",
+   "comentario": "Claim degenerado/meta ('What the context covers:.')."
+  },
+  "A-132": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de 'How GKE works' (nodos/pods); el paso de esperar la API no aparece en este chunk."
+  },
+  "A-133": {
+   "juicio": "dudoso",
+   "comentario": "El chunk muestra 'DB instance class: db.t3' y se corta justo antes del sufijo '.micro' que el claim cita."
+  },
+  "A-134": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; chunk de Container Insights para ECS, no metricas de EKS."
+  },
+  "A-135": {
+   "juicio": "incorrecto",
+   "comentario": "Nota meta de remision a documentacion; chunk del tutorial ECS de AWS."
+  },
+  "A-136": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; chunk del proceso de build de Cloud Functions/logs, sin conexion a GitHub."
+  },
+  "A-137": {
+   "juicio": "incorrecto",
+   "comentario": "La cita sobre security groups least-privilege no aparece en el chunk visible (solo la conexion automatica en la misma VPC)."
+  },
+  "A-138": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de alertas basadas en Prometheus para AKS; la 'calculacion sobre columnas numericas' no aparece."
+  },
+  "A-139": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento degenerado ('Inference for AWS and Azure:.'); chunk de Workforce Identity Federation de GKE."
+  },
+  "A-140": {
+   "juicio": "dudoso",
+   "comentario": "El chunk lista los prompts del azd y se corta tras 'Environment name'; el prompt de Location del claim queda justo en el corte."
+  },
+  "A-141": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk del FAQ de EBS snapshots en Outposts (AWS); claim de tiering de Azure: provider swap."
+  },
+  "A-142": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de habilitar la API de Kubernetes Engine y roles; no menciona firewall rules."
+  },
+  "A-143": {
+   "juicio": "dudoso",
+   "comentario": "Tabla de tiers AKS cortada en la fila Free; los datos del claim (99.9-99.95% uptime, LTS 24m) corresponderian a filas no visibles: truncamiento genuino."
+  },
+  "A-144": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; el paso 'Go to Networking settings' no aparece en el chunk."
+  },
+  "A-145": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de rotacion de claves KMS; la lista de alcance del cifrado EBS no aparece."
+  },
+  "A-146": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento-etiqueta; chunk de lista de tutoriales GKE."
+  },
+  "A-147": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk del FAQ de VNet (Cloud Services); el paso del claim no aparece."
+  },
+  "A-148": {
+   "juicio": "incorrecto",
+   "comentario": "Chunk de VNet triggers de Functions; no describe la opcion durante la creacion."
+  },
+  "A-149": {
+   "juicio": "incorrecto",
+   "comentario": "El chunk solo lista features IAM para ECS; la descripcion general de IAM que afirma el claim no esta en este chunk."
+  },
+  "A-150": {
+   "juicio": "incorrecto",
+   "comentario": "Fragmento; chunk de release notes GKE que menciona Cloud Logging/Log Router, no habilitar logging para BigQuery."
+  }
+ },
+ "estado": "etapa A completa (150/150); etapa B pendiente"
+}

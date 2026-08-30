@@ -1,0 +1,324 @@
+{
+ "generated_by": "scripts/analyze_gold_v4.py",
+ "simulated": false,
+ "n_annotated_stage_a": 150,
+ "n_used": 132,
+ "n_dudoso": 18,
+ "dudoso_rule": "exclude",
+ "pool_size": 14409,
+ "sampled_strata_n": {
+  "false_contr": 30,
+  "near_threshold": 40,
+  "disagreement": 50,
+  "random_anchor": 30
+ },
+ "kish_n_eff": 38.5,
+ "ht_weights": {
+  "scheme": "Horvitz-Thompson, 1/pi; pi replayed from the real sequential sampler over overlapping strata, pooled within flag pattern",
+  "n_replicates": 400,
+  "pi_by_flag_pattern": {
+   "fc=0,nt=0,dis=0": {
+    "pi": 0.002086,
+    "pool_n": 9376,
+    "weight": 479.5
+   },
+   "fc=0,nt=0,dis=1": {
+    "pi": 0.012814,
+    "pool_n": 4301,
+    "weight": 78.0
+   },
+   "fc=0,nt=1,dis=0": {
+    "pi": 0.067618,
+    "pool_n": 319,
+    "weight": 14.8
+   },
+   "fc=0,nt=1,dis=1": {
+    "pi": 0.077736,
+    "pool_n": 286,
+    "weight": 12.9
+   },
+   "fc=1,nt=0,dis=1": {
+    "pi": 0.246333,
+    "pool_n": 120,
+    "weight": 4.1
+   },
+   "fc=1,nt=1,dis=1": {
+    "pi": 0.281071,
+    "pool_n": 7,
+    "weight": 3.6
+   }
+  }
+ },
+ "bh_family": "5 candidate-vs-human kappa tests (fdr_bh)",
+ "candidates_intended": [
+  "small",
+  "base",
+  "hhem",
+  "E5_base_and_hhem",
+  "E1_mean"
+ ],
+ "candidates_available": [
+  "small",
+  "base",
+  "hhem",
+  "E5_base_and_hhem",
+  "E1_mean"
+ ],
+ "candidates_missing": [],
+ "candidates_note": null,
+ "bootstrap": {
+  "n_boot": 10000,
+  "seed": 42,
+  "scheme": "stratified, within-stratum"
+ },
+ "selection_note": "Promotion to primary verifier is NOT decided here: the pre-registered blind criterion is the negative control in ensemble_sweep_results.json. This table is the human-arbitration evidence that goes to Enzo alongside it.",
+ "candidates": [
+  {
+   "candidate": "hhem",
+   "kappa_weighted": 0.315,
+   "kappa_ci95": [
+    0.0137,
+    0.5712
+   ],
+   "kappa_random_anchor": 0.3966,
+   "n_random_anchor": 27,
+   "accuracy_random_anchor": 0.7037,
+   "precision_supported": 0.6585,
+   "recall_supported": 0.6136,
+   "verifier_supported_rate": 0.6212,
+   "reliability_bins": [
+    {
+     "bin": "[0.0,0.2)",
+     "n": 33,
+     "mean_conf": 0.0819,
+     "human_supported_rate": 0.5758
+    },
+    {
+     "bin": "[0.2,0.4)",
+     "n": 11,
+     "mean_conf": 0.2913,
+     "human_supported_rate": 0.9091
+    },
+    {
+     "bin": "[0.4,0.6)",
+     "n": 9,
+     "mean_conf": 0.4798,
+     "human_supported_rate": 0.8889
+    },
+    {
+     "bin": "[0.6,0.8)",
+     "n": 9,
+     "mean_conf": 0.7308,
+     "human_supported_rate": 0.6667
+    },
+    {
+     "bin": "[0.8,1.0)",
+     "n": 70,
+     "mean_conf": 0.9472,
+     "human_supported_rate": 0.6429
+    }
+   ],
+   "ece": 0.3686,
+   "p_bh": 0.212
+  },
+  {
+   "candidate": "E5_base_and_hhem",
+   "kappa_weighted": 0.1601,
+   "kappa_ci95": [
+    -0.0827,
+    0.3969
+   ],
+   "kappa_random_anchor": 0.1702,
+   "n_random_anchor": 27,
+   "accuracy_random_anchor": 0.5185,
+   "precision_supported": 0.6444,
+   "recall_supported": 0.3295,
+   "verifier_supported_rate": 0.3409,
+   "reliability_bins": [
+    {
+     "bin": "[0.0,0.2)",
+     "n": 33,
+     "mean_conf": 0.0819,
+     "human_supported_rate": 0.5758
+    },
+    {
+     "bin": "[0.2,0.4)",
+     "n": 11,
+     "mean_conf": 0.2913,
+     "human_supported_rate": 0.9091
+    },
+    {
+     "bin": "[0.4,0.6)",
+     "n": 9,
+     "mean_conf": 0.4798,
+     "human_supported_rate": 0.8889
+    },
+    {
+     "bin": "[0.6,0.8)",
+     "n": 9,
+     "mean_conf": 0.7308,
+     "human_supported_rate": 0.6667
+    },
+    {
+     "bin": "[0.8,1.0)",
+     "n": 70,
+     "mean_conf": 0.9472,
+     "human_supported_rate": 0.6429
+    }
+   ],
+   "ece": 0.3686,
+   "p_bh": 0.4545
+  },
+  {
+   "candidate": "small",
+   "kappa_weighted": 0.0916,
+   "kappa_ci95": [
+    -0.1844,
+    0.3548
+   ],
+   "kappa_random_anchor": 0.0156,
+   "n_random_anchor": 27,
+   "accuracy_random_anchor": 0.4815,
+   "precision_supported": 0.7907,
+   "recall_supported": 0.3864,
+   "verifier_supported_rate": 0.3258,
+   "reliability_bins": [
+    {
+     "bin": "[0.0,0.2)",
+     "n": 35,
+     "mean_conf": 0.0555,
+     "human_supported_rate": 0.5143
+    },
+    {
+     "bin": "[0.2,0.4)",
+     "n": 7,
+     "mean_conf": 0.2846,
+     "human_supported_rate": 0.8571
+    },
+    {
+     "bin": "[0.4,0.6)",
+     "n": 6,
+     "mean_conf": 0.5043,
+     "human_supported_rate": 0.6667
+    },
+    {
+     "bin": "[0.6,0.8)",
+     "n": 47,
+     "mean_conf": 0.7106,
+     "human_supported_rate": 0.7872
+    },
+    {
+     "bin": "[0.8,1.0)",
+     "n": 37,
+     "mean_conf": 0.919,
+     "human_supported_rate": 0.6216
+    }
+   ],
+   "ece": 0.27,
+   "p_bh": 0.6545
+  },
+  {
+   "candidate": "base",
+   "kappa_weighted": 0.0839,
+   "kappa_ci95": [
+    -0.1887,
+    0.3405
+   ],
+   "kappa_random_anchor": 0.078,
+   "n_random_anchor": 27,
+   "accuracy_random_anchor": 0.4815,
+   "precision_supported": 0.6441,
+   "recall_supported": 0.4318,
+   "verifier_supported_rate": 0.447,
+   "reliability_bins": [
+    {
+     "bin": "[0.0,0.2)",
+     "n": 59,
+     "mean_conf": 0.0231,
+     "human_supported_rate": 0.661
+    },
+    {
+     "bin": "[0.2,0.4)",
+     "n": 6,
+     "mean_conf": 0.2908,
+     "human_supported_rate": 0.8333
+    },
+    {
+     "bin": "[0.4,0.6)",
+     "n": 3,
+     "mean_conf": 0.489,
+     "human_supported_rate": 1.0
+    },
+    {
+     "bin": "[0.6,0.8)",
+     "n": 4,
+     "mean_conf": 0.7501,
+     "human_supported_rate": 0.5
+    },
+    {
+     "bin": "[0.8,1.0)",
+     "n": 60,
+     "mean_conf": 0.9507,
+     "human_supported_rate": 0.65
+    }
+   ],
+   "ece": 0.4657,
+   "p_bh": 0.6545
+  },
+  {
+   "candidate": "E1_mean",
+   "kappa_weighted": -0.0288,
+   "kappa_ci95": [
+    -0.2844,
+    0.1861
+   ],
+   "kappa_random_anchor": -0.08,
+   "n_random_anchor": 27,
+   "accuracy_random_anchor": 0.2963,
+   "precision_supported": 0.6333,
+   "recall_supported": 0.2159,
+   "verifier_supported_rate": 0.2273,
+   "reliability_bins": [
+    {
+     "bin": "[0.0,0.2)",
+     "n": 59,
+     "mean_conf": 0.0231,
+     "human_supported_rate": 0.661
+    },
+    {
+     "bin": "[0.2,0.4)",
+     "n": 6,
+     "mean_conf": 0.2908,
+     "human_supported_rate": 0.8333
+    },
+    {
+     "bin": "[0.4,0.6)",
+     "n": 3,
+     "mean_conf": 0.489,
+     "human_supported_rate": 1.0
+    },
+    {
+     "bin": "[0.6,0.8)",
+     "n": 4,
+     "mean_conf": 0.7501,
+     "human_supported_rate": 0.5
+    },
+    {
+     "bin": "[0.8,1.0)",
+     "n": 60,
+     "mean_conf": 0.9507,
+     "human_supported_rate": 0.65
+    }
+   ],
+   "ece": 0.4657,
+   "p_bh": 0.8622
+  }
+ ],
+ "stage_b_evidence_bias": {
+  "n_judged_twice": 50,
+  "n_flips": 18,
+  "flip_rate": 0.36,
+  "flips_toward_supported": 12,
+  "reading": "flips toward 'correcto' are the confound: evidence that was present in the context but hidden from stage A. A high rate means the stage-A kappa understates every verifier that reads all 5 chunks (HHEM, NLI vb_agree) and the weighted kappa above should be read as a lower bound for them."
+ }
+}
