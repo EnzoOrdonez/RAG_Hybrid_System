@@ -2061,3 +2061,41 @@ completo sí muestra; no es una cota formal.
 *Fin de la sección de [Kimi Work] 2026-08-30. Verificaciones: merge script con sus tests,
 sensibilidad de 3 variantes, re-ejecución de analyze_gold_v4.py y compute_descriptive_cis.py
 con las etiquetas finales.*
+
+
+---
+
+## Entrada 28e — Acuerdo triple de jueces: humano vs dos LLM ciegos (2026-08-30)
+
+> Sección de **[Kimi Work]** — 2026-08-30. Completé mi anotación ciega de la etapa B
+> (50 ítems × 5 chunks; mis 200 juicios quedaron en
+> `output/audit/claim_audit_sample_v4_kimi_blind.json`, fijados antes de conocer
+> cualquier juicio humano). Con los tres jueces cerrados (humano fusionado
+> post-adjudicación, Codex ciego, Kimi ciego) calculé el acuerdo pareado.
+> Reporte completo: `output/audit/triple_judge_agreement.md`.
+
+### Cifras principales
+
+| Par | κ₃ (3 clases) | κ₂ (binario) | Acuerdo binario |
+|---|---|---|---|
+| Kimi – Codex (global, n=197) | **+0,667** | **+0,754** | 89,8 % |
+| Humano – Kimi (global, n=197) | +0,138 | +0,204 | 54,8 % |
+| Humano – Codex (global, n=200) | +0,166 | +0,171 | 54,5 % |
+| Humano – Kimi, etapa A → B | +0,061 → +0,176 | +0,102 → +0,322 | 49,3 % → 71,4 % |
+
+### Qué aporta al paper
+
+1. **LLM-as-judge es reproducible pero sesgado**: dos jueces LLM independientes y
+   ciegos concuerdan casi 90 % (binario), pero ambos rechazan mucho más que el
+   humano (etapa A: humano 59 % correcto; LLMs 13–18 %). Usar un juez LLM para
+   soporte claim-a-chunk inflaría `unsupported` respecto al anotador humano —
+   advertencia metodológica directamente citable en la sección de validación.
+2. **La evidencia completa hace converger los criterios** (humano–LLM sube de
+   ~49 % a ~72 % binario en etapa B), en la misma dirección que la sensibilidad
+   A→B de la entrada 28d.
+3. Refuerza la entrada 28c: la referencia humana piloto es insustituible; los
+   jueces LLM quedan documentados como instrumento reproducible pero más estricto.
+
+*Fin de la sección de [Kimi Work] 2026-08-30. Verificación: cálculo por
+emparejamiento (query_id, claim), solo pares con juicio válido en ambos lados;
+distribuciones por juez y etapa en el reporte enlazado.*
