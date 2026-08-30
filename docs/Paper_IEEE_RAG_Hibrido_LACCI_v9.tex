@@ -1,0 +1,180 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{url}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+\title{Hybrid Retrieval-Augmented Generation for Multi-Cloud Documentation: A Comparative Evaluation of Lexical, Semantic, and Hybrid Pipelines Against an LLM-Only Baseline}
+\author{
+\IEEEauthorblockN{Enzo Ordo\~nez Flores}
+\IEEEauthorblockA{\textit{Facultad de Ingenier\'ia y Arquitectura} \\
+\textit{Universidad de Lima}\\
+Lima, Per\'u \\
+enzoordonezf@gmail.com}
+\and
+\IEEEauthorblockN{Winston Lewis Fuentes}
+\IEEEauthorblockA{\textit{Facultad de Ingenier\'ia y Arquitectura} \\
+\textit{Universidad de Lima}\\
+Lima, Per\'u \\
+wlewis@aloe.ulima.edu.pe}
+}
+\maketitle
+\IEEEpubid{\makebox[\columnwidth]{979-8-3195-2812-4/26/\$31.00~\copyright~2026 IEEE \hfill} \hspace{\columnsep}\makebox[\columnwidth]{}}
+\IEEEpubidadjcol
+\begin{abstract}
+Large Language Models (LLMs) fabricate confidently when queried about specialized technical domains such as multi-cloud documentation. Retrieval-Augmented Generation (RAG) is the standard mitigation, but how much lexical, dense, and hybrid retrieval contribute to final-answer faithfulness in this setting is unclear. We present a hybrid RAG procedure for AWS, Azure, and Google Cloud documentation that fuses BM25 and BGE-large dense retrieval via Reciprocal Rank Fusion (RRF), reranks with a cross-encoder, and verifies faithfulness with Natural Language Inference (NLI). We benchmark four retrieval scenarios (no-RAG, lexical, dense, hybrid) across four current open LLMs (Granite 4.1 8B, Gemma 4 E4B, Mistral 7B, Qwen 3.5 9B) over 194 queries. Because judging relevance with the pipeline's own reranker is circular, we report an independent oracle: the reranked hybrid reaches NDCG@5 0.740 (versus 0.995 under the circular judge), and its advantage over the dense baseline, though real, originates in the reranking stage rather than in RRF fusion. The central finding is that better retrieval does not translate into higher answer faithfulness; the dominant difference between models is how often they decline to answer, not their faithfulness. The no-RAG control rarely declines honestly; its evidence-supported claim rate is zero by construction, and representative outputs contain confident factual errors. A reproducible benchmark with dataset, code, and results is released.
+\end{abstract}
+\begin{IEEEkeywords}
+retrieval-augmented generation, hybrid retrieval, cross-encoder reranking, faithfulness verification, natural language inference, oracle circularity, cloud documentation
+\end{IEEEkeywords}
+\section{Introduction}
+The deployment of LLMs as conversational interfaces over specialized technical documentation faces a recurring failure mode: without retrieved evidence, models produce confident yet factually incorrect outputs, known as hallucination~\cite{ji2023survey,huang2023survey}. This is acute in cloud documentation, where service catalogs evolve continuously and answers depend on precise quotas, pricing tiers, and configuration parameters that LLMs may have memorized from outdated snapshots.
+Retrieval-Augmented Generation (RAG)~\cite{lewis2020rag} grounds generation in passages retrieved from an authoritative corpus. Retrieval is dominated by two paradigms: sparse lexical methods such as BM25~\cite{robertson2009bm25} and dense embedding methods~\cite{karpukhin2020dpr,wang2022bge}. Hybrid retrieval combines both, via score fusion such as Reciprocal Rank Fusion (RRF)~\cite{cormack2009rrf} or learned combinations~\cite{sawarkar2024hybrid}, and cross-encoder reranking~\cite{nogueira2019passage} refines the top-$k$.
+Four questions motivate this work: how much do hybrid retrieval gains transfer to answer faithfulness when generation uses small, locally-deployable open LLMs; what is the absolute no-retrieval baseline under a consistent faithfulness definition; how can honest-decline behavior be measured across heterogeneous response formats; and how much of the apparent hybrid advantage is real rather than an artifact of judging relevance with the pipeline's own reranker?
+This paper contributes: (i) a hybrid RAG procedure for AWS, Azure, and GCP documentation, with 24{,}481 chunks indexed by BGE-large and BM25, fused via RRF and cross-encoder reranked; (ii) a comparative evaluation crossing four retrieval scenarios with four current open LLMs of distinct vendors over 194 queries; (iii) the quantification and mitigation of \emph{oracle circularity} by reporting an independent relevance oracle, showing the hybrid advantage over dense is real but inflated under the circular judge and stems from reranking, not fusion; and (iv) an NLI faithfulness detector with an explicit operational definition plus a decline metric, yielding the findings that retrieval gains do not transfer to faithfulness and that the decline rate dominates inter-model differences. We also correct two evaluation-pipeline defects (a case-sensitivity defect in decline matching and a claim-extraction failure on list-formatted responses).
+\section{Related Work}
+RAG~\cite{lewis2020rag} grounds a generator in documents from an external index; since retrieval failures cap generation quality~\cite{liu2024lost}, the retrieval stage deserves evaluation as a distinct contributor to answer correctness~\cite{gao2023retrieval,asai2023self}. Sparse (BM25~\cite{robertson2009bm25}) and dense~\cite{karpukhin2020dpr,wang2022bge} retrieval exhibit complementary failure modes---lexical mismatch versus rare exact-match identifiers~\cite{thakur2021beir}. Hybrid methods combine them through tunable linear fusion~\cite{sawarkar2024hybrid} or parameter-free RRF~\cite{cormack2009rrf}, and consistently match or exceed the better single paradigm~\cite{thakur2021beir,muennighoff2023mteb}. Cross-encoder rerankers~\cite{nogueira2019passage,nogueira2020monot5} jointly attend to query and document, yielding more accurate but costlier scores typically applied as a second stage to the top-$k$.
+Faithfulness in RAG is measured by checking whether generated claims are entailed by the retrieved evidence, via LLM judges such as Ragas~\cite{es2024ragas} or NLI models such as RARR~\cite{gao2023rarr}; the NLI approach is reproducible and cheaper but bounded by the entailment model's coverage, so we report two verifiers. The complementary behavior of explicitly acknowledging missing knowledge (honest decline) is less studied, and smaller models frequently fail to abstain~\cite{yin2023large}; we show that the decline rate, not faithfulness, is the dominant axis of inter-model variation in this domain.
+\section{Methodology}
+\subsection{Corpus Construction}
+The corpus comprises official documentation from AWS, Azure, and GCP. The scope was restricted to these three providers after a broader corpus (including Kubernetes and CNCF projects) introduced vendor-level imbalance unrelated to the research question. Documents were chunked adaptively (target 500 tokens, 50-token overlap). Two dominant services were sub-sampled with a fixed seed, stratified by section hierarchy (Azure Functions 10{,}681$\rightarrow$2{,}500 chunks; Azure Blob Storage 3{,}841$\rightarrow$1{,}500), preserving 100\% of unique top-level headings. The final corpus has 24{,}481 chunks (Table~\ref{tab:corpus}); the residual imbalance reflects Azure's documentation verbosity and is reported as a limitation.
+\begin{table}[htbp]
+\caption{Corpus Distribution After Sub-Sampling}
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Provider} & \textbf{Chunks} & \textbf{Share (\%)} \\
+\midrule
+AWS & 6{,}366 & 26.0 \\
+Azure & 9{,}606 & 39.2 \\
+GCP & 8{,}509 & 34.8 \\
+\midrule
+\textbf{Total} & \textbf{24{,}481} & \textbf{100.0} \\
+\bottomrule
+\end{tabular}
+\label{tab:corpus}
+\end{center}
+\end{table}
+\subsection{Retrieval and Fusion}
+Each chunk is encoded by BAAI/bge-large-en-v1.5~\cite{wang2022bge} (1024-dim) and indexed with FAISS~\cite{johnson2019faiss} (FlatIP, exact search). BM25~\cite{robertson2009bm25} uses $k_1=1.5$, $b=0.75$ (average document length 124.4 tokens). For the hybrid system, BM25 and dense rankings are merged via RRF~\cite{cormack2009rrf},
+\begin{equation}
+\text{RRFscore}(d) = \sum_{r \in \mathcal{R}} \frac{1}{k + \text{rank}_r(d)},
+\label{eq:rrf}
+\end{equation}
+with $k=60$. The top-50 fused candidates are re-scored by cross-encoder/ms-marco-MiniLM-L-12-v2~\cite{nogueira2019passage}, and the top-5 are passed to the generator. Linear fusion with $\alpha\in\{0.3,0.5,0.7\}$ was also evaluated for comparison.
+\subsection{Generation}
+Generation uses four open, currently maintained instruction-tuned LLMs from distinct vendors, all Q4-quantized and served locally via Ollama on a single consumer GPU ($\leq$6~GB VRAM): \textbf{Granite 4.1 8B} (IBM, Apache-2.0, RAG-tuned), \textbf{Gemma 4 E4B} (Google), \textbf{Mistral 7B} (Mistral AI), and \textbf{Qwen 3.5 9B} (Alibaba). The selection criterion was open, current models from distinct labs runnable on consumer hardware. Granite 4.1 8B is the primary model, being deterministic at temperature zero in our measurement environment and RAG-tuned; Qwen 3.5 was likewise deterministic in that environment, whereas Gemma 4 and Mistral 7B are not fully deterministic and carry residual sampling noise. The prompt supplies the retrieved chunks, the query, and an instruction to cite sources and to decline honestly when the answer cannot be grounded.
+\subsection{Faithfulness and Decline Detection}
+Faithfulness is computed claim-by-claim. Responses are split into claims by sentence segmentation, with two improvements: list items (bullets, numbered) become separate claims with the parent header as context, and non-factual lead-ins (e.g., ``Based on my knowledge'') are filtered. Each claim is matched against the retrieved chunks by an NLI model and labeled \textsc{supported} (entailment $>0.7$), \textsc{contradicted} ($>0.7$), or \textsc{unsupported}. We report the primary metric over \emph{answered} responses (\textit{faithfulness\_answered}): the mean per-claim faithfulness restricted to responses that are not pure declines, so a model is not credited for refusing to answer,
+\begin{equation}
+\text{faithfulness} = \frac{|\{c : \text{status}(c) = \textsc{supported}\}|}{|\text{claims}|}.
+\label{eq:faith}
+\end{equation}
+With no retrieved evidence (no-RAG), all claims are \textsc{unsupported}, yielding faithfulness $=0$ by construction. Responses whose extracted claims are entirely formatting artifacts, with no genuine factual content, are treated as non-answers and excluded from the denominator. Because NLI verifiers differ in coverage, we report two entailment models (nli-deberta-v3-small and -base) and treat the absolute values as instrument-relative. A response is an honest decline if it matches any of fourteen explicit-acknowledgment patterns; we corrected a case-sensitivity defect that had rendered four patterns unreachable. The answered-response count and the pattern-based decline rate are not complements: responses with no extractable factual claims are excluded from the former, while a mixed response may contribute factual claims and also match a decline pattern.
+\section{Experimental Setup}
+We cross four retrieval scenarios with the four generators, a $4\times4$ matrix. The scenarios are \textbf{no-RAG} (parametric memory only; the control measuring the value of retrieval), \textbf{lexical} (BM25 top-5), \textbf{dense} (BGE top-5), and \textbf{hybrid} (RRF + cross-encoder, top-5). Because retrieval precedes generation, retrieval metrics are identical across generators and reported once; the generator affects only faithfulness, decline, and latency.
+The benchmark has 194 queries tagged for AWS (100), Azure (82), and GCP (54), provider counts overlapping for the 42 multi-cloud queries, balanced across factual (63), procedural (65), and comparative (66) types. Six of an original 200 referenced Kubernetes/CNCF concepts and were removed to match the corpus scope. We report Precision@5, Recall@5, MRR, and NDCG@5. Lacking human relevance labels, a cross-encoder serves as oracle; using the pipeline's own reranker (ms-marco) is \emph{circular}, so we adopt an \emph{independent} oracle (BAAI/bge-reranker-large) as headline judge and report the circular one only as reference. Pairwise comparisons use the Wilcoxon signed-rank test with Benjamini-Hochberg correction (FDR $=0.05$), effect sizes as Cohen's $d_z$, and 10{,}000-resample bootstrap intervals.
+\section{Results}
+\subsection{Retrieval and Oracle Circularity}
+Under the independent oracle (Table~\ref{tab:retrieval}), the reranked hybrid outperforms both baselines on every metric (NDCG@5 0.442$\rightarrow$0.740; P@5 0.443$\rightarrow$0.637). Crucially, the hybrid \emph{before} reranking (RRF only) does not beat dense (NDCG@5 0.603 vs.\ 0.624), so the gain is attributable to the cross-encoder, not the fusion. Under the circular judge the same systems score 0.552, 0.649, 0.668, and 0.995 (BM25, dense, RRF-only, reranked): the reranked hybrid inflates to 0.995 because the reranker agrees with itself. The system ordering is preserved across oracles, but the hybrid's advantage over dense shrinks from $d_z=+1.38$ (circular) to $d_z=+0.45$ (independent, $p<0.001$); the RRF-only hybrid does not differ from dense ($d_z=-0.08$, $p=0.240$), and reranking alone accounts for the gain ($d_z=+0.52$, $p<0.001$).
+\begin{table}[htbp]
+\caption{Retrieval Performance, Independent Oracle (194 queries)}
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{System} & \textbf{P@5} & \textbf{R@5} & \textbf{MRR} & \textbf{NDCG@5} \\
+\midrule
+BM25 (lexical) & 0.443 & 0.299 & 0.603 & 0.442 \\
+Dense (BGE) & 0.546 & 0.390 & 0.742 & 0.624 \\
+Hybrid (RRF only) & 0.543 & 0.377 & 0.699 & 0.603 \\
+\textbf{Hybrid (reranked)} & \textbf{0.637} & \textbf{0.468} & \textbf{0.770} & \textbf{0.740} \\
+\bottomrule
+\end{tabular}
+\label{tab:retrieval}
+\end{center}
+\end{table}
+\subsection{Faithfulness and Decline}
+Table~\ref{tab:faithfulness} reports \textit{faithfulness\_answered} ($n$ answered in parentheses). Moving from lexical to hybrid retrieval barely changes faithfulness (e.g., Granite 0.235$\rightarrow$0.299) and is non-monotonic for some models (Gemma peaks under lexical). The no-RAG control collapses to 0.000 for every model. Absolute values are low and instrument-relative; they are meaningful for comparison, not as an absolute truth rate.
+\begin{table}[htbp]
+\caption{Faithfulness on Answered Responses ($n$ answered)}
+\begin{center}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Scenario} & \textbf{Granite} & \textbf{Gemma} & \textbf{Mistral} & \textbf{Qwen} \\
+\midrule
+No-RAG & 0.000 (189) & 0.000 (191) & 0.000 (193) & 0.000 (17) \\
+Lexical & 0.235 (75) & 0.413 (57) & 0.246 (114) & 0.255 (36) \\
+Dense & 0.247 (85) & 0.377 (60) & 0.281 (132) & 0.265 (45) \\
+Hybrid & \textbf{0.299 (87)} & 0.317 (56) & 0.288 (122) & 0.294 (43) \\
+\bottomrule
+\end{tabular}
+\label{tab:faithfulness}
+\end{center}
+\end{table}
+The decline rate (Table~\ref{tab:decline}), not faithfulness, is the dominant axis of inter-model variation: under the hybrid scenario Granite declines 61.9\% of the time while Mistral declines only 24.2\%, so a model that answers more is exposed to more chances to be unfaithful. Under no-RAG the recognized decline rate is approximately zero for all models: they rarely acknowledge the absence of retrieved evidence.
+\begin{table}[htbp]
+\caption{Honest-Decline Rate (\%) by Scenario and Model}
+\begin{center}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Scenario} & \textbf{Granite} & \textbf{Gemma} & \textbf{Mistral} & \textbf{Qwen} \\
+\midrule
+No-RAG & 0.0 & 0.0 & 0.0 & 0.0 \\
+Lexical & 65.5 & 55.2 & 25.3 & 43.8 \\
+Dense & 61.9 & 51.0 & 20.6 & 47.9 \\
+Hybrid & 61.9 & 52.6 & 24.2 & 46.4 \\
+\bottomrule
+\end{tabular}
+\label{tab:decline}
+\end{center}
+\end{table}
+Median generation latency in the hybrid scenario ranged from 36~s (Gemma, 25.8~tok/s) to 239~s (Qwen, an upper bound due to GPU contention), with Granite at 66~s and Mistral at 42~s. Representative no-RAG fabrications, common across models, include a discontinued ``Lightly Used'' AWS Reserved Instance tier (removed in 2014), a 99.99\% AWS Lambda SLA (the official figure is 99.95\%), and a non-existent Microsoft Entra ID ``P3'' tier (valid SKUs are Free, P1, P2, and the Entra Suite).
+\section{Discussion}
+\subsection{Retrieval Gains Do Not Transfer, and the Gain Is from Reranking}
+Hybrid retrieval delivers large relative gains over BM25 (NDCG@5 $+67\%$ under the independent oracle), yet faithfulness moves only a few points per model and is non-monotonic for others. Several factors are consistent with this: even the weakest scenario returns a relevant chunk on most queries and one may suffice; the entailment model's coverage may be the binding constraint, suppressing the benefit of better retrieval; and small instruction-tuned models may default to memorized facts despite correct context~\cite{shi2023large}. Decomposing the pipeline shows RRF fusion alone does not beat dense, whereas the cross-encoder does, localizing the contribution to reranking and cautioning against attributing gains to ``hybridization'' in the aggregate. Because using the pipeline's reranker as judge inflates NDCG@5 to 0.995 by construction, we recommend that hybrid RAG evaluations always report an oracle independent of the reranker; doing so reduces the hybrid's score to a still-leading 0.740.
+\subsection{Fabrication Persistence and the Decline Axis}
+With a permissive ``acknowledge if unsure'' prompt, all four models show a near-zero recognized decline rate under no-RAG, and their evidence-based faithfulness is structurally zero because no retrieved chunks are available; this pattern of overconfidence is consistent with prior observations~\cite{yin2023large} and quantifies the floor against which RAG should be compared. The largest difference between models is not faithfulness but how often they decline (Granite declines $\approx$2.5$\times$ as often as Mistral under RAG); faithfulness comparisons that ignore the decline rate are therefore misleading, and we report the two jointly.
+\subsection{Pilot Human Validation of the Measurement Layer}
+A pilot annotation audited the claim-level support judgments behind our faithfulness metric, using 200 claim--condition judgments over 150 unique claims (one-chunk condition, plus a paired 50-claim subset re-judged with five chunks) drawn from a separate measurement experiment. Against this reference, the best-aligned automatic verifier reached $\kappa=0.30$ (weighted; 95\%~CI $[-0.02,0.56]$), and no verifier's $\kappa$ differed from zero after Benjamini--Hochberg correction. Two independent LLM judges, blind under the same protocol, agreed strongly with each other on 197 valid matched judgments (binary $\kappa=0.754$, 89.8\% agreement) yet were systematically stricter than the human ($\kappa=0.17$--$0.20$, $\approx$55\% agreement); across the condition-specific summaries, human--LLM agreement was approximately 49\% with one visible chunk and 72\% with five, a descriptive contrast that also reflects the different condition-specific sample sizes. Intra-annotator stability on a blind 20-item re-annotation was 55\% ($\kappa=0.268$), below the pre-registered target, so we treat the labels as a pilot reference rather than ground truth. These results reinforce that absolute faithfulness values are instrument- and judge-relative and motivate the cautious comparative interpretation used throughout.
+\par\textit{Human annotation ethics.} The pilot involved only the first author annotating technical claims; no external participants or personal data were involved.
+\subsection{Limitations}
+The oracle is a cross-encoder rather than human-annotated ground truth; we mitigate the self-consistency bias by reporting an independent oracle, and the pilot human validation reported above indicates that absolute values are judge-dependent and that verifier--human agreement is limited. The corpus retains provider imbalance and uneven per-service coverage (e.g., AWS EC2 contributes 4{,}215 chunks while AWS Lambda contributes only 283), so under-represented services may show higher fabrication. Generators are limited to four open models at $\leq$9B parameters and Q4 quantization; larger models may differ, and two of the four are not fully deterministic. Cross-provider query expansion based on an inter-provider terminology dictionary was evaluated separately and improved neither retrieval nor faithfulness, and is reported as a negative result rather than a pipeline component. Faithfulness for no-RAG is structurally zero and the absolute values are instrument-relative to the NLI verifier.
+\section{Conclusion and Future Work}
+We evaluate a hybrid RAG procedure for AWS, Azure, and GCP documentation, crossing four retrieval scenarios with four open generators over 194 queries. Hybrid retrieval reaches NDCG@5 0.740 under an independent oracle; the advantage over dense is real but moderate and originates in reranking, not fusion. The no-RAG control shows near-zero recognized declines and, by construction, zero evidence-supported claims---with representative outputs containing confident factual errors---motivating retrieval as a necessary component, yet retrieval gains barely transfer to faithfulness, and the dominant inter-model difference is the decline rate. Future work will extend the claim-level human-annotation pilot to retrieval-relevance labels and larger annotator pools, evaluate larger generators to characterize decline-rate scaling, develop retrieval-quality- and decline-aware prompting, and rebalance the corpus to reduce per-service variance.
+\section*{Acknowledgment}
+The authors thank the Universidad de Lima Faculty of Engineering for the institutional support that enabled this work.
+
+\textit{Disclosure of AI-generated content.} In accordance with IEEE policy on AI-generated text, the authors disclose that portions of this manuscript (notably parts of the abstract, introduction, related work, and discussion, and the formatting of result tables) were drafted and edited with the assistance of Claude (Anthropic). The experimental code was developed with the assistance of AI coding assistants, including Claude Code (Anthropic), OpenAI Codex, and Kimi (Moonshot AI). OpenAI Codex and Kimi additionally served as blind judges within the validation methodology; their outputs are reported as study data, not manuscript text. The authors determined the research design, verified all experiments and numerical results, reviewed and edited all AI-assisted material, and take full responsibility for the content of this publication.
+\begin{thebibliography}{00}
+\bibitem{ji2023survey} Z. Ji, N. Lee, R. Frieske, T. Yu, D. Su, Y. Xu, E. Ishii, Y. Bang, A. Madotto, and P. Fung, ``Survey of hallucination in natural language generation,'' \textit{ACM Computing Surveys}, vol.\ 55, no.\ 12, pp.\ 1--38, 2023.
+\bibitem{huang2023survey} L. Huang, W. Yu, W. Ma, W. Zhong, Z. Feng, H. Wang, Q. Chen, W. Peng, X. Feng, B. Qin, and T. Liu, ``A survey on hallucination in large language models: Principles, taxonomy, challenges, and open questions,'' \textit{arXiv:2311.05232}, 2023.
+\bibitem{lewis2020rag} P. Lewis, E. Perez, A. Piktus, F. Petroni, V. Karpukhin, N. Goyal, H. Kuttler, M. Lewis, W. Yih, T. Rocktaschel, S. Riedel, and D. Kiela, ``Retrieval-augmented generation for knowledge-intensive NLP tasks,'' in \textit{Advances in Neural Information Processing Systems}, vol.\ 33, pp.\ 9459--9474, 2020.
+\bibitem{robertson2009bm25} S. Robertson and H. Zaragoza, ``The probabilistic relevance framework: BM25 and beyond,'' \textit{Foundations and Trends in Information Retrieval}, vol.\ 3, no.\ 4, pp.\ 333--389, 2009.
+\bibitem{karpukhin2020dpr} V. Karpukhin, B. Oguz, S. Min, P. Lewis, L. Wu, S. Edunov, D. Chen, and W. Yih, ``Dense passage retrieval for open-domain question answering,'' in \textit{Proc.\ EMNLP}, 2020, pp.\ 6769--6781.
+\bibitem{wang2022bge} S. Xiao, Z. Liu, P. Zhang, and N. Muennighof, ``C-Pack: Packed resources for general Chinese embeddings,'' in \textit{Proc.\ SIGIR}, 2024, pp.\ 641--649.
+\bibitem{cormack2009rrf} G. V. Cormack, C. L. A. Clarke, and S. Buettcher, ``Reciprocal rank fusion outperforms condorcet and individual rank learning methods,'' in \textit{Proc.\ SIGIR}, 2009, pp.\ 758--759.
+\bibitem{sawarkar2024hybrid} K. Sawarkar, A. Mangal, and S. R. Solanki, ``Blended RAG: Improving RAG accuracy with semantic search and hybrid query-based retrievers,'' in \textit{Proc.\ IEEE Int.\ Conf.\ on Multimedia Information Processing and Retrieval}, 2024, pp.\ 155--161.
+\bibitem{nogueira2019passage} R. Nogueira and K. Cho, ``Passage re-ranking with BERT,'' \textit{arXiv:1901.04085}, 2019.
+\bibitem{nogueira2020monot5} R. Nogueira, Z. Jiang, R. Pradeep, and J. Lin, ``Document ranking with a pretrained sequence-to-sequence model,'' in \textit{Findings of EMNLP}, 2020, pp.\ 708--718.
+\bibitem{thakur2021beir} N. Thakur, N. Reimers, A. R\"uckl\'e, A. Srivastava, and I. Gurevych, ``BEIR: A heterogeneous benchmark for zero-shot evaluation of information retrieval models,'' in \textit{Proc.\ NeurIPS Datasets and Benchmarks}, 2021.
+\bibitem{muennighoff2023mteb} N. Muennighoff, N. Tazi, L. Magne, and N. Reimers, ``MTEB: Massive text embedding benchmark,'' in \textit{Proc.\ EACL}, 2023, pp.\ 2014--2037.
+\bibitem{es2024ragas} S. Es, J. James, L. Espinosa-Anke, and S. Schockaert, ``RAGAS: Automated evaluation of retrieval augmented generation,'' in \textit{Proc.\ EACL}, 2024, pp.\ 150--158.
+\bibitem{gao2023rarr} L. Gao, Z. Dai, P. Pasupat, A. Chen, A. T. Chaganty, Y. Fan, V. Y. Zhao, N. Lao, H. Lee, D. Juan, and K. Guu, ``RARR: Researching and revising what language models say, using language models,'' in \textit{Proc.\ ACL}, 2023, pp.\ 16477--16508.
+\bibitem{gao2023retrieval} Y. Gao, Y. Xiong, X. Gao, K. Jia, J. Pan, Y. Bi, Y. Dai, J. Sun, and H. Wang, ``Retrieval-augmented generation for large language models: A survey,'' \textit{arXiv:2312.10997}, 2023.
+\bibitem{asai2023self} A. Asai, Z. Wu, Y. Wang, A. Sil, and H. Hajishirzi, ``Self-RAG: Learning to retrieve, generate, and critique through self-reflection,'' in \textit{Proc.\ ICLR}, 2024.
+\bibitem{liu2024lost} N. F. Liu, K. Lin, J. Hewitt, A. Paranjape, M. Bevilacqua, F. Petroni, and P. Liang, ``Lost in the middle: How language models use long contexts,'' \textit{Trans.\ ACL}, vol.\ 12, pp.\ 157--173, 2024.
+\bibitem{johnson2019faiss} J. Johnson, M. Douze, and H. J\'egou, ``Billion-scale similarity search with GPUs,'' \textit{IEEE Trans.\ Big Data}, vol.\ 7, no.\ 3, pp.\ 535--547, 2019.
+\bibitem{yin2023large} Z. Yin, Q. Sun, Q. Guo, J. Wu, X. Qiu, and X. Huang, ``Do large language models know what they don't know?,'' in \textit{Findings of ACL}, 2023, pp.\ 8653--8665.
+\bibitem{shi2023large} F. Shi, X. Chen, K. Misra, N. Scales, D. Dohan, E. Chi, N. Sch\"arli, and D. Zhou, ``Large language models can be easily distracted by irrelevant context,'' in \textit{Proc.\ ICML}, 2023, pp.\ 31210--31227.
+\end{thebibliography}
+\end{document}

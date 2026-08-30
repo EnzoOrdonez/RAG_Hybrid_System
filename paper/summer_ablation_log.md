@@ -2147,3 +2147,98 @@ distribuciones por juez y etapa en el reporte enlazado.*
 *Fin de la sección de [Kimi Work] 2026-08-30. Verificación: McNemar recalculado desde
 `claim_audit_sample_v4.csv` y `claim_audit_sample_v4_stageB.csv` (tabla 27/3/12/8,
 p=0,035156); cambios solo documentales, sin tocar código ni datos.*
+
+---
+
+## 2026-08-30 (29) — Camera-ready LACCI: ediciones al v8 aceptado [Kimi Work]
+
+Contexto: paper aceptado (carta EEE LACCI 2026, 2026-08-30); PR #1
+`summer/taxonomia-759` → `main` **mergeado** (56a262b); CI GitHub Actions
+**verde** (2/2 check runs `success`, run 33296105889). Trabajo sobre
+`docs/Paper_IEEE_RAG_Hibrido_LACCI_v8.tex` (copia local entregada por Enzo).
+
+### Ediciones aplicadas (5)
+
+1. **Footer copyright** (pedido obligatorio de la carta): `\IEEEpubid` con
+   `979-8-3195-2812-4/26/$31.00 ©2026 IEEE` tras `\maketitle`.
+2. **Nueva subsección VI-C "Pilot Human Validation of the Measurement Layer"**:
+   200 juicios claim–condición / 150 claims únicos; mejor verificador κ=0,30
+   (pond., IC95 [-0,02; 0,56]); jueces LLM ciegos κ₂=0,754 entre sí pero
+   κ₂=0,17–0,20 vs humano; acuerdo humano–LLM 49 %→72 % con 5 chunks;
+   intra-anotador 55 % (κ=0,268); etiquetas = referencia piloto, no ground truth.
+   Cifras verificadas contra `docs/SECCION_VALIDACION_HUMANA.md` y
+   `output/audit/triple_judge_agreement.md`. Se declara explícitamente que el
+   piloto auditó la **capa de medición** (experimento aparte), no las cifras
+   del benchmark de 194 queries — no se mezclan datasets.
+3. **Limitations**: eliminado "human annotation is left to future work" (ya
+   existe el piloto); añadido desbalance por servicio verificado en
+   `data/corpus_stats.json`: AWS EC2 4.215 vs AWS Lambda 283 chunks.
+4. **Future Work**: "replace the cross-encoder oracle with human annotation" →
+   "extend the claim-level human-annotation pilot to retrieval-relevance labels
+   and larger annotator pools".
+5. **AI disclosure**: ampliado a asistentes LLM en general + asistentes de
+   código + dos LLM como jueces ciegos (dato del estudio, no texto).
+
+### Pendientes del camera-ready (no verificables localmente)
+
+- Compilar en Overleaf y confirmar **≤ 6 páginas** (la nueva subsección suma
+  ~8 líneas a dos columnas; si excede, recortar el ejemplo de fabricaciones de
+  la línea ~140 o Related Work).
+- PDF eXpress (Conference ID 69158X, ventana cierra 2026-08-31): US Letter,
+  fuentes embebidas, sin marcadores de revisión.
+- Subida EasyChair Proceedings hasta 2026-09-05 (sin re-subidas); eCF
+  copyright ("IEEE general terms"); 1 inscripción full por paper.
+
+*Fin de la sección de [Kimi Work] 2026-08-30. Cambios solo en el .tex y este
+ledger; sin tocar código, datos ni resultados.*
+
+---
+
+## 2026-08-30 (30) — Resolución del dictamen NO-GO de ChatGPT work [Kimi Work]
+
+ChatGPT work revisó el camera-ready (renombrado v8→v9 por Enzo, mismo contenido)
+y dictó **NO-GO provisional** con 6 bloqueos + 4 recomendables
+(`output/audit/revision_chatgpt_cameraready_2026-08-30` — ver archivo adjunto de la sesión).
+Verifiqué cada hallazgo contra las fuentes del repo antes de tocar el .tex.
+Compilación Overleaf de Enzo: **5 páginas** ✓.
+
+### Bloqueos resueltos en `docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex`
+
+1. **Archivo ambiguo**: confirmado — solo existe v9; es el candidato definitivo.
+2. **`\IEEEpubidadjcol` faltante**: legítimo (el snippet pubid ocupa ancho completo
+   → HOWTO exige adjcol en página 1). Añadido tras `\IEEEpubid`; verificación visual
+   de la página 1 queda para Enzo en Overleaf.
+3. **"Fabrication" inferida de un cero estructural**: el hallazgo más serio y correcto.
+   faithfulness no-RAG = 0 por construcción (no hay chunks contra los que verificar),
+   luego no prueba fabricación. Corregido en 4 lugares (abstract, Results, Discussion,
+   Conclusion): ahora "zero evidence-supported claims **by construction**" + la
+   evidencia real de fabricación (los 3 ejemplos cualitativos, que sí se quedan).
+4. **49%→72% como contraste causal**: corregido — ahora "descriptive contrast that
+   also reflects the different condition-specific sample sizes", y 89,8 % con
+   denominador explícito (197 pares válidos, no 200).
+5. **AI disclosure sin nombres**: IEEE exige identificar sistemas. Ahora nombra
+   Claude (Anthropic) en redacción; Claude Code, OpenAI Codex y Kimi (Moonshot AI)
+   en código; Codex y Kimi como jueces ciegos.
+6. **PDF eXpress**: pendiente de Enzo (compilar v9 → PASS antes del 31 ago).
+
+### Recomendables adoptados
+
+- Frase metodológica: answered count y decline rate **no son complementarios**
+  (explica Qwen no-RAG n=17 de 194, etc.).
+- Conteos por proveedor: "provider counts overlapping for the 42 multi-cloud
+  queries" (100+82+54=236≠194 quedaba sin explicar).
+- Cierre de la subsección piloto suavizado: "motivate the cautious comparative
+  interpretation" (no "support the comparative reading").
+- Nota ética: piloto anotado solo por el primer autor, sin participantes externos
+  ni datos personales (factualmente correcto).
+
+### Estado
+
+- v9 contiene las 5 ediciones camera-ready + estos 11 fixes. Verificado con grep:
+  los 10 anchors presentes.
+- Pendiente solo lo no verificable localmente: compilación final, revisión visual
+  del footer pág. 1, PASS de PDF eXpress (cierra 31 ago), eCF, subida EasyChair
+  (5 set), registro.
+
+*Fin de la sección de [Kimi Work] 2026-08-30. Cambios solo en el .tex y este
+ledger; sin tocar código, datos ni resultados.*
