@@ -2242,3 +2242,35 @@ Compilación Overleaf de Enzo: **5 páginas** ✓.
 
 *Fin de la sección de [Kimi Work] 2026-08-30. Cambios solo en el .tex y este
 ledger; sin tocar código, datos ni resultados.*
+
+---
+
+## 2026-08-30 (31) — PDF eXpress PASS + README actualizado [Kimi Work]
+
+### Hitos del camera-ready completados hoy
+
+- **PDF eXpress: PASS a la primera** (1 de 10 checks usados). Paper ID
+  **2026305869**; PDF certificado `2026305869.pdf` (175 KB) guardado en `docs/`
+  y verificado visualmente por Enzo (5 páginas, footer correcto, sin cambios de
+  layout). Es el único archivo válido para la subida proceedings.
+- **Merge final a `main`** hecho por Enzo (incluye v9 con los 11 fixes del
+  dictamen NO-GO).
+- **eCF copyright**: pendiente de que llegue el correo de IEEE; no bloquea la
+  subida a EasyChair, pero IEEE no publica sin él.
+- **EasyChair proceedings** (hasta 5 set, sin re-subidas) y **registro**
+  (1 inscripción full por paper): pendientes, guiados en sesión.
+
+### README actualizado
+
+La sección Experiments decía "12 versioned experiments (exp3-exp13 + exp8b)" —
+desactualizada. Ahora declara **19 experimentos versionados (exp3-exp19b +
+exp8b)** con filas nuevas: exp14 (piso de ruido del runtime, |Δ| media 0,0616),
+exp15 (ablaciones de verificador), exp16 (sonda de decodificación anclada),
+exp17 (cobertura por proveedor: 8 % baseline → 80 % balanced), exp18 (techo de
+evidencia + taxonomía de 759 claims, Kish 27,4), exp19b (selector anclado con
+compuerta de replay, Δ HHEM +0,0451) y **gold v4** (validación humana a nivel
+de claim: κ=0,30 mejor verificador; jueces LLM κ₂=0,754 entre sí, 0,17–0,20 vs
+humano). También se actualizaron las menciones "exp9..13" → "exp9..19b".
+
+*Fin de la sección de [Kimi Work] 2026-08-30. Cambios solo en README y este
+ledger; sin tocar código, datos ni resultados.*

@@ -395,3 +395,32 @@ Commit sugerido:
    `output/audit/revision_chatgpt_final_2026-08-30.txt` (nuevo).
 5. **Pendiente para Enzo:** commit+push de esos archivos; si sobra tiempo GPU, probe T1/T2
    (~40 min); si no, la banda ±0,081 ya está defendida con T0.
+
+---
+
+## 11.9 Camera-ready LACCI (2026-08-30, [Kimi Work])
+
+**Estado:** paper aceptado; camera-ready compilado, dictaminado y certificado.
+
+1. **PR #1 mergeado a `main` con CI verde** (2/2 check runs success, GitHub Actions).
+2. **v9 camera-ready** (`docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex`, 5 páginas):
+   5 ediciones iniciales (footer IEEE `979-8-3195-2812-4/26/$31.00 ©2026 IEEE`,
+   subsección "Pilot Human Validation of the Measurement Layer", Limitations y
+   Future Work actualizados al gold ya existente, desbalance EC2 4.215/Lambda 283,
+   disclosure ampliado) + **11 fixes del dictamen NO-GO de ChatGPT work**
+   (`\IEEEpubidadjcol`, "fabrication" no-RAG reformulada como cero estructural por
+   construcción en 4 lugares, contraste 49 %/72 % declarado descriptivo con n=197,
+   disclosure con sistemas nombrados, frase answered/decline no complementarios,
+   solapamiento de conteos por proveedor, cierre cauteloso del piloto, nota ética
+   de anotación).
+3. **PDF eXpress: PASS a la primera** (Paper ID 2026305869, `2026305869.pdf` en
+   `docs/`, verificado visualmente). Ventana cerraba 31 ago.
+4. **Merge final a `main`** con el v9, hecho por Enzo.
+5. **Pendientes administrativos:** eCF copyright (esperar correo IEEE, "IEEE general
+   terms"; no bloquea EasyChair pero IEEE no publica sin él), subida proceedings a
+   EasyChair con el PDF certificado (hasta 5 set, sin re-subidas), registro
+   (1 inscripción full por paper).
+6. **README actualizado:** 19 experimentos versionados (exp3-exp19b + exp8b) con
+   filas para exp14-19b y gold v4; referencias "exp9..13" → "exp9..19b".
+7. **Probe T1/T2:** descartado — el foco pasó al camera-ready y la banda ±0,081
+   ya quedó defendida con T0.
