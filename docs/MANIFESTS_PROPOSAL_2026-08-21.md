@@ -1,4 +1,9 @@
-# Propuesta de manifiestos — PENDIENTE DE OK, nada ejecutado
+# Propuesta de manifiestos — archivo histórico, parcialmente ejecutado
+
+> **ESTADO AL 2026-08-30.** Se materializaron el lockfile versionado
+> (`requirements-lock.txt`) y el CI (`.github/workflows/ci.yml`). El resto de esta
+> propuesta conserva su formulación original y no debe leerse como una lista vigente de
+> cambios autorizados; `requirements.txt` sigue siendo la fuente editable.
 
 > **Sección de Claude Code — 2026-08-21 07:50 (hora local).**
 > Ítem 4 del prompt P-DOC (`docs/PLAYBOOK_GATES_2026-08-06.md`), que pide **proponer antes de

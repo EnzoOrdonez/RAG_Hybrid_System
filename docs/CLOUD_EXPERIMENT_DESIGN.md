@@ -1,7 +1,11 @@
 # Diseño del experimento de nube — ¿el techo de fidelidad es de cómputo?
 
-**Estado: PROPUESTA. Cero gasto ejecutado. Requiere OK explícito de Enzo con el costo sobre
-la mesa, y va DESPUÉS de exp18** (§6). Fecha: 2026-07-30.
+> **ARCHIVO HISTÓRICO — NO-GO registrado.** El diseño no se autorizó ni se ejecutó;
+> se mantuvo cero gasto. No es un pendiente operativo. La propuesta original del
+> 2026-07-30 se conserva debajo para trazabilidad.
+
+**Estado original: PROPUESTA. Cero gasto ejecutado. Requería OK explícito de Enzo con el
+costo sobre la mesa, y debía ir DESPUÉS de exp18** (§6).
 
 ---
 

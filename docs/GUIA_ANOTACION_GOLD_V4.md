@@ -1,4 +1,8 @@
-# Guía de anotación del gold humano v4 — paso a paso para Enzo
+# Guía de anotación de la referencia humana piloto v4 — paso a paso para Enzo
+
+> **PROTOCOLO HISTÓRICO EJECUTADO (2026-08-29).** Las tandas A, B y el test–retest ya
+> se completaron. Este archivo conserva exactamente las reglas que recibió el anotador;
+> no es una convocatoria a reabrir ni modificar la referencia adjudicada.
 
 > **Sección de [Kimi Work] — 2026-08-06 23:59 (hora local)**
 > Guía práctica para anotar `claim_audit_sample_v4.csv` (Etapa A, 150 claims) y
@@ -121,7 +125,7 @@ Ejemplos **sintéticos** (no son del paquete; no busques coincidencias):
      verificadores → te ancla.
    - Cualquier `arm_stats__*.md`, `hhem_vs_nli.md`, `disagreement_summary.md` — idem.
    - No me preguntes a mí ni a otra IA "¿este claim es correcto?" mientras anotas: eso
-     convierte el gold humano en gold asistido. Si te atoras, marca `dudoso` con
+     convierte la referencia humana en una referencia asistida. Si te atoras, marca `dudoso` con
      comentario y sigue.
 7. **Adjudicación post-hoc (excepción controlada).** Si al terminar te quedan `dudoso`
    que quieres resolver con consulta externa, hazlo DESPUÉS de entregar todo, y márcalos
