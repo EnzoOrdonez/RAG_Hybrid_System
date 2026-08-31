@@ -1,5 +1,10 @@
 # Estado unificado del proyecto — hybrid-rag-system (CloudRAG)
 
+> **AVISO DE CIERRE (2026-08-30, [Kimi Work]):** las secciones §1-§11.8 son una
+> **instantánea histórica** (6-23 de agosto); donde contradigan el cierre, manda
+> **§11.9** (paper aceptado, camera-ready certificado, gold v4 adjudicado, exp19b
+> cerrado, 19 experimentos, CI verde, merge a `main`).
+
 > **Sección de [Kimi Work] — 2026-08-06 23:10 (hora local)**
 > Documento de recopilación y diagnóstico. No modifica ningún archivo existente ni evidencia.
 > Fuentes: CLAUDE.md, SUMMER_RESULTS.md, RESULTADOS_RESUMEN.md, NOTA3_NEXT_STEPS.md,
@@ -72,7 +77,7 @@ validación humana del nivel de fidelidad (gold).
 
 | # | Gate | Esfuerzo | Qué desbloquea | Estado |
 |---|---|---|---|---|
-| **G1** | **Gold humano v4 — Etapa A (150 claims) + Etapa B (50)** | ~4-5 h + ~3,5 h | El único árbitro objetivo del nivel real de fidelidad (¿0,30 NLI u 0,55 HHEM?) y del verificador definitivo. Sin esto el paper queda sin validar | **0/150 y 0/50** — el pendiente más antiguo (v3 en 0/50 desde el 11/06 quedó reemplazado) |
+| **G1** | **Referencia humana piloto v4 — Etapa A (150 claims) + Etapa B (50)** | ~4-5 h + ~3,5 h | Comparación exploratoria de concordancia entre verificadores y una referencia humana bajo evidencia controlada; no estima por sí sola la fidelidad absoluta ni define un verificador definitivo | **0/150 y 0/50** — estado histórico del 2026-08-06; el protocolo se completó después |
 | **G2** | **Congelar config de encuestas** (k=5 vs k=10 sobre la ruta de despliegue; TTFT ya medido con granite: 12,8 s k=5 / 15,2 s k=10) | decisión + corrida corta | Todo lo de encuestas. **Vence a mediados de agosto (≈1 semana)** — es el gate con fecha más próxima | pendiente de decisión de Enzo |
 | **G3** | **Decisión nube como infraestructura** + compuerta `exp21_hosted_equivalence` (TOST ±0,081, 3 verificadores) | USD 6-14 (techo 30), ~2-4 h + corrida 194 q | Encuestas remotas sin contaminar SUS/Likert con la lentitud local. Si la equivalencia falla: encuesta local a k=5 | diseño listo; **cero gasto ejecutado; requiere OK explícito con costo a la vista** |
 | **G4** | **Decisión exp19b** (brazo generativo: borrador → claims → rerank por claim → regenerar; primaria Δ fidelidad + TOST en 3 verificadores) | 1 corrida GPU local | El posible segundo positivo de la fase: selector guiado por anclaje, motivado por la cota 0,4552→0,5834 | pendiente de decisión de Enzo |
@@ -83,7 +88,7 @@ validación humana del nivel de fidelidad (gold).
 **Cadena crítica:** G1 → (verificador definitivo + nivel validado) → reescritura A.3/paper con
 cifras validadas. En paralelo: G2+G3 → G5. G4 es independiente y local.
 
-## 6. Gold humano v4 — estado y auditoría de esta sesión
+## 6. Referencia humana piloto v4 — estado y auditoría de esta sesión
 
 Archivos (todos con `juicio_humano` y `comentario` **vacíos**):
 
@@ -227,7 +232,7 @@ seed 42, caché off, 1024 tokens) + `docs/APP_VS_EXPERIMENTO.md`. Cierra la debi
 
 | # | Debilidad | Estado 2026-08-23 |
 |---|---|---|
-| 1 | Sin gold humano | ABIERTA — es de Enzo; todo lo instrumental está listo |
+| 1 | Sin referencia humana piloto | ABIERTA — estado histórico; todo lo instrumental estaba listo |
 | 2 | Circularidad de proxies | diseño cerrado; validación final depende del gold |
 | 3 | Calibración de verificadores | depende del gold (κ contra juicios) |
 | 4 | SESOI provisional ±0,081 | probe T0 hecho; T1/T2 pendientes (GPU, ~40 min, NO depende del gold) |
@@ -238,7 +243,7 @@ seed 42, caché off, 1024 tokens) + `docs/APP_VS_EXPERIMENTO.md`. Cierra la debi
 
 ### 10.3 Qué falta, en orden
 
-1. **G1 gold humano (Enzo)**: tanda 0 = los 40 claims de
+1. **G1 referencia humana piloto (Enzo)**: tanda 0 = los 40 claims de
    `output/audit/unsupported_claims_sample_v2.csv` (escuela de calibración); luego el gold
    oficial `claim_audit_sample_v4.csv` (150, etapa A) y `claim_audit_sample_v4_stageB.csv`
    (50, etapa B), siguiendo `docs/GUIA_ANOTACION_GOLD_V4.md` y registrando en
@@ -268,27 +273,32 @@ de equivalence__hhem.md, arm_stats__hhem.md y la ficha/informes de deficiencias.
 
 ---
 
-## 11. Cierre del gold humano y arbitraje del verificador — 2026-08-29 [Kimi Work]
+## 11. Cierre de la referencia humana piloto y arbitraje del verificador — 2026-08-29 [Kimi Work]
 
 > Deadline LACCI: 31 de agosto. Esta sección sustituye al punto 10.3.1: **G1 está hecho**.
 
 ### 11.1 Lo que se cerró hoy
 
-1. **Gold humano completo (240/240)** recibido como JSON del anotador HTML offline
+1. **Referencia humana piloto completa** recibida como JSON del anotador HTML offline:
+   A=150 claims, B=50 juicios pareados y taxonomía=40; son tres subconjuntos con propósitos
+   distintos, no una muestra homogénea de 240 observaciones
    (`output/audit/anotador_gold.html`, generado por `scripts/build_anotador_gold.py`;
    todo en español, localStorage + export/import, ciego por construcción: sin scores,
    estratos, configs ni juicios LLM embebidos — verificado por script).
 2. **Merge validado** a los 3 CSV con `scripts/merge_gold_v4.py` (backups en
    `output/audit/backups_pre_merge_2026-08-29/`). Los CSV ya NO se editan a mano.
-3. **`analyze_gold_v4.py` real ejecutado**: HHEM κ ponderado 0,303 / κ anchor 0,349 — el
-   humano se alinea con HHEM; fidelidad real más cerca de 0,55 que de 0,30. Etapa B:
-   16/50 flips (32 %, 11 hacia correcto) → κ de etapa A = cota inferior.
-4. **Taxonomía exp18 calibrada**: 53 % de los 759 claims no soportados son verdaderos
-   (paramétricos), 45 % incorrectos. `d_threshold_artifact` solo 30 % correctos.
+3. **`analyze_gold_v4.py` real ejecutado**: HHEM tuvo la mayor concordancia puntual con
+   la referencia (κ ponderada 0,303 / κ anchor 0,349), pero ninguna κ fue significativa
+   tras BH; estos acuerdos no identifican un nivel absoluto de fidelidad de 0,55 o 0,30.
+   En B hubo 16/50 cambios (32 %, 11 hacia `correcto`): es sensibilidad al conjunto de
+   evidencia visible y no demuestra que A sea una cota inferior formal.
+4. **Taxonomía exp18 calibrada**: estimación HT de 53 % externamente correctos y 45 %
+   externamente incorrectos entre los claims `unsupported@0.5`; la etiqueta no permite
+   atribuir el origen a memoria paramétrica. `d_threshold_artifact` tuvo 30 % correctos.
 5. **Triple juez ciego completo en taxonomía** (Codex entregó
    `unsupported_taxonomy_llmjudge_blind.json` hoy): consenso 2-de-3 en 39/40;
    κ Enzo–Codex 0,571 / Enzo–Kimi 0,422 / Kimi–Codex 0,712. En A/B: Enzo–Codex κ 0,055
-   (A) y 0,204 (B) — el LLM-juez sin calibrar no sustituye al gold (reportable).
+   (A) y 0,204 (B) — el LLM-juez sin calibrar no sustituye a la referencia piloto.
 6. Detalle completo de cifras: `paper/summer_ablation_log.md` **entrada 28** y
    `output/audit/taxonomy_calibration_report.md` + `output/audit/gold_v4_analysis.{json,md}`.
 
@@ -377,7 +387,8 @@ Commit sugerido:
 
 **Estado:** todo cerrado salvo el commit+push final de Enzo y el probe T1/T2 (opcional, GPU).
 
-1. **Gold humano completo y adjudicado** (240/240: A=150, B=50 pareados, taxonomía=40);
+1. **Referencia humana piloto completa y adjudicada** (A=150 claims, B=50 juicios
+   pareados, taxonomía=40; subconjuntos no homogéneos);
    sensibilidad de 3 variantes con ordenamiento estable (Δκ ≤ 0,012).
 2. **Triple juez ciego completado** (humano / Codex / Kimi, cegamiento mutuo total):
    Kimi–Codex κ₂=0,754 (89,8 %); humano–LLM κ₂=0,171–0,204 (~55 %); convergencia con
@@ -420,7 +431,8 @@ Commit sugerido:
    terms"; no bloquea EasyChair pero IEEE no publica sin él), subida proceedings a
    EasyChair con el PDF certificado (hasta 5 set, sin re-subidas), registro
    (1 inscripción full por paper).
-6. **README actualizado:** 19 experimentos versionados (exp3-exp19b + exp8b) con
+6. **README actualizado:** 19 experimentos lógicos versionados en 20 directorios
+   (exp15 está partido en dos; exp3-exp19b + exp8b), con
    filas para exp14-19b y gold v4; referencias "exp9..13" → "exp9..19b".
 7. **Probe T1/T2:** descartado — el foco pasó al camera-ready y la banda ±0,081
    ya quedó defendida con T0.

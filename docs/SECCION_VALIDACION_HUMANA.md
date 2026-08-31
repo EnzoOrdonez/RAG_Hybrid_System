@@ -43,7 +43,8 @@ resultados estratificados por condición.
 ## Concordancia con la referencia piloto: resultado principal preadjudicación
 
 En A hubo 132 juicios binarios utilizables; los 18 `dudoso` se excluyeron de κ según la
-regla declarada. El n efectivo de Kish fue 38,8. κ cuantifica concordancia con esta
+regla declarada. El n efectivo de Kish fue 38,5 según
+`output/audit/gold_v4_analysis.json`. κ cuantifica concordancia con esta
 referencia bajo este diseño; no estima el nivel absoluto o «real» de fidelidad.
 
 | Verificador | κ ponderada | IC95 | p ajustada BH | κ `random_anchor` |
@@ -136,15 +137,18 @@ en 39/40. Es estabilidad local de mayoría, no validación externa.
 Como análisis de dependencia respecto del juez, los mismos 200 juicios claim–condición
 fueron anotados a ciegas por el humano y dos LLM independientes (protocolo y cifras
 completas en `output/audit/triple_judge_agreement.md`). Los jueces automáticos mostraron
-alta concordancia intermodelo bajo el protocolo fijado (κ binaria=0,754; acuerdo=89,8 %),
+alta concordancia intermodelo bajo el protocolo fijado (**κ binaria=0,754; acuerdo=89,8 %
+sobre 197 pares válidos** — 3 claves duplicadas quedaron fuera del emparejamiento),
 que no establece corrección ni estabilidad ante otros prompts, modelos o ejecuciones. Su
 concordancia con la referencia piloto fue baja (κ binaria=0,171–0,204; acuerdo≈55 %): con
 un solo chunk ambos LLM aplicaron un criterio considerablemente más estricto (etapa A:
 13–18 % de `correcto` frente a 59 % humano). La inspección cualitativa sugiere que parte
 de la discrepancia se concentra en claims multi-parte parcialmente respaldados,
 meta-claims autorreferentes y fragmentos de encabezado/enlace; esta atribución no fue
-evaluada cuantitativamente. En el subconjunto pareado con evidencia ampliada, el acuerdo
-humano–LLM subió de 49 % a 72 % (κ binaria ≈0,10 → 0,32). Bajo este protocolo, los jueces
+evaluada cuantitativamente. Los resúmenes por condición muestran un acuerdo humano–LLM de
+≈49 % con un chunk visible y de 72 % con cinco; **este contraste es descriptivo y también
+refleja los distintos tamaños muestrales por condición** (no es un contraste pareado
+sobre los mismos 50 claims). Bajo este protocolo, los jueces
 LLM no son intercambiables con la referencia humana; esto no implica que todos los
 desacuerdos sean errores del LLM ni valida al humano como ground truth (recuérdese la
 estabilidad intra-anotador de 55 %). La triangulación caracteriza la dependencia del
@@ -199,11 +203,12 @@ con una referencia inestable no valida por sí sola ningún verificador.
 
 ## Trazabilidad
 
-- `paper/summer_ablation_log.md`, entradas 27, 28, 28b y 28c.
+- `paper/summer_ablation_log.md`, entradas 27, 28, 28b, 28c, 28d, 28e y 28f.
 - `output/audit/gold_v4_analysis.json` y `output/audit/gold_v4_analysis.md`.
 - `output/audit/descriptive_cis.json` y `output/audit/descriptive_cis.md`.
 - `output/audit/taxonomy_calibration_report.md`.
 - `output/audit/gold_v4_tandaC_resultado.json`.
 - `output/audit/gold_v4_sensitivity.json` y `output/audit/gold_v4_sensitivity.md`.
+- `output/audit/triple_judge_agreement.md` (acuerdo triple humano/Codex/Kimi).
 - `scripts/analyze_gold_v4.py`, `scripts/analyze_taxonomy_calibration.py` y
   `scripts/run_gold_sensitivity.py`.

@@ -10,10 +10,12 @@
 ### La evidencia visible cambia el juicio humano
 
 La etapa A mostró al anotador un único chunk por claim, mientras que la etapa B presentó
-los cinco chunks recuperados para los mismos 50 casos. Cambiaron 16/50 veredictos (32 %) y
-11 cambios fueron hacia `correcto`. Por ello, la evaluación de etapa A puede subestimar el
+los cinco chunks recuperados para los mismos 50 casos. En la variante **preadjudicación**
+(principal) cambiaron 16/50 veredictos (32 %) y 11 cambios fueron hacia `correcto`; en la
+variante **reconciliada** (sensibilidad, tras la adjudicación de los nueve casos de la
+tanda C) fueron 18/50. Por ello, la evaluación de etapa A puede subestimar el
 soporte disponible para verificadores que recorren varios fragmentos. Este efecto está
-registrado en `output/audit/gold_v4_analysis.md` y en la entrada 28 de
+registrado en `output/audit/gold_v4_analysis.md` y en las entradas 28-28f de
 `paper/summer_ablation_log.md`; no debe confundirse con error aleatorio del verificador.
 
 ### La confiabilidad intra-anotador fue baja
@@ -21,15 +23,19 @@ registrado en `output/audit/gold_v4_analysis.md` y en la entrada 28 de
 La reanotación ciega de tanda C obtuvo acuerdo crudo de 11/20 (55 %) y κ=0,268, por debajo
 de la meta de 85 %. El retest ocurrió el mismo día después de una sesión larga y la muestra
 sobrerrepresentó casos difíciles, pero esos atenuantes no eliminan la limitación. Los nueve
-casos discordantes requieren adjudicación razonada y una prueba de sensibilidad con y sin
-ellos. El resultado crudo y el procedimiento se conservan en la entrada 28b de
-`paper/summer_ablation_log.md` y en `output/audit/gold_v4_tandaC_resultado.json`.
+casos discordantes **fueron adjudicados** (9/9, con razones registradas) y se ejecutó la
+sensibilidad con y sin ellos: la adjudicación no aumenta retroactivamente la confiabilidad
+y el orden de los verificadores se mantuvo estable (Δκ ≤ 0,012 entre variantes). Los
+artefactos se conservan en las entradas 28b-28e de
+`paper/summer_ablation_log.md`, `output/audit/gold_v4_tandaC_resultado.json` y
+`output/audit/gold_v4_sensitivity.md`.
 
 ### El diseño estratificado reduce la precisión efectiva
 
 Los pesos de Horvitz–Thompson permiten extrapolar desde estratos sobremuestreados, pero
 incrementan la varianza. En la etapa A, 150 anotaciones corresponden a un tamaño efectivo
-de Kish de 38,8; en la taxonomía de 40 claims, el tamaño efectivo fue 27,4. Los intervalos
+de Kish de 38,5 según `output/audit/gold_v4_analysis.json`; en la taxonomía de 40 claims,
+el tamaño efectivo fue 27,4. Los intervalos
 de κ son, en consecuencia, amplios y ninguna κ de la etapa A resultó significativa tras BH.
 Las cifras ponderadas deben leerse como estimaciones poblacionales con incertidumbre, junto
 con la lectura no ponderada de `random_anchor`. Véanse `output/audit/gold_v4_analysis.md`,

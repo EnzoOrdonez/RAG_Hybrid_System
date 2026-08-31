@@ -1,5 +1,14 @@
 # RESULTADOS_RESUMEN — Nota 3 (2026-06-11)
 
+> **Aviso de cierre (2026-08-30):** este es el **resumen histórico de Nota 3**; sus cifras
+> (exp9-exp13) siguen siendo las citables del paper. Lo que este documento lista como
+> "pendiente" ya está resuelto: la revisión humana se completó como **gold v4**
+> (`docs/SECCION_VALIDACION_HUMANA.md`), la reescritura del paper terminó con su
+> **aceptación en IEEE LACCI 2026** (camera-ready certificado, `docs/2026305869.pdf`), y
+> el estado vivo del proyecto está en `docs/ESTADO_PROYECTO_UNIFICADO_2026-08-06.md` §11.9.
+> Sigue siendo cierto que no hay qrels humanos de retrieval; la referencia humana existente
+> es a nivel de claim (piloto), no de ranking.
+
 **Estado:** retrieval (exp11) COMPLETO; matriz de fidelidad (exp12) **COMPLETA**
 (4 modelos × 4 escenarios × 194 q, temp=0); **exp13 (expansión cross-cloud) COMPLETO**.
 Insumo para A.3/A.1.
@@ -72,7 +81,8 @@ los primeros 300c) / `hedged_partial` (hedge tardío) / `answered`.
 | RAG híbrido | 0,293 (87) | 0,312 (60) | 0,282 (122) | 0,293 (47) |
 
 `*` Sin RAG = 0 por construcción (N3). `†` qwen sin_rag: 177/194 respuestas VACÍAS (N6).
-Sensibilidad bajo 4 denominadores: `output/tables/nota3/tabla6_sensibilidad_denominador`.
+Sensibilidad bajo 4 denominadores:
+`output/tables/nota3/tabla6_sensibilidad_denominador__exp12_matrix.md`.
 La métrica v1 se conserva solo como sensibilidad etiquetada (sens_c).
 
 **Tabla 6 v3 — `faithfulness_answered` corregida (small, N8: artefactos de formato excluidos del
@@ -87,7 +97,8 @@ denominador + guarda de contradicción vb_agree):**
 v2 (arriba) queda como *superseded documentado* (postura N8: ambas). Delta = exclusión de artefactos
 (H1): granite/mistral ~igual (±0,01); **gemma/qwen suben +0,05..0,11** (tenían 20-23 % de artefactos
 de formato que inflaban su denominador con contradicciones-basura). Fuente:
-`faithfulness_metrics_v3_small.json`; tabla `output/tables/nota3/tabla6_fidelidad_v3`.
+`faithfulness_metrics_v3_small.json`; tabla
+`output/tables/nota3/tabla6_fidelidad_v3__exp12_matrix.md`.
 
 **Tabla 6 v4 — CITABLE (small, N9): v3 + exclusión de respuestas 100%-artefactos** (`genuine==0`,
 59/1798, que en v3 entraban como faithfulness=1,0 vacuo; mismo trato que method='none', Flag 137):
@@ -101,7 +112,7 @@ de formato que inflaban su denominador con contradicciones-basura). Fuente:
 Granite/mistral idénticos a v3 (sus vacuas eran declinaciones ya excluidas); gemma baja −0,03..−0,05
 y qwen −0,06..−0,11 respecto de v3 — parte del alza v2→v3 de gemma/qwen venía de los flips 0→1,0
 vacuos, no solo de limpiar el denominador. Fuente: `faithfulness_metrics_v4_small.json`; tabla
-`output/tables/nota3/tabla6_fidelidad_v4`. Detalle y decisión: ledger **N9**.
+`output/tables/nota3/tabla6_fidelidad_v4__exp12_matrix.md`. Detalle y decisión: ledger **N9**.
 
 Re-stats v2 (pareado por INTERSECCIÓN de no-excluidas en ambos brazos; n por par; familias BH):
 - **"El método de retrieval NO mueve la fidelidad" SE SOSTIENE bajo la métrica corregida:**
