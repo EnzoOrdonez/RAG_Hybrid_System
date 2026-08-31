@@ -11,7 +11,9 @@ caro. Hay dos niveles de reproducción, declarados por separado a propósito:
    los chunks y el corpus procesado existen solo localmente (gitignored); un clon público
    del repo no los contiene. Ver §0 para cómo obtenerlos.
 
-Estado actual: **todas las verificaciones de nivel 1 y 2 pasan** (2026-08-30; suite 341/341).
+Última verificación registrada: **2026-08-30**, niveles 1 y 2 en verde y suite
+**341/341**. Esta fecha identifica la corrida que respalda la afirmación; no implica que
+una edición posterior haya vuelto a ejecutar la suite.
 
 ---
 
@@ -114,24 +116,31 @@ Reconstruyen artefactos derivados sin volver a generar con el LLM.
 `--exp-dir` / `--baseline-arm` son obligatorios fuera de Tier A: sin ellos el artefacto sale
 con la metadata de Tier A (era el defecto D1, ya corregido y con test).
 
-## 4. Gold humano (COMPLETADO 2026-08-29 — las recetas regeneran los análisis)
+## 4. Referencia humana piloto (COMPLETADA 2026-08-29 — reanálisis)
 
 ```powershell
-& $PY scripts\build_gold_v4.py                  # regenera etapa A (150) + etapa B (50)
 & $PY scripts\analyze_gold_v4.py --simulate 0.15   # smoke test, no escribe nada
 & $PY scripts\analyze_gold_v4.py                # análisis real (el CSV ya está relleno y adjudicado)
 & $PY scripts\run_gold_sensitivity.py           # sensibilidad: preadjudicación / reconciliada / sin 9
 & $PY scripts\analyze_taxonomy_calibration.py   # calibración de la taxonomía (40 ítems)
 ```
 
+> **PELIGRO — `build_gold_v4.py` no forma parte del flujo normal.** Su implementación
+> actual escribe directamente `claim_audit_sample_v4.csv`, su etapa B y el meta; volver a
+> ejecutarlo sobre `output/audit/` sobrescribiría los CSV adjudicados. La muestra final se
+> considera entrada congelada del reanálisis. Una regeneración excepcional requeriría antes
+> un backup verificable y modificar el runner para escribir en un directorio temporal con
+> sufijo nuevo; mientras no exista esa salida parametrizada, **no ejecutar el script**.
+
 Salidas finales versionadas: `output/audit/gold_v4_analysis.{json,md}`,
 `output/audit/gold_v4_sensitivity.md`, `output/audit/taxonomy_calibration_report.md`,
 `output/audit/triple_judge_agreement.md` y `docs/SECCION_VALIDACION_HUMANA.md`.
 
-El muestreo es determinista (seed 42): regenerar **no** cambia qué 150 claims salen.
+El muestreo original fue determinista (seed 42): la misma receta selecciona los mismos
+150 claims, pero eso no autoriza a sobrescribir sus juicios.
 El análisis pondera por Horvitz-Thompson re-ejecutando el muestreador real; reporta el
-**n efectivo de Kish**, que es bastante menor que 150 porque el diseño sobre-muestrea a
-propósito las celdas de desacuerdo.
+**n efectivo de Kish final de 38,5** (`output/audit/gold_v4_analysis.json`), bastante
+menor que 150 porque el diseño sobre-muestrea a propósito las celdas de desacuerdo.
 
 ## 5. Regeneración con GPU (horas — solo con motivo)
 

@@ -36,19 +36,31 @@ Preámbulo de entorno para TODO comando: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=
 |---|---|---|---|---|
 | **Tabla 4** — retrieval por sistema y oráculo (P@1/R@5/MRR/NDCG@5) | exp11 | `run_retrieval_only.py` → `compute_retrieval_metrics.py` (×2 oráculos) → `_export_paper_tables_nota3.py` | `exp11…/results.json`, `…/retrieval_metrics__{bge-reranker-indep,ms-marco-circular}.json` | `output/tables/nota3/tabla4_retrieval__exp11_retrieval194_fullrerank.{md,csv}` |
 | **Estabilidad de oráculos** (NDCG@5, d_z, p_BH) | exp11 | `_oracle_stability.py` | mismos `retrieval_metrics__*.json` | `output/tables/nota3/oracle_stability__exp11_retrieval194_fullrerank.{md,csv}` |
-| **Tabla 6 v2** — fidelidad answered por escenario×modelo | exp12 | `run_generation_matrix.py` → `compute_faithfulness_metrics.py` → `_export_paper_tables_nota3.py` | `exp12_matrix/results.json`, `…/faithfulness_metrics_v2.json` | `output/tables/nota3/tabla6_fidelidad_v2__exp12_matrix.{md,csv}` (+ `tabla6_sensibilidad_denominador`, `tabla6c_clasificacion_v2`, `tabla5_modelo_principal_v2`, `tabla_claims_desglose`) |
+| **Tabla 6 v2** — fidelidad answered por escenario×modelo | exp12 | `run_generation_matrix.py` → `compute_faithfulness_metrics.py` → `_export_paper_tables_nota3.py` | `exp12_matrix/results.json`, `…/faithfulness_metrics_v2.json` | `output/tables/nota3/tabla6_fidelidad_v2__exp12_matrix.{md,csv}` (+ `output/tables/nota3/tabla6_sensibilidad_denominador__exp12_matrix.{md,csv}`, `tabla6c_clasificacion_v2__exp12_matrix`, `tabla5_modelo_principal_v2__exp12_matrix`, `tabla_claims_desglose__exp12_matrix`) |
 | **Tabla 6b** — tasa de declinación | exp12 | idem | `faithfulness_metrics.json` (v1, vía `--write-v1`) | `output/tables/nota3/tabla6_declinacion__exp12_matrix.{md,csv}` |
 | **Latencias p50/p95** | exp12 | `_latency_p50p95.py` | `exp12_matrix/results.json` | `output/tables/nota3/latency__exp12_matrix.{md,csv}` |
 | **Figuras f1–f4** | exp11/exp12 | `_make_figures_nota3.py` | tablas/jsons anteriores | `output/figures/nota3/f{1,2,3,4}_*.png` |
 | **Expansión cross-cloud OFF≈ON (N4)** | exp13 | `run_exp13_expansion.py` → `compute_retrieval_metrics.py` / `compute_faithfulness_metrics.py` | `exp13_expansion/results.json`, `retrieval_metrics__bge-indep.json`, `faithfulness_metrics_v2.json` | (veredicto en `RESULTADOS_RESUMEN.md` §2/§8) |
 | **Control 0 (LLM sin RAG)** | exp9 | `run_llm_only_benchmark.py` | `exp9_llm_only_no_rag/results.json` | (RESULTADOS §3, "Sin RAG = 0 por construcción", N3) |
 
-## Recetas mínimas (regenerar SOLO lo citado, sin reejecutar los experimentos de generación y retrieval de Nota 3, exp9–exp13)
+## Verificación vigente y recetas históricas
 
-Las salidas crudas (`results.json`) ya están versionadas; estos comandos re-derivan las
-tablas/figuras a partir de ellas (no re-corren generación LLM salvo el primer bloque):
+Las salidas crudas (`results.json`) ya están versionadas. La vía vigente y no destructiva
+para rederivar las cifras es:
 
 ```bash
+python scripts/verify_v4_offline.py
+python scripts/verify_summer_offline.py
+```
+
+Los comandos siguientes documentan cómo se produjeron originalmente las tablas. Son
+**recetas históricas, no instrucciones ejecutables sobre el checkout final**:
+`compute_retrieval_metrics.py` y `compute_faithfulness_metrics.py` escriben in-place y
+`guard_write` hoy aborta correctamente al encontrar los artefactos congelados. Para una
+derivación nueva se necesita un sufijo/archivo de salida nuevo; nunca se debe relajar la
+guarda ni sobrescribir exp11/exp12.
+
+```text
 # Tabla 4 + estabilidad de oráculos (retrieval ya guardado en exp11):
 python scripts/compute_retrieval_metrics.py --experiment exp11_retrieval194_fullrerank \
     --oracle-model BAAI/bge-reranker-large --oracle-label bge-reranker-indep
@@ -116,9 +128,10 @@ los dos verificadores** (mismo estándar dual del hallazgo central; cada verific
 distinto que no se sostiene al cruzarlos — frágil, atribuible al instrumento). Ledger **N9** +
 cierre N9.
 
-Notas de reproducibilidad (N9): (a) la receta de Tabla 4 sobrescribe `retrieval_metrics__*.json`
-in-place en exp11, y sus oráculos (bge-reranker-large, ms-marco) pueden no estar en la caché local
-(re-descarga necesaria); (b) el veredicto de exp13 (expansión OFF≈ON) permanece bajo métrica v2 —
+Notas de reproducibilidad (N9): (a) la receta histórica de Tabla 4 escribía
+`retrieval_metrics__*.json` in-place en exp11; hoy `guard_write` la bloquea y la verificación
+se hace con los `verify_*_offline.py`. Sus oráculos (bge-reranker-large, ms-marco) pueden no estar
+en la caché local si se intenta una derivación nueva; (b) el veredicto de exp13 (expansión OFF≈ON) permanece bajo métrica v2 —
 comparación intra-modelo con el mismo confound en ambos brazos; si el paper lo cita junto a cifras
 v4, añadir nota de instrumento; (c) los rescores NLI usan `data/models/nli-deberta-v3-{base,small}`
 locales, no el hub de HF; (d) el camino CANÓNICO de los prompts de exp12 es
