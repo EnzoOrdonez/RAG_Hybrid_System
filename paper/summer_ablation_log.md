@@ -2324,3 +2324,59 @@ ronda de re-revisión de Codex.
 
 *Fin de la sección de [Kimi Work] 2026-08-30. Cambios solo en documentación y
 este ledger; sin tocar código, datos ni resultados.*
+
+---
+
+## 2026-08-30 (33) — Resolución auditoría Codex ronda 2 (P1–P3) [Codex]
+
+Segunda ronda aplicada sobre los hallazgos priorizados de
+`output/audit/docs_audit_codex_2026-08-30.md`, exclusivamente en documentación.
+La comprobación local posterior al `fetch` situó `origin/main` y `main` en
+`670f8e5` (merge PR #3): las afirmaciones del camera-ready ya fusionado eran
+correctas; la discrepancia provenía de una rama `main` local desactualizada y no
+requirió cambios documentales.
+
+### P1 — credibilidad y reproducción
+
+- `REPRODUCE.md` retira `build_gold_v4.py` del flujo normal y lo marca peligroso
+  sobre la referencia adjudicada; cualquier uso excepcional exige backup y un
+  runner modificado con salida temporal/sufijada. La cifra 341/341 quedó fechada
+  como última verificación registrada, no como garantía perpetua.
+- `docs/ESTADO_PROYECTO_UNIFICADO_2026-08-06.md` ya no presenta κ como medida de
+  «fidelidad real», A como cota inferior ni los claims externamente correctos como
+  necesariamente paramétricos.
+- `CITATION.cff` contiene a Enzo Ordoñez Flores y Winston Lewis Fuentes, mantiene
+  `GPL-3.0-only` y añade la cita preferida del paper aceptado en IEEE LACCI 2026.
+
+### P2 — cifras y archivos históricos
+
+- Kish final se unificó en **38,5**, con
+  `output/audit/gold_v4_analysis.json` como autoridad; el 42,7 del ledger de verano
+  quedó rotulado como cálculo preliminar.
+- `MODELS.md` separa los denominadores y conceptos: preadjudicación A (150 claims,
+  132 binarios), κ NLI-small=0,0860, NLI-base=0,0829 y HHEM=0,3033; el rango
+  0,171–0,204 corresponde a humano–jueces LLM sobre 197 pares válidos.
+- Playbook, guía de anotación, propuesta de manifiestos y diseño de nube llevan
+  banners de archivo histórico con su estado final.
+- El inventario de ramas se regeneró desde las refs posteriores al `fetch`, distingue
+  ramas locales, refs de seguimiento y tres refs obsoletas de ramas remotas borradas;
+  no se eliminó ninguna.
+- TRACEABILITY y RESULTADOS usan las rutas exactas `__exp12_matrix`; las recetas
+  históricas in-place quedaron sustituidas por verificadores offline vigentes.
+
+### P3 — nomenclatura y referencias de código
+
+- Se unificó «referencia humana piloto» y se declaró la convención de **19
+  experimentos lógicos / 20 directorios físicos** (exp15 está partido en dos).
+- `docs/KNOB_MAP_summer.md` retiró la referencia inexistente a
+  `config/evaluation_config.yaml` y actualizó líneas/consumidores; la llamada viva
+  `verify_answer` de Streamlit quedó ubicada en `chat_page.py:213`.
+- `CLAUDE.md` aclara que `generate_phase3_artifacts.py`,
+  `recompute_nli_over_saved.py` y `build_annotation_pool.py` solo existen en ramas
+  históricas, no en el árbol actual.
+
+Commits de la ronda: `eaab456`, `1ad167d`, `0062fbf`, `50c8ff3`, `3071c0f` y
+`e13046b`. No se ejecutaron tests, modelos ni verificadores por tratarse de una
+ronda de solo texto; no hubo push ni cambios en código, datos o resultados.
+
+*Fin de la entrada 33 — [Codex] 2026-08-30.*
