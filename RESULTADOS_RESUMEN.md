@@ -1,5 +1,14 @@
 # RESULTADOS_RESUMEN — Nota 3 (2026-06-11)
 
+> **Aviso de cierre (2026-08-30):** este es el **resumen histórico de Nota 3**; sus cifras
+> (exp9-exp13) siguen siendo las citables del paper. Lo que este documento lista como
+> "pendiente" ya está resuelto: la revisión humana se completó como **gold v4**
+> (`docs/SECCION_VALIDACION_HUMANA.md`), la reescritura del paper terminó con su
+> **aceptación en IEEE LACCI 2026** (camera-ready certificado, `docs/2026305869.pdf`), y
+> el estado vivo del proyecto está en `docs/ESTADO_PROYECTO_UNIFICADO_2026-08-06.md` §11.9.
+> Sigue siendo cierto que no hay qrels humanos de retrieval; la referencia humana existente
+> es a nivel de claim (piloto), no de ranking.
+
 **Estado:** retrieval (exp11) COMPLETO; matriz de fidelidad (exp12) **COMPLETA**
 (4 modelos × 4 escenarios × 194 q, temp=0); **exp13 (expansión cross-cloud) COMPLETO**.
 Insumo para A.3/A.1.

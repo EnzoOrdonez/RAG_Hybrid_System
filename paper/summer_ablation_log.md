@@ -2274,3 +2274,53 @@ humano). También se actualizaron las menciones "exp9..13" → "exp9..19b".
 
 *Fin de la sección de [Kimi Work] 2026-08-30. Cambios solo en README y este
 ledger; sin tocar código, datos ni resultados.*
+
+---
+
+## 2026-08-30 (32) — Auditoría documental exhaustiva (Codex) resuelta [Kimi Work]
+
+Codex auditó 14 documentos del repo (prompt: `output/audit/PROMPT_CODEX_AUDIT_DOCS_2026-08-30.md`).
+Veredicto: 3 OK / 5 DESACTUALIZADO / 6 CONTRADICE. Correcciones aplicadas, **solo
+documentación** (sin tocar código, datos ni resultados):
+
+- **CLAUDE.md** — "Estado actual" reescrito: paper aceptado LACCI 2026, eXpress
+  PASS (PID 2026305869), 19 experimentos, exp19b cerrado (Δ HHEM +0,0451), gold
+  v4 adjudicado, 341 tests, CI + lockfile. "Problemas conocidos abiertos"
+  marcados como cerrados 2026-08-30.
+- **README.md** — tag post-N9 ya fijado en `main`; determinismo declarado por
+  modelo (Granite/Qwen deterministas; Gemma/Mistral no, ver MODELS.md); exp9
+  redactado como "soporte estructuralmente cero" (no "fabrica 195/200"); matiz
+  en la frase "RAG ≫ no-RAG".
+- **REPRODUCE.md** — dos niveles de reproducción declarados: (1) rederivación
+  offline de tablas/figuras desde artefactos versionados; (2) repetición completa
+  (requiere `data/models`, `data/indices`, chunks y corpus, todos gitignored).
+  Intérprete portable (`$PY`); `verify_summer_offline` descrito como
+  descubrimiento por forma; §4 gold marcado COMPLETADO 2026-08-29; inmutables
+  exp3..exp19b+exp8b; ruta `paper/audit_outputs/exp8_stats_corrected.csv`;
+  cobertura condicional histórica (7/25→25/25) vs estricta canónica (2/25→20/25);
+  aviso de NO re-ejecutar el lanzador de exp19b.
+- **docs/SECCION_VALIDACION_HUMANA.md** — triple juez: 89,8 % sobre **197 pares
+  válidos** (3 claves duplicadas fuera del emparejamiento); el contraste
+  49 %→72 % declarado descriptivo por condición con tamaños distintos (no
+  pareado). Trazabilidad ampliada (entradas 28d–28f + `triple_judge_agreement.md`).
+- **docs/LIMITACIONES_Y_TRABAJO_FUTURO.md** — 16/50 = variante **preadjudicación**
+  (principal); 18/50 = reconciliada (sensibilidad); adjudicación 9/9 completada;
+  orden de verificadores estable (Δκ ≤ 0,012).
+- **SUMMER_RESULTS.md / RESULTADOS_RESUMEN.md / NOTA3_NEXT_STEPS.md /
+  docs/ESTADO_PROYECTO_UNIFICADO_2026-08-06.md** — banners de cierre: son
+  instantáneas históricas; los pendientes que listaban ya están resueltos.
+- **MODELS.md** — plan de selección y checklist de Phase 4 marcados como
+  históricos (smoke ya ejecutado, matriz exp12 ya corrida); ETA/latencia como
+  concluidos; **κ=0,411 aclarado**: era concordancia NLI-small vs NLI-base
+  (entre verificadores), NO contra gold humano — la κ real contra el humano es
+  ≈ 0,17–0,30.
+- **docs/TRACEABILITY_nota3.md** — "sin correr las 13 experimentaciones" →
+  "sin reejecutar los experimentos de generación y retrieval de Nota 3
+  (exp9–exp13)".
+
+**Queda menor (código, fuera del alcance de esta ronda):** `LIVE_EXPERIMENTS`
+en `src/utils/signed_evidence.py` aún incluye exp19b; retiro propuesto para la
+ronda de re-revisión de Codex.
+
+*Fin de la sección de [Kimi Work] 2026-08-30. Cambios solo en documentación y
+este ledger; sin tocar código, datos ni resultados.*

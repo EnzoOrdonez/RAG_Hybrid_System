@@ -70,7 +70,7 @@ p_BH < 0.001); the advantage comes from the **reranking stage**, not the RRF fus
 by construction — reported only as a circularity reference (ledger N2).
 
 Generation faithfulness (4 LLMs × 4 scenarios × 194, NLI verifier): RAG ≫ no-RAG for
-every testable model, but the **retrieval method does not significantly move generation
+every testable model — a difference in evidence-supported claims, with no-RAG structurally at zero (not a direct proof of factual accuracy) — but the **retrieval method does not significantly move generation
 faithfulness** (n.s. under 2 NLI verifiers × 4 denominators; ledger N5). Decline-aware
 v2 metric and instrument audit: `output/tables/nota3/` + `RESULTADOS_RESUMEN.md`.
 
@@ -157,8 +157,8 @@ The raw-evidence snapshot for the Nota 3 round (exp9-13) is published as the ann
 tag **`nota3-evidencia-2026-06-11`** (v2-era faithfulness metric, ledger N1-N7). The
 citable faithfulness figures were since corrected **offline** — v3 (N8: format-artifact
 exclusion) and **v4 (N9: vacuous-row exclusion; the citable Tabla 6)** — without touching
-the signed raw outputs. See `RESULTADOS_RESUMEN.md` and ledger entries N8/N9; a post-N9
-tag will mark the documentation-ready state.
+the signed raw outputs. See `RESULTADOS_RESUMEN.md` and ledger entries N8/N9; the documentation-ready
+state is frozen on `main` (camera-ready round, 2026-08-30).
 
 **Traceability + minimal repro recipes:** [docs/TRACEABILITY_nota3.md](docs/TRACEABILITY_nota3.md)
 maps every cited table/figure to its experiment → script → output path, and lists the commands
@@ -207,8 +207,10 @@ python scripts/run_retrieval_only.py --exp-id exp11_retrieval194_fullrerank
   RRF fusion is bit-reproducible. Runners also call
   `reproducibility.ensure_hashseed_at_startup(42)`, which re-execs once if the
   var is unset, but setting it explicitly is preferred.
-- `seed=42` everywhere; generation uses `temperature=0` (greedy decoding) so LLM
-  output is reproducible independent of sampling seed.
+- `seed=42` everywhere; generation uses `temperature=0` (greedy decoding). Determinism is
+  model- and runtime-dependent: Granite 4.1 and Qwen 3.5 were deterministic in the
+  measurement environment, Gemma 4 and Mistral 7B were not fully; see [MODELS.md](MODELS.md).
+  
 
 ### Run
 
@@ -292,7 +294,7 @@ ceiling, anchored selection), complemented by the claim-level human gold (v4):
 
 | Experiment | What it tests | Key finding |
 |------------|--------------|-------------|
-| exp9 | LLM-only control (no RAG), pre-curation 200-query set | Fabricates in 195/200; RAG's floor baseline |
+| exp9 | LLM-only control (no RAG), pre-curation 200-query set | 195/200 responses answer without retrieved evidence (support structurally zero); representative outputs contain verified factual errors; RAG's floor baseline |
 | exp10-11 | Retrieval, multi-oracle (D12 fix) | Hybrid>Dense real (d_z +0.45) but inflated under circular oracle (0.995 vs 0.740); edge lives in the rerank stage |
 | exp12 | Faithfulness matrix (4 LLMs × 4 scenarios × 194) | RAG ≫ no-RAG; retrieval method n.s. on faithfulness — robust under metrics v2/v3/v4 (ledgers N5/N8/N9), 2 verifiers × 4 denominators |
 | exp13 | Cross-cloud expansion ON vs OFF (D11 fix) | Expansion does NOT help; the earlier exp7 "+16.8%" claim is **retired** (its arms ran identical retrieval — N1/N4) |

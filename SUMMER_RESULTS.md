@@ -1,7 +1,15 @@
 # SUMMER_RESULTS — Informe de hallazgos de la fase de verano
 
-**Estado: EN CURSO** (arranque 2026-07-22). Este documento acumula los resultados de la ablación
-(Fase 1), el diagnóstico (Fase 1b) y las mejoras (Fase 2). Ledger de decisiones:
+**Estado: CERRADO (2026-08-30).** Este documento es un **ledger cronológico** de la fase de
+verano (arranque 2026-07-22); las secciones intermedias describen estados ya superados
+("gold pendiente", "exp19b en curso", conteos de tests históricos como 130 o 218).
+**Cierre real:** exp19b completado con veredicto (Δ HHEM +0,0451, IC95 [0,0076; 0,0817],
+TOST dentro de ±0,081); gold humano v4 completado y adjudicado (κ mejor verificador 0,30;
+jueces LLM κ₂=0,754 entre sí, 0,17–0,20 vs humano; intra-anotador 55 %); taxonomía de 759
+claims calibrada (Kish 27,4); 19 experimentos versionados; paper **aceptado en IEEE LACCI
+2026** y camera-ready certificado (PDF eXpress PASS, PID 2026305869); suite 341/341; CI
+verde. Referencias vigentes: `docs/FICHA_EXPERIMENTAL.md` y
+`docs/SECCION_VALIDACION_HUMANA.md`. Ledger de decisiones:
 `paper/summer_ablation_log.md`. Línea base: tag `summer-baseline` (cifras v4 verificadas,
 `output/audit/phase0_verification_summer_2026-07-22.md`).
 

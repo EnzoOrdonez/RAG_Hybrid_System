@@ -1,5 +1,10 @@
 # Estado unificado del proyecto — hybrid-rag-system (CloudRAG)
 
+> **AVISO DE CIERRE (2026-08-30, [Kimi Work]):** las secciones §1-§11.8 son una
+> **instantánea histórica** (6-23 de agosto); donde contradigan el cierre, manda
+> **§11.9** (paper aceptado, camera-ready certificado, gold v4 adjudicado, exp19b
+> cerrado, 19 experimentos, CI verde, merge a `main`).
+
 > **Sección de [Kimi Work] — 2026-08-06 23:10 (hora local)**
 > Documento de recopilación y diagnóstico. No modifica ningún archivo existente ni evidencia.
 > Fuentes: CLAUDE.md, SUMMER_RESULTS.md, RESULTADOS_RESUMEN.md, NOTA3_NEXT_STEPS.md,

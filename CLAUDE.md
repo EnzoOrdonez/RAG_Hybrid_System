@@ -12,33 +12,33 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 
 ## Estado actual
 
-- La evidencia de Nota 3 está cerrada en `exp9..exp13`; `exp3..exp8` y `exp8b` son historia.
-- La fase de verano tiene artefactos para `exp15..exp18`. El verificador offline del 2026-08-03
-  descubre los cuatro experimentos y reproduce sus cifras desde probabilidades persistidas.
-- Las rutas Streamlit de Chat y Evaluation resuelven el brazo `hybrid` a `SURVEY_DEPLOY`. El registro
-  experimental conserva `get_config("hybrid") == PROPOSED_HYBRID`. `query_stream()` aplica el mismo
-  routing de prompts y balanceo cross-cloud que `query()` cuando esas perillas están activas.
-- `exp18` está **CERRADA**: resultados y análisis committeados en `f6816b4`, y `SUMMER_RESULTS.md`
-  la declara cerrada desde el 2026-08-04. La contradicción documental que había aquí quedó resuelta.
-- `exp19a` (sonda offline del selector) cerró en **PASS**. `exp19b`, el brazo generativo, tiene
-  runner, pre-registro (ledger entrada 25) y smoke validado; su corrida real arrancó el 2026-08-21.
-- Rama activa: **`summer/exp19b`**, publicada en `origin/summer/exp19b` el 2026-08-21 con 3 commits
-  (runner de exp19b, guarda de evidencia invertida, log). `summer/mejoras` sigue publicada y es su
-  base. No hay CI versionada bajo `.github/` ni ADRs formales; el remoto no tiene issues ni PRs, así
-  que el seguimiento real vive en documentos, ledgers y tests.
-- Línea base de tests con el intérprete 3.14, modo offline y seed 42: **218 pasan, 0 fallan, 0
-  omitidas** (suite rápida `-m "not slow and not gpu"` para trabajo con la GPU ocupada). Trayectoria:
-  115/117 → 121/123 (paridad de despliegue) → 177 → 206 (runner exp19b) → 218 (guarda invertida).
-  No hay medición de coverage configurada.
-- Verificación offline: `verify_v4_offline.py` y `verify_summer_offline.py` pasan con
-  `PYTHONUTF8=1`, variable ya documentada en `REPRODUCE.md §0`. Ninguna evidencia bajo
-  `experiments/` ha cambiado: **322 altas, 0 modificaciones, 0 borrados** contra
-  `nota3-evidencia-2026-06-11`.
-- La guarda de evidencia (`src/utils/signed_evidence.py`) protege por **defecto** todo dir `expN*`
-  bajo `experiments/results/` contra sobrescritura, salvo los declarados en `LIVE_EXPERIMENTS`
-  (hoy `exp19b`). Crear artefactos nuevos sigue permitido.
-- Health check local aprobado: 24.481 chunks, FAISS y BM25 cargan 24.481 entradas, Ollama responde con
-  Llama 3.1 disponible y el snapshot NLI local carga correctamente.
+> **Actualizado 2026-08-30 (cierre LACCI, [Kimi Work]):** este bloque es la fuente vigente.
+> Las secciones fechadas de más abajo se conservan como historial; donde contradigan este
+> bloque, manda este bloque.
+
+- **Paper aceptado en IEEE LACCI 2026.** Camera-ready v9 certificado por PDF eXpress
+  (PASS a la primera; Paper ID 2026305869; PDF certificado `docs/2026305869.pdf`).
+  Fuente: `docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex`. Merge final a `main` hecho;
+  CI de GitHub Actions en verde (`.github/workflows/ci.yml` + escáner de secretos con
+  baseline + Ruff informativo + lockfile `requirements-lock.txt`).
+- **19 experimentos versionados** (`exp3..exp19b` + `exp8b`), todos cerrados. Evidencia
+  de Nota 3: `exp9..exp13`; auditoría/validación post-paper: `exp14..exp19b` (piso de
+  ruido del runtime, ablaciones de verificador, techo de evidencia, selector anclado).
+- **exp19b CERRADO**: Δ HHEM +0,0451 (IC95 [0,0076; 0,0817], p=0,018), TOST dentro de la
+  banda preespecificada ±0,081; compuerta `draft_replay_check` (5/5 bit-idénticas).
+  Veredicto: mejora local alineada al verificador, no independiente del verificador.
+- **Gold humano v4 COMPLETADO y adjudicado**: 150 claims / 200 juicios claim–condición +
+  taxonomía 40 + retest 20. Mejor verificador κ=0,30 ponderada (IC95 cruza 0); jueces LLM
+  ciegos κ₂=0,754 entre sí pero 0,17–0,20 vs humano; intra-anotador 55 %. Las etiquetas
+  son referencia piloto, no ground truth. Docs: `docs/SECCION_VALIDACION_HUMANA.md`,
+  `docs/FICHA_EXPERIMENTAL.md`, `output/audit/triple_judge_agreement.md`.
+- **Suite de tests: 341 pasan, 0 fallan** (`-m "not slow and not gpu"`, intérprete Python
+  3.14, `PYTHONUTF8=1`). La cifra 218 de más abajo es histórica (2026-08-21).
+- La guarda de evidencia (`src/utils/signed_evidence.py`) protege por defecto todo
+  `experiments/results/expN*`; `LIVE_EXPERIMENTS` aún lista `exp19b` por inercia — su
+  evidencia ya está committeada como final, así que procede retirarlo (limpieza menor).
+- Health check local aprobado: 24.481 chunks, FAISS y BM25 cargan 24.481 entradas, Ollama
+  responde con Llama 3.1 disponible y el snapshot NLI local carga correctamente.
 
 ## Sensible / no tocar sin permiso
 
@@ -55,13 +55,10 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 
 ## Problemas conocidos abiertos
 
-- El gold humano de dos etapas sigue pendiente de anotación real.
-- La decisión sobre experimentos de nube y gasto está bloqueada hasta interpretar `exp18` y recibir
-  aprobación explícita.
-- No hay CI versionada; la protección depende de pruebas y verificadores locales.
-- La instalación declarada no reproduce todos los flujos. `requirements.txt` omite Streamlit, Plotly
-  y pytest; `setup.py` omite buena parte del stack de retrieval y evaluación. No existe lockfile.
-  Propuesta escrita en `docs/MANIFESTS_PROPOSAL_2026-08-21.md`, pendiente de OK de Enzo.
+> Cerrados el 2026-08-30 (ver "Estado actual"): el gold humano v4 está completado y
+> adjudicado; existe CI versionada (`.github/workflows/ci.yml`) y lockfile
+> (`requirements-lock.txt`, generado el 2026-08-23 junto con la propuesta de manifiestos).
+> Lo que sigue abierto:
 - `test_nli_output_is_softmax_probabilities` **hoy no se omite**: con `HF_HUB_OFFLINE=1` la suite da
   218 pasan y 0 omitidas (verificado el 2026-08-21). Carga porque el tag
   `cross-encoder/nli-deberta-v3-small` **está en el caché de Hugging Face**, no porque el test use el
@@ -90,13 +87,10 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 > - **`PYTHONUTF8=1` ausente de `REPRODUCE.md`** — añadida a la receta con la explicación del
 >   `UnicodeEncodeError` en consola `cp1252`.
 
-- README presenta 12 experimentos de `exp3..exp13` más `exp8b`, pero el repo ya contiene la fase
-  `exp15..exp19b`. Pregunta pendiente: si README debe describir solo Nota 3 o también el estado de
-  verano. **Fuera del alcance de P-DOC**, que no lo autoriza.
-- README indica instalar `requirements.txt` y luego lanzar Streamlit, pero Streamlit y Plotly no están
-  declarados allí. `setup.py` expone otro conjunto más corto. Pregunta pendiente: cuál manifiesto es
-  canónico y si UI, pruebas y ML deben separarse en extras o instalarse juntos. **Propuesta escrita
-  en `docs/MANIFESTS_PROPOSAL_2026-08-21.md`, a la espera de OK; el lockfile no se genera sin él.**
+- ~~README presenta 12 experimentos~~ — **resuelto el 2026-08-30**: README declara los 19
+  experimentos (`exp3..exp19b` + `exp8b`) con tabla completa y sección Publication.
+- ~~Lockfile pendiente de OK~~ — **resuelto el 2026-08-23**: `requirements-lock.txt` generado
+  (134 distribuciones, Python 3.14) y CI creada; la propuesta de manifiestos quedó aplicada.
 - La suite completa se reporta verde con una omisión, pero la prueba omitida es una guarda NLI central y
   el modelo local sí está presente. Pregunta pendiente: si la prueba debe resolverse mediante el mismo
   cargador del detector o mediante una ruta local explícita. **Hilo separado a propósito**: P-DOC lo

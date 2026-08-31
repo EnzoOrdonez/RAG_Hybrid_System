@@ -7,6 +7,10 @@
 > v4 antes del A.3). Queda: reescritura A.3/A.1/paper con cifras **v4** (Tabla 6 v4, "0/18
 > entre-modelos robusto bajo ambos verificadores" — framing B, cierre N9), revisión humana de `claim_audit_sample_v3.csv` (0/50). H5 ABORTADO en el cierre N9 (ruido de entorno; parcial 140/300 = evidencia en
 > exp14_h5_replicas/). Nota: exp13 usó 25 q cross-cloud (no 30, N6).
+> **ACTUALIZADO 2026-08-30 (cierre):** la reescritura v4 y la revisión humana están
+> **completas** (gold v4 adjudicado, ver `docs/SECCION_VALIDACION_HUMANA.md`); el paper fue
+> **aceptado en IEEE LACCI 2026** con camera-ready certificado. Los TODO del runbook de
+> abajo son historial, no tareas actuales.
 
 ## exp12 matrix — COMPLETO (histórico: instrucciones de resume/run)
 

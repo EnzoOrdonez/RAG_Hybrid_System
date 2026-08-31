@@ -43,7 +43,7 @@ Preámbulo de entorno para TODO comando: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=
 | **Expansión cross-cloud OFF≈ON (N4)** | exp13 | `run_exp13_expansion.py` → `compute_retrieval_metrics.py` / `compute_faithfulness_metrics.py` | `exp13_expansion/results.json`, `retrieval_metrics__bge-indep.json`, `faithfulness_metrics_v2.json` | (veredicto en `RESULTADOS_RESUMEN.md` §2/§8) |
 | **Control 0 (LLM sin RAG)** | exp9 | `run_llm_only_benchmark.py` | `exp9_llm_only_no_rag/results.json` | (RESULTADOS §3, "Sin RAG = 0 por construcción", N3) |
 
-## Recetas mínimas (regenerar SOLO lo citado, sin correr las 13 experimentaciones)
+## Recetas mínimas (regenerar SOLO lo citado, sin reejecutar los experimentos de generación y retrieval de Nota 3, exp9–exp13)
 
 Las salidas crudas (`results.json`) ya están versionadas; estos comandos re-derivan las
 tablas/figuras a partir de ellas (no re-corren generación LLM salvo el primer bloque):

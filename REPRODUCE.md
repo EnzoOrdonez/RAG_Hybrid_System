@@ -1,17 +1,26 @@
 # REPRODUCE — regenerar las cifras desde limpio
 
 Cómo volver a obtener cada número citable del proyecto, ordenado de lo más barato a lo más
-caro. **Todo lo del nivel 1 y 2 corre sin GPU, sin LLM y sin red**: la fase de verano se
-diseñó para que el pase GPU se pague una sola vez por verificador y todo lo demás sea
-re-agregación en CPU de las probabilidades persistidas.
+caro. Hay dos niveles de reproducción, declarados por separado a propósito:
 
-Estado actual: **todas las verificaciones de nivel 1 y 2 pasan** (2026-07-30).
+1. **Rederivación offline** (niveles 1-4): recomputa cada cifra publicada desde los
+   resultados y probabilidades **versionados** en `experiments/results/`. Corre sin GPU,
+   sin LLM y sin red.
+2. **Repetición completa** (nivel 5 y regeneración): requiere descargar los modelos y
+   reconstruir corpus e índices. **No están versionados**: `data/models/`, `data/indices/`,
+   los chunks y el corpus procesado existen solo localmente (gitignored); un clon público
+   del repo no los contiene. Ver §0 para cómo obtenerlos.
+
+Estado actual: **todas las verificaciones de nivel 1 y 2 pasan** (2026-08-30; suite 341/341).
 
 ---
 
 ## 0. Entorno (obligatorio)
 
-El intérprete del PATH es 3.11 y **no** tiene el stack ML. Usar el 3.14:
+El intérprete del PATH es 3.11 y **no** tiene el stack ML. Usar Python **3.14** con las
+dependencias de `requirements-lock.txt` instaladas; apunta `$PY` a ese intérprete
+(la ruta mostrada es la del entorno original del autor, conservada como procedencia
+histórica — ajusta a tu instalación):
 
 ```powershell
 $PY = "C:\Users\enziz\AppData\Local\Python\pythoncore-3.14-64\python.exe"
@@ -44,6 +53,13 @@ ms-marco-MiniLM-L-12-v2, nli-deberta-v3-{small,base,large}, hhem-2.1). Manifiest
 sha256 en `data/models/*_manifest.json`. Índice único construido:
 `data/indices/*_bge-large_adaptive_500.*`.
 
+> **Aviso de artefactos no versionados (gitignored):** `data/models/`, `data/indices/`,
+> los chunks y el corpus procesado **no viajan con un clon**. Para obtenerlos:
+> los modelos se descargan de Hugging Face con los IDs exactos de arriba (verificar
+> contra los sha256 de los manifiestos); los índices se reconstruyen con los scripts de
+> `src/embedding/` sobre los chunks; el corpus se regenera con los crawlers de
+> `src/ingestion/` más la curación documentada en `data/evaluation/README.md`.
+
 ---
 
 ## 1. Suite de tests (segundos, sin GPU)
@@ -69,7 +85,7 @@ Qué fija cada archivo:
 
 ```powershell
 & $PY scripts\verify_v4_offline.py        # cifras v4 / N9 (Nota 3, firmadas)
-& $PY scripts\verify_summer_offline.py    # Tier A + exp16 + exp17 (fase de verano)
+& $PY scripts\verify_summer_offline.py    # descubre por forma los artefactos de verano (Tier A + exp15-exp19b)
 ```
 
 Ambos salen con código 0 solo si **todo** cuadra, y escriben un reporte en `output/audit/`.
@@ -98,13 +114,19 @@ Reconstruyen artefactos derivados sin volver a generar con el LLM.
 `--exp-dir` / `--baseline-arm` son obligatorios fuera de Tier A: sin ellos el artefacto sale
 con la metadata de Tier A (era el defecto D1, ya corregido y con test).
 
-## 4. Gold humano (dependencia humana + CPU)
+## 4. Gold humano (COMPLETADO 2026-08-29 — las recetas regeneran los análisis)
 
 ```powershell
 & $PY scripts\build_gold_v4.py                  # regenera etapa A (150) + etapa B (50)
 & $PY scripts\analyze_gold_v4.py --simulate 0.15   # smoke test, no escribe nada
-& $PY scripts\analyze_gold_v4.py                # análisis real (requiere el CSV relleno)
+& $PY scripts\analyze_gold_v4.py                # análisis real (el CSV ya está relleno y adjudicado)
+& $PY scripts\run_gold_sensitivity.py           # sensibilidad: preadjudicación / reconciliada / sin 9
+& $PY scripts\analyze_taxonomy_calibration.py   # calibración de la taxonomía (40 ítems)
 ```
+
+Salidas finales versionadas: `output/audit/gold_v4_analysis.{json,md}`,
+`output/audit/gold_v4_sensitivity.md`, `output/audit/taxonomy_calibration_report.md`,
+`output/audit/triple_judge_agreement.md` y `docs/SECCION_VALIDACION_HUMANA.md`.
 
 El muestreo es determinista (seed 42): regenerar **no** cambia qué 150 claims salen.
 El análisis pondera por Horvitz-Thompson re-ejecutando el muestreador real; reporta el
@@ -141,11 +163,11 @@ con el mismo `config_name` y prompt que otro experimento se sirve del caché de 
 
 ## Reglas que la reproducción no debe romper
 
-- `experiments/results/exp3..exp14` (+`exp8b`) son **solo lectura** — evidencia firmada, tags
+- `experiments/results/exp3..exp19b` (+`exp8b`) son **solo lectura** — evidencia firmada y cerrada, tags
   `nota3-evidencia-2026-06-11` / `nota3-N9-cierre-2026-07-02`. Comprobar con
   `git diff --name-status nota3-evidencia-2026-06-11 -- experiments/results`: solo debe haber
-  altas (`A`). Todo recálculo va a archivos `_vN` nuevos o a IDs `exp15+`.
-- `paper/audit_findings.md` y `exp8_stats_corrected.csv` son **inmutables**.
+  altas (`A`). Todo recálculo va a archivos `_vN` nuevos; no hay experimentos nuevos previstos.
+- `paper/audit_findings.md` y `paper/audit_outputs/exp8_stats_corrected.csv` son **inmutables**.
 - `scripts/compute_retrieval_metrics.py` y `compute_faithfulness_metrics.py` escriben
   **in-place** en el directorio que se les pasa. Para verificar, usar los `verify_*_offline.py`,
   que importan funciones y **jamás** ejecutan sus `main()`.
@@ -160,9 +182,10 @@ perillas cambiadas, ambas justificadas por la fase:
 
 - `prompt_routing=True` — sin esto `RAGPipeline` tipa todo como `default` y usa otra plantilla
   que la ruta medida en **115/194** queries.
-- `balance_cross_cloud_providers=True` — la única palanca positiva de la fase (exp17: cobertura
-  7/25→25/25, HHEM +0,081). Piloto n=25, no significativo: es una decisión de despliegue, no una
-  afirmación de la tesis.
+- `balance_cross_cloud_providers=True` — la única palanca positiva de la fase (exp17, cobertura
+  **condicional** histórica 7/25→25/25, HHEM +0,081; la auditoría **estricta** canónica del
+  2026-08-29 es 2/25→20/25, es decir 8 %→80 % — ver `output/audit/provider_coverage_probe.md`).
+  Piloto n=25, no significativo: es una decisión de despliegue, no una afirmación de la tesis.
 
 Está **fuera** de `PIPELINE_CONFIGS` a propósito, para que `get_config("hybrid")` siga
 devolviendo el sistema medido. Fijado por `test_coverage_balancer.py`.
@@ -188,3 +211,9 @@ El orden protegido es `draft -> extract/select en CPU -> draft_replay_check -> r
 `select_exp19b_evidence.py` fija el CrossEncoder en `device="cpu"` y el lanzador oculta CUDA
 a extract/select; la GPU no se toca entre draft y el final de regen. Draft y select arrancan
 con `--no-resume`, y draft/regen mantienen la caché LLM desactivada.
+
+**Resultado cerrado (2026-08-22):** la corrida completa pareada terminó con replay 5/5 y
+Δ HHEM **+0,0451** (IC95 [0,0076; 0,0817], p=0,018), TOST dentro de la banda ±0,081.
+Veredicto: mejora local alineada al verificador HHEM, **no** una mejora de fidelidad
+independiente del verificador. El lanzador de arriba queda como registro operativo:
+**no** debe re-ejecutarse sobre la evidencia final, que está cerrada y es de solo lectura.
