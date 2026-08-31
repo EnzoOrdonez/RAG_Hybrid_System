@@ -34,7 +34,8 @@ artefactos se conservan en las entradas 28b-28e de
 
 Los pesos de Horvitz–Thompson permiten extrapolar desde estratos sobremuestreados, pero
 incrementan la varianza. En la etapa A, 150 anotaciones corresponden a un tamaño efectivo
-de Kish de 38,8; en la taxonomía de 40 claims, el tamaño efectivo fue 27,4. Los intervalos
+de Kish de 38,5 según `output/audit/gold_v4_analysis.json`; en la taxonomía de 40 claims,
+el tamaño efectivo fue 27,4. Los intervalos
 de κ son, en consecuencia, amplios y ninguna κ de la etapa A resultó significativa tras BH.
 Las cifras ponderadas deben leerse como estimaciones poblacionales con incertidumbre, junto
 con la lectura no ponderada de `random_anchor`. Véanse `output/audit/gold_v4_analysis.md`,

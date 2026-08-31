@@ -21,13 +21,14 @@ Streamlit y la evidencia experimental de una tesis y un paper.
   Fuente: `docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex`. Merge final a `main` hecho;
   CI de GitHub Actions en verde (`.github/workflows/ci.yml` + escáner de secretos con
   baseline + Ruff informativo + lockfile `requirements-lock.txt`).
-- **19 experimentos versionados** (`exp3..exp19b` + `exp8b`), todos cerrados. Evidencia
+- **19 experimentos lógicos versionados** (`exp3..exp19b` + `exp8b`), almacenados en 20
+  directorios porque exp15 está partido en dos; todos cerrados. Evidencia
   de Nota 3: `exp9..exp13`; auditoría/validación post-paper: `exp14..exp19b` (piso de
   ruido del runtime, ablaciones de verificador, techo de evidencia, selector anclado).
 - **exp19b CERRADO**: Δ HHEM +0,0451 (IC95 [0,0076; 0,0817], p=0,018), TOST dentro de la
   banda preespecificada ±0,081; compuerta `draft_replay_check` (5/5 bit-idénticas).
   Veredicto: mejora local alineada al verificador, no independiente del verificador.
-- **Gold humano v4 COMPLETADO y adjudicado**: 150 claims / 200 juicios claim–condición +
+- **Referencia humana piloto v4 COMPLETADA y adjudicada**: 150 claims / 200 juicios claim–condición +
   taxonomía 40 + retest 20. Mejor verificador κ=0,30 ponderada (IC95 cruza 0); jueces LLM
   ciegos κ₂=0,754 entre sí pero 0,17–0,20 vs humano; intra-anotador 55 %. Las etiquetas
   son referencia piloto, no ground truth. Docs: `docs/SECCION_VALIDACION_HUMANA.md`,
@@ -55,8 +56,8 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 
 ## Problemas conocidos abiertos
 
-> Cerrados el 2026-08-30 (ver "Estado actual"): el gold humano v4 está completado y
-> adjudicado; existe CI versionada (`.github/workflows/ci.yml`) y lockfile
+> Cerrados el 2026-08-30 (ver "Estado actual"): la referencia humana piloto v4 está completada y
+> adjudicada; existe CI versionada (`.github/workflows/ci.yml`) y lockfile
 > (`requirements-lock.txt`, generado el 2026-08-23 junto con la propuesta de manifiestos).
 > Lo que sigue abierto:
 - `test_nli_output_is_softmax_probabilities` **hoy no se omite**: con `HF_HUB_OFFLINE=1` la suite da
@@ -231,7 +232,7 @@ pendiente de OK de Enzo para actualizarlas):
 - La verificación "SUMMER_RESULTS.md:271 describe exp18 como pendiente (sigue así)" de la
   entrada previa también quedó obsoleta.
 
-Cuellos de botella vigentes (detalle en el documento unificado): G1 gold humano v4 A+B
+Cuellos de botella vigentes (detalle en el documento unificado): G1 referencia humana piloto v4 A+B
 (~8 h de anotador, el más antiguo); G2 congelar config de encuestas (vence ~mediados de
 agosto); G3 decisión nube-infraestructura + compuerta exp21 (cero gasto ejecutado); G4
 decisión exp19b; G6 taxonomía de 759 claims; G7 confirmatorio exp17 (opcional).

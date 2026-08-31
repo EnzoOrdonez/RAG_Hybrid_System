@@ -95,10 +95,13 @@ filas `from_cache=True`. Las latencias p50/p95 resultantes están en
 
 Agreement (N5): claim-level kappa **0.411** on the 50-claim audit sample — **ojo:
 esa κ es la concordancia ENTRE los dos verificadores NLI (small vs base), NO contra
-un gold humano**. La concordancia de los verificadores NLI contra el gold humano real
-(gold v4, 2026-08-29, 50 claims de la etapa A) es mucho menor (κ ≈ 0,17–0,30 según la
-variante pre/post-adjudicación; ver `docs/SECCION_VALIDACION_HUMANA.md` y
-`output/audit/taxonomy_calibration_report.md`). Config-mean
+una referencia humana**. En la referencia humana piloto v4 preadjudicación, la etapa A
+contiene 150 claims y la κ ponderada usa 132 juicios binarios (18 `dudoso` excluidos):
+NLI small **0.0860**, NLI base **0.0829** y HHEM **0.3033**. Son concordancias
+verificador–referencia; véanse `output/audit/gold_v4_sensitivity.json`,
+`output/audit/gold_v4_analysis.json` y `docs/SECCION_VALIDACION_HUMANA.md`. El rango
+**0.171–0.204** corresponde, en cambio, a humano–jueces LLM sobre 197 pares válidos de
+claim-condición; no es una κ verificador–humano. Config-mean
 Spearman 0.825 (published metric) / 0.559 n.s. (v2 primary); per-model scenario ordering
 flips in 3/4 models → NLI faithfulness is reported as instrument-relative (contrasts only).
 The claim-format ablation (small verifier, no "Header:" prefix) was cleanly negative

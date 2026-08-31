@@ -45,7 +45,7 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 - **Hallucination detection**: NLI-based faithfulness scoring with DeBERTa v3
 - **Local LLMs**: Runs entirely on your machine with Ollama (demo: Llama 3.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see MODELS.md)
 - **Streamlit UI**: 5-page web interface with chat, metrics dashboard, and evaluation tools
-- **Benchmarking suite**: 19 versioned experiments (exp3-exp19b + exp8b) with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
+- **Benchmarking suite**: 19 logical experiments (exp3-exp19b + exp8b), stored in 20 result directories because exp15 is split in two, with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
 
 ---
 
@@ -165,7 +165,7 @@ maps every cited table/figure to its experiment → script → output path, and 
 to regenerate only the report's artifacts (without re-running the full experiment suite).
 
 - [Guía de anotación del gold](docs/GUIA_ANOTACION_GOLD_V4.md)
-- [Validación con gold humano](docs/SECCION_VALIDACION_HUMANA.md)
+- [Validación con referencia humana piloto](docs/SECCION_VALIDACION_HUMANA.md)
 - [Reproducción de experimentos](REPRODUCE.md)
 - [Ledger de ablaciones de verano](paper/summer_ablation_log.md)
 
@@ -290,7 +290,7 @@ LLM comparison, ablation, and cross-cloud evaluation. exp3-8/8b ran on the pre-r
 corpus/oracle and are kept as history; the paper's evidence is the final round (exp10-13
 on the curated 194-query set + exp9 control on the pre-curation 200-query set); exp14-19b are
 post-paper audit and validation experiments (runtime-noise floor, verifier ablations, evidence
-ceiling, anchored selection), complemented by the claim-level human gold (v4):
+ceiling, anchored selection), complemented by the claim-level pilot human reference (v4):
 
 | Experiment | What it tests | Key finding |
 |------------|--------------|-------------|
@@ -304,7 +304,7 @@ ceiling, anchored selection), complemented by the claim-level human gold (v4):
 | exp17 | Cross-cloud balanced arm | Provider-coverage probe (descriptive): strict coverage 8% baseline vs 80% balanced, 0/125 foreign-provider chunks |
 | exp18 | Evidence ceiling + unsupported-claim taxonomy | 759 unsupported claims taxonomized; stratified sample with Horvitz-Thompson weights, Kish n_eff = 27.4 |
 | exp19b | Anchored evidence selector, paired + replay-gated | HHEM Δ=+0.0451 (CI95 [0.0076; 0.0817], p=0.018), TOST within ±0.081; verdict: verifier-aligned local improvement, not verifier-independent |
-| gold v4 | Claim-level human validation (150 claims, 200 claim-condition judgments, blinded LLM judges) | Best verifier κ=0.30 (weighted, CI crosses 0) vs pilot human reference; LLM judges κ₂=0.754 between them but 0.17-0.20 vs human; labels = pilot reference, not ground truth |
+| pilot reference v4 | Claim-level human validation (150 claims, 200 claim-condition judgments, blinded LLM judges) | Best verifier κ=0.30 (weighted, CI crosses 0) vs pilot human reference; LLM judges κ₂=0.754 between them but 0.17-0.20 vs human; labels = pilot reference, not ground truth |
 
 Paired stats throughout: Wilcoxon signed-rank + Cohen's d_z + bootstrap CI, BH/Holm
 corrected per research-question family.

@@ -43,7 +43,8 @@ resultados estratificados por condición.
 ## Concordancia con la referencia piloto: resultado principal preadjudicación
 
 En A hubo 132 juicios binarios utilizables; los 18 `dudoso` se excluyeron de κ según la
-regla declarada. El n efectivo de Kish fue 38,8. κ cuantifica concordancia con esta
+regla declarada. El n efectivo de Kish fue 38,5 según
+`output/audit/gold_v4_analysis.json`. κ cuantifica concordancia con esta
 referencia bajo este diseño; no estima el nivel absoluto o «real» de fidelidad.
 
 | Verificador | κ ponderada | IC95 | p ajustada BH | κ `random_anchor` |
