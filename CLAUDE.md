@@ -246,10 +246,12 @@ Totalmente fusionadas en `summer/mejoras` y sin contenido único: `codex/plan-a-
 `fase-2.5-recompute-retrieval-stats`, `fix/phase-1-no-rerun`, `fix/phase-2-nli-and-seeds`,
 `pre-corpus-rebuild-2026-05-21`, `summer/ablacion`. Con commits NO fusionados: solo dos.
 `fase-3-regenerate-figures` (3 commits, publicados en origin, trae `generate_phase3_artifacts.py`
-y 20 artefactos `_phase3` ausentes de `summer/mejoras`) y
+y 20 artefactos `_phase3` ausentes de `summer/mejoras`; el script existe solo en esa rama
+histórica, no en el árbol actual) y
 `fase-3.5-nli-recompute-saved-answers` (9 commits, de los cuales **6 existen solo en este disco**:
 `origin/…` está en `c119c99`, local en `e8d2e2e`; incluye el commit de anti-circularidad
-Flag 17/142 y los scripts `recompute_nli_over_saved.py` y `build_annotation_pool.py`). Los 5 tags
+Flag 17/142 y los scripts `recompute_nli_over_saved.py` y `build_annotation_pool.py`, que existen
+solo en esa rama histórica y no en el árbol actual). Los 5 tags
 están contenidos en `main`, `summer/ablacion` y `summer/mejoras`: ningún borrado de rama los
 huerfanaría. `main` local va 2 commits por delante de `origin/main`. La eliminación queda a
 decisión de Enzo, rama por rama.

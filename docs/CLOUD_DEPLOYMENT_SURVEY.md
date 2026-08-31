@@ -84,7 +84,7 @@ KV cache 640 MiB por slot a 4096 cells, medido):
 | KV cache, 4096 × 4 slots concurrentes | ~2,5 GiB |
 | bge-large-en-v1.5 (fp16) | ~0,7 GiB |
 | ms-marco-MiniLM-L-12-v2 | ~0,15 GiB |
-| nli-deberta-v3-small — la UI **verifica en vivo** (`chat_page.py:210` → `verify_answer`) | ~0,6 GiB |
+| nli-deberta-v3-small — la UI **verifica en vivo** (`chat_page.py:213` → `verify_answer`) | ~0,6 GiB |
 | **total** | **~9 GiB** |
 
 → **16 GB bastan; 24 GB da margen cómodo** para más concurrencia o picos.
