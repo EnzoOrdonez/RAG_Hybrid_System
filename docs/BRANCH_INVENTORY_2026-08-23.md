@@ -1,30 +1,42 @@
-# Inventario de ramas — 2026-08-23
+# Inventario de ramas — refrescado el 2026-08-30
 
-Inventario generado solo con referencias locales existentes, sin `fetch`, cambios de rama ni operaciones destructivas.
-Los conteos `adelante` y `atrás` son relativos a `summer/taxonomia-759`. Una rama figura como mergeada cuando su punta es ancestro de la rama base.
-Las clasificaciones son propuestas para decisión humana; este inventario no ejecuta ninguna acción.
+Instantánea de solo lectura tomada después del `fetch` autorizado, con
+`summer/taxonomia-759` en `50c8ff3` como base y `origin/main` en `670f8e5` como rama
+principal pública. Los conteos `adelante` y `atrás` son relativos a esa punta exacta de
+la base. «Mergeada» significa que la punta de la fila es ancestro de la rama indicada.
 
-| Rama | Ámbito | Último commit | Fecha | Mergeada a taxonomía | Mergeada a main | Adelante | Atrás | Propuesta | Razón |
+Las filas `origin/*` son **referencias locales de seguimiento remoto**, no ramas remotas
+por sí mismas. El `fetch` actualizó las ramas presentes, pero no usó `--prune`: las tres
+refs marcadas «obsoleta» corresponden a ramas remotas cuya eliminación fue registrada el
+2026-08-23. `origin/HEAD -> origin/main` es una ref simbólica y no se cuenta como rama.
+Ninguna clasificación ejecuta una acción; todas quedan sujetas a decisión humana.
+
+| Ref | Tipo / estado remoto | Último commit | Fecha | Mergeada a taxonomía | Mergeada a `origin/main` | Adelante | Atrás | Propuesta | Razón |
 |---|---|---:|---:|:---:|:---:|---:|---:|---|---|
-| codex/plan-a-thesis-safe | local | 42b95ba | 2026-03-06 | sí | sí | 0 | 192 | candidata a archivar | punta integrada en summer/taxonomia-759, main; conservar como hito hasta revisión humana |
-| fase-2.5-recompute-retrieval-stats | local | 7f9eede | 2026-04-23 | sí | sí | 0 | 170 | candidata a borrar | copia local totalmente integrada y respaldada por una referencia remota idéntica |
-| fase-3-regenerate-figures | local | f6d345b | 2026-04-23 | no | no | 3 | 166 | candidata a archivar | conserva 3 commit(s) no integrados, pero su última actividad fue hace 122 días |
-| fase-3.5-nli-recompute-saved-answers | local | e8d2e2e | 2026-04-24 | no | no | 9 | 166 | candidata a archivar | conserva 9 commit(s) no integrados, pero su última actividad fue hace 121 días |
-| fix/phase-1-no-rerun | local | 270ee58 | 2026-04-23 | sí | sí | 0 | 181 | candidata a borrar | copia local totalmente integrada y respaldada por una referencia remota idéntica |
-| fix/phase-2-nli-and-seeds | local | e6a599b | 2026-04-23 | sí | sí | 0 | 175 | candidata a borrar | copia local totalmente integrada y respaldada por una referencia remota idéntica |
-| main | local | 29cea4a | 2026-07-22 | sí | sí | 0 | 96 | activa | rama principal o su referencia remota |
-| pre-corpus-rebuild-2026-05-21 | local | 66cd0cf | 2026-06-30 | sí | sí | 0 | 119 | candidata a archivar | punta integrada en summer/taxonomia-759, main; conservar como hito hasta revisión humana |
-| summer/ablacion | local | 3b60ed3 | 2026-07-24 | sí | no | 0 | 79 | candidata a archivar | punta integrada en summer/taxonomia-759; conservar como hito hasta revisión humana |
-| summer/exp19b | local | cea75a1 | 2026-08-21 | sí | no | 0 | 20 | candidata a archivar | punta integrada en summer/taxonomia-759; conservar como hito hasta revisión humana |
-| summer/mejoras | local | 89dc654 | 2026-08-04 | sí | no | 0 | 34 | candidata a archivar | punta integrada en summer/taxonomia-759; conservar como hito hasta revisión humana |
-| summer/taxonomia-759 | local | 95087e4 | 2026-08-23 | sí | no | 0 | 0 | activa | rama de trabajo actual o su referencia remota |
-| origin/fase-2.5-recompute-retrieval-stats | remota | 7f9eede | 2026-04-23 | sí | sí | 0 | 170 | candidata a archivar | punta integrada en summer/taxonomia-759, main; conservar como hito hasta revisión humana |
-| origin/fase-3-regenerate-figures | remota | f6d345b | 2026-04-23 | no | no | 3 | 166 | candidata a archivar | conserva 3 commit(s) no integrados, pero su última actividad fue hace 122 días |
-| origin/fase-3.5-nli-recompute-saved-answers | remota | c119c99 | 2026-04-23 | no | no | 3 | 166 | candidata a archivar | conserva 3 commit(s) no integrados, pero su última actividad fue hace 122 días |
-| origin/fix/phase-1-no-rerun | remota | 270ee58 | 2026-04-23 | sí | sí | 0 | 181 | candidata a archivar | punta integrada en summer/taxonomia-759, main; conservar como hito hasta revisión humana |
-| origin/fix/phase-2-nli-and-seeds | remota | e6a599b | 2026-04-23 | sí | sí | 0 | 175 | candidata a archivar | punta integrada en summer/taxonomia-759, main; conservar como hito hasta revisión humana |
-| origin/main | remota | a524b0d | 2026-07-02 | sí | sí | 0 | 98 | activa | rama principal o su referencia remota |
-| origin/pre-corpus-rebuild-2026-05-21 | remota | b5c597e | 2026-06-11 | sí | sí | 0 | 125 | candidata a archivar | punta integrada en summer/taxonomia-759, main; conservar como hito hasta revisión humana |
-| origin/summer/exp19b | remota | cea75a1 | 2026-08-21 | sí | no | 0 | 20 | candidata a archivar | punta integrada en summer/taxonomia-759; conservar como hito hasta revisión humana |
-| origin/summer/mejoras | remota | 89dc654 | 2026-08-04 | sí | no | 0 | 34 | candidata a archivar | punta integrada en summer/taxonomia-759; conservar como hito hasta revisión humana |
-| origin/summer/taxonomia-759 | remota | d4c6594 | 2026-08-23 | sí | no | 0 | 1 | activa | rama de trabajo actual o su referencia remota |
+| `codex/plan-a-thesis-safe` | local | `42b95ba` | 2026-03-06 | sí | sí | 0 | 220 | candidata a archivar | Hito antiguo totalmente integrado. |
+| `fase-3-regenerate-figures` | local | `f6d345b` | 2026-04-23 | no | no | 3 | 194 | candidata a archivar | Conserva 3 commits no integrados; requiere revisión humana antes de cualquier retiro. |
+| `fase-3.5-nli-recompute-saved-answers` | local | `e8d2e2e` | 2026-04-24 | no | no | 9 | 194 | candidata a archivar | Conserva 9 commits no integrados; requiere revisión humana antes de cualquier retiro. |
+| `main` | local | `670f8e5` | 2026-08-30 | no | sí | 3 | 6 | activa | Rama principal local sincronizada con el merge camera-ready; diverge por trabajo posterior de esta rama. |
+| `pre-corpus-rebuild-2026-05-21` | local | `66cd0cf` | 2026-06-30 | sí | sí | 0 | 147 | candidata a archivar | Hito previo al rebuild, totalmente integrado. |
+| `summer/ablacion` | local | `3b60ed3` | 2026-07-24 | sí | sí | 0 | 107 | candidata a archivar | Punta integrada en ambas líneas vigentes. |
+| `summer/exp19b` | local | `cea75a1` | 2026-08-21 | sí | sí | 0 | 48 | candidata a archivar | Hito de exp19b integrado; útil para trazabilidad. |
+| `summer/mejoras` | local | `89dc654` | 2026-08-04 | sí | sí | 0 | 62 | candidata a archivar | Punta integrada en ambas líneas vigentes. |
+| `summer/taxonomia-759` | local | `50c8ff3` | 2026-08-30 | sí | no | 0 | 0 | activa | Rama de trabajo de esta instantánea. |
+| `origin/fase-2.5-recompute-retrieval-stats` | seguimiento remoto obsoleto; rama remota borrada | `7f9eede` | 2026-04-23 | sí | sí | 0 | 198 | candidata a borrar | Solo queda la ref local obsoleta; la rama remota fue eliminada el 2026-08-23. |
+| `origin/fase-3-regenerate-figures` | seguimiento de rama remota | `f6d345b` | 2026-04-23 | no | no | 3 | 194 | candidata a archivar | Conserva 3 commits remotos no integrados. |
+| `origin/fase-3.5-nli-recompute-saved-answers` | seguimiento de rama remota | `c119c99` | 2026-04-23 | no | no | 3 | 194 | candidata a archivar | Conserva 3 commits remotos no integrados; además difiere de la rama local homónima. |
+| `origin/fix/phase-1-no-rerun` | seguimiento remoto obsoleto; rama remota borrada | `270ee58` | 2026-04-23 | sí | sí | 0 | 209 | candidata a borrar | Solo queda la ref local obsoleta; la rama remota fue eliminada el 2026-08-23. |
+| `origin/fix/phase-2-nli-and-seeds` | seguimiento remoto obsoleto; rama remota borrada | `e6a599b` | 2026-04-23 | sí | sí | 0 | 203 | candidata a borrar | Solo queda la ref local obsoleta; la rama remota fue eliminada el 2026-08-23. |
+| `origin/main` | seguimiento de rama remota | `670f8e5` | 2026-08-30 | no | sí | 3 | 6 | activa | Ref pública actual; contiene el merge camera-ready PR #3. |
+| `origin/pre-corpus-rebuild-2026-05-21` | seguimiento de rama remota | `b5c597e` | 2026-06-11 | sí | sí | 0 | 153 | candidata a archivar | Hito remoto anterior y totalmente integrado. |
+| `origin/summer/exp19b` | seguimiento de rama remota | `cea75a1` | 2026-08-21 | sí | sí | 0 | 48 | candidata a archivar | Hito remoto de exp19b integrado. |
+| `origin/summer/mejoras` | seguimiento de rama remota | `89dc654` | 2026-08-04 | sí | sí | 0 | 62 | candidata a archivar | Punta remota integrada. |
+| `origin/summer/taxonomia-759` | seguimiento de rama remota | `293cc0e` | 2026-08-30 | sí | no | 0 | 4 | activa | Ref remota de la rama de trabajo, cuatro commits detrás de la instantánea local. |
+
+## Lectura propuesta
+
+- Mantener activas `main`, `summer/taxonomia-759` y sus refs de seguimiento.
+- Conservar como archivo los hitos integrados y revisar manualmente las dos familias
+  `fase-3*`, porque guardan commits no integrados.
+- Considerar retirar únicamente las tres refs de seguimiento obsoletas después de una
+  decisión humana. Este inventario no borró ramas ni refs locales o remotas.
