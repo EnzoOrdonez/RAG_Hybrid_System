@@ -3,7 +3,19 @@ message: "If you use this software, please cite it using the metadata below."
 type: software
 title: "CloudRAG: Hybrid RAG System for Cloud Documentation"
 authors:
-  - family-names: "Ordoñez"
+  - family-names: "Ordoñez Flores"
     given-names: "Enzo"
+  - family-names: "Lewis Fuentes"
+    given-names: "Winston"
 license: GPL-3.0-only
 repository-code: "https://github.com/EnzoOrdonez/RAG_Hybrid_System"
+preferred-citation:
+  type: conference-paper
+  title: "Hybrid Retrieval-Augmented Generation for Multi-Cloud Documentation: A Comparative Evaluation of Lexical, Semantic, and Hybrid Pipelines Against an LLM-Only Baseline"
+  authors:
+    - family-names: "Ordoñez Flores"
+      given-names: "Enzo"
+    - family-names: "Lewis Fuentes"
+      given-names: "Winston"
+  collection-title: "2026 IEEE Latin American Conference on Computational Intelligence (LACCI)"
+  year: 2026
