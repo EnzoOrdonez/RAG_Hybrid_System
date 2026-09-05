@@ -18,7 +18,15 @@ reproducción de exp19b requeriría una ruta explícita y no se hizo aquí.
 | Reranking | MiniLM-L-12-v2 sobre `(query, chunk)` | MiniLM-L-12-v2 sobre `(claim, chunk)`, ejecutado en CPU | Diferencia de lógica |
 | Selección cross-cloud | `SURVEY_DEPLOY` rebalancea proveedores en queries cross-cloud | `claim_selected` usa el selector condicionado por claims | Diferencia de lógica |
 | Tipo de query y prompt | `QueryProcessor` + `build_context` + `get_template` + `SYSTEM_PROMPT` | `build_prompt("hibrido", ...)` reutiliza esas mismas funciones | Alineado para iguales IDs y tipo |
-| `keep_alive` | `30m`, operación de la demo | No se envía | Diferencia operativa; no cambia el texto generado |
+| `keep_alive` | `30m` en Chat; Evaluation no lo envía | No se envía | Operación distinta entre páginas |
+| Contexto | `num_ctx=4096`, explícito en el cliente de la app | Consultar receta y servidor histórico | No se infiere paridad por el tag |
+| Identidad de artefactos | Manifiesto de índices, consultas y snapshots; digest del modelo comprobado por generación en modo participante | Evidencia congelada | Trazabilidad distinta, explícita |
+
+Desde la corrección de preparación para entrevistas, `src/ui/app.py` abre únicamente
+Evaluation por defecto. Chat y las herramientas requieren `CLOUDRAG_MODE=development`.
+Evaluation persiste intentos y respuestas antes de admitir ratings, muestra las fuentes
+en un desplegable y rechaza fallos técnicos o verificación NLI degradada. Instalación y
+compuerta de validación real: [INTERVIEW_READINESS.md](INTERVIEW_READINESS.md).
 
 ## Diferencias que no son configuración pura
 

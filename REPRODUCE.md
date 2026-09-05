@@ -11,6 +11,12 @@ Estado actual: **todas las verificaciones de nivel 1 y 2 pasan** (2026-07-30).
 
 ## 0. Entorno (obligatorio)
 
+**Aplicación de entrevistas:** su entorno nuevo se instala desde `requirements-app.txt`
+con hashes y auxiliares CPU. Ver [INTERVIEW_READINESS.md](docs/INTERVIEW_READINESS.md)
+para instalación portable, artefactos, sesiones y validación pendiente. Las rutas y
+mediciones que siguen documentan el entorno experimental histórico; no prueban que
+un despliegue remoto de Evaluation Mode esté listo ni autorizan regenerar evidencia.
+
 El intérprete del PATH es 3.11 y **no** tiene el stack ML. Usar el 3.14:
 
 ```powershell

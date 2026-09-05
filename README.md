@@ -43,7 +43,7 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 - **Adaptive chunking**: Preserves code blocks and tables as atomic units
 - **Cross-encoder re-ranking**: ms-marco-MiniLM-L-12-v2 for precision refinement
 - **Hallucination detection**: NLI-based faithfulness scoring with DeBERTa v3
-- **Local LLMs**: Runs entirely on your machine with Ollama (demo: Llama 3.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see MODELS.md)
+- **Local LLMs**: Runs with Ollama (UI default: Granite 4.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see MODELS.md)
 - **Streamlit UI**: 5-page web interface with chat, metrics dashboard, and evaluation tools
 - **Benchmarking suite**: 19 versioned experiments (exp3-exp19b + exp8b) with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
 
@@ -136,12 +136,17 @@ Query → Normalization + Expansion
 
 ### Install
 
+For the participant application, use the Python 3.14 environment, hashed dependency
+lock and artifact provisioning steps in [Interview readiness](docs/INTERVIEW_READINESS.md).
+Installing packages alone does not provision the corpus, indices or model snapshots.
+The recipe below is the historical CLI environment, not the interview deployment.
+
 ```bash
 git clone https://github.com/EnzoOrdonez/RAG_Hybrid_System.git
 cd RAG_Hybrid_System
 pip install -r requirements.txt
 
-# Download the DEMO model (UI / sustentación).
+# Historical CLI example model.
 # The 4 models EVALUATED in the Nota 3 report (granite4.1:8b, gemma4:e4b,
 # mistral:7b-instruct, qwen3.5:9b) are documented in MODELS.md — pull those
 # to reproduce exp12.
@@ -226,32 +231,35 @@ python -m streamlit run src/ui/app.py
 python scripts/run_benchmark.py --experiment exp8 --quick
 ```
 
-### Cómo lanzar la demo (video de sustentación / sesiones B.4)
+### Aplicación para participantes y demo privada
+
+La aplicación abre **Evaluation Mode** por defecto y requiere una invitación del
+operador. Antes de iniciarla, seguir [la guía de instalación y operación](docs/INTERVIEW_READINESS.md)
+para fijar almacenamiento, manifiesto de artefactos, digest del modelo y endpoint.
+Las entrevistas permanecen bloqueadas hasta validar el despliegue y su latencia real.
+
+El Chat de desarrollo se habilita explícitamente en un entorno privado:
 
 ```bash
-# 1) Ollama corriendo y modelo de demo descargado
-ollama serve            # si no está ya corriendo
-ollama pull llama3.1:8b-instruct-q4_K_M
-
-# 2) Lanzar la UI (recomendado para el video y las sesiones SUS)
-python -m streamlit run src/ui/app.py
+# Con el entorno y los modelos ya provisionados (Linux/macOS):
+export CLOUDRAG_MODE=development
+.venv-app/bin/python -m streamlit run src/ui/app.py
 # abre http://localhost:8501 → página "Chat"
 ```
 
-Notas operativas (fixes 2026-06-11, ver commits F6):
+En PowerShell: `$env:CLOUDRAG_MODE='development'` y usar `.venv-app/Scripts/python.exe`.
+Configuración actual y diferencias históricas:
 
-- **Modelo de demo:** `llama3.1:8b-instruct-q4_K_M` (default del selector). Es el único
-  que cabe entero en la GPU de 6 GB; gemma4:e4b (9,6 GB) cae a CPU y es más lento aquí.
+- **Modelo por defecto:** `granite4.1:8b`, seed 42, caché desactivada, salida máxima
+  1024 y contexto 4096. El Chat permite overrides; Evaluation conserva la receta fijada.
 - **GPU para Ollama:** la UI fija `CUDA_VISIBLE_DEVICES=""` para sus propios modelos
   (embedder/reranker/NLI van a CPU) y deja la GPU completa al LLM. Con GPU ≥12 GB:
   `CLOUDRAG_DEMO_GPU=1` para revertir.
-- **keep_alive:** la UI envía `keep_alive=30m` y precalienta el modelo al primer uso de
-  la sesión → sin carga fría entre consultas ni tras pausas (sesiones de ~30 min).
-- **Streaming:** primeros tokens ~4-5 s tras enviar la consulta; respuesta completa
-  ~40-50 s (512 tokens). La verificación NLI corre DESPUÉS de mostrar la respuesta
-  (toggle en el sidebar).
-- **Primera consulta del proceso:** paga ~25 s extra de cargas perezosas (reranker en
-  CPU). Para el video: hacer una consulta de calentamiento antes de grabar.
+- **keep_alive y streaming:** corresponden al Chat. Evaluation utiliza `query()` y
+  espera generación y verificación antes de mostrar la respuesta y habilitar ratings.
+- **Latencia:** las cifras de junio (4–5 s a primeros tokens, 40–50 s completos con
+  512 tokens, ~25 s de carga inicial) pertenecen a la demo histórica. No verifican
+  Granite a 1024 tokens ni el p95 ≤60 s exigido para el despliegue de entrevistas.
 - Los benchmarks NO usan este camino (paridad cubierta por
   `tests/test_benchmark_parity.py`).
 
@@ -329,7 +337,7 @@ python -m streamlit run src/ui/app.py
 | Chunk strategy | adaptive | fixed, recursive, semantic, hierarchical, adaptive |
 | Fusion method | RRF (k=60) | RRF, Linear (alpha 0.0-1.0) |
 | Re-ranker | ms-marco-L-12 | ms-marco-L-6, ms-marco-L-12, bge-reranker |
-| LLM (demo/UI) | llama3.1:8b (demo) | evaluated set in MODELS.md: granite4.1, gemma4:e4b, mistral, qwen3.5 |
+| LLM (UI default) | granite4.1:8b | evaluated set in MODELS.md: granite4.1, gemma4:e4b, mistral, qwen3.5 |
 | Top-K | 5 | 1-20 |
 
 ---

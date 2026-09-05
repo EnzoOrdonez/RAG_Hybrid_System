@@ -10,7 +10,22 @@ Azure y GCP. Combina BM25, embeddings BGE, fusión RRF, reranking con cross-enco
 por Ollama y medición de fidelidad con verificadores NLI/HHEM. El repo contiene el pipeline, una UI
 Streamlit y la evidencia experimental de una tesis y un paper.
 
-## Estado actual
+## Estado técnico de entrevistas (2026-09-05)
+
+- Trabajo aislado desde `main` 670f8e5 en `fix/interview-readiness`.
+- CI está versionada en `.github/workflows/ci.yml`. La app tiene un lock con hashes
+  `requirements-app.txt`; baseline de esta corrección: 337 pasan, 4 omitidas, 5 excluidas.
+- Evaluation es la entrada predeterminada; usa invitaciones, sesiones UUID persistentes,
+  bloqueo de una entrevista activa, respuestas guardadas y exportación transaccional.
+- `LIVE_EXPERIMENTS` está vacío: exp19b también queda protegido contra sobrescritura.
+- No ejecutar modelos, modificar evidencia/corpus/gold, desplegar ni hacer push sin
+  autorización expresa. El trabajo académico congelado queda fuera del alcance.
+- Estado de entrevistas: **NO-GO** hasta la validación del despliegue real y p95 ≤60 s.
+  Runbook y límites: `docs/INTERVIEW_READINESS.md`.
+- Las secciones siguientes conservan el contexto histórico de agosto; sus referencias
+  a ramas activas, ausencia de CI, conteos y anotación pendiente no describen este checkout.
+
+## Estado histórico (agosto de 2026)
 
 - La evidencia de Nota 3 está cerrada en `exp9..exp13`; `exp3..exp8` y `exp8b` son historia.
 - La fase de verano tiene artefactos para `exp15..exp18`. El verificador offline del 2026-08-03
@@ -36,7 +51,8 @@ Streamlit y la evidencia experimental de una tesis y un paper.
   `nota3-evidencia-2026-06-11`.
 - La guarda de evidencia (`src/utils/signed_evidence.py`) protege por **defecto** todo dir `expN*`
   bajo `experiments/results/` contra sobrescritura, salvo los declarados en `LIVE_EXPERIMENTS`
-  (hoy `exp19b`). Crear artefactos nuevos sigue permitido.
+  (vacío desde la corrección de entrevistas). Crear artefactos nuevos requiere respetar
+  la autorización y el alcance de cada tarea.
 - Health check local aprobado: 24.481 chunks, FAISS y BM25 cargan 24.481 entradas, Ollama responde con
   Llama 3.1 disponible y el snapshot NLI local carga correctamente.
 
@@ -50,10 +66,10 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 - `experiments/results/exp15..exp19a`: evidencia de verano ya committeada. No regenerar, sobrescribir
   ni reinterpretar sin fijar antes el alcance y revisar el ledger. Desde el 2026-08-21 esto lo hace
   cumplir el código: `src/utils/signed_evidence.py` protege por defecto y solo `LIVE_EXPERIMENTS`
-  (hoy `exp19b`) queda sobrescribible.
+  (actualmente vacío) permite sobrescritura; exp19b también está congelado.
 - `.env`: existe localmente, está ignorado y puede contener secretos. No leer, imprimir ni versionar.
 
-## Problemas conocidos abiertos
+## Registro histórico de problemas (agosto de 2026)
 
 - El gold humano de dos etapas sigue pendiente de anotación real.
 - La decisión sobre experimentos de nube y gasto está bloqueada hasta interpretar `exp18` y recibir
