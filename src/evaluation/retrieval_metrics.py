@@ -19,8 +19,17 @@ from typing import Dict, List
 logger = logging.getLogger(__name__)
 
 
+def _validate_ids(retrieved_ids, relevant_ids, k=None):
+    """Reject ambiguous ranks/denominators; preserve historical valid-input values."""
+    if len(set(retrieved_ids)) != len(retrieved_ids) or len(set(relevant_ids)) != len(relevant_ids):
+        raise ValueError("Retrieval metrics require unique retrieved and relevant IDs")
+    if k is not None and (type(k) is not int or k <= 0):
+        raise ValueError("k must be a positive integer")
+
+
 def recall_at_k(retrieved_ids: List[str], relevant_ids: List[str], k: int) -> float:
     """Fraction of relevant documents found in top-k results."""
+    _validate_ids(retrieved_ids, relevant_ids, k)
     if not relevant_ids:
         logger.warning("recall_at_k: empty relevant_ids")
         return 0.0
@@ -32,7 +41,8 @@ def recall_at_k(retrieved_ids: List[str], relevant_ids: List[str], k: int) -> fl
 
 
 def precision_at_k(retrieved_ids: List[str], relevant_ids: List[str], k: int) -> float:
-    """Fraction of top-k results that are relevant."""
+    """Relevant / returned results up to k (historical denominator: min(k, n))."""
+    _validate_ids(retrieved_ids, relevant_ids, k)
     if not relevant_ids:
         logger.warning("precision_at_k: empty relevant_ids")
         return 0.0
@@ -45,6 +55,7 @@ def precision_at_k(retrieved_ids: List[str], relevant_ids: List[str], k: int) ->
 
 def mrr(retrieved_ids: List[str], relevant_ids: List[str]) -> float:
     """Mean Reciprocal Rank: 1/rank of first relevant result."""
+    _validate_ids(retrieved_ids, relevant_ids)
     if not relevant_ids or not retrieved_ids:
         return 0.0
     relevant_set = set(relevant_ids)
@@ -56,6 +67,7 @@ def mrr(retrieved_ids: List[str], relevant_ids: List[str]) -> float:
 
 def ndcg_at_k(retrieved_ids: List[str], relevant_ids: List[str], k: int) -> float:
     """Normalized Discounted Cumulative Gain at k."""
+    _validate_ids(retrieved_ids, relevant_ids, k)
     if not relevant_ids or not retrieved_ids:
         return 0.0
     relevant_set = set(relevant_ids)
@@ -76,6 +88,7 @@ def ndcg_at_k(retrieved_ids: List[str], relevant_ids: List[str], k: int) -> floa
 
 def map_score(retrieved_ids: List[str], relevant_ids: List[str]) -> float:
     """Mean Average Precision (for a single query = Average Precision)."""
+    _validate_ids(retrieved_ids, relevant_ids)
     if not relevant_ids or not retrieved_ids:
         return 0.0
     relevant_set = set(relevant_ids)
