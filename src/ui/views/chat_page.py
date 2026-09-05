@@ -4,13 +4,10 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
-import time
 
 import streamlit as st
 
 from src.ui.components.provider_colors import (
-    PROVIDER_COLORS,
-    SYSTEM_COLORS,
     faithfulness_color,
     faithfulness_label,
     get_provider_badge,
@@ -105,7 +102,7 @@ def render():
                 "Query Expansion",
                 value=False,  # OFF por defecto: N4 — la expansión no aporta (exp13)
             )
-            alpha = st.slider("Hybrid Alpha", 0.0, 1.0, 0.5, 0.1)
+            st.slider("Hybrid Alpha", 0.0, 1.0, 0.5, 0.1)
             from src.ui.components.index_loader import UI_MAX_TOKENS
             max_tokens = st.slider(
                 "Max tokens (demo)", 128, 1024, value=UI_MAX_TOKENS, step=64

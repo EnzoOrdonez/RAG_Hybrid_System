@@ -35,8 +35,8 @@ if mode not in {"participant", "development"}:
     st.error("Invalid application mode")
     st.stop()
 if mode == "participant":
-    from src.ui.pages.evaluation_page import render
-    render()
+    from src.ui.views.evaluation_page import render
+    st.navigation([st.Page(render, title="Evaluation Mode", default=True)], position="hidden").run()
     st.stop()
 
 # Page registry
@@ -96,17 +96,17 @@ with st.sidebar:
 selected_page = PAGES[page]
 
 if selected_page == "chat":
-    from src.ui.pages.chat_page import render
+    from src.ui.views.chat_page import render
     render()
 elif selected_page == "dashboard":
-    from src.ui.pages.dashboard_page import render
+    from src.ui.views.dashboard_page import render
     render()
 elif selected_page == "explorer":
-    from src.ui.pages.explorer_page import render
+    from src.ui.views.explorer_page import render
     render()
 elif selected_page == "evaluation":
-    from src.ui.pages.evaluation_page import render
+    from src.ui.views.evaluation_page import render
     render()
 elif selected_page == "experiments":
-    from src.ui.pages.experiments_page import render
+    from src.ui.views.experiments_page import render
     render()

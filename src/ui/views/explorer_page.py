@@ -164,7 +164,6 @@ def render():
                 )
                 st.plotly_chart(fig, use_container_width=True)
             except ImportError:
-                import numpy as np
                 sizes = stats["token_sizes"]
                 st.write(f"Mean: {sum(sizes)/len(sizes):.0f} tokens")
                 st.write(f"Min: {min(sizes)}, Max: {max(sizes)}")
