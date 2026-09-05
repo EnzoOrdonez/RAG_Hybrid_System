@@ -28,6 +28,8 @@ class ClaimDetail(BaseModel):
     status: str
     evidence_chunk_id: Optional[str] = None
     nli_score: float = 0.0
+    verification_method: str = "nli"
+    verification_error: Optional[str] = None
 
 
 class HallucinationReport(BaseModel):
@@ -206,7 +208,7 @@ class HallucinationDetector:
     @property
     def nli_model(self):
         """Lazy load NLI model."""
-        if self._nli_model is None and self._use_nli:
+        if self._nli_model is None and self._use_nli and self._nli_available is not False:
             try:
                 from sentence_transformers import CrossEncoder
                 self._nli_model = CrossEncoder(
@@ -297,9 +299,11 @@ class HallucinationDetector:
         # Step 2: Evidence matching
         if self._use_nli and self.nli_model is not None:
             claim_details = self._nli_matching(claims, chunk_texts, chunk_ids)
-            method = "nli"
+            method = "mixed" if any(c.verification_method == "keyword_fallback" for c in claim_details) else "nli"
         else:
             claim_details = self._keyword_matching(claims, chunk_texts, chunk_ids)
+            for detail in claim_details:
+                detail.verification_method = "keyword_fallback"
             method = "keyword_fallback"
 
         # Step 3: Scoring. not_a_claim (format artifacts, N8/H1) stay in
@@ -530,9 +534,10 @@ class HallucinationDetector:
                     "NLI prediction failed for claim, using keyword fallback: %s",
                     e,
                 )
-                results.append(
-                    self._keyword_match_single(claim, chunk_texts, chunk_ids)
-                )
+                detail = self._keyword_match_single(claim, chunk_texts, chunk_ids)
+                detail.verification_method = "keyword_fallback"
+                detail.verification_error = type(e).__name__
+                results.append(detail)
                 continue
 
             contr_scores, ent_scores = [], []

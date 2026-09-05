@@ -17,7 +17,7 @@ the constraint is about what the module is ALLOWED to reach at all.
 Run: pytest tests/test_selector_hygiene.py -v
 """
 
-import re
+import ast
 import sys
 from pathlib import Path
 
@@ -75,6 +75,34 @@ def _code_only(src):
     """Executable tokens only. Shared with the other source-level guard via conftest."""
     from conftest import code_only
     return code_only(src)
+
+
+def _model_literals(src):
+    """Retain executable model IDs, including constants hidden from token-only guards.
+
+    Narrative strings mention evaluators legitimately. Match actual repository IDs,
+    not prose, and exclude genuine module/class/function docstrings.
+    """
+    tree = ast.parse(src)
+    docstrings = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            if node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
+                docstrings.add(id(node.body[0].value))
+    return [node.value.lower() for node in ast.walk(tree)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+            and id(node) not in docstrings and not any(c.isspace() for c in node.value)]
+
+
+@pytest.mark.parametrize("name,src", _sources())
+def test_selector_model_literals_exclude_verifiers_and_oracle(name, src):
+    forbidden = ("nli-deberta", "hhem-2.1", "bge-reranker-large")
+    assert not any(token in literal for literal in _model_literals(src) for token in forbidden), name
+
+
+def test_model_literal_guard_sees_calls_and_assigned_ids_but_not_docstrings():
+    source = '\"\"\"cross-encoder/nli-deberta-v3-small\"\"\"\nMODEL = "vectara/hhem-2.1-open"\nCrossEncoder("BAAI/bge-reranker-large")'
+    assert _model_literals(source) == ["vectara/hhem-2.1-open", "baai/bge-reranker-large"]
 
 
 def test_the_selector_scripts_exist():
