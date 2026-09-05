@@ -7,15 +7,22 @@ query assignment, rating collection, SUS questionnaire, and data export.
 
 import hashlib
 import json
-import logging
 import os
 import time
+import uuid
 from datetime import datetime
+from functools import cached_property
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from filelock import FileLock
+from src.ui.components.session_storage import (
+    SessionConflict, SessionStorageError, atomic_json, atomic_text, read_json,
+    session_path, validate_participant,
+)
+
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-SESSIONS_DIR = PROJECT_ROOT / "data" / "evaluation" / "user_sessions"
+SESSIONS_DIR = Path(os.environ.get("CLOUDRAG_SESSION_DIR", PROJECT_ROOT / "data" / "evaluation" / "user_sessions"))
 
 SYSTEMS = ["lexical", "semantic", "hybrid"]
 SYSTEM_DISPLAY_NAMES = {
@@ -57,15 +64,14 @@ def _get_evaluation_queries() -> List[dict]:
     """Load 30 queries for evaluation from test_queries.json."""
     queries_path = PROJECT_ROOT / "data" / "evaluation" / "test_queries.json"
     if not queries_path.exists():
-        # Generate a default set
-        return _generate_fallback_queries()
+        raise ValueError("Evaluation query set is missing; contact the coordinator")
 
     data = json.loads(queries_path.read_text(encoding="utf-8"))
     if isinstance(data, dict):
         data = data.get("queries", [])
 
     if not data:
-        return _generate_fallback_queries()
+        raise ValueError("Evaluation query set is empty")
 
     # Select 30 queries: 10 easy, 10 medium, 10 hard
     easy = [q for q in data if q.get("difficulty") == "easy"][:10]
@@ -79,7 +85,12 @@ def _get_evaluation_queries() -> List[dict]:
         remaining = [q for q in data if q not in selected]
         selected.extend(remaining[:30 - len(selected)])
 
-    return selected[:30]
+    selected = selected[:30]
+    if len(selected) != 30 or len({q.get("query_id") for q in selected}) != 30 or any(
+        not q.get("query_id") or not q.get("question", "").strip() for q in selected
+    ):
+        raise ValueError("Evaluation requires 30 distinct, non-empty queries")
+    return selected
 
 
 def _generate_fallback_queries() -> List[dict]:
@@ -150,8 +161,15 @@ def get_system_order(participant_id: str) -> List[str]:
 class EvaluationSession:
     """Manages a single participant's evaluation session."""
 
-    def __init__(self, participant_id: str, experience_level: str):
-        self.participant_id = participant_id
+    def __init__(self, participant_id: str, experience_level: str, session_id=None):
+        self.participant_id = validate_participant(participant_id)
+        self.session_id = session_id or uuid.uuid4().hex
+        session_path(SESSIONS_DIR, self.session_id)
+        self.schema_version = 2
+        self.revision = 0
+        self.attempts = []
+        self.training_index = 0
+        self.break_started_at = None
         self.experience_level = experience_level
         self.system_order = get_system_order(participant_id)
         self.created_at = datetime.now().isoformat()
@@ -171,6 +189,46 @@ class EvaluationSession:
         self.open_responses: Dict[str, str] = {}
         self.timestamps: List[dict] = []
         self.training_complete = False
+
+    @property
+    def pending_attempt(self):
+        query = self.current_query
+        if query is None:
+            return None
+        for attempt in reversed(self.attempts):
+            if attempt["system"] == self.current_system and attempt["query_id"] == query["query_id"]:
+                return attempt
+        return None
+
+    def begin_attempt(self, configuration, query_shown_ts):
+        if self.state != "evaluating" or self.current_query is None:
+            raise ValueError("No query to answer")
+        if self.pending_attempt and self.pending_attempt["status"] in ("running", "success", "rated"):
+            raise SessionConflict("La consulta ya está en curso o respondida.")
+        attempt = {
+            "attempt_id": uuid.uuid4().hex, "query_id": self.current_query["query_id"],
+            "question": self.current_query["question"], "system": self.current_system,
+            "system_label": self.current_system_label, "configuration": configuration,
+            "status": "running", "query_shown_ts": query_shown_ts,
+            "started_at": time.time(), "answer": None, "sources": [], "chunks": [],
+            "verification": None, "error": None,
+        }
+        self.attempts.append(attempt)
+        self.save_checkpoint()
+        return attempt["attempt_id"]
+
+    def finish_attempt(self, attempt_id, *, answer=None, sources=None, chunks=None,
+                       verification=None, error=None, elapsed_ms=None):
+        attempt = self.pending_attempt
+        if not attempt or attempt["attempt_id"] != attempt_id or attempt["status"] != "running":
+            raise SessionConflict("Attempt has already finished or is no longer current")
+        if not error and (not answer or not answer.strip()):
+            error = "empty_response"
+        attempt.update(answer=answer, sources=sources or [], chunks=chunks or [],
+                       verification=verification, error=error,
+                       status="error" if error else "success", finished_at=time.time(),
+                       elapsed_ms=elapsed_ms)
+        self.save_checkpoint()
 
     def _distribute_queries(self, queries: List[dict]) -> Dict[str, List[dict]]:
         """Distribute 30 queries across 3 systems (10 each), rotating by participant."""
@@ -238,7 +296,12 @@ class EvaluationSession:
         """Record a single query rating."""
         query = self.current_query
         if query is None:
-            return
+            raise ValueError("No current query")
+        attempt = self.pending_attempt
+        if not attempt or attempt["status"] != "success":
+            raise ValueError("Only a successful, un-rated answer can be rated")
+        if any(isinstance(v, bool) or not isinstance(v, int) or not 1 <= v <= 5 for v in (utility, accuracy)):
+            raise ValueError("Ratings must be integers from 1 to 5")
 
         # N9: nombres honestos — search_clicked->response_shown es LATENCIA del
         # sistema (no lectura del participante); response_shown->rated engloba
@@ -247,6 +310,7 @@ class EvaluationSession:
         read_and_rate_ms = (rated_ts - response_shown_ts) * 1000
 
         rating = {
+            "attempt_id": attempt["attempt_id"],
             "query_id": query.get("query_id", f"q_{self.total_queries_answered}"),
             "question": query.get("question", ""),
             "system": self.current_system,
@@ -261,6 +325,7 @@ class EvaluationSession:
             "read_and_rate_ms": read_and_rate_ms,
         }
         self.ratings.append(rating)
+        attempt["status"] = "rated"
 
         self.timestamps.append({
             "query_id": rating["query_id"],
@@ -293,7 +358,9 @@ class EvaluationSession:
     def calculate_sus_score(self) -> float:
         """Calculate SUS score (0-100) from 10 responses."""
         if len(self.sus_responses) != 10:
-            return 0.0
+            return None
+        if any(isinstance(v, bool) or not isinstance(v, int) or not 1 <= v <= 5 for v in self.sus_responses):
+            raise ValueError("SUS requires ten responses from 1 to 5")
 
         total = 0
         for i, resp in enumerate(self.sus_responses):
@@ -306,14 +373,24 @@ class EvaluationSession:
 
     def get_session_dir(self) -> Path:
         """Get or create session directory."""
-        session_dir = SESSIONS_DIR / self.participant_id
+        session_dir = session_path(SESSIONS_DIR, self.session_id)
         session_dir.mkdir(parents=True, exist_ok=True)
         return session_dir
+
+    @cached_property
+    def storage_lock(self):
+        return FileLock(str(self.get_session_dir() / ".session.lock"), timeout=5)
 
     def save_checkpoint(self):
         """Save current session state to disk."""
         session_dir = self.get_session_dir()
         data = {
+            "schema_version": self.schema_version,
+            "session_id": self.session_id,
+            "revision": self.revision + 1,
+            "attempts": self.attempts,
+            "training_index": self.training_index,
+            "break_started_at": self.break_started_at,
             "participant_id": self.participant_id,
             "experience_level": self.experience_level,
             "system_order": self.system_order,
@@ -330,18 +407,54 @@ class EvaluationSession:
             "checkpoint_time": datetime.now().isoformat(),
         }
         path = session_dir / "session_checkpoint.json"
-        path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+        with self.storage_lock:
+            current_revision = read_json(path).get("revision", 0) if path.exists() else 0
+            if current_revision != self.revision:
+                raise SessionConflict("La sesión cambió en otra pestaña. Recarga para continuar.")
+            atomic_json(path, data)
+            self.revision = data["revision"]
 
     @classmethod
-    def load_checkpoint(cls, participant_id: str) -> Optional["EvaluationSession"]:
+    def load_checkpoint(cls, session_id: str) -> Optional["EvaluationSession"]:
         """Load a saved session checkpoint."""
-        path = SESSIONS_DIR / participant_id / "session_checkpoint.json"
+        path = session_path(SESSIONS_DIR, session_id) / "session_checkpoint.json"
         if not path.exists():
             return None
 
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(data, dict) or data.get("schema_version") != 2 or data.get("session_id") != session_id:
+                raise ValueError("Unsupported checkpoint schema or identity")
+            validate_participant(data["participant_id"])
+            if data["state"] not in {"training", "evaluating", "break", "sus", "open_questions", "complete"}:
+                raise ValueError("Invalid session state")
+            for field, maximum in (("current_system_index", 3), ("current_query_index", 9), ("training_index", 3)):
+                if type(data[field]) is not int or not 0 <= data[field] <= maximum:
+                    raise ValueError("Invalid progress index")
+            if type(data["revision"]) is not int or data["revision"] < 1:
+                raise ValueError("Invalid checkpoint revision")
+            if not isinstance(data["system_order"], list) or sorted(data["system_order"]) != sorted(SYSTEMS):
+                raise ValueError("Invalid system order")
+            for field in ("attempts", "ratings", "sus_responses", "timestamps"):
+                if not isinstance(data[field], list):
+                    raise ValueError("Invalid checkpoint collection")
+            queries = data["query_sets"]
+            if not isinstance(queries, dict) or set(queries) != set(SYSTEMS) or any(
+                not isinstance(qs, list) or len(qs) != 10 or any(
+                    not isinstance(q, dict) or not isinstance(q.get("question"), str) or not q["question"].strip()
+                    or not isinstance(q.get("query_id"), str) or not q["query_id"] for q in qs
+                ) for qs in queries.values()
+            ):
+                raise ValueError("Invalid persisted query set")
+            if len({q["query_id"] for qs in queries.values() for q in qs}) != 30:
+                raise ValueError("Duplicate persisted queries")
             session = cls.__new__(cls)
+            session.schema_version = 2
+            session.session_id = session_id
+            session.revision = data["revision"]
+            session.attempts = data["attempts"]
+            session.training_index = data["training_index"]
+            session.break_started_at = data.get("break_started_at")
             session.participant_id = data["participant_id"]
             session.experience_level = data["experience_level"]
             session.system_order = data["system_order"]
@@ -356,28 +469,37 @@ class EvaluationSession:
             session.timestamps = data.get("timestamps", [])
             session.query_sets = data.get("query_sets", {})
             return session
-        except Exception as e:
-            # N9: un checkpoint corrupto/esquema viejo NO debe tratarse como
-            # "no hay sesion" (el save posterior sobrescribiria los ratings).
-            # Se preserva el archivo para recuperacion manual.
-            try:
-                corrupt = path.with_name("session_checkpoint.corrupt.json")
-                path.rename(corrupt)
-                logging.getLogger(__name__).error(
-                    "Checkpoint ilegible para %s (%s); renombrado a %s",
-                    participant_id, e, corrupt.name)
-            except OSError:
-                logging.getLogger(__name__).error(
-                    "Checkpoint ilegible para %s (%s); no se pudo renombrar",
-                    participant_id, e)
-            return None
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            raise SessionStorageError("Checkpoint ilegible; contacta al coordinador. El archivo se conserva.") from e
 
     def export_results(self):
+        with self.storage_lock:
+            return self._export_results()
+
+    def _export_results(self):
         """Export all session data to individual files."""
+        import csv
+        import io
+
+        if self.state == "complete":
+            return self.get_session_dir()
+        if self.state != "open_questions" or self.calculate_sus_score() is None or self.total_queries_answered != 30:
+            raise ValueError("Only a completed evaluation can be exported")
+        rated = {a["attempt_id"]: a for a in self.attempts if a["status"] == "rated"}
+        if len(rated) != 30 or len({r.get("attempt_id") for r in self.ratings}) != 30 or any(
+            r.get("attempt_id") not in rated or not rated[r["attempt_id"]].get("answer") for r in self.ratings
+        ):
+            raise ValueError("Every rating must reference a unique saved answer")
         session_dir = self.get_session_dir()
+        current = self.load_checkpoint(self.session_id)
+        if current.revision != self.revision:
+            raise SessionConflict("La sesión cambió. Recarga para continuar.")
 
         # session_config.json
         config_data = {
+            "schema_version": 2,
+            "session_id": self.session_id,
+            "checkpoint_revision": self.revision + 1,
             "participant_id": self.participant_id,
             "experience_level": self.experience_level,
             "system_order": self.system_order,
@@ -386,55 +508,52 @@ class EvaluationSession:
             "completed_at": datetime.now().isoformat(),
             "total_queries": self.total_queries_answered,
         }
-        (session_dir / "session_config.json").write_text(
-            json.dumps(config_data, indent=2, ensure_ascii=False), encoding="utf-8"
-        )
+        atomic_json(session_dir / "session_config.json", config_data)
 
         # ratings.csv
         if self.ratings:
             import csv
             headers = list(self.ratings[0].keys())
-            with open(session_dir / "ratings.csv", "w", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=headers)
-                writer.writeheader()
-                writer.writerows(self.ratings)
+            f = io.StringIO(newline="")
+            writer = csv.DictWriter(f, fieldnames=headers)
+            writer.writeheader()
+            writer.writerows(self.ratings)
+            atomic_text(session_dir / "ratings.csv", f.getvalue())
 
         # sus_responses.csv
         if self.sus_responses:
             import csv
-            with open(session_dir / "sus_responses.csv", "w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow(["question_number", "response"])
-                for i, resp in enumerate(self.sus_responses):
-                    writer.writerow([i + 1, resp])
+            f = io.StringIO(newline="")
+            writer = csv.writer(f)
+            writer.writerow(["question_number", "response"])
+            for i, resp in enumerate(self.sus_responses):
+                writer.writerow([i + 1, resp])
+            atomic_text(session_dir / "sus_responses.csv", f.getvalue())
 
         # sus_score.json
         sus_score = self.calculate_sus_score()
-        (session_dir / "sus_score.json").write_text(
-            json.dumps({
+        atomic_json(session_dir / "sus_score.json", {
                 "raw_scores": self.sus_responses,
                 "total": sus_score,
-            }, indent=2),
-            encoding="utf-8",
-        )
+            })
 
         # open_questions.json
-        (session_dir / "open_questions.json").write_text(
-            json.dumps(self.open_responses, indent=2, ensure_ascii=False),
-            encoding="utf-8",
-        )
+        atomic_json(session_dir / "open_questions.json", self.open_responses)
 
         # timing_log.csv
         if self.timestamps:
             import csv
             headers = list(self.timestamps[0].keys())
-            with open(session_dir / "timing_log.csv", "w", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=headers)
-                writer.writeheader()
-                writer.writerows(self.timestamps)
+            f = io.StringIO(newline="")
+            writer = csv.DictWriter(f, fieldnames=headers)
+            writer.writeheader()
+            writer.writerows(self.timestamps)
+            atomic_text(session_dir / "timing_log.csv", f.getvalue())
 
         # full_session.json (complete backup)
         full = {
+            "schema_version": 2,
+            "attempts": self.attempts,
             "config": config_data,
             "ratings": self.ratings,
             "sus_responses": self.sus_responses,
@@ -443,8 +562,11 @@ class EvaluationSession:
             "timestamps": self.timestamps,
             "query_sets": self.query_sets,
         }
-        (session_dir / "full_session.json").write_text(
-            json.dumps(full, indent=2, ensure_ascii=False), encoding="utf-8"
-        )
-
+        atomic_json(session_dir / "full_session.json", full)
+        self.state = "complete"
+        try:
+            self.save_checkpoint()  # completion marker only after every export is durable
+        except Exception:
+            self.state = "open_questions"
+            raise
         return session_dir

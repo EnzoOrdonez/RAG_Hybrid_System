@@ -29,6 +29,16 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Public entry point is Evaluation only. Operator tools require an explicit local mode.
+mode = os.environ.get("CLOUDRAG_MODE", "participant")
+if mode not in {"participant", "development"}:
+    st.error("Invalid application mode")
+    st.stop()
+if mode == "participant":
+    from src.ui.pages.evaluation_page import render
+    render()
+    st.stop()
+
 # Page registry
 PAGES = {
     "💬 Chat": "chat",
@@ -61,7 +71,7 @@ with st.sidebar:
 
     # Check indices
     import os
-    indices_dir = os.path.join(os.path.dirname(__file__), "..", "..", "data", "indices")
+    indices_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "indices")
     indices_dir = os.path.normpath(indices_dir)
     if os.path.exists(indices_dir) and os.listdir(indices_dir):
         st.success("Indices: Available", icon="✅")
@@ -69,7 +79,7 @@ with st.sidebar:
         st.warning("Indices: Not built", icon="⚠️")
 
     # Corpus stats
-    chunks_dir = os.path.join(os.path.dirname(__file__), "..", "..", "data", "chunks", "adaptive", "size_500")
+    chunks_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "chunks", "adaptive", "size_500")
     chunks_dir = os.path.normpath(chunks_dir)
     if os.path.exists(chunks_dir):
         chunk_count = 0

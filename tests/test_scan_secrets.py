@@ -82,6 +82,7 @@ def test_stream_scanner_detects_token_split_across_chunks(
     [
         Path(".git/config"),
         Path(".venv/Lib/site-packages/example.py"),
+        Path(".venv-app/Lib/site-packages/example.py"),
         Path(".pytest_cache/state"),
         Path("data/models/model.bin"),
         Path("experiments/results/example.json.gz"),

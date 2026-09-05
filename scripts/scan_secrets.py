@@ -93,6 +93,7 @@ _GENERATED_DIRECTORIES = {
     ".ruff_cache",
     ".tox",
     ".venv",
+    ".venv-app",
     "__pycache__",
     "node_modules",
     "venv",

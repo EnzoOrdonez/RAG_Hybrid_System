@@ -59,3 +59,5 @@ output/tables/*.csv
 # Repos cloned during crawling
 data/raw/*/_repo/
 data/raw/*/_zip/
+# Isolated application installation used by the interview readiness checks.
+.venv-app/

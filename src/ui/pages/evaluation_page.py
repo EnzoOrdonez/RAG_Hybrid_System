@@ -14,11 +14,14 @@ import time
 import streamlit as st
 
 from src.ui.components.session_manager import (
-    SYSTEM_DISPLAY_NAMES,
     SUS_QUESTIONS,
     TRAINING_QUERIES,
     EvaluationSession,
 )
+from src.ui.components import session_manager
+from src.ui.components.session_storage import InvitationStore, SessionStorageError
+from src.ui.components.evaluation_service import answer_query, recover_interrupted, submit_rating
+from filelock import FileLock, Timeout
 
 
 def _init_session_state():
@@ -44,10 +47,7 @@ def _render_login():
     st.subheader("Participant Login")
 
     with st.form("login_form"):
-        participant_id = st.text_input(
-            "Participant ID",
-            placeholder="P01, P02, ..., P10",
-        )
+        invitation = st.text_input("Código de invitación", type="password")
         experience = st.selectbox(
             "Cloud experience level",
             ["Principiante", "Intermedio", "Avanzado"],
@@ -60,29 +60,22 @@ def _render_login():
         submitted = st.form_submit_button("Comenzar Evaluacion", type="primary")
 
     if submitted:
-        if not participant_id:
-            st.error("Please enter a Participant ID.")
+        if not invitation:
+            st.error("Introduce el código que te entregó el coordinador.")
             return
         if not consent:
             st.error("You must accept the consent to participate.")
             return
 
         # Check for existing session
-        existing = EvaluationSession.load_checkpoint(participant_id)
-        if existing and existing.state != "complete":
-            st.info(f"Found existing session for {participant_id}. Resuming...")
-            st.session_state.eval_session = existing
-        else:
-            st.session_state.eval_session = EvaluationSession(participant_id, experience)
-
-        st.session_state.eval_session.save_checkpoint()
+        st.session_state.eval_session = InvitationStore(session_manager.SESSIONS_DIR).admit(invitation, experience)
         st.rerun()
 
 
 def _render_training():
     """Step 2: Training with 3 practice queries."""
     session = st.session_state.eval_session
-    idx = st.session_state.eval_training_idx
+    idx = session.training_index
 
     st.subheader("Training Phase")
     st.info(
@@ -114,19 +107,29 @@ def _render_training():
         if st.button("Buscar respuesta", key="training_search"):
             try:
                 from src.ui.components.index_loader import load_hybrid_index, load_pipeline
-                hybrid_index = load_hybrid_index()
-                pipeline = load_pipeline("hybrid", _hybrid_index=hybrid_index)
-                response = pipeline.query(query)
+                with FileLock(str(session_manager.SESSIONS_DIR / "_inference.lock"), timeout=0):
+                    InvitationStore(session_manager.SESSIONS_DIR).assert_active(session.session_id)
+                    hybrid_index = load_hybrid_index()
+                    pipeline = load_pipeline("hybrid", _hybrid_index=hybrid_index)
+                    response = pipeline.query(query)
+                report = response.hallucination_report
+                method = report.get("method") if isinstance(report, dict) else getattr(report, "method", None)
+                if response.error or not response.answer or not response.answer.strip() or response.confidence == "ERROR" or (
+                    method in ("mixed", "keyword_fallback")
+                ):
+                    raise ValueError("Practice response failed")
                 st.session_state.eval_response_text = response.answer or "No response generated."
-            except Exception as e:
-                st.session_state.eval_response_text = f"[Retrieval-only mode] Error: {e}"
+            except Exception:
+                st.error("No se pudo obtener la respuesta. Intenta de nuevo o contacta al coordinador.")
+                return
             st.rerun()
     else:
         st.markdown("**Response:**")
         st.write(st.session_state.eval_response_text)
 
         if st.button("Next Practice Question", key="training_next"):
-            st.session_state.eval_training_idx += 1
+            session.training_index += 1
+            session.save_checkpoint()
             st.session_state.eval_response_text = None
             st.rerun()
 
@@ -137,10 +140,7 @@ def _render_evaluation():
     query = session.current_query
 
     if query is None:
-        # All queries for this system done
-        new_state = session.advance()
-        session.save_checkpoint()
-        st.rerun()
+        st.error("No hay una consulta válida. Contacta al coordinador.")
         return
 
     # Show progress
@@ -160,26 +160,39 @@ def _render_evaluation():
     if st.session_state.eval_query_shown_ts is None:
         st.session_state.eval_query_shown_ts = time.time()
 
-    # Search button
-    if st.session_state.eval_response_text is None:
+    attempt = session.pending_attempt
+    if attempt and attempt["status"] == "running":
+        st.info("La consulta sigue en curso. Si se interrumpió, recupera el estado para reintentar.")
+        if st.button("Recuperar estado de consulta"):
+            recover_interrupted(session)
+            st.rerun()
+        return
+    if attempt and attempt["status"] == "error":
+        st.error("No se pudo completar la consulta. Puedes reintentar o contactar al coordinador.")
+
+    if attempt is None or attempt["status"] == "error":
         if st.button("Buscar respuesta", key="eval_search", type="primary"):
-            st.session_state.eval_search_clicked_ts = time.time()
-            try:
+            def pipeline_factory(system_key):
                 from src.ui.components.index_loader import load_hybrid_index, load_pipeline
-                system_key = session.current_system
                 hybrid_index = load_hybrid_index()
-                pipeline = load_pipeline(system_key, _hybrid_index=hybrid_index)
-                response = pipeline.query(question)
-                st.session_state.eval_response_text = response.answer or "No response generated."
-            except Exception as e:
-                st.session_state.eval_response_text = f"[Error: {e}]"
-            st.session_state.eval_response_shown_ts = time.time()
+                return load_pipeline(system_key, _hybrid_index=hybrid_index)
+            with st.spinner("Buscando y verificando la respuesta…"):
+                answer_query(session, pipeline_factory, st.session_state.eval_query_shown_ts)
             st.rerun()
     else:
         # Show response
         st.divider()
         st.markdown("**System Response:**")
-        st.write(st.session_state.eval_response_text)
+        if attempt["status"] != "success":
+            raise SessionStorageError("Estado de respuesta inesperado; recarga la sesión.")
+        if not attempt.get("shown_at"):
+            attempt["shown_at"] = time.time()
+            session.save_checkpoint()
+        st.write(attempt["answer"])
+        if attempt["sources"]:
+            with st.expander("Fuentes de la respuesta"):
+                for source in attempt["sources"]:
+                    st.write(" / ".join(str(source.get(k, "")) for k in ("provider", "service", "section")))
         st.divider()
 
         # Rating form
@@ -205,15 +218,7 @@ def _render_evaluation():
             submitted = st.form_submit_button("Siguiente pregunta →", type="primary")
 
         if submitted:
-            rated_ts = time.time()
-            session.record_rating(
-                utility=utility,
-                accuracy=accuracy,
-                query_shown_ts=st.session_state.eval_query_shown_ts or rated_ts,
-                search_clicked_ts=st.session_state.eval_search_clicked_ts or rated_ts,
-                response_shown_ts=st.session_state.eval_response_shown_ts or rated_ts,
-                rated_ts=rated_ts,
-            )
+            submit_rating(session, utility, accuracy)
 
             # Reset query state
             st.session_state.eval_query_shown_ts = None
@@ -221,21 +226,21 @@ def _render_evaluation():
             st.session_state.eval_response_shown_ts = None
             st.session_state.eval_response_text = None
 
-            new_state = session.advance()
-            session.save_checkpoint()
             st.rerun()
 
 
+@st.fragment(run_every="1s")
 def _render_break():
     """Step 4/6: Break between systems."""
     session = st.session_state.eval_session
 
     st.subheader("Descanso")
 
-    if st.session_state.eval_break_start is None:
-        st.session_state.eval_break_start = time.time()
+    if session.break_started_at is None:
+        session.break_started_at = time.time()
+        session.save_checkpoint()
 
-    elapsed = time.time() - st.session_state.eval_break_start
+    elapsed = time.time() - session.break_started_at
     min_break = 120  # 2 minutes minimum
     max_break = 600  # 10 minutes maximum
 
@@ -249,9 +254,7 @@ def _render_break():
             f"cuando estes listo.\n\n"
             f"Tiempo minimo restante: **{mins}:{secs:02d}**"
         )
-        # Auto-refresh every second
-        time.sleep(1)
-        st.rerun()
+        # Fragment refreshes the countdown without restarting the complete page.
     else:
         st.success("Puedes continuar cuando estes listo.")
         if elapsed > max_break:
@@ -259,7 +262,7 @@ def _render_break():
         # N9: continuar REQUIERE el click del participante (antes auto-avanzaba
         # al expirar los 2:00 y arrancaba el reloj de la siguiente pregunta).
         if st.button("Estoy listo (continuar)", type="primary"):
-            st.session_state.eval_break_start = None
+            session.break_started_at = None
             session.state = "evaluating"
             session.save_checkpoint()
             st.rerun()
@@ -334,8 +337,6 @@ def _render_open_questions():
             "noticed_differences": q2,
             "improvements": q3,
         }
-        session.state = "complete"
-        session.save_checkpoint()
         session.export_results()
         st.rerun()
 
@@ -356,7 +357,7 @@ def _render_complete():
     col2.metric("SUS Score", f"{sus_score:.1f}/100")
     col3.metric("Systems Evaluated", len(session.system_order))
 
-    st.info(f"Results exported to: `data/evaluation/user_sessions/{session.participant_id}/`")
+    st.info("Tus respuestas se guardaron correctamente.")
 
     # Option to start new session
     if st.button("New Evaluation Session"):
@@ -368,13 +369,20 @@ def _render_complete():
         st.rerun()
 
 
-def render():
+def _render():
     """Render the Evaluation Mode page."""
     st.header("Evaluation Mode")
 
     _init_session_state()
 
     session = st.session_state.eval_session
+    if session is not None:
+        session = EvaluationSession.load_checkpoint(session.session_id)
+        if session is None:
+            raise SessionStorageError("No se encontró la sesión. Contacta al coordinador.")
+        st.session_state.eval_session = session
+        if session.state != "complete":
+            InvitationStore(session_manager.SESSIONS_DIR).assert_active(session.session_id)
 
     # No session yet -> show login
     if session is None:
@@ -391,7 +399,6 @@ def render():
         st.write(f"**Participant:** {session.participant_id}")
         st.write(f"**State:** {state}")
         st.progress(session.progress_pct / 100)
-        st.write(f"System order: {' → '.join(s.upper()[:3] for s in session.system_order)}")
 
         if session.current_system:
             st.write(f"**Current:** {session.current_system_label}")
@@ -410,3 +417,14 @@ def render():
         _render_complete()
     else:
         st.error(f"Unknown state: {state}")
+
+
+def render():
+    try:
+        _render()
+    except Timeout:
+        st.warning("Hay una consulta en curso. Espera y vuelve a intentar.")
+    except (SessionStorageError, ValueError):
+        st.error("No se pudo continuar con seguridad. Recarga o contacta al coordinador; tus datos guardados se conservan.")
+    except OSError:
+        st.error("No se pudieron guardar los datos. Contacta al coordinador antes de continuar.")
