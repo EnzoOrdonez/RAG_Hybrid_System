@@ -1,11 +1,12 @@
 """Durable, resumable operational cohort. All generated evidence stays outside git.
 
-plan/report are read-only. run imports the legacy cohort by hash and measures only
-unfilled slots. Each physical attempt has an immutable journal and terminal record.
+plan/report are read-only. init starts an independent cohort; --source explicitly
+selects legacy import. Each physical attempt has a durable journal and terminal record.
 """
 import argparse
 from datetime import datetime, timezone
 import hashlib
+import importlib.metadata
 import json
 import math
 import os
@@ -67,7 +68,7 @@ def coordinator_lock(root):
     return FileLock(str(Path(root) / "run.lock"), timeout=0)
 
 
-def measure_attempt(root, metadata, work, interval=1.0):
+def measure_attempt(root, metadata, work, interval=1.0, validate_after=None):
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
     with FileLock(str(root / "inference.lock"), timeout=0):
@@ -115,6 +116,12 @@ def measure_attempt(root, metadata, work, interval=1.0):
             raise OSError("Heartbeat persistence failed: " + ",".join(heartbeat_errors))
         if not isinstance(payload, dict) or payload.get("status") not in ("success", "error"):
             raise ValueError("Work must return a success/error payload")
+        if validate_after is not None:
+            try:
+                validate_after()  # identity checks are outside the response clock
+            except Exception as exc:
+                payload = dict(payload, status="error", environment_invalid=True,
+                               error=f"Environment validation: {type(exc).__name__}: {exc}")
         result = dict(payload, **attempt, elapsed_s=elapsed, finished_at=now(),
                       journal_sha256=digest(journal))
         write_new(directory / "result.json", result)
@@ -149,7 +156,8 @@ def local_records(root):
 
 def completed_slots(rows):
     slots = [(r["system"], r["phase"], r["index"]) for r in rows
-             if not r.get("warmup") and r["status"] in ("success", "error")]
+             if not r.get("warmup") and (r["status"] in ("success", "error")
+                                        or r.get("consumes_slot", False))]
     if len(slots) != len(set(slots)):
         raise ValueError("Duplicate completed logical slot")
     return set(slots)
@@ -260,6 +268,72 @@ def preflight(protocol):
     check_model()
     if api("/api/version") != protocol["server"]:
         raise ValueError("Ollama server version changed; separate cohort required")
+    check_environment(protocol)
+
+
+def environment_identity():
+    """Stable runtime identity; no model execution and no utilization samples."""
+    gpu = subprocess.check_output([
+        "nvidia-smi", "--query-gpu=uuid,name,driver_version,memory.total",
+        "--format=csv,noheader,nounits"], text=True).strip()
+    hardware = json.loads(subprocess.check_output([
+        "powershell", "-NoProfile", "-Command",
+        "@{cpu=@(Get-CimInstance Win32_Processor | Select-Object Name,NumberOfCores,NumberOfLogicalProcessors);"
+        "ram=(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory} | ConvertTo-Json -Depth 4"],
+        text=True))
+    model = check_model()
+    return dict(gpu=gpu, hardware=hardware, server=api("/api/version"),
+                model=model, model_digest=os.environ["CLOUDRAG_MODEL_DIGEST"],
+                commit=git("rev-parse", "HEAD"), runner_sha256=digest(__file__),
+                python=sys.version, packages={d.metadata["Name"]: d.version
+                                             for d in importlib.metadata.distributions()},
+                source_sha256={p.relative_to(PROJECT).as_posix(): digest(p)
+                               for p in sorted((PROJECT / "src").rglob("*.py"))},
+                lock_sha256=digest(PROJECT / "requirements-app.txt"))
+
+
+def check_environment(protocol):
+    if "environment" in protocol and environment_identity() != protocol["environment"]:
+        raise ValueError("Cohort environment changed; stop and request a separate cohort")
+
+
+def initialize_fresh(root, protocol):
+    root = Path(root).resolve()
+    common_git = Path(git("rev-parse", "--git-common-dir")).resolve()
+    if root.is_relative_to(common_git.parent):
+        raise ValueError("Evidence output must be outside checkout")
+    manifest = dict(mode="fresh", abort_consumes_slot=True, total_attempts=120, protocol=protocol)
+    path = root / "source-manifest.json"
+    if path.exists():
+        existing = read_json(path)
+        if {k: v for k, v in existing.items() if k != "created_at"} != manifest:
+            raise ValueError("Cohort identity differs; existing evidence preserved")
+        return existing
+    if list(root.glob("attempts/*/request.json")):
+        raise ValueError("Cohort identity missing from nonempty attempt directory")
+    manifest["created_at"] = now()
+    write_new(path, manifest)
+    return manifest
+
+
+def fresh_protocol():
+    from src.ui.components.session_manager import _get_evaluation_queries
+    queries = _get_evaluation_queries()
+    selected = [queries[i * 30 // 20] for i in range(20)]
+    environment = environment_identity()
+    if any(line.split(",")[2].strip() != "616.64" for line in environment["gpu"].splitlines()):
+        raise ValueError("New cohort requires authorized driver 616.64")
+    protocol = dict(purpose="TECHNICAL SYNTHETIC VALIDATION ONLY", queries=selected,
+                    seed=42, llm_cache=False, timeout_s=60, environment=environment,
+                    build_id=git("rev-parse", "HEAD"), server=environment["server"],
+                    model_digest=environment["model_digest"],
+                    manifest_sha256=digest(os.environ["CLOUDRAG_ARTIFACT_MANIFEST"]),
+                    queries_sha256=digest(PROJECT / "data/evaluation/test_queries.json"),
+                    cold="fresh process, Granite unloaded; OS file cache retained",
+                    warm="persistent process, successful unmeasured warmup",
+                    percentile_population="successful complete responses only")
+    preflight(protocol)
+    return protocol
 
 
 def initialize(source, root):
@@ -281,6 +355,12 @@ def initialize(source, root):
 
 def all_records(root):
     manifest = read_json(Path(root) / "source-manifest.json")
+    if manifest.get("mode") == "fresh":
+        rows = local_records(root)
+        if any(not r.get("consumes_slot") for r in rows):
+            raise ValueError("Fresh attempt missing fixed-slot policy")
+        completed_slots(rows)
+        return rows
     for name, expected in manifest["files"].items():
         if digest(Path(manifest["source"]) / name) != expected:
             raise ValueError("Legacy evidence hash changed")
@@ -288,15 +368,19 @@ def all_records(root):
 
 
 def worker(root, system, phase, indices):
-    protocol = read_json(root / "source-manifest.json")["protocol"]
+    manifest = read_json(root / "source-manifest.json")
+    protocol = manifest["protocol"]
     pipeline = None
     sequence = [-1] + indices if phase == "warm" else indices
     for index in sequence:
         check_model()
+        check_environment(protocol)
         metadata = dict(system=system, phase=phase, index=index, warmup=index == -1,
                         query=protocol["queries"][max(0, index)], build_id=os.environ["CLOUDRAG_BUILD_ID"],
                         application_baseline_build_id=protocol["build_id"],
-                        runner_sha256=digest(__file__), timeout_s=60)
+                        runner_sha256=digest(__file__), timeout_s=60,
+                        consumes_slot=manifest.get("abort_consumes_slot", False),
+                        environment_manifest_sha256=digest(root / "source-manifest.json"))
 
         def query():
             nonlocal pipeline
@@ -321,20 +405,25 @@ def worker(root, system, phase, indices):
                         cache_enabled=llm.cache_enabled, num_ctx=llm.num_ctx, model_digest=llm.model_digest,
                         artifact_manifest_sha256=pipeline.hybrid_index.deployment_manifest_sha256)
 
-        row = measure_attempt(root, metadata, query)
+        row = measure_attempt(root, metadata, query, validate_after=lambda: check_environment(protocol))
         print(json.dumps({k: row[k] for k in ("system", "phase", "index", "status", "elapsed_s")}), flush=True)
         check_model()
+        if row.get("environment_invalid"):
+            raise RuntimeError("Environment changed during attempt; excluded from percentiles")
         if index == -1 and row["status"] != "success":
             raise RuntimeError("Warmup failed; warm condition not established")
 
 
 def run(source, root):
-    initialize(source, root)
+    if source is not None:
+        initialize(source, root)
     with coordinator_lock(root):
         recover(root)
         protocol = read_json(root / "source-manifest.json")["protocol"]
         existing = all_records(root)
         recorded_digests = {r["model_digest"] for r in existing if r.get("model_digest")}
+        if protocol.get("model_digest"):
+            recorded_digests.add(protocol["model_digest"])
         if recorded_digests != {os.environ.get("CLOUDRAG_MODEL_DIGEST")}:
             raise ValueError("Model digest differs from recorded cohort")
         preflight(protocol)
@@ -371,21 +460,25 @@ def run(source, root):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("plan", "run", "report", "_worker"))
+    parser.add_argument("operation", choices=("init", "plan", "run", "report", "_worker"))
     parser.add_argument("--source", type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--system", choices=SYSTEMS)
     parser.add_argument("--phase", choices=PHASES)
     parser.add_argument("--indices", nargs="+", type=int)
     args = parser.parse_args()
-    if args.operation in ("plan", "run") and args.source is None:
-        parser.error("--source is required")
-    if args.operation in ("run", "report", "_worker") and args.output is None:
+    if args.operation == "plan" and args.source is None and args.output is None:
+        parser.error("--source or --output is required")
+    if args.operation in ("init", "run", "report", "_worker") and args.output is None:
         parser.error("--output is required")
+    if args.operation == "init" and args.source is not None:
+        parser.error("init cannot import legacy evidence")
     if args.operation == "_worker" and (not args.system or not args.phase or not args.indices
             or len(set(args.indices)) != len(args.indices) or any(i < 0 or i > 19 for i in args.indices)):
         parser.error("worker requires system, phase and distinct indices 0..19")
-    if args.operation == "plan":
+    if args.operation == "init":
+        print(json.dumps(initialize_fresh(args.output, fresh_protocol()), indent=2))
+    elif args.operation == "plan":
         rows = legacy_records(args.source) if not args.output or not args.output.exists() else all_records(args.output)
         print(json.dumps(dict(pending=pending(rows), report=summarize(rows)), indent=2))
     elif args.operation == "report":

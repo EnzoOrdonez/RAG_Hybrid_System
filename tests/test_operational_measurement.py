@@ -263,3 +263,72 @@ def test_warm_resume_loads_once_and_records_new_warmup_separately(tmp_path, monk
 def test_invalid_successful_duration_is_rejected(duration):
     with pytest.raises(ValueError, match="duration"):
         gate.percentile([duration], .95)
+
+
+def test_fresh_cohort_is_empty_idempotent_and_rejects_drift(tmp_path):
+    protocol = dict(environment={"driver": "616.64"}, queries=[{"question": "q"}] * 20)
+    root = tmp_path / "fresh"
+    gate.initialize_fresh(root, protocol)
+    original = (root / "source-manifest.json").read_bytes()
+    assert gate.all_records(root) == []
+    assert len(gate.pending(gate.all_records(root))) == 120
+    gate.initialize_fresh(root, protocol)
+    assert (root / "source-manifest.json").read_bytes() == original
+    with pytest.raises(ValueError, match="identity"):
+        gate.initialize_fresh(root, dict(protocol, environment={"driver": "610.62"}))
+    assert (root / "source-manifest.json").read_bytes() == original
+
+
+def test_fresh_abort_consumes_slot_once_and_never_enters_percentiles(tmp_path):
+    gate.initialize_fresh(tmp_path, {"queries": []})
+    gate.write_new(tmp_path / "attempts" / "killed" / "request.json",
+                   dict(system="hybrid", phase="cold", index=0, warmup=False,
+                        consumes_slot=True))
+    gate.recover(tmp_path)
+    rows = gate.all_records(tmp_path)
+    assert ("hybrid", "cold", 0) not in gate.pending(rows)
+    assert len(gate.pending(rows)) == 119
+    assert gate.recover(tmp_path) == []
+    cell = gate.summarize(rows)["cells"][0]
+    assert cell["completed_slots"] == cell["failures"] == cell["aborted"] == 1
+    assert cell["p95_s"] is None
+
+
+def test_environment_drift_after_response_is_persisted_as_failure(tmp_path):
+    def changed():
+        raise ValueError("environment changed")
+
+    row = gate.measure_attempt(tmp_path, dict(system="hybrid", phase="cold", index=0),
+                               lambda: {"status": "success", "answer": "actual response"},
+                               validate_after=changed)
+    assert row["status"] == "error"
+    assert row["environment_invalid"] is True
+    assert row["answer"] == "actual response"
+    assert gate.summarize([row])["cells"][0]["p95_s"] is None
+    assert gate.local_records(tmp_path) == [row]
+
+
+def test_fresh_environment_guard_rejects_driver_and_commit_drift(monkeypatch):
+    expected = {"gpu": "616.64", "commit": "first"}
+    monkeypatch.setattr(gate, "environment_identity", lambda: expected)
+    gate.check_environment({"environment": dict(expected)})
+    for changed in ({"gpu": "610.62", "commit": "first"},
+                    {"gpu": "616.64", "commit": "second"}):
+        with pytest.raises(ValueError, match="environment"):
+            gate.check_environment({"environment": changed})
+
+
+def test_fresh_cli_plan_requires_no_legacy_source(tmp_path):
+    gate.initialize_fresh(tmp_path, {"queries": []})
+    result = subprocess.run([sys.executable, str(gate.__file__), "plan", "--output", str(tmp_path)],
+                             capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert len(json.loads(result.stdout)["pending"]) == 120
+
+
+def test_fresh_refuses_legacy_output_and_checkout(tmp_path):
+    gate.write_new(tmp_path / "source-manifest.json", {"source": "historical"})
+    with pytest.raises(ValueError, match="identity"):
+        gate.initialize_fresh(tmp_path, {})
+    with pytest.raises(ValueError, match="outside"):
+        gate.initialize_fresh(gate.PROJECT / "not-created", {})
