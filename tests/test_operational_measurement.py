@@ -332,3 +332,19 @@ def test_fresh_refuses_legacy_output_and_checkout(tmp_path):
         gate.initialize_fresh(tmp_path, {})
     with pytest.raises(ValueError, match="outside"):
         gate.initialize_fresh(gate.PROJECT / "not-created", {})
+
+
+def test_invocation_distinguishes_first_run_from_resume(tmp_path, monkeypatch):
+    gate.initialize_fresh(tmp_path, {"model_digest": "digest"})
+    monkeypatch.setenv("CLOUDRAG_MODEL_DIGEST", "digest")
+    monkeypatch.setattr(gate, "preflight", lambda protocol: None)
+    monkeypatch.setattr(gate, "SYSTEMS", ())  # no model work; exercise real invocation persistence
+    gate.run(None, tmp_path)
+    first = next((tmp_path / "invocations").glob("*.json"))
+    assert gate.read_json(first)["interrupted_cohort"] is False
+    gate.measure_attempt(tmp_path, dict(system="hybrid", phase="cold", index=0,
+                         consumes_slot=True), lambda: {"status": "error"})
+    gate.run(None, tmp_path)
+    second = next(p for p in (tmp_path / "invocations").glob("*.json") if p != first)
+    assert gate.read_json(second)["interrupted_cohort"] is True
+    assert len(gate.local_records(tmp_path)) == 1

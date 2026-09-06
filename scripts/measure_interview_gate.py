@@ -430,7 +430,7 @@ def run(source, root):
         write_new(root / "invocations" / f"{uuid.uuid4().hex}.json",
                   dict(at=now(), coordinator_pid=os.getpid(), build_id=git("rev-parse", "HEAD"),
                        runner_sha256=digest(__file__), source_manifest_sha256=digest(root / "source-manifest.json"),
-                       pending_slots=pending(existing), interrupted_cohort=True, heartbeat_interval_s=1.0))
+                       pending_slots=pending(existing), interrupted_cohort=bool(existing), heartbeat_interval_s=1.0))
         for system in SYSTEMS:
             for phase in PHASES:
                 indices = [i for s, p, i in pending(all_records(root)) if (s, p) == (system, phase)]
