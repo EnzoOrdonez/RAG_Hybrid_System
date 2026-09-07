@@ -68,7 +68,7 @@ def coordinator_lock(root):
     return FileLock(str(Path(root) / "run.lock"), timeout=0)
 
 
-def measure_attempt(root, metadata, work, interval=1.0, validate_after=None):
+def measure_attempt(root, metadata, work, interval=1.0, validate_after=None, observer=None):
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
     with FileLock(str(root / "inference.lock"), timeout=0):
@@ -78,6 +78,8 @@ def measure_attempt(root, metadata, work, interval=1.0, validate_after=None):
         directory.mkdir(parents=True)
         write_new(directory / "request.json", attempt)
         journal = directory / "events.jsonl"
+        if observer is not None:
+            observer.start()
         started = time.perf_counter()
         stop = threading.Event()
         write_lock = threading.Lock()
@@ -112,6 +114,7 @@ def measure_attempt(root, metadata, work, interval=1.0, validate_after=None):
         finally:
             stop.set()
             thread.join()
+            control = observer.finish() if observer is not None else {}
         if heartbeat_errors:
             raise OSError("Heartbeat persistence failed: " + ",".join(heartbeat_errors))
         if not isinstance(payload, dict) or payload.get("status") not in ("success", "error"):
@@ -122,7 +125,7 @@ def measure_attempt(root, metadata, work, interval=1.0, validate_after=None):
             except Exception as exc:
                 payload = dict(payload, status="error", environment_invalid=True,
                                error=f"Environment validation: {type(exc).__name__}: {exc}")
-        result = dict(payload, **attempt, elapsed_s=elapsed, finished_at=now(),
+        result = dict(payload, **attempt, **control, elapsed_s=elapsed, finished_at=now(),
                       journal_sha256=digest(journal))
         write_new(directory / "result.json", result)
         return result
@@ -174,23 +177,36 @@ def percentile(values, q):
     return values[lower] + (values[upper] - values[lower]) * (position - lower)
 
 
-def summarize(rows):
+def selected_systems(protocol):
+    systems = tuple(protocol.get("systems", SYSTEMS))
+    if "systems" in protocol and (not systems or len(set(systems)) != len(systems)
+                                  or any(s not in SYSTEMS for s in systems)):
+        raise ValueError("Invalid cohort systems")
+    return systems
+
+
+def summarize(rows, systems=None):
     cells = []
-    for system in SYSTEMS:
+    for system in SYSTEMS if systems is None else systems:
         for phase in PHASES:
             selected = [r for r in rows if r["system"] == system and r["phase"] == phase
                         and not r.get("warmup")]
-            durations = [r["elapsed_s"] for r in selected if r["status"] == "success"]
+            durations = [r["elapsed_s"] for r in selected if r["status"] == "success"
+                         and not r.get("conditions_invalid") and not r.get("environment_invalid")]
             failures = sum(r["status"] != "success" for r in selected)
+            invalid = sum(bool(r.get("conditions_invalid") or r.get("environment_invalid")) for r in selected)
             cells.append(dict(system=system, phase=phase, attempts=len(selected),
                               completed_slots=len(completed_slots(selected)), successes=len(durations),
-                              failures=failures, aborted=sum(r["status"] == "aborted" for r in selected),
+                              failures=failures, conditions_invalid=invalid,
+                              valid_attempts=len(selected) - invalid,
+                              aborted=sum(r["status"] == "aborted" for r in selected),
                               failure_rate=failures / len(selected) if selected else None,
                               p50_s=percentile(durations, .5), p95_s=percentile(durations, .95)))
     warmups = [r for r in rows if r.get("warmup")]
-    return dict(cells=cells, percentile_population="successful complete responses only",
+    return dict(cells=cells, percentile_population="successful complete responses with valid controls only",
                 warmups=dict(attempts=len(warmups), failures=sum(r["status"] != "success" for r in warmups)),
-                passed=all(c["completed_slots"] == 20 and c["failures"] == 0
+                passed=bool(cells) and all(c["completed_slots"] == 20 and c["failures"] == 0
+                           and c["conditions_invalid"] == 0
                            and c["p95_s"] is not None and c["p95_s"] <= 60 for c in cells))
 
 
@@ -219,9 +235,9 @@ def legacy_records(source):
     return rows
 
 
-def pending(rows):
+def pending(rows, systems=None):
     completed = completed_slots(rows)
-    return [(s, p, i) for s in SYSTEMS for p in PHASES for i in range(20)
+    return [(s, p, i) for s in (SYSTEMS if systems is None else systems) for p in PHASES for i in range(20)
             if (s, p, i) not in completed]
 
 
@@ -302,7 +318,8 @@ def initialize_fresh(root, protocol):
     common_git = Path(git("rev-parse", "--git-common-dir")).resolve()
     if root.is_relative_to(common_git.parent):
         raise ValueError("Evidence output must be outside checkout")
-    manifest = dict(mode="fresh", abort_consumes_slot=True, total_attempts=120, protocol=protocol)
+    manifest = dict(mode="fresh", abort_consumes_slot=True,
+                    total_attempts=len(selected_systems(protocol)) * 40, protocol=protocol)
     path = root / "source-manifest.json"
     if path.exists():
         existing = read_json(path)
@@ -316,7 +333,7 @@ def initialize_fresh(root, protocol):
     return manifest
 
 
-def fresh_protocol():
+def fresh_protocol(systems=None, controlled=False):
     from src.ui.components.session_manager import _get_evaluation_queries
     queries = _get_evaluation_queries()
     selected = [queries[i * 30 // 20] for i in range(20)]
@@ -332,6 +349,16 @@ def fresh_protocol():
                     cold="fresh process, Granite unloaded; OS file cache retained",
                     warm="persistent process, successful unmeasured warmup",
                     percentile_population="successful complete responses only")
+    if systems is not None:
+        protocol["systems"] = list(systems)
+        selected_systems(protocol)
+    if controlled:
+        from scripts import observe_interview_gate as observe
+        protocol["controls"] = dict(version=1, sample_interval_s=5, idle_window_s=60,
+                                    power_scheme=observe.BALANCED, overlay=observe.BEST_PERFORMANCE,
+                                    ac_required=True, idle_cpu_gpu_below_percent=10,
+                                    pause_on_invalid=True, replace_attempts=False,
+                                    observer_sha256=digest(observe.__file__))
     preflight(protocol)
     return protocol
 
@@ -360,6 +387,10 @@ def all_records(root):
         if any(not r.get("consumes_slot") for r in rows):
             raise ValueError("Fresh attempt missing fixed-slot policy")
         completed_slots(rows)
+        systems = selected_systems(manifest["protocol"])
+        if any(("systems" in manifest["protocol"] and r["system"] not in systems) or r["phase"] not in PHASES
+               or (r["index"] != -1 if r.get("warmup") else not 0 <= r["index"] < 20) for r in rows):
+            raise ValueError("Attempt outside immutable cohort slots")
         return rows
     for name, expected in manifest["files"].items():
         if digest(Path(manifest["source"]) / name) != expected:
@@ -370,6 +401,8 @@ def all_records(root):
 def worker(root, system, phase, indices):
     manifest = read_json(root / "source-manifest.json")
     protocol = manifest["protocol"]
+    if system not in selected_systems(protocol):
+        raise ValueError("Worker system outside cohort")
     pipeline = None
     sequence = [-1] + indices if phase == "warm" else indices
     for index in sequence:
@@ -381,6 +414,16 @@ def worker(root, system, phase, indices):
                         runner_sha256=digest(__file__), timeout_s=60,
                         consumes_slot=manifest.get("abort_consumes_slot", False),
                         environment_manifest_sha256=digest(root / "source-manifest.json"))
+        observer = None
+        if protocol.get("controls"):
+            from scripts import observe_interview_gate as observe
+            if digest(observe.__file__) != protocol["controls"]["observer_sha256"]:
+                raise ValueError("Observer changed during cohort")
+            trace_id = uuid.uuid4().hex
+            observer = observe.Observer(root / "telemetry" / f"{trace_id}.jsonl",
+                                         allowed_pids={os.getpid(), os.getppid()})
+            metadata["http_trace_path"] = str(root / "http" / trace_id)
+            metadata["control_journal_path"] = str(observer.path)
 
         def query():
             nonlocal pipeline
@@ -393,6 +436,15 @@ def worker(root, system, phase, indices):
             llm = pipeline.llm
             if llm.cache_enabled or llm.seed != 42 or llm.timeout != 60 or llm.max_retries != 1:
                 raise ValueError("Measured recipe differs from original cohort")
+            if observer is not None:
+                import httpx
+                import ollama
+                from scripts.diagnose_interview_timeout import TracedClient
+                if llm._ollama_client is None:
+                    llm._ollama_client = TracedClient(ollama.Client(host=os.environ["OLLAMA_HOST"],
+                        timeout=httpx.Timeout(llm.timeout, connect=5)), metadata["http_trace_path"])
+                else:
+                    llm._ollama_client.output = Path(metadata["http_trace_path"])
             response = pipeline.query(metadata["query"]["question"]).model_dump(mode="json")
             report = response.get("hallucination_report")
             error = response.get("error")
@@ -405,10 +457,11 @@ def worker(root, system, phase, indices):
                         cache_enabled=llm.cache_enabled, num_ctx=llm.num_ctx, model_digest=llm.model_digest,
                         artifact_manifest_sha256=pipeline.hybrid_index.deployment_manifest_sha256)
 
-        row = measure_attempt(root, metadata, query, validate_after=lambda: check_environment(protocol))
+        row = measure_attempt(root, metadata, query, validate_after=lambda: check_environment(protocol),
+                              observer=observer)
         print(json.dumps({k: row[k] for k in ("system", "phase", "index", "status", "elapsed_s")}), flush=True)
         check_model()
-        if row.get("environment_invalid"):
+        if row.get("environment_invalid") or row.get("conditions_invalid"):
             raise RuntimeError("Environment changed during attempt; excluded from percentiles")
         if index == -1 and row["status"] != "success":
             raise RuntimeError("Warmup failed; warm condition not established")
@@ -420,6 +473,7 @@ def run(source, root):
     with coordinator_lock(root):
         recover(root)
         protocol = read_json(root / "source-manifest.json")["protocol"]
+        systems = selected_systems(protocol)
         existing = all_records(root)
         recorded_digests = {r["model_digest"] for r in existing if r.get("model_digest")}
         if protocol.get("model_digest"):
@@ -427,13 +481,16 @@ def run(source, root):
         if recorded_digests != {os.environ.get("CLOUDRAG_MODEL_DIGEST")}:
             raise ValueError("Model digest differs from recorded cohort")
         preflight(protocol)
+        if protocol.get("controls"):
+            from scripts.observe_interview_gate import admission
+            admission(root / "admissions" / uuid.uuid4().hex)
         write_new(root / "invocations" / f"{uuid.uuid4().hex}.json",
                   dict(at=now(), coordinator_pid=os.getpid(), build_id=git("rev-parse", "HEAD"),
                        runner_sha256=digest(__file__), source_manifest_sha256=digest(root / "source-manifest.json"),
-                       pending_slots=pending(existing), interrupted_cohort=bool(existing), heartbeat_interval_s=1.0))
-        for system in SYSTEMS:
+                       pending_slots=pending(existing, systems), interrupted_cohort=bool(existing), heartbeat_interval_s=1.0))
+        for system in systems:
             for phase in PHASES:
-                indices = [i for s, p, i in pending(all_records(root)) if (s, p) == (system, phase)]
+                indices = [i for s, p, i in pending(all_records(root), systems) if (s, p) == (system, phase)]
                 batches = [[i] for i in indices] if phase == "cold" else ([indices] if indices else [])
                 for batch in batches:
                     with FileLock(str(root / "inference.lock"), timeout=0):
@@ -451,7 +508,7 @@ def run(source, root):
                                "--system", system, "--phase", phase, "--indices", *map(str, batch)]
                     with (root / f"worker-{uuid.uuid4().hex}.log").open("x", encoding="utf-8") as log:
                         result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
-                    report = summarize(all_records(root))
+                    report = summarize(all_records(root), systems)
                     write_new(root / "reports" / f"{uuid.uuid4().hex}.json", dict(at=now(), **report))
                     print(json.dumps(report), flush=True)
                     if result.returncode:
@@ -466,6 +523,8 @@ def main():
     parser.add_argument("--system", choices=SYSTEMS)
     parser.add_argument("--phase", choices=PHASES)
     parser.add_argument("--indices", nargs="+", type=int)
+    parser.add_argument("--systems", nargs="+", choices=SYSTEMS, help="init only; immutable system subset")
+    parser.add_argument("--controlled", action="store_true", help="init only; require observed idle admission")
     args = parser.parse_args()
     if args.operation == "plan" and args.source is None and args.output is None:
         parser.error("--source or --output is required")
@@ -473,16 +532,21 @@ def main():
         parser.error("--output is required")
     if args.operation == "init" and args.source is not None:
         parser.error("init cannot import legacy evidence")
+    if args.operation != "init" and (args.systems is not None or args.controlled):
+        parser.error("cohort controls/selection may only be set at init")
     if args.operation == "_worker" and (not args.system or not args.phase or not args.indices
             or len(set(args.indices)) != len(args.indices) or any(i < 0 or i > 19 for i in args.indices)):
         parser.error("worker requires system, phase and distinct indices 0..19")
     if args.operation == "init":
-        print(json.dumps(initialize_fresh(args.output, fresh_protocol()), indent=2))
+        print(json.dumps(initialize_fresh(args.output, fresh_protocol(args.systems, args.controlled)), indent=2))
     elif args.operation == "plan":
         rows = legacy_records(args.source) if not args.output or not args.output.exists() else all_records(args.output)
-        print(json.dumps(dict(pending=pending(rows), report=summarize(rows)), indent=2))
+        systems = selected_systems(read_json(args.output / "source-manifest.json")["protocol"]) if (
+            args.output and args.output.exists()) else SYSTEMS
+        print(json.dumps(dict(pending=pending(rows, systems), report=summarize(rows, systems)), indent=2))
     elif args.operation == "report":
-        print(json.dumps(summarize(all_records(args.output)), indent=2))
+        systems = selected_systems(read_json(args.output / "source-manifest.json")["protocol"])
+        print(json.dumps(summarize(all_records(args.output), systems), indent=2))
     elif args.operation == "run":
         run(args.source, args.output)
     else:
