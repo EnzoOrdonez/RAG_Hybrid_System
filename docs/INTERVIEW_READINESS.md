@@ -1,10 +1,17 @@
 # Preparación técnica de Evaluation Mode
 
-Esta corrección prepara la aplicación para una validación de despliegue. **NO-GO para
-entrevistas** hasta probar el entorno remoto real, confirmar su configuración y medir
-p95 de respuesta completa ≤60 s. No se ejecutaron modelos ni se desplegó un servicio
-durante la implementación. La evidencia, el corpus, el gold y el trabajo académico
-congelado no forman parte de los cambios.
+**NO-GO para entrevistas.** La cohorte independiente terminada el 2026-09-06 sobre
+driver 616.64 completó 120 intentos: 105 respuestas completas, 15 timeouts y cero
+abortos; las seis condiciones incumplen p95 <=60 s. La sesión técnica P900 permanece
+incompleta en la consulta 8, conservando sus dos timeouts sin permitir valorarlos.
+El diagnóstico separado confirmó `httpx.ReadTimeout`: elevar a 180 s permitió el
+probe frío, pero el caliente volvió a agotar 180 s. No es una corrección validada;
+el timeout de la app sigue en 60 s. La preparación de nube sigue bloqueada:
+todavía no se ha demostrado que la latencia sea el único impedimento y su causa sea
+exclusivamente capacidad de hardware. El registro de ejecución y sus mediciones está en
+[OPERATIONAL_GATE_2026-09-05.md](OPERATIONAL_GATE_2026-09-05.md).
+No se ha desplegado en nube. La evidencia experimental congelada, el corpus, el gold
+y el trabajo académico no forman parte de los cambios.
 
 ## Entorno instalable
 
@@ -95,6 +102,11 @@ históricos. Una segunda entrevista no puede comenzar mientras otra siga activa.
 El mismo token permite retomar la respuesta guardada sin regenerarla; una sesión
 completa no se reinicia ni sobrescribe. El orden técnico de sistemas no aparece al participante.
 
+Las vistas viven en `src/ui/views/`, fuera del descubrimiento automático de `pages/`.
+La entrada registra una sola página con `st.navigation(..., position="hidden")` en
+modo participante, antes y después del login. Las URL antiguas de operador no abren
+esas vistas: Streamlit redirige a la entrada y puede mostrar «Page not found».
+
 Una consulta interrumpida queda pendiente. El participante puede recuperar su estado
 cuando el lock confirme que ya no hay inferencia activa; un fallo técnico permite
 reintentar, nunca calificar una respuesta vacía o una verificación degradada.
@@ -143,7 +155,7 @@ conservan sus valores y no se modifica ningún resultado histórico archivado.
 
 Baseline en `main` 670f8e5: 337 pasan, 4 omitidas, 5 excluidas. El primer pase del nuevo
 entorno limpio obtuvo 364 pasan, 4 omitidas, 5 excluidas. El pase final del 2026-09-05
-obtuvo **379 pasan, 4 omitidas, 5 excluidas** en 15,59 s (Python 3.14.3, Windows;
+obtuvo inicialmente **379 pasan, 4 omitidas, 5 excluidas** en 15,59 s (Python 3.14.3, Windows;
 3 advertencias de deprecación de FAISS/SWIG). Las cuatro omisiones requieren
 chunk map/artefactos exp17 y snapshots BGE/MiniLM ausentes en el worktree; no son pruebas
 de modelos ejecutadas. Los casos nuevos incluyen AppTest real de Streamlit con dobles
@@ -156,7 +168,15 @@ presenta hallazgos nuevos (6 exclusiones de evidencia firmada). No hay cambios e
 `experiments/results/`, `data/`, `paper/` ni `output/` respecto de la base del worktree.
 CI se verificó estáticamente y con su suite local; no se afirma una ejecución remota.
 
-Antes del GO, con autorización expresa para ejecutar modelos y desplegar:
+Auditoría posterior a la cohorte 616.64 y sus herramientas de diagnóstico:
+**411 pasan, 5 excluidas**, 3 advertencias SWIG, 55,92 s en el cierre del 2026-09-07;
+Ruff, diff check y escaneo
+con baseline aprobados (17 exclusiones: 11 corpus y 6 evidencia firmada).
+El bundle provisionado permite ejecutar los casos antes omitidos. No se mezclan
+versiones ni resultados de tests históricos con la medición actual.
+
+La ejecución local de modelos está autorizada. El despliegue real en nube no lo
+está. Para emitir GO deben quedar verificados los cuatro puntos siguientes:
 
 1. Provisionar y verificar el bundle real, commit, digest y versiones de servidor.
 2. Ejecutar una sesión completa con la app del despliegue objetivo; comprobar acceso,

@@ -44,7 +44,7 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 - **Cross-encoder re-ranking**: ms-marco-MiniLM-L-12-v2 for precision refinement
 - **Hallucination detection**: NLI-based faithfulness scoring with DeBERTa v3
 - **Local LLMs**: Runs with Ollama (UI default: Granite 4.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see MODELS.md)
-- **Streamlit UI**: 5-page web interface with chat, metrics dashboard, and evaluation tools
+- **Streamlit UI**: invitation-only participant evaluation; five views in private development mode
 - **Benchmarking suite**: 19 versioned experiments (exp3-exp19b + exp8b) with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
 
 ---
@@ -252,9 +252,10 @@ Configuración actual y diferencias históricas:
 
 - **Modelo por defecto:** `granite4.1:8b`, seed 42, caché desactivada, salida máxima
   1024 y contexto 4096. El Chat permite overrides; Evaluation conserva la receta fijada.
-- **GPU para Ollama:** la UI fija `CUDA_VISIBLE_DEVICES=""` para sus propios modelos
-  (embedder/reranker/NLI van a CPU) y deja la GPU completa al LLM. Con GPU ≥12 GB:
-  `CLOUDRAG_DEMO_GPU=1` para revertir.
+- **GPU para Ollama:** el entorno de entrevistas fija auxiliares en CPU
+  (embedder/reranker/NLI); Ollama administra la GPU disponible. El override
+  `CLOUDRAG_DEMO_GPU=1` corresponde a una demo privada con PyTorch CUDA compatible,
+  no al entorno CPU fijado y medido para entrevistas.
 - **keep_alive y streaming:** corresponden al Chat. Evaluation utiliza `query()` y
   espera generación y verificación antes de mostrar la respuesta y habilitar ratings.
 - **Latencia:** las cifras de junio (4–5 s a primeros tokens, 40–50 s completos con
@@ -279,7 +280,7 @@ cloudrag/
 │   ├── generation/         # LLM manager (Ollama) + hallucination detector (NLI)
 │   ├── pipeline/           # End-to-end RAG pipeline (7 stages)
 │   ├── evaluation/         # Metrics, benchmark runner, statistical analysis
-│   └── ui/                 # Streamlit app (5 pages)
+│   └── ui/                 # Participant entry; 5 private development views
 ├── scripts/                # CLI: benchmark, export, analyze
 ├── experiments/results/    # JSON results per experiment
 ├── data/                   # Corpus + chunks + indices (~341 MB)
@@ -319,7 +320,12 @@ corrected per research-question family.
 
 ## Streamlit UI
 
-5 pages: **Chat** (interactive Q&A with system selector), **Metrics Dashboard** (Plotly charts), **Document Explorer** (search corpus), **Evaluation Mode** (controlled user studies), **Experiment Runner** (run benchmarks from UI).
+Participant mode registers only **Evaluation Mode**, with invitation login and no
+operator routes. The five views under `src/ui/views/` (**Chat**, **Metrics Dashboard**,
+**Document Explorer**, **Evaluation Mode**, **Experiment Runner**) are available only
+in the separate private `CLOUDRAG_MODE=development` environment. Installation and
+required deployment variables are documented in
+[INTERVIEW_READINESS.md](docs/INTERVIEW_READINESS.md).
 
 ```bash
 python -m streamlit run src/ui/app.py
