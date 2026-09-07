@@ -359,7 +359,100 @@ El comando inicial de resumen histórico falló por quoting de PowerShell, antes
 escribir el resumen o ejecutar la suite; se corrigió y quedó registrado en
 `audit-command-correction.json`. No se presenta ese primer comando como exitoso.
 
-Pregunta pendiente al usuario: ¿el equipo estuvo conectado a corriente y sin juegos
+Pregunta planteada al cierre anterior: ¿el equipo estuvo conectado a corriente y sin juegos
 u otras cargas de GPU durante la cohorte y los probes del 6 de septiembre? No se
 registraron esas condiciones de manera suficiente para atribuir la diferencia de
 rendimiento exclusivamente al hardware o al driver.
+
+## Reanudación controlada del 2026-09-07
+
+**DECLARADO por el usuario:** durante parte de la cohorte 616.64 la laptop estuvo
+desconectada de corriente y Brave se abrió varias veces. La cohorte se conserva
+como evidencia histórica con condiciones no controladas; no es una referencia de
+capacidad local. No se reconstruyen condiciones retrospectivas ni se mezclan sus
+percentiles con los del nuevo piloto. La comparación con 610.62 será descriptiva:
+no permite atribuir diferencias al driver. No se cambia el controlador.
+
+### Crítica del plan y criterios fijados antes de inferir
+
+Extender el ejecutor durable evita crear un segundo mecanismo de recuperación.
+El riesgo principal es confundir una condición inválida con un fallo del sistema,
+o eliminar respuestas lentas y mejorar artificialmente los percentiles. Por ello,
+el resultado técnico se conserva, `conditions_invalid` es independiente, y todos
+los intentos consumen su posición. Fallos/abortos cuentan en la tasa de fallos;
+solo éxitos completos con controles válidos entran a p50/p95. No hay reemplazos.
+
+El piloto acordado tiene **40 posiciones híbridas: 20 frías y 20 calientes**, con
+las mismas veinte consultas y orden históricos. Veinte observaciones por condición
+permiten una comparación descriptiva emparejada, pero el p95 depende de la cola
+de una muestra pequeña y no certifica un percentil poblacional. Un resultado
+satisfactorio del piloto no equivale al GO de los tres sistemas; la extensión a
+los otros 80 intentos requiere decisión posterior.
+
+En este equipo Modern Standby solo se encontró el plan Equilibrado. Se registra
+AC + Equilibrado + overlay efectivo «Mejor rendimiento» (GUID
+`ded574b5-45a0-4f42-8737-46345c09c238`); no se modifican ajustes de energía.
+Antes de medir se exigen 60 s de observación, CPU y GPU medias inferiores al 10 %,
+sin navegadores, launchers u overlays visibles. No se cierran procesos ajenos.
+
+`scripts/observe_interview_gate.py` observa cada 5 s alimentación, modo efectivo,
+RAM, CPU actual calculada por diferencias, procesos con PID/RAM, GPU/VRAM,
+temperatura GPU, frecuencias y limitadores disponibles; registra `ollama ps` y
+`/api/ps`. Los contadores no soportados se conservan como N/A; la temperatura CPU
+se declara no disponible. Utilización GPU y reparto de pesos GPU/CPU son magnitudes
+distintas. Telemetría obligatoria ausente, cambio de energía, otro modelo o carga
+externa sostenida invalidan el control y pausan tras finalizar el intento activo.
+Los límites térmicos/energéticos propios de la inferencia y la presión de memoria
+son resultados observados: por sí solos no invalidan una respuesta lenta.
+
+Las observaciones tienen UTC, reloj monotónico, PID y errores; se guardan como
+JSONL con flush/fsync. El request enlaza el journal incluso si el proceso aborta.
+Los HTTP traces conservan peticiones, clase de excepción y métricas devueltas por
+Ollama. El cliente caliente mantiene su conexión entre consultas. Ni la receta
+del modelo ni el timeout participante de 60 s cambian.
+
+### Avance verificado y bloqueo de admisión
+
+Baseline `fc0537765e469e34e202cb2c99434400000ea83f`, árbol inicialmente limpio:
+**411 pasan, 5 excluidas, 3 advertencias SWIG, 51,72 s**. Evidencia nueva y separada:
+`C:/CloudRAG/controlled-pilot-20260907T190630Z/` (`baseline-status.txt`,
+`baseline-log.txt`, `baseline-pytest.txt`).
+
+Las pruebas del observador sin inferencia (`observer-smoke.json`,
+`observer-command-profile.json`, `observer-native-smoke.json`) detectaron un coste
+inicial de 8,91/4,34 s por muestra. El perfil midió 1,99 s al lanzar PowerShell y
+un coste residual aproximado de 2 s en HTTP. Se sustituyó el subproceso de inventario
+por getters nativos y solo la URL del observador usa IPv4. Las siguientes lecturas
+tardaron 0,39/0,50 s y no tuvieron errores. Estos son tiempos de observación, **no
+latencias RAG ni una prueba de ausencia de interferencia durante inferencia**.
+
+VERIFICADO en esas muestras: AC, overlay esperado, pero Epic Games Launcher y
+overlays activos. Se pidió al usuario cerrarlos.
+
+La admisión formal posterior falló: `admission-01/identity.json`, `samples.jsonl`
+y `result.json` bajo el directorio externo anterior. Commit observado
+`7b48d3792f6870f4f5a673d443fa3a7a33013bf6`, observer SHA-256
+`f247e8c8ae790103985429b20d5eb009b382ca17cf34c4f587c86bd71656a5da`.
+Ventana UTC `2026-09-07T20:13:36.417953+00:00` a
+`2026-09-07T20:14:36.820888+00:00`: **13 muestras, 60,40 s**, CPU media **3,05 %**,
+GPU media **15,08 %**, sin errores de sensores. Edge, Epic Games Launcher y overlays
+de NVIDIA/Epic seguían presentes. Motivos: `idle_gpu` y `prohibited_process`.
+El comando terminó con error explícito de admisión; no es un timeout RAG y no
+consume ninguna de las cuarenta posiciones. Coste del observador en esta ventana:
+media **0,315 s**, máximo **0,399 s** por muestra. No demuestra ausencia de
+interferencia durante inferencia; falta el contraste sobre trabajo sintético.
+
+El cambio de instrumentación incluye **14 regresiones nuevas**: selección inmutable,
+40 posiciones reales del coordinador con un calentamiento aparte, reanudación sin
+duplicación, exclusión de controles inválidos conservando la respuesta, bloqueo
+antes de inferir, sensores nativos y detección de energía/carga/telemetría ausente.
+Auditoría: **425 pasan, 5 excluidas, 3 advertencias SWIG, 30,67 s**;
+Ruff, diff check y escaneo con baseline aprobados (`implementation-*-02.txt`).
+El pase final repitió **425 pasan/5 excluidas en 29,96 s**, con los mismos tres
+avisos SWIG y Ruff/diff/secretos aprobados (`final-pytest.txt`, `final-ruff.txt`,
+`final-diff.txt`, `final-secrets.txt`).
+
+No se inició el piloto ni se reintentó P900. Quedan pendientes una admisión aprobada,
+el coste sobre trabajo sintético bajo las condiciones fijadas y los 40 intentos.
+**NO-GO; Fase B sigue bloqueada.** No hay evidencia nueva para atribuir la demora
+exclusivamente al hardware, ni para cambiar la espera visible del participante.

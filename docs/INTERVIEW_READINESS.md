@@ -185,3 +185,35 @@ está. Para emitir GO deben quedar verificados los cuatro puntos siguientes:
    cargas frías/calientes y pausas; reportar p50/p95, fallos y hardware. Exigir p95 ≤60 s.
 4. Confirmar que errores técnicos no entran como valoraciones y que el almacenamiento
    sobrevive reinicios. Emitir GO solo con esa evidencia; no inferirlo de los mocks.
+
+### Piloto controlado pendiente (2026-09-07)
+
+**DECLARADO por el usuario:** la cohorte histórica 616.64 incluyó uso con batería y
+aperturas de Brave. Sus resultados se conservan, pero no acreditan la capacidad
+local bajo condiciones controladas. El estado continúa **NO-GO**, con P900 sin
+cierre integral y Fase B bloqueada. Véase la reanudación y evidencia externa en
+`docs/OPERATIONAL_GATE_2026-09-05.md`.
+
+El ejecutor permite iniciar una cohorte independiente con
+`scripts/measure_interview_gate.py init --output RUTA_EXTERNA_NUEVA --systems hybrid --controlled`.
+Requiere primero configurar las variables de esta guía y verificar bundle, digest,
+servidor y commit. El manifiesto fija 40 posiciones (20 frías/20 calientes);
+`plan --output RUTA` es de solo lectura y `run --output RUTA` exige admisión observada
+de 60 s en AC, Equilibrado con overlay efectivo Mejor rendimiento, CPU/GPU medias
+<10 %, sin otros navegadores/launchers/overlays. No cambia ajustes ni cierra procesos.
+El proceso frío descarga Granite y conserva la caché de archivos del sistema;
+el caliente mantiene un worker y separa un calentamiento exitoso de las 20 posiciones.
+
+Todo fallo o aborto consume su posición sin reemplazo. Una condición inválida
+conserva respuesta, error y duración, excluye esa duración de percentiles y pausa
+la cohorte; revisar la evidencia antes de cualquier reanudación. La observación
+incluye logs incrementales de recursos y traces HTTP, sin cambiar el timeout de
+la app. El piloto híbrido no autoriza por sí solo entrevistas ni preparación de
+nube: faltan los controles de los otros sistemas y el cierre real de P900.
+
+VERIFICADO: instrumentación en `7b48d37`, 425 tests pasan/5 excluidos, Ruff/diff/secretos
+aprobados. La primera admisión controlada falló el 2026-09-07 a las 20:14 UTC:
+CPU media 3,05 %, GPU 15,08 %; Edge, Epic y overlays seguían activos. No hubo
+inferencias nuevas. Evidencia: `C:/CloudRAG/controlled-pilot-20260907T190630Z/admission-01/`.
+Cerrar esas cargas y mantener AC/Mejor rendimiento antes de pedir otra admisión;
+no reintentar automáticamente ni interpretar esta observación de reposo como latencia RAG.
