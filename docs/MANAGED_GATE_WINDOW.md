@@ -83,6 +83,18 @@ la prueba real de cinco segundos (2026-09-08T10:22:08Z), terminada por timeout. 
 no confirma lectura humana. La serialización conserva ahora las rutas mediante
 objetos explícitos y elimina duplicados por aplicación/sesión.
 
+El segundo inicio (`window-real-02/`, build `d28a790`) sí cerró AnyDesk y los overlays
+y aprobó la admisión. El contraste se detuvo antes de completar su primer par:
+sus comprobaciones de extremos aplicaban incorrectamente la continuidad de 15 s
+al intervalo que incluía detener/decodificar WPR. Las tres muestras durante el
+trabajo observado eran válidas; el error fue `endpoint_control_reasons=telemetry_gap`.
+La regresión reprodujo el fallo antes de separar los controles de extremos de la
+telemetría continua. Esta última mantiene su límite de 15 s, y la admisión exige
+continuidad. No se reinterpretan como aprobados los resultados de ese intento.
+AnyDesk se detuvo a las 10:25:08Z y se verificó Running/Auto a las 10:27:16Z del
+2026-09-08; el resto de la restauración terminó a las 10:27:27Z y el watchdog se
+eliminó. Evidencia: `window-real-02/events/` y `restored.json`. No hubo consultas RAG.
+
 ## Semántica del timeout (VERIFICADO, sin cambio de la app)
 
 `tests/test_http_timeout_semantics.py` verifica con HTTP real de loopback que un
