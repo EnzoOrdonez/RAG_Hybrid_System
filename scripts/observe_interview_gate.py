@@ -169,6 +169,7 @@ class Sampler:
                 raise ValueError('Expected one reference GPU')
             row['gpu'] = dict(zip(GPU_FIELDS, (v.strip() for v in values[0].split(',')), strict=True))
             float(row['gpu']['utilization.gpu'])  # mandatory; optional unsupported sensors remain N/A
+            row['gpu_process_listing'] = command(['nvidia-smi'])  # includes graphics users on WDDM
         except Exception as exc:
             row['errors'].append(f'gpu: {type(exc).__name__}: {exc}')
         try:
@@ -246,7 +247,7 @@ def assess(rows, admission=False, allowed_pids=()):
 
 
 class Observer:
-    def __init__(self, path, sampler=None, interval=5, allowed_pids=()):
+    def __init__(self, path, sampler=None, interval=5, allowed_pids=(), capture_enabled=None):
         self.path = Path(path)
         self.sampler = sampler or Sampler()
         self.interval = interval
@@ -254,6 +255,11 @@ class Observer:
         self.rows = []
         self.stop_event = threading.Event()
         self.persistence_errors = []
+        self.capture = None
+        self.capture_enabled = (os.environ.get('CLOUDRAG_MEMORY_TRACE') == '1'
+                                if capture_enabled is None else capture_enabled)
+        self.response_started_at = None
+        self.response_elapsed_s = None
 
     def sample(self):
         try:
@@ -274,6 +280,10 @@ class Observer:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open('x'):
             pass
+        if self.capture_enabled:
+            from scripts.gate_etw import Capture
+            self.capture = Capture(self.path.with_suffix('.etw'))
+            self.capture.start()
         self.sample()  # before response clock; primes delta counters
         self.thread = threading.Thread(target=self._loop, daemon=True)
         self.thread.start()
@@ -293,7 +303,14 @@ class Observer:
         reasons = assess(self.rows, allowed_pids=self.allowed_pids)
         if self.persistence_errors:
             reasons.append('telemetry_persistence_error')
-        return dict(conditions_invalid=bool(reasons), control_reasons=reasons,
+        trace = {}
+        if self.capture is not None:
+            try:
+                trace = self.capture.finish(self.response_started_at, self.response_elapsed_s)
+            except Exception as exc:
+                reasons.append('hard_fault_capture_invalid')
+                trace['hard_fault_error'] = f'{type(exc).__name__}: {exc}'
+        return dict(conditions_invalid=bool(reasons), control_reasons=reasons, **trace,
                     telemetry_path=str(self.path), telemetry_samples=len(self.rows),
                     observer_errors=self.persistence_errors)
 
@@ -301,7 +318,7 @@ class Observer:
 def admission(root):
     from scripts.measure_interview_gate import write_new
     root = Path(root)
-    observer = Observer(root / 'samples.jsonl', allowed_pids={os.getpid(), os.getppid()})
+    observer = Observer(root / 'samples.jsonl', allowed_pids={os.getpid(), os.getppid()}, capture_enabled=False)
     observer.start()
     # No inference; the final sample must span at least 60 seconds of idle observation.
     deadline = time.monotonic() + 60

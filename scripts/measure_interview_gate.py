@@ -80,6 +80,7 @@ def measure_attempt(root, metadata, work, interval=1.0, validate_after=None, obs
         journal = directory / "events.jsonl"
         if observer is not None:
             observer.start()
+            observer.response_started_at = now()
         started = time.perf_counter()
         stop = threading.Event()
         write_lock = threading.Lock()
@@ -105,6 +106,7 @@ def measure_attempt(root, metadata, work, interval=1.0, validate_after=None, obs
         event("start")
         thread = threading.Thread(target=heartbeat, daemon=True)
         thread.start()
+        elapsed = None
         try:
             try:
                 payload = work()
@@ -114,6 +116,8 @@ def measure_attempt(root, metadata, work, interval=1.0, validate_after=None, obs
         finally:
             stop.set()
             thread.join()
+            if observer is not None:
+                observer.response_elapsed_s = elapsed if elapsed is not None else time.perf_counter() - started
             control = observer.finish() if observer is not None else {}
         if heartbeat_errors:
             raise OSError("Heartbeat persistence failed: " + ",".join(heartbeat_errors))
@@ -311,6 +315,13 @@ def environment_identity():
 def check_environment(protocol):
     if "environment" in protocol and environment_identity() != protocol["environment"]:
         raise ValueError("Cohort environment changed; stop and request a separate cohort")
+    if protocol.get('controls', {}).get('memory_trace'):
+        from scripts import gate_etw, gate_memory
+        if os.environ.get('CLOUDRAG_MEMORY_TRACE') != '1' or any(
+            digest(path) != protocol['controls'][key] for key, path in (
+                ('memory_sha256', gate_memory.__file__), ('etw_sha256', gate_etw.__file__),
+                ('profile_sha256', gate_memory.PROFILE))):
+            raise ValueError('Memory instrumentation changed during cohort')
 
 
 def initialize_fresh(root, protocol):
@@ -359,6 +370,12 @@ def fresh_protocol(systems=None, controlled=False):
                                     ac_required=True, idle_cpu_gpu_below_percent=10,
                                     pause_on_invalid=True, replace_attempts=False,
                                     observer_sha256=digest(observe.__file__))
+        protocol['controls']['memory_trace'] = os.environ.get('CLOUDRAG_MEMORY_TRACE') == '1'
+        if protocol['controls']['memory_trace']:
+            from scripts import gate_etw, gate_memory
+            protocol['controls']['memory_sha256'] = digest(gate_memory.__file__)
+            protocol['controls']['etw_sha256'] = digest(gate_etw.__file__)
+            protocol['controls']['profile_sha256'] = digest(gate_memory.PROFILE)
     preflight(protocol)
     return protocol
 
@@ -419,6 +436,8 @@ def worker(root, system, phase, indices):
             from scripts import observe_interview_gate as observe
             if digest(observe.__file__) != protocol["controls"]["observer_sha256"]:
                 raise ValueError("Observer changed during cohort")
+            if bool(protocol['controls'].get('memory_trace')) != (os.environ.get('CLOUDRAG_MEMORY_TRACE') == '1'):
+                raise ValueError('Memory trace mode differs from cohort')
             trace_id = uuid.uuid4().hex
             observer = observe.Observer(root / "telemetry" / f"{trace_id}.jsonl",
                                          allowed_pids={os.getpid(), os.getppid()})
