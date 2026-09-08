@@ -456,3 +456,67 @@ No se inició el piloto ni se reintentó P900. Quedan pendientes una admisión a
 el coste sobre trabajo sintético bajo las condiciones fijadas y los 40 intentos.
 **NO-GO; Fase B sigue bloqueada.** No hay evidencia nueva para atribuir la demora
 exclusivamente al hardware, ni para cambiar la espera visible del participante.
+
+## Contraste del observador y nuevo prechequeo (2026-09-07)
+
+DECLARADO por el usuario: cerró las aplicaciones indicadas, mantiene AC/Mejor
+rendimiento y dispone de unas dos horas sin interrupciones. Esta declaración no
+sustituye los controles. La reanudación parte de `87fc16f`, árbol limpio, baseline
+**425 pasan/5 excluidas en 30,80 s**, Ruff/diff/secretos aprobados.
+Evidencia nueva: `C:/CloudRAG/clean-pilot-20260907T203624Z/` (`baseline-*`).
+
+### Crítica y decisiones previas
+
+Descontar un coste sintético de la latencia RAG produciría una duración que ningún
+participante experimentó y supondría interferencia aditiva sin demostrarla. El
+usuario eligió **no descontar**: aceptar el observador si el límite superior
+unilateral del 95 % del aumento mediano pareado es <=5 %. Se fijaron diez pares,
+orden alternado AB/BA, hashing de un buffer de 64 MiB, cantidad de trabajo calibrada
+una vez a unos diez segundos, bootstrap de 10.000 remuestreos y seed 42. Ambos
+brazos usan el mismo registrador durable; preparación/cierre del observador quedan
+fuera del reloj de respuesta, como en el ejecutor RAG. Los pares fallidos o inválidos
+no se descartan para aprobar: el contraste se detiene y conserva evidencia parcial.
+Un coste sintético aceptable no demuestra ausencia de interferencia en GPU.
+
+Hipótesis para la etapa de inferencia, aún no ejecutada: offload parcial asociado
+con generación lenta; presión de RAM/VRAM; limitación térmica/energética; o duración
+en etapas fuera del chat HTTP. El usuario aceptó declarar causalidad indeterminada
+si la observación no aísla el mecanismo. No se atribuirá retrospectivamente al
+driver la diferencia entre cohortes con condiciones históricas no verificables.
+
+VERIFICADO: `cf0328d4ddbcf77716404c3c097987ef6308ccad` incorpora el contraste en
+`scripts/contrast_interview_observer.py` y once regresiones: criterio bootstrap,
+variabilidad de la cola, pares incompletos/duplicados/inválidos, veinte brazos del
+registrador real, rechazo de repetición y conservación de un brazo fallido.
+Suite **436 pasan/5 excluidas en 31,64 s**, tres avisos SWIG; Ruff/diff/secretos
+aprobados (`contrast-pytest.txt`, `contrast-ruff.txt`, `contrast-diff.txt`,
+`contrast-secrets.txt`).
+
+### Resultado operativo: bloqueo previo al contraste
+
+VERIFICADO: `observer-contrast-01/result.json`, UTC
+`2026-09-07T20:44:58.506716+00:00`, registra `status=blocked`, `passed=false`,
+motivo `prohibited_process`. El protocolo contiene commit y hashes de los tres
+scripts; `initial-state.json` conserva los sensores y procesos observados.
+**Cero pares sintéticos, cero nuevas ventanas de admisión, cero intentos RAG.**
+No se repitió automáticamente el prechequeo ni se consumieron posiciones del piloto.
+
+Los cinco procesos NVIDIA Overlay seguían activos (PID 2860, 10356, 16896, 21664,
+33192); `nvidia-smi` listó los PID 10356 y 16896 como usuarios de GPU. El inventario
+está en `gpu-processes.txt`, `gpu-compute-processes.txt` y su timestamp asociado.
+`gpu-engines.json` registró 19 % en un motor 3D para PID 31384, identificado después
+como AnyDesk; también registró DWM y Windows Terminal. Esa muestra de motor **no
+es el porcentaje total de utilización de la RTX** ni prueba una causa exclusiva.
+WDDM reportó memoria por proceso N/A. No se cerró AnyDesk: podría sostener el acceso
+remoto del usuario. Se solicitó confirmar si puede cerrarse y desactivar la
+superposición NVIDIA, con comandos para comprobarlo.
+
+**NO-GO; Fase B bloqueada.** Continúan pendientes el contraste, la admisión, los
+cuarenta intentos, pruebas de semántica HTTP y el cierre P900/SUS/exportación.
+No hubo cambios de timeout, modelos, driver, energía ni sesiones. El límite de dos
+ventanas de admisión fallidas de esta reanudación sigue sin consumirse.
+
+Auditoría final: **436 pasan/5 excluidas en 30,31 s**, tres avisos SWIG;
+Ruff, diff check y secretos aprobados (`final-pytest.txt`, `final-ruff.txt`,
+`final-diff.txt`, `final-secrets.txt`). Git y el inventario SHA-256 de la evidencia
+nueva se registran en `final-git.json` y `final-inventory.json` al cerrar los commits.

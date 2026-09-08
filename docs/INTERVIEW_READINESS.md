@@ -1,6 +1,6 @@
 # Preparación técnica de Evaluation Mode
 
-**NO-GO para entrevistas.** La cohorte independiente terminada el 2026-09-06 sobre
+**NO-GO para entrevistas.** La cohorte histórica terminada el 2026-09-06 sobre
 driver 616.64 completó 120 intentos: 105 respuestas completas, 15 timeouts y cero
 abortos; las seis condiciones incumplen p95 <=60 s. La sesión técnica P900 permanece
 incompleta en la consulta 8, conservando sus dos timeouts sin permitir valorarlos.
@@ -12,6 +12,8 @@ exclusivamente capacidad de hardware. El registro de ejecución y sus mediciones
 [OPERATIONAL_GATE_2026-09-05.md](OPERATIONAL_GATE_2026-09-05.md).
 No se ha desplegado en nube. La evidencia experimental congelada, el corpus, el gold
 y el trabajo académico no forman parte de los cambios.
+El usuario declaró uso con batería y aperturas de Brave durante esa cohorte: sus
+latencias no acreditan capacidad local bajo condiciones controladas.
 
 ## Entorno instalable
 
@@ -217,3 +219,19 @@ CPU media 3,05 %, GPU 15,08 %; Edge, Epic y overlays seguían activos. No hubo
 inferencias nuevas. Evidencia: `C:/CloudRAG/controlled-pilot-20260907T190630Z/admission-01/`.
 Cerrar esas cargas y mantener AC/Mejor rendimiento antes de pedir otra admisión;
 no reintentar automáticamente ni interpretar esta observación de reposo como latencia RAG.
+
+### Contraste previo al piloto
+
+`scripts/contrast_interview_observer.py --output RUTA_EXTERNA_NUEVA` compara diez
+pares de trabajo sintético idéntico con/sin observador, alternando el orden. Se
+exige límite superior unilateral bootstrap del 95 % <=5 % de aumento mediano,
+con 10.000 remuestreos y seed 42. No se descuentan tiempos del RAG. Fallos, pares
+incompletos o condiciones inválidas impiden aprobar; la evidencia parcial se conserva.
+Cada ejecución requiere una ruta nueva y no modifica la app ni ejecuta modelos.
+
+VERIFICADO: implementación `cf0328d`, 436 tests pasan/5 excluidos y checks aprobados.
+El prechequeo del 2026-09-07 a las 20:44 UTC se bloqueó por NVIDIA Overlay todavía
+activo, antes del primer par. Se detectó además actividad de un motor GPU asociada
+a AnyDesk; falta confirmar si el usuario puede cerrarlo sin perder acceso remoto.
+Evidencia: `C:/CloudRAG/clean-pilot-20260907T203624Z/observer-contrast-01/` y el informe
+operativo. No se ejecutaron nuevas ventanas de admisión ni consultas RAG.
