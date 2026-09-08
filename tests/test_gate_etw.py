@@ -137,3 +137,16 @@ def test_sampler_keeps_graphics_gpu_process_listing(monkeypatch):
     row = observe.Sampler()()
     assert row['errors'] == []
     assert '1234 C+G AnyDesk.exe' in row['gpu_process_listing']
+
+
+def test_trace_command_preserves_non_utf8_native_console_bytes(tmp_path, monkeypatch):
+    import base64
+    import sys
+    monkeypatch.setenv('PYTHONUTF8', '1')
+    capture = etw.Capture(tmp_path)
+    capture.command([sys.executable, '-c',
+        "import os; os.write(1, bytes.fromhex('636f6d706c6574a20a')); os.write(2, bytes.fromhex('ff0a'))"])
+    record = gate.read_json(next(tmp_path.glob('command-*.json')))
+    assert base64.b64decode(record['stdout_base64']) == b'complet\xa2\n'
+    assert base64.b64decode(record['stderr_base64']) == b'\xff\n'
+    assert record['returncode'] == 0

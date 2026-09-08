@@ -1,4 +1,5 @@
 """Decode a limited WPR hard-fault capture without equating all faults with disk faults."""
+import base64
 from datetime import datetime
 import math
 import os
@@ -118,10 +119,15 @@ class Capture:
 
     def command(self, args, timeout=90):
         from scripts.measure_interview_gate import now, write_new
-        result = subprocess.run(args, capture_output=True, text=True, timeout=timeout,
+        result = subprocess.run(args, capture_output=True, timeout=timeout,
                                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
         write_new(self.root / f'command-{uuid.uuid4().hex}.json',
-                  dict(at=now(), args=args, returncode=result.returncode, stdout=result.stdout, stderr=result.stderr))
+                  dict(at=now(), args=args, returncode=result.returncode,
+                       stdout_base64=base64.b64encode(result.stdout).decode('ascii'),
+                       stderr_base64=base64.b64encode(result.stderr).decode('ascii'),
+                       preview_encoding='utf-8 with backslashreplace; raw bytes retained above',
+                       stdout=result.stdout.decode('utf-8', errors='backslashreplace'),
+                       stderr=result.stderr.decode('utf-8', errors='backslashreplace')))
         if result.returncode:
             raise RuntimeError(f'Trace command failed: {args[0]} ({result.returncode})')
         return result.stdout
