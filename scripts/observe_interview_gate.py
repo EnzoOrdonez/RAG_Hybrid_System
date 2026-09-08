@@ -139,6 +139,7 @@ class Sampler:
         self.previous = None
         self.process_times = {}
         self.process_at = None
+        self.paging = None
 
     def __call__(self):
         started = time.monotonic()
@@ -153,6 +154,14 @@ class Sampler:
             self.previous = ticks
         except Exception as exc:
             row['errors'].append(f'windows: {type(exc).__name__}: {exc}')
+        try:
+            from scripts.gate_memory import PagingCounters, system_memory
+            row.update(system_memory())
+            if self.paging is None:
+                self.paging = PagingCounters()
+            row['paging'] = self.paging.sample()
+        except Exception as exc:
+            row['errors'].append(f'memory: {type(exc).__name__}: {exc}')
         try:
             values = command(['nvidia-smi', '--query-gpu=' + ','.join(GPU_FIELDS),
                               '--format=csv,noheader,nounits']).splitlines()

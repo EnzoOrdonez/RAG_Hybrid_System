@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WindowsPerformanceRecorder Version="1.0" Author="CloudRAG">
+  <Profiles>
+    <SystemCollector Id="GateCollector" Name="CloudRAGMemory">
+      <BufferSize Value="64" />
+      <Buffers Value="64" />
+    </SystemCollector>
+    <SystemProvider Id="GateProvider">
+      <Keywords>
+        <Keyword Value="HardFaults" />
+        <Keyword Value="ProcessThread" />
+        <Keyword Value="Filename" />
+      </Keywords>
+    </SystemProvider>
+    <Profile Id="GateMemory.Light.File" Name="GateMemory" Description="CloudRAG hard faults and attribution only" LoggingMode="File" DetailLevel="Light">
+      <Collectors>
+        <SystemCollectorId Value="GateCollector">
+          <SystemProviderId Value="GateProvider" />
+        </SystemCollectorId>
+      </Collectors>
+    </Profile>
+  </Profiles>
+</WindowsPerformanceRecorder>
