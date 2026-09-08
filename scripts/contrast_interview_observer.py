@@ -59,7 +59,9 @@ def execute_pairs(root, work, sampler, observer_factory=observe.Observer):
             after = sampler()
             gate.write_new(root / 'checks' / f'{index:02d}-{arm}-after.json', after)
             # Endpoint controls apply equally; only the observed arm has in-work telemetry.
-            reasons = observe.assess([before, after], allowed_pids={os.getpid(), os.getppid()})
+            # These are endpoint checks, not samples of a continuous stream. WPR stop/decode
+            # is outside the response clock and may separate them by more than 15 seconds.
+            reasons = observe.assess([before, after], allowed_pids={os.getpid(), os.getppid()}, continuous=False)
             arms[arm] = dict(row, endpoint_control_reasons=reasons)
             gate.write_new(root / 'arms' / f'{index:02d}-{arm}.json', arms[arm])
             if row['status'] != 'success' or row.get('conditions_invalid') or reasons:

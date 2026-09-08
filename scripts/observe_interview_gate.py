@@ -194,7 +194,9 @@ class Sampler:
         return row
 
 
-def assess(rows, admission=False, allowed_pids=()):
+def assess(rows, admission=False, allowed_pids=(), continuous=True):
+    if admission and not continuous:
+        raise ValueError('Admission requires continuous telemetry')
     reasons = set()
     if not rows:
         return ['telemetry_missing']
@@ -214,7 +216,7 @@ def assess(rows, admission=False, allowed_pids=()):
         if any(m.get('name', m.get('model')) != 'granite4.1:8b'
                for m in row.get('ollama_ps_api', {}).get('models', [])):
             reasons.add('concurrent_model')
-        if previous is not None and row['monotonic_s'] - previous > 15:
+        if continuous and previous is not None and row['monotonic_s'] - previous > 15:
             reasons.add('telemetry_gap')
         previous = row['monotonic_s']
         busy = set()

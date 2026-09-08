@@ -93,3 +93,25 @@ def test_failed_arm_is_durable_and_prevents_second_arm(tmp_path):
     assert len(rows) == 1 and rows[0]['status'] == 'error'
     assert not (tmp_path / 'observed').exists()
     assert not (tmp_path / 'pairs').exists()
+
+
+def test_long_endpoint_separation_is_not_a_continuous_sensor_gap(tmp_path):
+    timestamps = iter(range(0, 2000, 30))
+
+    def endpoints():
+        return dict(sensor(), monotonic_s=next(timestamps))
+
+    def observer(path, **kwargs):
+        return contrast.observe.Observer(path, sampler=sensor, capture_enabled=False, **kwargs)
+
+    rows = contrast.execute_pairs(tmp_path, lambda: contrast.hash_work(b'fixed', 1), endpoints, observer)
+    assert len(rows) == 10
+
+
+def test_continuous_gaps_and_endpoint_power_errors_still_block():
+    rows = [dict(sensor(), monotonic_s=t) for t in (0, 30)]
+    assert 'telemetry_gap' in contrast.observe.assess(rows)
+    rows[-1]['ac'] = False
+    assert contrast.observe.assess(rows, continuous=False) == ['ac_unavailable']
+    with pytest.raises(ValueError, match='continuous'):
+        contrast.observe.assess(rows, continuous=False, admission=True)
