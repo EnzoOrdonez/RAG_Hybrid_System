@@ -123,3 +123,21 @@ def test_manager_rejects_checkout_as_evidence_root(root):
         capture_output=True, text=True)
     assert result.returncode != 0
     assert 'Use external evidence root' in result.stderr
+
+
+@pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell snapshot regression')
+def test_interactive_snapshot_preserves_hashtable_paths_and_deduplicates():
+    script = gate.PROJECT / 'scripts/manage_gate_window.ps1'
+    command = r'''
+$ast=[System.Management.Automation.Language.Parser]::ParseFile($args[0],[ref]$null,[ref]$null)
+$node=$ast.Find({param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Interactive-Snapshot'},$true)
+if(-not $node){throw 'Missing function'}
+. ([scriptblock]::Create($node.Extent.Text))
+$rows=@(@{session=1;name='AnyDesk';path='C:/apps/AnyDesk.exe'},@{session=1;name='AnyDesk';path='C:/apps/AnyDesk.exe'},@{session=0;name='AnyDesk';path='C:/service/AnyDesk.exe'},@{session=1;name='NVIDIA Overlay';path='C:/overlay.exe'})
+@(Interactive-Snapshot $rows 1) | ConvertTo-Json
+'''
+    # Pass path in the script body, not as a command string interpreted as shell code.
+    command = command.replace('$args[0]', "'" + str(script).replace("'", "''") + "'")
+    result = subprocess.run(['powershell', '-NoProfile', '-Command', command], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == {'path': 'C:/apps/AnyDesk.exe'}

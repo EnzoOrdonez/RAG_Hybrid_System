@@ -1,6 +1,6 @@
 <# Bounded reversible window. Run elevated only after SelfTest and code audit pass. #>
 param(
-    [ValidateSet('Run','Watch','Restore','SelfTest','SelfTestController')][string]$Mode,
+    [ValidateSet('Run','Watch','Restore','SelfTest','SelfTestController','NoticeTest')][string]$Mode,
     [Parameter(Mandatory=$true)][string]$Root
 )
 $ErrorActionPreference = 'Stop'
@@ -28,6 +28,19 @@ function Identity($Process) { @{pid=$Process.Id; creation_filetime=$Process.Star
 function Same-Process($Identity) {
     $candidate = Get-Process -Id $Identity.pid -ErrorAction SilentlyContinue
     return ($null -ne $candidate -and $candidate.StartTime.ToUniversalTime().ToFileTimeUtc() -eq $Identity.creation_filetime)
+}
+function Interactive-Snapshot($Processes, $SessionId) {
+    @($Processes | Where-Object { $_.session -eq $SessionId -and $_.name -in @('AnyDesk','EpicGamesLauncher') } |
+        ForEach-Object { [pscustomobject]@{path=$_.path} } | Sort-Object path -Unique)
+}
+function Show-Notice([string]$Message, [int]$Seconds=10) {
+    if ((Get-Process -Id $PID).SessionId -eq 0) { throw 'Notice requires an interactive session' }
+    $shell = New-Object -ComObject WScript.Shell
+    try {
+        $code = $shell.Popup($Message, $Seconds, 'CloudRAG - aviso tecnico', 4160)
+        if ($code -notin @(-1,1)) { throw 'Notice failed or returned an unexpected result' }
+        return @{mechanism='WScript.Shell.Popup'; return_code=$code; seconds=$Seconds; read_by_user='unverified'}
+    } finally { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) | Out-Null }
 }
 function Restore-Service($Before, [bool]$Simulated) {
     if ($Before.name -notin @('AnyDesk','NvContainerLocalSystem')) { throw 'Service outside allowlist' }
@@ -132,6 +145,11 @@ function Watch-Window {
         Start-Sleep -Seconds 2
     }
 }
+if ($Mode -eq 'NoticeTest') {
+    $result = Show-Notice 'CloudRAG: prueba del aviso visible. NO se cerrara AnyDesk ni se ejecutaran modelos en esta prueba.' 5
+    Save-New (Join-Path $rootFull 'notice-test.json') @{at=[DateTime]::UtcNow.ToString('o'); result=$result}
+    exit
+}
 if ($Mode -eq 'Restore') { Restore-Window; exit }
 if ($Mode -eq 'Watch') { Watch-Window; exit }
 if (Test-Path -LiteralPath (Join-Path $rootFull 'window.json')) { throw 'Window already exists; use Restore, never replay Run' }
@@ -160,7 +178,7 @@ $sessionId = (Get-Process -Id $PID).SessionId
 $processes = @(Get-Process | Where-Object { $_.ProcessName -in @('AnyDesk','NVIDIA Overlay','EpicGamesLauncher','EpicWebHelper') } | ForEach-Object {
     @{name=$_.ProcessName; path=$_.Path; identity=(Identity $_); session=$_.SessionId}
 })
-$interactive = @($processes | Where-Object { $_.session -eq $sessionId -and $_.name -in @('AnyDesk','EpicGamesLauncher') } | Select-Object path -Unique)
+$interactive = @(Interactive-Snapshot $processes $sessionId)
 $windowId = [guid]::NewGuid().ToString('N')
 $deadline = [DateTime]::UtcNow.AddMinutes(120)
 if ($simulated) { $deadline = [DateTime]::UtcNow.AddSeconds(15) }
@@ -217,9 +235,8 @@ try {
     }
     $notice = 'CloudRAG: prueba tecnica autorizada. AnyDesk se desconectara. Restauracion automatica antes de ' + $deadline.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz') + '. Estado: ' + $rootFull
     Save-New (Join-Path $rootFull 'notice.json') @{at=[DateTime]::UtcNow.ToString('o'); text=$notice; deadline_utc=$deadline.ToString('o')}
-    & msg.exe $sessionId /time:30 $notice
-    if ($LASTEXITCODE -ne 0) { throw 'Visible notice failed; remote access remains connected' }
-    Event 'notice-delivered' @{session=$sessionId}
+    $noticeResult = Show-Notice $notice 10
+    Event 'notice-delivered' @{session=$sessionId; result=$noticeResult}
     Start-Sleep -Seconds 5
     Save-New (Join-Path $rootFull 'armed.json') @{at=[DateTime]::UtcNow.ToString('o'); deadline_utc=$deadline.ToString('o')}
     foreach ($task in $tasks) {
