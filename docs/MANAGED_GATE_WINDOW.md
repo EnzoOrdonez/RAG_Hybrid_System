@@ -72,6 +72,17 @@ el nombre de la raíz identifica el inicio del trabajo, no el comienzo del pilot
 No se cerró AnyDesk ni se ejecutó inferencia en estas pruebas de preparación.
 Consultar el informe operativo para el resultado posterior de la ventana real.
 
+El primer inicio real (`window-real-01/`, build `9616379`) falló antes de armar:
+`msg.exe` no existe en esta instalación. No se detuvo AnyDesk ni se ejecutaron
+consultas. Además, `Select-Object path` sobre hashtables produjo una ruta nula de
+restauración; la regresión reprodujo el valor nulo antes de corregirlo. Se retiró
+el watchdog que reintentaba esa restauración, verificando servicios y PIDs originales
+en `window-real-01/precut-cleanup.json` (2026-09-08T10:19:24Z).
+El aviso se cambió a `WScript.Shell.Popup`: `notice-test-01/notice-test.json` registra
+la prueba real de cinco segundos (2026-09-08T10:22:08Z), terminada por timeout. Esto
+no confirma lectura humana. La serialización conserva ahora las rutas mediante
+objetos explícitos y elimina duplicados por aplicación/sesión.
+
 ## Semántica del timeout (VERIFICADO, sin cambio de la app)
 
 `tests/test_http_timeout_semantics.py` verifica con HTTP real de loopback que un
