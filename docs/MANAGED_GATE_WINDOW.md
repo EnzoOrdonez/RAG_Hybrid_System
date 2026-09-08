@@ -95,6 +95,16 @@ AnyDesk se detuvo a las 10:25:08Z y se verificó Running/Auto a las 10:27:16Z de
 2026-09-08; el resto de la restauración terminó a las 10:27:27Z y el watchdog se
 eliminó. Evidencia: `window-real-02/events/` y `restored.json`. No hubo consultas RAG.
 
+El tercer inicio (`window-real-03/`, build `e00b8b7`) aprobó admisión y avanzó en el
+contraste, pero su consola mostró `UnicodeDecodeError`: `tracerpt` emitía bytes
+locales incompatibles con `PYTHONUTF8=1`. Aunque XML/ETL seguían disponibles, la
+salida de consola podía perderse en el hilo lector de subprocess. Se abortó la
+ventana sin autorizar el piloto; AnyDesk y los demás componentes quedaron restaurados
+a las 10:36:26Z del 2026-09-08 (`restored.json`). Una regresión con stdout/stderr
+no UTF-8 reprodujo ambos errores. La captura guarda ahora los bytes íntegros en
+base64 y una vista textual explícitamente escapada, sin depender de la página de
+códigos de Windows ni silenciar pérdidas de evidencia.
+
 ## Semántica del timeout (VERIFICADO, sin cambio de la app)
 
 `tests/test_http_timeout_semantics.py` verifica con HTTP real de loopback que un
