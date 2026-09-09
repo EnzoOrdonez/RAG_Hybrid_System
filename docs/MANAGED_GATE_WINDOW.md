@@ -52,9 +52,22 @@ una admisión fallida. Guarda lista completa `nvidia-smi` para identificar usuar
 gráficos WDDM, además de procesos, offload, memoria y temperatura GPU. Temperatura
 CPU se declara no disponible si no hay sensor autorizado accesible.
 
-Los cuarenta slots híbridos (20 frío/20 caliente) no sustituyen los otros sistemas
-ni el cierre de P900. Un fallo, aborto o condición inválida consume su slot, sin
-reemplazo ni inclusión en p50/p95. Timeout de la app: 60 s por lectura, sin cambios.
+Los cuarenta slots híbridos históricos (20 frío/20 caliente) no sustituyen la nueva
+cohorte de 120 posiciones ni el cierre de P900. Un fallo, aborto o condición inválida
+consume su slot, sin reemplazo ni inclusión en p50/p95. La app participante usa
+ahora lectura de 180 s y residencia renovable de 30 minutos; el protocolo prospectivo
+está en [WARM_GATE_PREREGISTRATION.md](WARM_GATE_PREREGISTRATION.md).
+
+Cada `Run` requiere `-Cohort RUTA_EXTERNA -System hybrid|lexical|semantic -Phase cold|warm`.
+Inicializar una sola vez con `measure_interview_gate.py init --output RUTA_EXTERNA
+--systems hybrid lexical semantic --controlled`, después de fijar y verificar las
+variables de la guía y el commit auditado. El manifiesto incluye su ruta de bundle;
+las ventanas siguientes verifican ese mismo archivo sin recrearlo. `-KeepAnyDesk`
+evita tocar servicio e interfaces de acceso remoto cuando las condiciones lo permiten.
+Sin ese switch, siguen siendo obligatorios el aviso y la necesidad observada del corte.
+El supervisor conserva el límite de 120 minutos y el ejecutor deja margen antes de
+otra consulta/preparación. El cierre del payload distingue condición y cohorte completas.
+Las capturas compartidas llevan ID de ventana: el watchdog solo recupera las propias.
 
 ## Evidencia de preparación (VERIFICADO)
 

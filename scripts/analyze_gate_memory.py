@@ -69,7 +69,9 @@ def analyze(root):
 
     manifest = gate.read_json(source(root / 'source-manifest.json'))
     rows = gate.all_records(root)
-    report = gate.summarize(rows, gate.selected_systems(manifest['protocol']))
+    report = gate.summarize(rows, gate.selected_systems(manifest['protocol']), protocol=manifest['protocol'])
+    for path in sorted((root / 'preparation').glob('*.json')):
+        source(path)
     attempts = []
     for row in rows:
         directory = root / 'attempts' / row['attempt_id']
@@ -86,6 +88,10 @@ def analyze(root):
             raise ValueError('Incomplete ETW capture')
         source(decoded_path.with_name('trace.etl'), decoded['trace_sha256'])
         calls = [gate.read_json(source(p)) for p in Path(row['http_trace_path']).glob('*.json')]
+        if row.get('warmup_kind') == 'all_system_preparation':
+            attempts.append(dict(item, preparation_receipt=row['preparation_receipt'],
+                                 excluded_from_performance=True))
+            continue
         chats = [c for c in calls if c['method'] == 'chat']
         if len(chats) != 1 or chats[0]['status'] != 'success':
             raise ValueError('Expected one successful chat call per response')

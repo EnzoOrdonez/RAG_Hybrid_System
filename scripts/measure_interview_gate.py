@@ -189,7 +189,34 @@ def selected_systems(protocol):
     return systems
 
 
-def summarize(rows, systems=None):
+def recipe(protocol):
+    version = protocol.get('protocol_version', 1)
+    if version == 1:
+        return dict(read=60, connect=5, write=60, pool=60, keep_alive=None)
+    expected = dict(read=180, connect=5, write=60, pool=60)
+    if (version != 2 or protocol.get('http_timeouts') != expected
+            or protocol.get('keep_alive') != '30m'
+            or protocol.get('warm_preparation') != 'all_three_in_process'
+            or protocol.get('acceptance') != 'prepared_warm_three_systems_v1'):
+        raise ValueError('Unregistered deployment recipe')
+    return dict(expected, keep_alive='30m')
+
+
+def selected_conditions(protocol, system=None, phase=None):
+    systems = selected_systems(protocol)
+    if system is None and phase is None:
+        return [(s, p) for s in systems for p in PHASES]
+    if system not in systems or phase not in PHASES:
+        raise ValueError('Condition selection requires registered system and phase')
+    return [(system, phase)]
+
+
+def window_has_margin(seconds=600):
+    deadline = os.environ.get('CLOUDRAG_GATE_DEADLINE')
+    return not deadline or (datetime.fromisoformat(deadline) - datetime.now(timezone.utc)).total_seconds() >= seconds
+
+
+def summarize(rows, systems=None, protocol=None):
     cells = []
     for system in SYSTEMS if systems is None else systems:
         for phase in PHASES:
@@ -207,11 +234,22 @@ def summarize(rows, systems=None):
                               failure_rate=failures / len(selected) if selected else None,
                               p50_s=percentile(durations, .5), p95_s=percentile(durations, .95)))
     warmups = [r for r in rows if r.get("warmup")]
-    return dict(cells=cells, percentile_population="successful complete responses with valid controls only",
+    report = dict(cells=cells, percentile_population="successful complete responses with valid controls only",
                 warmups=dict(attempts=len(warmups), failures=sum(r["status"] != "success" for r in warmups)),
                 passed=bool(cells) and all(c["completed_slots"] == 20 and c["failures"] == 0
                            and c["conditions_invalid"] == 0
                            and c["p95_s"] is not None and c["p95_s"] <= 60 for c in cells))
+    if protocol is not None:
+        recipe(protocol)
+    if protocol and protocol.get('protocol_version') == 2:
+        warm = [c for c in cells if c['phase'] == 'warm']
+        report['acceptance'] = protocol['acceptance']
+        report['passed'] = (len(cells) == 6 and {c['system'] for c in cells} == set(SYSTEMS)
+            and all(c['completed_slots'] == 20 for c in cells)
+            and all(c['successes'] == 20 and c['failures'] == c['conditions_invalid'] == 0
+                    and c['p95_s'] is not None and c['p95_s'] <= 60 for c in warm))
+        report['warmups']['description'] = 'Each all_system_preparation attempt contains three separate warmup queries and explicit NLI probes'
+    return report
 
 
 def legacy_records(source):
@@ -352,13 +390,18 @@ def fresh_protocol(systems=None, controlled=False):
     if any(line.split(",")[2].strip() != "616.64" for line in environment["gpu"].splitlines()):
         raise ValueError("New cohort requires authorized driver 616.64")
     protocol = dict(purpose="TECHNICAL SYNTHETIC VALIDATION ONLY", queries=selected,
-                    seed=42, llm_cache=False, timeout_s=60, environment=environment,
+                    seed=42, llm_cache=False, timeout_s=180, environment=environment,
+                    protocol_version=2, http_timeouts=dict(read=180, connect=5, write=60, pool=60),
+                    keep_alive='30m', warm_preparation='all_three_in_process',
+                    acceptance='prepared_warm_three_systems_v1',
+                    preregistration_sha256=digest(PROJECT / 'docs/WARM_GATE_PREREGISTRATION.md'),
                     build_id=git("rev-parse", "HEAD"), server=environment["server"],
                     model_digest=environment["model_digest"],
                     manifest_sha256=digest(os.environ["CLOUDRAG_ARTIFACT_MANIFEST"]),
+                    artifact_manifest_path=str(Path(os.environ['CLOUDRAG_ARTIFACT_MANIFEST']).resolve()),
                     queries_sha256=digest(PROJECT / "data/evaluation/test_queries.json"),
                     cold="fresh process, Granite unloaded; OS file cache retained",
-                    warm="persistent process, successful unmeasured warmup",
+                    warm="persistent process, all three pipelines prepared; Granite residency checked per query",
                     percentile_population="successful complete responses only")
     if systems is not None:
         protocol["systems"] = list(systems)
@@ -420,17 +463,59 @@ def worker(root, system, phase, indices):
     protocol = manifest["protocol"]
     if system not in selected_systems(protocol):
         raise ValueError("Worker system outside cohort")
+    policy = recipe(protocol)
     pipeline = None
+    preparation = None
+    scope = uuid.uuid4().hex
+    if protocol.get('protocol_version') == 2 and phase == 'warm':
+        from src.ui.components.interview_preparation import Preparation
+        preparation = Preparation(root / 'preparation', factory=lambda key: attach_trace(load(key)))
+
+    def load(key):
+        import torch
+        if torch.version.cuda is not None:
+            raise ValueError('CPU-only auxiliary runtime required')
+        from src.ui.components.index_loader import load_hybrid_index, load_pipeline
+        return load_pipeline(key, _hybrid_index=load_hybrid_index())
+
+    def attach_trace(candidate):
+        llm = candidate.llm
+        if (llm.cache_enabled or llm.seed != 42 or llm.timeout != policy['write'] or llm.max_retries != 1
+                or (getattr(llm, 'read_timeout', None) or llm.timeout) != policy['read']
+                or getattr(llm, 'default_keep_alive', None) != policy['keep_alive']):
+            raise ValueError('Measured recipe differs from registered cohort')
+        if observer is not None:
+            import httpx
+            import ollama
+            from scripts.diagnose_interview_timeout import TracedClient
+            if llm._ollama_client is None:
+                llm._ollama_client = TracedClient(ollama.Client(host=os.environ['OLLAMA_HOST'],
+                    timeout=httpx.Timeout(policy['write'], read=policy['read'], connect=policy['connect'])),
+                    metadata['http_trace_path'])
+            else:
+                llm._ollama_client.output = Path(metadata['http_trace_path'])
+        return candidate
+
     sequence = [-1] + indices if phase == "warm" else indices
     for index in sequence:
+        if not window_has_margin(900 if preparation is not None and index == -1 else 600):
+            write_new(root / 'pauses' / f'{uuid.uuid4().hex}.json',
+                      dict(at=now(), reason='window_margin', system=system, phase=phase, next_index=index))
+            return
+        if preparation is not None and index != -1 and not preparation.ready(scope):
+            raise RuntimeError('Warm preparation lost before starting the next position')
         check_model()
         check_environment(protocol)
         metadata = dict(system=system, phase=phase, index=index, warmup=index == -1,
                         query=protocol["queries"][max(0, index)], build_id=os.environ["CLOUDRAG_BUILD_ID"],
                         application_baseline_build_id=protocol["build_id"],
-                        runner_sha256=digest(__file__), timeout_s=60,
+                        runner_sha256=digest(__file__), timeout_s=policy['read'],
+                        http_timeouts={k: policy[k] for k in ('read', 'connect', 'write', 'pool')},
+                        keep_alive=policy['keep_alive'],
                         consumes_slot=manifest.get("abort_consumes_slot", False),
                         environment_manifest_sha256=digest(root / "source-manifest.json"))
+        if preparation is not None and index == -1:
+            metadata['warmup_kind'] = 'all_system_preparation'
         observer = None
         if protocol.get("controls"):
             from scripts import observe_interview_gate as observe
@@ -446,24 +531,16 @@ def worker(root, system, phase, indices):
 
         def query():
             nonlocal pipeline
-            if pipeline is None:
-                import torch
-                if torch.version.cuda is not None:
-                    raise ValueError("CPU-only auxiliary runtime required")
-                from src.ui.components.index_loader import load_hybrid_index, load_pipeline
-                pipeline = load_pipeline(system, _hybrid_index=load_hybrid_index())
+            if preparation is not None:
+                if index == -1:
+                    receipt = preparation.prepare(scope)
+                    return dict(status='success', preparation_receipt=receipt,
+                                model_digest=protocol['model_digest'])
+                pipeline = preparation.pipeline(system, scope)
+            elif pipeline is None:
+                pipeline = load(system)
+            attach_trace(pipeline)
             llm = pipeline.llm
-            if llm.cache_enabled or llm.seed != 42 or llm.timeout != 60 or llm.max_retries != 1:
-                raise ValueError("Measured recipe differs from original cohort")
-            if observer is not None:
-                import httpx
-                import ollama
-                from scripts.diagnose_interview_timeout import TracedClient
-                if llm._ollama_client is None:
-                    llm._ollama_client = TracedClient(ollama.Client(host=os.environ["OLLAMA_HOST"],
-                        timeout=httpx.Timeout(llm.timeout, connect=5)), metadata["http_trace_path"])
-                else:
-                    llm._ollama_client.output = Path(metadata["http_trace_path"])
             response = pipeline.query(metadata["query"]["question"]).model_dump(mode="json")
             report = response.get("hallucination_report")
             error = response.get("error")
@@ -474,6 +551,8 @@ def worker(root, system, phase, indices):
             return dict(status="error" if error else "success", error=error, response=response,
                         configuration=pipeline.config.model_dump(mode="json"), seed=llm.seed,
                         cache_enabled=llm.cache_enabled, num_ctx=llm.num_ctx, model_digest=llm.model_digest,
+                        preparation_id=getattr(pipeline, 'interview_preparation_id', None),
+                        preparation_check=getattr(pipeline, 'interview_preparation_check', None),
                         artifact_manifest_sha256=pipeline.hybrid_index.deployment_manifest_sha256)
 
         row = measure_attempt(root, metadata, query, validate_after=lambda: check_environment(protocol),
@@ -486,13 +565,15 @@ def worker(root, system, phase, indices):
             raise RuntimeError("Warmup failed; warm condition not established")
 
 
-def run(source, root):
+def run(source, root, system=None, phase=None):
     if source is not None:
         initialize(source, root)
     with coordinator_lock(root):
         recover(root)
         protocol = read_json(root / "source-manifest.json")["protocol"]
         systems = selected_systems(protocol)
+        conditions = selected_conditions(protocol, system, phase)
+        recipe(protocol)
         existing = all_records(root)
         recorded_digests = {r["model_digest"] for r in existing if r.get("model_digest")}
         if protocol.get("model_digest"):
@@ -509,9 +590,15 @@ def run(source, root):
                        pending_slots=pending(existing, systems), interrupted_cohort=bool(existing), heartbeat_interval_s=1.0))
         for system in systems:
             for phase in PHASES:
+                if (system, phase) not in conditions:
+                    continue
                 indices = [i for s, p, i in pending(all_records(root), systems) if (s, p) == (system, phase)]
                 batches = [[i] for i in indices] if phase == "cold" else ([indices] if indices else [])
                 for batch in batches:
+                    if not window_has_margin(900 if phase == 'warm' else 600):
+                        write_new(root / 'pauses' / f'{uuid.uuid4().hex}.json',
+                                  dict(at=now(), reason='window_margin', system=system, phase=phase))
+                        return
                     with FileLock(str(root / "inference.lock"), timeout=0):
                         model = check_model()
                         if phase == "cold":
@@ -527,7 +614,7 @@ def run(source, root):
                                "--system", system, "--phase", phase, "--indices", *map(str, batch)]
                     with (root / f"worker-{uuid.uuid4().hex}.log").open("x", encoding="utf-8") as log:
                         result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
-                    report = summarize(all_records(root), systems)
+                    report = summarize(all_records(root), systems, protocol=protocol)
                     write_new(root / "reports" / f"{uuid.uuid4().hex}.json", dict(at=now(), **report))
                     print(json.dumps(report), flush=True)
                     if result.returncode:
@@ -553,6 +640,10 @@ def main():
         parser.error("init cannot import legacy evidence")
     if args.operation != "init" and (args.systems is not None or args.controlled):
         parser.error("cohort controls/selection may only be set at init")
+    if args.operation not in ('run', '_worker') and (args.system or args.phase):
+        parser.error('system/phase apply only to run or worker')
+    if args.operation == 'run' and bool(args.system) != bool(args.phase):
+        parser.error('select both system and phase for a bounded window')
     if args.operation == "_worker" and (not args.system or not args.phase or not args.indices
             or len(set(args.indices)) != len(args.indices) or any(i < 0 or i > 19 for i in args.indices)):
         parser.error("worker requires system, phase and distinct indices 0..19")
@@ -562,12 +653,14 @@ def main():
         rows = legacy_records(args.source) if not args.output or not args.output.exists() else all_records(args.output)
         systems = selected_systems(read_json(args.output / "source-manifest.json")["protocol"]) if (
             args.output and args.output.exists()) else SYSTEMS
-        print(json.dumps(dict(pending=pending(rows, systems), report=summarize(rows, systems)), indent=2))
+        protocol = read_json(args.output / 'source-manifest.json')['protocol'] if args.output and args.output.exists() else None
+        print(json.dumps(dict(pending=pending(rows, systems), report=summarize(rows, systems, protocol=protocol)), indent=2))
     elif args.operation == "report":
         systems = selected_systems(read_json(args.output / "source-manifest.json")["protocol"])
-        print(json.dumps(summarize(all_records(args.output), systems), indent=2))
+        protocol = read_json(args.output / 'source-manifest.json')['protocol']
+        print(json.dumps(summarize(all_records(args.output), systems, protocol=protocol), indent=2))
     elif args.operation == "run":
-        run(args.source, args.output)
+        run(args.source, args.output, args.system, args.phase)
     else:
         worker(args.output, args.system, args.phase, args.indices)
 

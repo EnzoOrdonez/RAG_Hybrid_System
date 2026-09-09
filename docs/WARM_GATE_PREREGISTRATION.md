@@ -62,3 +62,29 @@ calentamientos fuera de ratings/percentiles; protocolo durable sin reescritura d
 históricos; exportación real reconstruible. Cada cambio de código lleva regresiones,
 suite completa, Ruff, diff check y secretos antes de su commit. Esta nota no afirma
 que las implementaciones o mediciones nuevas ya estén completadas.
+
+## Ventanas y trazabilidad de la cohorte nueva
+
+Una inicialización crea las 120 posiciones inmutables, el hash de esta enmienda,
+commit, paquetes, fuentes, servidor, driver y manifiesto del bundle. Cada ventana
+ejecuta únicamente `--system SISTEMA --phase cold|warm` sobre esa misma cohorte.
+No crear una cohorte por ventana ni mezclar resultados de commits diferentes.
+El supervisor de 120 minutos conserva un margen antes de comenzar nuevas consultas
+(600 s) o preparación completa (900 s). Estos márgenes reducen el riesgo de corte;
+no son límites demostrados de ejecución. Un corte conserva el aborto sin duración
+final; reanudar posiciones pendientes exige una ventana nueva y preparación nueva.
+
+Crítica operativa: agrupar los 120 intentos en una sola ventana podría exceder el
+supervisor y cortar acceso remoto innecesariamente. Las ventanas por condición
+conservan identidad y registran interrupciones; el reporte separa condición completa
+de cohorte completa. `-KeepAnyDesk` conserva el servicio y procesos de acceso remoto;
+solo omitirlo si la admisión/telemetría demuestra necesidad y se aplica el aviso
+visible y restauración autorizados. El manifiesto del bundle se verifica en cada
+ventana; no se vuelve a crear ni se sobrescribe durante la cohorte.
+
+En condición caliente, cada inicio de proceso registra una preparación que contiene
+tres respuestas de calentamiento y tres pruebas NLI explícitas. Se conservan fuera
+de las 120 posiciones y fuera de p50/p95. Cada consulta medida guarda la identidad
+de preparación y la comprobación de residencia inmediatamente anterior a generar.
+No se afirma residencia física permanente de páginas de RAM ni ausencia de toda
+actividad del sistema operativo; las condiciones válidas son las del observador.

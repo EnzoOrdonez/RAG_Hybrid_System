@@ -43,6 +43,7 @@ class Preparation:
         self.pipelines = {}
         self.receipt = None
         self.bound_identity = None
+        self.last_check = None
         self.lock = threading.RLock()
 
     def _identity(self):
@@ -86,7 +87,8 @@ class Preparation:
                 identity = self._identity()
                 if identity != self.receipt['identity'] or set(self.pipelines) != set(SYSTEMS):
                     raise PreparationRequired('Preparation identity changed')
-                self._resident(identity)
+                resident = self._resident(identity)
+                self.last_check = dict(at=self.clock(), identity=identity, resident=resident)
                 return True
             except Exception as exc:
                 previous = self.receipt['id']
@@ -98,9 +100,12 @@ class Preparation:
             self.lock.release()
 
     def pipeline(self, system, scope):
-        if not self.ready(scope):
-            raise PreparationRequired('Study deployment needs preparation')
-        return self.pipelines[system]
+        with self.lock:
+            if not self.ready(scope):
+                raise PreparationRequired('Study deployment needs preparation')
+            pipeline = self.pipelines[system]
+            pipeline.interview_preparation_check = self.last_check
+            return pipeline
 
     def prepare(self, scope):
         if not isinstance(scope, str) or not scope:

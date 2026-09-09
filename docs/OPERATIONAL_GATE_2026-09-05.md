@@ -676,3 +676,33 @@ prefijo `closure-`, sin sobrescribir artefactos anteriores.
 Pase de cierre verificado: **476 pasan, 5 excluidas, tres avisos SWIG, 43,78 s**;
 Ruff/secretos aprobados. No hay diferencias versionadas contra `670f8e5` en
 `experiments/results`, `data`, `paper` ni `output` (`closure-protected-paths.txt`).
+
+## Enmienda caliente y preparación de nueva cohorte — 2026-09-09
+
+Esta sección sustituye las propuestas pendientes y el criterio de la sección
+anterior; no reinterpreta las mediciones históricas. El usuario autorizó lectura
+participante de 180 s, reloj y avisos a 60/120 s; pre-calentamiento obligatorio y
+una cohorte nueva homogénea de 120 posiciones (tres sistemas, frío/caliente, 20 por
+celda). GO exige p95 caliente <=60 s y cero errores, abortos o condiciones inválidas
+en cada celda caliente, además de P900 completa, exportación y resiliencia integral.
+El frío se informa sin bloquear por su latencia. La anterior excepción de hardware
+ya no aplica. Crítica, receta y textos UX: [WARM_GATE_PREREGISTRATION.md](WARM_GATE_PREREGISTRATION.md).
+
+**VERIFICADO:** `ffceaff` implementa timeout y reloj; 482 tests pasaron. `3744b9b`
+implementa preparación real de tres pipelines y NLI en el proceso participante,
+residencia de Granite por 30 minutos renovados y pausa si se pierde preparación;
+494 tests pasaron. Los tests son offline y no acreditan aún latencia real.
+Evidencia externa: `C:/CloudRAG/warm-protocol-20260909T152518Z/`, baseline
+`baseline-head.txt`/`baseline-pytest.txt` (476 pasan), auditorías `wait-*` y
+`preparation-final-*`. `wait-browser-controlled.json` verifica el reloj HTML
+con tiempo de navegador simulado; no es una inferencia ni una medición real.
+
+El ejecutor prospectivo mantiene una sola identidad por cohorte y permite ventanas
+por condición. La preparación de cada proceso caliente conserva tres respuestas
+y pruebas NLI fuera de las posiciones medidas; cada respuesta conserva su
+comprobación de residencia. La recuperación de capturas WPR compartidas queda
+acotada por ID de ventana. No se repiten ventanas fallidas a ciegas.
+
+**NO-GO pendiente de validación nueva:** estas implementaciones no completan P900
+ni acreditan todavía el criterio caliente de los tres sistemas. No se han preparado
+artefactos de nube ni desplegado recursos como parte de esta enmienda.

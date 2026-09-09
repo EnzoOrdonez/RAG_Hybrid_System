@@ -154,3 +154,18 @@ def test_trace_command_preserves_non_utf8_native_console_bytes(tmp_path, monkeyp
     assert base64.b64decode(record['stdout_base64']) == b'complet\xa2\n'
     assert base64.b64decode(record['stderr_base64']) == b'\xff\n'
     assert record['returncode'] == 0
+
+
+def test_trace_persists_window_ownership_before_native_start(tmp_path, monkeypatch):
+    monkeypatch.setenv('CLOUDRAG_GATE_WINDOW_ID', 'synthetic-window')
+    capture = etw.Capture(tmp_path / 'shared-cohort' / 'trace')
+    import shutil
+    monkeypatch.setattr(shutil, 'disk_usage', lambda p: type('Disk', (), {'free': 6 * 1024 ** 3})())
+    def command(args):
+        identity = gate.read_json(capture.root / 'trace-identity.json')
+        assert identity['window_id'] == 'synthetic-window'
+        assert identity['instance'] == capture.instance
+        assert args[0:2] == ['wpr', '-start']
+    monkeypatch.setattr(capture, 'command', command)
+    capture.start()
+    assert capture.active

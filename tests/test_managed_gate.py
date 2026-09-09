@@ -64,7 +64,8 @@ def prepare(tmp_path, monkeypatch, *, expired=False):
     # managed.run updates the process environment; pytest restores every affected variable.
     for name in ('CLOUDRAG_MODE', 'HF_HUB_OFFLINE', 'TRANSFORMERS_OFFLINE', 'PYTHONHASHSEED',
                  'PYTHONUTF8', 'CUDA_VISIBLE_DEVICES', 'CLOUDRAG_MEMORY_TRACE', 'CLOUDRAG_MODEL_DIGEST',
-                 'CLOUDRAG_BUILD_ID', 'CLOUDRAG_SESSION_DIR', 'CLOUDRAG_ARTIFACT_MANIFEST', 'OLLAMA_HOST'):
+                 'CLOUDRAG_BUILD_ID', 'CLOUDRAG_SESSION_DIR', 'CLOUDRAG_ARTIFACT_MANIFEST', 'OLLAMA_HOST',
+                 'CLOUDRAG_GATE_DEADLINE', 'CLOUDRAG_GATE_WINDOW_ID'):
         monkeypatch.setenv(name, os.environ.get(name, ''))
 
 
@@ -93,6 +94,33 @@ def test_expired_window_runs_no_commands(tmp_path, monkeypatch):
     with pytest.raises(TimeoutError, match='deadline'):
         managed.run(tmp_path)
     assert not list(tmp_path.glob('*.log'))
+
+
+def test_bounded_window_uses_one_manifest_and_does_not_claim_cohort_complete(tmp_path, monkeypatch):
+    prepare(tmp_path, monkeypatch)
+    from tests.test_warm_gate_protocol import protocol
+    cohort = tmp_path / 'shared'
+    gate.write_new(cohort / 'source-manifest.json', dict(protocol=dict(protocol(), artifact_manifest_path='fixed.json')))
+    window_path = tmp_path / 'window.json'
+    window = gate.read_json(window_path)
+    window.update(cohort=str(cohort), system='lexical', phase='warm')
+    window_path.write_text(json.dumps(window))  # synthetic fixture only
+    commands = []
+    def command(args, **kwargs):
+        commands.append(args)
+        assert kwargs['env']['CLOUDRAG_ARTIFACT_MANIFEST'] == 'fixed.json'
+        assert kwargs['env']['CLOUDRAG_GATE_DEADLINE']
+        assert kwargs['env']['CLOUDRAG_GATE_WINDOW_ID'] == 'technical'
+        return subprocess.CompletedProcess(args, 0)
+    monkeypatch.setattr(subprocess, 'run', command)
+    monkeypatch.setattr('scripts.observe_interview_gate.admission', lambda root: None)
+    monkeypatch.setattr(gate, 'pending', lambda *args: [('semantic', 'cold', 0)])
+    monkeypatch.setattr(gate, 'summarize', lambda *args, **kwargs: {'passed': False})
+    managed.run(tmp_path)
+    assert not any('snapshot' in c or 'init' in c for c in commands)
+    assert commands[-1][-4:] == ['--system', 'lexical', '--phase', 'warm']
+    report = gate.read_json(tmp_path / 'payload-complete.json')
+    assert report['condition_complete'] and not report['cohort_complete']
 
 
 def test_restored_window_cannot_run_again(tmp_path, monkeypatch):

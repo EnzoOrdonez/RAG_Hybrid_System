@@ -1,7 +1,11 @@
 <# Bounded reversible window. Run elevated only after SelfTest and code audit pass. #>
 param(
     [ValidateSet('Run','Watch','Restore','SelfTest','SelfTestController','NoticeTest')][string]$Mode,
-    [Parameter(Mandatory=$true)][string]$Root
+    [Parameter(Mandatory=$true)][string]$Root,
+    [string]$Cohort,
+    [ValidateSet('hybrid','lexical','semantic')][string]$System,
+    [ValidateSet('cold','warm')][string]$Phase,
+    [switch]$KeepAnyDesk
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -72,7 +76,9 @@ function Restore-Window {
     try {
         if (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json')) { return }
         # Remote access is always the first restoration action, even if worker cleanup fails.
-        Restore-Service ($window.services | Where-Object name -eq 'AnyDesk') $window.simulated
+        if (-not $window.PSObject.Properties['manage_anydesk'] -or $window.manage_anydesk) {
+            Restore-Service ($window.services | Where-Object name -eq 'AnyDesk') $window.simulated
+        }
         $failures = [Collections.Generic.List[string]]::new()
         try {
             if (Test-Path -LiteralPath (Join-Path $rootFull 'worker-identity.json')) {
@@ -82,10 +88,15 @@ function Restore-Window {
         } catch { $failures.Add($_.Exception.Message) }
         if (-not $window.simulated) {
             # Stop only named traces belonging to this window; never global wpr -cancel.
-            foreach ($file in @(Get-ChildItem -LiteralPath $rootFull -Filter trace-identity.json -Recurse)) {
+            $traceRoots = @($rootFull)
+            if ($window.PSObject.Properties['cohort']) { $traceRoots += $window.cohort }
+            foreach ($file in @(Get-ChildItem -LiteralPath $traceRoots -Filter trace-identity.json -Recurse)) {
                 if (Test-Path -LiteralPath (Join-Path $file.DirectoryName 'trace-stopped.json')) { continue }
                 try {
                     $trace = Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json
+                    if (-not $file.FullName.StartsWith($rootFull.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) {
+                        if (-not $trace.PSObject.Properties['window_id'] -or $trace.window_id -ne $window.id) { continue }
+                    }
                     if ($trace.instance -notmatch '^CloudRAG-[a-f0-9]{32}$') { throw 'Unrecognized trace identity' }
                     $destination = Join-Path $file.DirectoryName ('recovered-' + [guid]::NewGuid().ToString('N') + '.etl')
                     $output = & wpr -stop $destination -skipPdbGen -instancename $trace.instance 2>&1
@@ -153,6 +164,15 @@ if ($Mode -eq 'NoticeTest') {
 if ($Mode -eq 'Restore') { Restore-Window; exit }
 if ($Mode -eq 'Watch') { Watch-Window; exit }
 if (Test-Path -LiteralPath (Join-Path $rootFull 'window.json')) { throw 'Window already exists; use Restore, never replay Run' }
+if ($Mode -eq 'Run' -and (-not $Cohort -or -not $System -or -not $Phase)) { throw 'Run requires Cohort, System and Phase' }
+if ($KeepAnyDesk -and $Mode -ne 'Run') { throw 'KeepAnyDesk applies only to Run' }
+if ($Mode -eq 'Run') {
+    $cohortFull = [IO.Path]::GetFullPath($Cohort)
+    if ($cohortFull -eq $checkout -or $cohortFull.StartsWith($checkout.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Use external cohort root' }
+    $cohortProtocol = (Get-Content -LiteralPath (Join-Path $cohortFull 'source-manifest.json') -Raw | ConvertFrom-Json).protocol
+    if ($cohortProtocol.protocol_version -ne 2 -or $cohortProtocol.systems.Count -ne 3 -or $System -notin $cohortProtocol.systems) { throw 'Unregistered bounded cohort' }
+    if ($cohortProtocol.build_id -ne (& git -C $project rev-parse HEAD)) { throw 'Cohort build differs before process changes' }
+}
 [IO.Directory]::CreateDirectory($rootFull) | Out-Null
 $simulated = $Mode -in @('SelfTest','SelfTestController')
 if (-not $simulated) {
@@ -178,6 +198,7 @@ $sessionId = (Get-Process -Id $PID).SessionId
 $processes = @(Get-Process | Where-Object { $_.ProcessName -in @('AnyDesk','NVIDIA Overlay','EpicGamesLauncher','EpicWebHelper') } | ForEach-Object {
     @{name=$_.ProcessName; path=$_.Path; identity=(Identity $_); session=$_.SessionId}
 })
+if ($KeepAnyDesk) { $processes = @($processes | Where-Object name -ne 'AnyDesk') }
 $interactive = @(Interactive-Snapshot $processes $sessionId)
 $windowId = [guid]::NewGuid().ToString('N')
 $deadline = [DateTime]::UtcNow.AddMinutes(120)
@@ -195,7 +216,9 @@ $window = @{
     model_digest='444af1c4b2fedd6b54041aca558e7300b0b3d5c0468c44619126240323ba2852'
     trusted_manifest='C:/CloudRAG/operational-20260905T1428Z/deployment-manifest.json'
     script_sha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    manage_anydesk=(-not $KeepAnyDesk)
 }
+if ($Mode -eq 'Run') { $window.cohort=$cohortFull; $window.system=$System; $window.phase=$Phase }
 Save-New (Join-Path $rootFull 'window.json') $window
 [IO.File]::WriteAllText((Join-Path $rootFull 'heartbeat'), [DateTime]::UtcNow.ToString('o'))
 $safeScript = $PSCommandPath.Replace("'", "''")
@@ -234,6 +257,7 @@ try {
         exit
     }
     $notice = 'CloudRAG: prueba tecnica autorizada. AnyDesk se desconectara. Restauracion automatica antes de ' + $deadline.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz') + '. Estado: ' + $rootFull
+    if ($KeepAnyDesk) { $notice = 'CloudRAG: prueba tecnica autorizada; AnyDesk permanece activo. Restauracion de NVIDIA/launchers antes de ' + $deadline.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz') + '. Estado: ' + $rootFull }
     Save-New (Join-Path $rootFull 'notice.json') @{at=[DateTime]::UtcNow.ToString('o'); text=$notice; deadline_utc=$deadline.ToString('o')}
     $noticeResult = Show-Notice $notice 10
     Event 'notice-delivered' @{session=$sessionId; result=$noticeResult}
@@ -244,6 +268,7 @@ try {
         if ($task.enabled) { Disable-ScheduledTask -TaskName $task.name -TaskPath $task.path | Out-Null }
     }
     foreach ($service in $services) {
+        if ($KeepAnyDesk -and $service.name -eq 'AnyDesk') { continue }
         Event 'stop-service-intent' $service
         Set-Service -Name $service.name -StartupType Disabled
         Stop-Service -Name $service.name
@@ -253,7 +278,7 @@ try {
     foreach ($process in $processes) {
         if (Same-Process $process.identity) { Event 'stop-process-intent' $process; Stop-Process -Id $process.identity.pid -Force; Event 'process-stopped' $process }
     }
-    Event 'remote-cut-complete' @{deadline_utc=$deadline.ToString('o')}
+    Event 'process-window-ready' @{deadline_utc=$deadline.ToString('o'); remote_cut=(-not $KeepAnyDesk)}
     $python = Join-Path $project '.venv-app/Scripts/python.exe'
     $payload = Start-Process -FilePath $python -ArgumentList @('scripts/run_managed_gate.py','--root',('"' + $rootFull + '"')) -WorkingDirectory $project -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $rootFull 'payload.stdout.log') -RedirectStandardError (Join-Path $rootFull 'payload.stderr.log')
     while (-not $payload.HasExited -and [DateTime]::UtcNow -lt $deadline) {

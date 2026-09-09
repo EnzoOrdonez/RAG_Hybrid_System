@@ -139,7 +139,8 @@ class Capture:
         if shutil.disk_usage(self.root).free < 5 * 1024 ** 3:
             raise RuntimeError('At least 5 GiB free required for bounded trace evidence')
         write_new(self.root / 'trace-identity.json', dict(at=now(), instance=self.instance,
-            owner_pid=os.getpid(), profile_sha256=digest(PROFILE), decoder_sha256=digest(__file__)))
+            owner_pid=os.getpid(), window_id=os.environ.get('CLOUDRAG_GATE_WINDOW_ID'),
+            profile_sha256=digest(PROFILE), decoder_sha256=digest(__file__)))
         self.command(['wpr', '-start', f'{PROFILE}!GateMemory', '-filemode', '-recordtempto', str(self.root),
                       '-instancename', self.instance])
         self.active = True

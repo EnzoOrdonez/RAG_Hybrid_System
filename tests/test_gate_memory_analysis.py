@@ -57,3 +57,27 @@ def test_changed_journal_is_rejected_before_analysis(tmp_path):
         stream.write('\n')
     with pytest.raises(ValueError, match='hash mismatch'):
         analysis.analyze(tmp_path)
+
+
+def test_three_chat_preparation_is_evidence_but_not_query_latency(tmp_path):
+    gate.write_new(tmp_path / 'source-manifest.json', {'mode': 'fresh',
+        'protocol': {'systems': ['hybrid'], 'build_id': 'measured'}})
+    telemetry = tmp_path / 'telemetry.jsonl'
+    telemetry.write_text('{}\n')
+    etl = tmp_path / 'trace.etl'
+    etl.write_bytes(b'synthetic trace')
+    decoded = tmp_path / 'decoded.json'
+    gate.write_new(decoded, dict(events_lost=0, buffers_lost=0, trace_sha256=gate.digest(etl)))
+    for i in range(3):
+        gate.write_new(tmp_path / 'http' / f'{i}.json', {'method': 'chat', 'status': 'success'})
+    gate.write_new(tmp_path / 'preparation' / 'receipt.json', {'status': 'ready'})
+    gate.measure_attempt(tmp_path, dict(system='hybrid', phase='warm', index=-1, warmup=True,
+        warmup_kind='all_system_preparation', consumes_slot=True),
+        lambda: dict(status='success', preparation_receipt={'status': 'ready'},
+            telemetry_path=str(telemetry), hard_fault_evidence=str(decoded),
+            hard_fault_evidence_sha256=gate.digest(decoded), http_trace_path=str(tmp_path / 'http')))
+    result = analysis.analyze(tmp_path)
+    assert all(g['n'] == 0 for g in result['groups'])
+    assert result['attempts'][0]['excluded_from_performance']
+    assert 'preparation/receipt.json' in result['source_hashes']
+    assert result['latency_report']['warmups']['attempts'] == 1

@@ -24,11 +24,22 @@ def run(root):
         raise RuntimeError('Window is not armed')
     armed = gate.read_json(root / 'armed.json')
     deadline = datetime.fromisoformat(armed['deadline_utc'])
+    cohort = Path(manifest['cohort']) if manifest.get('cohort') else root / 'cohort'
+    bounded = bool(manifest.get('cohort'))
+    protocol = gate.read_json(cohort / 'source-manifest.json')['protocol'] if bounded else None
+    if bounded:
+        gate.recipe(protocol)
+        gate.selected_conditions(protocol, manifest.get('system'), manifest.get('phase'))
+        if protocol.get('protocol_version') != 2 or tuple(gate.selected_systems(protocol)) != gate.SYSTEMS:
+            raise ValueError('Managed bounded window requires the registered three-system cohort')
+    artifact_manifest = protocol['artifact_manifest_path'] if bounded else str(root / 'deployment-manifest.json')
     env = dict(os.environ, CLOUDRAG_MODE='participant', HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1',
         PYTHONHASHSEED='42', PYTHONUTF8='1', CUDA_VISIBLE_DEVICES='', CLOUDRAG_MEMORY_TRACE='1',
         CLOUDRAG_MODEL_DIGEST=manifest['model_digest'], CLOUDRAG_BUILD_ID=manifest['build_id'],
         CLOUDRAG_SESSION_DIR=str(Path(tempfile.gettempdir()) / ('cloudrag-managed-technical-' + manifest['id'])),
-        CLOUDRAG_ARTIFACT_MANIFEST=str(root / 'deployment-manifest.json'), OLLAMA_HOST='http://localhost:11434')
+        CLOUDRAG_ARTIFACT_MANIFEST=artifact_manifest, CLOUDRAG_GATE_DEADLINE=deadline.isoformat(),
+        CLOUDRAG_GATE_WINDOW_ID=manifest['id'],
+        OLLAMA_HOST='http://localhost:11434')
     os.environ.update(env)
 
     def command(label, args):
@@ -43,14 +54,25 @@ def run(root):
             raise RuntimeError(f'{label} failed with exit {result.returncode}; inspect durable evidence')
 
     command('verify-original', ['scripts/check_deployment_artifacts.py', 'verify', '--manifest', manifest['trusted_manifest']])
-    command('snapshot', ['scripts/check_deployment_artifacts.py', 'snapshot', '--manifest', env['CLOUDRAG_ARTIFACT_MANIFEST']])
+    if not bounded:
+        command('snapshot', ['scripts/check_deployment_artifacts.py', 'snapshot', '--manifest', env['CLOUDRAG_ARTIFACT_MANIFEST']])
     command('verify-new', ['scripts/check_deployment_artifacts.py', 'verify', '--manifest', env['CLOUDRAG_ARTIFACT_MANIFEST']])
     from scripts.observe_interview_gate import admission
     admission(root / 'admission-before-contrast')
     command('contrast', ['scripts/contrast_interview_observer.py', '--output', str(root / 'contrast')])
-    command('cohort-init', ['scripts/measure_interview_gate.py', 'init', '--output', str(root / 'cohort'), '--systems', 'hybrid', '--controlled'])
-    command('cohort-run', ['scripts/measure_interview_gate.py', 'run', '--output', str(root / 'cohort')])
-    gate.write_new(root / 'payload-complete.json', dict(at=gate.now(), report=gate.summarize(gate.all_records(root / 'cohort'), ('hybrid',))))
+    if not bounded:
+        command('cohort-init', ['scripts/measure_interview_gate.py', 'init', '--output', str(cohort), '--systems', 'hybrid', '--controlled'])
+    selection = ['--system', manifest['system'], '--phase', manifest['phase']] if bounded else []
+    command('cohort-run', ['scripts/measure_interview_gate.py', 'run', '--output', str(cohort), *selection])
+    protocol = gate.read_json(cohort / 'source-manifest.json')['protocol']
+    rows = gate.all_records(cohort)
+    remaining = gate.pending(rows, gate.selected_systems(protocol))
+    selected_remaining = [slot for slot in remaining if not bounded or
+                          slot[:2] == (manifest['system'], manifest['phase'])]
+    gate.write_new(root / 'payload-complete.json', dict(at=gate.now(), cohort=str(cohort),
+        condition_complete=not selected_remaining, cohort_complete=not remaining,
+        pending_condition=selected_remaining,
+        report=gate.summarize(rows, gate.selected_systems(protocol), protocol=protocol)))
 
 
 if __name__ == '__main__':
