@@ -22,6 +22,7 @@ from src.ui.components import session_manager
 from src.ui.components.session_storage import InvitationStore, SessionStorageError
 from src.ui.components.evaluation_service import answer_query, recover_interrupted, submit_rating
 from filelock import FileLock, Timeout
+from src.ui.components.wait_feedback import render_wait
 
 
 def _init_session_state():
@@ -105,10 +106,13 @@ def _render_training():
     # Search button
     if st.session_state.eval_response_text is None:
         if st.button("Buscar respuesta", key="training_search"):
+            feedback = st.empty()
             try:
                 from src.ui.components.index_loader import load_hybrid_index, load_pipeline
                 with FileLock(str(session_manager.SESSIONS_DIR / "_inference.lock"), timeout=0):
                     InvitationStore(session_manager.SESSIONS_DIR).assert_active(session.session_id)
+                    with feedback.container():
+                        render_wait(time.time())
                     hybrid_index = load_hybrid_index()
                     pipeline = load_pipeline("hybrid", _hybrid_index=hybrid_index)
                     response = pipeline.query(query)
@@ -122,6 +126,8 @@ def _render_training():
             except Exception:
                 st.error("No se pudo obtener la respuesta. Intenta de nuevo o contacta al coordinador.")
                 return
+            finally:
+                feedback.empty()
             st.rerun()
     else:
         st.markdown("**Response:**")
@@ -162,6 +168,7 @@ def _render_evaluation():
 
     attempt = session.pending_attempt
     if attempt and attempt["status"] == "running":
+        render_wait(attempt['started_at'])
         st.info("La consulta sigue en curso. Si se interrumpió, recupera el estado para reintentar.")
         if st.button("Recuperar estado de consulta"):
             recover_interrupted(session)
@@ -176,8 +183,15 @@ def _render_evaluation():
                 from src.ui.components.index_loader import load_hybrid_index, load_pipeline
                 hybrid_index = load_hybrid_index()
                 return load_pipeline(system_key, _hybrid_index=hybrid_index)
-            with st.spinner("Buscando y verificando la respuesta…"):
-                answer_query(session, pipeline_factory, st.session_state.eval_query_shown_ts)
+            feedback = st.empty()
+            def show_wait(started_at):
+                with feedback.container():
+                    render_wait(started_at)
+            try:
+                answer_query(session, pipeline_factory, st.session_state.eval_query_shown_ts,
+                             on_started=show_wait)
+            finally:
+                feedback.empty()
             st.rerun()
     else:
         # Show response

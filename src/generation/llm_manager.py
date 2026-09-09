@@ -106,12 +106,14 @@ class LLMManager:
         enforce_timeout: bool = False,
         num_ctx: Optional[int] = None,
         expected_model_digest: Optional[str] = None,
+        read_timeout: Optional[float] = None,
     ):
         self.provider = provider
         self.model = model
         self.cache_enabled = cache_enabled
         self.max_retries = max_retries
         self.timeout = timeout
+        self.read_timeout = read_timeout
         self.enforce_timeout = enforce_timeout
         self.num_ctx = num_ctx
         self._ollama_client = None
@@ -148,7 +150,8 @@ class LLMManager:
             import httpx
             self._ollama_client = ollama.Client(
                 host=os.environ.get("OLLAMA_HOST", "http://localhost:11434"),
-                timeout=httpx.Timeout(self.timeout, connect=min(5, self.timeout)))
+                timeout=httpx.Timeout(self.timeout, connect=min(5, self.timeout),
+                                      read=getattr(self, 'read_timeout', None) or self.timeout))
         if self.num_ctx is not None:
             kwargs["options"] = {**kwargs["options"], "num_ctx": self.num_ctx}
         if self.expected_model_digest:

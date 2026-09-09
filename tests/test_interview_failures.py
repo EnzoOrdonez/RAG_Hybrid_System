@@ -46,6 +46,25 @@ def test_recovery_cannot_interrupt_an_inflight_request(active):
     assert active.pending_attempt["error"] == "interrupted"
 
 
+def test_wait_callback_observes_durable_attempt_and_effective_timeouts(active):
+    seen = []
+    def on_started(timestamp):
+        saved = sm.EvaluationSession.load_checkpoint(active.session_id)
+        assert saved.pending_attempt['status'] == 'running'
+        assert timestamp == saved.pending_attempt['started_at']
+        seen.append(timestamp)
+    response = SimpleNamespace(answer='answer', error=None, confidence='HIGH', sources=[],
+                               retrieved_chunks=[], hallucination_report={'method': 'nli'})
+    pipeline = SimpleNamespace(config=SURVEY_DEPLOY, query=lambda q: response,
+                               llm=SimpleNamespace(seed=42, cache_enabled=False, timeout=60, read_timeout=180))
+    answer_query(active, lambda key: pipeline, on_started=on_started)
+    assert len(seen) == 1
+    saved = sm.EvaluationSession.load_checkpoint(active.session_id)
+    assert saved.pending_attempt['configuration']['http_timeouts'] == {
+        'read': 180, 'connect': 5, 'write': 60, 'pool': 60}
+    assert saved.pending_attempt['status'] == 'success'
+
+
 def test_partial_export_is_not_complete_and_retry_preserves_answers(active, monkeypatch):
     active.state = "open_questions"
     active.ratings = [{"attempt_id": str(i), "utility_rating": 3} for i in range(30)]

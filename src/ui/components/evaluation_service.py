@@ -26,7 +26,7 @@ def recover_interrupted(session):
             session.finish_attempt(session.pending_attempt["attempt_id"], error="interrupted")
 
 
-def answer_query(session, pipeline_factory, query_shown_ts=None):
+def answer_query(session, pipeline_factory, query_shown_ts=None, *, on_started=None):
     """Persist request before work and the exact presentation payload before rating."""
     with FileLock(str(sm.SESSIONS_DIR / "_inference.lock"), timeout=0):
         InvitationStore(sm.SESSIONS_DIR).assert_active(session.session_id)
@@ -34,11 +34,16 @@ def answer_query(session, pipeline_factory, query_shown_ts=None):
                                     time.time() if query_shown_ts is None else query_shown_ts)
         started = time.perf_counter()
         try:
+            if on_started is not None:
+                on_started(session.pending_attempt['started_at'])
             pipeline = pipeline_factory(session.current_system)
             config = _dump(pipeline.config)
             config.update(seed=pipeline.llm.seed, max_tokens=1024,
                           num_ctx=getattr(pipeline.llm, "num_ctx", None),
                           cache_enabled=pipeline.llm.cache_enabled,
+                          http_timeouts={"read": getattr(pipeline.llm, "read_timeout", None) or getattr(pipeline.llm, "timeout", 60),
+                                         "connect": 5, "write": getattr(pipeline.llm, "timeout", 60),
+                                         "pool": getattr(pipeline.llm, "timeout", 60)},
                           build_id=os.environ.get("CLOUDRAG_BUILD_ID", "unverified"),
                           artifact_manifest_sha256=getattr(getattr(pipeline, "hybrid_index", None), "deployment_manifest_sha256", None))
             session.pending_attempt["configuration"] = config

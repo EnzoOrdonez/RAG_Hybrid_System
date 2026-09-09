@@ -5,8 +5,9 @@ terminó con 40 respuestas híbridas completas y cero fallos: p95 frío 83,24 s,
 caliente 57,62 s. Pasaron admisión y contraste del observador; AnyDesk y mecanismos
 NVIDIA fueron restaurados. P900 volvió a fallar en consulta 8 al recuperarla desde
 la app, fuera del piloto: revisión 49, diez intentos, siete ratings, sin SUS ni
-exportación. Se conservan los tres errores sin valoración. El timeout sigue en
-60 s; su semántica por lectura ya está comprobada, no limita el tiempo total RAG.
+exportación. Se conservan los tres errores sin valoración. La enmienda prospectiva
+de timeout y operación caliente está en [WARM_GATE_PREREGISTRATION.md](WARM_GATE_PREREGISTRATION.md);
+las mediciones anteriores no acreditan todavía la nueva configuración.
 La preparación de nube continúa bloqueada: faltan cierre integral, controles limpios
 léxico/semántico y atribución exclusivamente a hardware. El registro vigente está en
 [OPERATIONAL_GATE_2026-09-05.md](OPERATIONAL_GATE_2026-09-05.md).
@@ -80,7 +81,8 @@ La aplicación utiliza Granite `granite4.1:8b`, temperatura 0, seed 42, caché d
 salida máxima 1024 tokens y contexto 4096. Hybrid usa `SURVEY_DEPLOY`; los controles
 conservan su recuperación lexical/dense. Las diferencias con exp19b están declaradas
 en [APP_VS_EXPERIMENTO.md](APP_VS_EXPERIMENTO.md): no es un replay del experimento.
-El cliente tiene un intento y timeout HTTP de lectura de 60 s/conexión de 5 s. **Ese
+El cliente participante tiene un intento y timeout HTTP de lectura de 180 s,
+conexión 5 s y escritura/pool 60 s. Development conserva lectura 60 s. **Ese
 timeout no limita el tiempo total de retrieval + generación + NLI ni demuestra p95.**
 
 ## Operación de una entrevista a la vez
@@ -262,7 +264,8 @@ reinicio ya conservadas. Las cohortes históricas permanecen separadas.
 El diagnóstico no acredita 32 GB como solución del p95 ni permite cuantificar una
 mejora por ampliación: [nota de RAM](RAM_INTERVIEW_DIAGNOSTIC.md). Offload parcial
 está observado; causa exclusivamente de hardware no demostrada. La propuesta de
-lectura 180 s con reloj y avisos al participante sigue **sin implementar**, pendiente
-de aprobación específica; el criterio p95 no cambia. No hay artefactos de nube
+lectura 180 s con reloj y avisos fue autorizada y está implementada; todavía falta
+validar la operación preparada y la cohorte nueva. El criterio p95 caliente <=60 s
+queda fijado en la enmienda, con cero fallos en los tres sistemas. No hay artefactos de nube
 nuevos ni despliegue autorizado. Véase el cierre vigente del registro operativo
 para timestamps, hashes, límites de causalidad y el nuevo fallo UI de 112,00 s.

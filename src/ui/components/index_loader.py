@@ -73,6 +73,7 @@ def load_pipeline(config_name: str, _hybrid_index=None, llm_model: str = ""):
         seed=UI_GENERATOR_SEED,
         max_retries=1,
         timeout=60,
+        read_timeout=180 if os.environ.get("CLOUDRAG_MODE", "participant") == "participant" else None,
         enforce_timeout=True,
         num_ctx=4096,
         expected_model_digest=os.environ.get("CLOUDRAG_MODEL_DIGEST") or None,
