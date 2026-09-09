@@ -172,8 +172,11 @@ def smoke(root):
     capture = Capture(root)
     capture.start()
     started_at, started = now(), time.perf_counter()
-    time.sleep(5)
-    result = capture.finish(started_at, time.perf_counter() - started)
+    try:
+        capture.command(['wpr', '-status', 'collectors', '-details', '-instancename', capture.instance])
+        time.sleep(5)
+    finally:
+        result = capture.finish(started_at, time.perf_counter() - started)
     write_new(Path(root) / 'smoke-result.json', dict(at=now(), **result))
 
 

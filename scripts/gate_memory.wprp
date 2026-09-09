@@ -3,7 +3,7 @@
   <Profiles>
     <SystemCollector Id="GateCollector" Name="CloudRAGMemory">
       <BufferSize Value="64" />
-      <Buffers Value="64" />
+      <Buffers Value="256" />
     </SystemCollector>
     <SystemProvider Id="GateProvider">
       <Keywords>

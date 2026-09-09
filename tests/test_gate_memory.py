@@ -36,6 +36,15 @@ def test_wpr_accepts_profile_without_starting_a_recording():
     assert 'GateMemory' in result.stdout
 
 
+def test_trace_buffer_reserve_has_burst_capacity_and_small_memory_budget():
+    import xml.etree.ElementTree as ET
+    collector = ET.parse(gate_memory.PROFILE).find('Profiles/SystemCollector')
+    count = int(collector.find('Buffers').get('Value'))
+    size_kib = int(collector.find('BufferSize').get('Value'))
+    assert count >= 256  # address the observed 1,463-event loss without dropping providers
+    assert 16 * 1024 <= count * size_kib <= 32 * 1024  # 16-32 MiB requested reserve
+
+
 @pytest.mark.skipif(sys.platform != 'win32', reason='Windows PDH counters')
 def test_paging_primes_before_reporting_rates_and_does_not_mislabel_hard_faults():
     counters = gate_memory.PagingCounters()

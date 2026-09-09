@@ -102,6 +102,10 @@ def test_smoke_saves_only_completed_capture(tmp_path, monkeypatch):
     class Capture:
         def __init__(self, root):
             assert root == tmp_path
+            self.instance = 'synthetic-owned-instance'
+
+        def command(self, args):
+            assert args == ['wpr', '-status', 'collectors', '-details', '-instancename', self.instance]
 
         def start(self):
             pass
