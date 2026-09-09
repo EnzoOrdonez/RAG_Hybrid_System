@@ -1,5 +1,10 @@
 # Ventana local administrada (prueba técnica)
 
+**Estado al 2026-09-09:** ventana real 05 completada y restaurada; contraste
+aprobado, 40 respuestas válidas sin timeouts. El p95 híbrido frío sigue >60 s.
+Esto no cierra la sesión P900 ni habilita nube. Resultados vigentes al final del
+[registro operativo](OPERATIONAL_GATE_2026-09-05.md#cierre-del-piloto-y-reanudación-de-p900-2026-09-09).
+
 ## Crítica y criterios previos
 
 La autorización del usuario permite cerrar AnyDesk y NVIDIA Overlay temporalmente.
@@ -125,6 +130,42 @@ Se conserva stdout binario y vista textual en `command-*.json`; el smoke consult
 la configuración activa y detiene su captura en `finally`. Referencias del ajuste:
 [Sessions](https://learn.microsoft.com/en-us/windows-hardware/test/wpt/sessions) y
 [Buffers](https://learn.microsoft.com/en-us/windows-hardware/test/wpt/buffers).
+
+## Resultado de la ventana 05 (VERIFICADO)
+
+Raíz `C:/CloudRAG/managed-pilot-20260908T012621Z/window-real-05/`; build `a761fa2`.
+Se entregó Popup el 2026-09-09T00:25:06Z y archivo `notice.json` con deadline
+02:24:54Z. Lectura humana del aviso no verificada. Corte remoto terminado 00:25:12Z.
+
+| Componente previo | Acción reversible | Restauración verificada UTC |
+|---|---|---|
+| AnyDesk servicio PID 29780, interfaz PID 20652 | Deshabilitar/detener servicio y cerrar interfaz | Servicio 01:24:22Z, interfaz PIDs 12632/36472 a 01:24:31Z |
+| NvContainerLocalSystem PID 16372 | Deshabilitar/detener autoarranque durante ventana | Running/Auto 01:24:24Z |
+| NVIDIA Overlay PIDs 7804/22236/23316/23524/33728 | Salen al detener su servicio; ausencia comprobada por admisión | Se restaura su mecanismo de arranque; no se afirma identidad de PIDs anteriores |
+| NVIDIA App SelfUpdate, previamente habilitada | Deshabilitación temporal | Habilitada 01:24:26Z |
+| Epic/launchers autorizados | Ningún proceso de esos nombres en snapshot inicial | No fue necesario relanzarlos |
+
+`window.json` contiene rutas, identidad PID/creación y estado inicial; `events/`
+contiene intenciones y comprobaciones. `restored.json` confirma restauración real
+con AnyDesk primero a las 01:24:33Z; watchdog propio eliminado 01:24:36Z. No se
+cambiaron NVDisplay.ContainerLocalSystem, FvSvc, protección del endpoint ni energía.
+Recomprobación a las 11:01:17Z: `R/closure-restoration-audit.json`, donde R es el
+directorio padre de ventana 05. AnyDesk PIDs 32752/36472, NVIDIA Overlay
+7708/19812/20580/22008/26600; servicios AnyDesk/NvContainer Running/Auto,
+tarea NVIDIA habilitada, watchdog propio ausente y Streamlit de prueba detenido.
+
+Admisiones antes del contraste (14 muestras) y antes del piloto (13) aprobadas.
+Contraste: diez pares completos, costo mediano -0,179 %, límite superior unilateral
+95 % bootstrap +0,0463 % (<5 %), sin descuento de tiempo. `contrast/result.json`.
+Los 40 intentos y un calentamiento tienen captura ETW sin pérdidas; análisis
+posterior comprueba los hashes. RAG terminó 01:24:20Z (`payload-complete.json`).
+
+«Controlado» significa aprobado según los controles registrados, no ausencia
+absoluta de actividad del sistema. ETW conservó actividad de servicios Windows,
+protección del endpoint y `upc.exe` (146 fallos en el primer chat frío). Este último
+nombre no pertenece a la lista de exclusión implementada: no se inventa una causa
+ni se reescriben los estados de la cohorte para ocultarlo. Sus efectos no están
+aislados; esta limitación impide interpretar la admisión como prueba causal total.
 
 ## Semántica del timeout (VERIFICADO, sin cambio de la app)
 

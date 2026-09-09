@@ -1,5 +1,11 @@
 # Compuerta local: registro de ejecución
 
+**Estado vigente: NO-GO (2026-09-09); Fase B bloqueada.** El piloto controlado
+completó 40 respuestas, pero el p95 frío fue 83,24 s. P900 volvió a fallar al
+recuperar la consulta 8; sigue sin SUS/exportación. Las secciones anteriores al
+[cierre actual](#cierre-del-piloto-y-reanudación-de-p900-2026-09-09) conservan la
+cronología histórica y no describen el estado más reciente.
+
 ## Crítica previa a la corrección
 
 El navegador real mostró rutas de operador antes del login en modo participante.
@@ -520,3 +526,153 @@ Auditoría final: **436 pasan/5 excluidas en 30,31 s**, tres avisos SWIG;
 Ruff, diff check y secretos aprobados (`final-pytest.txt`, `final-ruff.txt`,
 `final-diff.txt`, `final-secrets.txt`). Git y el inventario SHA-256 de la evidencia
 nueva se registran en `final-git.json` y `final-inventory.json` al cerrar los commits.
+
+## Cierre del piloto y reanudación de P900 (2026-09-09)
+
+### Evidencia reconstruible y entorno
+
+En esta sección R = `C:/CloudRAG/managed-pilot-20260908T012621Z/`.
+No confundir la fecha del directorio con las fechas efectivas de cada prueba.
+**VERIFICADO:** piloto build `a761fa28e7af691f2e2bdaee880e20f987ae1a59`,
+Ollama 0.22.1, driver 616.64, i5-12450H, 16 GB nominales, RTX 3060 Laptop 6 GB;
+Python 3.14.3, auxiliares CPU, seed 42, caché de respuestas desactivada, contexto
+4096 y máximo 1024 tokens. Versiones y digest completo en
+`R/window-real-05/cohort/source-manifest.json`. Granite conserva
+`444af1c4b2fedd6b54041aca558e7300b0b3d5c0468c44619126240323ba2852`.
+Se verificó el manifiesto original, se tomó snapshot nuevo y se verificó de nuevo:
+`verify-original.log`, `snapshot.log`, `verify-new.log`, `deployment-manifest.json`
+de esa ventana. Hash del manifiesto: `0bb1957f6ce0426214c4ca121f162638db0947e9f95b22fc214fad7034caec10`.
+
+Contraste aprobado a las 00:31:49Z: 10 pares, mediana -0,179 %, límite superior
+unilateral bootstrap 95 % +0,0463 %, por debajo del criterio 5 %. Dos admisiones
+aprobadas, AC y overlay efectivo Mejor rendimiento, sin cambiar energía.
+La reserva ETW fue verificada en runtime (256 buffers de 64 KiB); las capturas
+utilizadas no perdieron eventos. Piloto terminado 01:24:20Z, restauración real
+01:24:33Z con AnyDesk primero. Fallos previos de ventanas 01–04 se conservan y
+no se mezclan con la ventana aprobada. Acciones/PIDs/timestamps:
+[MANAGED_GATE_WINDOW.md](MANAGED_GATE_WINDOW.md#resultado-de-la-ventana-05-verificado).
+
+### Latencias: poblaciones separadas
+
+**VERIFICADO:** éxitos completos y controles válidos exclusivamente en percentiles;
+fallos/abortos cuentan aparte y nunca reciben duración inventada. Frío significa
+worker nuevo y descarga previa de Granite, conservando caché de archivos del SO.
+Caliente mantiene el worker después de un calentamiento independiente.
+
+| Cohorte / sistema | Condición | Éxitos / intentos | p50 s | p95 s | Fallos (abortos incluidos) |
+|---|---|---:|---:|---:|---:|
+| Piloto 616.64 / híbrido | Frío | 20/20 | 50,13 | 83,24 | 0 |
+| Piloto 616.64 / híbrido | Caliente | 20/20 | 23,21 | 57,62 | 0 |
+| Histórica 616.64 / híbrido | Frío | 19/20 | 90,67 | 126,01 | 1 |
+| Histórica 616.64 / híbrido | Caliente | 18/20 | 40,41 | 75,90 | 2 |
+| Histórica 616.64 / léxico | Frío | 16/20 | 71,50 | 96,67 | 4 |
+| Histórica 616.64 / léxico | Caliente | 17/20 | 24,19 | 83,28 | 3 |
+| Histórica 616.64 / semántico | Frío | 18/20 | 76,29 | 111,99 | 2 |
+| Histórica 616.64 / semántico | Caliente | 17/20 | 26,20 | 67,35 | 3 |
+| Histórica 610.62 / híbrido | Frío | 19/20 | 74,91 | 88,93 | 1 |
+| Histórica 610.62 / híbrido | Caliente | 18/20 | 35,15 | 67,44 | 2 |
+| Histórica 610.62 / léxico | Frío parcial | 8/11 | 65,12 | 82,12 | 3 (1 aborto) |
+
+Piloto: 40 éxitos, cero fallos/abortos/condiciones inválidas y un calentamiento
+excluido. `R/window-real-05/payload-complete.json` y `cohort/reports/`.
+Los p95 son percentiles descriptivos de 20 observaciones por condición, no un
+límite de confianza ni una garantía para futuras sesiones; hubo una respuesta
+caliente de 61,47 s aun cuando su p95 muestral cumple el umbral.
+Histórica 616.64: build `fd747f8`, 120 intentos/105 éxitos/15 timeouts,
+tres calentamientos aparte; `C:/CloudRAG/cohort-61664-20260906T015527Z/`.
+**DECLARADO por el usuario:** hubo batería y aperturas de Brave; no usarla como
+capacidad autoritativa del hardware. Histórica 610.62: build `4af9728`,
+51 intentos físicos (45 éxitos, 5 errores, un aborto), un calentamiento aparte;
+`C:/CloudRAG/operational-20260905-routing/latency-cohort/`. Otras condiciones no
+medidas en esa cohorte. `window-CLOSE` sigue de causa indeterminada.
+
+La reducción observada no identifica un efecto causal del driver: las condiciones
+históricas no son retroverificables. No se mezclan ni recalculan esas cohortes.
+El piloto de 40 no sustituye los controles léxico/semántico requeridos para GO.
+
+### Causa y RAM
+
+`R/memory-analysis-01.json` (2026-09-09T10:45:35Z), generado con `f4a60f2`,
+verifica hashes y separa chat HTTP de carga/observación. **VERIFICADO:** offload
+parcial, costos de carga en frío, generación y NLI; sin agotamiento sostenido de
+RAM durante chat. **SIN AISLAR:** cuánto aporta cada límite físico y si explica
+exclusivamente la demora. Actividad residual del SO y de `upc.exe` está registrada;
+pasar la lista de admisión no prueba ausencia absoluta de interferencias.
+No se cambió retrospectivamente la clasificación de las observaciones.
+La recomendación es **no comprar 32 GB como solución acreditada del p95**: no hay
+estimación defendible de aceleración; detalle en
+[RAM_INTERVIEW_DIAGNOSTIC.md](RAM_INTERVIEW_DIAGNOSTIC.md).
+
+### Recuperación real de P900 y nuevo bloqueo
+
+**VERIFICADO:** servidor Streamlit de build `f4a60f2a420c63b8d4e04c143a36590bdba49326`,
+registro `R/p900-server-01.json`, mismo digest y manifiesto. El token existente
+recuperó revisión 46 en consulta 8 (q027), tres prácticas hechas, siete ratings y
+dos errores. Se reintentó una vez con timeout 60 s, después de restaurar procesos:
+esta prueba UI está fuera del piloto controlado y nunca entra en sus percentiles.
+
+Intento `370c95e728eb45d7b1dfdd15090b3ba1`, 10:48:37–10:50:29Z,
+**111,9988 s de respuesta fallida**, `pipeline_error`; stderr informa `timed out`.
+No se registró el subtipo HTTP en este intento UI: los traces anteriores sí
+confirmaron `httpx.ReadTimeout`, pero no se inventa un trace nuevo.
+Checkpoint revisión 49: 10 intentos, 7 ratings, ningún SUS ni exportación.
+`R/p900-recovery-failure-01.json`, copia `p900-checkpoint-revision49.json`
+(SHA-256 `eca08ef8a01ba2aa70db2e2e87a00dd037dfe9d102a86e6a4ba683e96b936afa`),
+`p900-streamlit-01.stderr.log`, `p900-browser-failure-01.json`.
+El navegador comprobó cero grupos de valoración y cero botones de envío de rating.
+No se calificó el fallo ni se fabricó SUS para forzar la exportación.
+Se detuvo exclusivamente el Streamlit propio; `p900-server-stop-01.json`.
+
+Desconexión y reinicio ya probados no se repitieron como si fueran evidencia nueva:
+`C:/CloudRAG/operational-20260905-routing/disconnection-check.json`,
+`restart-recovery-check.json`, `real-timeout-no-rating.json`.
+La recuperación actual refuerza persistencia, pero sigue faltando el cierre integral.
+
+### Timeout: verificado y propuesta pendiente
+
+La semántica queda aclarada con código y tres pruebas HTTP reales en
+`tests/test_http_timeout_semantics.py` (commit `75dfa3e`). `httpx.Timeout(60,
+connect=5)` limita silencio de lectura/escritura y espera de pool por operación;
+no es deadline de retrieval + generación + NLI. `list` y `chat` son peticiones
+distintas. En el probe frío/180 histórico, chat duró 128,3947 s, list 2,0800 s,
+y la respuesta completa 199,0460 s. No se superó un deadline total de 180 s porque
+ese deadline no existe. [Semántica oficial HTTPX](https://www.python-httpx.org/advanced/timeouts/).
+
+**PROPUESTA, NO IMPLEMENTADA:** probar read timeout de 180 s solo en participante,
+con conexión 5 s, reloj visible de tiempo transcurrido y avisos a los 60/120 s,
+sin porcentajes de progreso ni prometer término antes de 180 s. Conservar respuesta
+persistente, lock de inferencia, recuperación por token y prohibición de valorar
+fallos. Recargar o cerrar el navegador no debe anunciar cancelación del modelo.
+La UI debe explicar que una espera larga puede incluir carga y verificación.
+Esto requiere aprobación específica del cambio visible, aun teniendo autorización
+para ejecutar modelos. No equivale a resolver el criterio p95 <=60 s.
+
+Tests exigidos antes de usarlo: timeout configurado correctamente sin cambiar otros
+modos/modelos; feedback real del navegador a 60/120 s sin bloquear refresco; error
+sin rating; recarga sin inferencias duplicadas; suite completa. Después, prueba
+real P900 y exportación. No ejecutar nuevos reintentos a ciegas.
+
+### Veredicto y auditoría
+
+| Paso | Estado vigente | Evidencia |
+|---|---|---|
+| Bundle/identidad | ✅ VERIFICADO | snapshot/verify y manifiesto de ventana 05 |
+| Sesión real completa | ❌ VERIFICADO incompleta | P900 revisión 49, q027 fallida, sin SUS/exportación |
+| Latencia <=60 s en todas las condiciones | ❌ VERIFICADO | Piloto híbrido frío 83,24 s; caliente 57,62 s; controles limpios no ejecutados |
+| Resiliencia integral | ⚠️ VERIFICADO parcialmente | Persistencia/recuperación y exclusión de ratings erróneos; falta exportación final |
+
+**NO-GO; Fase B bloqueada.** No se cumple la excepción «solo latencia por hardware»:
+falta cierre real y la exclusividad causal del hardware no está demostrada.
+No se diseñó ni preparó despliegue de nube, no se cotizaron proveedores ni se
+desplegó. Tampoco se modificó timeout, modelos, driver, energía o evidencia congelada.
+
+Auditoría de `f4a60f2`: **476 pasan, 5 excluidas, tres advertencias SWIG, 69,60 s**;
+Ruff y secretos aprobados, diff sin errores. Evidencia `R/analysis-pytest.txt`,
+`analysis-ruff.txt`, `analysis-secrets.txt`, `analysis-diff.txt`. El test de journal
+alterado detectó primero una fixture sin política de posición; se corrigió la
+fixture y las cinco regresiones pasaron. No se presenta el primer fallo como pase.
+La auditoría final de documentos y el inventario de hashes se guardan en R con
+prefijo `closure-`, sin sobrescribir artefactos anteriores.
+Pase de cierre verificado: **476 pasan, 5 excluidas, tres avisos SWIG, 43,78 s**;
+Ruff/secretos aprobados. No hay diferencias versionadas contra `670f8e5` en
+`experiments/results`, `data`, `paper` ni `output` (`closure-protected-paths.txt`).

@@ -1,14 +1,14 @@
 # Preparación técnica de Evaluation Mode
 
-**NO-GO para entrevistas.** La cohorte histórica terminada el 2026-09-06 sobre
-driver 616.64 completó 120 intentos: 105 respuestas completas, 15 timeouts y cero
-abortos; las seis condiciones incumplen p95 <=60 s. La sesión técnica P900 permanece
-incompleta en la consulta 8, conservando sus dos timeouts sin permitir valorarlos.
-El diagnóstico separado confirmó `httpx.ReadTimeout`: elevar a 180 s permitió el
-probe frío, pero el caliente volvió a agotar 180 s. No es una corrección validada;
-el timeout de la app sigue en 60 s. La preparación de nube sigue bloqueada:
-todavía no se ha demostrado que la latencia sea el único impedimento y su causa sea
-exclusivamente capacidad de hardware. El registro de ejecución y sus mediciones está en
+**NO-GO para entrevistas (2026-09-09).** El piloto controlado con driver 616.64
+terminó con 40 respuestas híbridas completas y cero fallos: p95 frío 83,24 s,
+caliente 57,62 s. Pasaron admisión y contraste del observador; AnyDesk y mecanismos
+NVIDIA fueron restaurados. P900 volvió a fallar en consulta 8 al recuperarla desde
+la app, fuera del piloto: revisión 49, diez intentos, siete ratings, sin SUS ni
+exportación. Se conservan los tres errores sin valoración. El timeout sigue en
+60 s; su semántica por lectura ya está comprobada, no limita el tiempo total RAG.
+La preparación de nube continúa bloqueada: faltan cierre integral, controles limpios
+léxico/semántico y atribución exclusivamente a hardware. El registro vigente está en
 [OPERATIONAL_GATE_2026-09-05.md](OPERATIONAL_GATE_2026-09-05.md).
 No se ha desplegado en nube. La evidencia experimental congelada, el corpus, el gold
 y el trabajo académico no forman parte de los cambios.
@@ -188,7 +188,7 @@ está. Para emitir GO deben quedar verificados los cuatro puntos siguientes:
 4. Confirmar que errores técnicos no entran como valoraciones y que el almacenamiento
    sobrevive reinicios. Emitir GO solo con esa evidencia; no inferirlo de los mocks.
 
-### Piloto controlado pendiente (2026-09-07)
+### Registro histórico del piloto pendiente (2026-09-07)
 
 **DECLARADO por el usuario:** la cohorte histórica 616.64 incluyó uso con batería y
 aperturas de Brave. Sus resultados se conservan, pero no acreditan la capacidad
@@ -202,7 +202,9 @@ Requiere primero configurar las variables de esta guía y verificar bundle, dige
 servidor y commit. El manifiesto fija 40 posiciones (20 frías/20 calientes);
 `plan --output RUTA` es de solo lectura y `run --output RUTA` exige admisión observada
 de 60 s en AC, Equilibrado con overlay efectivo Mejor rendimiento, CPU/GPU medias
-<10 %, sin otros navegadores/launchers/overlays. No cambia ajustes ni cierra procesos.
+<10 %, sin procesos de la lista de exclusión implementada (navegadores comunes,
+Epic, Steam y nombres con `overlay`). Esa lista no detecta toda carga posible.
+El comando directo no cambia ajustes ni cierra procesos.
 El proceso frío descarga Granite y conserva la caché de archivos del sistema;
 el caliente mantiene un worker y separa un calentamiento exitoso de las 20 posiciones.
 
@@ -220,7 +222,7 @@ inferencias nuevas. Evidencia: `C:/CloudRAG/controlled-pilot-20260907T190630Z/ad
 Cerrar esas cargas y mantener AC/Mejor rendimiento antes de pedir otra admisión;
 no reintentar automáticamente ni interpretar esta observación de reposo como latencia RAG.
 
-### Contraste previo al piloto
+### Contraste: método y registro histórico del 2026-09-07
 
 `scripts/contrast_interview_observer.py --output RUTA_EXTERNA_NUEVA` compara diez
 pares de trabajo sintético idéntico con/sin observador, alternando el orden. Se
@@ -234,4 +236,33 @@ El prechequeo del 2026-09-07 a las 20:44 UTC se bloqueó por NVIDIA Overlay toda
 activo, antes del primer par. Se detectó además actividad de un motor GPU asociada
 a AnyDesk; falta confirmar si el usuario puede cerrarlo sin perder acceso remoto.
 Evidencia: `C:/CloudRAG/clean-pilot-20260907T203624Z/observer-contrast-01/` y el informe
-operativo. No se ejecutaron nuevas ventanas de admisión ni consultas RAG.
+operativo. En ese prechequeo no se ejecutaron ventanas de admisión ni consultas RAG.
+
+### Evidencia vigente del 2026-09-09
+
+VERIFICADO: `C:/CloudRAG/managed-pilot-20260908T012621Z/window-real-05/` contiene
+manifiesto verificado, dos admisiones aprobadas, contraste de diez pares aprobado,
+40 intentos completos y restauración de procesos. Build medido `a761fa2`.
+`memory-analysis-01.json` de su directorio padre separa carga y chat, comprueba
+hashes y excluye el calentamiento. La suite posterior al analizador (`f4a60f2`)
+obtuvo 476 pasan/5 excluidas. La app bajo prueba no cambió durante el análisis.
+
+| Compuerta | Estado |
+|---|---|
+| Bundle y modelos reales | ✅ VERIFICADO |
+| Sesión real completa | ❌ P900 revisión 49, sin SUS/exportación |
+| p95 <=60 s, tres sistemas frío/caliente | ❌ Híbrido frío 83,24 s; caliente 57,62 s; faltan controles limpios |
+| Resiliencia integral | ⚠️ Persistencia y errores sin rating verificados; cierre/exportación pendientes |
+
+El corte autorizado de AnyDesk, su watchdog y las restauraciones están documentados
+en [MANAGED_GATE_WINDOW.md](MANAGED_GATE_WINDOW.md). No repetir esas operaciones
+sin una ventana autorizada; no hace falta repetir las pruebas de desconexión y
+reinicio ya conservadas. Las cohortes históricas permanecen separadas.
+
+El diagnóstico no acredita 32 GB como solución del p95 ni permite cuantificar una
+mejora por ampliación: [nota de RAM](RAM_INTERVIEW_DIAGNOSTIC.md). Offload parcial
+está observado; causa exclusivamente de hardware no demostrada. La propuesta de
+lectura 180 s con reloj y avisos al participante sigue **sin implementar**, pendiente
+de aprobación específica; el criterio p95 no cambia. No hay artefactos de nube
+nuevos ni despliegue autorizado. Véase el cierre vigente del registro operativo
+para timestamps, hashes, límites de causalidad y el nuevo fallo UI de 112,00 s.

@@ -139,6 +139,9 @@ Query → Normalization + Expansion
 For the participant application, use the Python 3.14 environment, hashed dependency
 lock and artifact provisioning steps in [Interview readiness](docs/INTERVIEW_READINESS.md).
 Installing packages alone does not provision the corpus, indices or model snapshots.
+Interview gate (2026-09-09): **NO-GO**. The controlled hybrid pilot completed 40
+responses, but cold p95 was 83.24 s and the real P900 session remains incomplete.
+See the runbook for evidence, memory diagnosis and the blocked cloud preparation.
 The recipe below is the historical CLI environment, not the interview deployment.
 
 ```bash
