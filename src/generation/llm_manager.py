@@ -107,6 +107,7 @@ class LLMManager:
         num_ctx: Optional[int] = None,
         expected_model_digest: Optional[str] = None,
         read_timeout: Optional[float] = None,
+        default_keep_alive: Optional[str] = None,
     ):
         self.provider = provider
         self.model = model
@@ -114,6 +115,7 @@ class LLMManager:
         self.max_retries = max_retries
         self.timeout = timeout
         self.read_timeout = read_timeout
+        self.default_keep_alive = default_keep_alive
         self.enforce_timeout = enforce_timeout
         self.num_ctx = num_ctx
         self._ollama_client = None
@@ -271,7 +273,7 @@ class LLMManager:
                 if self.provider == "ollama":
                     response = self._generate_ollama(
                         prompt, system_prompt, max_tokens, temperature,
-                        keep_alive=keep_alive,
+                        keep_alive=keep_alive if keep_alive is not None else getattr(self, 'default_keep_alive', None),
                     )
                 elif self.provider == "openai":
                     response = self._generate_openai(

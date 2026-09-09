@@ -18,6 +18,8 @@ def _button(app, label):
 
 def test_evaluation_full_flow_and_reload(tmp_path, monkeypatch):
     from src.ui.components import index_loader
+    from src.ui.components import interview_preparation as prep
+    from datetime import datetime, timezone
     monkeypatch.setenv("CLOUDRAG_MODE", "participant")
     monkeypatch.setattr(sm, "SESSIONS_DIR", tmp_path)
     monkeypatch.setattr(sm, "_get_evaluation_queries", lambda: [
@@ -30,7 +32,23 @@ def test_evaluation_full_flow_and_reload(tmp_path, monkeypatch):
                                retrieved_chunks=[{"chunk_id": "c1", "text": "evidence"}],
                                hallucination_report={"method": "nli"})
     fake = SimpleNamespace(config=SURVEY_DEPLOY, query=query,
-                           llm=SimpleNamespace(seed=42, cache_enabled=False, num_ctx=4096))
+                           llm=SimpleNamespace(seed=42, cache_enabled=False, num_ctx=4096),
+                           hallucination_detector=SimpleNamespace(nli_model=SimpleNamespace(
+                               predict=lambda *args, **kw: [[.1, .8, .1]])))
+    # Warmup uses the same response serialization contract as the actual pipeline.
+    original_query = fake.query
+    def serializable_query(question):
+        response = original_query(question)
+        response.model_dump = lambda **kw: {k: v for k, v in vars(response).items() if k != 'model_dump'}
+        return response
+    fake.query = serializable_query
+    manifest = tmp_path / 'manifest.json'
+    manifest.write_text('{}')
+    monkeypatch.setenv('CLOUDRAG_ARTIFACT_MANIFEST', str(manifest))
+    monkeypatch.setenv('CLOUDRAG_BUILD_ID', 'a' * 40)
+    monkeypatch.setenv('CLOUDRAG_MODEL_DIGEST', 'b' * 64)
+    monkeypatch.setattr(prep, 'resident_models', lambda: {'models': [dict(name=prep.MODEL,
+        digest='b' * 64, expires_at=datetime.fromtimestamp(time.time() + 1800, timezone.utc).isoformat())]})
     monkeypatch.setattr(index_loader, "load_hybrid_index", lambda: object())
     monkeypatch.setattr(index_loader, "load_pipeline", lambda *a, **k: fake)
     token = InvitationStore(tmp_path).issue("P01")
@@ -40,6 +58,9 @@ def test_evaluation_full_flow_and_reload(tmp_path, monkeypatch):
     app.text_input[0].set_value(token)
     app.checkbox[0].check()
     _button(app, "Comenzar Evaluacion").click().run()
+    assert not app.exception
+    assert not any(b.label == 'Buscar respuesta' for b in app.button)
+    _button(app, 'Preparar y volver a comprobar').click().run()
     assert not app.exception
     for _ in range(3):
         _button(app, "Buscar respuesta").click().run()
@@ -73,5 +94,5 @@ def test_evaluation_full_flow_and_reload(tmp_path, monkeypatch):
     exported = json.loads((session.get_session_dir() / "full_session.json").read_text(encoding="utf-8"))
     assert len(exported["attempts"]) == len(exported["ratings"]) == 30
     assert all(attempt["answer"] == "Saved answer" for attempt in exported["attempts"])
-    assert len(calls) == 33  # three unrecorded practice questions, no duplicate generation
+    assert len(calls) == 36  # three warmups, three practices, thirty answers; no duplicate generation
     assert not any("System order" in element.value for element in app.markdown)

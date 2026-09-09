@@ -8,8 +8,9 @@ la app, fuera del piloto: revisión 49, diez intentos, siete ratings, sin SUS ni
 exportación. Se conservan los tres errores sin valoración. La enmienda prospectiva
 de timeout y operación caliente está en [WARM_GATE_PREREGISTRATION.md](WARM_GATE_PREREGISTRATION.md);
 las mediciones anteriores no acreditan todavía la nueva configuración.
-La preparación de nube continúa bloqueada: faltan cierre integral, controles limpios
-léxico/semántico y atribución exclusivamente a hardware. El registro vigente está en
+La preparación de nube continúa bloqueada: faltan cierre integral y una nueva
+cohorte homogénea de los tres sistemas contra el criterio caliente aprobado.
+La excepción anterior por hardware fue sustituida por esa enmienda. El registro está en
 [OPERATIONAL_GATE_2026-09-05.md](OPERATIONAL_GATE_2026-09-05.md).
 No se ha desplegado en nube. La evidencia experimental congelada, el corpus, el gold
 y el trabajo académico no forman parte de los cambios.
@@ -186,7 +187,9 @@ está. Para emitir GO deben quedar verificados los cuatro puntos siguientes:
 2. Ejecutar una sesión completa con la app del despliegue objetivo; comprobar acceso,
    recuperación tras desconexión, fuentes y reconstrucción de la sesión exportada.
 3. Medir respuesta completa (incluye NLI) en los tres sistemas, con caché desactivada,
-   cargas frías/calientes y pausas; reportar p50/p95, fallos y hardware. Exigir p95 ≤60 s.
+   cargas frías/calientes y pausas; reportar p50/p95, fallos y hardware. La enmienda
+   exige p95 caliente ≤60 s y cero fallos/abortos/condiciones inválidas en las veinte
+   posiciones calientes de cada sistema. El frío se reporta sin bloquear por latencia.
 4. Confirmar que errores técnicos no entran como valoraciones y que el almacenamiento
    sobrevive reinicios. Emitir GO solo con esa evidencia; no inferirlo de los mocks.
 
@@ -253,7 +256,7 @@ obtuvo 476 pasan/5 excluidas. La app bajo prueba no cambió durante el análisis
 |---|---|
 | Bundle y modelos reales | ✅ VERIFICADO |
 | Sesión real completa | ❌ P900 revisión 49, sin SUS/exportación |
-| p95 <=60 s, tres sistemas frío/caliente | ❌ Híbrido frío 83,24 s; caliente 57,62 s; faltan controles limpios |
+| p95 caliente <=60 s, tres sistemas con receta nueva | ❌ Nueva cohorte homogénea de 120 posiciones pendiente |
 | Resiliencia integral | ⚠️ Persistencia y errores sin rating verificados; cierre/exportación pendientes |
 
 El corte autorizado de AnyDesk, su watchdog y las restauraciones están documentados
@@ -269,3 +272,24 @@ validar la operación preparada y la cohorte nueva. El criterio p95 caliente <=6
 queda fijado en la enmienda, con cero fallos en los tres sistemas. No hay artefactos de nube
 nuevos ni despliegue autorizado. Véase el cierre vigente del registro operativo
 para timestamps, hashes, límites de causalidad y el nuevo fallo UI de 112,00 s.
+
+### Operación preparada (enmienda prospectiva)
+
+El operador valida la invitación antes de entregar el flujo al participante y pulsa
+«Preparar y volver a comprobar». Se cargan y ejercitan los tres pipelines en ese
+proceso, incluyendo una predicción NLI explícita incluso si el calentamiento declina.
+Las operaciones van a `CLOUDRAG_SESSION_DIR/_preparation/` como eventos nuevos;
+no son prácticas, respuestas del participante, ratings ni observaciones de latencia.
+Cada sesión nueva exige preparación propia. No usar un script externo que solo
+cargue Granite como comprobación de auxiliares de Streamlit.
+
+Granite permanece residente 30 minutos, renovados en cada generación. Antes de
+consultar se comprueba identidad y residencia, con al menos 180 s de lease restante.
+Un reinicio, manifiesto/build/digest cambiado o pérdida de residencia bloquea nuevas
+consultas y requiere preparar otra vez. Si cambió la identidad del despliegue,
+reiniciar el proceso antes de preparar para evitar reutilizar cachés antiguas.
+Se registra la invalidación; no se vuelve
+a generar automáticamente ni se oculta esa interrupción. Las respuestas guardadas
+siguen disponibles para valorar sin regenerarlas. «Preparado» acredita inicialización
+y residencia del modelo, no garantiza ausencia de paginación del SO ni un tiempo máximo.
+La lista y memoria simultánea de pipelines son iguales en la nueva medición caliente.

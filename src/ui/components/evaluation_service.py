@@ -41,6 +41,8 @@ def answer_query(session, pipeline_factory, query_shown_ts=None, *, on_started=N
             config.update(seed=pipeline.llm.seed, max_tokens=1024,
                           num_ctx=getattr(pipeline.llm, "num_ctx", None),
                           cache_enabled=pipeline.llm.cache_enabled,
+                          keep_alive=getattr(pipeline.llm, 'default_keep_alive', None),
+                          preparation_id=getattr(pipeline, 'interview_preparation_id', None),
                           http_timeouts={"read": getattr(pipeline.llm, "read_timeout", None) or getattr(pipeline.llm, "timeout", 60),
                                          "connect": 5, "write": getattr(pipeline.llm, "timeout", 60),
                                          "pool": getattr(pipeline.llm, "timeout", 60)},

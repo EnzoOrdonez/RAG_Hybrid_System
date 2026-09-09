@@ -33,6 +33,7 @@ def test_loader_applies_read_override_only_to_participants(monkeypatch, mode, re
         pipeline = index_loader.load_pipeline('hybrid', _hybrid_index=object())
         assert pipeline.llm_manager.read_timeout == read
         assert pipeline.llm_manager.timeout == 60
+        assert pipeline.llm_manager.default_keep_alive == ('30m' if mode == 'participant' else None)
     finally:
         index_loader.load_pipeline.clear()
 
@@ -52,3 +53,18 @@ def test_feedback_uses_persisted_elapsed_and_monotonic_browser_clock():
 def test_feedback_handles_server_clock_rollback_without_negative_display():
     from src.ui.components.wait_feedback import wait_html
     assert 'const initial = 0.0;' in wait_html(-5)
+
+
+@pytest.mark.parametrize('explicit,expected', [(None, '30m'), ('5m', '5m')])
+def test_nonstreaming_chat_renews_residency_and_preserves_explicit_override(monkeypatch, explicit, expected):
+    from src.generation.llm_manager import LLMResponse
+    manager = LLMManager('ollama', 'fake', cache_enabled=False, enforce_timeout=True,
+                         read_timeout=180, default_keep_alive='30m', max_retries=1)
+    calls = []
+    def generate(*args, **kwargs):
+        calls.append(kwargs['keep_alive'])
+        return LLMResponse(text='answer', model='fake', provider='ollama', tokens_input=1,
+                           tokens_output=1, latency_ms=1, from_cache=False)
+    monkeypatch.setattr(manager, '_generate_ollama', generate)
+    manager.generate('question', keep_alive=explicit)
+    assert calls == [expected]

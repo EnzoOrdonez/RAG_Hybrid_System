@@ -43,6 +43,37 @@ def _init_session_state():
         st.session_state.eval_break_start = None
 
 
+def _prepared(session):
+    """Authenticated preparation only; no operator route and no silent inference."""
+    if os.environ.get('CLOUDRAG_MODE', 'participant') != 'participant':
+        return True
+    from src.ui.components.index_loader import get_preparation
+    preparation = get_preparation(str(session_manager.SESSIONS_DIR))
+    if preparation.ready(session.session_id):
+        return True
+    st.info('El sistema necesita preparación antes de continuar. Tu progreso está guardado; avisa al coordinador.')
+    if st.button('Preparar y volver a comprobar'):
+        with FileLock(str(session_manager.SESSIONS_DIR / '_inference.lock'), timeout=0):
+            InvitationStore(session_manager.SESSIONS_DIR).assert_active(session.session_id)
+            try:
+                with st.spinner('Preparando el sistema…'):
+                    preparation.prepare(session.session_id)
+            except (OSError, SessionStorageError):
+                raise
+            except Exception:
+                st.error('No se pudo preparar el sistema. Contacta al coordinador.')
+                return False
+        st.rerun()
+    return False
+
+
+def _session_pipeline(session, system):
+    from src.ui.components.index_loader import get_preparation, load_hybrid_index, load_pipeline
+    if os.environ.get('CLOUDRAG_MODE', 'participant') == 'participant':
+        return get_preparation(str(session_manager.SESSIONS_DIR)).pipeline(system, session.session_id)
+    return load_pipeline(system, _hybrid_index=load_hybrid_index())
+
+
 def _render_login():
     """Step 1: Participant login and consent."""
     st.subheader("Participant Login")
@@ -105,16 +136,16 @@ def _render_training():
 
     # Search button
     if st.session_state.eval_response_text is None:
+        if not _prepared(session):
+            return
         if st.button("Buscar respuesta", key="training_search"):
             feedback = st.empty()
             try:
-                from src.ui.components.index_loader import load_hybrid_index, load_pipeline
                 with FileLock(str(session_manager.SESSIONS_DIR / "_inference.lock"), timeout=0):
                     InvitationStore(session_manager.SESSIONS_DIR).assert_active(session.session_id)
                     with feedback.container():
                         render_wait(time.time())
-                    hybrid_index = load_hybrid_index()
-                    pipeline = load_pipeline("hybrid", _hybrid_index=hybrid_index)
+                    pipeline = _session_pipeline(session, 'hybrid')
                     response = pipeline.query(query)
                 report = response.hallucination_report
                 method = report.get("method") if isinstance(report, dict) else getattr(report, "method", None)
@@ -178,11 +209,11 @@ def _render_evaluation():
         st.error("No se pudo completar la consulta. Puedes reintentar o contactar al coordinador.")
 
     if attempt is None or attempt["status"] == "error":
+        if not _prepared(session):
+            return
         if st.button("Buscar respuesta", key="eval_search", type="primary"):
             def pipeline_factory(system_key):
-                from src.ui.components.index_loader import load_hybrid_index, load_pipeline
-                hybrid_index = load_hybrid_index()
-                return load_pipeline(system_key, _hybrid_index=hybrid_index)
+                return _session_pipeline(session, system_key)
             feedback = st.empty()
             def show_wait(started_at):
                 with feedback.container():

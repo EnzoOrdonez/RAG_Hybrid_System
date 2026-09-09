@@ -74,11 +74,18 @@ def load_pipeline(config_name: str, _hybrid_index=None, llm_model: str = ""):
         max_retries=1,
         timeout=60,
         read_timeout=180 if os.environ.get("CLOUDRAG_MODE", "participant") == "participant" else None,
+        default_keep_alive="30m" if os.environ.get("CLOUDRAG_MODE", "participant") == "participant" else None,
         enforce_timeout=True,
         num_ctx=4096,
         expected_model_digest=os.environ.get("CLOUDRAG_MODEL_DIGEST") or None,
     )
     return RAGPipeline(config=config, hybrid_index=_hybrid_index, llm_manager=llm)
+
+
+@st.cache_resource(show_spinner=False)
+def get_preparation(session_root: str):
+    from src.ui.components.interview_preparation import Preparation
+    return Preparation(Path(session_root) / '_preparation')
 
 
 def warm_model(model: str, keep_alive: str = "30m") -> bool:
