@@ -105,6 +105,27 @@ no UTF-8 reprodujo ambos errores. La captura guarda ahora los bytes íntegros en
 base64 y una vista textual explícitamente escapada, sin depender de la página de
 códigos de Windows ni silenciar pérdidas de evidencia.
 
+El cuarto inicio (`window-real-04/`, build `c52d2dc`) aprobó admisión, completó cinco
+pares y rechazó el brazo observado del sexto por **1.463 eventos perdidos** y cero
+buffers perdidos, según XML y `contrast/telemetry/05.etw/summary.txt`. La guarda
+funcionó; no hay un contraste aprobado ni consultas RAG. Restauración terminada
+el 2026-09-08T10:45:50Z. La suficiencia del búfer es una **hipótesis**, no una causa
+demostrada: se aumenta la reserva solicitada de 64 a 256 buffers de 64 KiB (16 MiB),
+sin eliminar proveedores. El test limita la solicitud a 16-32 MiB; esto no afirma
+la asignación efectiva del kernel ni confunde el BufferSize del ETL fusionado con
+la reserva configurada. Criterios sin relajar: cero pérdidas y diez pares válidos
+con límite superior de interferencia <=5%. La siguiente ventana vuelve a medir;
+no completa ni mezcla los cinco pares anteriores.
+
+VERIFICADO el 2026-09-09T00:20:59Z: `wpr -status collectors -details` informó modo
+File, Buffer Size 64 KB y Number of Buffers 256 para la instancia propia de
+`capture-buffer-probe-01/`. En esta versión local sí se aplica la solicitud,
+aunque la página Microsoft de `Buffers` limita su descripción al modo memoria.
+Se conserva stdout binario y vista textual en `command-*.json`; el smoke consulta
+la configuración activa y detiene su captura en `finally`. Referencias del ajuste:
+[Sessions](https://learn.microsoft.com/en-us/windows-hardware/test/wpt/sessions) y
+[Buffers](https://learn.microsoft.com/en-us/windows-hardware/test/wpt/buffers).
+
 ## Semántica del timeout (VERIFICADO, sin cambio de la app)
 
 `tests/test_http_timeout_semantics.py` verifica con HTTP real de loopback que un
