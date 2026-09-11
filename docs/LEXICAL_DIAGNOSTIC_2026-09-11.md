@@ -33,6 +33,49 @@ pareado con instrumentación, 10 pares y límite superior unilateral bootstrap d
 observaciones que interpolan el p95 total, sin sumar percentiles independientes
 ni llamar ahorro causal al tiempo observado. La mejora permanece sin autorizar.
 
+### Defecto detectado durante la primera ventana, antes de los slots
+
+En `b47af43`, el coordinador llamaba `Preparation.pipeline()` antes de
+`measure_traced_attempt`. El ejecutor histórico hace esa selección dentro de su
+callback cronometrado. Aunque ambas rutas verifican residencia, quitar ese costo
+del total impide comparar el mismo reloj. La revisión lo detectó después del
+contraste sintético y antes de iniciar las cuarenta posiciones. No se corrige
+sumando retrospectivamente una constante ni reinterpretando el umbral.
+
+Se pidió restauración inmediata; terminó a las 13:08:36Z. La ventana se consumió.
+Se observaron cero request/result de posiciones diagnósticas y una preparación
+iniciada sin cierre. No se atribuye duración de inferencia a esa interrupción.
+La corrección mantendrá la instalación de probes fuera del reloj, pero ejecutará
+la selección/validación de preparación dentro del callback, como la compuerta.
+Una regresión de reloj determinista exigirá que 2 s de selección + 3 s de consulta
+produzcan 5 s de respuesta completa. No se abre otra ventana sin autorización.
+
+Evidencia VERIFICADA en la raíz de esta segunda tanda:
+
+- `proof/deadline/selftest-passed.json`, 13:00:16Z, y
+  `proof/controller/selftest-passed.json`, 13:00:23Z: watchdog independiente,
+  servicios simulados; SHA del supervisor
+  `3383b0d7c5214bbc7d05a83a8a84826f22ee7f48629481d8728cf991472b0a5e`.
+- `window-01/overlay-relaunch-proof.json`: tras el corte a las 13:00:45Z apareció
+  PID 30888, hijo de nvcontainer 30956, hijo del PID 8616 del servicio autorizado.
+  Solo entonces se desactivó temporalmente NvContainerLocalSystem.
+- `window-01/admission-before-contrast/result.json`: admisión aprobada.
+- `window-01/contrast/result.json`, 13:07:21Z: diez pares, mediana -0,0379 %,
+  límite superior unilateral 95 % de 0,1899 %, umbral 5 %. Es contraste sintético,
+  no una medición de latencia RAG ni un permiso para descontar tiempos.
+- `restore-request.json` y `window-01/restored.json`, 13:08:36Z: restauración
+  real completada con AnyDesk intacto. El launcher registró `restored=false`
+  cinco segundos antes mientras la restauración independiente seguía trabajando;
+  no se sobrescribe ese registro intermedio ni se confunde con el cierre posterior.
+- A las 13:09:43Z se observaron cinco procesos NVIDIA Overlay nuevos (3080,
+  3120, 4312, 13088, 29076), NvContainer en Running y NVDisplay en Running;
+  AnyDesk en Stopped. Los PID son evidencia temporal, no identificadores reutilizables.
+- `clock-red.txt` conserva el fallo de regresión previo a la corrección.
+
+No se creó `LEXICO_P95_PREPRREGISTRO_2026-09-11.md`: falta el contraste RAG
+prospectivo que debe sustentar sus apartados. Los resultados históricos siguen
+siendo hipótesis candidatas. Tampoco se ejecutaron optimizaciones, P2s ni nube.
+
 ## Baseline y crítica antes de implementar
 
 VERIFICADO: baseline `7c449bf`, rama `fix/interview-readiness`; 507 tests pasan,

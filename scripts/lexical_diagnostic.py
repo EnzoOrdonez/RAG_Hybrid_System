@@ -22,7 +22,7 @@ def text_metrics(text):
     return dict(chars=len(text), utf8_bytes=len(encoded), sha256=hashlib.sha256(encoded).hexdigest())
 
 
-def measure_traced_attempt(root, metadata, pipeline, observer=None, validate_after=None):
+def measure_traced_attempt(root, metadata, pipeline, observer=None, validate_after=None, before_query=None):
     """Use the existing durable response clock and publish probes with its terminal record.
 
     Preparation/admission belong to the caller. This refuses cold models, but cannot
@@ -36,6 +36,8 @@ def measure_traced_attempt(root, metadata, pipeline, observer=None, validate_aft
     with PipelineTrace(pipeline) as trace:
         def work():
             try:
+                if before_query is not None and before_query() is not pipeline:
+                    raise ValueError('Prepared pipeline identity changed before query')
                 response = pipeline.query(metadata['query']['question']).model_dump(mode='json')
                 report = response.get('hallucination_report') or {}
                 error = response.get('error')
@@ -43,6 +45,7 @@ def measure_traced_attempt(root, metadata, pipeline, observer=None, validate_aft
                                   or report.get('method') in ('mixed', 'keyword_fallback')):
                     error = 'incomplete_response_or_verification'
                 return dict(status='error' if error else 'success', error=error, response=response,
+                            preparation_check=getattr(pipeline, 'interview_preparation_check', None),
                             diagnostic_trace=trace.export())
             except Exception as exc:
                 return dict(status='error', error=f'{type(exc).__name__}: {exc}',

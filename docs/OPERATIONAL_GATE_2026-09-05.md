@@ -710,6 +710,19 @@ artefactos de nube ni desplegado recursos como parte de esta enmienda.
 
 ## Seguimiento del bloqueo léxico: 2026-09-11
 
+**Segunda tanda:** `b47af43` añadió el coordinador emparejado y perfil NVIDIA.
+Las pruebas independientes del watchdog pasaron a las 13:00:16Z y 13:00:23Z;
+corte a las 13:00:45Z. Se verificó una reaparición del overlay descendiente de
+NvContainer antes de desactivar ese servicio. Admisión aprobada y contraste
+combinado de diez pares aprobado (límite superior 0,1899 %). Se descubrió una
+discrepancia en el límite del cronómetro y se ordenó restaurar antes de iniciar
+los slots. Restauración completada a las 13:08:36Z; AnyDesk quedó apagado e intacto.
+Cero request/result diagnósticos; preparación iniciada e interrumpida, sin duración
+imputada. La tanda no confirma la hipótesis ni permite pre-registrar una mejora
+causalmente sustentada. Raíz nueva: `C:/CloudRAG/lexical-clean-20260911T1245Z/`.
+La autorización puntual se consumió; otra ventana requiere autorización explícita.
+Detalles y corrección del coordinador en el diagnóstico enlazado abajo.
+
 Continúa **NO-GO**. Se inició instrumentación externa sin cambiar la app ni la
 receta medida. La reconstrucción histórica muestra más tokens/claims en las dos
 posiciones que forman la cola léxica; todavía no prueba causalidad exclusiva.

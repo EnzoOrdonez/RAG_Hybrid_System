@@ -205,3 +205,24 @@ def test_real_stage_tracker_still_times_and_records_failure_boundaries():
     assert [r['name'] for r in stages] == ['retrieval', 'generation']
     assert stages[0]['status'] == 'success' and stages[1]['status'] == 'error'
     assert all(r['started_at'] <= r['finished_at'] and r['elapsed_s'] >= 0 for r in stages)
+
+
+def test_preparation_selection_is_inside_durable_response_clock(tmp_path, monkeypatch):
+    from scripts.lexical_diagnostic import measure_traced_attempt
+    from scripts import measure_interview_gate as gate
+    subject = pipeline()
+    tick = [0.0]
+    monkeypatch.setattr(gate.time, 'perf_counter', lambda: tick[0])
+    def select():
+        tick[0] += 2.0
+        subject.interview_preparation_check = {'resident': 'verified_inside_clock'}
+        return subject
+    def query(question):
+        tick[0] += 3.0
+        return SimpleNamespace(model_dump=lambda **kwargs: dict(answer='complete', confidence='HIGH'))
+    subject.query = query
+    row = measure_traced_attempt(tmp_path,
+        dict(system='lexical', phase='warm', index=0, query={'question': 'question'}),
+        subject, before_query=select)
+    assert row['elapsed_s'] == 5.0
+    assert row['preparation_check'] == {'resident': 'verified_inside_clock'}

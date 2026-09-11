@@ -56,8 +56,10 @@ def prepare(tmp_path, monkeypatch):
         timeout=60, read_timeout=180, default_keep_alive='30m', _ollama_client=object()),
         config=SimpleNamespace(model_dump=lambda **kwargs: {}))
     preparation = SimpleNamespace(prepare=lambda scope: {'id': 'ready'}, ready=lambda scope: True,
-        pipeline=lambda system, scope: subject, last_check={'resident': True})
+        pipeline=lambda system, scope: subject, pipelines={'hybrid': subject, 'lexical': subject},
+        last_check={'resident': True})
     def measure(root, metadata, pipeline, **kwargs):
+        assert kwargs['before_query']() is pipeline
         captured.append((metadata['system'], metadata['index']))
         record = dict(metadata, status='success', elapsed_s=1)
         gate.write_new(root / 'attempts' / str(len(captured)) / 'result.json', record)

@@ -79,7 +79,9 @@ def execute(root, protocol, preparation, observer_factory=observe.Observer):
         check_protocol(protocol)
         if not preparation.ready(scope):
             raise RuntimeError('Preparation residency lost')
-        pipeline = preparation.pipeline(system, scope)
+        # Install probes on the already-loaded object without moving the actual
+        # preparation selection/check out of the gate's response clock.
+        pipeline = preparation.pipelines[system]
         policy = gate.recipe(protocol)
         llm = pipeline.llm
         if (llm.cache_enabled or llm.seed != 42 or llm.max_retries != 1 or llm.timeout != policy['write']
@@ -100,9 +102,10 @@ def execute(root, protocol, preparation, observer_factory=observe.Observer):
         row = measure_traced_attempt(root, dict(system=system, phase='warm', index=index,
             query=protocol['queries'][index], warmup=False, consumes_slot=True,
             build_id=protocol['build_id'], configuration=pipeline.config.model_dump(mode='json'),
-            preparation_id=receipt['id'], preparation_check=preparation.last_check,
+            preparation_id=receipt['id'], preparation_precheck=preparation.last_check,
             http_trace_path=str(http_root), protocol_sha256=gate.digest(root / 'source-manifest.json')),
-            pipeline, observer=observer, validate_after=lambda: check_protocol(protocol))
+            pipeline, observer=observer, validate_after=lambda: check_protocol(protocol),
+            before_query=lambda: preparation.pipeline(system, scope))
         print({k: row.get(k) for k in ('system', 'index', 'status', 'elapsed_s', 'conditions_invalid')}, flush=True)
         if row['status'] != 'success' or row.get('conditions_invalid') or row.get('environment_invalid'):
             raise RuntimeError('Diagnostic failed/invalid; preserve position and restore window')

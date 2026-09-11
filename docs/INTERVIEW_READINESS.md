@@ -1,8 +1,11 @@
 # Preparación técnica de Evaluation Mode
 
-**Seguimiento 2026-09-11:** diagnóstico léxico en curso, sin nueva inferencia ni
-optimización aplicada. La admisión falló por NVIDIA Overlay; AnyDesk sigue activo.
-El veredicto siguiente permanece vigente. Véase el
+**Seguimiento 2026-09-11, segunda tanda:** pasó la admisión sin overlays y el
+contraste combinado (límite superior 0,19 %). Se abortó antes de los slots por una
+discrepancia del cronómetro del coordinador; NVIDIA quedó restaurado y AnyDesk
+apagado e intacto, según la decisión actual del usuario. Cero posiciones
+diagnósticas; no hay optimización aplicada ni hipótesis confirmada. La ventana
+autorizada se consumió. El veredicto siguiente permanece vigente. Véase el
 [diagnóstico y evidencia parcial](LEXICAL_DIAGNOSTIC_2026-09-11.md).
 
 **NO-GO para entrevistas (cierre 2026-09-10, Lima). VERIFICADO:** la cohorte nueva
