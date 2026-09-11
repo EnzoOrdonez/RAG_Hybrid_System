@@ -1,9 +1,11 @@
 # Ventana local administrada (prueba técnica)
 
-**Estado al 2026-09-09:** ventana real 05 completada y restaurada; contraste
-aprobado, 40 respuestas válidas sin timeouts. El p95 híbrido frío sigue >60 s.
-Esto no cierra la sesión P900 ni habilita nube. Resultados vigentes al final del
-[registro operativo](OPERATIONAL_GATE_2026-09-05.md#cierre-del-piloto-y-reanudación-de-p900-2026-09-09).
+**Estado al 2026-09-10, Lima:** nueva cohorte preparada completa, 120 posiciones;
+119 válidas y una inválida por Brave, sin errores de generación/abortos. Las ocho
+ventanas quedaron restauradas, incluidas dos interrumpidas. P900 completó SUS y
+exportación. Continúa NO-GO por p95 léxico caliente de 65,75 s. Resultados y rutas:
+[registro operativo](OPERATIONAL_GATE_2026-09-05.md#cierre-de-la-cohorte-preparada-y-p900-2026-09-10-lima).
+Los registros de ventana real 01–05 que siguen son históricos y permanecen separados.
 
 ## Crítica y criterios previos
 
@@ -180,7 +182,7 @@ nombre no pertenece a la lista de exclusión implementada: no se inventa una cau
 ni se reescriben los estados de la cohorte para ocultarlo. Sus efectos no están
 aislados; esta limitación impide interpretar la admisión como prueba causal total.
 
-## Semántica del timeout (VERIFICADO, sin cambio de la app)
+## Registro histórico de semántica del timeout (antes de la enmienda de 180 s)
 
 `tests/test_http_timeout_semantics.py` verifica con HTTP real de loopback que un
 silencio de lectura agota `httpx.ReadTimeout`, que bytes sucesivos reinician la

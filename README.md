@@ -139,9 +139,14 @@ Query → Normalization + Expansion
 For the participant application, use the Python 3.14 environment, hashed dependency
 lock and artifact provisioning steps in [Interview readiness](docs/INTERVIEW_READINESS.md).
 Installing packages alone does not provision the corpus, indices or model snapshots.
-Interview gate (2026-09-09): **NO-GO**. The controlled hybrid pilot completed 40
-responses, but cold p95 was 83.24 s and the real P900 session remains incomplete.
-See the runbook for evidence, memory diagnosis and the blocked cloud preparation.
+Interview gate (2026-09-10, Lima): **NO-GO**. The new 120-position cohort is complete:
+warm p95 is 51.57 s hybrid, 65.75 s lexical and 45.09 s semantic. Lexical exceeds
+the preregistered 60 s limit. P900 completed 30 technical ratings, synthetic SUS and
+export; its three historical errors have no ratings. Mandatory preparation and
+participant read timeout 180 s with elapsed feedback are implemented and verified.
+Cold latency is reported separately and does not block under the approved protocol.
+See the runbook for hashes, one invalid cold observation, citation-display findings
+and the still-blocked cloud preparation. No public deployment has been prepared.
 The recipe below is the historical CLI environment, not the interview deployment.
 
 ```bash

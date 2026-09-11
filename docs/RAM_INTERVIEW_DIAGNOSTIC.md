@@ -1,4 +1,4 @@
-# RAM y latencia: diagnóstico local del 2026-09-09
+# RAM y latencia: diagnóstico local (actualizado 2026-09-10, Lima)
 
 **VERIFICADO:** el piloto de 40 consultas híbridas terminó sin errores de respuesta.
 **Conclusión:** estos datos no justifican comprar 32 GB como solución al p95.
@@ -86,5 +86,44 @@ mitigar competencia de RAM al mantener aplicaciones abiertas; no elimina el
 offload causado por capacidad de VRAM. **ESTIMADO:** no hay un porcentaje defendible
 de aceleración con estos datos. Para cuantificarlo haría falta una comparación
 pareada con 16/32 GB y mismo resto del entorno, sin comprar ni cambiar hardware
-por iniciativa del agente. Sigue pendiente el cierre real de la app; véase
-[la compuerta](OPERATIONAL_GATE_2026-09-05.md#cierre-del-piloto-y-reanudación-de-p900-2026-09-09).
+por iniciativa del agente. El cierre real de P900 quedó completado en la ampliación
+siguiente; no elimina el incumplimiento de latencia de la nueva cohorte.
+
+## Ampliación: cohorte preparada de tres sistemas
+
+**VERIFICADO:** `C:/CloudRAG/warm-protocol-20260909T152518Z/final-memory-analysis-01.json`,
+build medido `b6f3fea006ce2ae2555bd63ffc4a1e78c37f703a`, análisis generado
+2026-09-10T20:37:58Z, SHA-256
+`2625c89066164580f0ea6718d4075849de70f27464bf8a7e23c5eaa9e5e6df42`.
+Se excluyen calentamientos y una respuesta fría inválida por Brave. Mismo equipo,
+driver 616.64 y Ollama 0.22.1; nueva receta read=180 s, keep_alive=30m y tres
+pipelines preparados en el mismo proceso caliente. No mezclar con el piloto anterior.
+
+| Sistema/condición | n válido | RAM disponible mínima durante chat, GiB | Mediana de fallos duros globales/s por chat |
+|---|---:|---:|---:|
+| Híbrido frío | 20 | 3,12 | 25,36 |
+| Híbrido caliente | 20 | 2,83 | 1,59 |
+| Léxico frío | 20 | 5,71 | 4,96 |
+| Léxico caliente | 20 | 3,35 | 0,83 |
+| Semántico frío | 19 | 4,02 | 25,06 |
+| Semántico caliente | 20 | 3,72 | 0,87 |
+
+El léxico caliente incumplió p95 (65,75 s). Sus dos respuestas más lentas:
+
+| Consulta | Total s | Generación s | NLI s | Retrieval s | RAM mínima chat GiB | Fallos duros/s chat |
+|---|---:|---:|---:|---:|---:|---:|
+| q016 | 72,29 | 52,44 | 17,75 | 0,032 | 3,62 | 0,38 |
+| q057 | 65,40 | 42,70 | 20,61 | 0,042 | 3,55 | 2,36 |
+
+`ollama ps` mostró 21 % CPU / 79 % GPU en esos chats; GPU libre 518 MiB, temperatura
+máxima 61/58 °C y sin flags térmicos activos muestreados. El compromiso rondó
+31,9 GiB, aproximadamente 70 % del límite, no 31,9 GiB residentes en RAM física.
+Los costos de generación y NLI están medidos; su causa exclusiva en offload,
+RAM o throttling CPU **no está aislada**. Los picos globales de fallos duros no
+demuestran paginación de Ollama por falta de RAM.
+
+**Decisión:** no hay evidencia para recomendar comprar 32 GB como solución del
+p95 ni un porcentaje defendible de mejora (**ESTIMADO no disponible**). Puede
+ofrecer margen de multitarea (**SUPUESTO**), pero requiere contraste antes/después
+para medir su beneficio. La comparación con 610.62 o la cohorte 616.64 contaminada
+no identifica un efecto causal del driver: cambiaron condiciones y receta.

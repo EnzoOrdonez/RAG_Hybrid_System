@@ -1,21 +1,24 @@
 # Preparación técnica de Evaluation Mode
 
-**NO-GO para entrevistas (2026-09-09).** El piloto controlado con driver 616.64
-terminó con 40 respuestas híbridas completas y cero fallos: p95 frío 83,24 s,
-caliente 57,62 s. Pasaron admisión y contraste del observador; AnyDesk y mecanismos
-NVIDIA fueron restaurados. P900 volvió a fallar en consulta 8 al recuperarla desde
-la app, fuera del piloto: revisión 49, diez intentos, siete ratings, sin SUS ni
-exportación. Se conservan los tres errores sin valoración. La enmienda prospectiva
-de timeout y operación caliente está en [WARM_GATE_PREREGISTRATION.md](WARM_GATE_PREREGISTRATION.md);
-las mediciones anteriores no acreditan todavía la nueva configuración.
-La preparación de nube continúa bloqueada: faltan cierre integral y una nueva
-cohorte homogénea de los tres sistemas contra el criterio caliente aprobado.
-La excepción anterior por hardware fue sustituida por esa enmienda. El registro está en
-[OPERATIONAL_GATE_2026-09-05.md](OPERATIONAL_GATE_2026-09-05.md).
-No se ha desplegado en nube. La evidencia experimental congelada, el corpus, el gold
-y el trabajo académico no forman parte de los cambios.
-El usuario declaró uso con batería y aperturas de Brave durante esa cohorte: sus
-latencias no acreditan capacidad local bajo condiciones controladas.
+**NO-GO para entrevistas (cierre 2026-09-10, Lima). VERIFICADO:** la cohorte nueva
+terminó sus 120 posiciones: p95 caliente híbrido **51,57 s**, léxico **65,75 s** y
+semántico **45,09 s**. El léxico incumple el umbral de 60 s. Hubo cero errores de
+generación/abortos y una respuesta fría inválida por aparición de Brave, conservada
+y excluida de percentiles sin reemplazo. Los tres calentamientos están separados.
+P900 completó 30 ratings, SUS sintético neutral y exportación, revisión 168; sus tres
+errores históricos permanecen sin valoración. Las 23 respuestas nuevas pasaron con
+lectura 180 s y preparación registrada. Reloj y avisos 60/120 s verificados.
+
+Se aplicó [el pre-registro](WARM_GATE_PREREGISTRATION.md) sin mover el criterio:
+preparación obligatoria de los tres pipelines antes de cada participante; el frío
+se informa sin bloquear por latencia. **Fase B continúa bloqueada**: no hay GO ni
+excepción por hardware vigente. El costo exclusivo de hardware no está aislado.
+La UI conserva un defecto de presentación de citas `None`/`N/A`, registrado como
+P2; no se oculta ni se altera la respuesta original. Evidencia, límites y cierre:
+[registro operativo](OPERATIONAL_GATE_2026-09-05.md#cierre-de-la-cohorte-preparada-y-p900-2026-09-10-lima).
+No se preparó ni desplegó nube; evidencia experimental, corpus, gold y trabajo
+académico permanecieron fuera del alcance. Los registros anteriores de este
+documento son históricos, no resultados acumulables con esta cohorte.
 
 ## Entorno instalable
 
@@ -243,7 +246,7 @@ a AnyDesk; falta confirmar si el usuario puede cerrarlo sin perder acceso remoto
 Evidencia: `C:/CloudRAG/clean-pilot-20260907T203624Z/observer-contrast-01/` y el informe
 operativo. En ese prechequeo no se ejecutaron ventanas de admisión ni consultas RAG.
 
-### Evidencia vigente del 2026-09-09
+### Evidencia histórica del 2026-09-09 (sustituida por el cierre siguiente)
 
 VERIFICADO: `C:/CloudRAG/managed-pilot-20260908T012621Z/window-real-05/` contiene
 manifiesto verificado, dos admisiones aprobadas, contraste de diez pares aprobado,
@@ -293,3 +296,36 @@ a generar automáticamente ni se oculta esa interrupción. Las respuestas guarda
 siguen disponibles para valorar sin regenerarlas. «Preparado» acredita inicialización
 y residencia del modelo, no garantiza ausencia de paginación del SO ni un tiempo máximo.
 La lista y memoria simultánea de pipelines son iguales en la nueva medición caliente.
+
+### Cierre vigente: 2026-09-10 Lima / 2026-09-11 UTC
+
+Raíz externa `C:/CloudRAG/warm-protocol-20260909T152518Z/` (R). Build medido y app
+`b6f3fea006ce2ae2555bd63ffc4a1e78c37f703a`, driver 616.64, Ollama 0.22.1,
+Granite con digest `444af1c4b2fedd6b54041aca558e7300b0b3d5c0468c44619126240323ba2852`.
+`R/final-memory-analysis-01.json` comprueba hashes de la cohorte completa y conserva
+fallos/condiciones inválidas aparte. No se mezclan las cohortes históricas.
+
+| Compuerta | Resultado VERIFICADO | Evidencia en R |
+|---|---|---|
+| Bundle e identidad | ✅ Verificados en cada ventana | `deployment-manifest.json`, `cohort/source-manifest.json`, logs `verify-*` de ventanas |
+| Sesión real completa | ✅ P900: 30 ratings, SUS técnico, exportación y checkpoint; revisión 168 | `p900-ui-evidence-final-01.json`, `p900-export-reconstruction-01.json` |
+| Tres p95 calientes <=60 s y cero fallos/inválidas | ❌ Léxico 65,75 s; híbrido/semántico pasan | `window-semantic-warm-01/payload-complete.json` |
+| Resiliencia integral | ✅ Errores sin rating, persistencia, exportación y preparación perdida | Reconstrucción anterior, eventos `_preparation/` externos y pruebas históricas de desconexión/reinicio |
+
+La app de P900 fue detenida antes de reconstruir el checkpoint desde otro proceso;
+los hashes de los ocho archivos no cambiaron durante la comprobación. El analizador
+acepta una sola P900 completa. SUS=50 es resultado de diez valores sintéticos 3,
+**no una medición de usabilidad humana**. Se conservan dos pausas largas: la pérdida
+de preparación bloqueó consultas antes de crear un intento y exigió preparar de nuevo.
+No interpretar la sesión técnica como una entrevista continua ni usar sus tiempos
+en los percentiles de la cohorte.
+
+El reloj real de P900 mostró el aviso de 60 s durante inferencia. El aviso de 120 s
+se comprobó reutilizando el componente real en Streamlit con bloqueo síncrono de
+125 s, sin modelos ni reloj simulado: `wait-blocking-probe-result-01.json` conserva
+muestras a 02:00/02:02/02:04 antes de terminar el bloqueo. Se cerraron ambas apps y
+se comprobaron servicios restaurados en `p900-and-probe-stop-01.json`.
+
+No habilitar entrevistas ni Fase B a partir de este cierre. Resolver el p95 léxico
+requiere una propuesta y nueva validación prospectiva; no repetir solo consultas
+lentas ni descartar respuestas válidas. La nota UX y el criterio permanecen fijos.

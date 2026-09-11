@@ -1,9 +1,10 @@
 # Compuerta local: registro de ejecución
 
-**Estado vigente: NO-GO (2026-09-09); Fase B bloqueada.** El piloto controlado
-completó 40 respuestas, pero el p95 frío fue 83,24 s. P900 volvió a fallar al
-recuperar la consulta 8; sigue sin SUS/exportación. Las secciones anteriores al
-[cierre actual](#cierre-del-piloto-y-reanudación-de-p900-2026-09-09) conservan la
+**Estado vigente: NO-GO (2026-09-10, Lima); Fase B bloqueada.** La nueva cohorte
+completó 120 posiciones y P900 terminó SUS/exportación. El p95 léxico caliente
+de 65,75 s incumple el criterio prospectivo de 60 s. Híbrido y semántico calientes
+pasan; el frío se informa sin bloquear por latencia. Las secciones anteriores al
+[cierre actual](#cierre-de-la-cohorte-preparada-y-p900-2026-09-10-lima) conservan la
 cronología histórica y no describen el estado más reciente.
 
 ## Crítica previa a la corrección
@@ -706,3 +707,217 @@ acotada por ID de ventana. No se repiten ventanas fallidas a ciegas.
 **NO-GO pendiente de validación nueva:** estas implementaciones no completan P900
 ni acreditan todavía el criterio caliente de los tres sistemas. No se han preparado
 artefactos de nube ni desplegado recursos como parte de esta enmienda.
+
+## Cierre de la cohorte preparada y P900: 2026-09-10 Lima
+
+### Pre-registro y trazabilidad
+
+**VERIFICADO:** ejecutor y app `b6f3fea006ce2ae2555bd63ffc4a1e78c37f703a`.
+Raíz R: `C:/CloudRAG/warm-protocol-20260909T152518Z/`. Se mantuvieron sin cambios
+el ejecutor, fuentes, paquete de modelos y pre-registro durante las 120 posiciones.
+La documentación de cierre es posterior; no cambia el build medido.
+
+Crítica aplicada: declarar caliente como condición operativa solo es comprobable
+si la app prepara los tres pipelines en su propio proceso y detecta pérdida de
+residencia. Ese contrato se implementó antes de medir. Veinte posiciones por celda
+permiten aplicar el criterio descriptivo acordado, no garantizar el p95 poblacional
+ni identificar por sí solas un efecto causal del driver. No seleccionar reintentos
+favorables, descontar observador ni modificar umbral después de conocer resultados.
+El pre-registro exige cero fallos/abortos/inválidas y p95 <=60 s en cada celda caliente;
+el frío se completa y reporta sin bloquear por su latencia. Fase B solo con GO.
+
+| Identidad | Valor VERIFICADO |
+|---|---|
+| Equipo | i5-12450H, 16 GB RAM, RTX 3060 Laptop 6 GB |
+| Driver / Ollama | 616.64 / 0.22.1 |
+| Granite | `granite4.1:8b`, digest `444af1c4b2fedd6b54041aca558e7300b0b3d5c0468c44619126240323ba2852` |
+| Receta | participante, offline, seed 42, temperatura 0, contexto 4096, máximo 1024 tokens, caché desactivada, auxiliares CPU |
+| HTTP / residencia | read 180 s, connect 5 s, write/pool 60 s; keep_alive 30m |
+| SHA-256 manifiesto bundle | `0bb1957f6ce0426214c4ca121f162638db0947e9f95b22fc214fad7034caec10` |
+| SHA-256 manifiesto cohorte | `fca9054866656cfb801c040e6a673924836386efcad8d3edb255b15021b70c40` |
+| SHA-256 pre-registro | `81b5b27f805089c2b57cdcbc308d39c19809a5e6f35c59f1cb10b377fcd82258` |
+
+El bundle se verificó en cada ventana. Las muestras válidas acreditan AC, plan
+efectivo y ausencia de las cargas excluidas según el observador; no ausencia
+absoluta de actividad del SO. `final-memory-analysis-01.json`, generado
+2026-09-10T20:37:58Z, verifica hashes de resultados, journals, telemetría, HTTP y
+capturas ETW. SHA-256 `2625c89066164580f0ea6718d4075849de70f27464bf8a7e23c5eaa9e5e6df42`.
+
+### Latencias completas de la receta nueva
+
+Respuesta completa: retrieval + generación + NLI y costos externos al cronómetro
+interno. Frío: proceso nuevo y descarga de Granite, conservando caché de archivos
+del SO. Caliente: tres pipelines preparados en el mismo worker y residencia
+comprobada por consulta. Los tres intentos de preparación contienen nueve consultas
+y nueve probes NLI explícitos en total; están fuera de estas 120 posiciones.
+
+| Sistema | Condición | Posiciones | n válido | p50 s | p95 s | Errores/abortos | Inválidas |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Híbrido | Frío | 20 | 20 | 49,30 | 83,86 | 0 / 0 | 0 |
+| Híbrido | Caliente | 20 | 20 | 28,97 | 51,57 | 0 / 0 | 0 |
+| Léxico | Frío | 20 | 20 | 43,92 | 79,58 | 0 / 0 | 0 |
+| Léxico | Caliente | 20 | 20 | 18,67 | 65,75 | 0 / 0 | 0 |
+| Semántico | Frío | 20 | 19 | 39,71 | 72,31 | 0 / 0 | 1 |
+| Semántico | Caliente | 20 | 20 | 19,89 | 45,09 | 0 / 0 | 0 |
+
+Cierre del ejecutor: `window-semantic-warm-01/payload-complete.json`,
+2026-09-10T12:44:51Z, `cohort_complete=true`, `report.passed=false`.
+Las 120 respuestas terminaron, pero solo 119 entran en percentiles. Fallos técnicos
+0/120; condiciones inválidas 1/120 (0,83 %), reportadas aparte. No convertir una
+duración inválida en cero ni sustituir su posición.
+
+### Incidencias y restauración
+
+1. `window-semantic-cold-01` falló antes de iniciar la posición 2 por la guarda
+   de descarga de Granite: no consumió un intento de consulta. Los logs muestran
+   fallos simultáneos de GPU discovery, sin demostrar causalidad exclusiva.
+   En Ollama 0.22.1, `expireRunner` programa la descarga y el HTTP 200 no espera
+   necesariamente a que `/api/ps` quede vacío ([routes.go](https://github.com/ollama/ollama/blob/v0.22.1/server/routes.go#L330),
+   [sched.go](https://github.com/ollama/ollama/blob/v0.22.1/server/sched.go#L857)).
+   `unload-diagnostic-01/result.json` (2026-09-10T11:18:22Z) verificó precarga GPU
+   sin generación y descarga completa. Se reanudó sin cambiar la guarda ni receta;
+   sigue siendo una limitación operativa a corregir antes de otra cohorte.
+2. `window-semantic-cold-02`: Brave apareció durante el índice 7; primera muestra
+   2026-09-10T11:36:38Z, intento `d56a21dac9e943bea15ac28b03863e57`, 62,4932 s.
+   Se conservó la respuesta como inválida y se pausó. `brave-interruption-01.json`
+   conserva procesos, timestamps y hashes. No se cerró Brave programáticamente.
+   Ausencia verificada antes de `semantic-final-start.json` a las 11:51:32Z;
+   nueva admisión, sin reemplazar el índice 7. Presencia de Brave invalida el
+   control acordado; no cuantifica su efecto causal en esa duración.
+
+Las ocho ventanas tienen `restored.json` real, con snapshots y acciones en
+`window.json`/`events/`. AnyDesk solo se detuvo en las dos ventanas híbridas;
+las demás usaron `KeepAnyDesk` y conservaron el acceso remoto. Las restauraciones UTC:
+
+| Ventana | Restauración UTC |
+|---|---|
+| hybrid-cold-01 | 2026-09-09T21:16:40Z |
+| hybrid-warm-01 | 2026-09-10T01:59:32Z |
+| lexical-cold-01 | 2026-09-10T02:37:21Z |
+| lexical-warm-01 | 2026-09-10T03:05:38Z |
+| semantic-cold-01 | 2026-09-10T03:17:13Z |
+| semantic-cold-02 | 2026-09-10T11:38:32Z |
+| semantic-cold-03 | 2026-09-10T12:16:53Z |
+| semantic-warm-01 | 2026-09-10T12:44:56Z |
+
+Las dos ventanas finales aprobaron contrastes de diez pares: límite superior
+unilateral 95 % de interferencia 0,1341 % / 0,0681 %, frente al 5 % fijado.
+La restauración no demuestra que el usuario haya leído el aviso o se haya reconectado.
+
+### P900, timeout y cierre de resiliencia
+
+Sesión ficticia `5f98cae82a544089a50616789f5095fa` bajo
+`C:/Users/enziz/AppData/Local/Temp/cloudrag-technical-20260905-routing/`.
+App del build medido; inicio `p900-streamlit-180-start-01.json`,
+2026-09-10T20:39:10Z. Retomó revisión 49, consulta 8 de A, tres prácticas conservadas.
+Terminó en revisión **168**, estado `complete`, **33 intentos / 30 ratings / 3 errores
+históricos sin rating**. Las 23 respuestas nuevas terminaron sin fallos, con lectura
+180 s y configuración/preparación persistidas. Diez ratings por sistema.
+
+`p900-ui-evidence-final-01.json` conserva acceso por token, navegación de operador
+ausente, fuentes abiertas, valoraciones, SUS y pantalla final. No se publica el token.
+SUS global: diez respuestas sintéticas neutrales 3, score 50; respuestas abiertas
+marcadas **PRUEBA TECNICA**. No es evidencia de usabilidad humana.
+
+Dos pausas prolongadas agotaron residencia: invalidaciones 2026-09-10T22:26:17Z
+y 2026-09-11T01:33:48Z. La app exigió preparar antes de crear nuevos intentos;
+progreso intacto. Tres preparaciones completas y dos invalidaciones en `_preparation/`.
+Estas pausas y configuraciones históricas impiden tratar P900 como sesión homogénea
+de latencia o entrevista humana continua. No se mezcló con la cohorte.
+
+La lectura 180 s no es un deadline total. Consulta 8 de A completó en 117,8537 s;
+el navegador mostró el aviso de 60 s durante inferencia. La prueba separada
+`wait-blocking-probe-01.py` reutilizó `render_wait` real con bloqueo síncrono de
+125 s, sin modelos ni reloj simulado. `wait-blocking-probe-result-01.json` demuestra
+aviso de 120 s a 02:00/02:02/02:04 mientras el servidor seguía bloqueado. No contar
+este bloqueo sintético como latencia RAG. Textos exactos y límites de validez UX
+permanecen en el pre-registro; el feedback puede influir en SUS y es parte de la UI evaluada.
+
+Exportación más checkpoint: ocho archivos. `p900-export-reconstruction-01.json`
+(2026-09-11T01:54:41Z) y su script `verify_p900_closure_01.py` verifican igualdad de
+intentos, ratings, SUS, preguntas, fuentes y timestamps; unicidad de 30 ratings;
+ausencia de enlaces a errores; lectura por el analizador; hashes inalterados.
+SHA-256 de `full_session.json`:
+`5a19d6a213e6cff9200bd3b09bc732de24994d7a797656b7cb0f5fe135a46074`.
+La copia `R/p900-export-copy-01/` conserva los ocho archivos con esos mismos hashes;
+`p900-export-copy-verified-01.json` acredita la copia sin modificar los originales.
+La reconstrucción ocurrió después de detener la app, desde otro proceso.
+Se reutiliza, sin repetir, la evidencia de desconexión/reinicio y errores:
+`C:/CloudRAG/operational-20260905-routing/disconnection-check.json`,
+`restart-recovery-check.json`, `real-timeout-no-rating.json`.
+`p900-and-probe-stop-01.json` (2026-09-11T01:47:20Z) identifica las dos apps cerradas,
+puertos 8501/8502 sin listeners y AnyDesk/NvContainer en Running/Auto.
+
+### Hallazgos y límites del cierre
+
+| ID | Severidad | Evidencia | Acción propuesta, no ejecutada |
+|---|---|---|---|
+| W01 | P1, bloquea el GO fijado | Léxico caliente p95 65,7494 s, dos respuestas >60 s | Propuesta de mejora con tests y nueva validación prospectiva; no modificar criterio ni seleccionar reintentos |
+| W02 | P2, medición | Guarda de descarga inmediata; `measure_interview_gate.py:610`, ventana semantic-cold-01 | Espera acotada de descarga con registro de cada respuesta y regresión antes de otra cohorte; conservar este fallo |
+| W03 | P2, presentación | P900 C3/C10: `[Source: None]` y `[Source: N/A]` aparecen como `None / /` y `N / A /`; `response_formatter.py:185`, `evaluation_page.py:238` | Separar citas no identificadas de fuentes asociadas; no inventar chunks ni alterar respuestas exportadas; revisar nota UX antes de cambiar la UI |
+| W04 | P2, analizador | `load_all_sessions()` advierte `_preparation - no full_session.json`; acepta P900 completa | Distinguir directorios auxiliares de sesiones en el escaneo, con regresión; no generar estadísticas humanas con P900 |
+
+W01 concentra tiempo en generación/NLI, no retrieval: q016 total 72,29 s,
+generación 52,44 y NLI 17,75; q057 total 65,40 s, generación 42,70 y NLI 20,61.
+RAM mínima durante esos chats 3,62/3,55 GiB y fallos duros globales 0,38/2,36 por
+segundo. Se observó 21 % CPU / 79 % GPU, pero no se aisló el costo del offload ni
+una causa exclusiva de hardware. No hay mejora estimable por comprar 32 GB;
+[nota RAM actualizada](RAM_INTERVIEW_DIAGNOSTIC.md). `window-CLOSE` histórico sigue
+indeterminado. Las comparaciones históricas no separan driver de carga/receta.
+
+### Cohortes históricas separadas
+
+No se recalcularon ni mezclaron. La diferencia con estos p95 no es un experimento
+causal de driver. La cohorte 616.64 de septiembre 6 tuvo batería y Brave según
+**DECLARACIÓN del usuario**, no condiciones retro-verificadas.
+
+| Cohorte / build | Sistema/condición | Éxitos/intentos | p50 / p95 s | Errores / abortos |
+|---|---|---:|---:|---:|
+| 610.62 / 4af9728 | Híbrido frío | 19/20 | 74,91 / 88,93 | 1 / 0 |
+| 610.62 / 4af9728 | Híbrido caliente | 18/20 | 35,15 / 67,44 | 2 / 0 |
+| 610.62 / 4af9728 | Léxico frío parcial | 8/11 | 65,12 / 82,12 | 2 / 1 |
+| 616.64 contaminada / fd747f8 | Híbrido frío | 19/20 | 90,67 / 126,01 | 1 / 0 |
+| 616.64 contaminada / fd747f8 | Híbrido caliente | 18/20 | 40,41 / 75,90 | 2 / 0 |
+| 616.64 contaminada / fd747f8 | Léxico frío | 16/20 | 71,50 / 96,67 | 4 / 0 |
+| 616.64 contaminada / fd747f8 | Léxico caliente | 17/20 | 24,19 / 83,28 | 3 / 0 |
+| 616.64 contaminada / fd747f8 | Semántico frío | 18/20 | 76,29 / 111,99 | 2 / 0 |
+| 616.64 contaminada / fd747f8 | Semántico caliente | 17/20 | 26,20 / 67,35 | 3 / 0 |
+| Piloto híbrido limpio / a761fa2 | Híbrido frío | 20/20 | 50,13 / 83,24 | 0 / 0 |
+| Piloto híbrido limpio / a761fa2 | Híbrido caliente | 20/20 | 23,21 / 57,62 | 0 / 0 |
+
+Fuentes históricas: `C:/CloudRAG/operational-20260905-routing/latency-cohort/`,
+`C:/CloudRAG/cohort-61664-20260906T015527Z/` y
+`C:/CloudRAG/managed-pilot-20260908T012621Z/window-real-05/`. Calentamientos aparte:
+uno, tres y uno respectivamente. No ejecutar ni sobrescribir evidencia histórica.
+
+### Veredicto contra el pre-registro
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Bundle/identidad | ✅ VERIFICADO | Manifiestos y verificaciones por ventana |
+| p95 caliente <=60 s, tres sistemas, cero fallos/inválidas | ❌ VERIFICADO | Híbrido 51,57; léxico 65,75; semántico 45,09 s; 20 válidas en cada celda caliente |
+| Frío medido y pre-calentamiento obligatorio | ✅ VERIFICADO | 60 posiciones frías, una inválida preservada; preparación real de app y cohortes |
+| P900 completa con SUS/exportación | ✅ VERIFICADO | Revisión 168, reconstrucción y hashes |
+| Resiliencia integral | ✅ VERIFICADO | Historial de desconexión/reinicio + preparación perdida + errores sin rating + lectura tras parar servidor |
+
+**NO-GO local; Fase B bloqueada.** El frío dejó de bloquear conforme al pre-registro,
+pero el léxico caliente no cumple. No se transfirió GO a staging, no se diseñó nube,
+no se generaron Docker/compose/env/provisionamiento, no se cotizó ni desplegó.
+No se optimizaron modelos ni NLI a posteriori, no se cambió driver ni energía,
+no se editaron datos exportados, evidencia experimental, corpus, gold o paper;
+sin push ni merge. Los cambios finales son documentales.
+
+Auditoría previa del build medido: `cohort-final-pytest.txt`, **507 pasan / 5
+excluidas**, tres advertencias SWIG, 57,13 s; Ruff/diff/secretos aprobados en los
+archivos `cohort-final-*`. Baseline original de esta enmienda: 476 pasan / 5
+excluidas en `baseline-*`; 482 tras timeout, 494 tras preparación y 507 tras
+congelar el protocolo. Auditoría final de documentación registrada con prefijo
+`closure-final-*` en R; esos archivos conservan comandos, salidas y estado git.
+
+**Pase final VERIFICADO:** 507 pasan / 5 excluidas, tres advertencias SWIG,
+72,12 s (`closure-final-pytest.txt`). Ruff sobre los 18 archivos Python de la
+enmienda, `git diff --check` y secretos con baseline pasan; 17 exclusiones
+históricas del escáner, ningún hallazgo nuevo. `closure-final-checks.txt` registra
+códigos de salida 0 y ninguna diferencia en `experiments/results`, `data`, `paper`
+ni `output` respecto de `670f8e5`. Este cierre modifica cinco documentos; no hay
+cambios adicionales de código ni inferencias después de la validación de P900.
