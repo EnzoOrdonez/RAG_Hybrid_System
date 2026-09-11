@@ -1,5 +1,38 @@
 # Diagnóstico léxico prospectivo — 2026-09-11
 
+## Segunda tanda: crítica y contrato antes de implementar
+
+Baseline `94e73a5`: 522 tests pasan / 5 excluidos. Evidencia nueva:
+`C:/CloudRAG/lexical-clean-20260911T1245Z/baseline-*`.
+El usuario autorizó **una** ventana NVIDIA de diagnóstico. Aclaró después que
+AnyDesk debe permanecer **apagado e intacto**, porque está presente localmente.
+
+El supervisor anterior modifica NvContainer incondicionalmente y contempla Epic;
+no cumple esta autorización estrecha. Se añadirá un perfil diagnóstico explícito:
+solo Overlay, tareas SelfUpdate identificadas y servicio NvContainer si se observa
+reinicio del overlay vinculado a él. La cadena parental demuestra origen, no
+reinicio. No se tocarán AnyDesk, Epic, NVDisplay ni el driver. Primero se prueban
+deadline y pérdida del controlador con restauración simulada independiente; luego
+se arma la ventana real. Cada intención se persiste antes de modificar su objeto.
+Si el servicio no se interviene, tampoco se reinicia al restaurar. Se verifica la
+reaparición del overlay raíz, sin exigir PID o cantidad de subprocesos idénticos.
+
+El ejecutor anterior exige una cohorte de tres sistemas; se añadirá una entrada
+diagnóstica separada, sin cambiar su interpretación histórica. Los cuarenta slots
+AB/BA definidos abajo comparten proceso y preparación. Un manifiesto nuevo fija
+fuentes, consultas, receta, hashes y entorno; la recuperación conserva abortos y
+prohíbe duplicados. El diagnóstico **no emite GO**. La ventana no se renueva ni
+extiende al reintentar: cualquier ejecución posterior a restauración exige otra
+autorización. No se ejecuta un segundo intento ante una condición inválida.
+
+Aceptación antes de la ventana: suite completa, Ruff, diff y secretos; regresiones
+de alcance/ancestría, orden, receta, residencia, slots inválidos, deadline y
+restauración; pruebas del watchdog sobre este mismo commit. Contraste sintético
+pareado con instrumentación, 10 pares y límite superior unilateral bootstrap del
+95 % <=5 %, sin descontar tiempos. El análisis informará componentes de las dos
+observaciones que interpolan el p95 total, sin sumar percentiles independientes
+ni llamar ahorro causal al tiempo observado. La mejora permanece sin autorizar.
+
 ## Baseline y crítica antes de implementar
 
 VERIFICADO: baseline `7c449bf`, rama `fix/interview-readiness`; 507 tests pasan,

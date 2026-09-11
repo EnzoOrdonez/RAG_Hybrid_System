@@ -5,7 +5,9 @@ param(
     [string]$Cohort,
     [ValidateSet('hybrid','lexical','semantic')][string]$System,
     [ValidateSet('cold','warm')][string]$Phase,
-    [switch]$KeepAnyDesk
+    [switch]$KeepAnyDesk,
+    [switch]$LexicalDiagnostic,
+    [string]$SupervisorProof
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -15,6 +17,27 @@ $checkout = [IO.Path]::GetFullPath((Join-Path $project '../..'))
 if ($rootFull -eq $checkout -or $rootFull.StartsWith($checkout.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Use external evidence root' }
 $admin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $admin) { throw 'Administrator token required; nothing changed' }
+if ($LexicalDiagnostic) { $KeepAnyDesk = $true }
+
+function Test-NvidiaAncestry($Rows, [int]$OverlayId, [int]$ServiceId) {
+    $current = @($Rows | Where-Object ProcessId -eq $OverlayId)
+    if ($current.Count -ne 1 -or $current[0].Name -ne 'NVIDIA Overlay.exe') { return $false }
+    for ($depth=0; $depth -lt 8; $depth++) {
+        if ($current[0].ProcessId -eq $ServiceId) { return $true }
+        $parent = @($Rows | Where-Object ProcessId -eq $current[0].ParentProcessId)
+        if ($parent.Count -ne 1 -or $parent[0].CreationDate -gt $current[0].CreationDate) { return $false }
+        if ($parent[0].Name -notin @('nvcontainer.exe','NVIDIA Overlay.exe')) { return $false }
+        $current = $parent
+    }
+    return $false
+}
+function Save-OverlayProof($CutAt, $Service, $Linked, $Rows) {
+    Save-New (Join-Path $rootFull 'overlay-relaunch-proof.json') @{
+        at=[DateTime]::UtcNow.ToString('o'); cut_at=$CutAt.ToString('o'); service=$Service
+        linked_pids=@($Linked | ForEach-Object { $_.ProcessId })
+        processes=@($Rows | Where-Object { $_.Name -in @('nvcontainer.exe','NVIDIA Overlay.exe') } | Select-Object Name,ProcessId,ParentProcessId,CreationDate)
+    }
+}
 
 function Save-New([string]$Path, $Value) {
     [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($Path)) | Out-Null
@@ -70,6 +93,7 @@ function Restore-Service($Before, [bool]$Simulated) {
 }
 function Restore-Window {
     $window = Read-Json 'window.json'
+    $diagnostic = $window.PSObject.Properties['lexical_diagnostic'] -and $window.lexical_diagnostic
     if (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json')) { return }
     $lock = $null
     try { $lock = [IO.File]::Open((Join-Path $rootFull 'restore.lock'), 'OpenOrCreate', 'ReadWrite', 'None') } catch { return }
@@ -105,8 +129,11 @@ function Restore-Window {
                 } catch { $failures.Add($_.Exception.Message) }
             }
         }
-        try { Restore-Service ($window.services | Where-Object name -eq 'NvContainerLocalSystem') $window.simulated } catch { $failures.Add($_.Exception.Message) }
+        if (-not $diagnostic -or (Test-Path -LiteralPath (Join-Path $rootFull 'nvcontainer-intent.json'))) {
+            try { Restore-Service ($window.services | Where-Object name -eq 'NvContainerLocalSystem') $window.simulated } catch { $failures.Add($_.Exception.Message) }
+        }
         foreach ($task in $window.tasks) {
+            if ($diagnostic -and -not $window.simulated -and -not (Test-Path -LiteralPath (Join-Path $rootFull 'task-interventions.json'))) { continue }
             try {
                 if ($task.name -notlike 'NVIDIA App SelfUpdate_*' -or $task.path -ne '\') { throw 'Task outside allowlist' }
                 if (-not $window.simulated -and $task.enabled) { Enable-ScheduledTask -TaskName $task.name -TaskPath $task.path | Out-Null }
@@ -115,15 +142,17 @@ function Restore-Window {
             } catch { $failures.Add($_.Exception.Message) }
         }
         foreach ($launch in $window.interactive) {
+            if ($diagnostic -and -not (Test-Path -LiteralPath (Join-Path $rootFull 'overlay-cut-intent.json'))) { continue }
             try {
                 if ($window.simulated) { continue }
-                if ([IO.Path]::GetFileName($launch.path) -notin @('AnyDesk.exe','EpicGamesLauncher.exe','EpicWebHelper.exe')) { throw 'Interactive app outside allowlist' }
+                $allowedApps = if ($diagnostic) { @('NVIDIA Overlay.exe') } else { @('AnyDesk.exe','EpicGamesLauncher.exe','EpicWebHelper.exe') }
+                if ([IO.Path]::GetFileName($launch.path) -notin $allowedApps) { throw 'Interactive app outside allowlist' }
                 if ([IO.Path]::GetFileName($launch.path) -eq 'EpicWebHelper.exe') { continue } # launcher owns helpers
                 $present = @(Get-Process | Where-Object { $_.SessionId -eq $window.session_id -and $_.Path -eq $launch.path })
                 if ($present.Count) { continue }
                 $name = $window.task_name + '-Interactive-' + [guid]::NewGuid().ToString('N')
                 $principal = New-ScheduledTaskPrincipal -UserId $window.user -LogonType Interactive -RunLevel Limited
-                $action = New-ScheduledTaskAction -Execute $launch.path
+                $action = if ($diagnostic -and $launch.arguments) { New-ScheduledTaskAction -Execute $launch.path -Argument $launch.arguments } else { New-ScheduledTaskAction -Execute $launch.path }
                 Register-ScheduledTask -TaskName $name -Action $action -Principal $principal | Out-Null
                 try {
                     Start-ScheduledTask -TaskName $name
@@ -135,7 +164,14 @@ function Restore-Window {
             } catch { $failures.Add($_.Exception.Message) }
         }
         if ($failures.Count) { Event 'restore-incomplete' @($failures); throw ($failures -join '; ') }
-        Save-New (Join-Path $rootFull 'restored.json') @{at=[DateTime]::UtcNow.ToString('o'); simulated=$window.simulated; anydesk_first=$true}
+        if ($diagnostic -and -not $window.simulated) {
+            foreach ($before in $window.untouched_services) {
+                $after = Get-CimInstance Win32_Service -Filter "Name='$($before.name)'"
+                if ($after.State -ne $before.state -or $after.StartMode -ne $before.start_mode) { $failures.Add('Untouched service state changed: ' + $before.name) }
+            }
+            if ($failures.Count) { Event 'restore-incomplete' @($failures); throw ($failures -join '; ') }
+        }
+        Save-New (Join-Path $rootFull 'restored.json') @{at=[DateTime]::UtcNow.ToString('o'); simulated=$window.simulated; anydesk_first=(-not $diagnostic); anydesk_untouched=[bool]$diagnostic}
         if (Get-ScheduledTask -TaskName $window.task_name -ErrorAction SilentlyContinue) {
             Unregister-ScheduledTask -TaskName $window.task_name -Confirm:$false
             Event 'watchdog-unregistered' $window.task_name
@@ -164,13 +200,21 @@ if ($Mode -eq 'NoticeTest') {
 if ($Mode -eq 'Restore') { Restore-Window; exit }
 if ($Mode -eq 'Watch') { Watch-Window; exit }
 if (Test-Path -LiteralPath (Join-Path $rootFull 'window.json')) { throw 'Window already exists; use Restore, never replay Run' }
-if ($Mode -eq 'Run' -and (-not $Cohort -or -not $System -or -not $Phase)) { throw 'Run requires Cohort, System and Phase' }
-if ($KeepAnyDesk -and $Mode -ne 'Run') { throw 'KeepAnyDesk applies only to Run' }
+if ($Mode -eq 'Run' -and (-not $Cohort -or (-not $LexicalDiagnostic -and (-not $System -or -not $Phase)))) { throw 'Run requires Cohort, System and Phase' }
+if ($KeepAnyDesk -and $Mode -ne 'Run' -and -not $LexicalDiagnostic) { throw 'KeepAnyDesk applies only to Run' }
 if ($Mode -eq 'Run') {
     $cohortFull = [IO.Path]::GetFullPath($Cohort)
     if ($cohortFull -eq $checkout -or $cohortFull.StartsWith($checkout.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Use external cohort root' }
     $cohortProtocol = (Get-Content -LiteralPath (Join-Path $cohortFull 'source-manifest.json') -Raw | ConvertFrom-Json).protocol
-    if ($cohortProtocol.protocol_version -ne 2 -or $cohortProtocol.systems.Count -ne 3 -or $System -notin $cohortProtocol.systems) { throw 'Unregistered bounded cohort' }
+    if ($cohortProtocol.protocol_version -ne 2 -or $cohortProtocol.systems.Count -ne 3 -or (-not $LexicalDiagnostic -and $System -notin $cohortProtocol.systems)) { throw 'Unregistered bounded cohort' }
+    if ($LexicalDiagnostic) {
+        if (-not $cohortProtocol.PSObject.Properties['diagnostic_only'] -or -not $cohortProtocol.diagnostic_only) { throw 'Paired diagnostic required' }
+        if (-not $SupervisorProof) { throw 'Independent supervisor proof required before intervention' }
+        foreach ($item in @(@{dir='deadline';mode='SelfTest'},@{dir='controller';mode='SelfTestController'})) {
+            $proof = Get-Content -LiteralPath (Join-Path $SupervisorProof ($item.dir + '/selftest-passed.json')) -Raw | ConvertFrom-Json
+            if (-not $proof.lexical_diagnostic -or $proof.mode -ne $item.mode -or $proof.script_sha256 -ne (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()) { throw 'Supervisor proof does not match this profile/build' }
+        }
+    }
     if ($cohortProtocol.build_id -ne (& git -C $project rev-parse HEAD)) { throw 'Cohort build differs before process changes' }
 }
 [IO.Directory]::CreateDirectory($rootFull) | Out-Null
@@ -184,7 +228,8 @@ if (-not $simulated) {
     if ($version.version -ne '0.22.1' -or $model.Count -ne 1 -or $model[0].digest -ne '444af1c4b2fedd6b54041aca558e7300b0b3d5c0468c44619126240323ba2852') { throw 'Ollama version/digest mismatch; stop and ask' }
     Save-New (Join-Path $rootFull 'ollama-identity.json') @{at=[DateTime]::UtcNow.ToString('o'); version=$version; models=$tags}
 }
-$services = foreach ($name in @('AnyDesk','NvContainerLocalSystem')) {
+$serviceNames = if ($LexicalDiagnostic) { @('NvContainerLocalSystem') } else { @('AnyDesk','NvContainerLocalSystem') }
+$services = foreach ($name in $serviceNames) {
     $service = Get-CimInstance Win32_Service -Filter "Name='$name'"
     if (-not $service) { throw ('Missing authorized service: ' + $name) }
     $reg = Get-ItemProperty -LiteralPath ('HKLM:/SYSTEM/CurrentControlSet/Services/' + $name)
@@ -192,6 +237,11 @@ $services = foreach ($name in @('AnyDesk','NvContainerLocalSystem')) {
       delayed_auto_start= $(if ($reg.PSObject.Properties['DelayedAutoStart']) { $reg.DelayedAutoStart } else { $null })}
 }
 $tasks = @(Get-ScheduledTask | Where-Object { $_.TaskName -like 'NVIDIA App SelfUpdate_*' -and $_.TaskPath -eq '\' } | ForEach-Object {
+    if ($LexicalDiagnostic) {
+        foreach ($action in $_.Actions) {
+            if ($action.Execute.Trim('"') -ne 'C:\Program Files\NVIDIA Corporation\NVIDIA App\CEF\NVIDIA App.exe') { throw 'Unidentified SelfUpdate action' }
+        }
+    }
     @{name=$_.TaskName; path=$_.TaskPath; enabled=$_.Settings.Enabled}
 })
 $sessionId = (Get-Process -Id $PID).SessionId
@@ -200,8 +250,23 @@ $processes = @(Get-Process | Where-Object { $_.ProcessName -in @('AnyDesk','NVID
 })
 if ($KeepAnyDesk) { $processes = @($processes | Where-Object name -ne 'AnyDesk') }
 $interactive = @(Interactive-Snapshot $processes $sessionId)
+if ($LexicalDiagnostic) {
+    $processes = @($processes | Where-Object name -eq 'NVIDIA Overlay')
+    $nativeRows = @(Get-CimInstance Win32_Process)
+    $interactive = @($processes | Where-Object session -eq $sessionId | ForEach-Object {
+        $overlayProcess = $_
+        $native = $nativeRows | Where-Object ProcessId -eq $overlayProcess.identity.pid
+        $parent = $nativeRows | Where-Object ProcessId -eq $native.ParentProcessId
+        if ($parent.Name -ne 'NVIDIA Overlay.exe') {
+            $prefix = '^\s*"?' + [regex]::Escape($overlayProcess.path) + '"?\s*'
+            if ($native.CommandLine -notmatch $prefix) { throw 'Unrecognized overlay command line' }
+            @{path=$overlayProcess.path; arguments=([regex]::Replace($native.CommandLine,$prefix,''))}
+        }
+    })
+}
 $windowId = [guid]::NewGuid().ToString('N')
-$deadline = [DateTime]::UtcNow.AddMinutes(120)
+$hardDeadline = [DateTime]::UtcNow.AddMinutes(120)
+$deadline = if ($LexicalDiagnostic) { $hardDeadline.AddMinutes(-2) } else { $hardDeadline }
 if ($simulated) { $deadline = [DateTime]::UtcNow.AddSeconds(15) }
 $controller = Get-Process -Id $PID
 if ($Mode -eq 'SelfTestController') {
@@ -217,6 +282,11 @@ $window = @{
     trusted_manifest='C:/CloudRAG/operational-20260905T1428Z/deployment-manifest.json'
     script_sha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()
     manage_anydesk=(-not $KeepAnyDesk)
+    lexical_diagnostic=[bool]$LexicalDiagnostic; hard_deadline_utc=$hardDeadline.ToString('o')
+}
+if ($LexicalDiagnostic) {
+    $window.untouched_services = @(Get-CimInstance Win32_Service | Where-Object Name -in @('AnyDesk','NVDisplay.ContainerLocalSystem') | ForEach-Object { @{name=$_.Name;state=$_.State;start_mode=$_.StartMode} })
+    if ($simulated) { Save-New (Join-Path $rootFull 'nvcontainer-intent.json') @{simulated=$true} }
 }
 if ($Mode -eq 'Run') { $window.cohort=$cohortFull; $window.system=$System; $window.phase=$Phase }
 Save-New (Join-Path $rootFull 'window.json') $window
@@ -252,22 +322,57 @@ try {
         $events = @(Get-ChildItem -LiteralPath (Join-Path $rootFull 'events') -Filter '*.json' | ForEach-Object { Get-Content -LiteralPath $_.FullName -Raw | ConvertFrom-Json })
         $trigger = @($events | Where-Object kind -eq 'watchdog-trigger')
         $restoration = @($events | Where-Object kind -eq 'restore-service-intent' | Sort-Object at)
-        if (-not $trigger.Count -or $restoration[0].data.name -ne 'AnyDesk' -or $restoration[0].pid -eq $PID) { throw 'Independent restoration/order not demonstrated' }
-        Save-New (Join-Path $rootFull 'selftest-passed.json') @{at=[DateTime]::UtcNow.ToString('o'); mode=$Mode; trigger=$trigger; simulated_services=$true}
+        $firstExpected = if ($LexicalDiagnostic) { 'NvContainerLocalSystem' } else { 'AnyDesk' }
+        if (-not $trigger.Count -or $restoration[0].data.name -ne $firstExpected -or $restoration[0].pid -eq $PID) { throw 'Independent restoration/order not demonstrated' }
+        Save-New (Join-Path $rootFull 'selftest-passed.json') @{at=[DateTime]::UtcNow.ToString('o'); mode=$Mode; trigger=$trigger; simulated_services=$true; lexical_diagnostic=[bool]$LexicalDiagnostic; script_sha256=$window.script_sha256}
         exit
     }
     $notice = 'CloudRAG: prueba tecnica autorizada. AnyDesk se desconectara. Restauracion automatica antes de ' + $deadline.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz') + '. Estado: ' + $rootFull
     if ($KeepAnyDesk) { $notice = 'CloudRAG: prueba tecnica autorizada; AnyDesk permanece activo. Restauracion de NVIDIA/launchers antes de ' + $deadline.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz') + '. Estado: ' + $rootFull }
+    if ($LexicalDiagnostic) { $notice = 'CloudRAG: diagnostico tecnico NVIDIA. AnyDesk queda apagado e intacto. Restauracion prevista antes de ' + $deadline.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz') + '; limite maximo ' + $hardDeadline.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz') + '. Evidencia: ' + $rootFull }
     Save-New (Join-Path $rootFull 'notice.json') @{at=[DateTime]::UtcNow.ToString('o'); text=$notice; deadline_utc=$deadline.ToString('o')}
     $noticeResult = Show-Notice $notice 10
     Event 'notice-delivered' @{session=$sessionId; result=$noticeResult}
     Start-Sleep -Seconds 5
     Save-New (Join-Path $rootFull 'armed.json') @{at=[DateTime]::UtcNow.ToString('o'); deadline_utc=$deadline.ToString('o')}
+    if ($LexicalDiagnostic) {
+        $cutAt = [DateTime]::UtcNow
+        Save-New (Join-Path $rootFull 'overlay-cut-intent.json') @{at=$cutAt.ToString('o');processes=$processes}
+        foreach ($process in $processes) {
+            if (Same-Process $process.identity) { Stop-Process -Id $process.identity.pid -Force; Event 'overlay-stopped' $process }
+        }
+        $probeEnd = [DateTime]::UtcNow.AddSeconds(35)
+        $restarted = @()
+        do {
+            [IO.File]::WriteAllText((Join-Path $rootFull 'heartbeat'),[DateTime]::UtcNow.ToString('o'))
+            $rows = @(Get-CimInstance Win32_Process)
+            $restarted = @($rows | Where-Object { $_.Name -eq 'NVIDIA Overlay.exe' -and $_.CreationDate.ToUniversalTime() -ge $cutAt })
+            if ($restarted.Count) { break }
+            Start-Sleep -Seconds 2
+        } while ([DateTime]::UtcNow -lt $probeEnd)
+        $nvService = $services | Where-Object name -eq 'NvContainerLocalSystem'
+        $linked = @($restarted | Where-Object { Test-NvidiaAncestry $rows $_.ProcessId $nvService.pid })
+        Save-OverlayProof $cutAt $nvService $linked $rows
+        if ($restarted.Count -and -not $linked.Count) { throw 'Overlay restarted through an unproven mechanism; restore and ask' }
+        if ($linked.Count) {
+            Save-New (Join-Path $rootFull 'nvcontainer-intent.json') $nvService
+            Set-Service -Name 'NvContainerLocalSystem' -StartupType Disabled
+            Stop-Service -Name 'NvContainerLocalSystem'
+            (Get-Service -Name 'NvContainerLocalSystem').WaitForStatus('Stopped',[TimeSpan]::FromSeconds(30))
+            foreach ($overlay in @(Get-Process -Name 'NVIDIA Overlay' -ErrorAction SilentlyContinue)) {
+                if ($overlay.Path -notin $processes.path) { throw 'Unexpected overlay image path' }
+                Event 'restarted-overlay-stop' (Identity $overlay)
+                Stop-Process -Id $overlay.Id -Force
+            }
+        }
+    }
+    if ($LexicalDiagnostic) { Save-New (Join-Path $rootFull 'task-interventions.json') @{at=[DateTime]::UtcNow.ToString('o');tasks=$tasks} }
     foreach ($task in $tasks) {
         Event 'disable-task-intent' $task
         if ($task.enabled) { Disable-ScheduledTask -TaskName $task.name -TaskPath $task.path | Out-Null }
     }
     foreach ($service in $services) {
+        if ($LexicalDiagnostic) { continue } # conditional stop above, never blanket stop
         if ($KeepAnyDesk -and $service.name -eq 'AnyDesk') { continue }
         Event 'stop-service-intent' $service
         Set-Service -Name $service.name -StartupType Disabled
@@ -276,9 +381,11 @@ try {
         Event 'service-stopped' $service
     }
     foreach ($process in $processes) {
+        if ($LexicalDiagnostic) { continue }
         if (Same-Process $process.identity) { Event 'stop-process-intent' $process; Stop-Process -Id $process.identity.pid -Force; Event 'process-stopped' $process }
     }
     Event 'process-window-ready' @{deadline_utc=$deadline.ToString('o'); remote_cut=(-not $KeepAnyDesk)}
+    if ($LexicalDiagnostic -and @(Get-Process -Name 'NVIDIA Overlay' -ErrorAction SilentlyContinue).Count) { throw 'Overlay remains; no admission or inference' }
     $python = Join-Path $project '.venv-app/Scripts/python.exe'
     $payload = Start-Process -FilePath $python -ArgumentList @('scripts/run_managed_gate.py','--root',('"' + $rootFull + '"')) -WorkingDirectory $project -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $rootFull 'payload.stdout.log') -RedirectStandardError (Join-Path $rootFull 'payload.stderr.log')
     while (-not $payload.HasExited -and [DateTime]::UtcNow -lt $deadline) {

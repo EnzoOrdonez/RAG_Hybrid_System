@@ -27,9 +27,14 @@ def run(root):
     cohort = Path(manifest['cohort']) if manifest.get('cohort') else root / 'cohort'
     bounded = bool(manifest.get('cohort'))
     protocol = gate.read_json(cohort / 'source-manifest.json')['protocol'] if bounded else None
+    diagnostic = manifest.get('lexical_diagnostic', False)
     if bounded:
         gate.recipe(protocol)
-        gate.selected_conditions(protocol, manifest.get('system'), manifest.get('phase'))
+        if diagnostic:
+            if not protocol.get('diagnostic_only'):
+                raise ValueError('Window requires paired diagnostic manifest')
+        else:
+            gate.selected_conditions(protocol, manifest.get('system'), manifest.get('phase'))
         if protocol.get('protocol_version') != 2 or tuple(gate.selected_systems(protocol)) != gate.SYSTEMS:
             raise ValueError('Managed bounded window requires the registered three-system cohort')
     artifact_manifest = protocol['artifact_manifest_path'] if bounded else str(root / 'deployment-manifest.json')
@@ -59,6 +64,13 @@ def run(root):
     command('verify-new', ['scripts/check_deployment_artifacts.py', 'verify', '--manifest', env['CLOUDRAG_ARTIFACT_MANIFEST']])
     from scripts.observe_interview_gate import admission
     admission(root / 'admission-before-contrast')
+    if diagnostic:
+        command('contrast', ['scripts/run_lexical_diagnostic.py', 'contrast', '--output', str(root / 'contrast')])
+        command('cohort-run', ['scripts/run_lexical_diagnostic.py', 'run', '--output', str(cohort)])
+        from scripts.run_lexical_diagnostic import report
+        gate.write_new(root / 'payload-complete.json', dict(at=gate.now(), cohort=str(cohort),
+            report=report(gate.local_records(cohort)), diagnostic_only=True))
+        return
     command('contrast', ['scripts/contrast_interview_observer.py', '--output', str(root / 'contrast')])
     if not bounded:
         command('cohort-init', ['scripts/measure_interview_gate.py', 'init', '--output', str(cohort), '--systems', 'hybrid', '--controlled'])
