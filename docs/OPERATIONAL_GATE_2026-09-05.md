@@ -708,6 +708,17 @@ acotada por ID de ventana. No se repiten ventanas fallidas a ciegas.
 ni acreditan todavía el criterio caliente de los tres sistemas. No se han preparado
 artefactos de nube ni desplegado recursos como parte de esta enmienda.
 
+## Seguimiento del bloqueo léxico: 2026-09-11
+
+Continúa **NO-GO**. Se inició instrumentación externa sin cambiar la app ni la
+receta medida. La reconstrucción histórica muestra más tokens/claims en las dos
+posiciones que forman la cola léxica; todavía no prueba causalidad exclusiva.
+La admisión nueva falló por NVIDIA Overlay, sin ejecutar inferencias ni cerrar
+AnyDesk. Las cohortes históricas y P900 no se modificaron. Véase
+[el diagnóstico fechado](LEXICAL_DIAGNOSTIC_2026-09-11.md) para protocolo, crítica,
+evidencia y autorización pendiente. Esto no constituye el pre-registro de una
+optimización ni cambia los criterios de aceptación siguientes.
+
 ## Cierre de la cohorte preparada y P900: 2026-09-10 Lima
 
 ### Pre-registro y trazabilidad

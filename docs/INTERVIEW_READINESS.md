@@ -1,5 +1,10 @@
 # Preparación técnica de Evaluation Mode
 
+**Seguimiento 2026-09-11:** diagnóstico léxico en curso, sin nueva inferencia ni
+optimización aplicada. La admisión falló por NVIDIA Overlay; AnyDesk sigue activo.
+El veredicto siguiente permanece vigente. Véase el
+[diagnóstico y evidencia parcial](LEXICAL_DIAGNOSTIC_2026-09-11.md).
+
 **NO-GO para entrevistas (cierre 2026-09-10, Lima). VERIFICADO:** la cohorte nueva
 terminó sus 120 posiciones: p95 caliente híbrido **51,57 s**, léxico **65,75 s** y
 semántico **45,09 s**. El léxico incumple el umbral de 60 s. Hubo cero errores de
