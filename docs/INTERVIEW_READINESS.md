@@ -1,5 +1,10 @@
 # Preparación técnica de Evaluation Mode
 
+**Seguimiento 2026-09-12 — entrega desatendida:** el diagnóstico siguiente lo
+lanza el humano con el [runner documentado](UNATTENDED_DIAGNOSTIC.md). Pre-flight
+en dos fases, autorización explícita por reanudación y aborto por energía.
+Esta entrega sólo ejecuta pruebas sintéticas; NO-GO vigente, sin nueva cohorte.
+
 **Seguimiento 2026-09-11, tercera tanda — VERIFICADO:** segunda ventana NVIDIA
 con `658b748`, 29/40 intentos diagnósticos: 14 pares válidos y una respuesta
 inválida por Brave; once posiciones sin ejecutar. El coordinador se detuvo y

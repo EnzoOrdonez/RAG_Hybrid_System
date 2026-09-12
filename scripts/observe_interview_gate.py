@@ -95,6 +95,7 @@ def windows_processes():
     kernel.Process32FirstW.argtypes = [ctypes.c_void_p, ctypes.POINTER(Entry)]
     kernel.Process32NextW.argtypes = [ctypes.c_void_p, ctypes.POINTER(Entry)]
     kernel.GetProcessTimes.argtypes = [ctypes.c_void_p] + [ctypes.POINTER(ctypes.c_uint64)] * 4
+    kernel.QueryFullProcessImageNameW.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.c_wchar_p, ctypes.POINTER(ctypes.c_uint32)]
     kernel.K32GetProcessMemoryInfo.argtypes = [ctypes.c_void_p, ctypes.POINTER(Memory), ctypes.c_uint32]
     snapshot = kernel.CreateToolhelp32Snapshot(2, 0)
     if snapshot == ctypes.c_void_p(-1).value:
@@ -111,6 +112,11 @@ def windows_processes():
             handle = kernel.OpenProcess(0x1000, False, entry.pid)  # query only
             if handle:
                 try:
+                    if os.environ.get('CLOUDRAG_UNATTENDED') == '1':
+                        image = ctypes.create_unicode_buffer(32768)
+                        length = ctypes.c_uint32(len(image))
+                        if kernel.QueryFullProcessImageNameW(handle, 0, image, ctypes.byref(length)):
+                            row['image_path'] = image.value
                     created, exited, system, user = (ctypes.c_uint64() for _ in range(4))
                     if kernel.GetProcessTimes(handle, ctypes.byref(created), ctypes.byref(exited),
                                               ctypes.byref(system), ctypes.byref(user)):
@@ -177,6 +183,10 @@ class Sampler:
             at = time.monotonic()
             row['processes'] = process_deltas(rows, self.process_times,
                                                at - self.process_at if self.process_at else 0, os.cpu_count())
+            if os.environ.get('CLOUDRAG_UNATTENDED') == '1':
+                paths = {r['Id']: r.get('image_path') for r in rows}
+                for process in row['processes']:
+                    process['path'] = paths.get(process['pid'])
             row['collector_pid'] = os.getpid()
             self.process_times = {r['Id']: r['CPU'] for r in rows if r.get('CPU') is not None}
             self.process_at = at
@@ -262,6 +272,7 @@ class Observer:
                                 if capture_enabled is None else capture_enabled)
         self.response_started_at = None
         self.response_elapsed_s = None
+        self.live_reasons = set()
 
     def sample(self):
         try:
@@ -270,6 +281,12 @@ class Observer:
             row = dict(at=datetime.now(timezone.utc).isoformat(), monotonic_s=time.monotonic(),
                        errors=[f'{type(exc).__name__}: {exc}'])
         self.rows.append(row)
+        if os.environ.get('CLOUDRAG_UNATTENDED') == '1':
+            try:
+                from scripts.unattended_diagnostic import live_sample
+                self.live_reasons.update(live_sample(self.path.with_suffix('.control'), row))
+            except Exception as exc:
+                self.persistence_errors.append(f'live control: {type(exc).__name__}: {exc}')
         try:
             with self.path.open('ab') as stream:
                 stream.write((json.dumps(row, allow_nan=False) + '\n').encode())
@@ -303,6 +320,7 @@ class Observer:
         self.thread.join()
         self.sample()  # after response clock; captures last power state
         reasons = assess(self.rows, allowed_pids=self.allowed_pids)
+        reasons = sorted(set(reasons) | self.live_reasons)
         if self.persistence_errors:
             reasons.append('telemetry_persistence_error')
         trace = {}

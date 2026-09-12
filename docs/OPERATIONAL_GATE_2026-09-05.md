@@ -1,5 +1,14 @@
 # Compuerta local: registro de ejecución
 
+## Addendum 2026-09-12: runner para lanzamiento humano
+
+Se entrega [runner desatendido](UNATTENDED_DIAGNOSTIC.md), probado con modelos
+y restauración simulados. No se ejecuta otra cohorte en la sesión del agente.
+Evidencia: `C:/CloudRAG/unattended-build-20260912T023124Z/`. El NO-GO sigue
+vigente; no se modifica el pre-registro ni se implementa la optimización.
+DECLARADO por el usuario: abrió Brave en el intento 29 de la segunda ventana.
+La invalidez original se conserva y los 14 pares siguen siendo descriptivos.
+
 ## Addendum 2026-09-11: segunda ventana diagnóstica incompleta
 
 **VERIFICADO; NO-GO vigente.** Con build `658b748` se ejecutaron 29/40 posiciones:

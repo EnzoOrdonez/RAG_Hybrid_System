@@ -13,6 +13,16 @@ from scripts import gate_job
 from scripts import measure_interview_gate as gate
 
 
+def observer_environment(env, protocol):
+    """Pass the same observer policy to the worker and every child command."""
+    env = dict(env)
+    if protocol and protocol.get('unattended_policy') == 'unattended-paired-v1':
+        env['CLOUDRAG_UNATTENDED'] = '1'
+    else:
+        env.pop('CLOUDRAG_UNATTENDED', None)
+    return env
+
+
 def run(root):
     root = Path(root).resolve()
     identity = gate_job.enter()
@@ -45,6 +55,8 @@ def run(root):
         CLOUDRAG_ARTIFACT_MANIFEST=artifact_manifest, CLOUDRAG_GATE_DEADLINE=deadline.isoformat(),
         CLOUDRAG_GATE_WINDOW_ID=manifest['id'],
         OLLAMA_HOST='http://localhost:11434')
+    env = observer_environment(env, protocol)
+    os.environ.pop('CLOUDRAG_UNATTENDED', None)
     os.environ.update(env)
 
     def command(label, args):

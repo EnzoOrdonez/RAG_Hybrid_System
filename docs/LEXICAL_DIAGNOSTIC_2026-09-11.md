@@ -1,5 +1,17 @@
 # Diagnóstico léxico prospectivo — 2026-09-11
 
+## Cuarta tanda: artefacto desatendido (2026-09-12)
+
+El [runner y checklist](UNATTENDED_DIAGNOSTIC.md) aplican las tres reglas
+confirmadas: pre-flight en dos fases, nueva autorización tras restauración y
+protección temporal contra suspensión automática. El agente sólo ejecuta tests
+y dry-run; el humano ejecutará los 40 intentos y devolverá `summary.json` y la
+ruta del paquete con hashes. No hay resultado prospectivo nuevo ni pre-registro
+de mejora listo para aprobación. NO-GO vigente.
+
+DECLARADO por el usuario: él abrió Brave durante el intento 29. Esto identifica
+la causa humana comunicada; no cambia la invalidez ni valida los pares parciales.
+
 ## Tercera tanda: segunda ventana detenida por Brave (2026-09-11, Lima)
 
 **VERIFICADO: diagnóstico incompleto; NO-GO vigente.** Se ejecutaron 29/40

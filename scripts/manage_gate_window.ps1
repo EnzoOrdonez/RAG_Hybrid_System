@@ -7,7 +7,8 @@ param(
     [ValidateSet('cold','warm')][string]$Phase,
     [switch]$KeepAnyDesk,
     [switch]$LexicalDiagnostic,
-    [string]$SupervisorProof
+    [string]$SupervisorProof,
+    [switch]$Unattended
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -18,6 +19,53 @@ if ($rootFull -eq $checkout -or $rootFull.StartsWith($checkout.TrimEnd('\') + '\
 $admin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $admin) { throw 'Administrator token required; nothing changed' }
 if ($LexicalDiagnostic) { $KeepAnyDesk = $true }
+if ($Unattended -and -not $LexicalDiagnostic) { throw 'Unattended requires the narrow NVIDIA diagnostic profile' }
+$script:restoring = $false
+
+function Power-Stamp {
+    if (-not ('CloudRAGPower' -as [type])) {
+        Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class CloudRAGPower {
+ [DllImport("kernel32.dll")] public static extern uint SetThreadExecutionState(uint flags);
+ [DllImport("kernel32.dll")] public static extern bool QueryUnbiasedInterruptTime(out ulong ticks);
+ [DllImport("kernel32.dll")] public static extern ulong GetTickCount64();
+}
+'@
+    }
+    [ulong]$unbiased=0
+    if (-not [CloudRAGPower]::QueryUnbiasedInterruptTime([ref]$unbiased)) { throw 'Cannot monitor suspend clock' }
+    @{awake_ms=($unbiased/10000.0);elapsed_ms=[CloudRAGPower]::GetTickCount64()}
+}
+function Test-PowerGap($Before,$After) {
+    (($After.elapsed_ms -lt $Before.elapsed_ms) -or ($After.awake_ms -lt $Before.awake_ms) -or
+     (($After.elapsed_ms-$Before.elapsed_ms)-($After.awake_ms-$Before.awake_ms) -gt 2000))
+}
+function Stop-OwnedTraces {
+    # Runs only AFTER NVIDIA restoration. No global WPR cancellation.
+    $cleanupLock=$null
+    try { $cleanupLock=[IO.File]::Open((Join-Path $rootFull 'cleanup.lock'),'OpenOrCreate','ReadWrite','None') } catch { return }
+    try {
+    $window=Read-Json 'window.json'
+    $roots=@($rootFull)
+    if ($window.PSObject.Properties['cohort']) { $roots += $window.cohort }
+    foreach($file in @(Get-ChildItem -LiteralPath $roots -Filter trace-identity.json -Recurse -ErrorAction SilentlyContinue)) {
+        if((Test-Path -LiteralPath (Join-Path $file.DirectoryName 'trace-stopped.json')) -or (Test-Path -LiteralPath (Join-Path $file.DirectoryName 'trace-recovered.json'))) { continue }
+        $trace=Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json
+        if (-not $trace.PSObject.Properties['window_id'] -or $trace.window_id -ne $window.id -or $trace.instance -notmatch '^CloudRAG-[a-f0-9]{32}$') { continue }
+        $destination=Join-Path $file.DirectoryName ('recovered-'+[guid]::NewGuid().ToString('N')+'.etl')
+        $process=Start-Process wpr.exe -WindowStyle Hidden -PassThru -ArgumentList @('-stop',('"'+$destination+'"'),'-skipPdbGen','-instancename',$trace.instance)
+        if(-not $process.WaitForExit(30000)) {
+            Stop-Process -Id $process.Id -Force
+            Event 'trace-cleanup-timeout' @{instance=$trace.instance;action='inspect named recorder; no global cancel'}
+        } else {
+            Event 'trace-cleanup-returned' @{instance=$trace.instance;exit=$process.ExitCode;destination=$destination}
+            if($process.ExitCode -eq 0) { Save-New (Join-Path $file.DirectoryName 'trace-recovered.json') @{at=[DateTime]::UtcNow.ToString('o');instance=$trace.instance;destination=$destination} }
+        }
+    }
+    } finally { $cleanupLock.Dispose() }
+}
 
 function Test-NvidiaAncestry($Rows, [int]$OverlayId, [int]$ServiceId) {
     $current = @($Rows | Where-Object ProcessId -eq $OverlayId)
@@ -46,8 +94,13 @@ function Save-New([string]$Path, $Value) {
     try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) } finally { $stream.Dispose() }
 }
 function Event($Kind, $Data) {
+    try {
     Save-New (Join-Path $rootFull ('events/' + [guid]::NewGuid().ToString('N') + '.json')) @{
         at=[DateTime]::UtcNow.ToString('o'); kind=$Kind; data=$Data; pid=$PID
+    }
+    } catch {
+        if (-not $script:restoring) { throw }
+        Write-Warning ('Restoration log unavailable: ' + $_.Exception.Message)
     }
 }
 function Read-Json($Name) { Get-Content -LiteralPath (Join-Path $rootFull $Name) -Raw | ConvertFrom-Json }
@@ -94,10 +147,16 @@ function Restore-Service($Before, [bool]$Simulated) {
 function Restore-Window {
     $window = Read-Json 'window.json'
     $diagnostic = $window.PSObject.Properties['lexical_diagnostic'] -and $window.lexical_diagnostic
+    $bounded = $window.PSObject.Properties['unattended'] -and $window.unattended
     if (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json')) { return }
     $lock = $null
     try { $lock = [IO.File]::Open((Join-Path $rootFull 'restore.lock'), 'OpenOrCreate', 'ReadWrite', 'None') } catch { return }
     try {
+        $script:restoring = $true
+        if ($bounded) {
+            $reserve = Join-Path ([IO.Path]::GetFullPath((Join-Path $rootFull '../..'))) 'runtime/emergency-reserve.bin'
+            if (Test-Path -LiteralPath $reserve) { Remove-Item -LiteralPath $reserve -Force }
+        }
         if (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json')) { return }
         # Remote access is always the first restoration action, even if worker cleanup fails.
         if (-not $window.PSObject.Properties['manage_anydesk'] -or $window.manage_anydesk) {
@@ -110,7 +169,7 @@ function Restore-Window {
                 if (Same-Process $worker) { Stop-Process -Id $worker.pid -Force; Event 'worker-stopped' $worker }
             }
         } catch { $failures.Add($_.Exception.Message) }
-        if (-not $window.simulated) {
+        if (-not $window.simulated -and -not $bounded) {
             # Stop only named traces belonging to this window; never global wpr -cancel.
             $traceRoots = @($rootFull)
             if ($window.PSObject.Properties['cohort']) { $traceRoots += $window.cohort }
@@ -176,20 +235,59 @@ function Restore-Window {
             Unregister-ScheduledTask -TaskName $window.task_name -Confirm:$false
             Event 'watchdog-unregistered' $window.task_name
         }
-    } finally { $lock.Dispose() }
+    } finally { $script:restoring=$false; $lock.Dispose() }
+}
+function Invoke-WatchRestore($details) {
+    # Logging failure must never prevent restoration (for example a full disk).
+    try { Event 'watchdog-trigger' $details } catch { Write-Warning $_.Exception.Message }
+    Restore-Window
 }
 function Watch-Window {
     $window = Read-Json 'window.json'
-    Event 'watchdog-ready' @{sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value}
+    $bounded = $window.PSObject.Properties['unattended'] -and $window.unattended
+    $power=$null
+    if ($bounded) {
+        $power=Power-Stamp
+        if (-not [CloudRAGPower]::SetThreadExecutionState([uint32]2147483649)) { throw 'Cannot prevent automatic suspend' }
+    }
+    $bootChanged=$false
+    $triggered=$false
+    if ($bounded) { $bootChanged=((Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o') -ne $window.boot_time) }
+    try {
+    Event 'watchdog-ready' @{sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value;prevent_automatic_suspend=[bool]$bounded}
     while (-not (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json'))) {
         $expired = [DateTime]::UtcNow -ge [DateTime]::Parse($window.deadline_utc).ToUniversalTime()
         $beat = Get-Item -LiteralPath (Join-Path $rootFull 'heartbeat') -ErrorAction SilentlyContinue
         $stale = $null -eq $beat -or ([DateTime]::UtcNow - $beat.LastWriteTimeUtc).TotalSeconds -gt 60
-        if ($expired -or $stale -or -not (Same-Process $window.controller)) {
-            Event 'watchdog-trigger' @{expired=$expired; stale=$stale; controller_alive=(Same-Process $window.controller)}
-            try { Restore-Window } catch { Event 'watchdog-restore-error' $_.Exception.Message }
+        $energy = $false
+        if ($bounded) {
+            $stamp=Power-Stamp
+            $energy=$bootChanged -or (Test-PowerGap $window.power_stamp $stamp)
+            if ($energy -and -not (Test-Path -LiteralPath (Join-Path $rootFull 'energy-event.json'))) {
+                $reserve=Join-Path ([IO.Path]::GetFullPath((Join-Path $rootFull '../..'))) 'runtime/emergency-reserve.bin'
+                if(Test-Path -LiteralPath $reserve) { Remove-Item -LiteralPath $reserve -Force }
+                try {
+                    Save-New (Join-Path $rootFull 'energy-event.json') @{at=[DateTime]::UtcNow.ToString('o');before=$window.power_stamp;after=$stamp;classification='cohort_aborted'}
+                } catch {
+                    Invoke-WatchRestore @{energy=$true; logging_error=$_.Exception.Message}
+                    # Retry only the missing evidence after restoration freed the reserve.
+                    Save-New (Join-Path $rootFull 'energy-event.json') @{at=[DateTime]::UtcNow.ToString('o');before=$window.power_stamp;after=$stamp;classification='cohort_aborted'}
+                }
+            }
+        }
+        if ($expired -or $stale -or $energy -or -not (Same-Process $window.controller)) {
+            $triggered=$true
+            try { Invoke-WatchRestore @{expired=$expired; stale=$stale; energy=$energy; controller_alive=(Same-Process $window.controller)} } catch { Write-Warning ('watchdog-restore-error: '+$_.Exception.Message) }
         }
         Start-Sleep -Seconds 2
+    }
+    } finally {
+        if ($bounded) { [CloudRAGPower]::SetThreadExecutionState([uint32]2147483648) | Out-Null }
+    }
+    if ($triggered -and $bounded -and -not $window.simulated -and (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json'))) {
+        Stop-OwnedTraces
+        $package=[IO.Path]::GetFullPath((Join-Path $rootFull '../..'))
+        & (Join-Path $project '.venv-app/Scripts/python.exe') (Join-Path $project 'scripts/unattended_diagnostic.py') package --root $package
     }
 }
 if ($Mode -eq 'NoticeTest') {
@@ -203,9 +301,14 @@ if (Test-Path -LiteralPath (Join-Path $rootFull 'window.json')) { throw 'Window 
 if ($Mode -eq 'Run' -and (-not $Cohort -or (-not $LexicalDiagnostic -and (-not $System -or -not $Phase)))) { throw 'Run requires Cohort, System and Phase' }
 if ($KeepAnyDesk -and $Mode -ne 'Run' -and -not $LexicalDiagnostic) { throw 'KeepAnyDesk applies only to Run' }
 if ($Mode -eq 'Run') {
+    if ($Unattended) {
+        & (Join-Path $project '.venv-app/Scripts/python.exe') (Join-Path $project 'scripts/unattended_diagnostic.py') preflight --before-cut --root ([IO.Path]::GetFullPath((Join-Path $Cohort '..')))
+        if ($LASTEXITCODE) { throw 'Pre-flight contamination; no intervention' }
+    }
     $cohortFull = [IO.Path]::GetFullPath($Cohort)
     if ($cohortFull -eq $checkout -or $cohortFull.StartsWith($checkout.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Use external cohort root' }
     $cohortProtocol = (Get-Content -LiteralPath (Join-Path $cohortFull 'source-manifest.json') -Raw | ConvertFrom-Json).protocol
+    if ($Unattended -and $cohortProtocol.unattended_policy -ne 'unattended-paired-v1') { throw 'Unattended policy must be explicitly registered' }
     if ($cohortProtocol.protocol_version -ne 2 -or $cohortProtocol.systems.Count -ne 3 -or (-not $LexicalDiagnostic -and $System -notin $cohortProtocol.systems)) { throw 'Unregistered bounded cohort' }
     if ($LexicalDiagnostic) {
         if (-not $cohortProtocol.PSObject.Properties['diagnostic_only'] -or -not $cohortProtocol.diagnostic_only) { throw 'Paired diagnostic required' }
@@ -213,6 +316,7 @@ if ($Mode -eq 'Run') {
         foreach ($item in @(@{dir='deadline';mode='SelfTest'},@{dir='controller';mode='SelfTestController'})) {
             $proof = Get-Content -LiteralPath (Join-Path $SupervisorProof ($item.dir + '/selftest-passed.json')) -Raw | ConvertFrom-Json
             if (-not $proof.lexical_diagnostic -or $proof.mode -ne $item.mode -or $proof.script_sha256 -ne (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()) { throw 'Supervisor proof does not match this profile/build' }
+            if ($Unattended -and -not $proof.unattended) { throw 'Proof did not test unattended power supervision' }
         }
     }
     if ($cohortProtocol.build_id -ne (& git -C $project rev-parse HEAD)) { throw 'Cohort build differs before process changes' }
@@ -283,6 +387,11 @@ $window = @{
     script_sha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()
     manage_anydesk=(-not $KeepAnyDesk)
     lexical_diagnostic=[bool]$LexicalDiagnostic; hard_deadline_utc=$hardDeadline.ToString('o')
+    unattended=[bool]$Unattended
+}
+if ($Unattended) {
+    $window.power_stamp=Power-Stamp
+    $window.boot_time=(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o')
 }
 if ($LexicalDiagnostic) {
     $window.untouched_services = @(Get-CimInstance Win32_Service | Where-Object Name -in @('AnyDesk','NVDisplay.ContainerLocalSystem') | ForEach-Object { @{name=$_.Name;state=$_.State;start_mode=$_.StartMode} })
@@ -324,7 +433,7 @@ try {
         $restoration = @($events | Where-Object kind -eq 'restore-service-intent' | Sort-Object at)
         $firstExpected = if ($LexicalDiagnostic) { 'NvContainerLocalSystem' } else { 'AnyDesk' }
         if (-not $trigger.Count -or $restoration[0].data.name -ne $firstExpected -or $restoration[0].pid -eq $PID) { throw 'Independent restoration/order not demonstrated' }
-        Save-New (Join-Path $rootFull 'selftest-passed.json') @{at=[DateTime]::UtcNow.ToString('o'); mode=$Mode; trigger=$trigger; simulated_services=$true; lexical_diagnostic=[bool]$LexicalDiagnostic; script_sha256=$window.script_sha256}
+        Save-New (Join-Path $rootFull 'selftest-passed.json') @{at=[DateTime]::UtcNow.ToString('o'); mode=$Mode; trigger=$trigger; simulated_services=$true; lexical_diagnostic=[bool]$LexicalDiagnostic; unattended=[bool]$Unattended; script_sha256=$window.script_sha256}
         exit
     }
     $notice = 'CloudRAG: prueba tecnica autorizada. AnyDesk se desconectara. Restauracion automatica antes de ' + $deadline.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz') + '. Estado: ' + $rootFull
@@ -386,15 +495,31 @@ try {
     }
     Event 'process-window-ready' @{deadline_utc=$deadline.ToString('o'); remote_cut=(-not $KeepAnyDesk)}
     if ($LexicalDiagnostic -and @(Get-Process -Name 'NVIDIA Overlay' -ErrorAction SilentlyContinue).Count) { throw 'Overlay remains; no admission or inference' }
+    if ($Unattended) {
+        & (Join-Path $project '.venv-app/Scripts/python.exe') (Join-Path $project 'scripts/unattended_diagnostic.py') preflight --root ([IO.Path]::GetFullPath((Join-Path $Cohort '..')))
+        if ($LASTEXITCODE) { throw 'Post-cut contamination; restore before admission' }
+    }
     $python = Join-Path $project '.venv-app/Scripts/python.exe'
     $payload = Start-Process -FilePath $python -ArgumentList @('scripts/run_managed_gate.py','--root',('"' + $rootFull + '"')) -WorkingDirectory $project -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $rootFull 'payload.stdout.log') -RedirectStandardError (Join-Path $rootFull 'payload.stderr.log')
+    $shown=@{}
     while (-not $payload.HasExited -and [DateTime]::UtcNow -lt $deadline) {
         [IO.File]::WriteAllText((Join-Path $rootFull 'heartbeat'), [DateTime]::UtcNow.ToString('o'))
         if (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json')) { throw 'Window restored by watchdog' }
+        if ($Unattended) {
+            $logs=@('contrast.log','cohort-run.log')
+            foreach($log in $logs) {
+                $path=Join-Path $rootFull $log
+                if (Test-Path -LiteralPath $path) {
+                    $last=Get-Content -LiteralPath $path -Tail 1
+                    if ($last -and $last -match 'intento |INVALID:|index' -and $shown[$log] -ne $last) { Write-Host $last; $shown[$log]=$last }
+                }
+            }
+        }
         Start-Sleep -Seconds 2
         $payload.Refresh()
     }
     Event 'payload-ended' @{has_exited=$payload.HasExited; deadline_reached=([DateTime]::UtcNow -ge $deadline)}
 } catch { Event 'controller-error' $_.Exception.Message; throw } finally {
     Restore-Window
+    if ($Unattended -and (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json'))) { Stop-OwnedTraces }
 }

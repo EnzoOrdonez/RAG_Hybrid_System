@@ -35,6 +35,9 @@ def initialize(root):
 
 
 def check_protocol(protocol):
+    if protocol.get('unattended_policy'):
+        if protocol['unattended_policy'] != 'unattended-paired-v1' or os.environ.get('CLOUDRAG_UNATTENDED') != '1':
+            raise ValueError('Unattended observer policy/environment mismatch')
     if not protocol.get('diagnostic_only') or protocol.get('diagnostic_schedule') != [list(p) for p in paired_schedule()]:
         raise ValueError('Not the frozen paired diagnostic')
     for name, expected in protocol['diagnostic_sources'].items():
@@ -73,6 +76,9 @@ def execute(root, protocol, preparation, observer_factory=observe.Observer):
         raise TimeoutError('No preparation margin')
     receipt = preparation.prepare(scope)
     gate.write_new(root / 'warmups' / f'{scope}.json', receipt)
+    unattended = protocol.get('unattended_policy') == 'unattended-paired-v1'
+    progress_started = time.monotonic()
+    initial_count = len(gate.local_records(root))
     for system, index in remaining(gate.local_records(root)):
         if not gate.window_has_margin(600):
             raise TimeoutError('No query/restoration margin')
@@ -107,7 +113,10 @@ def execute(root, protocol, preparation, observer_factory=observe.Observer):
             pipeline, observer=observer, validate_after=lambda: check_protocol(protocol),
             before_query=lambda: preparation.pipeline(system, scope))
         print({k: row.get(k) for k in ('system', 'index', 'status', 'elapsed_s', 'conditions_invalid')}, flush=True)
-        if row['status'] != 'success' or row.get('conditions_invalid') or row.get('environment_invalid'):
+        from scripts.unattended_diagnostic import should_stop, progress
+        if unattended:
+            progress(root, row, progress_started, initial_count)
+        if should_stop(row, unattended):
             raise RuntimeError('Diagnostic failed/invalid; preserve position and restore window')
     return report(gate.local_records(root))
 
@@ -127,7 +136,8 @@ def run(root):
         preparation = Preparation(root / 'preparation',
             factory=lambda key: load_pipeline(key, _hybrid_index=load_hybrid_index()))
         result = execute(root, protocol, preparation)
-        gate.write_new(root / 'complete.json', dict(at=gate.now(), **result))
+        if not (root / 'complete.json').exists():
+            gate.write_new(root / 'complete.json', dict(at=gate.now(), **result))
         return result
 
 
