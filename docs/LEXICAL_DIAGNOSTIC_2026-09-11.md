@@ -1,5 +1,134 @@
 # Diagnóstico léxico prospectivo — 2026-09-11
 
+## Tercera tanda: segunda ventana detenida por Brave (2026-09-11, Lima)
+
+**VERIFICADO: diagnóstico incompleto; NO-GO vigente.** Se ejecutaron 29/40
+posiciones con el build exacto `658b7487bc570033067a1c012d8023fc05f9a2c9`:
+28 respuestas válidas (14 pares), una respuesta completada con condiciones
+inválidas y 11 posiciones sin iniciar. Cero errores de generación, timeouts o
+intentos abortados. La posición inválida no entra en percentiles ni se reemplaza.
+La ventana terminó por incumplimiento de condiciones, no por defecto del reloj.
+Los 14 pares previos se conservan como evidencia parcial, sin convertirlos en la
+cohorte confirmatoria prevista de 20 pares ni mezclarlos con cohortes históricas.
+
+Evidencia nueva: `C:/CloudRAG/lexical-clean-20260911T2020Z/` (en adelante `R`).
+El análisis es `R/partial-analysis.json`, SHA-256
+`f58c09fa46ddc5d50a833e8bd2f6b30ee4daa347b28708c2e41cde294d3a1f8c`.
+Incluye filas, hashes, llamadas NLI reales y observaciones que interpolan cada
+p95; `R/analysis-inventory.json` fija sus fuentes antes de derivar resultados.
+El análisis y las cinco pruebas externas de reloj/análisis quedan fuera del
+checkout; no se alteró el build medido para añadirlas.
+
+### Contrato, baseline y supervisión
+
+- `R/measurement-contract.md`: crítica y fronteras fijadas antes del corte.
+  El reloj incluye selección/comprobación de preparación, consulta completa,
+  serialización y extracción de trazas a memoria. Excluye precalentamiento,
+  instalación de probes, inicio/cierre del observador, validación ambiental
+  posterior y publicación final. Incluye el inicio durable y arranque del
+  heartbeat. `R/clock-boundaries-02.txt` prueba nueve fronteras del ejecutor y
+  la del wrapper; complementa la regresión versionada de 2 s + 3 s = 5 s.
+- `R/baseline-pytest.txt`: 538 pasan / 5 excluidos, tres avisos SWIG, 70,65 s.
+  Ruff y diff aprobados. El primer escaneo se lanzó sin baseline y devolvió
+  los 17 hallazgos históricos; `R/baseline-secrets-with-baseline.txt` verifica
+  cero activos con 11 exclusiones de corpus y 6 de evidencia firmada.
+  Un fallo inicial de captura de stderr de PowerShell y otro de comillas del
+  lanzador precedieron las pruebas completas; no fueron fallos del pipeline.
+- `R/environment-before.json`, 20:25:25 UTC: driver 616.64, Ollama 0.22.1,
+  digest Granite esperado `444af1c4b2fedd6b54041aca558e7300b0b3d5c0468c44619126240323ba2852`,
+  AnyDesk detenido. Snapshot y verificaciones del bundle aprobados; manifiesto
+  SHA-256 `0bb1957f6ce0426214c4ca121f162638db0947e9f95b22fc214fad7034caec10`.
+- Supervisor independiente probado antes del corte: deadline a las
+  20:27:22 UTC y pérdida del controlador a las 20:27:29 UTC, en
+  `R/proof/{deadline,controller}/selftest-passed.json`. Servicios simulados
+  durante estas dos pruebas, no una afirmación de restauración real anticipada.
+- Corte a las 20:27:52 UTC. Se detuvieron Overlay PID 3080, 3120, 4312,
+  13088 y 29076. El reinicio PID 32084 quedó vinculado a NvContainer en
+  `R/window-01/overlay-relaunch-proof.json`; solo entonces se intervino
+  `NvContainerLocalSystem` (PID previo 31332). Se desactivó temporalmente la tarea
+  `NVIDIA App SelfUpdate_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}`.
+  AnyDesk y NVDisplay quedaron fuera de la intervención.
+- Admisión: 13 muestras, aprobada, sin razones de invalidez. Contraste a las
+  20:34:31 UTC: diez pares, mediana -0,6104 %, límite superior unilateral 95 %
+  -0,02277 % frente a 5 %, aprobado. No se descontaron tiempos RAG.
+
+### Causa concreta del cierre y restauración
+
+**VERIFICADO:** intento híbrido índice 14, ID
+`ab41ff5e41654570ae215632c93848e9`, respuesta de 20,1455 s completada,
+`conditions_invalid=true`, razón `prohibited_process`. La primera muestra de
+su telemetría, 21:12:09.849592 UTC, registra Brave y procesos GPU Brave PID 2212
+y 35520. Archivo:
+`R/cohort/telemetry/85869fad697f4959b453f42195eff97d.jsonl`.
+Esto demuestra presencia del proceso prohibido, no quién lo abrió ni cuánto
+afectó la latencia. El ejecutor detuvo la secuencia al registrar el resultado.
+Invalidez de condiciones: 1/29 (3,45 %); fallos de generación/abortos: 0/29.
+
+Restauración real a las 21:13:12.9649008 UTC (16:13:12 Lima), antes del límite
+duro 22:27:34 UTC. NvContainer restaurado/verificado a las 21:13:09 UTC;
+tarea habilitada a las 21:13:11 UTC. `R/restoration-audit.json` vuelve a
+verificar el estado a las 01:52:32 UTC del 12-sep: Overlay PID 12976, 28720,
+32976, 35556 y 35724; NvContainer Running/Auto; NVDisplay Running/Auto;
+AnyDesk Stopped/Auto; tarea habilitada; watchdog retirado. El registro
+`controller_returned` acredita el retorno del controlador y la restauración,
+**no** el éxito del diagnóstico completo. No se abrió una tercera ventana.
+
+### Resultados parciales descriptivos, no confirmatorios
+
+Cada celda muestra p50 / p95 sobre 14 respuestas válidas por sistema. Los
+percentiles de etapas son independientes y no se suman.
+
+| Medida | Híbrido | Léxico |
+|---|---:|---:|
+| Respuesta completa (s) | 33,79 / 64,71 | 25,03 / 68,99 |
+| Retrieval (s) | 0,1307 / 0,1455 | 0,0330 / 0,0407 |
+| Re-ranking (s) | 4,2272 / 4,9509 | <0,0001 / <0,0001 |
+| Generación (s) | 19,55 / 46,46 | 19,27 / 49,95 |
+| Verificación, etapa NLI (s) | 3,46 / 12,66 | 3,60 / 16,95 |
+| Chunks al generador | 5 / 5 | 5 / 5 |
+| Tokens de salida | 230,5 / 563,55 | 212,5 / 659,5 |
+| Claims extraídos | 3,5 / 9 | 4 / 13,15 |
+| Llamadas NLI reales | 2,5 / 9 | 3,5 / 12,8 |
+| Pares NLI reales | 12,5 / 45 | 17,5 / 64 |
+| Prompt de usuario (caracteres) | 8885 / 13587,4 | 7165,5 / 10428,8 |
+| Respuesta (caracteres) | 1191,5 / 2474 | 1073 / 2662,65 |
+
+El p95 parcial léxico de 68,9869 s interpola q001/q016 con pesos 0,65/0,35.
+Al aplicar esos mismos pesos a sus componentes: generación 49,9474 s,
+verificación 16,9477 s, retrieval 0,0329 s y otros 2,0589 s (más componentes
+residuales inferiores a 0,00001 s). Esto contabiliza el total y su exceso
+descriptivo de 8,9869 s sobre 60; **no** demuestra qué intervención ahorraría
+esos segundos. No se adjudica causalmente el exceso repartiendo percentiles.
+
+En q016, léxico/híbrido: 77,3821/49,6160 s, 666/378 tokens, 19/9 claims,
+90/45 pares NLI. Generación añade 20,2255 s y verificación 12,2538 s al léxico;
+su ahorro en retrieval/re-ranking compensa aproximadamente 4,7131 s. Es una
+observación prospectiva compatible con la hipótesis, no confirmación de la cola
+completa. q057, otra candidata histórica, no llegó a medirse en esta ventana.
+Tampoco se oculta la respuesta híbrida q027 de 92,7320 s, 845 tokens y 40 pares
+NLI: el p95 parcial híbrido también supera 60 s. No reemplaza su piloto previo
+ni autoriza a ignorar esta nueva señal.
+
+**Crítica:** AB/BA y verificaciones de residencia acotan orden y recarga, pero
+no eliminan interacción con contexto/plantilla, variación de generación ni toda
+carga residual. El cierre temprano deja seis pares sin completar y no permite
+confirmar la hipótesis exigida. No atribuir estos resultados exclusivamente al
+driver, a RAM o a hardware, ni usar la aparición de Brave para explicar respuestas
+previas donde el observador no lo registró.
+
+### Parada y continuación necesaria
+
+No se redacta una optimización como si su hipótesis estuviera confirmada: el
+pre-registro de mejora sigue bloqueado. No se implementaron optimizaciones, P2s
+ni nube; P900 y su evidencia de resiliencia no se modificaron.
+Una continuación que aspire a veinte pares válidos requiere autorización
+explícita para **otra ventana y una cohorte nueva completa**; reponer el índice
+14 inválido o juntar estos catorce pares con otra ventana violaría el protocolo.
+Antes de esa nueva ventana: cerrar Brave y comprobar ausencia con
+`Get-Process brave -ErrorAction SilentlyContinue`; mantenerlo cerrado durante
+toda la medición. Esta es una acción futura propuesta, no ejecutada ni autorizada
+por silencio. El pre-registro de la compuerta y el NO-GO vigente no cambian.
+
 ## Segunda tanda: crítica y contrato antes de implementar
 
 Baseline `94e73a5`: 522 tests pasan / 5 excluidos. Evidencia nueva:

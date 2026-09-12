@@ -1,5 +1,26 @@
 # Compuerta local: registro de ejecución
 
+## Addendum 2026-09-11: segunda ventana diagnóstica incompleta
+
+**VERIFICADO; NO-GO vigente.** Con build `658b748` se ejecutaron 29/40 posiciones:
+28 respuestas válidas (14 pares), una respuesta inválida por aparición de Brave
+y once posiciones sin ejecutar. No hubo errores de generación ni abortos de
+intento; la invalidez es 1/29, separada de los percentiles. El controlador detuvo
+la secuencia y restauró NVIDIA a las 21:13:12 UTC, dentro del límite autorizado;
+AnyDesk permaneció apagado e intacto. No se abrió otra ventana.
+
+Evidencia: `C:/CloudRAG/lexical-clean-20260911T2020Z/partial-analysis.json` y
+`restoration-audit.json`. P95 parciales: híbrido 64,71 s y léxico 68,99 s (n=14
+por sistema), sin mezclar con los pilotos previos ni usarlos como confirmación
+del mecanismo causal. La respuesta híbrida q027 de 92,73 s también se conserva.
+El diagnóstico prospectivo de veinte pares quedó incompleto y no sustenta aún
+el pre-registro de una optimización. P900/resiliencia no se reejecutaron ni
+modificaron; P2s y nube siguen fuera de esta tanda. Tabla por etapa, fronteras,
+regresiones externas, hashes y causa del cierre en
+[el addendum del diagnóstico](LEXICAL_DIAGNOSTIC_2026-09-11.md).
+
+Los estados y resultados siguientes conservan su carácter histórico.
+
 **Estado vigente: NO-GO (2026-09-10, Lima); Fase B bloqueada.** La nueva cohorte
 completó 120 posiciones y P900 terminó SUS/exportación. El p95 léxico caliente
 de 65,75 s incumple el criterio prospectivo de 60 s. Híbrido y semántico calientes

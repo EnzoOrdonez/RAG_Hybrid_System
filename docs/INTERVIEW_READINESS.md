@@ -1,5 +1,15 @@
 # Preparación técnica de Evaluation Mode
 
+**Seguimiento 2026-09-11, tercera tanda — VERIFICADO:** segunda ventana NVIDIA
+con `658b748`, 29/40 intentos diagnósticos: 14 pares válidos y una respuesta
+inválida por Brave; once posiciones sin ejecutar. El coordinador se detuvo y
+restauró NVIDIA a las 21:13:12 UTC, con AnyDesk apagado e intacto. Los p95
+parciales (híbrido 64,71 s, léxico 68,99 s; n=14 cada uno) son descriptivos,
+no un nuevo piloto completo ni confirmación causal. No hay optimización ni
+pre-registro de mejora aprobado. NO-GO y bloqueo de Fase B permanecen.
+Evidencia y límites en el [addendum del diagnóstico](LEXICAL_DIAGNOSTIC_2026-09-11.md).
+No reutilizar la autorización consumida ni sustituir posiciones inválidas.
+
 **Seguimiento 2026-09-11, segunda tanda:** pasó la admisión sin overlays y el
 contraste combinado (límite superior 0,19 %). Se abortó antes de los slots por una
 discrepancia del cronómetro del coordinador; NVIDIA quedó restaurado y AnyDesk
