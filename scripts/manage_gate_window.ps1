@@ -34,7 +34,7 @@ public static class CloudRAGPower {
 }
 '@
     }
-    [ulong]$unbiased=0
+    [uint64]$unbiased=0
     if (-not [CloudRAGPower]::QueryUnbiasedInterruptTime([ref]$unbiased)) { throw 'Cannot monitor suspend clock' }
     @{awake_ms=($unbiased/10000.0);elapsed_ms=[CloudRAGPower]::GetTickCount64()}
 }
