@@ -155,11 +155,13 @@ def prepare(root, resume=False, authorize=False, nli_experiment=False):
             raise ValueError('Explicit experiment flag must match resumed cohort')
         rows = gate.local_records(root / 'cohort')
         if nli_experiment:
-            diagnostic.resume_boundary(rows)
+            gaps = diagnostic.load_gaps(root / 'cohort', rows)
+            diagnostic.resume_boundary(rows, gaps)
             quality = diagnostic.quality_summary(root / 'cohort', rows)
             if quality['failures']:
                 raise RuntimeError('Quality failure is terminal; review evidence before any new experiment')
-        if not diagnostic.remaining(rows) and (not nli_experiment or quality['passed']):
+        pending = diagnostic.remaining(rows, gaps) if nli_experiment else diagnostic.remaining(rows)
+        if not pending and (not nli_experiment or quality['replay_complete']):
             print('COMPLETE', flush=True)
             return None
         check_resume(root, authorize)
@@ -291,10 +293,12 @@ def package(root):
         protocol_file = root / 'cohort/source-manifest.json'
         experiment = protocol_file.exists() and gate.read_json(protocol_file)['protocol'].get('nli_experiment')
         if experiment:
-            from scripts.nli_batch_experiment import EXPERIMENT, summarize as report, quality_summary, bootstrap
+            from scripts.nli_batch_experiment import EXPERIMENT, summarize as report, quality_summary, bootstrap, seal_interruptions
             if experiment != EXPERIMENT:
                 raise ValueError('Unknown NLI experiment')
-        summary = dict(at=gate.now(), **report(rows, energy=energy),
+            gaps = seal_interruptions(root / 'cohort')
+        reported = report(rows, energy=energy, gaps=gaps) if experiment else report(rows, energy=energy)
+        summary = dict(at=gate.now(), **reported,
                        cleanup_pending=pending_traces(root),
                        windows=[dict(path=p.parent.relative_to(root).as_posix(),
                                 state=gate.read_json(p), restored=gate.read_json(p.with_name('restored.json'))) for p in windows])
@@ -302,7 +306,7 @@ def package(root):
             summary['quality'] = quality_summary(root / 'cohort', rows)
             summary['quality_pass'] = summary['quality']['passed']
             summary['confirmation_ready'] = summary['confirmation_ready'] and summary['quality_pass']
-            summary['bootstrap'] = bootstrap(rows) if not energy else []
+            summary['bootstrap'] = bootstrap(rows, gaps) if not energy else []
         version = root / 'packages' / uuid.uuid4().hex
         gate.write_new(version / 'summary.json', summary)
         replace_view(root / 'summary.json', summary)

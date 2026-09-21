@@ -85,7 +85,9 @@ def run(root):
         command('contrast', ['scripts/run_lexical_diagnostic.py', 'contrast', '--output', str(root / 'contrast')])
         if protocol.get('nli_experiment'):
             command('cohort-run', ['scripts/nli_batch_experiment.py', 'run', '--output', str(cohort)])
-            from scripts.nli_batch_experiment import summarize as report
+            from scripts.nli_batch_experiment import summarize, load_gaps
+            def report(rows):
+                return summarize(rows, gaps=load_gaps(cohort, rows))
         else:
             command('cohort-run', ['scripts/run_lexical_diagnostic.py', 'run', '--output', str(cohort)])
             from scripts.run_lexical_diagnostic import report

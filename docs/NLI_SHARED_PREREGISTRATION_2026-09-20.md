@@ -8,6 +8,16 @@ aprobación y no implementado. El texto siguiente conserva ese pre-registro;
 su parada para aprobación queda satisfecha por la decisión explícita de 21-sep.
 Avance técnico en [la nota de implementación](NLI_BATCH_IMPLEMENTATION_2026-09-21.md).
 
+**Enmienda autorizada 2026-09-21, séptima tanda (antes de la cohorte real):**
+ante un par interrumpido se continúa sólo con pares posteriores, conservando
+`INCOMPLETO_INTERRUMPIDO` y los brazos ausentes como no ejecutados, sin imputar.
+Los contrastes y la equivalencia pareada excluyen el par entero. El n de
+suficiencia sigue siendo 20 pares completos válidos por sistema (60 en total);
+un hueco implica insuficiencia y NO-GO aunque el calendario restante termine.
+No se recalcula potencia ni se relaja p95/cero fallos. Los replays individuales
+anteriores, si existen, se conservan sin incorporarlos a la equivalencia pareada.
+Detalle y criterios en [el runbook](NLI_BATCH_RUNNER_2026-09-21.md).
+
 Este documento fija una propuesta revisable por el usuario antes de cualquier
 cambio de producción. "Implement the plan" autoriza esta entrega documental;
 no elimina la parada obligatoria previa a la optimización. El usuario eligió

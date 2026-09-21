@@ -9,6 +9,28 @@ modelos, umbrales, dispositivo ni tamaño interno de lote (32).
 
 ## Diseño y crítica
 
+### Enmienda autorizada de reanudación (21-sep, séptima tanda)
+
+DECISIÓN DEL USUARIO, previa a la medición: continuar los pares restantes
+conservando el hueco `INCOMPLETO_INTERRUMPIDO`. Crítica previa a implementar:
+un registro sintético de intento ausente inventaría una observación; borrar el
+brazo existente ocultaría un fallo. Se usará un anexo inmutable por par con
+referencias y hashes de los intentos originales y lista de brazos no ejecutados.
+Se publica sólo después de recuperar intentos y verificar restauración, nunca
+entre los brazos de un par que aún se está ejecutando en la misma ventana.
+
+El calendario podrá quedar consumido con menos de 120 ejecuciones reales. Eso
+no significa suficiencia: se conservan **20 pares completos válidos por sistema**
+como n mínimo registrado, cero fallos y p95 candidato ≤60 s. No se ha añadido un
+cálculo de potencia ni rebajado el n. Contrastes, bootstrap y equivalencia pareada
+usan sólo pares con ambos brazos válidos en la misma ventana; los brazos huérfanos
+siguen disponibles como evidencia individual descriptiva, fuera del contraste.
+Una interrupción de energía sigue abortando toda la cohorte según el protocolo.
+
+Criterios verificables: reanudación autorizada sin duplicados ni imputación;
+anexo idéntico al volver a empaquetar; rechazo de intento posterior en un hueco;
+conteos separados y NO-GO por insuficiencia incluso con latencias restantes bajas.
+
 Una posición se identifica por sistema, índice y brazo. Las 120 posiciones son
 20 consultas × tres sistemas × dos brazos, en calendario determinista rotado,
 diez órdenes control/candidato y diez candidato/control por sistema. Se firma
@@ -67,13 +89,19 @@ Con Windows apagado no puede garantizarse restauración inmediata; al volver se
 restaura, se prohíben inferencias fuera de plazo y la cohorte energética queda
 abortada, sin reutilizar sus datos como válidos.
 
-**Caso de protocolo pendiente de decisión del usuario:** si se interrumpe un par
-después de su primer brazo, está prohibido completar el segundo en otra ventana.
-El runner rechaza esa reanudación **antes de intervenir NVIDIA** y pide revisión;
-no declara por su cuenta la cohorte terminal ni salta el hueco. La pregunta
-pendiente es terminar como insuficiente o continuar sólo pares posteriores.
-Los intentos existentes quedan intactos; el brazo no iniciado no se imputa.
-La reanudación entre pares completos sí está implementada.
+**Regla autorizada:** al restaurar se recuperan los intentos abortados, sin
+inventar duración final, y se sella cada par roto en
+`cohort/gaps/<sistema>-<índice>.json` como `INCOMPLETO_INTERRUMPIDO`. El anexo
+referencia los intentos existentes con SHA-256 y enumera `missing_arms`; no crea
+un intento para el brazo que nunca comenzó. Si ambos comenzaron pero uno quedó
+abortado, el par también se excluye, aunque `missing_arms` esté vacío.
+
+Al reanudar se verifica el manifiesto, los hashes y `-AuthorizeNewWindow`, y se
+avanza al siguiente par pendiente. Está prohibido repetir los intentos previos,
+completar el compañero en otra ventana, sustituir posiciones o recalcular sus
+duraciones. El anexo se publica una sola vez, entra al manifiesto y permanece
+idéntico al reempaquetar. No se aplica esta política retroactivamente a paquetes
+construidos sin `interrupted_pair_policy=continue-pairs-preserve-gap-v1`.
 
 ## Lanzamiento humano (no ejecutado por el agente)
 
@@ -108,7 +136,7 @@ La reanudación entre pares completos sí está implementada.
    ```
 
    Se imprime la ruta nueva `C:/CloudRAG/diag-run-<timestamp>/`, estado de
-   supervisor/admisión y `intento i/120 | sistema | brazo | elapsed | ETA`.
+   supervisor/admisión y `intento i/120 | posicion j/120 | sistema | brazo | elapsed | ETA`.
    Después aparece progreso de calidad. La ETA de consultas no incluye replays.
    ESTIMADO de planificación: varias horas y posiblemente varias ventanas,
    según generación/NLI; no se promete completar 120 más 160 replays en 120 min.
@@ -123,8 +151,10 @@ La reanudación entre pares completos sí está implementada.
    Mismo build/entorno/paquete, sin editar archivos ni rellenar posiciones.
    Código 3: calendario pendiente tras pausa; código 2: evidencia insuficiente
    o calidad pendiente/fallida; código 1: fallo. Revisar `summary.json` y los
-   logs antes de reanudar. Si hay fallos de calidad o par incompleto, detenerse
-   y traer el paquete; no forzar ni abrir una nueva cohorte para ocultarlos.
+   logs antes de reanudar. Tras una interrupción y restauración verificada se
+   permite continuar los pares restantes con el mismo comando; el hueco ya
+   sellado no se rellena. Si hay fallo de calidad, identidad o restauración,
+   detenerse y traer el paquete; no forzar ni abrir una cohorte para ocultarlo.
    Máximo dos admisiones fallidas por la misma causa: identificarla antes de
    otra autorización. Código 0 sólo indica paquete listo para análisis, **no GO**.
 
@@ -151,14 +181,37 @@ No requiere administrador, no carga modelos ni toca servicios. Comprueba rechazo
 de contaminación, expiración sin inferencias, supervisor **simulado** independiente
 tras kill de un hijo, autorización de reanudación, 120 posiciones sin duplicación,
 alternancia real de estrategia con modelo simulado, 160 replays, invalidez y hashes.
+También crea `scenarios/interrupted-pair/`: interrupción tras la novena respuesta,
+restauración simulada, rechazo sin autorización y reanudación autorizada. El
+resultado es **119 intentos reales simulados, un brazo no ejecutado, 59 pares
+completos y NO-GO por insuficiencia**. Compara hashes antes/después y no rellena
+el intento décimo. Es un escenario separado del camino feliz de 120 posiciones.
 No sustituye las pruebas reales del Programador de tareas antes del corte.
 
-`summary.json` separa seis celdas brazo/sistema: n, fallos, inválidos y
-p50/p90/p95/mín/máx/media por etapa y carga. Incluye 60 pares con ventana/orden,
-bootstrap pareado exploratorio (10.000, seed 42) y discrepancia frente al ahorro
-NLI supuesto del 65 %. Fallos/abortos/invalidaciones nunca entran en cuantiles.
-`complete` sólo significa calendario consumido; `quality_pass` exige equivalencia
-de las 160 entradas; `confirmation_ready` exige 20 válidos por cada celda y calidad.
+`summary.json` distingue `planned_slots=120`, `executed_attempts` y
+`not_executed_slots`. El campo heredado `total_attempts=120` es el tamaño planeado,
+no el número observado. `groups` conserva seis celdas individuales descriptivas
+con n, fallos, inválidos y p50/p90/p95/mín/máx/media por etapa y carga.
+`paired_groups`, `pairs` y el bootstrap usan **sólo pares completos válidos**;
+un brazo huérfano válido puede aparecer en `groups`, nunca en el contraste.
+`pair_states` separa `COMPLETO_VALIDO`, `INVALIDO_CONTAMINACION`,
+`INCOMPLETO_INTERRUMPIDO`, `FALLIDO_TECNICO` y posiciones pendientes. Las causas
+adicionales siguen en los registros originales. `interrupted_pairs` incluye los
+anexos; `complete_valid_pairs_by_system` y `sufficiency` declaran suficiencia.
+
+Bootstrap exploratorio (10.000, seed 42) sobre los pares disponibles, con n
+efectivo explícito y etiqueta insuficiente si n<20; no cambia el umbral GO.
+Fallos/abortos/invalidaciones nunca entran en cuantiles ni se imputan. La
+discrepancia respecto del ahorro NLI supuesto del 65 % también es descriptiva.
+
+`complete` sólo significa calendario consumido, incluidos huecos registrados.
+Los replays de respuestas nuevas se restringen a brazos de pares válidos; los
+40 replays fuente permanecen separados. `quality.replay_complete` indica que
+terminaron los replays elegibles; evita abrir ventanas sin fin cuando existe
+un hueco. `quality_pass` sigue exigiendo las 160 entradas; sin 20 pares válidos
+por sistema no puede cumplirse. Los replays excluidos previos se conservan y
+enumeran, sin incorporarlos a la equivalencia pareada.
+`confirmation_ready` exige suficiencia y calidad.
 `latency_pass_candidate` exige p95 ≤60 s en los tres sistemas candidatos.
 El control se reporta aunque exceda 60 s. Ningún flag cambia automáticamente el
 veredicto: quedan la auditoría del paquete y contratos P900/resiliencia.
@@ -172,3 +225,7 @@ Auditoría de alcance: Ruff sobre archivos tocados aprobado. Ruff global encontr
 `runner-ruff-baseline-comparison.json`; no se corrigen fuera de este alcance ni
 se afirma que el repositorio completo esté limpio de lint. Suite, secretos,
 diff y dry-run se registran en los logs externos `runner-final-*`.
+
+La auditoría de esta enmienda de huecos se registra separadamente en
+`C:/CloudRAG/nli-gap-20260921-060446391/`, baseline `fb45949`, 653 tests.
+Los nuevos logs finales y el paquete sintético no alteran la evidencia anterior.

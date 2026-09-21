@@ -49,7 +49,7 @@ def test_calendar_rejects_corruption(kind):
         experiment.remaining(data)
 
 
-def test_unresolved_interrupted_pair_refuses_mate_across_windows():
+def test_unsealed_interrupted_pair_refuses_mate_across_windows():
     with pytest.raises(RuntimeError, match='Interrupted pair'):
         experiment.resume_boundary(rows()[:1])
     experiment.resume_boundary(rows()[:2])
