@@ -1,5 +1,16 @@
 # Diagnóstico léxico prospectivo — 2026-09-11
 
+## Quinta tanda: diagnóstico completo (2026-09-20)
+
+VERIFICADO: paquete `C:/CloudRAG/diag-run-20260920T223927918Z/`, build
+`a06bb98`, 962 archivos verificados, 40/40 respuestas válidas y restauración
+cerrada. p95 léxico 70,61 s e híbrido 63,18 s: NO-GO vigente para ambos.
+La hipótesis se matiza: la cola concentra generación/NLI, pero el léxico es más
+lento sólo en 6/20 pares y en q016 el híbrido produce más claims que el léxico.
+Ver [análisis completo](LEXICAL_CONFIRMATION_2026-09-20.md) y
+[pre-registro pendiente de aprobación](NLI_SHARED_PREREGISTRATION_2026-09-20.md).
+Las tandas anteriores se conservan separadas. No hay optimización implementada.
+
 ## Cuarta tanda: artefacto desatendido (2026-09-12)
 
 El [runner y checklist](UNATTENDED_DIAGNOSTIC.md) aplican las tres reglas

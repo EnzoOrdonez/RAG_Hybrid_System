@@ -1,5 +1,21 @@
 # Compuerta local: registro de ejecución
 
+## Addendum 2026-09-20: diagnóstico completo; dos incumplimientos de p95
+
+**VERIFICADO; NO-GO vigente.** La cohorte `diag-run-20260920T223927918Z`,
+build `a06bb98`, completa 20 respuestas calientes válidas por sistema, cero
+fallos/abortos/invalidaciones y restauración verificada. Léxico: p50 24,66 s,
+p95 **70,61 s**; híbrido: p50 29,54 s, p95 **63,18 s**. Ambos incumplen 60 s.
+`confirmation_ready=true` indica completitud diagnóstica, no GO de entrevistas.
+
+Se conserva íntegra la historia previa, incluido el cierre P900/resiliencia;
+no se reejecutó en esta tanda. La [confirmación matizada](LEXICAL_CONFIRMATION_2026-09-20.md)
+expone casos contrarios a una explicación exclusivamente léxica. Se propone
+[una sola intervención NLI compartida](NLI_SHARED_PREREGISTRATION_2026-09-20.md),
+pendiente de visto bueno formal y validación prospectiva de tres sistemas.
+Fase B continúa bloqueada. Esta tanda sólo añade documentación y análisis
+externo; no modifica pipeline ni criterios de compuerta.
+
 ## Addendum 2026-09-12: runner para lanzamiento humano
 
 Se entrega [runner desatendido](UNATTENDED_DIAGNOSTIC.md), probado con modelos

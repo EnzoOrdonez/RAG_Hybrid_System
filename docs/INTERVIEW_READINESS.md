@@ -1,5 +1,11 @@
 # Preparación técnica de Evaluation Mode
 
+**Seguimiento 2026-09-20 — VERIFICADO:** diagnóstico completo, 40/40 válidos;
+p95 léxico **70,61 s** e híbrido **63,18 s**, ambos >60 s. **NO-GO vigente**;
+Fase B bloqueada. El [informe](LEXICAL_CONFIRMATION_2026-09-20.md) matiza la
+hipótesis histórica y el [pre-registro NLI compartido](NLI_SHARED_PREREGISTRATION_2026-09-20.md)
+queda pendiente de aprobación formal. No se implementó la optimización.
+
 **Seguimiento 2026-09-12 — entrega desatendida:** el diagnóstico siguiente lo
 lanza el humano con el [runner documentado](UNATTENDED_DIAGNOSTIC.md). Pre-flight
 en dos fases, autorización explícita por reanudación y aborto por energía.
