@@ -358,3 +358,16 @@ se comprobaron servicios restaurados en `p900-and-probe-stop-01.json`.
 No habilitar entrevistas ni Fase B a partir de este cierre. Resolver el p95 léxico
 requiere una propuesta y nueva validación prospectiva; no repetir solo consultas
 lentas ni descartar respuestas válidas. La nota UX y el criterio permanecen fijos.
+
+### Addendum 2026-09-21: candidato NLI, sin aceptación operativa
+
+El [diagnóstico posterior](LEXICAL_CONFIRMATION_2026-09-20.md) registra p95
+léxico 70,61 s e híbrido 63,18 s; ambos incumplen 60 s en esa cohorte separada.
+El usuario aprobó [agrupar los pares NLI](NLI_SHARED_PREREGISTRATION_2026-09-20.md).
+El mecanismo candidato está implementado en `c86d734`, con recuperación trazable;
+la app conserva la estrategia secuencial hasta validación y decisión posterior.
+El [runner comparativo de 120 intentos](NLI_BATCH_RUNNER_2026-09-21.md) se entrega
+para lanzamiento humano, con control/candidato en el mismo build y replays de
+equivalencia. **NO-GO y Fase B bloqueada**: tests y dry-run no son evidencia de
+latencia ni de equivalencia numérica con modelos reales. No se repitió P900 ni
+se reinterpretaron sus valoraciones. P2s siguen pendientes.

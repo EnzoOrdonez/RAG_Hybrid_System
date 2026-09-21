@@ -991,3 +991,25 @@ históricas del escáner, ningún hallazgo nuevo. `closure-final-checks.txt` reg
 códigos de salida 0 y ninguna diferencia en `experiments/results`, `data`, `paper`
 ni `output` respecto de `670f8e5`. Este cierre modifica cinco documentos; no hay
 cambios adicionales de código ni inferencias después de la validación de P900.
+
+## Addendum 2026-09-21: implementación experimental de NLI compartido
+
+Este addendum no sustituye los cierres históricos anteriores. El diagnóstico
+de 20-sep, documentado en `LEXICAL_CONFIRMATION_2026-09-20.md`, dejó p95 70,61 s
+léxico y 63,18 s híbrido, ambos sobre 60 s. NO-GO vigente.
+
+El usuario aprobó el pre-registro `NLI_SHARED_PREREGISTRATION_2026-09-20.md` el
+21-sep. `c86d734` añade la agrupación opcional de los mismos pares NLI, lote
+interno 32 y recuperación secuencial con error visible. App predeterminada:
+control `per_claim`. No se cambiaron prompts, retrieval, re-ranking ni modelos.
+
+La validación prospectiva se empaqueta para el humano en
+`scripts/run_diagnostic_window.ps1 -NliExperiment`: 120 respuestas nuevas,
+calendario contrabalanceado, hashes, supervisor por ventana y equivalencia sobre
+40 respuestas fuente más 120 nuevas. Procedimiento, límites y pregunta pendiente
+de par interrumpido: `NLI_BATCH_RUNNER_2026-09-21.md`.
+
+Evidencia de desarrollo externa: `C:/CloudRAG/nli-build-20260921T004410616Z/`.
+Baseline 576 tests; tras cambio NLI 605. Los logs finales del runner se registran
+como `runner-final-*`; son tests sin modelos y evidencia sintética, no una nueva
+cohorte de rendimiento. NO-GO, P2s pendientes y Fase B bloqueada; sin despliegue.

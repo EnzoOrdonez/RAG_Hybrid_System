@@ -20,6 +20,10 @@ def observer_environment(env, protocol):
         env['CLOUDRAG_UNATTENDED'] = '1'
     else:
         env.pop('CLOUDRAG_UNATTENDED', None)
+    if protocol and protocol.get('nli_experiment') == 'shared-nli-pairs-v1':
+        env['CLOUDRAG_NLI_EXPERIMENT'] = '1'
+    else:
+        env.pop('CLOUDRAG_NLI_EXPERIMENT', None)
     return env
 
 
@@ -57,6 +61,7 @@ def run(root):
         OLLAMA_HOST='http://localhost:11434')
     env = observer_environment(env, protocol)
     os.environ.pop('CLOUDRAG_UNATTENDED', None)
+    os.environ.pop('CLOUDRAG_NLI_EXPERIMENT', None)
     os.environ.update(env)
 
     def command(label, args):
@@ -78,8 +83,12 @@ def run(root):
     admission(root / 'admission-before-contrast')
     if diagnostic:
         command('contrast', ['scripts/run_lexical_diagnostic.py', 'contrast', '--output', str(root / 'contrast')])
-        command('cohort-run', ['scripts/run_lexical_diagnostic.py', 'run', '--output', str(cohort)])
-        from scripts.run_lexical_diagnostic import report
+        if protocol.get('nli_experiment'):
+            command('cohort-run', ['scripts/nli_batch_experiment.py', 'run', '--output', str(cohort)])
+            from scripts.nli_batch_experiment import summarize as report
+        else:
+            command('cohort-run', ['scripts/run_lexical_diagnostic.py', 'run', '--output', str(cohort)])
+            from scripts.run_lexical_diagnostic import report
         gate.write_new(root / 'payload-complete.json', dict(at=gate.now(), cohort=str(cohort),
             report=report(gate.local_records(cohort)), diagnostic_only=True))
         return

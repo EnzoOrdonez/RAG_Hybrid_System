@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from functools import wraps
 import hashlib
 import inspect
+import os
 import time
 from unittest.mock import patch
 
@@ -139,7 +140,11 @@ class PipelineTrace:
             self._install(self.pipeline.llm, 'generate', 'generation', generation)
             self._install(detector, '_extract_claims', 'extractions', lambda args: {},
                           lambda result: dict(claims=list(result), count=len(result)))
-            self._install(detector._nli_model, 'predict', 'nli', prediction)
+            raw_scores = None
+            if os.environ.get('CLOUDRAG_NLI_EXPERIMENT') == '1':
+                def raw_scores(result):
+                    return dict(raw_scores=result.tolist() if hasattr(result, 'tolist') else result)
+            self._install(detector._nli_model, 'predict', 'nli', prediction, raw_scores)
         except BaseException:
             self.stack.close()
             raise

@@ -1,5 +1,5 @@
 <# Human entry point. DryRun never invokes the privileged manager or models. #>
-param([string]$Resume, [switch]$AuthorizeNewWindow, [switch]$DryRun, [string]$Output)
+param([string]$Resume, [switch]$AuthorizeNewWindow, [switch]$DryRun, [string]$Output, [switch]$NliExperiment)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $project = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -16,7 +16,9 @@ $root = if ($Resume) { [IO.Path]::GetFullPath($Resume) } elseif ($Output) { [IO.
     Join-Path 'C:/CloudRAG' (('diag-{0}-' -f $(if($DryRun){'synthetic'}else{'run'})) + [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ'))
 }
 if ($DryRun) {
-    & $python scripts/unattended_diagnostic.py dry-run --root $root
+    $dryArgs=@('scripts/unattended_diagnostic.py','dry-run','--root',$root)
+    if($NliExperiment){$dryArgs+='--nli-experiment'}
+    & $python @dryArgs
     exit $LASTEXITCODE
 }
 $admin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -28,6 +30,7 @@ try {
 $argsPrepare = @('scripts/unattended_diagnostic.py','prepare','--root',$root)
 if ($Resume) { $argsPrepare += '--resume' }
 if ($AuthorizeNewWindow) { $argsPrepare += '--authorize-new-window' }
+if ($NliExperiment) { $argsPrepare += '--nli-experiment' }
 # Native stderr is diagnostic output, not a PowerShell exception on Windows 5.1.
 $ErrorActionPreference='Continue'
 $outputLines = @(& $python @argsPrepare 2>&1)
@@ -36,7 +39,7 @@ $ErrorActionPreference='Stop'
 if ($prepareExit) { $outputLines | ForEach-Object { Write-Host $_ }; exit $prepareExit }
 $window = [string]$outputLines[-1]
 if ($window -eq 'COMPLETE') {
-    Write-Host "40 posiciones consumidas; sin nueva intervencion. Revise $root/summary.json; NO-GO vigente."
+    Write-Host "Calendario consumido; sin nueva intervencion. Revise $root/summary.json; NO-GO vigente."
     $done=Get-Content -LiteralPath (Join-Path $root 'summary.json') -Raw | ConvertFrom-Json
     if (-not $done.confirmation_ready -or $done.cleanup_pending.Count) { exit 2 }
     exit 0
@@ -64,5 +67,7 @@ try {
 if (Get-Variable failure -ErrorAction SilentlyContinue) { exit 1 }
 $summary=Get-Content -LiteralPath (Join-Path $root 'summary.json') -Raw | ConvertFrom-Json
 Write-Host "Fin: $root/summary.json | confirmation_ready=$($summary.confirmation_ready) | NO-GO vigente"
+if ($NliExperiment -and $summary.pending.Count) { Write-Host 'Ventana cerrada; quedan posiciones. Reanudar exige otra autorizacion explicita.'; exit 3 }
+if ($NliExperiment -and -not $summary.quality_pass) { Write-Host 'Equivalencia real pendiente o fallida: consulte quality en summary.json antes de reanudar.'; exit 2 }
 if (-not $summary.confirmation_ready -or $summary.cleanup_pending.Count) { exit 2 }
 } finally { if ($lock) { $lock.Dispose() } }

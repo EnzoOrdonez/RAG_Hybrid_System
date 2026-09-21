@@ -35,6 +35,9 @@ def initialize(root):
 
 
 def check_protocol(protocol):
+    if protocol.get('nli_experiment'):
+        from scripts.nli_batch_experiment import check_protocol as check_experiment
+        return check_experiment(protocol)
     if protocol.get('unattended_policy'):
         if protocol['unattended_policy'] != 'unattended-paired-v1' or os.environ.get('CLOUDRAG_UNATTENDED') != '1':
             raise ValueError('Unattended observer policy/environment mismatch')
@@ -68,6 +71,41 @@ def report(rows):
                 pending=remaining(rows), new_interview_verdict=None)
 
 
+def measure_position(root, protocol, preparation, scope, receipt, system, index,
+                     observer_factory=observe.Observer, extra_metadata=None):
+    """Shared response clock for historical diagnostic and NLI experiment."""
+    check_protocol(protocol)
+    if not preparation.ready(scope):
+        raise RuntimeError('Preparation residency lost')
+    pipeline = preparation.pipelines[system]
+    policy = gate.recipe(protocol)
+    llm = pipeline.llm
+    if (llm.cache_enabled or llm.seed != 42 or llm.max_retries != 1 or llm.timeout != policy['write']
+            or llm.read_timeout != policy['read'] or llm.default_keep_alive != policy['keep_alive']):
+        raise ValueError('Prepared pipeline recipe changed')
+    import httpx
+    import ollama
+    from scripts.diagnose_interview_timeout import TracedClient
+    trace_id = uuid.uuid4().hex
+    http_root = root / 'http' / trace_id
+    if isinstance(llm._ollama_client, TracedClient):
+        llm._ollama_client.output = http_root
+    else:
+        llm._ollama_client = TracedClient(llm._ollama_client or ollama.Client(host=os.environ['OLLAMA_HOST'],
+            timeout=httpx.Timeout(60, read=180, connect=5)), http_root)
+    observer = observer_factory(root / 'telemetry' / f'{trace_id}.jsonl',
+                                allowed_pids={os.getpid(), os.getppid()})
+    metadata = dict(system=system, phase='warm', index=index,
+        query=protocol['queries'][index], warmup=False, consumes_slot=True,
+        build_id=protocol['build_id'], configuration=pipeline.config.model_dump(mode='json'),
+        preparation_id=receipt['id'], preparation_precheck=preparation.last_check,
+        http_trace_path=str(http_root), protocol_sha256=gate.digest(root / 'source-manifest.json'))
+    metadata.update(extra_metadata or {})
+    return measure_traced_attempt(root, metadata, pipeline, observer=observer,
+        validate_after=lambda: check_protocol(protocol),
+        before_query=lambda: preparation.pipeline(system, scope))
+
+
 def execute(root, protocol, preparation, observer_factory=observe.Observer):
     root = Path(root)
     check_protocol(protocol)
@@ -82,36 +120,7 @@ def execute(root, protocol, preparation, observer_factory=observe.Observer):
     for system, index in remaining(gate.local_records(root)):
         if not gate.window_has_margin(600):
             raise TimeoutError('No query/restoration margin')
-        check_protocol(protocol)
-        if not preparation.ready(scope):
-            raise RuntimeError('Preparation residency lost')
-        # Install probes on the already-loaded object without moving the actual
-        # preparation selection/check out of the gate's response clock.
-        pipeline = preparation.pipelines[system]
-        policy = gate.recipe(protocol)
-        llm = pipeline.llm
-        if (llm.cache_enabled or llm.seed != 42 or llm.max_retries != 1 or llm.timeout != policy['write']
-                or llm.read_timeout != policy['read'] or llm.default_keep_alive != policy['keep_alive']):
-            raise ValueError('Prepared pipeline recipe changed')
-        import httpx
-        import ollama
-        from scripts.diagnose_interview_timeout import TracedClient
-        trace_id = uuid.uuid4().hex
-        http_root = root / 'http' / trace_id
-        if isinstance(llm._ollama_client, TracedClient):
-            llm._ollama_client.output = http_root
-        else:
-            llm._ollama_client = TracedClient(llm._ollama_client or ollama.Client(host=os.environ['OLLAMA_HOST'],
-                timeout=httpx.Timeout(60, read=180, connect=5)), http_root)
-        observer = observer_factory(root / 'telemetry' / f'{trace_id}.jsonl',
-                                    allowed_pids={os.getpid(), os.getppid()})
-        row = measure_traced_attempt(root, dict(system=system, phase='warm', index=index,
-            query=protocol['queries'][index], warmup=False, consumes_slot=True,
-            build_id=protocol['build_id'], configuration=pipeline.config.model_dump(mode='json'),
-            preparation_id=receipt['id'], preparation_precheck=preparation.last_check,
-            http_trace_path=str(http_root), protocol_sha256=gate.digest(root / 'source-manifest.json')),
-            pipeline, observer=observer, validate_after=lambda: check_protocol(protocol),
-            before_query=lambda: preparation.pipeline(system, scope))
+        row = measure_position(root, protocol, preparation, scope, receipt, system, index, observer_factory)
         print({k: row.get(k) for k in ('system', 'index', 'status', 'elapsed_s', 'conditions_invalid')}, flush=True)
         from scripts.unattended_diagnostic import should_stop, progress
         if unattended:

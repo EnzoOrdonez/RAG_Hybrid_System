@@ -125,24 +125,41 @@ def pending_traces(root):
             if not p.with_name('trace-stopped.json').exists() and not p.with_name('trace-recovered.json').exists()]
 
 
-def configure(root):
+def configure(root, nli_experiment=False):
     os.environ.update(CLOUDRAG_MODE='participant', HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1',
                       PYTHONHASHSEED='42', PYTHONUTF8='1', CUDA_VISIBLE_DEVICES='',
                       CLOUDRAG_MEMORY_TRACE='1', CLOUDRAG_MODEL_DIGEST=DIGEST,
                       CLOUDRAG_UNATTENDED='1',
                       CLOUDRAG_BUILD_ID=gate.git('rev-parse', 'HEAD'), OLLAMA_HOST='http://localhost:11434',
                       CLOUDRAG_ARTIFACT_MANIFEST=str(root / 'deployment-manifest.json'))
+    if nli_experiment:
+        os.environ['CLOUDRAG_NLI_EXPERIMENT'] = '1'
+    else:
+        os.environ.pop('CLOUDRAG_NLI_EXPERIMENT', None)
 
 
-def prepare(root, resume=False, authorize=False):
+def prepare(root, resume=False, authorize=False, nli_experiment=False):
     from scripts import run_lexical_diagnostic as diagnostic
+    if nli_experiment:
+        from scripts import nli_batch_experiment as diagnostic
+        if not authorize:
+            raise PermissionError('Each NLI window requires -AuthorizeNewWindow, including first launch')
     from src.utils.deployment_artifacts import build_manifest, verify_manifest
     root = external_root(root)
     if gate.git('branch', '--show-current') != 'fix/interview-readiness' or gate.git('status', '--porcelain'):
         raise RuntimeError('Expected clean fix/interview-readiness worktree')
     if resume:
         verify_package(root)
-        if not diagnostic.remaining(gate.local_records(root / 'cohort')):
+        saved = gate.read_json(root / 'cohort/source-manifest.json')['protocol']
+        if bool(saved.get('nli_experiment')) != nli_experiment:
+            raise ValueError('Explicit experiment flag must match resumed cohort')
+        rows = gate.local_records(root / 'cohort')
+        if nli_experiment:
+            diagnostic.resume_boundary(rows)
+            quality = diagnostic.quality_summary(root / 'cohort', rows)
+            if quality['failures']:
+                raise RuntimeError('Quality failure is terminal; review evidence before any new experiment')
+        if not diagnostic.remaining(rows) and (not nli_experiment or quality['passed']):
             print('COMPLETE', flush=True)
             return None
         check_resume(root, authorize)
@@ -154,7 +171,7 @@ def prepare(root, resume=False, authorize=False):
             raise FileExistsError('Use a new evidence path or explicit -Resume')
         root.mkdir(parents=True)
     preflight(root, before_cut=True)
-    configure(root)
+    configure(root, nli_experiment)
     if gate.api('/api/version') != {'version': '0.22.1'}:
         raise RuntimeError('Ollama version mismatch')
     gate.check_model()
@@ -167,8 +184,10 @@ def prepare(root, resume=False, authorize=False):
         protocol = gate.fresh_protocol(systems=list(gate.SYSTEMS), controlled=True)
         protocol.update(diagnostic_only=True, diagnostic_schedule=paired_schedule(),
                         unattended_policy=POLICY, diagnostic_sources={p: gate.digest(gate.PROJECT / p) for p in SOURCES})
+        if nli_experiment:
+            diagnostic.register(protocol)
         gate.write_new(root / 'cohort/source-manifest.json', dict(created_at=gate.now(), mode='unattended',
-                       protocol=protocol, total_attempts=40, abort_consumes_slot=True))
+                       protocol=protocol, total_attempts=120 if nli_experiment else 40, abort_consumes_slot=True))
     # Real allocated bytes, not a sparse reservation. Restoration releases only this owned file.
     reserve = root / 'runtime/emergency-reserve.bin'
     reserve.parent.mkdir(exist_ok=True)
@@ -268,10 +287,22 @@ def package(root):
                            classification='all partial cohort data aborted; original files immutable'))
         gate.recover(root / 'cohort')
         rows = gate.local_records(root / 'cohort')
-        summary = dict(at=gate.now(), **summarize(rows, energy=energy),
+        report = summarize
+        protocol_file = root / 'cohort/source-manifest.json'
+        experiment = protocol_file.exists() and gate.read_json(protocol_file)['protocol'].get('nli_experiment')
+        if experiment:
+            from scripts.nli_batch_experiment import EXPERIMENT, summarize as report, quality_summary, bootstrap
+            if experiment != EXPERIMENT:
+                raise ValueError('Unknown NLI experiment')
+        summary = dict(at=gate.now(), **report(rows, energy=energy),
                        cleanup_pending=pending_traces(root),
                        windows=[dict(path=p.parent.relative_to(root).as_posix(),
                                 state=gate.read_json(p), restored=gate.read_json(p.with_name('restored.json'))) for p in windows])
+        if experiment:
+            summary['quality'] = quality_summary(root / 'cohort', rows)
+            summary['quality_pass'] = summary['quality']['passed']
+            summary['confirmation_ready'] = summary['confirmation_ready'] and summary['quality_pass']
+            summary['bootstrap'] = bootstrap(rows) if not energy else []
         version = root / 'packages' / uuid.uuid4().hex
         gate.write_new(version / 'summary.json', summary)
         replace_view(root / 'summary.json', summary)
@@ -444,12 +475,13 @@ def main():
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--authorize-new-window', action='store_true')
+    parser.add_argument('--nli-experiment', action='store_true')
     parser.add_argument('--before-cut', action='store_true')
     parser.add_argument('--pid', type=int)
     parser.add_argument('--deadline', type=float)
     args = parser.parse_args()
     if args.command == 'prepare':
-        prepare(args.root, args.resume, args.authorize_new_window)
+        prepare(args.root, args.resume, args.authorize_new_window, args.nli_experiment)
     elif args.command == 'preflight':
         preflight(args.root, args.before_cut)
     elif args.command == 'package':
@@ -457,7 +489,11 @@ def main():
     elif args.command == 'verify':
         verify_package(args.root)
     elif args.command == 'dry-run':
-        dry_run(args.root)
+        if args.nli_experiment:
+            from scripts.nli_batch_experiment import dry_run as dry_experiment
+            dry_experiment(args.root)
+        else:
+            dry_run(args.root)
     else:
         synthetic_watch(args.root, args.pid, args.deadline)
 
