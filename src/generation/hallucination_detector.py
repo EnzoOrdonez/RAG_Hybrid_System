@@ -11,6 +11,7 @@ Fallback: keyword matching if NLI model unavailable
 """
 
 import logging
+import math
 import re
 import time
 from typing import List, Optional
@@ -191,7 +192,11 @@ class HallucinationDetector:
     CONTRADICTION_THRESHOLD = 0.7
     NLI_TIMEOUT = 30  # seconds
 
-    def __init__(self, use_nli: bool = True):
+    def __init__(self, use_nli: bool = True, *, nli_pair_schedule: str = "per_claim"):
+        if nli_pair_schedule not in ("per_claim", "cross_claim"):
+            raise ValueError("Unknown NLI pair schedule")
+        self.nli_pair_schedule = nli_pair_schedule
+        self.nli_batch_error = None
         self._nli_model = None
         self._use_nli = use_nli
         self._nli_available = None
@@ -252,6 +257,7 @@ class HallucinationDetector:
             HallucinationReport with claim-level details
         """
         start = time.perf_counter()
+        self.nli_batch_error = None
 
         # Edge cases
         if not response or not response.strip():
@@ -299,7 +305,7 @@ class HallucinationDetector:
         # Step 2: Evidence matching
         if self._use_nli and self.nli_model is not None:
             claim_details = self._nli_matching(claims, chunk_texts, chunk_ids)
-            method = "mixed" if any(c.verification_method == "keyword_fallback" for c in claim_details) else "nli"
+            method = "mixed" if any(c.verification_method == "keyword_fallback" or c.verification_error for c in claim_details) else "nli"
         else:
             claim_details = self._keyword_matching(claims, chunk_texts, chunk_ids)
             for detail in claim_details:
@@ -470,6 +476,44 @@ class HallucinationDetector:
     # ============================================================
 
     def _nli_matching(
+        self, claims: List[str], chunk_texts: List[str], chunk_ids: List[str],
+    ) -> List[ClaimDetail]:
+        """Select only the scheduling policy; defaults to the registered control."""
+        self.nli_batch_error = None
+        if self.nli_pair_schedule == "per_claim":
+            return self._nli_matching_sequential(claims, chunk_texts, chunk_ids)
+        if self.nli_pair_schedule != "cross_claim":
+            raise ValueError("Unknown NLI pair schedule")
+        eligible = [i for i, claim in enumerate(claims) if not classify_artifact(claim)]
+        if not eligible or not chunk_texts:
+            return self._nli_matching_sequential(claims, chunk_texts, chunk_ids)
+        pairs = [(text, claims[i]) for i in eligible for text in chunk_texts]
+        try:
+            scores = self.nli_model.predict(pairs, batch_size=32,
+                                            show_progress_bar=False, apply_softmax=True)
+            if len(scores) != len(pairs):
+                raise ValueError("NLI batch cardinality mismatch")
+            for score in scores:
+                values = list(score) if hasattr(score, "__len__") else [score]
+                if len(values) not in (1, 3) or any(not math.isfinite(float(x)) for x in values):
+                    raise ValueError("Malformed NLI batch scores")
+                if len(values) == 1 and hasattr(score, "__len__"):
+                    raise ValueError("NLI scalar score must be scalar")
+            by_claim = {i: scores[offset * len(chunk_texts):(offset + 1) * len(chunk_texts)]
+                        for offset, i in enumerate(eligible)}
+            return [self._detail_from_scores(claim, by_claim[i], chunk_ids) if i in by_claim
+                    else ClaimDetail(claim_text=claim, status="not_a_claim", nli_score=0.0)
+                    for i, claim in enumerate(claims)]
+        except Exception as exc:
+            self.nli_batch_error = type(exc).__name__
+            logger.warning("Grouped NLI failed; recovering per claim: %s", exc)
+            recovered = self._nli_matching_sequential(claims, chunk_texts, chunk_ids)
+            for i in eligible:
+                previous = recovered[i].verification_error
+                recovered[i].verification_error = "batch:" + type(exc).__name__ + (";" + previous if previous else "")
+            return recovered
+
+    def _nli_matching_sequential(
         self,
         claims: List[str],
         chunk_texts: List[str],
@@ -540,39 +584,27 @@ class HallucinationDetector:
                 results.append(detail)
                 continue
 
-            contr_scores, ent_scores = [], []
-            for score_set in scores:
-                # score_set: [contradiction, entailment, neutral]
-                if hasattr(score_set, "__len__") and len(score_set) == 3:
-                    contr_scores.append(float(score_set[0]))
-                    ent_scores.append(float(score_set[1]))
-                else:
-                    # Single-score models (rare): similarity == entailment.
-                    ent_scores.append(float(score_set))
-                    contr_scores.append(0.0)
-
-            # Honovich 2022 TRUE rule + H2 guard variant (ledger N8).
-            status, nli_score, chunk_idx = decide_nli_status(
-                contr_scores, ent_scores,
-                ent_threshold=self.ENTAILMENT_THRESHOLD,
-                contr_threshold=self.CONTRADICTION_THRESHOLD,
-                variant=self.nli_variant, margin=self.nli_margin,
-            )
-
-            best_chunk_id = (
-                chunk_ids[chunk_idx]
-                if 0 <= chunk_idx < len(chunk_ids)
-                else None
-            )
-
-            results.append(ClaimDetail(
-                claim_text=claim,
-                status=status,
-                evidence_chunk_id=best_chunk_id,
-                nli_score=round(nli_score, 4),
-            ))
+            results.append(self._detail_from_scores(claim, scores, chunk_ids))
 
         return results
+
+    def _detail_from_scores(self, claim, scores, chunk_ids):
+        """Unchanged TRUE/H2 aggregation shared by both schedules."""
+        contr_scores, ent_scores = [], []
+        for score_set in scores:
+            if hasattr(score_set, "__len__") and len(score_set) == 3:
+                contr_scores.append(float(score_set[0]))
+                ent_scores.append(float(score_set[1]))
+            else:
+                ent_scores.append(float(score_set))
+                contr_scores.append(0.0)
+        status, nli_score, chunk_idx = decide_nli_status(
+            contr_scores, ent_scores, ent_threshold=self.ENTAILMENT_THRESHOLD,
+            contr_threshold=self.CONTRADICTION_THRESHOLD,
+            variant=self.nli_variant, margin=self.nli_margin)
+        best_chunk_id = chunk_ids[chunk_idx] if 0 <= chunk_idx < len(chunk_ids) else None
+        return ClaimDetail(claim_text=claim, status=status, evidence_chunk_id=best_chunk_id,
+                           nli_score=round(nli_score, 4))
 
     # ============================================================
     # Step 2b: Keyword-based fallback

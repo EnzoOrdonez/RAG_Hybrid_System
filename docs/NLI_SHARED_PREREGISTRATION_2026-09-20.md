@@ -1,6 +1,13 @@
 # Pre-registro candidato: agrupación NLI compartida — 2026-09-20
 
-**PENDIENTE DE APROBACIÓN FORMAL. NO IMPLEMENTADO. NO-GO VIGENTE.**
+**APROBADO por el usuario el 2026-09-21, sexta tanda. NO-GO VIGENTE.**
+Se autoriza implementar el candidato, sus tests y el runner de 120 intentos;
+la cohorte real sólo la lanza el humano. La ganancia del 65 % sigue siendo un
+supuesto. El estado original de este documento el 20-sep era pendiente de
+aprobación y no implementado. El texto siguiente conserva ese pre-registro;
+su parada para aprobación queda satisfecha por la decisión explícita de 21-sep.
+Avance técnico en [la nota de implementación](NLI_BATCH_IMPLEMENTATION_2026-09-21.md).
+
 Este documento fija una propuesta revisable por el usuario antes de cualquier
 cambio de producción. "Implement the plan" autoriza esta entrega documental;
 no elimina la parada obligatoria previa a la optimización. El usuario eligió
