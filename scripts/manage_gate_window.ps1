@@ -57,7 +57,7 @@ function Stop-OwnedTraces {
         $destination=Join-Path $file.DirectoryName ('recovered-'+[guid]::NewGuid().ToString('N')+'.etl')
         $process=Start-Process wpr.exe -WindowStyle Hidden -PassThru -ArgumentList @('-stop',('"'+$destination+'"'),'-skipPdbGen','-instancename',$trace.instance)
         if(-not $process.WaitForExit(30000)) {
-            Stop-Process -Id $process.Id -Force
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
             Event 'trace-cleanup-timeout' @{instance=$trace.instance;action='inspect named recorder; no global cancel'}
         } else {
             Event 'trace-cleanup-returned' @{instance=$trace.instance;exit=$process.ExitCode;destination=$destination}
@@ -166,7 +166,7 @@ function Restore-Window {
         try {
             if (Test-Path -LiteralPath (Join-Path $rootFull 'worker-identity.json')) {
                 $worker = Read-Json 'worker-identity.json'
-                if (Same-Process $worker) { Stop-Process -Id $worker.pid -Force; Event 'worker-stopped' $worker }
+                if (Same-Process $worker) { Stop-Process -Id $worker.pid -Force -ErrorAction SilentlyContinue; Event 'worker-stopped' $worker }
             }
         } catch { $failures.Add($_.Exception.Message) }
         if (-not $window.simulated -and -not $bounded) {
@@ -424,7 +424,7 @@ try {
     } while (-not $ready.Count -and [DateTime]::UtcNow -lt $ackDeadline)
     if (-not $ready.Count -or $ready[0].data.sid -ne 'S-1-5-18') { throw 'Watchdog did not acknowledge SYSTEM ownership' }
     if ($simulated) {
-        if ($Mode -eq 'SelfTestController') { Stop-Process -Id $controller.Id -Force; Event 'synthetic-controller-stopped' $window.controller }
+        if ($Mode -eq 'SelfTestController') { Stop-Process -Id $controller.Id -Force -ErrorAction SilentlyContinue; Event 'synthetic-controller-stopped' $window.controller }
         # Expired deadline exercises the same independent restoration path; no real service mutation.
         while (-not (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json')) -and [DateTime]::UtcNow -lt $deadline.AddSeconds(30)) { Start-Sleep -Milliseconds 250 }
         if (-not (Test-Path -LiteralPath (Join-Path $rootFull 'restored.json'))) { throw 'SelfTest restoration missing' }
@@ -448,7 +448,7 @@ try {
         $cutAt = [DateTime]::UtcNow
         Save-New (Join-Path $rootFull 'overlay-cut-intent.json') @{at=$cutAt.ToString('o');processes=$processes}
         foreach ($process in $processes) {
-            if (Same-Process $process.identity) { Stop-Process -Id $process.identity.pid -Force; Event 'overlay-stopped' $process }
+            if (Same-Process $process.identity) { Stop-Process -Id $process.identity.pid -Force -ErrorAction SilentlyContinue; Event 'overlay-stopped' $process }
         }
         $probeEnd = [DateTime]::UtcNow.AddSeconds(35)
         $restarted = @()
@@ -471,7 +471,7 @@ try {
             foreach ($overlay in @(Get-Process -Name 'NVIDIA Overlay' -ErrorAction SilentlyContinue)) {
                 if ($overlay.Path -notin $processes.path) { throw 'Unexpected overlay image path' }
                 Event 'restarted-overlay-stop' (Identity $overlay)
-                Stop-Process -Id $overlay.Id -Force
+                Stop-Process -Id $overlay.Id -Force -ErrorAction SilentlyContinue
             }
         }
     }
@@ -491,7 +491,7 @@ try {
     }
     foreach ($process in $processes) {
         if ($LexicalDiagnostic) { continue }
-        if (Same-Process $process.identity) { Event 'stop-process-intent' $process; Stop-Process -Id $process.identity.pid -Force; Event 'process-stopped' $process }
+        if (Same-Process $process.identity) { Event 'stop-process-intent' $process; Stop-Process -Id $process.identity.pid -Force -ErrorAction SilentlyContinue; Event 'process-stopped' $process }
     }
     Event 'process-window-ready' @{deadline_utc=$deadline.ToString('o'); remote_cut=(-not $KeepAnyDesk)}
     if ($LexicalDiagnostic -and @(Get-Process -Name 'NVIDIA Overlay' -ErrorAction SilentlyContinue).Count) { throw 'Overlay remains; no admission or inference' }
