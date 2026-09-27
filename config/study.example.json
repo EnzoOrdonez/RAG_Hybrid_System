@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "labels": {
+    "A": "",
+    "B": ""
+  },
+  "tasks": {
+    "T1": [
+      "q001",
+      "q064",
+      "q171"
+    ],
+    "T2": [
+      "q010",
+      "q070",
+      "q172"
+    ]
+  },
+  "familiarization": "What is cloud computing?",
+  "sus": {
+    "source": "Sevilla-Gonzalez et al. (2020), JMIR Human Factors 7(4), e21161; única sustitución: herramienta → sistema",
+    "items": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  },
+  "likert": [
+    {
+      "id": "F1",
+      "text": "Las respuestas me parecieron respaldadas por la documentación.",
+      "inverse": false
+    },
+    {
+      "id": "F2",
+      "text": "Confiaría en estas respuestas para tomar una decisión técnica.",
+      "inverse": false
+    },
+    {
+      "id": "F3",
+      "text": "Detecté afirmaciones que me parecieron inventadas o incorrectas.",
+      "inverse": true
+    },
+    {
+      "id": "F4",
+      "text": "Cuando el sistema no sabía algo, lo admitió en lugar de inventar una respuesta.",
+      "inverse": false
+    },
+    {
+      "id": "U1",
+      "text": "Las respuestas me ahorrarían tiempo frente a buscar en la documentación oficial.",
+      "inverse": false
+    },
+    {
+      "id": "U2",
+      "text": "El nivel de detalle fue adecuado para mi necesidad.",
+      "inverse": false
+    },
+    {
+      "id": "U3",
+      "text": "Las respuestas comparativas entre proveedores me resultaron útiles.",
+      "inverse": false
+    },
+    {
+      "id": "R1",
+      "text": "El tiempo de espera me pareció aceptable.",
+      "inverse": false
+    },
+    {
+      "id": "R2",
+      "text": "La espera me hizo perder el interés en la respuesta.",
+      "inverse": true
+    },
+    {
+      "id": "I1",
+      "text": "Usaría este sistema en mi trabajo o estudio.",
+      "inverse": false
+    }
+  ],
+  "comparative": [
+    {
+      "id": "C1",
+      "text": "¿Qué sistema le dio respuestas más confiables?",
+      "choices": [
+        "A",
+        "B",
+        "iguales"
+      ]
+    },
+    {
+      "id": "C2",
+      "text": "¿Qué sistema le resultó más útil?",
+      "choices": [
+        "A",
+        "B",
+        "iguales"
+      ]
+    },
+    {
+      "id": "C3",
+      "text": "¿Cuál usaría?",
+      "choices": [
+        "A",
+        "B",
+        "ninguno"
+      ]
+    },
+    {
+      "id": "C4",
+      "text": "¿en qué notó la diferencia?",
+      "choices": []
+    }
+  ],
+  "free_instruction": "Ahora escribe tú una consulta sobre algo de AWS, Azure o GCP que te interese o que hayas necesitado buscar alguna vez. No incluyas información confidencial de tu empresa.",
+  "blinding_question": "De los dos sistemas que usaste, ¿cuál crees que consultaba documentación para responder?",
+  "blinding_choices": [
+    "Sistema A",
+    "Sistema B",
+    "No sabría decir"
+  ],
+  "blinding_reason": "¿En qué lo notaste?"
+}
