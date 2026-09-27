@@ -102,4 +102,5 @@ def load_protocol(config_path, assignment_path):
     hashes = dict(config=digest(config_path), assignments=digest(assignment_path), queries=digest(queries_path))
     fingerprint = hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
     return dict(config=config, assignments={r['participant_id']: r for r in assignments},
+                paths=dict(config=str(config_path), assignments=str(assignment_path), queries=str(queries_path)),
                 queries=catalog, hashes=hashes, fingerprint=fingerprint)
