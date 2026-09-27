@@ -115,6 +115,11 @@ def check_resume(root, authorize):
         raise RuntimeError('Owned ETW trace cleanup unverified; restore/clean previous window first')
     if windows and not authorize:
         raise PermissionError('Resume after restoration requires -AuthorizeNewWindow')
+    protocol_file = root / 'cohort/source-manifest.json'
+    if protocol_file.exists() and gate.read_json(protocol_file)['protocol'].get('nli_experiment'):
+        from scripts.nli_batch_experiment import load_gaps, resume_boundary
+        rows = gate.local_records(root / 'cohort')
+        resume_boundary(rows, load_gaps(root / 'cohort', rows))
     return windows
 
 

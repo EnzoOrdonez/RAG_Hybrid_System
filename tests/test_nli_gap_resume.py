@@ -1,4 +1,4 @@
-"""Interrupted paired observations remain immutable; never infer or impute a mate."""
+"""Historical gap reports remain readable; new interruptions terminate the cohort."""
 import copy
 
 import pytest
@@ -21,9 +21,9 @@ def publish(root, result):
     return path
 
 
-def initialize(root, restored=True):
+def initialize(root, restored=True, policy=experiment.LEGACY_GAP_POLICY):
     gate.write_new(root / 'cohort/source-manifest.json', dict(protocol=dict(
-        nli_experiment=experiment.EXPERIMENT, interrupted_pair_policy=experiment.GAP_POLICY,
+        nli_experiment=experiment.EXPERIMENT, interrupted_pair_policy=policy,
         quality_source_ids=[str(i) for i in range(40)])))
     gate.write_new(root / 'windows/first/window.json', dict(simulated=True))
     if restored:
@@ -163,7 +163,7 @@ def test_markers_cannot_invent_or_duplicate_pairs(tmp_path):
         experiment.remaining([*rows, row(4)])  # hole without its durable marker
 
 
-def test_quality_uses_only_complete_pairs_and_exhausted_insufficient_cohort_does_not_reopen(tmp_path, monkeypatch, capsys):
+def test_legacy_quality_excludes_orphan_and_cohort_cannot_reopen(tmp_path, monkeypatch):
     finish_with_gap(tmp_path)
     rows = gate.local_records(tmp_path / 'cohort')
     gaps = experiment.load_gaps(tmp_path / 'cohort')
@@ -182,8 +182,8 @@ def test_quality_uses_only_complete_pairs_and_exhausted_insufficient_cohort_does
     monkeypatch.setattr(unattended, 'external_root', lambda p: p)
     monkeypatch.setattr(gate, 'git', lambda *args: 'fix/interview-readiness' if args[0] == 'branch' else '')
     monkeypatch.setattr(unattended, 'preflight', lambda *args, **kwargs: pytest.fail('must not open another window'))
-    assert unattended.prepare(tmp_path, resume=True, authorize=True, nli_experiment=True) is None
-    assert 'COMPLETE' in capsys.readouterr().out
+    with pytest.raises(RuntimeError, match='terminal'):
+        unattended.prepare(tmp_path, resume=True, authorize=True, nli_experiment=True)
 
 
 def test_gap_marker_tamper_is_detected_by_manifest(tmp_path):
@@ -196,8 +196,77 @@ def test_gap_marker_tamper_is_detected_by_manifest(tmp_path):
         unattended.verify_package(tmp_path)
 
 
-def test_synthetic_interruption_resume_authorization_and_integrity(tmp_path):
+def test_synthetic_terminal_interruption_authorization_and_integrity(tmp_path):
     checks = experiment.synthetic_gap_run(tmp_path / 'scenario')
     assert all(checks.values())
-    assert checks['no_imputation_or_duplicates'] and checks['paired_n_59']
+    assert checks['no_imputation_or_duplicates'] and checks['paired_n_4']
+    assert checks['authorized_resume_refused'] and checks['inference_refused']
     unattended.verify_package(tmp_path / 'scenario')
+
+
+@pytest.mark.parametrize('position,aborted', [(0, False), (0, True), (1, True), (8, False), (119, True)])
+def test_terminal_summary_preserves_records_and_distinguishes_unexecuted(tmp_path, position, aborted):
+    initialize(tmp_path, policy=experiment.GAP_POLICY)
+    for i in range(position + 1):
+        result = row(i)
+        if i == position and aborted:
+            result.update(status='aborted', elapsed_s=None)
+        publish(tmp_path, result)
+    originals = {p: p.read_bytes() for p in (tmp_path / 'cohort/attempts').rglob('*.json')}
+    summary = unattended.package(tmp_path)
+    assert summary['terminal'] and summary['terminal_reason'] == experiment.GAP_STATUS
+    assert not summary['complete'] and not summary['confirmation_ready'] and not summary['latency_pass_candidate']
+    assert summary['sufficiency'] == 'INSUFICIENTE' and not summary['sufficient_pairs']
+    assert summary['executed_attempts'] == position + 1 and not summary['pending']
+    assert summary['not_executed_slots'] == experiment.schedule()[position + 1:]
+    assert len(summary['pairs']) == position // 2
+    states = [r['status'] for r in summary['pair_states']]
+    assert states.count(experiment.GAP_STATUS) == 1
+    assert states.count('NO_EJECUTADO_COHORTE_TERMINAL') == 59 - position // 2
+    assert sum(g['failures'] for g in summary['groups']) == int(aborted)
+    with pytest.raises(RuntimeError, match='terminal'):
+        unattended.check_resume(tmp_path, True)
+    with pytest.raises(RuntimeError, match='terminal'):
+        experiment.execute_slots(tmp_path / 'cohort', lambda *args: pytest.fail('no inference'), window_id='new')
+    with pytest.raises(RuntimeError, match='terminal'):
+        experiment.replay_quality(tmp_path / 'cohort', {}, None)
+    unattended.package(tmp_path)
+    assert all(p.read_bytes() == data for p, data in originals.items())
+    unattended.verify_package(tmp_path)
+
+
+def test_terminal_prepare_refuses_before_preflight_or_new_window(tmp_path, monkeypatch):
+    initialize(tmp_path, policy=experiment.GAP_POLICY)
+    publish(tmp_path, row(0))
+    unattended.package(tmp_path)
+    manifest = (tmp_path / 'manifest.json').read_bytes()
+    monkeypatch.setattr(unattended, 'external_root', lambda p: p)
+    monkeypatch.setattr(gate, 'git', lambda *args: 'fix/interview-readiness' if args[0] == 'branch' else '')
+    monkeypatch.setattr(unattended, 'preflight', lambda *args, **kwargs: pytest.fail('no preflight'))
+    monkeypatch.setattr(gate, 'api', lambda *args: pytest.fail('no model service'))
+    with pytest.raises(RuntimeError, match='terminal'):
+        unattended.prepare(tmp_path, resume=True, authorize=True, nli_experiment=True)
+    assert len(list((tmp_path / 'windows').glob('*/window.json'))) == 1
+    assert (tmp_path / 'manifest.json').read_bytes() == manifest
+    assert not (tmp_path / 'launches').exists()
+
+
+def test_terminal_cannot_gain_observations_in_later_pairs(tmp_path):
+    initialize(tmp_path, policy=experiment.GAP_POLICY)
+    publish(tmp_path, row(0))
+    unattended.package(tmp_path)
+    publish(tmp_path, dict(row(2), window_id='forbidden'))
+    with pytest.raises(ValueError, match='after terminal'):
+        experiment.load_gaps(tmp_path / 'cohort')
+
+
+def test_terminal_policy_marker_must_match_registered_policy(tmp_path):
+    initialize(tmp_path, policy=experiment.GAP_POLICY)
+    publish(tmp_path, row(0))
+    unattended.package(tmp_path)
+    marker = next((tmp_path / 'cohort/gaps').glob('*.json'))
+    data = gate.read_json(marker)
+    data['policy'] = experiment.LEGACY_GAP_POLICY
+    unattended.replace_view(marker, data)
+    with pytest.raises(ValueError, match='registered protocol'):
+        experiment.load_gaps(tmp_path / 'cohort')

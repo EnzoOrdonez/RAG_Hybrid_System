@@ -8,7 +8,17 @@ aprobación y no implementado. El texto siguiente conserva ese pre-registro;
 su parada para aprobación queda satisfecha por la decisión explícita de 21-sep.
 Avance técnico en [la nota de implementación](NLI_BATCH_IMPLEMENTATION_2026-09-21.md).
 
-**Enmienda autorizada 2026-09-21, séptima tanda (antes de la cohorte real):**
+**Enmienda vigente, autorizada y confirmada por el usuario el 2026-09-27:**
+un par control/candidato interrumpido deja la cohorte TERMINAL E INSUFICIENTE.
+No se ejecuta su brazo faltante en otra ventana ni se continúan pares posteriores.
+Se conservan intentos, hashes y marcador `INCOMPLETO_INTERRUMPIDO`; no hay
+imputaciones ni reemplazos. Sólo son reanudables pausas entre pares completos.
+`-AuthorizeNewWindow` no permite reabrir una cohorte terminal. Se mantienen
+20 pares completos válidos por sistema, cero fallos, equivalencia y p95 ≤60 s.
+La política se registra antes de nuevas ejecuciones como
+`terminal-on-interrupted-pair-v1`; no reclasifica evidencia histórica.
+
+**Enmienda histórica 2026-09-21, séptima tanda (sustituida el 27-sep):**
 ante un par interrumpido se continúa sólo con pares posteriores, conservando
 `INCOMPLETO_INTERRUMPIDO` y los brazos ausentes como no ejecutados, sin imputar.
 Los contrastes y la equivalencia pareada excluyen el par entero. El n de

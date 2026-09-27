@@ -9,7 +9,29 @@ modelos, umbrales, dispositivo ni tamaño interno de lote (32).
 
 ## Diseño y crítica
 
+### Política vigente: cohorte terminal (27-sep)
+
+DECISIÓN DEL USUARIO, confirmada el 2026-09-27: un par interrumpido termina
+la cohorte como insuficiente. Sustituye la disposición de continuar con huecos
+del 21-sep, conservada abajo como historia. No cambia el mínimo de 20 pares
+válidos por sistema, cero fallos, equivalencia ni p95 candidato ≤60 s.
+
+Crítica previa a implementar: continuar después de perder un par no puede
+recuperar el n exigido sin reemplazos prohibidos; consume ventanas sin poder
+cerrar la compuerta. Terminar evita ese trabajo, pero pierde la descripción
+de los pares posteriores: quedarán explícitamente NO EJECUTADOS, nunca fallos
+inventados. Una pausa entre pares completos sigue siendo reanudable.
+
+Criterios verificables: bloqueo antes de pre-flight/nueva ventana y antes de
+inferencias, incluso con `-AuthorizeNewWindow`; marcador inmutable del par;
+conservación de hashes; resumen terminal e insuficiente; ninguna imputación.
+Los paquetes de la política anterior conservan su interpretación descriptiva;
+no se migran ni se reescriben. No se permite ejecutarlos para eludir esta regla.
+No cambia la UI del participante ni el algoritmo NLI.
+
 ### Enmienda autorizada de reanudación (21-sep, séptima tanda)
+
+HISTÓRICA, sustituida por la decisión del 27-sep anterior:
 
 DECISIÓN DEL USUARIO, previa a la medición: continuar los pares restantes
 conservando el hueco `INCOMPLETO_INTERRUMPIDO`. Crítica previa a implementar:
@@ -96,12 +118,16 @@ referencia los intentos existentes con SHA-256 y enumera `missing_arms`; no crea
 un intento para el brazo que nunca comenzó. Si ambos comenzaron pero uno quedó
 abortado, el par también se excluye, aunque `missing_arms` esté vacío.
 
-Al reanudar se verifica el manifiesto, los hashes y `-AuthorizeNewWindow`, y se
-avanza al siguiente par pendiente. Está prohibido repetir los intentos previos,
-completar el compañero en otra ventana, sustituir posiciones o recalcular sus
-duraciones. El anexo se publica una sola vez, entra al manifiesto y permanece
-idéntico al reempaquetar. No se aplica esta política retroactivamente a paquetes
-construidos sin `interrupted_pair_policy=continue-pairs-preserve-gap-v1`.
+Con un par interrumpido la cohorte queda **terminal e insuficiente**. No se
+reanuda con `-AuthorizeNewWindow`, no se ejecutan pares posteriores ni replays
+de calidad. Sin par interrumpido, una pausa entre pares completos permite
+reanudar tras verificar manifiesto, hashes y nueva autorización. Está prohibido
+repetir intentos, completar el compañero en otra ventana, sustituir posiciones
+o recalcular duraciones. El anexo se publica una sola vez, entra al manifiesto
+y permanece idéntico al reempaquetar. Las nuevas cohortes registran
+`interrupted_pair_policy=terminal-on-interrupted-pair-v1`. Los informes de
+`continue-pairs-preserve-gap-v1` siguen siendo legibles como historia; no se
+convierten en terminales retroactivamente ni se permite reanudarlos con huecos.
 
 ## Lanzamiento humano (no ejecutado por el agente)
 
@@ -142,7 +168,9 @@ construidos sin `interrupted_pair_policy=continue-pairs-preserve-gap-v1`.
    según generación/NLI; no se promete completar 120 más 160 replays en 120 min.
    Nunca abrir navegadores/juegos durante una ventana de medición.
 
-4. Una pausa por margen restaura primero. Con nueva autorización explícita:
+4. Una pausa por margen **entre pares completos** restaura primero. Sólo si
+   `summary.json` indica `terminal=false`, sin pares interrumpidos, y con nueva
+   autorización explícita:
 
    ```powershell
    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run_diagnostic_window.ps1 -NliExperiment -Resume 'C:\CloudRAG\diag-run-REEMPLAZAR' -AuthorizeNewWindow
@@ -151,9 +179,10 @@ construidos sin `interrupted_pair_policy=continue-pairs-preserve-gap-v1`.
    Mismo build/entorno/paquete, sin editar archivos ni rellenar posiciones.
    Código 3: calendario pendiente tras pausa; código 2: evidencia insuficiente
    o calidad pendiente/fallida; código 1: fallo. Revisar `summary.json` y los
-   logs antes de reanudar. Tras una interrupción y restauración verificada se
-   permite continuar los pares restantes con el mismo comando; el hueco ya
-   sellado no se rellena. Si hay fallo de calidad, identidad o restauración,
+   logs antes de reanudar. `terminal=true` exige detenerse y traer el paquete:
+   **no ejecutar Resume**, ni siquiera con autorización de otra ventana. La
+   cohorte es insuficiente y no se inicia una sustituta automáticamente.
+   Si hay fallo de calidad, identidad o restauración,
    detenerse y traer el paquete; no forzar ni abrir una cohorte para ocultarlo.
    Máximo dos admisiones fallidas por la misma causa: identificarla antes de
    otra autorización. Código 0 sólo indica paquete listo para análisis, **no GO**.
@@ -182,10 +211,11 @@ de contaminación, expiración sin inferencias, supervisor **simulado** independ
 tras kill de un hijo, autorización de reanudación, 120 posiciones sin duplicación,
 alternancia real de estrategia con modelo simulado, 160 replays, invalidez y hashes.
 También crea `scenarios/interrupted-pair/`: interrupción tras la novena respuesta,
-restauración simulada, rechazo sin autorización y reanudación autorizada. El
-resultado es **119 intentos reales simulados, un brazo no ejecutado, 59 pares
-completos y NO-GO por insuficiencia**. Compara hashes antes/después y no rellena
-el intento décimo. Es un escenario separado del camino feliz de 120 posiciones.
+restauración simulada y rechazo de reanudación **incluso con autorización**. El
+resultado es **9 intentos simulados, 111 posiciones no ejecutadas, 4 pares
+completos, una cohorte terminal y NO-GO por insuficiencia**. Compara hashes
+antes/después; no ejecuta el décimo intento ni los posteriores y no abre otra
+ventana. Es un escenario separado del camino feliz de 120 posiciones.
 No sustituye las pruebas reales del Programador de tareas antes del corte.
 
 `summary.json` distingue `planned_slots=120`, `executed_attempts` y
@@ -195,7 +225,8 @@ con n, fallos, inválidos y p50/p90/p95/mín/máx/media por etapa y carga.
 `paired_groups`, `pairs` y el bootstrap usan **sólo pares completos válidos**;
 un brazo huérfano válido puede aparecer en `groups`, nunca en el contraste.
 `pair_states` separa `COMPLETO_VALIDO`, `INVALIDO_CONTAMINACION`,
-`INCOMPLETO_INTERRUMPIDO`, `FALLIDO_TECNICO` y posiciones pendientes. Las causas
+`INCOMPLETO_INTERRUMPIDO`, `FALLIDO_TECNICO`, posiciones pendientes y
+`NO_EJECUTADO_COHORTE_TERMINAL`. Las causas
 adicionales siguen en los registros originales. `interrupted_pairs` incluye los
 anexos; `complete_valid_pairs_by_system` y `sufficiency` declaran suficiencia.
 
@@ -204,13 +235,17 @@ efectivo explícito y etiqueta insuficiente si n<20; no cambia el umbral GO.
 Fallos/abortos/invalidaciones nunca entran en cuantiles ni se imputan. La
 discrepancia respecto del ahorro NLI supuesto del 65 % también es descriptiva.
 
-`complete` sólo significa calendario consumido, incluidos huecos registrados.
-Los replays de respuestas nuevas se restringen a brazos de pares válidos; los
-40 replays fuente permanecen separados. `quality.replay_complete` indica que
-terminaron los replays elegibles; evita abrir ventanas sin fin cuando existe
-un hueco. `quality_pass` sigue exigiendo las 160 entradas; sin 20 pares válidos
-por sistema no puede cumplirse. Los replays excluidos previos se conservan y
-enumeran, sin incorporarlos a la equivalencia pareada.
+`terminal=true`, `terminal_reason=INCOMPLETO_INTERRUMPIDO` y `complete=false`
+indican cierre insuficiente definitivo. `pending=[]` significa que no hay
+trabajo ejecutable; `not_executed_slots` enumera todas las posiciones nunca
+ejecutadas, sin convertirlas en fallos observados. `complete=false` no autoriza
+reanudación. En la política histórica sólo se enumeraban los brazos omitidos
+y `complete` podía significar calendario consumido con huecos.
+Los replays nuevos sólo se ejecutan si no hay interrupción terminal; los 40
+replays fuente permanecen separados. `quality.replay_complete` describe los
+replays elegibles ya existentes, nunca reabre una cohorte terminal.
+`quality_pass` sigue exigiendo 160 entradas; los replays excluidos previos se
+conservan y enumeran, sin incorporarlos a la equivalencia pareada.
 `confirmation_ready` exige suficiencia y calidad.
 `latency_pass_candidate` exige p95 ≤60 s en los tres sistemas candidatos.
 El control se reporta aunque exceda 60 s. Ningún flag cambia automáticamente el
@@ -229,3 +264,9 @@ diff y dry-run se registran en los logs externos `runner-final-*`.
 La auditoría de esta enmienda de huecos se registra separadamente en
 `C:/CloudRAG/nli-gap-20260921-060446391/`, baseline `fb45949`, 653 tests.
 Los nuevos logs finales y el paquete sintético no alteran la evidencia anterior.
+
+La enmienda terminal del 27-sep se audita en
+`C:/CloudRAG/nli-terminal-20260927T111241274/`, baseline `4e305a7`:
+666 tests, 5 excluidos, 9 subpruebas y tres avisos SWIG. El ajuste previo de
+PID efímeros del overlay se conserva. Sólo se ejecutan tests y simulaciones;
+ninguna latencia real nueva ni intervención de procesos se atribuye a esta tanda.

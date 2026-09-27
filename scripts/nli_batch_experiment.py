@@ -15,7 +15,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts import measure_interview_gate as gate
 
 EXPERIMENT = 'shared-nli-pairs-v1'
-GAP_POLICY = 'continue-pairs-preserve-gap-v1'
+LEGACY_GAP_POLICY = 'continue-pairs-preserve-gap-v1'
+GAP_POLICY = 'terminal-on-interrupted-pair-v1'
 GAP_STATUS = 'INCOMPLETO_INTERRUMPIDO'
 SYSTEMS = ('hybrid', 'lexical', 'semantic')
 STRATEGIES = {'control': 'per_claim', 'candidate': 'cross_claim'}
@@ -42,7 +43,7 @@ def validate_gaps(rows, gaps):
     seen, omitted = set(), set()
     for gap in gaps:
         pair = (gap['system'], gap['index'])
-        if pair in seen or gap.get('status') != GAP_STATUS or gap.get('policy') != GAP_POLICY:
+        if pair in seen or gap.get('status') != GAP_STATUS or gap.get('policy') not in (GAP_POLICY, LEGACY_GAP_POLICY):
             raise ValueError('Duplicate/unknown interrupted pair marker')
         seen.add(pair)
         planned = [s for s in schedule() if s[:2] == pair]
@@ -59,6 +60,8 @@ def validate_gaps(rows, gaps):
             raise ValueError('Gap references changed')
         if len({r['window_id'] for r in present}) != 1:
             raise ValueError('Interrupted pair crosses windows')
+        if gap['policy'] == GAP_POLICY and any(schedule().index(key(r)) > schedule().index(planned[-1]) for r in rows):
+            raise ValueError('Execution after terminal interrupted pair')
         omitted.update((*pair, arm) for arm in missing)
     return omitted
 
@@ -82,6 +85,9 @@ def load_gaps(root, rows=None):
     gaps = [gate.read_json(p) for p in sorted((root / 'gaps').glob('*.json'))]
     remaining(rows, gaps)
     for gap in gaps:
+        policy = gate.read_json(root / 'source-manifest.json')['protocol'].get('interrupted_pair_policy')
+        if gap['policy'] != policy:
+            raise ValueError('Interrupted pair policy differs from registered protocol')
         for ref in gap['attempts']:
             # Resolve only to a known record; never accept a path supplied by a marker.
             matches = [p for p in (root / 'attempts').glob('*/result.json')
@@ -102,7 +108,8 @@ def seal_interruptions(root):
         if (system, index) in sealed or not pair or (len(pair) == 2 and not any(r['status'] == 'aborted' for r in pair)):
             continue
         protocol = gate.read_json(root / 'source-manifest.json')['protocol']
-        if protocol.get('interrupted_pair_policy') != GAP_POLICY:
+        policy = protocol.get('interrupted_pair_policy')
+        if policy not in (GAP_POLICY, LEGACY_GAP_POLICY):
             raise ValueError('Gap policy was not registered; do not reinterpret old cohorts')
         windows = list((root.parent / 'windows').glob('*/window.json'))
         if not windows or any(not p.with_name('restored.json').exists() for p in windows):
@@ -113,7 +120,7 @@ def seal_interruptions(root):
             refs.append(dict(arm=row['arm'], attempt_id=row['attempt_id'], status=row['status'],
                              window_id=row['window_id'], sha256=gate.digest(path)))
         missing = [s[2] for s in schedule() if s[:2] == (system, index) and s[2] not in {r['arm'] for r in pair}]
-        marker = dict(at=gate.now(), policy=GAP_POLICY, status=GAP_STATUS, system=system,
+        marker = dict(at=gate.now(), policy=policy, status=GAP_STATUS, system=system,
                       index=index, attempts=refs, missing_arms=missing, imputed=False)
         validate_gaps(rows, [*gaps, marker])
         gate.write_new(root / 'gaps' / f'{system}-{index:02d}.json', marker)
@@ -203,6 +210,7 @@ def metrics(items):
 
 def summarize(rows, energy=False, gaps=()):
     pending = remaining(rows, gaps)
+    terminal = any(g['policy'] == GAP_POLICY for g in gaps)
     complete = [] if energy else complete_pairs(rows, gaps)
     counts = {system: sum(a['system'] == system for a, _ in complete) for system in SYSTEMS}
     sufficient = all(n == 20 for n in counts.values())
@@ -219,8 +227,8 @@ def summarize(rows, energy=False, gaps=()):
                 invalid=sum(bool(r.get('conditions_invalid') or r.get('environment_invalid')) for r in selected),
                 energy_aborted_records=len(selected) if energy else 0,
                 metrics={field: metrics([r[field] for r in measured]) for field in fields}))
-    ready = not energy and sufficient and all(g['valid'] == 20 for g in groups)
-    latency = not energy and sufficient and all(g['valid'] == 20 and g['metrics']['total_s']['p95'] <= 60
+    ready = not terminal and not energy and sufficient and all(g['valid'] == 20 for g in groups)
+    latency = not terminal and not energy and sufficient and all(g['valid'] == 20 and g['metrics']['total_s']['p95'] <= 60
                                for g in groups if g['arm'] == 'candidate')
     pairs = []
     for control, candidate in complete:
@@ -244,7 +252,7 @@ def summarize(rows, energy=False, gaps=()):
         elif (system, index) in gap_keys:
             state = GAP_STATUS
         elif not selected:
-            state = 'PENDIENTE'
+            state = 'NO_EJECUTADO_COHORTE_TERMINAL' if terminal else 'PENDIENTE'
         elif len(selected) == 1:
             state = 'INCOMPLETO_PENDIENTE'
         elif any(r.get('conditions_invalid') for r in selected):
@@ -254,10 +262,13 @@ def summarize(rows, energy=False, gaps=()):
         else:
             state = 'FALLIDO_TECNICO'
         states.append(dict(system=system, index=index, status=state))
-    return dict(experiment=EXPERIMENT, total_attempts=120, complete=not pending and not energy,
-        planned_slots=120, executed_attempts=len(rows), not_executed_slots=sorted(validate_gaps(rows, gaps)),
+    unexecuted = [s for s in schedule() if s not in {key(r) for r in rows}]
+    return dict(experiment=EXPERIMENT, total_attempts=120, complete=not terminal and not pending and not energy,
+        terminal=terminal, terminal_reason=GAP_STATUS if terminal else None,
+        planned_slots=120, executed_attempts=len(rows),
+        not_executed_slots=unexecuted if terminal else sorted(validate_gaps(rows, gaps)),
         confirmation_ready=ready, latency_pass_candidate=latency, energy_aborted=energy,
-        groups=groups, paired_groups=paired_groups, pairs=pairs, pending=pending, quality_pass=False,
+        groups=groups, paired_groups=paired_groups, pairs=pairs, pending=[] if terminal else pending, quality_pass=False,
         pair_states=states, interrupted_pairs=list(gaps), complete_valid_pairs_by_system=counts,
         sufficient_pairs=sufficient, minimum_valid_pairs_per_system=20,
         sufficiency='SUFICIENTE' if sufficient else 'INSUFICIENTE',
@@ -342,13 +353,14 @@ def quality_summary(root, rows):
 
 
 def resume_boundary(rows, gaps=()):
-    """A restored interrupted pair needs an immutable marker, never a new mate."""
+    """Interrupted pairs terminate the cohort, including an explicitly authorized resume."""
     remaining(rows, gaps)
-    sealed = {(g['system'], g['index']) for g in gaps}
+    if gaps:
+        raise RuntimeError('Interrupted pair: cohort is terminal and insufficient; no resume or further inference')
     for system, index, _ in schedule()[::2]:
         pair = [r for r in rows if (r['system'], r['index']) == (system, index)]
-        if pair and (len(pair) == 1 or any(r['status'] == 'aborted' for r in pair)) and (system, index) not in sealed:
-            raise RuntimeError('Interrupted pair not sealed after restoration; package before resume')
+        if pair and (len(pair) == 1 or any(r['status'] == 'aborted' for r in pair)):
+            raise RuntimeError('Interrupted pair: cohort is terminal; restore and package evidence, never resume')
 
 
 def bootstrap(rows, gaps=()):
@@ -419,6 +431,8 @@ def execute_slots(root, measure, *, window_id, margin=gate.window_has_margin):
 
 def replay_quality(root, protocol, preparation, *, margin=gate.window_has_margin):
     from scripts.unattended_diagnostic import verify_package
+    rows = gate.local_records(root)
+    resume_boundary(rows, load_gaps(root, rows))
     source = Path(protocol['quality_source'])
     verify_package(source)
     if gate.digest(source / 'manifest.json') != protocol['quality_source_sha256']:
@@ -561,22 +575,28 @@ def synthetic_gap_run(root):
         unattended.check_resume(root, False)
     except PermissionError:
         authorization_required = True
-    unattended.check_resume(root, True)
-    second = root / 'windows/second'
-    gate.write_new(second / 'window.json', dict(simulated=True))
-    execute_slots(cohort, measure, window_id='second', margin=lambda _: True)
-    gate.write_new(second / 'restored.json', dict(simulated=True))
+    terminal_refused = False
+    try:
+        unattended.check_resume(root, True)
+    except RuntimeError as exc:
+        terminal_refused = 'terminal' in str(exc)
+    inference_refused = False
+    try:
+        execute_slots(cohort, measure, window_id='forbidden', margin=lambda _: True)
+    except RuntimeError as exc:
+        inference_refused = 'terminal' in str(exc)
     summary = unattended.package(root)
     unattended.verify_package(root)
     checks = dict(authorization_required=authorization_required,
+        authorized_resume_refused=terminal_refused, inference_refused=inference_refused,
+        no_new_window=len(list((root / 'windows').glob('*/window.json'))) == 1,
         original_hashes_unchanged=all(gate.digest(p) == h for p, h in original.items()),
         gap_hashes_unchanged=all(gate.digest(p) == h for p, h in markers.items()),
-        no_imputation_or_duplicates=len(calls) == len(set(calls)) == 119 and schedule()[9] not in calls,
-        complete_but_insufficient=summary['complete'] and not summary['sufficient_pairs'] and not summary['confirmation_ready'],
-        paired_n_59=len(summary['pairs']) == 59,
+        no_imputation_or_duplicates=calls == schedule()[:9] and len(set(calls)) == 9,
+        terminal_insufficient=summary['terminal'] and not summary['complete'] and not summary['sufficient_pairs'] and not summary['confirmation_ready'],
+        paired_n_4=len(summary['pairs']) == 4,
         gap_named=summary['interrupted_pairs'][0]['status'] == GAP_STATUS,
-        explicit_unexecuted=summary['not_executed_slots'] == [list(schedule()[9])] or
-                            summary['not_executed_slots'] == [schedule()[9]])
+        explicit_unexecuted=[tuple(s) for s in summary['not_executed_slots']] == schedule()[9:])
     gate.write_new(root / 'gap-dry-run.json', dict(at=gate.now(), simulated=True, checks=checks))
     unattended.package(root)
     unattended.verify_package(root)
@@ -645,7 +665,7 @@ def dry_run(root):
     checks['invalid_excluded_not_replaced'] = not report['confirmation_ready'] and not report['pending']
     checks['quality_160'] = quality_summary(cohort, rows)['passed']
     checks['safety'] = all(gate.read_json(root / 'safety/dry-run.json')['checks'].values())
-    checks['interrupted_pair_resume'] = all(synthetic_gap_run(root / 'scenarios/interrupted-pair').values())
+    checks['interrupted_pair_terminal'] = all(synthetic_gap_run(root / 'scenarios/interrupted-pair').values())
     gate.write_new(root / 'dry-run.json', dict(at=gate.now(), simulated=True, checks=checks))
     unattended.package(root)
     checks['integrity'] = bool(unattended.verify_package(root))

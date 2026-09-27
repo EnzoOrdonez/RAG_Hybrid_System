@@ -67,6 +67,7 @@ try {
 if (Get-Variable failure -ErrorAction SilentlyContinue) { exit 1 }
 $summary=Get-Content -LiteralPath (Join-Path $root 'summary.json') -Raw | ConvertFrom-Json
 Write-Host "Fin: $root/summary.json | confirmation_ready=$($summary.confirmation_ready) | NO-GO vigente"
+if ($NliExperiment -and $summary.terminal) { Write-Host 'Cohorte TERMINAL E INSUFICIENTE por par interrumpido. Conserve el paquete; no reanudar.'; exit 2 }
 if ($NliExperiment -and $summary.pending.Count) { Write-Host 'Ventana cerrada; quedan posiciones. Reanudar exige otra autorizacion explicita.'; exit 3 }
 if ($NliExperiment -and -not $summary.quality_pass) { Write-Host 'Equivalencia real pendiente o fallida: consulte quality en summary.json antes de reanudar.'; exit 2 }
 if (-not $summary.confirmation_ready -or $summary.cleanup_pending.Count) { exit 2 }
