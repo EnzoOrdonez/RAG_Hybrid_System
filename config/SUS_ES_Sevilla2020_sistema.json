@@ -1,0 +1,20 @@
+{
+  "source": "Sevilla-Gonzalez et al. (2020), JMIR Human Factors 7(4), e21161, Multimedia Appendix 2 (CC BY 4.0). Sustitución declarada: «herramienta»/«herramienta electrónica» → «sistema», con concordancia (esta→este, la→el, de la→del). Resto literal, incluida la puntuación original.",
+  "instruction": "Por favor seleccione de cada uno de los enunciados la opción que mejor describa su experiencia con el sistema. Un puntaje de 1 significa que usted se encuentra totalmente en desacuerdo con el enunciado, mientras que un puntaje en 5 significa que está totalmente de acuerdo, un puntaje de 3 significaría que usted se encuentra neutral con el enunciado.",
+  "scale_labels": {
+    "1": "Totalmente en desacuerdo",
+    "5": "Totalmente de acuerdo"
+  },
+  "items": [
+    "Me gustaría usar este sistema frecuentemente.",
+    "Considero que este sistema es innecesariamente complejo",
+    "Considero que el sistema es fácil de usar.",
+    "Considero necesario el apoyo de personal experto para poder utilizar este sistema",
+    "Considero que las funciones del sistema están bien integradas",
+    "Considero que el sistema presenta muchas contradicciones",
+    "Imagino que la mayoría de las personas aprenderían a usar este sistema rápidamente",
+    "Considero que el uso de este sistema es tedioso",
+    "Me sentí muy confiado al usar el sistema",
+    "Necesité saber bastantes cosas antes de poder empezar a usar este sistema"
+  ]
+}

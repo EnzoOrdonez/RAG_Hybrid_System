@@ -19,7 +19,7 @@ STAGES = {'familiarization', 'tasks', 'free_query', 'instruments', 'comparative'
 class StudyStore(InvitationStore):
     def __init__(self, root, protocol, purpose='study'):
         root = Path(root).resolve()
-        if root.is_relative_to(ROOT.parent.parent) or purpose not in ('study', 'pilot', 'technical'):
+        if root.is_relative_to(ROOT.parent.parent) or purpose not in ('study', 'pilot', 'technical', 'smoke', 'rehearsal'):
             raise ValueError('Use a separate external study directory and explicit purpose')
         super().__init__(root)
         self.protocol, self.purpose = protocol, purpose
@@ -47,7 +47,8 @@ class StudyStore(InvitationStore):
 
     def assignment(self, pid, *, cell=None, profile=None):
         if self.purpose != 'study':
-            if not pid.startswith('P') or not pid[1:].isdigit() or int(pid[1:]) < 900 or cell not in CELLS or profile not in PROFILES:
+            required = {'smoke': 'P999', 'rehearsal': 'P998'}.get(self.purpose)
+            if not pid.startswith('P') or not pid[1:].isdigit() or (required and pid != required) or (not required and int(pid[1:]) < 900) or cell not in CELLS or profile not in PROFILES:
                 raise ValueError('Pilots/technical sessions require fictitious P900+, cell and profile')
             return dict(participant_id=pid, role='pilot', cell=cell, profile=profile, primary_slot=pid)
         row = self.protocol['assignments'].get(pid)
@@ -295,6 +296,9 @@ class StudySession:
         if self.data['stage'] not in ('complete', 'abandoned'):
             raise ValueError('Only closed sessions may be exported')
         payload = copy.deepcopy(self.data)
+        payload['analysis_excluded'] = self.store.purpose in ('smoke', 'rehearsal', 'technical')
+        if self.store.purpose == 'smoke':
+            payload['gate_marker'] = 'SMOKE_NOT_GATE'
         payload['protocol_hashes'] = self.store.protocol['hashes']
         payload['labels'] = self.store.protocol['config']['labels']
         target = self.path.parent / 'full_session.json'

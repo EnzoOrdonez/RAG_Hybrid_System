@@ -2,6 +2,7 @@
 import csv
 import hashlib
 import json
+import random
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -11,6 +12,7 @@ CELLS = {1: (('A', 'T1'), ('B', 'T2')), 2: (('A', 'T2'), ('B', 'T1')),
 QUOTAS = {1: (3, 2), 2: (2, 3), 3: (3, 2), 4: (2, 3)}
 PROFILES = ('without_experience', 'with_experience')
 LIKERT_IDS = ('F1', 'F2', 'F3', 'F4', 'U1', 'U2', 'U3', 'R1', 'R2', 'I1')
+SUS_SOURCE_SHA256 = '15f6ebf953df8adcf2fdfed5bfcb6e9cf65941e719df5ec48f4aeebc955d5fa9'
 
 
 def digest(path):
@@ -34,9 +36,10 @@ def load_protocol(config_path, assignment_path):
     reference = json.loads((ROOT / 'config/study.example.json').read_text(encoding='utf-8'))
     if config.get('schema_version') != 1 or set(config.get('labels', {})) != {'A', 'B'} or set(config['labels'].values()) != {'hybrid', 'no_rag'}:
         raise ValueError('Fill the fixed A/B mapping')
-    items = config.get('sus', {}).get('items', [])
-    if len(items) != 10 or any(not isinstance(v, str) or not v.strip() for v in items):
-        raise ValueError('Fill all ten literal SUS items before admission')
+    source_path = ROOT / 'config/SUS_ES_Sevilla2020_sistema.json'
+    source = json.loads(source_path.read_text(encoding='utf-8'))
+    if config.get('sus') != source or config.get('sus_source_sha256') != SUS_SOURCE_SHA256:
+        raise ValueError('Literal SUS source or instrument changed')
     # These texts are transcribed from the specified protocol, never freely reworded.
     for name in ('likert', 'comparative', 'free_instruction', 'blinding_question', 'blinding_choices', 'blinding_reason'):
         if config.get(name) != reference[name]:
@@ -101,8 +104,40 @@ def load_protocol(config_path, assignment_path):
             if sum(config['labels'][label] == condition and tasks_name == task_set
                    for r in primary for label, tasks_name in CELLS[r['cell']]) != 10:
                 raise ValueError('Task/condition imbalance')
-    hashes = dict(config=digest(config_path), assignments=digest(assignment_path), queries=digest(queries_path))
+    hashes = dict(config=digest(config_path), assignments=digest(assignment_path), queries=digest(queries_path), sus_source=digest(source_path))
     fingerprint = hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
     return dict(config=config, assignments={r['participant_id']: r for r in assignments},
                 paths=dict(config=str(config_path), assignments=str(assignment_path), queries=str(queries_path)),
                 queries=catalog, hashes=hashes, fingerprint=fingerprint)
+
+
+def draw_study_configuration(config_path, assignment_path, output_dir):
+    """Create, once, a sealed reproducible A/B draw and assignment CSV outside checkout."""
+    config = json.loads(Path(config_path).read_text(encoding='utf-8'))
+    if config.get('labels', {}).values() != {'', ''}:
+        raise ValueError('Draw only from the unfilled example configuration')
+    output = Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
+    target_config, target_csv = output / 'study.json', output / 'assignments.csv'
+    if target_config.exists() or target_csv.exists():
+        raise FileExistsError('Refuse to overwrite an existing study draw')
+    rnd = random.Random(config['randomization']['ab_seed'])
+    labels = ['hybrid', 'no_rag']; rnd.shuffle(labels)
+    config['labels'] = dict(zip(('A', 'B'), labels))
+    rows = []
+    for cell, quota in QUOTAS.items():
+        for profile, count in zip(PROFILES, quota):
+            rows.extend([(cell, profile)] * count)
+    assignment_rng = random.Random(config['randomization']['assignment_seed'])
+    assignment_rng.shuffle(rows)
+    for number, (cell, profile) in enumerate(rows, 1):
+        rows[number - 1] = (f'P{number:02d}', 'primary', cell, profile)
+    rows.extend([('P21', 'reserve', 1, 'with_experience'), ('P22', 'reserve', 2, 'without_experience'),
+                 ('P23', 'reserve', 3, 'with_experience'), ('P24', 'reserve', 4, 'without_experience')])
+    Path(target_config).write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding='utf-8')
+    with target_csv.open('w', newline='', encoding='utf-8') as stream:
+        writer = csv.writer(stream); writer.writerow(['participant_id', 'role', 'cell', 'profile']); writer.writerows(rows)
+    protocol = load_protocol(target_config, target_csv)
+    seal = dict(schema_version=1, seeds=config['randomization'], hashes=protocol['hashes'], fingerprint=protocol['fingerprint'])
+    (output / 'draw_seal.json').write_text(json.dumps(seal, ensure_ascii=False, indent=2), encoding='utf-8')
+    return protocol

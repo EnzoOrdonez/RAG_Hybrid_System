@@ -1,8 +1,12 @@
 {
   "schema_version": 1,
-  "labels": {
-    "A": "",
-    "B": ""
+  "labels": {"A": "", "B": ""},
+  "sus_source_sha256": "15f6ebf953df8adcf2fdfed5bfcb6e9cf65941e719df5ec48f4aeebc955d5fa9",
+  "randomization": {
+    "ab_seed": 20260928,
+    "assignment_seed": 20260929,
+    "algorithm": "independent Python random.Random Fisher-Yates shuffle",
+    "sealed_before_draw": true
   },
   "tasks": {
     "T1": [
@@ -18,18 +22,20 @@
   },
   "familiarization": "What is cloud computing?",
   "sus": {
-    "source": "Sevilla-Gonzalez et al. (2020), JMIR Human Factors 7(4), e21161; única sustitución: herramienta → sistema",
+    "source": "Sevilla-Gonzalez et al. (2020), JMIR Human Factors 7(4), e21161, Multimedia Appendix 2 (CC BY 4.0). Sustitución declarada: «herramienta»/«herramienta electrónica» → «sistema», con concordancia (esta→este, la→el, de la→del). Resto literal, incluida la puntuación original.",
+    "instruction": "Por favor seleccione de cada uno de los enunciados la opción que mejor describa su experiencia con el sistema. Un puntaje de 1 significa que usted se encuentra totalmente en desacuerdo con el enunciado, mientras que un puntaje en 5 significa que está totalmente de acuerdo, un puntaje de 3 significaría que usted se encuentra neutral con el enunciado.",
+    "scale_labels": {"1": "Totalmente en desacuerdo", "5": "Totalmente de acuerdo"},
     "items": [
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      ""
+      "Me gustaría usar este sistema frecuentemente.",
+      "Considero que este sistema es innecesariamente complejo",
+      "Considero que el sistema es fácil de usar.",
+      "Considero necesario el apoyo de personal experto para poder utilizar este sistema",
+      "Considero que las funciones del sistema están bien integradas",
+      "Considero que el sistema presenta muchas contradicciones",
+      "Imagino que la mayoría de las personas aprenderían a usar este sistema rápidamente",
+      "Considero que el uso de este sistema es tedioso",
+      "Me sentí muy confiado al usar el sistema",
+      "Necesité saber bastantes cosas antes de poder empezar a usar este sistema"
     ]
   },
   "likert": [
@@ -118,7 +124,7 @@
       "choices": []
     }
   ],
-  "free_instruction": "Ahora escribe tú una consulta sobre algo de AWS, Azure o GCP que te interese o que hayas necesitado buscar alguna vez. No incluyas información confidencial de tu empresa.",
+  "free_instruction": "Ahora escribe tú una consulta sobre algo de AWS, Azure o GCP que te interese o que hayas necesitado buscar alguna vez. Escríbela preferentemente en inglés, el idioma de la documentación. No incluyas información confidencial de tu empresa.",
   "blinding_question": "De los dos sistemas que usaste, ¿cuál crees que consultaba documentación para responder?",
   "blinding_choices": [
     "Sistema A",
