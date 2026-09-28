@@ -234,10 +234,12 @@ def _render_evaluation():
             attempt["shown_at"] = time.time()
             session.save_checkpoint()
         st.write(attempt["answer"])
-        if attempt["sources"]:
+        from src.ui.components.study_service import presented_sources
+        sources = presented_sources(attempt["sources"])
+        if sources:
             with st.expander("Fuentes de la respuesta"):
-                for source in attempt["sources"]:
-                    st.write(" / ".join(str(source.get(k, "")) for k in ("provider", "service", "section")))
+                for source in sources:
+                    st.write(source['label'])
         st.divider()
 
         # Rating form

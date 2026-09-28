@@ -27,7 +27,7 @@ def test_evaluation_full_flow_and_reload(tmp_path, monkeypatch):
     def query(question):
         calls.append(question)
         return SimpleNamespace(answer="Saved answer", error=None, confidence="MEDIUM",
-                               sources=[{"provider": "aws", "service": "s3"}],
+                               sources=[{"provider": "aws", "service": None, "section": "N/A"}],
                                retrieved_chunks=[{"chunk_id": "c1", "text": "evidence"}],
                                hallucination_report={"method": "nli"})
     fake = SimpleNamespace(config=SURVEY_DEPLOY, query=query,
@@ -68,6 +68,7 @@ def test_evaluation_full_flow_and_reload(tmp_path, monkeypatch):
     for index in range(30):
         _button(app, "Buscar respuesta").click().run()
         assert not app.exception
+        assert not any('None' in element.value or 'N/A' in element.value for element in app.markdown)
         if index == 0:
             before = len(calls)
             # A fresh browser reconnects with its invitation to the pending answer.
