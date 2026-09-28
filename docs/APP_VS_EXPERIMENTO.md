@@ -1,5 +1,12 @@
 # Interfaz Streamlit frente a la receta experimental
 
+**Addendum 2026-09-27:** esta comparación describe la receta histórica. La nueva
+entrada participante usa `study_pipeline.py`: `SURVEY_DEPLOY` y una configuración
+separada `STUDY_NO_RAG`, ambas con Granite, iguales parámetros de generación y
+presentación. La segunda no consulta índice ni reordenador. `LLM_ONLY_NO_RAG` y
+las configuraciones experimentales no se modifican. Ver [runbook](STUDY_DEPLOYMENT_RUNBOOK.md).
+La equivalencia de parámetros se prueba con dobles; rendimiento real aún NO verificado.
+
 Auditoría de configuración realizada el 2026-08-23 contra `REPRODUCE.md` y
 `scripts/run_exp19b_generation.py`. La comparación distingue valores configurables de
 diferencias de mecanismo: igualar un número es seguro; convertir la interfaz en una

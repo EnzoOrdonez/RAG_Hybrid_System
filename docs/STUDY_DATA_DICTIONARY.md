@@ -72,3 +72,27 @@ cambia. La sesión anterior se abandona y su invitación se revoca. No se promed
 dos personas de una plaza ni se imputa una condición faltante. Las sesiones
 abandonadas se reportan como exclusiones del contraste pareado. Errores dentro
 de sesiones completas se conservan y se reportan; no se borran para mejorar SUS.
+
+## Exportación consolidada y estadística
+
+`manage_study.py export` produce `sessions.json`, `analysis.json`, este diccionario
+y `manifest.json` con hashes; no sobrescribe un destino existente. El análisis
+solo incluye pares completos `purpose=study`, identifica duplicados por participante
+y plaza primaria, y rechaza mezcla de configuraciones congeladas distintas.
+
+Diferencia = híbrido menos condición sin consulta documental, independientemente
+del mapeo A/B. SUS se recalcula desde los diez ítems; valores almacenados discrepantes
+se rechazan. F = media F1/F2/(6−F3)/F4; U = media U1/U2/U3. Wilcoxon bilateral y
+BH conjunto sobre exactamente SUS/F/U, alfa 0,05. d_z = media de diferencias / SD
+muestral de diferencias. Si SD=0 con diferencia no nula, d_z es indefinido (null),
+no infinito. Bootstrap pareado por participante: 10 000 remuestras, seed42, IC
+percentil 95% para diferencia media y d_z; informa remuestras con d_z indefinido.
+Todos los contrastes usan la misma secuencia de índices de remuestreo.
+
+R1, R2 crudo, R2 invertido e I1 se presentan separados como descriptivos, sin promedio
+de responsividad ni contraste adicional. Perfiles: diferencias descriptivas, sin
+tests de subgrupos. C1–C3: conteos; C4, motivo de cegamiento y consultas libres:
+insumos cualitativos. Exactitud de cegamiento: aciertos / participantes incluidos
+con cierre; «No sabría decir» permanece en el denominador y se informa aparte.
+Pilotos, abandonos y pares faltantes aparecen como exclusiones explícitas, sin imputar.
+Los scripts no deciden GO ni sustituyen el plan/procedimientos éticos aprobados.

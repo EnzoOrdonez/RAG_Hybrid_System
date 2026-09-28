@@ -55,7 +55,7 @@ proyección de fuentes. Fin justo antes del guardado final. Excluye espera del l
 calentamiento previo, lectura humana, transporte y pintado del navegador. Se publica
 como latencia de servidor, nunca como tiempo visual completo. Medir por separado
 latencia cliente/servidor en la modalidad D2 seleccionada requiere instrumentación
-adicional autorizada. Regresión `test_clock_includes_factory_and_query` del servicio
+adicional autorizada. Regresión `test_clock_includes_preparation_and_query_but_not_network` del servicio
 y frontera 2+3=5 del ejecutor sintético.
 
 ## Ejecutor diseñado y comprobable sin modelos

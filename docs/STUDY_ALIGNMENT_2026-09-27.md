@@ -47,3 +47,33 @@ históricos no se migran. La lista de asignación no debe mutar: se sella por ha
 los reemplazos se registran aparte y conservan celda/perfil. No se puede garantizar
 que texto libre no contenga datos personales: no se añaden campos identificables,
 se advierte al participante y se exige revisión humana de exportaciones.
+
+## Implementación y pruebas concretas
+
+| Pieza | Implementación | Regresión verificable |
+|---|---|---|
+| Condiciones | `study_pipeline.py` | `test_study_protocol.py`: no_rag no llama índice/reordenador; mismas opciones LLM |
+| Asignación/tareas/SUS | `study_protocol.py`, plantillas `config/study*` | Cuotas y balance, denylist de ocho, tipo/dificultad/proveedor, campos extra CSV, SUS 0/50/100 |
+| Estado/persistencia | `study_sessions.py`, `study_service.py` | `test_study_sessions.py`: práctica sentinel ausente en disco/export, errores sin avance, 2+3=5, reemplazo, revisión obsoleta |
+| UI | `study_page.py`, `study_runtime.py`, `app.py` | `test_study_app.py`: dos bloques completos, reconexión sin regenerar, instrumentos solo por bloque, cierre/export; formulario obsoleto sin excepción visible |
+| Aislamiento | Registro único «Sesión» | `test_participant_routing.py`: antes/después de login sin rutas de operador |
+| Preparación | `Preparation` parametrizable con defaults históricos intactos | `test_study_warms_both_conditions_but_only_evidence_nli`: ambas condiciones, nuevo scope por participante |
+| Citas | `presented_sources`; vista histórica usa misma proyección | `test_evaluation_app.py` reprodujo fallo None/N/A antes del fix; nuevo flujo prueba ausencia de bloque vacío y respuesta original |
+| Operador/export/análisis | `manage_study.py`, `study_analysis.py` | `test_study_analysis.py`: hashes, tampering, efecto conocido, controles nulos sintéticos, inversos/BH, duplicados y exclusiones |
+| Compuerta separada | `study_gate_draft.py` sin adaptador real | `test_study_gate_draft.py`: 120 posiciones simuladas, integridad, invalidez, plazo vencido, interrupción terminal y autorización de reanudación |
+
+Evidencia de reproducción de citas: `citations-red.txt` (fallo esperado), seguida
+por `citations-green-pytest.txt` y sus Ruff/secretos/diff en la carpeta de auditoría.
+Evidencia sintética de compuerta: `study-gate-synthetic/summary.json` y manifiesto.
+Estos resultados no son latencias reales ni habilitan entrevistas.
+
+Las validaciones previas a los commits quedan en `protocol-*`, `sessions-v2-*`,
+`ui-v2-*`, `analysis-*`, `gate-*`, `citations-green-*` y `final-*`, dentro de la
+carpeta de auditoría inicial. Los errores intermedios de fixtures/AppTest/lint
+se resolvieron antes de los commits correspondientes; no son observaciones de estudio.
+
+Pendientes humanos: D1 aprobación de la compuerta separada; D2 selección/revisión
+del canal; D3 revisión de tareas/asignación/mapeo; D4 literal SUS. No se modificaron
+pre-registros aprobados, configuraciones experimentales, corpus, gold ni artículo.
+P900 anterior se conserva, pero no prueba el nuevo protocolo. NO-GO para personas
+hasta validación real del nuevo despliegue. Nube y cohortes reales no ejecutadas.

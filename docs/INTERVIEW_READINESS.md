@@ -1,5 +1,29 @@
 # Preparación técnica de Evaluation Mode
 
+## Estado operativo actual — 2026-09-27
+
+**NO-GO para piloto con personas y estudio real.** La entrada `participant` es ahora
+«Sesión»: dos condiciones (`hybrid`, `no_rag`), mapeo A/B global y CSV congelados,
+familiarización sin contenido persistido, tres tareas y una libre por bloque,
+SUS/Likert inmediatamente por bloque, comparativas y chequeo de cegamiento al cierre.
+No se rellenó SUS literal ni se asignaron participantes reales. Los valores técnicos
+Granite/seed/temperatura/timeout permanecen; `LLM_ONLY_NO_RAG` histórico no cambia.
+
+**Para operar la app actual usar exclusivamente [STUDY_DEPLOYMENT_RUNBOOK.md](STUDY_DEPLOYMENT_RUNBOOK.md)**
+y el [diccionario esquema 3](STUDY_DATA_DICTIONARY.md). El script es `manage_study.py`
+y las variables de sesiones son `CLOUDRAG_STUDY_*`. `manage_interviews.py`, esquema 2,
+30 ratings y tres sistemas descritos debajo pertenecen al flujo histórico privado;
+no emiten invitaciones válidas para la nueva entrada de participantes.
+
+El pre-registro NLI fue aprobado e implementado en tandas posteriores al registro
+del 20-sep de abajo; su validación real sigue pendiente. Se mantiene intacto y su
+runner se conserva en la copia aislada `521f525`. La [compuerta separada del estudio](STUDY_GATE_PREREGISTRATION_DRAFT.md)
+es solo propuesta. No se infiere GO de tests sintéticos ni de P900 histórico.
+Citas None/N/A: proyección corregida en la nueva UI/exportación y en la vista
+histórica, conservando las respuestas y los archivos históricos originales.
+
+## Historia de validación y receta anterior (no instrucciones de la app actual)
+
 **Seguimiento 2026-09-20 — VERIFICADO:** diagnóstico completo, 40/40 válidos;
 p95 léxico **70,61 s** e híbrido **63,18 s**, ambos >60 s. **NO-GO vigente**;
 Fase B bloqueada. El [informe](LEXICAL_CONFIRMATION_2026-09-20.md) matiza la

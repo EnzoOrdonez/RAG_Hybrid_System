@@ -1,5 +1,13 @@
 # REPRODUCE — regenerar las cifras desde limpio
 
+**Aplicación del estudio, 2026-09-27:** el modo participante usa el protocolo nuevo
+de dos condiciones, con configuración/asignación selladas e instrumentos por bloque.
+Ver [runbook del estudio](docs/STUDY_DEPLOYMENT_RUNBOOK.md). SUS vacío bloquea sesiones.
+La compuerta del estudio es BORRADOR y NO-GO sigue vigente. Estas instrucciones
+de reproducción histórica no son autorización para ejecutar cohortes ni publicar la app.
+El pre-registro NLI no cambia: su runner se ejecutará por el humano desde la copia
+aislada `.worktrees/nli-521f525`, no desde esta app modificada.
+
 Cómo volver a obtener cada número citable del proyecto, ordenado de lo más barato a lo más
 caro. **Todo lo del nivel 1 y 2 corre sin GPU, sin LLM y sin red**: la fase de verano se
 diseñó para que el pase GPU se pague una sola vez por verificador y todo lo demás sea

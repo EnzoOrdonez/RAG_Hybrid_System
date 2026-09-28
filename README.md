@@ -139,7 +139,14 @@ Query → Normalization + Expansion
 For the participant application, use the Python 3.14 environment, hashed dependency
 lock and artifact provisioning steps in [Interview readiness](docs/INTERVIEW_READINESS.md).
 Installing packages alone does not provision the corpus, indices or model snapshots.
-Interview gate (2026-09-10, Lima): **NO-GO**. The new 120-position cohort is complete:
+**Study app update (2026-09-27): NO-GO remains.** Participant mode now implements
+two blinded conditions and block-level instruments. Fill the literal SUS placeholders,
+freeze the global mapping/assignment CSV, and follow the
+[study runbook](docs/STUDY_DEPLOYMENT_RUNBOOK.md). Its separate gate is a draft;
+no real study cohort or network exposure has been executed. Approved NLI criteria
+remain intact; the NLI runner uses the isolated `521f525` copy.
+
+Historical interview gate (2026-09-10, Lima): **NO-GO**. That 120-position cohort is complete:
 warm p95 is 51.57 s hybrid, 65.75 s lexical and 45.09 s semantic. Lexical exceeds
 the preregistered 60 s limit. P900 completed 30 technical ratings, synthetic SUS and
 export; its three historical errors have no ratings. Mandatory preparation and
@@ -241,9 +248,10 @@ python scripts/run_benchmark.py --experiment exp8 --quick
 
 ### Aplicación para participantes y demo privada
 
-La aplicación abre **Evaluation Mode** por defecto y requiere una invitación del
-operador. Antes de iniciarla, seguir [la guía de instalación y operación](docs/INTERVIEW_READINESS.md)
-para fijar almacenamiento, manifiesto de artefactos, digest del modelo y endpoint.
+La aplicación abre **Sesión** por defecto y requiere una invitación del
+operador para el protocolo de dos condiciones. Antes de iniciarla, seguir
+[el runbook del estudio](docs/STUDY_DEPLOYMENT_RUNBOOK.md) para completar SUS,
+congelar asignación y fijar almacenamiento, manifiesto, digest y endpoint.
 Las entrevistas permanecen bloqueadas hasta validar el despliegue y su latencia real.
 
 El Chat de desarrollo se habilita explícitamente en un entorno privado:
@@ -328,12 +336,12 @@ corrected per research-question family.
 
 ## Streamlit UI
 
-Participant mode registers only **Evaluation Mode**, with invitation login and no
+Participant mode registers only **Sesión**, with invitation login and no
 operator routes. The five views under `src/ui/views/` (**Chat**, **Metrics Dashboard**,
 **Document Explorer**, **Evaluation Mode**, **Experiment Runner**) are available only
 in the separate private `CLOUDRAG_MODE=development` environment. Installation and
 required deployment variables are documented in
-[INTERVIEW_READINESS.md](docs/INTERVIEW_READINESS.md).
+[STUDY_DEPLOYMENT_RUNBOOK.md](docs/STUDY_DEPLOYMENT_RUNBOOK.md).
 
 ```bash
 python -m streamlit run src/ui/app.py
