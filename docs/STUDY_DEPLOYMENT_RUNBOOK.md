@@ -1,6 +1,14 @@
-# BORRADOR — operación y piloto del estudio de usuarios
+# Operación y piloto del estudio de usuarios
 
-2026-09-27. **NO-GO para piloto con personas y estudio real.** Software probado
+## Enmienda D2/D4 — 2026-09-28
+
+Zoom institucional es el canal principal: Streamlit permanece en `127.0.0.1` y se comparte únicamente su ventana. Antes de entregar el control, el operador usa una cuenta estándar aislada, sin datos personales ni sincronización, con solo Zoom y el navegador designado; desactiva notificaciones, portapapeles remoto, aceptación automática y transferencias disponibles. Se prueba apertura/guardado, descargas, `file:`, atajos, ejecución de programas y carpetas ajenas. Windows Home, pantalla completa o compartir una ventana no se presentan como garantías: si B.4 no puede verificarse, se bloquea el uso con personas. Ante fallo de Zoom, se reprograma; Meet no se convierte en otra condición de despliegue ni se configura otra herramienta remota.
+
+El instrumento SUS se carga literalmente desde `config/SUS_ES_Sevilla2020_sistema.json` (SHA-256 `15f6ebf953df8adcf2fdfed5bfcb6e9cf65941e719df5ec48f4aeebc955d5fa9`). La consulta libre se solicita preferentemente en inglés; su idioma lo anota un operador después de cerrar la sesión con `review_study_language.py`, enlazado al hash de la exportación y sin modificarla.
+
+Configure un respaldo obligatorio en otro disco físico. Tras cierre: exporte, valide `export_manifest.json`, copie a un directorio temporal, compare SHA-256 y publique solo cuando coincida. `backup_state.json=pending` es reintentable y bloquea la sesión siguiente; nunca borra respuestas ni obliga a repetir instrumentos.
+
+2026-09-28. **NO-GO para piloto con personas y estudio real.** Software probado
 con dobles, no validado todavía en el despliegue del estudio. No se configuró
 túnel, acceso remoto ni nube. No se reclutó/contactó a nadie.
 
