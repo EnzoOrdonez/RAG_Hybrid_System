@@ -86,3 +86,29 @@ def test_empty_sus_blocks_login(tmp_path, monkeypatch):
     monkeypatch.setattr(runtime, 'store_from_env', lambda: (_ for _ in ()).throw(ValueError('SUS')))
     app = AppTest.from_string('from src.ui.views.study_page import render; render()').run()
     assert app.error and not app.text_input and not app.exception
+
+
+def test_stale_block_form_has_neutral_error_and_no_duplicate_instruments(tmp_path, monkeypatch):
+    from src.ui.components import study_service as service
+    _, _, protocol = configured(tmp_path)
+    store = StudyStore(tmp_path / 'sessions', protocol)
+    store.freeze()
+    token = store.issue('P01')
+    session = store.admit(token)
+    session.familiarization_done()
+    for _ in range(4):
+        service.answer(session, lambda _: SimpleNamespace(query=lambda q: SimpleNamespace(
+            answer='ok', error=None, confidence='HIGH', sources=[], hallucination_report={})), 'free')
+        session.shown()
+        session.acknowledge()
+    monkeypatch.setattr(runtime, 'store_from_env', lambda: store)
+    app = AppTest.from_string('import streamlit as st\nfrom src.ui.views.study_page import render\nst.navigation([st.Page(render)]).run()\nst.stop()').run()
+    app.text_input[0].set_value(token)
+    click(app, 'Entrar')
+    # Another tab advances the revision after this form was rendered.
+    store.admit(token).incident()
+    for r in app.radio:
+        r.set_value(3)
+    click(app, 'Guardar respuestas del bloque')
+    assert app.error and not app.exception
+    assert store.admit(token).data['instruments'] == []

@@ -90,3 +90,12 @@ def test_no_rag_real_pipeline_path_does_not_retrieve_or_rerank(monkeypatch):
     response = p.query('Technical synthetic question')
     assert not response.error and not response.retrieved_chunks and len(calls) == 1
     assert calls[0]['temperature'] == 0
+def test_csv_extra_cell_is_rejected(tmp_path):
+    from tests.study_helpers import configured
+    from src.ui.components.study_protocol import load_protocol
+    config, csv, _ = configured(tmp_path)
+    lines = csv.read_text(encoding='utf-8').splitlines()
+    lines[1] += ',unrequested personal detail'
+    csv.write_text('\n'.join(lines), encoding='utf-8')
+    with pytest.raises(ValueError, match='four complete fields'):
+        load_protocol(config, csv)

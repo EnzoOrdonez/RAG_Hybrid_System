@@ -71,6 +71,8 @@ def load_protocol(config_path, assignment_path):
     seen = set()
     primary, reserves = [], []
     for row in assignments:
+        if set(row) != {'participant_id', 'role', 'cell', 'profile'} or any(not isinstance(v, str) or not v.strip() for v in row.values()):
+            raise ValueError('Every CSV row must have exactly four complete fields')
         pid = row['participant_id']
         if pid in seen or pid not in {f'P{i:02d}' for i in range(1, 25)}:
             raise ValueError('Invalid or duplicate participant')

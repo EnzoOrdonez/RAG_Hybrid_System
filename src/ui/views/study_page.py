@@ -115,7 +115,10 @@ def _flow(session, view):
             if None in sus or None in likert.values():
                 st.error('Responde todos los ítems antes de continuar.')
             else:
-                session.submit_instruments(sus, likert)
+                try:
+                    session.submit_instruments(sus, likert)
+                except Exception:
+                    st.error('La sesión cambió o no se pudo guardar. Contacta al coordinador y vuelve a comprobar las respuestas.')
         with st.form('block_' + str(block)):
             for i, text in enumerate(config['sus']['items']):
                 st.radio(text, range(1, 6), index=None, horizontal=True, key=f'sus_{block}_{i}')
