@@ -107,3 +107,13 @@ def test_manifest_change_cannot_reuse_readiness(prepared, monkeypatch):
     assert not obj.ready('session')
     with pytest.raises(prep.PreparationRequired, match='Restart process'):
         obj.prepare('session')
+
+
+def test_study_warms_both_conditions_but_only_evidence_nli(prepared):
+    old, calls, _ = prepared
+    obj = prep.Preparation(old.root, factory=old.factory, probe=old.probe, clock=old.clock,
+                           systems=('hybrid', 'no_rag'), nli_systems=('hybrid',))
+    receipt = obj.prepare('study')
+    assert calls == [('query', 'hybrid'), ('nli', 'hybrid'), ('query', 'no_rag')]
+    assert receipt['systems'] == ['hybrid', 'no_rag'] and obj.ready('study')
+    assert not obj.ready('next-participant')

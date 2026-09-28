@@ -23,7 +23,7 @@ if os.environ.get("CLOUDRAG_DEMO_GPU") != "1":
 import streamlit as st
 
 st.set_page_config(
-    page_title="CloudRAG — Hybrid RAG System",
+    page_title="Sesión",
     page_icon="☁️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -35,8 +35,8 @@ if mode not in {"participant", "development"}:
     st.error("Invalid application mode")
     st.stop()
 if mode == "participant":
-    from src.ui.views.evaluation_page import render
-    st.navigation([st.Page(render, title="Evaluation Mode", default=True)], position="hidden").run()
+    from src.ui.views.study_page import render
+    st.navigation([st.Page(render, title="Sesión", default=True)], position="hidden").run()
     st.stop()
 
 # Page registry

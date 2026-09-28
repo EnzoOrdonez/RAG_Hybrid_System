@@ -32,7 +32,11 @@ def load_pipeline(system):
 
 
 class Preparation:
-    def __init__(self, root, factory=None, probe=None, clock=None):
+    def __init__(self, root, factory=None, probe=None, clock=None, systems=SYSTEMS, nli_systems=None):
+        self.systems = tuple(systems)
+        self.nli_systems = set(self.systems if nli_systems is None else nli_systems)
+        if not self.systems or len(set(self.systems)) != len(self.systems) or not self.nli_systems <= set(self.systems):
+            raise ValueError('Invalid preparation systems')
         self.root = Path(root).resolve()
         if self.root.is_relative_to(PROJECT.parent.parent):
             raise ValueError('Preparation evidence must be outside checkout')
@@ -85,7 +89,7 @@ class Preparation:
                 return False
             try:
                 identity = self._identity()
-                if identity != self.receipt['identity'] or set(self.pipelines) != set(SYSTEMS):
+                if identity != self.receipt['identity'] or set(self.pipelines) != set(self.systems):
                     raise PreparationRequired('Preparation identity changed')
                 resident = self._resident(identity)
                 self.last_check = dict(at=self.clock(), identity=identity, resident=resident)
@@ -125,7 +129,7 @@ class Preparation:
             stage = 'loading'
             try:
                 import numpy as np
-                for system in SYSTEMS:
+                for system in self.systems:
                     stage = f'loading:{system}'
                     pipeline = self.factory(system)
                     stage = f'query:{system}'
@@ -139,6 +143,11 @@ class Preparation:
                             or report.get('method') in ('mixed', 'keyword_fallback')):
                         raise PreparationRequired(f'Warmup failed: {system}')
                     stage = f'nli:{system}'
+                    if system not in self.nli_systems:
+                        self.pipelines[system] = pipeline
+                        self._event('pipeline_prepared', scope, operation=operation['id'], system=system,
+                                    warm_response_id=warm_response['id'], nli_probe=None)
+                        continue
                     model = pipeline.hallucination_detector.nli_model
                     if model is None:
                         raise PreparationRequired('NLI unavailable')
@@ -157,7 +166,7 @@ class Preparation:
                     raise PreparationRequired('Identity changed while preparing')
                 resident = self._resident(identity)
                 self.receipt = self._event('preparation_ready', scope, operation=operation['id'],
-                    status='ready', identity=identity, systems=list(SYSTEMS), resident=resident,
+                    status='ready', identity=identity, systems=list(self.systems), resident=resident,
                     elapsed_s=time.perf_counter() - started)
                 for pipeline in self.pipelines.values():
                     pipeline.interview_preparation_id = self.receipt['id']

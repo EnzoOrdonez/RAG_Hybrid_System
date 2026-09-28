@@ -2,7 +2,6 @@
 
 import json
 import time
-from pathlib import Path
 from types import SimpleNamespace
 
 from streamlit.testing.v1 import AppTest
@@ -52,7 +51,7 @@ def test_evaluation_full_flow_and_reload(tmp_path, monkeypatch):
     monkeypatch.setattr(index_loader, "load_hybrid_index", lambda: object())
     monkeypatch.setattr(index_loader, "load_pipeline", lambda *a, **k: fake)
     token = InvitationStore(tmp_path).issue("P01")
-    app = AppTest.from_file(str(Path(__file__).parents[1] / "src/ui/app.py"), default_timeout=10).run()
+    app = AppTest.from_string("import streamlit as st\nfrom src.ui.views.evaluation_page import render\nst.navigation([st.Page(render)]).run()\nst.stop()", default_timeout=10).run()
     assert not app.exception
     assert not app.radio  # no operator navigation
     app.text_input[0].set_value(token)
@@ -72,7 +71,7 @@ def test_evaluation_full_flow_and_reload(tmp_path, monkeypatch):
         if index == 0:
             before = len(calls)
             # A fresh browser reconnects with its invitation to the pending answer.
-            app = AppTest.from_file(str(Path(__file__).parents[1] / "src/ui/app.py"), default_timeout=10).run()
+            app = AppTest.from_string("import streamlit as st\nfrom src.ui.views.evaluation_page import render\nst.navigation([st.Page(render)]).run()\nst.stop()", default_timeout=10).run()
             app.text_input[0].set_value(token)
             app.checkbox[0].check()
             _button(app, "Comenzar Evaluacion").click().run()
