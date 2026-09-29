@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import pytest
 
 from scripts.review_study_language import annotate
+from scripts.run_study_gate import run_cohort
 from src.ui.components.study_protocol import ROOT, draw_study_configuration, verify_draw
 
 
@@ -45,3 +46,15 @@ def test_review_records_operator_time_and_never_changes_export(tmp_path):
     assert export.read_bytes() == before
     with pytest.raises(ValueError):
         annotate(export, "english", tmp_path / "other.json", "")
+
+
+def test_two_window_dry_run_is_never_a_go_decision(tmp_path):
+    result = run_cohort(
+        tmp_path / "cohort",
+        dry_run=True,
+        operator_zoom_active=True,
+        screen_share_declared=True,
+    )
+    assert result["status"] == "complete"
+    assert result["go_decision"] == "SYNTHETIC_NOT_GO"
+    assert all(values["n"] == 60 for values in result["systems"].values())

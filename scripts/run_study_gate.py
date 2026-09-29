@@ -140,6 +140,84 @@ def run(
     return summary
 
 
+def run_cohort(
+    output,
+    *,
+    dry_run=False,
+    operator_zoom_active=False,
+    screen_share_declared=False,
+    backup_pending=False,
+    adapter=None,
+):
+    """Run both planned windows; an incomplete first window prohibits the second."""
+    root = Path(output).resolve()
+    if root.exists():
+        raise FileExistsError("Cohort evidence directory must be new")
+    root.mkdir(parents=True)
+    first = run(
+        root / "window-1",
+        window=1,
+        dry_run=dry_run,
+        operator_zoom_active=operator_zoom_active,
+        screen_share_declared=screen_share_declared,
+        backup_pending=backup_pending,
+        adapter=adapter,
+    )
+    if first["status"] != "complete":
+        aggregate = dict(
+            mode="SYNTHETIC_ONLY" if dry_run else "REAL",
+            status="WINDOW_1_TERMINAL",
+            go_decision="NOT_A_GO_DECISION",
+            windows=[first],
+        )
+        atomic_json(root / "aggregate.json", aggregate)
+        return aggregate
+    second = run(
+        root / "window-2",
+        window=2,
+        dry_run=dry_run,
+        operator_zoom_active=operator_zoom_active,
+        screen_share_declared=screen_share_declared,
+        backup_pending=backup_pending,
+        adapter=adapter,
+    )
+    systems = {}
+    for condition in ("hybrid", "no_rag"):
+        rows = []
+        for window in (root / "window-1", root / "window-2"):
+            rows.extend(
+                json.loads((window / "attempts.json").read_text(encoding="utf-8"))
+            )
+        group = [row for row in rows if row["condition"] == condition]
+        valid = [
+            row["elapsed_s"]
+            for row in group
+            if row["status"] == "success" and row["valid"]
+        ]
+        systems[condition] = dict(
+            n=len(valid),
+            failures=sum(row["status"] != "success" for row in group),
+            invalid=sum(not row["valid"] for row in group),
+            p95=float(np.percentile(valid, 95)) if valid else None,
+        )
+    eligible = second["status"] == "complete" and all(
+        values["n"] == 60
+        and values["failures"] == 0
+        and values["invalid"] == 0
+        and values["p95"] <= 60
+        for values in systems.values()
+    )
+    aggregate = dict(
+        mode="SYNTHETIC_ONLY" if dry_run else "REAL",
+        status="complete" if second["status"] == "complete" else "WINDOW_2_TERMINAL",
+        systems=systems,
+        go_decision="SYNTHETIC_NOT_GO" if dry_run else ("GO" if eligible else "NO_GO"),
+        windows=[first, second],
+    )
+    atomic_json(root / "aggregate.json", aggregate)
+    return aggregate
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", required=True)
