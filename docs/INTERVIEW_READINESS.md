@@ -17,7 +17,7 @@ no emiten invitaciones válidas para la nueva entrada de participantes.
 
 El pre-registro NLI fue aprobado e implementado en tandas posteriores al registro
 del 20-sep de abajo; su validación real sigue pendiente. Se mantiene intacto y su
-runner se conserva en la copia aislada `521f525`. La [compuerta separada del estudio](STUDY_GATE_PREREGISTRATION_DRAFT.md)
+runner se conserva en la copia aislada `521f525`. La [compuerta operativa aprobada](STUDY_GATE_PREREGISTRATION.md)
 es solo propuesta. No se infiere GO de tests sintéticos ni de P900 histórico.
 Citas None/N/A: proyección corregida en la nueva UI/exportación y en la vista
 histórica, conservando las respuestas y los archivos históricos originales.

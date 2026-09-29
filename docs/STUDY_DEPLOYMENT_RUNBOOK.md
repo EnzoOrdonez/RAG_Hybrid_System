@@ -15,7 +15,7 @@ túnel, acceso remoto ni nube. No se reclutó/contactó a nadie.
 ## Decisiones y alcance
 
 - D1: mantener la cohorte NLI aprobada sin cambios; ejecutarla desde la copia
-  aislada `.worktrees/nli-521f525`, HEAD `521f525`. [Compuerta separada propuesta](STUDY_GATE_PREREGISTRATION_DRAFT.md)
+  aislada `.worktrees/nli-521f525`, HEAD `521f525`. [Compuerta operativa aprobada](STUDY_GATE_PREREGISTRATION.md)
   pendiente de aprobación. Ningún resultado sintético concede GO.
 - D2: decidir entre las modalidades siguientes antes de exponer la aplicación.
 - D3: revisar T1=q001/q064/q171 y T2=q010/q070/q172; son propuesta verificada
