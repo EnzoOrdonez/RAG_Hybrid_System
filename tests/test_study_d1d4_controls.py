@@ -5,6 +5,8 @@ import pytest
 
 from scripts.review_study_language import annotate
 from scripts.run_study_gate import run_cohort
+from src.ui.components.study_backup import backup_export
+from src.ui.components.session_storage import atomic_json
 from src.ui.components.study_protocol import ROOT, draw_study_configuration, verify_draw
 
 
@@ -58,3 +60,25 @@ def test_two_window_dry_run_is_never_a_go_decision(tmp_path):
     assert result["status"] == "complete"
     assert result["go_decision"] == "SYNTHETIC_NOT_GO"
     assert all(values["n"] == 60 for values in result["systems"].values())
+
+
+def test_backup_is_verified_and_idempotent(tmp_path):
+    source = tmp_path / "source" / "session"
+    source.mkdir(parents=True)
+    (source / "full_session.json").write_text('{"complete": true}', encoding="utf-8")
+    from src.ui.components.study_protocol import digest
+
+    atomic_json(
+        source / "export_manifest.json",
+        {"files": {"full_session.json": digest(source / "full_session.json")}},
+    )
+    state = backup_export(
+        source, tmp_path / "backup", same_physical_disk=lambda *_: False
+    )
+    assert state["status"] == "complete"
+    assert (
+        backup_export(source, tmp_path / "backup", same_physical_disk=lambda *_: False)[
+            "status"
+        ]
+        == "complete"
+    )
