@@ -239,3 +239,22 @@ def draw_study_configuration(config_path, assignment_path, output_dir):
         json.dumps(seal, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     return protocol
+
+
+def verify_draw(output_dir):
+    """Verify the immutable draw package before an operator admits anyone."""
+    output = Path(output_dir)
+    seal_path = output / "draw_seal.json"
+    if not seal_path.exists():
+        raise ValueError("Missing study draw seal")
+    protocol = load_protocol(output / "study.json", output / "assignments.csv")
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    expected = dict(
+        schema_version=1,
+        seeds=protocol["config"]["randomization"],
+        hashes=protocol["hashes"],
+        fingerprint=protocol["fingerprint"],
+    )
+    if seal != expected:
+        raise ValueError("Study draw seal changed")
+    return protocol
