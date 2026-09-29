@@ -218,6 +218,23 @@ def run_cohort(
     return aggregate
 
 
+def make_app_adapter(protocol, pipeline_factory, *, clock=time.perf_counter):
+    """Adapt a planned row to the app's single query/presentation boundary."""
+    from src.ui.components.study_service import execute_query
+
+    def adapter(planned):
+        question = protocol["queries"][planned["query_id"]]["question"]
+        try:
+            _, elapsed_ms = execute_query(
+                planned["condition"], question, pipeline_factory, clock=clock
+            )
+            return elapsed_ms / 1000, True, None
+        except Exception as exc:
+            return None, False, type(exc).__name__
+
+    return adapter
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", required=True)

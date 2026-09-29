@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import pytest
 
 from scripts.review_study_language import annotate
-from scripts.run_study_gate import run_cohort
+from scripts.run_study_gate import make_app_adapter, run_cohort
 from src.ui.components.study_backup import backup_export
 from src.ui.components.session_storage import atomic_json
 from src.ui.components.study_protocol import ROOT, draw_study_configuration, verify_draw
@@ -60,6 +60,30 @@ def test_two_window_dry_run_is_never_a_go_decision(tmp_path):
     assert result["status"] == "complete"
     assert result["go_decision"] == "SYNTHETIC_NOT_GO"
     assert all(values["n"] == 60 for values in result["systems"].values())
+
+
+def test_real_adapter_uses_study_service_query_boundary(tmp_path):
+    protocol = draw_study_configuration(
+        ROOT / "config/study.example.json",
+        ROOT / "config/study_assignments.example.csv",
+        tmp_path / "draw",
+    )
+    calls = []
+
+    class Response:
+        answer = "answer"
+        error = None
+        confidence = "HIGH"
+        sources = []
+        hallucination_report = {"method": "nli"}
+
+    def factory(condition):
+        calls.append(condition)
+        return type("Pipeline", (), {"query": lambda _, question: Response()})()
+
+    adapter = make_app_adapter(protocol, factory)
+    elapsed, valid, error = adapter({"condition": "hybrid", "query_id": "q001"})
+    assert elapsed >= 0 and valid and error is None and calls == ["hybrid"]
 
 
 def test_backup_is_verified_and_idempotent(tmp_path):
