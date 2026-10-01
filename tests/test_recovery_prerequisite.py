@@ -17,9 +17,10 @@ def test_non_admin_cannot_attempt_system_registration(tmp_path):
     if check == 'True':
         pytest.skip('Test requires a non-elevated token; never register real tasks in the suite')
     result = subprocess.run(['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
-                             '-File', str(SCRIPT), '-Root', str(tmp_path)], capture_output=True, text=True)
+                             '-File', str(SCRIPT), '-Root', str(tmp_path)], capture_output=True)
     assert result.returncode != 0
-    assert 'Administrator token required' in result.stderr
+    # Match the ASCII contract without decoding native-codepage diagnostics.
+    assert b'Administrator token required' in result.stderr
     assert read_json(tmp_path / 'invocation.json')['administrator'] is False
     assert {p.name for p in tmp_path.iterdir()} == {'invocation.json'}
 
@@ -32,7 +33,7 @@ def test_memory_probe_refuses_non_admin_before_creating_files(tmp_path):
         pytest.skip('Never start ETW from the non-admin refusal test')
     result = subprocess.run(['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
         '-File', str(SCRIPT.with_name('probe_gate_memory.ps1')), '-Root', str(tmp_path / 'new')],
-        capture_output=True, text=True)
+        capture_output=True)
     assert result.returncode != 0
-    assert 'Administrator token required' in result.stderr
+    assert b'Administrator token required' in result.stderr
     assert not (tmp_path / 'new').exists()

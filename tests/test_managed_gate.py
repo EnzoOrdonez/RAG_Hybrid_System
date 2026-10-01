@@ -137,9 +137,10 @@ def test_non_admin_manager_refuses_without_files(tmp_path):
         pytest.skip('Explicit non-admin contract')
     result = subprocess.run(['powershell', '-NoProfile', '-File',
         str(Path(gate.PROJECT) / 'scripts/manage_gate_window.ps1'), '-Mode', 'SelfTest',
-        '-Root', str(tmp_path / 'window')], capture_output=True, text=True)
+        '-Root', str(tmp_path / 'window')], capture_output=True)
     assert result.returncode != 0
-    assert 'Administrator token required' in result.stderr
+    # Windows PowerShell emits native-codepage diagnostics, not Python UTF-8.
+    assert b'Administrator token required' in result.stderr
     assert not (tmp_path / 'window').exists()
 
 
@@ -148,9 +149,9 @@ def test_non_admin_manager_refuses_without_files(tmp_path):
 def test_manager_rejects_checkout_as_evidence_root(root):
     result = subprocess.run(['powershell', '-NoProfile', '-File',
         str(gate.PROJECT / 'scripts/manage_gate_window.ps1'), '-Mode', 'Run', '-Root', str(root)],
-        capture_output=True, text=True)
+        capture_output=True)
     assert result.returncode != 0
-    assert 'Use external evidence root' in result.stderr
+    assert b'Use external evidence root' in result.stderr
 
 
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell snapshot regression')
