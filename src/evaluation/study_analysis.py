@@ -5,6 +5,8 @@ from pathlib import Path
 import numpy as np
 from scipy.stats import wilcoxon
 
+from src.evaluation.decline_classifier import CLASSIFIER_VERSION, DISPLAY_LABELS, classify_response
+
 from src.ui.components.session_storage import read_json
 from src.ui.components.study_protocol import LIKERT_IDS, digest, scores, sus_score
 
@@ -64,6 +66,43 @@ def outcomes(block):
                 R1=x['R1'], R2=x['R2'], R2_reversed=6-x['R2'], I1=x['I1'])
 
 
+def decline_census(attempts):
+    """Descriptive v2 classes, not abstentions; never infer missing legacy metadata."""
+    counts = {name: 0 for name in DISPLAY_LABELS}
+    missing = 0
+    for attempt in attempts:
+        cls = attempt.get('decline_class')
+        version = attempt.get('decline_classifier_version')
+        if cls is None and version is None:
+            missing += 1
+        elif (version != CLASSIFIER_VERSION or cls not in counts
+              or classify_response(attempt.get('answer')) != cls):
+            raise ValueError('Invalid decline classifier metadata')
+        else:
+            counts[cls] += 1
+    n = sum(counts.values())
+    return dict(counts=counts, classified_denominator=n, missing_metadata=missing,
+                successful_responses=n + missing,
+                proportions={name: count / n if n else None for name, count in counts.items()})
+
+
+def declination_descriptive(records):
+    conditions = {}
+    for condition in ('hybrid', 'no_rag'):
+        attempts = [a for r in records for a in r['attempts']
+                    if a['status'] == 'acknowledged' and a['condition'] == condition]
+        tasks = [a for a in attempts if a['analysis_role'] == 'tasks']
+        conditions[condition] = dict(
+            F4=[b['likert']['F4'] for r in records for b in r['instruments'] if b['condition'] == condition],
+            tasks=decline_census(tasks),
+            free_queries=decline_census([a for a in attempts if a['analysis_role'] == 'free_query']),
+            by_task={qid: decline_census([a for a in tasks if a['query_id'] == qid])
+                     for qid in sorted({a['query_id'] for a in tasks})})
+    return dict(classifier_version=CLASSIFIER_VERSION, display_labels=DISPLAY_LABELS.copy(),
+                interpretation='Prefix/late markers, not content-based abstention; no imputation.',
+                conditions=conditions)
+
+
 def analyze(records):
     """Primary contrast hybrid minus no_rag; fixed BH family SUS/F/U.
 
@@ -114,6 +153,7 @@ def analyze(records):
         bootstrap=dict(seed=42, resamples=10000, unit='participant_pair', interval='percentile_95'),
         included=[r['assignment']['participant_id'] for r, _ in included], excluded=excluded,
         contrasts=contrasts, descriptive=descriptive, profiles_descriptive=profiles,
+        declination_descriptive=declination_descriptive([r for r, _ in included]),
         blinding=dict(blind, denominator=len(included), accuracy=blind['correct']/len(included) if included else None),
         comparative={key: dict(Counter(r['comparative'][key] for r, _ in included)) for key in ('C1', 'C2', 'C3')},
         qualitative=[dict(participant_id=r['assignment']['participant_id'], comparative=r['comparative']['C4'],

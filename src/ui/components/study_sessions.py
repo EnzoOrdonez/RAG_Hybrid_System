@@ -1,6 +1,8 @@
 """Versioned two-block study sessions, separate from historical evaluation sessions."""
 
 import copy
+
+from src.evaluation.decline_classifier import CLASSIFIER_VERSION, classify_response
 import hashlib
 import os
 from pathlib import Path
@@ -403,6 +405,8 @@ class StudySession:
                 elapsed_ms=None,
                 shown_at=None,
                 finished_at=None,
+                decline_class=None,
+                decline_classifier_version=None,
             )
         )
         self.save()
@@ -419,6 +423,8 @@ class StudySession:
             sources=[] if error else (sources or []),
             elapsed_ms=elapsed_ms,
             finished_at=time.time(),
+            decline_class=None if error else classify_response(answer),
+            decline_classifier_version=None if error else CLASSIFIER_VERSION,
         )
         self.save()
 

@@ -5,6 +5,8 @@ from types import SimpleNamespace
 
 from streamlit.testing.v1 import AppTest
 
+import pytest
+
 from src.ui.components import study_runtime as runtime
 from src.ui.components.study_sessions import StudyStore
 from tests.study_helpers import configured
@@ -80,6 +82,34 @@ def test_participant_templates_have_no_condition_hints():
     for node in ast.walk(tree):
         if isinstance(node, ast.Constant) and isinstance(node.value, str):
             assert not any(word in node.value.casefold() for word in forbidden)
+
+
+@pytest.mark.parametrize('text', [
+    'The documentation does not mention this service.',
+    'Documented details. ' * 30 + 'There is no information about quotas.',
+])
+def test_declination_is_displayed_unchanged_with_continue_not_retry(tmp_path, monkeypatch, text):
+    from src.ui.components import study_service as service
+    from tests.test_study_sessions import response
+
+    _, _, protocol = configured(tmp_path)
+    store = StudyStore(tmp_path / 'sessions', protocol)
+    store.freeze()
+    token = store.issue('P01')
+    session = store.admit(token)
+    session.familiarization_done()
+    service.answer(session, lambda _: SimpleNamespace(query=lambda q: response(text)))
+    monkeypatch.setattr(runtime, 'store_from_env', lambda: store)
+    monkeypatch.setattr(runtime, 'preparation', lambda root: SimpleNamespace(ready=lambda scope: True))
+    app = AppTest.from_string('import streamlit as st\nfrom src.ui.views.study_page import render\nst.navigation([st.Page(render)]).run()\nst.stop()').run()
+    app.text_input[0].set_value(token)
+    click(app, 'Entrar')
+    assert any(x.value == text for x in app.markdown)
+    assert not app.error
+    assert [b.label for b in app.button] == ['Continuar']
+    click(app, 'Continuar')
+    assert store.admit(token).data['task_index'] == 1
+    assert len(store.admit(token).data['attempts']) == 1
 
 
 def test_empty_sus_blocks_login(tmp_path, monkeypatch):

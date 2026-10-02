@@ -21,6 +21,8 @@ y `technical`; pilotos usan P900+ y nunca entran al análisis del estudio.
 | started_at, finished_at, shown_at | Epoch segundos; `shown_at` significa render solicitado en servidor, no prueba de pintura en navegador |
 | elapsed_ms | Reloj monotónico de consulta; null si un aborto impide medir el final |
 | status, error | Estado del intento y código técnico neutro; sin stacktrace ni credenciales |
+| decline_class | v2: `pure_decline` (marcador temprano), `hedged_partial` (marcador tardío), `answered`; null para errores/intentos pendientes |
+| decline_classifier_version | `faithfulness_v2_28_patterns_300_chars`; null cuando no hay respuesta exitosa |
 | instruments | Dos registros: 10 SUS crudos, SUS 0–100, F/U/R/I crudos y timestamp |
 | comparative | C1–C3 y texto abierto C4, una vez al cerrar ambos bloques |
 | blinding | Elección A/B/No sabría decir, motivo y timestamp |
@@ -96,3 +98,28 @@ insumos cualitativos. Exactitud de cegamiento: aciertos / participantes incluido
 con cierre; «No sabría decir» permanece en el denominador y se informa aparte.
 Pilotos, abandonos y pares faltantes aparecen como exclusiones explícitas, sin imputar.
 Los scripts no deciden GO ni sustituyen el plan/procedimientos éticos aprobados.
+
+## Registro v2 aprobado por Enzo el 1-oct-2026
+
+La implementación única está en `src/evaluation/decline_classifier.py`, movida
+sin cambiar su algoritmo desde `scripts/compute_faithfulness_metrics.py`, que
+reexporta la misma función. No es `_is_honest_decline` del formateador. Las 28
+expresiones regulares buscan en los primeros 300 caracteres en minúsculas y,
+después, en el resto. `pure_decline` conserva el valor histórico, pero se muestra
+en análisis como `decline_prefix`: no implica abstención ni ausencia de contenido.
+
+Se clasifica `response.answer` (salida ya formateada del pipeline), sin editarlo,
+al preparar el checkpoint final. Esta anotación está fuera del reloj de consulta,
+como el flush final; no modifica la frontera de medición de la compuerta.
+Una declinación es una respuesta exitosa: completa la tarea sin repregunta ni
+sustitución. El participante ve el texto y «Continuar», sin etiquetas añadidas.
+
+`analysis.json.declination_descriptive` informa por condición: F4 crudo de cada
+bloque, tres conteos/proporciones para tareas, para consultas libres y por query_id.
+Denominador: respuestas reconocidas (`acknowledged`) de pares completos del estudio
+con metadatos v2 válidos. `missing_metadata` y `successful_responses` explicitan
+faltantes; no se imputan clases antiguas ni se modifica la exportación de origen.
+Versión/clase/texto discrepantes se rechazan. No se suman las clases como una tasa
+de abstención. Los errores técnicos quedan fuera del denominador y se cuentan
+aparte. F4 es por bloque: no se inventa un F4 por tarea. SUS/F/U y su familia BH
+permanecen iguales. `smoke`, `rehearsal`, `pilot` y `technical` quedan excluidos.
