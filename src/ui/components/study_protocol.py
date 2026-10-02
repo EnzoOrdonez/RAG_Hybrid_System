@@ -257,4 +257,11 @@ def verify_draw(output_dir):
     )
     if seal != expected:
         raise ValueError("Study draw seal changed")
+    if "task_evidence_sha256" in protocol["config"]:
+        evidence = output / "task_evidence.json"
+        if (
+            not evidence.is_file()
+            or digest(evidence) != protocol["config"]["task_evidence_sha256"]
+        ):
+            raise ValueError("Task evidence changed")
     return protocol
