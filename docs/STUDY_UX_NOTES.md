@@ -55,3 +55,13 @@ Los dobles verifican desconexión/reentrada de la sesión y exclusión concurren
 no una caída real de Zoom ni el aislamiento de Windows. Al perder Zoom durante una
 sesión humana, detener la operación y reprogramar según el runbook; no inferir que
 el proceso Zoom activo demuestra reunión o pantalla compartida.
+
+## Admisión y respaldo — 2026-10-02
+
+Una invitación emitida antes de un fallo de copia tampoco permite iniciar otra
+sesión mientras el respaldo esté pendiente, ilegible o tenga estado desconocido.
+Al intentar entrar se conserva el mensaje existente: «No se pudo abrir la sesión.
+Contacta al coordinador.» En una reentrada se muestra «No se pudo continuar.
+Contacta al coordinador antes de reintentar.» No se revela la condición, no se
+inicia inferencia y no se solicitan nuevamente los instrumentos. El operador
+resuelve y verifica el respaldo antes de reutilizar la misma invitación.

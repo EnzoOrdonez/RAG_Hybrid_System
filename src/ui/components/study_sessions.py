@@ -125,15 +125,19 @@ class StudyStore(InvitationStore):
             raise ValueError("Primary slot already replaced")
         return dict(row, primary_slot=replacements.get(pid, {}).get("primary", pid))
 
-    def issue(self, participant_id, *, cell=None, profile=None):
-        self.check()
-        pending = list(self.root.glob("*/backup_state.json"))
-        if any(read_json(path).get("status") == "pending" for path in pending):
+    def check_backups(self):
+        """Fail closed before issuing or admitting, including preissued invitations."""
+        states = list(self.root.glob("*/backup_state.json"))
+        if any(read_json(path).get("status") != "complete" for path in states):
             raise SessionStorageError(
                 "Mandatory backup is pending; resolve it before another session"
             )
+
+    def issue(self, participant_id, *, cell=None, profile=None):
+        self.check()
         assignment = self.assignment(participant_id, cell=cell, profile=profile)
         with self.lock:
+            self.check_backups()
             token = super().issue(participant_id)
             data = self._read()
             data["invitations"][hashlib.sha256(token.encode()).hexdigest()][
@@ -145,6 +149,7 @@ class StudyStore(InvitationStore):
     def admit(self, token):
         self.check()
         with self.lock:
+            self.check_backups()
             data = self._read()
             invite = data["invitations"].get(hashlib.sha256(token.encode()).hexdigest())
             if not invite or invite.get("revoked"):
