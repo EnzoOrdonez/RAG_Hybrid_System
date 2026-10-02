@@ -11,6 +11,17 @@ from filelock import FileLock
 from src.ui.components.session_storage import SessionStorageError
 
 
+class QueryTimer:
+    """App/gate boundary: construct before durable request; sample before result flush."""
+
+    def __init__(self, clock=time.perf_counter):
+        self.clock = clock
+        self.started = clock()
+
+    def elapsed_ms(self):
+        return (self.clock() - self.started) * 1000
+
+
 def presented_sources(sources):
     """Project citation metadata only; never edit the original answer."""
     result = []
@@ -61,10 +72,15 @@ def presentation(response, condition):
     )
 
 
-def execute_query(condition, question, pipeline_factory, *, clock=time.perf_counter):
+def execute_query(
+    condition, question, pipeline_factory, *, clock=time.perf_counter, capture=None
+):
     """Shared app/gate path, from pipeline construction to ready-to-display payload."""
     started = clock()
-    payload = presentation(pipeline_factory(condition).query(question), condition)
+    response = pipeline_factory(condition).query(question)
+    if capture is not None:
+        capture(response)
+    payload = presentation(response, condition)
     return payload, (clock() - started) * 1000
 
 
@@ -99,6 +115,7 @@ def answer(
     free_question=None,
     on_started=None,
     clock=time.perf_counter,
+    capture=None,
 ):
     """Clock: before durable request through ready-to-display payload, before final flush.
 
@@ -107,23 +124,27 @@ def answer(
     """
     with FileLock(str(session.store.root / "_inference.lock"), timeout=0):
         session.store.assert_active(session.session_id)
-        started = clock()
+        timer = QueryTimer(clock)
         session.begin(free_question)
         try:
             if on_started:
                 on_started(session.pending["started_at"])
             condition = session.block["condition"]
             result, _ = execute_query(
-                condition, session.pending["question"], pipeline_factory, clock=clock
+                condition,
+                session.pending["question"],
+                pipeline_factory,
+                clock=clock,
+                capture=capture,
             )
         except SessionStorageError:
             raise
         except Exception:
-            session.finish(error="query_failed", elapsed_ms=(clock() - started) * 1000)
+            session.finish(error="query_failed", elapsed_ms=timer.elapsed_ms())
         else:
             # Storage failures must escape, but an OSError from Ollama is a query
             # failure. Keeping the final flush outside the query try distinguishes them.
-            session.finish(**result, elapsed_ms=(clock() - started) * 1000)
+            session.finish(**result, elapsed_ms=timer.elapsed_ms())
 
 
 def recover(session):
