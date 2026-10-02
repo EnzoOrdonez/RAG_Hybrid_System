@@ -27,3 +27,31 @@ vocabulario técnico: eso alteraría el tratamiento y la respuesta original.
 La familiarización vive únicamente en memoria de la conexión; reconectar puede
 exigir repetirla. Sus reintentos no se registran. Un bloqueo técnico persistente
 se registra mediante el operador como incidente de sesión sin contenido.
+
+## Robustez y declinación — 1-oct-2026
+
+No se añaden etiquetas de declinación a la pantalla. Una respuesta con marcador
+temprano o tardío se presenta exactamente como `response.answer`, con «Continuar»;
+no ofrece «Consultar» de nuevo. No se reemplaza la tarea ni se orienta su valoración.
+Esto no afirma igualdad con tokens crudos anteriores al formateador del pipeline.
+
+| Incidencia | Lo que ve / acción | Registro y recuperación |
+|---|---|---|
+| Ollama falla durante una consulta | «No se pudo completar la consulta. Puedes reintentar o avisar al coordinador.» | `query_failed`, sin texto de excepción ni clase v2. Reintento explícito, no automático. |
+| Recarga o desconexión con trabajador vivo | «Hay una consulta pendiente. Contacta al coordinador si la conexión se interrumpió.» | El lock impide segunda inferencia y recuperación prematura. Al volver se carga el resultado durable, sin reenviar. |
+| Doble envío/pestaña competidora | «No se pudo continuar. Contacta al coordinador antes de reintentar.» | Lock y revisión impiden segundo intento o sobrescritura. Recargar la invitación existente. |
+| Disco lleno/permisos en guardado | Consulta: mismo error neutro anterior. Formulario: «La sesión cambió o no se pudo guardar. Contacta al coordinador y vuelve a comprobar las respuestas.» | Checkpoint previo conservado; memoria vuelve a esa revisión. Corregir almacenamiento antes de continuar. |
+| Configuración sellada cambiada | «La sesión necesita preparación. Contacta al coordinador.» | No consulta ni nuevo intento. No alterar el sello para eludir el rechazo. |
+| Reloj civil cambiado | Los textos de espera no cambian | `elapsed_ms` usa reloj monotónico; timestamps civiles pueden retroceder. El reloj del navegador usa `performance.now()` tras inicializarse. |
+| Copia de respaldo interrumpida | No se pide repetir instrumentos; estado pendiente visible al operador | Original inmutable, `backup_state=pending`, nueva invitación bloqueada. Reintentar sólo la copia. |
+
+Si el flush de una respuesta falla, no puede garantizarse la conservación de texto
+que **nunca llegó a disco**. Se conserva el intento durable como pendiente, después
+`interrupted` con latencia null al recuperar. No se inventa ni se clasifica ese texto.
+Todos los instrumentos previamente guardados permanecen. No se promete recuperar
+formularios aún no enviados ni sobrevivir a la pérdida simultánea de ambos discos.
+
+Los dobles verifican desconexión/reentrada de la sesión y exclusión concurrente,
+no una caída real de Zoom ni el aislamiento de Windows. Al perder Zoom durante una
+sesión humana, detener la operación y reprogramar según el runbook; no inferir que
+el proceso Zoom activo demuestra reunión o pantalla compartida.

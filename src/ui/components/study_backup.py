@@ -23,10 +23,10 @@ def backup_export(session_dir, destination, *, same_physical_disk=None):
         or read_json(manifest)["files"].get(source.name) != digest(source)
     ):
         raise ValueError("Export is missing or its hash is invalid")
-    destination.mkdir(parents=True, exist_ok=True)
     target = destination / session_dir.name
     temporary = destination / (".pending-" + uuid.uuid4().hex)
     try:
+        destination.mkdir(parents=True, exist_ok=True)
         shutil.copytree(session_dir, temporary)
         copied = temporary / source.name
         if digest(copied) != digest(source):

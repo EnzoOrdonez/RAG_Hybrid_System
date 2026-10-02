@@ -275,12 +275,20 @@ class StudySession:
         self.store.check()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with FileLock(str(self.path) + ".lock", timeout=5):
-            old = read_json(self.path)["revision"] if self.path.exists() else 0
+            previous = read_json(self.path) if self.path.exists() else None
+            old = previous["revision"] if previous is not None else 0
             if old != self.data["revision"]:
                 raise SessionConflict("La sesión cambió en otra pestaña. Recarga.")
             payload = copy.deepcopy(self.data)
             payload["revision"] += 1
-            atomic_json(self.path, payload)
+            try:
+                atomic_json(self.path, payload)
+            except (OSError, SessionStorageError):
+                # The durable revision remains authoritative when publication fails.
+                # Never let a failed form submission or unflushed answer advance it.
+                if previous is not None:
+                    self.data = previous
+                raise
             self.data = payload
 
     @classmethod

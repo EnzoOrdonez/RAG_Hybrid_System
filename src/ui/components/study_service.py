@@ -116,11 +116,14 @@ def answer(
             result, _ = execute_query(
                 condition, session.pending["question"], pipeline_factory, clock=clock
             )
-            session.finish(**result, elapsed_ms=(clock() - started) * 1000)
-        except (SessionStorageError, OSError):
+        except SessionStorageError:
             raise
         except Exception:
             session.finish(error="query_failed", elapsed_ms=(clock() - started) * 1000)
+        else:
+            # Storage failures must escape, but an OSError from Ollama is a query
+            # failure. Keeping the final flush outside the query try distinguishes them.
+            session.finish(**result, elapsed_ms=(clock() - started) * 1000)
 
 
 def recover(session):
