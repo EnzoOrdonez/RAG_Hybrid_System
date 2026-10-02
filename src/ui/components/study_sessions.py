@@ -516,6 +516,7 @@ class StudySession:
         )
         if self.store.purpose == "smoke":
             payload["gate_marker"] = "SMOKE_NOT_GATE"
+            payload["instrument_responses_synthetic"] = True
         payload["protocol_hashes"] = self.store.protocol["hashes"]
         payload["labels"] = self.store.protocol["config"]["labels"]
         target = self.path.parent / "full_session.json"

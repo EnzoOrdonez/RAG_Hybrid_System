@@ -1,12 +1,18 @@
 # Operación y piloto del estudio de usuarios
 
+Actualización 1-oct-2026: [P999 humano y verificación](STUDY_SMOKE_P999.md),
+[orden obligatorio NLI → ventanas → P998 → pilotos](STUDY_HUMAN_CHECKLIST.md).
+La compuerta real permanece bloqueada por los hallazgos de implementación
+documentados en [el cierre](STUDY_CLOSURE_2026-10-01.md), no por falta de aprobación
+de su pre-registro. No usar la prueba sintética como admisión operativa.
+
 ## Enmienda D2/D4 — 2026-09-28
 
 Zoom institucional es el canal principal: Streamlit permanece en `127.0.0.1` y se comparte únicamente su ventana. Antes de entregar el control, el operador usa una cuenta estándar aislada, sin datos personales ni sincronización, con solo Zoom y el navegador designado; desactiva notificaciones, portapapeles remoto, aceptación automática y transferencias disponibles. Se prueba apertura/guardado, descargas, `file:`, atajos, ejecución de programas y carpetas ajenas. Windows Home, pantalla completa o compartir una ventana no se presentan como garantías: si B.4 no puede verificarse, se bloquea el uso con personas. Ante fallo de Zoom, se reprograma; Meet no se convierte en otra condición de despliegue ni se configura otra herramienta remota.
 
 El instrumento SUS se carga literalmente desde `config/SUS_ES_Sevilla2020_sistema.json` (SHA-256 `15f6ebf953df8adcf2fdfed5bfcb6e9cf65941e719df5ec48f4aeebc955d5fa9`). La consulta libre se solicita preferentemente en inglés; su idioma lo anota un operador después de cerrar la sesión con `review_study_language.py`, enlazado al hash de la exportación y sin modificarla.
 
-Configure un respaldo obligatorio en otro disco físico. Tras cierre: exporte, valide `export_manifest.json`, copie a un directorio temporal, compare SHA-256 y publique solo cuando coincida. `backup_state.json=pending` es reintentable y bloquea la sesión siguiente; nunca borra respuestas ni obliga a repetir instrumentos.
+Configure un respaldo obligatorio en otro disco físico. Tras cierre: exporte, valide `export_manifest.json`, copie a un directorio temporal, compare SHA-256 y publique solo cuando coincida. `backup_state.json=pending` es reintentable y bloquea nuevas invitaciones; el operador debe bloquear también las invitaciones emitidas previamente (el control en `admit` sigue pendiente). No se borran respuestas ni se repiten instrumentos para reintentar la copia. Sin cerrar esa limitación no se habilita uso con personas.
 
 2026-09-28. **NO-GO para piloto con personas y estudio real.** Software probado
 con dobles, no validado todavía en el despliegue del estudio. No se configuró
@@ -16,24 +22,25 @@ túnel, acceso remoto ni nube. No se reclutó/contactó a nadie.
 
 - D1: mantener la cohorte NLI aprobada sin cambios; ejecutarla desde la copia
   aislada `.worktrees/nli-521f525`, HEAD `521f525`. [Compuerta operativa aprobada](STUDY_GATE_PREREGISTRATION.md)
-  pendiente de aprobación. Ningún resultado sintético concede GO.
-- D2: decidir entre las modalidades siguientes antes de exponer la aplicación.
-- D3: revisar T1=q001/q064/q171 y T2=q010/q070/q172; son propuesta verificada
-  contra el catálogo de 194 consultas, no una asignación ya aprobada por el investigador.
+  aprobada el 28-sep; ejecución pendiente. Ningún resultado sintético concede GO.
+- D2: Zoom y servidor local, según la enmienda anterior. Sin túnel ni Meet alternativo.
+- D3: conservar T1=q001/q064/q171 y T2=q010/q070/q172 en la configuración sellada.
   Las seis son de dificultad media; cada conjunto tiene factual/procedimental AWS y
   comparación AWS/Azure. Validación informática no demuestra equivalencia cognitiva.
-- D4: usuario pega SUS literal validado de Sevilla-Gonzalez et al. (2020), con
-  solo «herramienta»→«sistema». Los diez marcadores se dejan vacíos. No corregirlos
-  ni sustituirlos por los ítems sintéticos de tests.
+- D4: SUS literal ya incorporado y verificado contra la referencia autorizada.
+  No editar el JSON, los ítems ni la configuración sellada.
 
-## Modalidad D2 — comparación y recomendación
+## Modalidad D2 — comparación histórica, no instrucciones vigentes
+
+La elección posterior de Zoom sustituye la recomendación histórica de esta sección.
+No autoriza túneles, nuevas cuentas/proveedores ni exposición de red.
 
 | Modalidad | Seguridad / privacidad | Latencia y cargas | Esfuerzo |
 |---|---|---|---|
 | Laptop + videollamada con control remoto | Puede permitir interacción con todo el escritorio: cerrar documentos, notificaciones, terminales y otras apps; usar cuenta aislada. Proveedor de videollamada/acceso procesa su tráfico. Riesgo de exposición accidental mayor que una sola aplicación. | Incluye transporte/compresión de pantalla y eventos de control, carga CPU/GPU de video. Incremento **NO MEDIDO**; no asumir que el piloto previo lo cubre. | Menor si existe herramienta institucional aprobada; comprobar alcance de permisos y revocación. |
 | Laptop + túnel temporal autenticado hacia una sola app | Restringe la superficie publicada a Streamlit; exige autenticación externa, HTTPS y token de estudio. Proveedor del túnel/proxy pasa a formar parte del tratamiento de datos. Un hostname público por sí solo no equivale a control de acceso. | Navegador del participante y red hacia proxy/laptop. Incremento **NO MEDIDO**; validar ida/vuelta, WebSocket y reconexión en el entorno elegido. | Mayor: política de acceso, HTTPS, origen local, expiración y retirada del túnel. |
 
-**Recomendación (juicio técnico, pendiente de D2): túnel autenticado limitado a la
+**Recomendación histórica, NO seleccionada: túnel autenticado limitado a la
 app**, con cuenta/proveedor permitido por la universidad y aprobación de privacidad.
 No usar un túnel público anónimo. Si esa revisión no está disponible, no sustituirla
 por exposición improvisada. La opción remota sigue siendo viable con escritorio
@@ -49,17 +56,13 @@ separan conectividad y control de acceso. No se crean cuentas ni se contratan se
 1. Trabajar en `.worktrees/interview-readiness`, rama `fix/interview-readiness`.
    Verificar `git status --short` y `git rev-parse HEAD`. No ejecutar cohortes durante
    tests, videollamadas o cambios de código. Modelo/digest/driver se mantienen.
-2. Copiar `config/study.example.json` y `config/study_assignments.example.csv` a un
-   directorio privado **externo al checkout**, por ejemplo `C:/CloudRAG/study-config/`.
-   No usar datos reales para probar. Guardar UTF-8.
-3. Llenar `labels` con una permutación global de `hybrid`/`no_rag`, idéntica para
-   todos. Completar SUS literal. Revisar tareas y consulta fija «What is cloud computing?»:
-   propuesta de una sola consulta genérica, repetida en ambos bloques, fuera de T1/T2
-   y de las ocho premisas inválidas. La app no admite una de esas ocho como tarea.
-4. Completar CSV P01–P20, `role=primary`, `cell=1..4`, `profile=without_experience`
-   o `with_experience`. Cuotas por celda sin/con experiencia: 3/2, 2/3, 3/2, 2/3.
-   Reservas opcionales P21–P24 con `role=reserve`, celda/perfil fijados antes de reclutar.
-   No poner nombres, correo, empresa, consentimiento ni notas en ese CSV.
+2. Usar el sorteo ya sellado en `C:/CloudRAG/study-config/`. No volver a sortear,
+   copiar plantillas encima, editar etiquetas ni publicar su mapeo en la UI.
+3. Ejecutar `python scripts/manage_study.py verify-draw --output C:/CloudRAG/study-config`
+   con el intérprete congelado. Rechazar cualquier diferencia del sello.
+4. Conservar cuotas 3/2, 2/3, 3/2, 2/3 y reservas ya fijadas P21–P24. No agregar
+   identificadores personales al CSV. El inglés técnico es criterio de inclusión
+   externo, no una prueba ni detector automático dentro de la app.
 5. Validar y congelar; el comando rechaza SUS vacío, tareas inválidas, columnas
    identificables o cuotas erróneas. Desde el worktree, en PowerShell:
 

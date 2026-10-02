@@ -53,7 +53,7 @@ def main(argv=None):
     parser.add_argument("--assignments")
     parser.add_argument("--root")
     parser.add_argument(
-        "--purpose", choices=("study", "pilot", "technical"), default="study"
+        "--purpose", choices=("study", "pilot", "technical", "smoke", "rehearsal"), default="study"
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("freeze")
