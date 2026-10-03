@@ -13,6 +13,7 @@ from scripts import measure_interview_gate as gate
 from scripts import run_managed_gate as managed
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='Windows job object')
 def test_killing_job_owner_terminates_grandchild(tmp_path):
     marker = tmp_path / 'child.json'
@@ -130,6 +131,7 @@ def test_restored_window_cannot_run_again(tmp_path, monkeypatch):
         managed.run(tmp_path)
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell Windows guard')
 def test_non_admin_manager_refuses_without_files(tmp_path):
     import ctypes
@@ -144,6 +146,7 @@ def test_non_admin_manager_refuses_without_files(tmp_path):
     assert not (tmp_path / 'window').exists()
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell Windows guard')
 @pytest.mark.parametrize('root', [gate.PROJECT, gate.PROJECT.parent.parent])
 def test_manager_rejects_checkout_as_evidence_root(root):
@@ -154,6 +157,7 @@ def test_manager_rejects_checkout_as_evidence_root(root):
     assert b'Use external evidence root' in result.stderr
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell snapshot regression')
 def test_interactive_snapshot_preserves_hashtable_paths_and_deduplicates():
     script = gate.PROJECT / 'scripts/manage_gate_window.ps1'

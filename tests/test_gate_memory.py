@@ -22,6 +22,7 @@ def test_invalid_commit_counters_do_not_become_zero_pressure(total, limit, page_
         gate_memory.commit_metrics(total, limit, 10, 2, page_size)
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='Windows reference memory counters')
 def test_native_system_commit_snapshot():
     result = gate_memory.system_memory()
@@ -29,6 +30,7 @@ def test_native_system_commit_snapshot():
     assert result['ram_total_bytes'] > result['ram_available_bytes'] > 0
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='WPR profile on reference Windows')
 def test_wpr_accepts_profile_without_starting_a_recording():
     result = subprocess.run(['wpr', '-profiles', str(gate_memory.PROFILE)], capture_output=True, text=True)
@@ -45,6 +47,7 @@ def test_trace_buffer_reserve_has_burst_capacity_and_small_memory_budget():
     assert 16 * 1024 <= count * size_kib <= 32 * 1024  # 16-32 MiB requested reserve
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='Windows PDH counters')
 def test_paging_primes_before_reporting_rates_and_does_not_mislabel_hard_faults():
     counters = gate_memory.PagingCounters()
@@ -58,6 +61,7 @@ def test_paging_primes_before_reporting_rates_and_does_not_mislabel_hard_faults(
         counters.finalizer()
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='Windows uncached file IO')
 def test_synthetic_fault_workload_is_bounded_and_refuses_overwrite(tmp_path):
     path = tmp_path / 'synthetic.bin'

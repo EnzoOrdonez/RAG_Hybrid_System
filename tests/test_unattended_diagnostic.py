@@ -250,6 +250,7 @@ def test_fast_dry_run_kills_child_and_packages_without_models(tmp_path, monkeypa
     runner.verify_package(root)
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell AST/pure energy policy')
 def test_powershell_parses_and_power_gap_detects_sleep_or_reboot():
     script = str(gate.PROJECT / 'scripts/manage_gate_window.ps1').replace("'", "''")
@@ -272,6 +273,7 @@ reboot=(Test-PowerGap @{awake_ms=100;elapsed_ms=100} @{awake_ms=1;elapsed_ms=1})
     assert json.loads(result.stdout) == dict(sleep=True, normal=False, reboot=True)
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell restoration policy')
 def test_watchdog_restores_even_if_event_disk_write_fails():
     script = str(gate.PROJECT / 'scripts/manage_gate_window.ps1').replace("'", "''")

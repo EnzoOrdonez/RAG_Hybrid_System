@@ -181,6 +181,7 @@ def test_operator_cli_can_create_only_the_designated_test_participant(package, t
         store.issue('P900', cell=1, profile='without_experience')
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='Frozen Windows launcher contract')
 def test_launch_wires_real_app_environment_and_cleans_only_owned_child(package, tmp_path, monkeypatch):
     from scripts import gate_job

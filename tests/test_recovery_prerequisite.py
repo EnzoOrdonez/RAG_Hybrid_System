@@ -10,6 +10,7 @@ from scripts.measure_interview_gate import read_json
 SCRIPT = Path(__file__).resolve().parents[1] / 'scripts/check_gate_recovery.ps1'
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='Windows recovery prerequisite')
 def test_non_admin_cannot_attempt_system_registration(tmp_path):
     check = subprocess.check_output(['powershell', '-NoProfile', '-Command',
@@ -25,6 +26,7 @@ def test_non_admin_cannot_attempt_system_registration(tmp_path):
     assert {p.name for p in tmp_path.iterdir()} == {'invocation.json'}
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='Windows ETW privilege prerequisite')
 def test_memory_probe_refuses_non_admin_before_creating_files(tmp_path):
     check = subprocess.check_output(['powershell', '-NoProfile', '-Command',

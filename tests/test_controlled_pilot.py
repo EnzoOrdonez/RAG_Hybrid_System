@@ -127,6 +127,7 @@ def test_admission_failure_prevents_any_inference(tmp_path, monkeypatch):
     assert not list(tmp_path.glob('unloads/*'))
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='Windows reference telemetry')
 def test_native_process_snapshot_reads_current_process_without_subprocess():
     own = next(r for r in observe.windows_processes() if r['Id'] == os.getpid())
@@ -134,6 +135,7 @@ def test_native_process_snapshot_reads_current_process_without_subprocess():
     assert own['WorkingSet64'] > 0
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='Windows reference telemetry')
 def test_native_power_and_memory_getters_return_real_values():
     state = observe.windows_state()

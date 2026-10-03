@@ -102,6 +102,7 @@ def test_synthetic_trace_preserves_hash_result():
     assert paired.synthetic_work(bytes(1024), 1, False) == paired.synthetic_work(bytes(1024), 1, True)
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell policy')
 def test_ancestry_requires_valid_overlay_and_non_reused_parent_pid():
     path = str(gate.PROJECT / 'scripts/manage_gate_window.ps1').replace("'", "''")
@@ -122,6 +123,7 @@ $reused=Test-NvidiaAncestry $rows 3 1
     assert json.loads(result.stdout) == {'valid': True, 'reused': False}
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell empty proof')
 def test_no_relaunch_proof_serializes_empty_ids_under_strict_mode():
     script = str(gate.PROJECT / 'scripts/manage_gate_window.ps1').replace("'", "''")
@@ -161,6 +163,7 @@ def test_managed_diagnostic_uses_specific_payload_and_never_legacy_cohort(tmp_pa
     assert gate.read_json(tmp_path / 'payload-complete.json')['diagnostic_only']
 
 
+@pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell restoration')
 @pytest.mark.parametrize('intervened', [False, True])
 def test_diagnostic_restore_only_touches_recorded_nv_service(tmp_path, intervened):
