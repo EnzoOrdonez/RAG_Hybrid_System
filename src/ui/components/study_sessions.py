@@ -70,8 +70,10 @@ class StudyStore(InvitationStore):
                 if read_json(self.seal) != expected:
                     raise ValueError("Frozen study identity changed")
             else:
-                if self.path.exists() or any(
-                    self.root.glob("*/session_checkpoint.json")
+                if (
+                    self.path.exists()
+                    or any(self.root.glob("*/session_checkpoint.json"))
+                    or any(self.root.glob("*/study_checkpoint.json"))
                 ):
                     raise ValueError("Do not reuse historical session storage")
                 atomic_json(self.seal, expected)
@@ -128,6 +130,12 @@ class StudyStore(InvitationStore):
     def check_backups(self):
         """Fail closed before issuing or admitting, including preissued invitations."""
         states = list(self.root.glob("*/backup_state.json"))
+        if os.environ.get("CLOUDRAG_BACKUP_BUCKET") and self.purpose != "technical":
+            if any(
+                not (export.parent / "backup_state.json").exists()
+                for export in self.root.glob("*/full_session.json")
+            ):
+                raise SessionStorageError("Mandatory cloud backup is missing")
         if any(read_json(path).get("status") != "complete" for path in states):
             raise SessionStorageError(
                 "Mandatory backup is pending; resolve it before another session"
@@ -535,4 +543,11 @@ class StudySession:
             raise SessionStorageError("Export integrity mismatch")
         if not manifest.exists():
             atomic_json(manifest, content)
+        bucket = os.environ.get("CLOUDRAG_BACKUP_BUCKET")
+        if bucket and self.store.purpose != "technical":
+            from scripts.cloud_storage import Bucket, backup_session
+
+            backup_session(
+                target.parent, Bucket(bucket), os.environ["CLOUDRAG_BACKUP_PREFIX"]
+            )
         return target
