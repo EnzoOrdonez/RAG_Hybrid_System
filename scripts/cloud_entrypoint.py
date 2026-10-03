@@ -18,6 +18,15 @@ from src.utils.deployment_artifacts import verify_manifest  # noqa: E402
 
 
 def configure(deployment):
+    if deployment.get("environment_identity"):
+        from scripts.environment_identity import load
+
+        inventory = load(deployment)
+        deployment = dict(
+            deployment,
+            build_id=inventory["source"]["commit"],
+            model_digest=inventory["ollama"]["digest"],
+        )
     config_dir = Path(deployment["config_dir"])
     os.environ.update(
         CLOUDRAG_BUILD_ID=deployment["build_id"],
@@ -37,7 +46,7 @@ def configure(deployment):
 def freeze_settings(deployment, path):
     from src.pipeline.pipeline_config import SURVEY_DEPLOY
     from src.ui.components.study_pipeline import STUDY_NO_RAG
-    from scripts.study_gate_environment import identity
+    from scripts.environment_identity import generate
 
     path = Path(path)
     if path.exists():
@@ -58,13 +67,13 @@ def freeze_settings(deployment, path):
             ROOT / "docs/STUDY_GATE_PREREGISTRATION_AMENDMENT_2026-10-02.md"
         ),
     )
-    identity(settings)
+    settings = generate(settings, path.with_name("environment_identity.json"))
     atomic_json(path, settings)
     atomic_json(path.with_name(path.stem + "-packages.json"), dict(packages=packages))
     return settings
 
 
-def verify(deployment):
+def verify(deployment, *, generating=False):
     build = subprocess.check_output(
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True, timeout=15
     ).strip()
@@ -99,6 +108,10 @@ def verify(deployment):
     ) as response:
         if json.load(response)["version"] != deployment["ollama_version"]:
             raise ValueError("Ollama version differs")
+    if not generating:
+        from scripts.environment_identity import verify as verify_identity
+
+        verify_identity(deployment)
     return protocol
 
 
@@ -114,7 +127,7 @@ def main():
     args = parser.parse_args()
     deployment = json.loads(Path(args.deployment).read_text())
     configure(deployment)
-    protocol = verify(deployment)
+    protocol = verify(deployment, generating=args.operation == "freeze")
     from src.ui.components.study_sessions import StudyStore
 
     store = StudyStore(

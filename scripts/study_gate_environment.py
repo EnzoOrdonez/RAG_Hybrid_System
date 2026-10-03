@@ -20,7 +20,7 @@ def command(args):
     return subprocess.check_output(args, text=True, timeout=15).strip()
 
 
-def identity(config):
+def collect_identity(config):
     protocol = verify_draw(config["config_dir"])
     build = command(["git", "-C", str(ROOT), "rev-parse", "HEAD"])
     if build != config["build_id"] or command(
@@ -86,6 +86,12 @@ def identity(config):
         ):
             raise ValueError("Cloud hardware differs from preregistration")
     return result
+
+
+def identity(config):
+    from scripts.environment_identity import verify
+
+    return verify(config)
 
 
 class LinuxSampler:
