@@ -36,8 +36,23 @@ def session_path(root, session_id):
     return path
 
 
+def _fsync_parent(directory):
+    """Persist the replacement's directory entry on POSIX; Windows stays compatible."""
+    if os.name != "posix":
+        return
+    fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
 def atomic_text(path, text):
-    """Flush a sibling temporary file, then atomically replace; preserve old on failure."""
+    """Confirm only after file sync, atomic replace and POSIX parent sync.
+
+    Failures before replacement preserve the old record. A parent sync failure
+    propagates even though replacement has occurred: durability is unconfirmed.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=".pending-", dir=path.parent)
@@ -47,6 +62,7 @@ def atomic_text(path, text):
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, path)
+        _fsync_parent(path.parent)
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
