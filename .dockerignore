@@ -6,3 +6,10 @@ __pycache__
 .ruff_cache
 data/models
 data/indices
+repository/.venv-app
+repository/.venv
+repository/**/__pycache__
+repository/.pytest_cache
+repository/.ruff_cache
+repository/data/models
+repository/data/indices

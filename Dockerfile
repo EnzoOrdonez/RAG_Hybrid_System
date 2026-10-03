@@ -5,10 +5,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONHASHSEED=42 PYTHONUTF8=1 
 RUN apt-get update && apt-get install -y --no-install-recommends git libgomp1 build-essential \
     && git config --system --add safe.directory /opt/cloudrag/repository
 WORKDIR /opt/cloudrag/repository
-COPY requirements-lock.txt /opt/cloudrag/requirements-lock.txt
+COPY repository/requirements-lock.txt /opt/cloudrag/requirements-lock.txt
+COPY repository/scripts/locked_vendor_requirements.py /opt/cloudrag/locked_vendor_requirements.py
+COPY vendor/thesis-paper-agents /opt/cloudrag/vendor/thesis-paper-agents
+COPY vendor/manifest.json /opt/cloudrag/vendor-manifest.json
+RUN python /opt/cloudrag/locked_vendor_requirements.py \
+    --lock /opt/cloudrag/requirements-lock.txt --vendor /opt/cloudrag/vendor/thesis-paper-agents \
+    --manifest /opt/cloudrag/vendor-manifest.json --output /opt/cloudrag/requirements-linux.txt
 RUN python -m pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cu126 \
-    -r /opt/cloudrag/requirements-lock.txt \
+    -r /opt/cloudrag/requirements-linux.txt \
     && python -m pip check \
     && python -m pip freeze > /opt/cloudrag/linux-installed.txt
-COPY . .
+COPY repository/ .
 ENTRYPOINT ["python", "scripts/cloud_entrypoint.py"]

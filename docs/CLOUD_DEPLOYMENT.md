@@ -7,6 +7,20 @@ driver version, image IDs, commit, model digests and artifact hashes before any 
 The `multidimensional_scoring` and `terminology_normalization` flags remain present
 and unused by the pipeline; this deployment does not implement them.
 
+Build context contains `repository/` (clean checkout including `.git`) and
+`vendor/thesis-paper-agents/` (tracked files of private commit
+`5db68deb53e6e88a668670101d8372a5cff0dcf7`, no `.git` or credentials), plus
+`vendor/manifest.json` (revision and SHA-256 for every tracked file). Copy the
+repository `.dockerignore` to the context root, then run
+`docker build -f repository/Dockerfile -t cloudrag-study:locked CONTEXT`.
+The source snapshot is obtained with the operator's existing authorized Git
+session, scanned for secrets, verified and privately transferred. No credential
+is installed in the VM. The build changes only this dependency's transport from
+the locked Git URL to a verified local editable source (version 3.2.0); every
+other lock line is preserved. The original lock is retained unmodified. Its
+installed editable source resides outside the app checkout so that the deployed
+Git identity stays clean. Record this transport difference in the inventory.
+
 The image retains a clean Git checkout at `/opt/cloudrag/repository`. Mount models
 and indices read-only at its data directories. Mount private configuration and
 session storage outside the checkout at `/srv/cloudrag`. The entrypoint verifies
