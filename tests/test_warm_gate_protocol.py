@@ -73,8 +73,15 @@ def test_deadline_reserves_time_without_inventing_attempt(tmp_path, monkeypatch)
     assert gate.window_has_margin(900)
 
 
-def test_warm_worker_prepares_three_and_persists_readiness_per_response(tmp_path, monkeypatch):
+@pytest.mark.parametrize('runtime_cuda', [None, '12.6'])
+def test_warm_worker_prepares_three_and_persists_readiness_per_response(
+    tmp_path, monkeypatch, runtime_cuda
+):
+    import torch
     from src.ui.components import interview_preparation as prep, index_loader
+    # The fake pipelines exercise the legacy CPU-only worker on either platform.
+    # A CUDA build must still be rejected before any fake pipeline is loaded.
+    monkeypatch.setattr(torch.version, 'cuda', runtime_cuda)
     monkeypatch.delenv('CLOUDRAG_GATE_DEADLINE', raising=False)
     artifact = tmp_path / 'artifact.json'
     artifact.write_text('{}')
@@ -101,6 +108,14 @@ def test_warm_worker_prepares_three_and_persists_readiness_per_response(tmp_path
     monkeypatch.setattr(index_loader, 'load_hybrid_index', lambda: None)
     p = dict(protocol(), queries=[{'question': 'Measured query'}] * 20, build_id='build', model_digest='b' * 64)
     gate.write_new(tmp_path / 'source-manifest.json', dict(protocol=p, abort_consumes_slot=True))
+    if runtime_cuda is not None:
+        with pytest.raises(RuntimeError, match='Warmup failed'):
+            gate.worker(tmp_path, 'semantic', 'warm', [0, 1])
+        rows = gate.local_records(tmp_path)
+        assert len(rows) == 1 and rows[0]['status'] == 'error'
+        assert 'CPU-only auxiliary runtime required' in rows[0]['error']
+        assert calls == []
+        return
     gate.worker(tmp_path, 'semantic', 'warm', [0, 1])
     rows = sorted(gate.local_records(tmp_path), key=lambda r: r['index'])
     assert [r['status'] for r in rows] == ['success'] * 3
