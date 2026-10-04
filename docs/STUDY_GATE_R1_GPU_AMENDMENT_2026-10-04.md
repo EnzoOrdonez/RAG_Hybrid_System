@@ -44,6 +44,12 @@ misma L4, digest, contexto y opciones. Se amplía la identidad para inventariar
 y rechazar deriva de esa variable, sin activar GPU por defecto ni cambiar
 la receta. Ambas ramas usan la misma imagen con esa instrumentación.
 
+Vinculación técnica comprobada antes de implementar: la política existente
+`configure_study_device()` exige `CLOUDRAG_DEMO_GPU=1` para no volver a ocultar
+CUDA. El bootstrap derivará ese permiso del selector anterior: vacío implica
+`device_gpu=0`, CUDA `0` implica `device_gpu=1`. Se registran ambos valores;
+no son dos parámetros ajustables ni se cambia la función existente.
+
 ## Calendario y admisión prospectiva
 
 1. Construcción del candidato de la Fase 7, independiente de los tres builds
