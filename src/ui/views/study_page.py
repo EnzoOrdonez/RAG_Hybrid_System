@@ -22,6 +22,9 @@ def render():
     except Exception:
         st.error('La sesión necesita preparación. Contacta al coordinador.')
         return
+    if st.session_state.get('study_closed'):
+        st.success('La sesión ha terminado. Gracias por participar.')
+        return
     if 'study_token' not in st.session_state:
         with st.form('login'):
             token = st.text_input('Invitación', type='password')
@@ -145,5 +148,7 @@ def _flow(session, view):
                     st.error('Selecciona una opción antes de continuar.')
                 else:
                     session.submit_blinding(choice, reason)
+                    st.session_state.study_closed = True
+                    del st.session_state.study_token
                     view.empty()
                     st.rerun()

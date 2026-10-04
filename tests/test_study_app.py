@@ -66,6 +66,10 @@ def test_two_blocks_app_disconnect_export_and_practice_privacy(tmp_path, monkeyp
     click(app, 'Continuar al cierre')
     app.radio[0].set_value('Sistema A')
     click(app, 'Finalizar')
+    assert app.success and not app.error
+    assert 'study_token' not in app.session_state
+    with pytest.raises(ValueError, match='Invitación'):
+        store.admit(token)
     exported = next(store.root.glob('*/full_session.json'))
     payload = json.loads(exported.read_text(encoding='utf-8'))
     assert payload['stage'] == 'complete' and len(payload['attempts']) == 8

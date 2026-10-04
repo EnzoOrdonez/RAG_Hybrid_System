@@ -6,6 +6,8 @@ from src.evaluation.decline_classifier import CLASSIFIER_VERSION, classify_respo
 import hashlib
 import os
 from pathlib import Path
+import re
+import secrets
 import time
 import uuid
 
@@ -132,6 +134,12 @@ class StudyStore(InvitationStore):
         states = list(self.root.glob("*/backup_state.json"))
         if os.environ.get("CLOUDRAG_BACKUP_BUCKET") and self.purpose != "technical":
             if any(
+                read_json(checkpoint).get("stage") in ("complete", "abandoned")
+                and not (checkpoint.parent / "backup_state.json").exists()
+                for checkpoint in self.root.glob("*/study_checkpoint.json")
+            ):
+                raise SessionStorageError("Mandatory cloud backup is missing")
+            if any(
                 not (export.parent / "backup_state.json").exists()
                 for export in self.root.glob("*/full_session.json")
             ):
@@ -142,17 +150,32 @@ class StudyStore(InvitationStore):
             )
 
     def issue(self, participant_id, *, cell=None, profile=None):
+        token = secrets.token_urlsafe(32)
+        self.register_invitation_hash(
+            hashlib.sha256(token.encode()).hexdigest(), participant_id,
+            cell=cell, profile=profile,
+        )
+        return token
+
+    def register_invitation_hash(self, token_hash, participant_id, *, cell=None, profile=None):
+        """Remote registration receives only a hash; every invitation expires in 24h."""
+        if not isinstance(token_hash, str) or not re.fullmatch(r"[a-f0-9]{64}", token_hash):
+            raise ValueError("Expected an invitation hash, never plaintext")
         self.check()
         assignment = self.assignment(participant_id, cell=cell, profile=profile)
         with self.lock:
             self.check_backups()
-            token = super().issue(participant_id)
             data = self._read()
-            data["invitations"][hashlib.sha256(token.encode()).hexdigest()][
-                "assignment"
-            ] = assignment
+            if (self.root / participant_id).exists() or any(
+                i["participant_id"] == participant_id for i in data["invitations"].values()
+            ) or token_hash in data["invitations"]:
+                raise ValueError("Participant already has an invitation; do not duplicate observations")
+            now = time.time()
+            data["invitations"][token_hash] = dict(
+                participant_id=participant_id, session_id=uuid.uuid4().hex,
+                assignment=assignment, issued_at=now, expires_at=now + 24 * 60 * 60,
+            )
             atomic_json(self.path, data)
-        return token
 
     def admit(self, token):
         self.check()
@@ -160,12 +183,12 @@ class StudyStore(InvitationStore):
             self.check_backups()
             data = self._read()
             invite = data["invitations"].get(hashlib.sha256(token.encode()).hexdigest())
-            if not invite or invite.get("revoked"):
+            if not invite or invite.get("revoked") or invite.get("expires_at", 0) <= time.time():
                 raise ValueError("Invitación inválida. Contacta al coordinador.")
             sid = invite["session_id"]
             session = StudySession.load(self, sid)
             if session and session.data["stage"] in ("complete", "abandoned"):
-                return session
+                raise ValueError("Invitación inválida. Contacta al coordinador.")
             if data.get("active") not in (None, sid):
                 previous = StudySession.load(self, data["active"])
                 if previous is None or previous.data["stage"] not in (
@@ -179,6 +202,29 @@ class StudyStore(InvitationStore):
             data["active"] = sid
             atomic_json(self.path, data)
             return session
+
+    def revoke(self, participant_id):
+        """Operator-only revocation also blocks an already admitted session."""
+        with FileLock(str(self.root / "_inference.lock"), timeout=0), self.lock:
+            data = self._read()
+            matches = [i for i in data["invitations"].values() if i["participant_id"] == participant_id]
+            if not matches:
+                raise ValueError("Invitation does not exist")
+            for invite in matches:
+                invite["revoked"] = True
+                if data.get("active") == invite["session_id"]:
+                    data["active"] = None
+            atomic_json(self.path, data)
+
+    def complete_admission(self, sid):
+        with self.lock:
+            data = self._read()
+            for invite in data["invitations"].values():
+                if invite["session_id"] == sid:
+                    invite["revoked"] = True
+            if data.get("active") == sid:
+                data["active"] = None
+            atomic_json(self.path, data)
 
     def abandon(self, sid):
         with FileLock(str(self.root / "_inference.lock"), timeout=0), self.lock:
@@ -516,6 +562,7 @@ class StudySession:
             stage="complete",
         )
         self.save()
+        self.store.complete_admission(self.session_id)
         self.export()
 
     def export(self):

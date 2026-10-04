@@ -44,7 +44,9 @@ def finish(session):
 def test_complete_two_blocks_and_export_reconstructs_without_personal_fields(active):
     store, session, token = active
     finish(session)
-    restored = store.admit(token)
+    with pytest.raises(ValueError, match='Invitación'):
+        store.admit(token)
+    restored = StudySession.load(store, session.session_id)
     exported = json.loads(restored.export().read_text(encoding='utf-8'))
     assert len(exported['attempts']) == 8 and len(exported['instruments']) == 2
     assert [i['sus_score'] for i in exported['instruments']] == [50, 50]

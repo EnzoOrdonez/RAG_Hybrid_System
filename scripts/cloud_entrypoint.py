@@ -179,32 +179,11 @@ def main():
             )
         print(json.dumps(receipts))
     elif args.operation == "invite":
-        import re
-        import uuid
-
         request = json.loads(Path(args.request).read_text())
-        token_hash = request["token_sha256"]
-        if not re.fullmatch("[a-f0-9]{64}", token_hash):
-            raise ValueError("Expected an invitation hash, never plaintext")
-        with store.lock:
-            store.check_backups()
-            data = store._read()
-            if any(
-                i["participant_id"] == request["participant_id"]
-                for i in data["invitations"].values()
-            ):
-                raise ValueError("Duplicate invitation request")
-            assignment = store.assignment(
-                request["participant_id"],
-                cell=request.get("cell"),
-                profile=request.get("profile"),
-            )
-            data["invitations"][token_hash] = dict(
-                participant_id=request["participant_id"],
-                session_id=uuid.uuid4().hex,
-                assignment=assignment,
-            )
-            atomic_json(store.path, data)
+        store.register_invitation_hash(
+            request["token_sha256"], request["participant_id"],
+            cell=request.get("cell"), profile=request.get("profile"),
+        )
         print(json.dumps(dict(status="invitation_hash_registered")))
     else:
         print(
