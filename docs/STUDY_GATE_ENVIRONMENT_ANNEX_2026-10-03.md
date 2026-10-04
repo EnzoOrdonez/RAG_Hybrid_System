@@ -14,6 +14,30 @@ el p95 lineal agregado de 60 segundos. La emisión HTTPS y la identidad nueva
 no constituyen resultados de equivalencia frente a exp12 ni autorización ética.
 No se combinan ventanas que difieran en identidad efectiva.
 
+## Despacho numérico Linux
+
+La prueba funcional de recuperación encontró un orden distinto entre fragmentos
+con texto y puntaje idénticos. El diagnóstico por etapas y los contrastes
+independientes están conservados en el paquete externo. NumPy 2.4 agrupa las
+funciones de despacho por ISA; desactivar nombres antiguos de características
+individuales no desactivó esos grupos en esta imagen y fue una intervención
+inefectiva, no evidencia contra esa causa.
+
+El contraste con `NPY_DISABLE_CPU_FEATURES=X86_V4` verificó que el grupo quedó
+desactivado, reprodujo exactamente los tres casos históricos de IDs y aprobó
+ambas suites del candidato. El contraste separado con `X86_V3,X86_V4` no
+reprodujo los IDs. Por ello, la ejecución Linux definitiva fijará únicamente
+`X86_V4` en esa variable, conservará todos los pins y comprobará de nuevo las
+suites en su imagen limpia. No se cambian IDs, textos, pesos, índices ni criterios.
+
+El inventario generado incluye los controles efectivos de NumPy y oneDNN,
+incluso cuando no estén establecidos; la verificación viva rechaza su deriva.
+Este ajuste es una diferencia de ejecución declarada frente a Windows/exp12.
+Los resultados del candidato son validación diagnóstica y no una compuerta GO.
+Fuente del mecanismo: [despacho en NumPy 2.4](https://numpy.org/doc/2.4/reference/simd/build-options.html).
+No cambia ningún mensaje de la interfaz; cualquier efecto en tiempo se medirá
+con las mismas fronteras y el mismo umbral pre-registrados.
+
 ## Generación y consumo de la identidad efectiva
 
 Después de commitear la fuente final limpia y construir su imagen definitiva,

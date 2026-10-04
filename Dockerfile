@@ -16,5 +16,6 @@ RUN python -m pip install --no-cache-dir --extra-index-url https://download.pyto
     -r /opt/cloudrag/requirements-linux.txt \
     && python -m pip check \
     && python -m pip freeze > /opt/cloudrag/linux-installed.txt
+ENV NPY_DISABLE_CPU_FEATURES=X86_V4
 COPY repository/ .
 ENTRYPOINT ["python", "scripts/cloud_entrypoint.py"]

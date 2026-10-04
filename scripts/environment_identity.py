@@ -31,6 +31,18 @@ def _api(endpoint):
         return json.load(response)
 
 
+def execution_environment():
+    """Record numerical dispatch controls, including an explicitly unset value."""
+    return {
+        name: os.environ.get(name)
+        for name in (
+            "NPY_DISABLE_CPU_FEATURES",
+            "NPY_ENABLE_CPU_FEATURES",
+            "ONEDNN_MAX_CPU_ISA",
+        )
+    }
+
+
 def snapshot(config):
     from scripts.study_gate_environment import collect_identity, command
     from src.pipeline.pipeline_config import SURVEY_DEPLOY
@@ -75,6 +87,7 @@ def snapshot(config):
         ),
         recipes=recipes,
         dependencies=packages,
+        execution_environment=execution_environment(),
         locks={
             name: digest(ROOT / name)
             for name in ("requirements-lock.txt", "requirements-app.txt", "Dockerfile")
