@@ -154,6 +154,7 @@ class LinuxSampler:
         ) as response:
             resident = json.load(response)
         return dict(
+            at=datetime.now(timezone.utc).isoformat(),
             monotonic_s=now,
             cpu_percent=cpu,
             gpu={"utilization.gpu": gpu},
@@ -182,12 +183,24 @@ def assess(rows, config, *, admission=False, allowed_pids=()):
             != config["model_digest"]
         ):
             reasons.add("model_residency")
-        elif (
-            models[0].get("context_length", 4096) != 4096
-            or datetime.fromisoformat(models[0]["expires_at"]).timestamp()
-            < time.time() + 180
-        ):
-            reasons.add("residency_lease")
+        else:
+            try:
+                observed = datetime.fromisoformat(row["at"])
+                expires = datetime.fromisoformat(models[0]["expires_at"])
+                if observed.tzinfo is None or expires.tzinfo is None:
+                    raise ValueError("Residence observation requires an aware clock")
+                # Historical leases were checked when sampled. Renewals must not
+                # make an earlier healthy observation expire retrospectively.
+                reference = observed.timestamp()
+                if row is rows[-1]:
+                    reference = max(reference, time.time())
+                if (
+                    models[0].get("context_length", 4096) != 4096
+                    or expires.timestamp() < reference + 180
+                ):
+                    reasons.add("residency_lease")
+            except (KeyError, TypeError, ValueError):
+                reasons.add("telemetry_error")
         busy = set()
         process_names = {p["pid"]: p["name"].lower() for p in row.get("processes", [])}
         for pid in row.get("gpu_pids", []):
