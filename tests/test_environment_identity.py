@@ -53,7 +53,8 @@ def test_inventory_cannot_be_written_inside_checkout(monkeypatch, tmp_path):
 
 def test_execution_environment_records_unset_controls_without_secrets(monkeypatch):
     for name in (
-        "NPY_DISABLE_CPU_FEATURES", "NPY_ENABLE_CPU_FEATURES", "ONEDNN_MAX_CPU_ISA"
+        "NPY_DISABLE_CPU_FEATURES", "NPY_ENABLE_CPU_FEATURES", "ONEDNN_MAX_CPU_ISA",
+        "CUDA_VISIBLE_DEVICES",
     ):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("PRIVATE_TEST_SECRET", "must-not-enter-inventory")
@@ -61,11 +62,13 @@ def test_execution_environment_records_unset_controls_without_secrets(monkeypatc
         "NPY_DISABLE_CPU_FEATURES": None,
         "NPY_ENABLE_CPU_FEATURES": None,
         "ONEDNN_MAX_CPU_ISA": None,
+        "CUDA_VISIBLE_DEVICES": None,
     }
 
 
 @pytest.mark.parametrize(
-    "name", ["NPY_DISABLE_CPU_FEATURES", "NPY_ENABLE_CPU_FEATURES", "ONEDNN_MAX_CPU_ISA"]
+    "name", ["NPY_DISABLE_CPU_FEATURES", "NPY_ENABLE_CPU_FEATURES", "ONEDNN_MAX_CPU_ISA",
+             "CUDA_VISIBLE_DEVICES"]
 )
 def test_numerical_control_drift_rejects_live_identity(tmp_path, monkeypatch, name):
     monkeypatch.delenv(name, raising=False)
@@ -80,6 +83,9 @@ def test_numerical_control_drift_rejects_live_identity(tmp_path, monkeypatch, na
     )
     config = inventory.generate({}, tmp_path / "environment_identity.json")
     assert inventory.verify(config)["build"] == "a" * 40
-    monkeypatch.setenv(name, "X86_V4" if name.startswith("NPY_") else "AVX2")
+    monkeypatch.setenv(
+        name, "0" if name == "CUDA_VISIBLE_DEVICES"
+        else "X86_V4" if name.startswith("NPY_") else "AVX2"
+    )
     with pytest.raises(ValueError, match="Live runtime"):
         inventory.verify(config)

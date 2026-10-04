@@ -39,6 +39,7 @@ def execution_environment():
             "NPY_DISABLE_CPU_FEATURES",
             "NPY_ENABLE_CPU_FEATURES",
             "ONEDNN_MAX_CPU_ISA",
+            "CUDA_VISIBLE_DEVICES",
         )
     }
 
