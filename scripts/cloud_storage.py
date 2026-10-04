@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import urllib.error
@@ -16,6 +17,8 @@ class Bucket:
         self.name = name
 
     def request(self, url, *, data=None, method="GET"):
+        if os.environ.get("CLOUDRAG_ISOLATED_SERVICE") == "1" or os.environ.get("CLOUDRAG_STUDY_PURPOSE") == "study":
+            raise ValueError("The isolated application must use its host backup agent")
         metadata = urllib.request.Request(
             "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token",
             headers={"Metadata-Flavor": "Google"},
@@ -99,6 +102,12 @@ def backup_session(session_dir, bucket, prefix):
         state_path,
         dict(status="pending", destination="gs://" + bucket.name + "/" + prefix),
     )
+    if os.environ.get("CLOUDRAG_BACKUP_SOCKET"):
+        from scripts.study_operator.agent_client import backup_request
+
+        state = backup_request(os.environ["CLOUDRAG_BACKUP_SOCKET"], session_dir, bucket.name, prefix)
+        atomic_json(state_path, state)
+        return state
     receipts = {}
     for name in ("full_session.json", "export_manifest.json"):
         receipts[name] = bucket.put_verified(
