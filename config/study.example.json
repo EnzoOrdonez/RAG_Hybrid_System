@@ -124,7 +124,7 @@
       "choices": []
     }
   ],
-  "free_instruction": "Ahora escribe tú una consulta sobre algo de AWS, Azure o GCP que te interese o que hayas necesitado buscar alguna vez. Escríbela preferentemente en inglés, el idioma de la documentación. No incluyas información confidencial de tu empresa.",
+  "free_instruction": "Ahora escribe tú una consulta sobre algo de AWS, Azure o GCP que te interese o que hayas necesitado buscar alguna vez. Escríbela preferentemente en inglés, el idioma de la documentación. No incluyas datos personales ni información confidencial de tu empleador.",
   "blinding_question": "De los dos sistemas que usaste, ¿cuál crees que consultaba documentación para responder?",
   "blinding_choices": [
     "Sistema A",
