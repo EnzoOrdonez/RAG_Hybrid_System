@@ -78,3 +78,10 @@ def test_study_delete_requires_exact_scope_confirmation():
         with pytest.raises(OperatorError, match='rechazado'):
             confirm_deletion(operation, code, 'study', '')
         assert confirm_deletion(operation, code, 'study', expected) == expected
+
+
+def test_export_handles_failed_attempt_without_a_response_class():
+    result = publication_export([dict(participant_id='P01', attempts=[
+        dict(condition='hybrid', decline_class=None, status='error'),
+        dict(condition='hybrid', decline_class='answered', status='success')])])
+    assert {row['response_class'] for row in result['aggregate']} == {'answered', 'error'}
