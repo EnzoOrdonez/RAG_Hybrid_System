@@ -95,10 +95,11 @@ def identity(config):
 
 
 class LinuxSampler:
-    def __init__(self):
+    def __init__(self, service_state_path=None):
         self.previous = None
         self.processes = {}
         self.previous_at = None
+        self.service_state_path = service_state_path
 
     def __call__(self):
         now = time.monotonic()
@@ -153,7 +154,7 @@ class LinuxSampler:
             timeout=3,
         ) as response:
             resident = json.load(response)
-        return dict(
+        result = dict(
             at=datetime.now(timezone.utc).isoformat(),
             monotonic_s=now,
             cpu_percent=cpu,
@@ -162,6 +163,12 @@ class LinuxSampler:
             ollama_ps_api=resident,
             errors=[],
         )
+        if self.service_state_path:
+            try:
+                result['service_state'] = read_json(self.service_state_path)
+            except (OSError, ValueError):
+                result['errors'].append('service_state_unreadable')
+        return result
 
 
 def assess(rows, config, *, admission=False, allowed_pids=()):
@@ -177,12 +184,21 @@ def assess(rows, config, *, admission=False, allowed_pids=()):
             reasons.add("telemetry_gap")
         previous = row["monotonic_s"]
         models = row.get("ollama_ps_api", {}).get("models", [])
+        expected_empty = False
+        if config.get('service_mode') == 'fresh_runner':
+            from scripts.study_operator.service_transition import transition
+
+            marker_valid, expected_empty = transition(row.get('service_state'), row['monotonic_s'],
+                config.get('service_boot_id'), admission=admission)
+            if not marker_valid:
+                reasons.add('service_transition')
         if (
             len(models) != 1
             or models[0].get("digest", "").removeprefix("sha256:")
             != config["model_digest"]
         ):
-            reasons.add("model_residency")
+            if models or not expected_empty:
+                reasons.add("model_residency")
         else:
             try:
                 observed = datetime.fromisoformat(row["at"])
@@ -260,7 +276,7 @@ class Environment:
 
             self.sampler = Sampler()
         else:
-            self.sampler = LinuxSampler()
+            self.sampler = LinuxSampler(config.get('service_state_path'))
         self.rows = []
         self.last = 0
 
