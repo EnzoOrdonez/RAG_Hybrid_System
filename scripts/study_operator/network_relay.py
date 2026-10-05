@@ -1,9 +1,21 @@
 """Byte-preserving Unix/loopback relays; the app needs no external network."""
 import argparse
+import os
 import selectors
 import socket
 import socketserver
+import stat
 import threading
+
+
+def unlink_owned_socket(path, identity, *, lstat=os.lstat, unlink=os.unlink):
+    """Remove only this relay's Unix socket, never a replacement or symlink."""
+    try:
+        current = lstat(path)
+    except FileNotFoundError:
+        return
+    if stat.S_ISSOCK(current.st_mode) and (current.st_dev,current.st_ino,current.st_uid) == identity:
+        unlink(path)
 
 
 def transfer(left, right):
@@ -71,6 +83,14 @@ def server(listen, target):
             # Never log client addresses, bytes or exception payloads.
             pass
 
+        def server_close(self):
+            try:
+                super().server_close()
+            finally:
+                owned = getattr(self,'owned_socket',None)
+                if owned:
+                    unlink_owned_socket(*owned)
+
     class Handler(socketserver.BaseRequestHandler):
         def handle(self):
             outgoing = socket.socket(socket.AF_UNIX if isinstance(target, str) else socket.AF_INET, socket.SOCK_STREAM)
@@ -79,7 +99,15 @@ def server(listen, target):
                 outgoing.connect(target)
                 transfer(self.request, outgoing)
 
-    return Relay(listen, Handler)
+    instance = Relay(listen, Handler)
+    if isinstance(listen,str):
+        try:
+            bound = os.lstat(listen)
+            instance.owned_socket = (listen,(bound.st_dev,bound.st_ino,bound.st_uid))
+        except OSError:
+            instance.server_close()
+            raise
+    return instance
 
 
 def main():
