@@ -131,6 +131,55 @@ def test_compute_and_static_ip_reservations_are_not_charged_twice(tmp_path):
     operator.stop()
     assert operator.state['cost']['estimated_usd'] == pytest.approx(.706832276)
     assert operator.state['cost']['reservations'] == {'ip-own':.72}
+    assert operator.state['cost']['margin_usd'] == .25
+
+
+def test_elapsed_retention_blocks_new_paid_effect_before_budget_overrun(tmp_path):
+    operator,cloud = installation(tmp_path)
+    operator.config['cost'].update(estimated_usd=89,margin_usd=0,
+        as_of_utc='2026-10-01T00:00:00+00:00',retention_usd_day=.3287664)
+    with pytest.raises(OperatorError,match='USD90'):
+        operator.start('smoke')
+    assert not any(args[:3] == ['compute','instances','start'] for args,_ in cloud.calls)
+
+
+def test_ip_creation_response_loss_remains_recoverable_and_rejects_foreign_address(tmp_path):
+    operator,cloud = installation(tmp_path)
+    live = []
+    original = cloud.command
+    def command(args,**options):
+        if args[:3] == ['compute','addresses','list']:
+            return live
+        if args[:3] == ['compute','addresses','create']:
+            marker = next(arg.removeprefix('--description=') for arg in args if arg.startswith('--description='))
+            live.append(dict(name='owned-address',id='42',region='regions/us-central1',addressType='EXTERNAL',
+                address='203.0.113.8',description=marker,creationTimestamp='2026-10-05T00:00:00+00:00'))
+            raise OperatorError('response lost')
+        if args[:3] == ['compute','addresses','describe']:
+            return live[0]
+        return original(args,**options)
+    cloud.command = command
+    with pytest.raises(OperatorError,match='response lost'):
+        operator.ip_reserve()
+    persisted = json.loads(operator.state_path.read_text())
+    assert persisted['ip_creation_intent']['ownership_marker'] == live[0]['description']
+    assert operator.ip_reserve()['address_id'] == '42'
+    assert 'ip_creation_intent' not in operator.state
+    live[0]['id'] = '43'
+    with pytest.raises(OperatorError,match='creación propio'):
+        operator.ip_reserve()
+
+
+def test_never_associated_ip_is_charged_at_unused_rate(tmp_path):
+    operator,cloud = installation(tmp_path)
+    address = dict(name='owned-address',id='42',address='203.0.113.8')
+    original = cloud.command
+    cloud.command = lambda args,**options: [address] if args[:3] == ['compute','addresses','list'] else original(args,**options)
+    operator.state.update(reserved_address_id='42',ip_reserved_utc='2026-10-05T00:00:00+00:00',
+        cost=dict(estimated_usd=0,margin_usd=0,reservations={'ip-own':.72}))
+    operator.now = lambda:datetime(2026,10,5,1,tzinfo=timezone.utc)
+    operator.ip_release()
+    assert operator.state['cost']['estimated_usd'] == pytest.approx(.01)
 
 
 def test_tls_preparation_and_capacity_fail_closed_before_start(tmp_path):

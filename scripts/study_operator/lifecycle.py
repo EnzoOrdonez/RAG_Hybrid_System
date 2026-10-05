@@ -64,14 +64,31 @@ class Operator:
     def reserve_cost(self, operation, amount):
         cost = self.state.setdefault('cost',dict(estimated_usd=0,margin_usd=0,reservations={}))
         inherited = self.config.get('cost',{})
+        retention = 0
+        if inherited.get('as_of_utc'):
+            seconds = max(0,(self.now()-datetime.fromisoformat(inherited['as_of_utc'])).total_seconds())
+            retention = seconds/86400*inherited.get('retention_usd_day',0)
+        for resource in self.state.get('alternate_vms',[]):
+            if resource.get('created_utc') and not resource.get('disposed'):
+                retention += max(0,(self.now()-datetime.fromisoformat(resource['created_utc'])).total_seconds())/86400*.3287664
+        # The initial IP reservation covers its first72h conservatively. Include
+        # any excess elapsed charge before reserving another paid operation.
+        active_ip_extra = 0
+        if self.state.get('ip_reserved_utc'):
+            created = datetime.fromisoformat(self.state['ip_reserved_utc'])
+            associated = datetime.fromisoformat(self.state.get('ip_associated_utc',self.now().isoformat()))
+            elapsed = (max(0,(associated-created).total_seconds())*.01+
+                       max(0,(self.now()-associated).total_seconds())*.005)/3600
+            active_ip_extra = max(0,elapsed-sum(value for key,value in cost['reservations'].items() if key.startswith('ip-')))
         total = (inherited.get('estimated_usd',0)+inherited.get('margin_usd',0)+cost['estimated_usd']+
-                 cost['margin_usd']+sum(cost['reservations'].values())+amount)
+                 cost['margin_usd']+sum(cost['reservations'].values())+amount+retention+active_ip_extra)
         if not 0 <= total < 90:
             raise OperatorError('El costo reservado alcanza el corte de USD90. Mantén apagada la VM y concilia el ledger.')
         cost['reservations'][operation] = amount
         self.persist()
         save_state(self.cloud.root/('cost-'+operation+'.json'),dict(status='RESERVED_BEFORE_EFFECT',
             estimate_usd=amount,conservative_total_usd=total,official_rates=self.config.get('official_rates'),
+            elapsed_retention_estimate_usd=retention,elapsed_ip_above_reservation_usd=active_ip_extra,
             observed_utc=self.now().isoformat()))
 
     def start(self, purpose):
@@ -173,6 +190,7 @@ class Operator:
             began = datetime.fromisoformat(self.state.pop('boot_started_utc'))
             seconds = max(0,(self.now()-began).total_seconds())
             self.state['cost']['estimated_usd'] += seconds/3600*self.config['official_rates']['compute_usd_h']
+            self.state['cost']['margin_usd'] += .25
             self.state['cost']['reservations'] = {key:value for key,value in self.state['cost']['reservations'].items()
                                                  if key.startswith('ip-')}
             self.state['last_estimated_vm_interval_s'] = seconds
@@ -202,19 +220,32 @@ class Operator:
         addresses = self.cloud.command(['compute','addresses','list','--filter=name='+name])
         if not addresses:
             self.reserve_cost('ip-'+self.now().strftime('%Y%m%dT%H%M%S%fZ'),.01*24*3)
-            self.cloud.command(['compute','addresses','create',name,'--region=us-central1','--ip-version=IPV4'])
+            intent = dict(name=name,region='us-central1',requested_utc=self.now().isoformat(),
+                          ownership_marker='CloudRAG-I4-owned-'+uuid.uuid4().hex)
+            self.state['ip_creation_intent'] = intent
+            self.persist()
+            self.cloud.command(['compute','addresses','create',name,'--region=us-central1','--ip-version=IPV4',
+                                '--description='+intent['ownership_marker']])
         observed = self.cloud.command(['compute','addresses','describe',name,'--region=us-central1'])
         if not observed.get('region','').endswith('/us-central1') or observed.get('addressType') != 'EXTERNAL':
             raise OperatorError('La IP no es externa regional en us-central1. Conserva el recurso y revisa su recibo.')
+        owned_id = self.state.get('reserved_address_id')
+        intent = self.state.get('ip_creation_intent',{})
+        if ((owned_id and str(observed['id']) != owned_id)
+                or (not owned_id and (intent.get('name') != name or intent.get('region') != 'us-central1'
+                                      or observed.get('description') != intent.get('ownership_marker')))):
+            raise OperatorError('La IP no acredita el intento de creación propio. No se asocia ni se libera; revisa los recibos.')
         self.config.update(static_ip=observed['address'],hostname=observed['address']+'.sslip.io')
+        self.state['reserved_address_id'] = str(observed['id'])
+        self.state.setdefault('ip_reserved_utc',observed.get('creationTimestamp',self.now().isoformat()))
+        self.persist()  # Recoverable even if association fails or its response is lost.
         selected = self.selected()
         vm = self.observed()
         if vm['status'] != 'TERMINATED':
             raise OperatorError('La IP está reservada, pero la VM corre. Ejecuta stop antes de asociarla.')
         self.attach_ip(selected,vm)
-        self.state['reserved_address_id'] = str(observed['id'])
-        self.state.setdefault('ip_reserved_utc',observed.get('creationTimestamp',self.now().isoformat()))
         self.state.setdefault('ip_associated_utc',self.now().isoformat())
+        self.state.pop('ip_creation_intent',None)
         self.persist()
         return dict(status='STATIC_IP_RESERVED',url='https://'+self.config['hostname'],idle_usd_day=.12,
                     unused_usd_day=.24,address_id=str(observed['id']))
@@ -237,7 +268,7 @@ class Operator:
             return dict(status='ALREADY_RELEASED')
         if len(addresses) != 1 or str(addresses[0]['id']) != self.state.get('reserved_address_id'):
             raise OperatorError('La IP no coincide con el ID reservado por este operador. No se libera; revisa el recibo.')
-        for item in [self.config['primary_vm'],*self.state.get('alternate_vms',[])]:
+        for item in [self.config['primary_vm'],*[row for row in self.state.get('alternate_vms',[]) if not row.get('disposed')]]:
             observed = self.cloud.command(['compute','instances','describe',item['name'],'--zone='+item['zone']])
             checked_vm(observed,name=item['name'],instance_id=item['id'],zone=item['zone'])
             if observed['status'] != 'TERMINATED':
@@ -251,7 +282,7 @@ class Operator:
         self.state.pop('reserved_address_id',None)
         if self.state.get('ip_reserved_utc'):
             created = datetime.fromisoformat(self.state.pop('ip_reserved_utc'))
-            associated = datetime.fromisoformat(self.state.pop('ip_associated_utc',created.isoformat()))
+            associated = datetime.fromisoformat(self.state.pop('ip_associated_utc',self.now().isoformat()))
             unused_s = max(0,(associated-created).total_seconds())
             associated_s = max(0,(self.now()-associated).total_seconds())
             cost = self.state.setdefault('cost',dict(estimated_usd=0,margin_usd=0,reservations={}))
@@ -332,7 +363,8 @@ class Operator:
             observed = self.cloud.command(['compute','instances','describe',name,'--zone='+zone])
             alternate = dict(name=name,id=str(observed['id']),zone=zone)
             checked_vm(observed,name=name,instance_id=alternate['id'],zone=zone)
-            self.state.setdefault('alternate_vms',[]).append(dict(alternate,disposable=True,disk_name=disk_name))
+            self.state.setdefault('alternate_vms',[]).append(dict(alternate,disposable=True,disk_name=disk_name,
+                                                                 created_utc=self.now().isoformat()))
             self.persist()
             self.cloud.command(['compute','instances','stop',name,'--zone='+zone],timeout=600)
         self.transfer_ip(alternate)
@@ -346,7 +378,7 @@ class Operator:
         # Reserve a separate upper bound for up to an hour detached at the differential rate.
         self.state['ip_transfer_gap_margin_usd'] = self.state.get('ip_transfer_gap_margin_usd',0)+.005
         self.persist()
-        for item in [self.config['primary_vm'],*self.state.get('alternate_vms',[])]:
+        for item in [self.config['primary_vm'],*[row for row in self.state.get('alternate_vms',[]) if not row.get('disposed')]]:
             observed = self.cloud.command(['compute','instances','describe',item['name'],'--zone='+item['zone']])
             checked_vm(observed,name=item['name'],instance_id=item['id'],zone=item['zone'])
             if observed['status'] != 'TERMINATED':
