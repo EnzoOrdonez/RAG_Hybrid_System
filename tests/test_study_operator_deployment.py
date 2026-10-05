@@ -35,6 +35,8 @@ def test_app_and_freeze_share_service_and_generation_environment():
         assert '--read-only' in command and '--rm=false' in command
         assert 'CLOUDRAG_ISOLATED_SERVICE=1' in command
         assert 'CLOUDRAG_DEMO_GPU=1' in command and 'CUDA_VISIBLE_DEVICES=0' in command
+        assert '/opt/cloudrag/repository/data/llm_cache:rw,nosuid,nodev,size=8m,uid=10001,gid=10001' in command
+        assert 'type=bind,source=/srv/cloudrag/assets/data/models,target=/opt/cloudrag/repository/data/models,readonly' in command
         assert '/service/generation.sock' in command
     assert 'type=bind,source=/srv/cloudrag/iteration4/boot/meta,target=/deployment,readonly' in serving
     assert 'type=bind,source=/srv/cloudrag/iteration4/boot/meta,target=/deployment' in freezing
@@ -43,12 +45,14 @@ def test_app_and_freeze_share_service_and_generation_environment():
 def isolated():
     return dict(Image='sha256:'+'b'*64, Config={'User':'10001:10001'},
         HostConfig=dict(NetworkMode='none', PidMode='', ReadonlyRootfs=True, CapDrop=['ALL'],
-            SecurityOpt=['no-new-privileges'], LogConfig={'Type':'none'}),
+            SecurityOpt=['no-new-privileges'], LogConfig={'Type':'none'},
+            Tmpfs={'/opt/cloudrag/repository/data/llm_cache':'rw,size=8m'}),
         Mounts=[dict(Destination=p, RW=False) for p in
-            ['/service','/deployment','/reviewed','/opt/cloudrag/repository/data']])
+            ['/service','/deployment','/reviewed','/opt/cloudrag/repository/data/models',
+             '/opt/cloudrag/repository/data/indices']])
 
 
-@pytest.mark.parametrize('mutation', ['network','pid','socket','logs','mount'])
+@pytest.mark.parametrize('mutation', ['network','pid','socket','logs','mount','cache'])
 def test_actual_docker_isolation_rejects_escape_paths(mutation):
     value = copy.deepcopy(isolated())
     if mutation in ('network','pid'):
@@ -57,6 +61,8 @@ def test_actual_docker_isolation_rejects_escape_paths(mutation):
         value['Mounts'].append(dict(Destination='/var/run/docker.sock',RW=False))
     elif mutation == 'logs':
         value['HostConfig']['LogConfig']['Type'] = 'json-file'
+    elif mutation == 'cache':
+        value['HostConfig']['Tmpfs'] = {}
     else:
         value['Mounts'][0]['RW'] = True
     with pytest.raises(OperatorError):

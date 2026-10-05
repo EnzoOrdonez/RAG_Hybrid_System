@@ -41,10 +41,12 @@ def app_command(config, boot_root, session_root, name, *, operation='serve', req
     argv = ['docker', 'run', '--rm=false', '--name', name, '--network', 'none', '--gpus', 'all',
             '--user', '10001:10001', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges',
             '--read-only', '--log-driver', 'none', '--tmpfs', '/tmp:rw,nosuid,nodev,size=512m',
+            '--tmpfs', '/opt/cloudrag/repository/data/llm_cache:rw,nosuid,nodev,size=8m,uid=10001,gid=10001',
             '-e', 'HOME=/tmp', '-e', 'CLOUDRAG_IMAGE_ID=' + config['image_id'],
             '-e', 'CLOUDRAG_ISOLATED_APP=1', '-e', 'CLOUDRAG_ISOLATED_SERVICE=1',
             '-e', 'CUDA_VISIBLE_DEVICES=0', '-e', 'CLOUDRAG_DEMO_GPU=1',
-            *bind(config['asset_root'] + '/data', '/opt/cloudrag/repository/data'),
+            *bind(config['asset_root'] + '/data/models', '/opt/cloudrag/repository/data/models'),
+            *bind(config['asset_root'] + '/data/indices', '/opt/cloudrag/repository/data/indices'),
             *bind(root / 'config', '/reviewed'), *bind(root / 'meta', '/deployment', operation != 'freeze'),
             *bind(root / 'sockets', '/service'), *bind(root / 'web', '/web', False),
             *bind(PurePosixPath(session_root).parent / 'private-inventory', '/private-inventory', False),
@@ -71,9 +73,12 @@ def assert_isolation(observed, expected_image):
     mounts = {m['Destination']: m for m in observed['Mounts']}
     if any(m.get('Destination') == '/var/run/docker.sock' for m in observed['Mounts']):
         raise OperatorError('Docker socket expuesto a la app. Detén el despliegue y corrige los montajes.')
-    for path in ('/service', '/deployment', '/reviewed', '/opt/cloudrag/repository/data'):
+    for path in ('/service', '/deployment', '/reviewed', '/opt/cloudrag/repository/data/models',
+                 '/opt/cloudrag/repository/data/indices'):
         if path not in mounts or mounts[path]['RW']:
             raise OperatorError('Montaje de solo lectura cambiado. Detén la admisión y revisa el recibo.')
+    if '/opt/cloudrag/repository/data/llm_cache' not in host.get('Tmpfs', {}):
+        raise OperatorError('Directorio transitorio de caché sin tmpfs. Detén la admisión y revisa los montajes.')
     return {'container_isolation_verified': True}
 
 
