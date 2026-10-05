@@ -48,6 +48,19 @@ en 15 minutos, TLS, identidad, IAM, metadatos inaccesibles y respaldo despejado.
 Cada invitación vuelve a comprobarlo. No se admite una sesión con menos de
 70 minutos hasta el primero de los dos límites independientes de apagado.
 
+Si preflight informa `BOOTSTRAP_FAILED` u otro rechazo definitivo, no sigas
+esperando ni repitas start. Conserva los recibos técnicos de ese arranque:
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 diagnostics
+& C:/CloudRAG/operator-iteration4/operator.ps1 stop
+```
+
+`diagnostics` guarda solo los recibos técnicos permitidos, incluidos los
+comandos de arranque y sus códigos de salida. No copia sesiones, logs de
+acceso, claves de certificado ni el árbol del despliegue. Revisa el primer
+comando fallido en la ruta que devuelve el recibo antes de corregir y reiniciar.
+
 ```powershell
 $participantCode = Read-Host 'Código congelado de participante, por ejemplo P01'
 & C:/CloudRAG/operator-iteration4/operator.ps1 invite $participantCode

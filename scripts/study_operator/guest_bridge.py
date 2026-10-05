@@ -3,6 +3,7 @@ from contextlib import contextmanager, redirect_stderr, redirect_stdout
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import uuid
@@ -105,14 +106,39 @@ def disk_dispatch(active, request):
                                                          stores=results))
 
 
+def current_boot():
+    return Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+
+
+def technical_files(root):
+    # A failed freeze has no active.json. Read only this boot's allowlisted receipts.
+    files = {}
+    allowed = {'ready.json','failure.json','stopped.json','environment_identity.json','host-runtime.json',
+               'image-receipt.json','service-policy.json','deployment-packages.json'}
+    candidates = [root/name for name in ('ready.json','failure.json','stopped.json')]
+    candidates += list((root/'meta').glob('*'))+list(root.glob('command-*.json'))
+    for path in candidates:
+        if (not path.is_symlink() and path.is_file() and
+                (path.name in allowed or re.fullmatch(r'command-[0-9]{4}\.json',path.name))):
+            files[path.name] = json.loads(path.read_text(encoding='utf-8'))
+    return dict(status='TECHNICAL_EVIDENCE',files=files,session_content_excluded=True)
+
+
 def dispatch(request):
     if request.get('operation') == 'snapshot-safety':
         return snapshot_safe(ROOT/'periods')
-    if request.get('operation') == 'preflight' and not (ROOT/'active.json').is_file():
-        return dict(status='WAITING',reason='BOOTSTRAP_PENDING')
+    boot = current_boot()
+    current = ROOT/'boots'/boot
+    if request.get('operation') == 'technical-evidence':
+        return dict(technical_files(current),boot_id=boot)
+    if request.get('operation') == 'preflight':
+        if (current/'failure.json').is_file():
+            return dict(status='ERROR',reason='BOOTSTRAP_FAILED',
+                        next_action='Ejecuta diagnostics, conserva sus recibos y después stop; corrige la causa antes de repetir start.')
+        if not (current/'ready.json').is_file():
+            return dict(status='WAITING',reason='BOOTSTRAP_PENDING')
     active = json.loads((ROOT/'active.json').read_text(encoding='utf-8'))
     root = Path(active['boot_root'])
-    boot = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
     if (active['boot_id'] != boot or root != ROOT/'boots'/boot or not root.is_dir()):
         raise ValueError('NO_ACTIVE_BOOT')
     operation = request['operation']
@@ -161,14 +187,6 @@ def dispatch(request):
         return dict(status='MAINTENANCE',admission_closed=True)
     if operation in {'inventory','download-disk','clean-disk','export','restore'}:
         return disk_dispatch(active,request)
-    if operation == 'technical-evidence':
-        # Explicit allowlist. Never upload the deployment tree, sessions, Caddy storage or logs.
-        files = {}
-        for path in [root/name for name in ('ready.json','failure.json','stopped.json')]+list((root/'meta').glob('*')):
-            if path.is_file() and path.name in {'ready.json','failure.json','stopped.json','environment_identity.json',
-                'host-runtime.json','image-receipt.json','service-policy.json','deployment-packages.json'}:
-                files[path.name] = json.loads(path.read_text(encoding='utf-8'))
-        return dict(status='TECHNICAL_EVIDENCE',files=files)
     raise ValueError('UNKNOWN_OWNER_OPERATION')
 
 
@@ -178,8 +196,9 @@ def main():
             request = json.load(sys.stdin)
             with owner_lock():
                 result = dispatch(request)
-        except Exception:
-            result = dict(status='ERROR',reason='GUEST_OPERATION_REJECTED',
+        except Exception as error:
+            reason = str(error) if isinstance(error,ValueError) and re.fullmatch('[A-Z][A-Z0-9_]{0,80}',str(error)) else 'GUEST_OPERATION_REJECTED'
+            result = dict(status='ERROR',reason=reason,
                           next_action='Verifica status, READY y mantenimiento; conserva los recibos antes de repetir.')
     print(json.dumps(result))
 

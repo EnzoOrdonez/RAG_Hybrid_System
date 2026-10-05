@@ -3,7 +3,7 @@ import pytest
 from scripts.study_operator.cli import parser
 
 
-@pytest.mark.parametrize('argv,operation', [(['status'],'status'), (['start','--purpose','study'],'start'),
+@pytest.mark.parametrize('argv,operation', [(['status'],'status'), (['diagnostics'],'diagnostics'), (['start','--purpose','study'],'start'),
     (['invite','P01'],'invite'), (['invite','P999','--cell','1','--profile','without_experience'],'invite'),
     (['withdraw','P01'],'withdraw'), (['withdraw','P01','--execute'],'withdraw'),
     (['purge-study'],'purge-study'), (['archive-local'],'archive-local'),

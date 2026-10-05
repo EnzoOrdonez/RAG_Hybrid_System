@@ -20,7 +20,7 @@ def parser():
     sub = value.add_subparsers(dest='operation',required=True)
     start = sub.add_parser('start')
     start.add_argument('--purpose',required=True,choices=('study','technical','smoke','rehearsal','pilot'))
-    for name in ('status','preflight','stop','ip-reserve','ip-release','failback','export-anonymized'):
+    for name in ('status','preflight','stop','diagnostics','ip-reserve','ip-release','failback','export-anonymized'):
         sub.add_parser(name)
     invite = sub.add_parser('invite')
     invite.add_argument('code')

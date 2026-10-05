@@ -52,7 +52,10 @@ class Operator:
             if result.get('status') == 'WAITING' and request.get('operation') == 'preflight':
                 raise ReadyPending('El invitado sigue preparando READY. Espera dentro del límite de 15 minutos; no repitas start.')
             if result.get('status') == 'ERROR':
-                raise ValueError('remote refusal')
+                reason = result.get('reason','GUEST_OPERATION_REJECTED')
+                if not re.fullmatch('[A-Z][A-Z0-9_]{0,80}',str(reason)):
+                    reason = 'GUEST_OPERATION_REJECTED'
+                raise OperatorError('El invitado rechazó la operación ('+reason+'). Ejecuta diagnostics y status; conserva los recibos antes de repetir.')
             return result
         except (TypeError,ValueError):
             raise OperatorError('El invitado rechazó la operación o aún no responde. Conserva el recibo, ejecuta status y revisa preflight.') from None
@@ -61,6 +64,18 @@ class Operator:
         observed = self.observed()
         return dict(status=observed['status'],vm_id=str(observed['id']),zone=observed['zone'].split('/')[-1],
                     retained_disk=True,deletion_protection=True,native_stop_s=10800)
+
+    def diagnostics(self):
+        if self.observed()['status'] != 'RUNNING':
+            raise OperatorError('La VM está detenida. Revisa los últimos recibos en runs; no la enciendas solo para repetir un fallo.')
+        result = self.bridge(dict(operation='technical-evidence'))
+        path = self.cloud.root/'technical-diagnostics.json'
+        save_state(path,result)
+        return dict(status='TECHNICAL_DIAGNOSTICS_SAVED',path=str(path),
+                    sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                    boot_id=result['boot_id'],receipt_count=len(result['files']),
+                    failure=result['files'].get('failure.json'),session_content_excluded=True,
+                    next_action='Revisa el primer comando con exit_code distinto de cero; corrige su causa y ejecuta stop antes de otro start.')
 
     def reserve_cost(self, operation, amount):
         cost = self.state.setdefault('cost',dict(estimated_usd=0,margin_usd=0,reservations={}))
