@@ -43,6 +43,7 @@ def configure(deployment):
     )
     if deployment.get('service_mode'):
         os.environ['CLOUDRAG_ISOLATED_APP'] = '1'
+        os.environ['CLOUDRAG_ISOLATED_SERVICE'] = '1'
         os.environ['CLOUDRAG_BACKUP_SOCKET'] = deployment['backup_socket']
 
 

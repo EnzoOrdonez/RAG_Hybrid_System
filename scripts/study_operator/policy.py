@@ -100,7 +100,7 @@ def publication_export(sessions):
     for session in sessions:
         code = participant_code(session.get('participant_id', session.get('assignment', {}).get('participant_id')))
         for attempt in session.get('attempts', []):
-            key = (attempt['condition'], attempt.get('response_class', 'unknown'))
+            key = (attempt['condition'], attempt.get('decline_class', attempt.get('response_class', 'unknown')))
             counts[key] = counts.get(key, 0) + 1
             if attempt.get('analysis_role') == 'free_query':
                 manual.append({'participant_code': code, 'field': 'free_query', 'publishable': False})

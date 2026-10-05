@@ -32,7 +32,7 @@ def private_directory(value):
     path = Path(value).absolute()
     for candidate in (path, *path.parents):
         if candidate.is_symlink() or (candidate.exists() and
-                getattr(candidate.stat(), 'st_file_attributes', 0) & 0x400):
+                getattr(candidate.lstat(), 'st_file_attributes', 0) & 0x400):
             raise OperatorError('Descarga en un enlace no admitida. Usa un directorio privado real.')
     path.mkdir(parents=True, exist_ok=True)
     return path.resolve()
@@ -65,7 +65,7 @@ def execute(storage, prefix, local_download, *, dry_run=True, disk_cleanup=None)
                            + b'\0' + prefix.encode()).hexdigest()
     state_path = root / ('deletion-' + scope + '.json')
     if state_path.is_symlink() or (state_path.exists() and
-            getattr(state_path.stat(), 'st_file_attributes', 0) & 0x400):
+            getattr(state_path.lstat(), 'st_file_attributes', 0) & 0x400):
         raise OperatorError('Recibo de borrado enlazado. Usa un directorio privado real.')
     previous = json.loads(state_path.read_text(encoding='utf-8')) if state_path.exists() else None
     if previous and previous['stage'] == 'COMPLETE':
