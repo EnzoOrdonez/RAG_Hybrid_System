@@ -20,6 +20,17 @@ from scripts.study_operator.service_gateway import save_state
 ROOT = Path('/srv/cloudrag/iteration4')
 
 
+def ready_elapsed(requested, now=None):
+    """Cloud boot and preparation both count from the owner's start request."""
+    began = datetime.fromisoformat(requested)
+    if began.tzinfo is None:
+        raise ValueError('START_TIMESTAMP_NOT_UTC')
+    elapsed = ((now or datetime.now(timezone.utc))-began).total_seconds()
+    if elapsed < 0:
+        raise ValueError('START_TIMESTAMP_IN_FUTURE')
+    return elapsed
+
+
 def metadata(field):
     request = urllib.request.Request('http://metadata.google.internal/computeMetadata/v1/instance/' + field,
         headers={'Metadata-Flavor': 'Google'})
@@ -61,6 +72,8 @@ class Host:
         self.root.mkdir(parents=True, exist_ok=False)
         self.began = time.monotonic()
         self.started = datetime.now(timezone.utc)
+        self.start_requested = config['start_requested_utc']
+        ready_elapsed(self.start_requested, self.started)
         self.children, self.containers = [], []
         self.sequence = 0
         self.session_root = ROOT / 'periods' / config['period_id'] / 'sessions'
@@ -220,7 +233,7 @@ class Host:
         self.container(['docker','run','--rm=false','--name',self.caddy,'--network','host','--log-driver','none',
             *bind(self.root/'caddy-config','/etc/caddy'),*bind(tls_root,'/data',False),*bind(self.root/'web','/web'),
             self.config['caddy_image'],'caddy','run','--config','/etc/caddy/Caddyfile','--adapter','caddyfile'],self.caddy)
-        while time.monotonic()-self.began < 900:
+        while ready_elapsed(self.start_requested) < 900:
             try:
                 tls = certificate(self.config['hostname'])
                 with urllib.request.urlopen('https://'+self.config['hostname']+'/_stcore/health',timeout=5) as response:
@@ -234,13 +247,15 @@ class Host:
                     "from src.ui.components.study_sessions import StudyStore; "
                     "d=json.load(open('/deployment/deployment.json')); configure(d); "
                     "StudyStore(d['session_root'],verify(d),d['purpose']).check_backups()"],timeout=120)
-                if time.monotonic()-self.began > 900:
+                ready_utc = datetime.now(timezone.utc)
+                elapsed = ready_elapsed(self.start_requested, ready_utc)
+                if elapsed > 900:
                     raise ValueError('READY_DEADLINE_900S')
                 save_state(self.root/'ready.json',dict(status='READY',image_id=image['Id'],
                     url='https://'+self.config['hostname'],boot_id=self.boot,identity_verified=True,
                     environment_identity_sha256=settings['environment_identity_sha256'],
                     metadata_unreachable=True,backup_clear=True,tls_verified=True,tls=tls,
-                    start_to_ready_s=time.monotonic()-self.began,ready_utc=datetime.now(timezone.utc).isoformat()))
+                    start_to_ready_s=elapsed,ready_utc=ready_utc.isoformat(),start_requested_utc=self.start_requested))
                 return
             except (OSError,ValueError):
                 time.sleep(2)

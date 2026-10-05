@@ -2,11 +2,12 @@ import base64
 import hashlib
 import json
 import subprocess
+from datetime import datetime, timezone
 
 import pytest
 
 from scripts.study_operator.gcs import Storage
-from scripts.study_operator.host_runtime import metadata_unreachable, re_safe_reason
+from scripts.study_operator.host_runtime import metadata_unreachable, re_safe_reason, ready_elapsed
 
 
 @pytest.mark.parametrize('observed,exit_code', [({'169.254.169.254':True,'metadata.google.internal':False},0),
@@ -27,6 +28,15 @@ def test_metadata_probe_and_technical_error_redaction():
     assert result['metadata_unreachable']
     assert re_safe_reason('READY_DEADLINE_900S')
     assert not re_safe_reason('private question or client IP 203.0.113.4')
+
+
+def test_start_to_ready_includes_vm_boot_and_rejects_invalid_clocks():
+    now = datetime(2026, 10, 5, 1, 10, tzinfo=timezone.utc)
+    assert ready_elapsed('2026-10-05T01:00:00+00:00', now) == 600
+    with pytest.raises(ValueError, match='NOT_UTC'):
+        ready_elapsed('2026-10-05T01:00:00', now)
+    with pytest.raises(ValueError, match='IN_FUTURE'):
+        ready_elapsed('2026-10-05T01:11:00+00:00', now)
 
 
 def test_creator_only_technical_upload_never_requests_read_permission(monkeypatch):

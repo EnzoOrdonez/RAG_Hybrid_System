@@ -75,6 +75,7 @@ class Operator:
             observed_utc=self.now().isoformat()))
 
     def start(self, purpose):
+        requested = self.now().isoformat()
         purpose_allowed(purpose,self.root)
         observed = self.observed()
         if observed['status'] == 'RUNNING':
@@ -94,7 +95,7 @@ class Operator:
             self.state['failover_data_reconciled'] = True
             self.state['period_origin'] = dict(period_id=periods[purpose],status='NEW_UNINVITED_PERIOD')
         config = dict(self.config,zone=self.selected()['zone'],instance_id=self.selected()['id'],
-                      native_deadline_utc=(self.now()+timedelta(hours=3)).isoformat())
+                      native_deadline_utc=(self.now()+timedelta(hours=3)).isoformat(),start_requested_utc=requested)
         checked_config(config)
         self.reserve_cost('boot-'+self.now().strftime('%Y%m%dT%H%M%S%fZ'),
             3*self.config['official_rates']['compute_usd_h']+.25)
