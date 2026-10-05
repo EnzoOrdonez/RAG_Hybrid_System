@@ -26,8 +26,9 @@ $firstSession = Read-Host 'Fecha de la primera sesión (AAAA-MM-DD), al menos 3 
 ```
 
 `tls-prepare` enciende con propósito técnico, verifica el certificado público y
-detiene la VM y prepara una instantánea regional ligada a esa imagen, IP y
-certificado. Antes de copiar el disco, exige que todos los periodos de iteración
+detiene la VM y prepara una instantánea global, almacenada en `us-central1`,
+ligada a esa imagen, IP y certificado. No es un disco ni una instantánea
+regional de la API de Compute Engine. Antes de copiar el disco, exige que todos los periodos de iteración
 4 y todas las instancias de recuperación estén vacíos: descarga y purga los
 datos del periodo anterior antes de esta preparación. No crea una instantánea
 con datos de participantes. La IP sigue asociada y el certificado privado queda en el disco
@@ -190,6 +191,79 @@ automáticamente. El recibo indica el directorio privado de descarga.
 Exige `TERMINATED_VERIFIED` y conserva disco, instantánea y buckets. La IP se
 libera al cerrar si no hay sesión agendada. No borres recursos originales.
 Un GO técnico no autoriza reclutar: requiere aprobación ética y B.4 aprobada.
+
+## Ensayo técnico literal, sin participantes ni registro ético real
+
+Esta sección es el recorrido de aceptación del operador. Solo usa datos
+sintéticos propios y propósito `technical`. No crea el archivo de aprobación
+ética y no habilita `study`. Antes de comenzar, verifica que la imagen final,
+el inventario, el certificado y la contingencia estén sellados y que todas las
+VM con GPU estén detenidas. Si un comando falla, conserva su recibo y corrige
+la causa antes de repetirlo; no conviertas el recorrido parcial en aprobado.
+
+Con el directorio `ethics` real aún sin registro, este primer comando debe
+rechazar `study` y no encender la VM:
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose study
+```
+
+Los comandos siguientes sí forman el ensayo técnico. La fecha calculada es
+un fixture de cuatro días de anticipación, no una sesión agendada. `P999` es
+exclusivamente el código de los scripts de aceptación de esta iteración; si
+ya tiene un respaldo en el periodo, conserva ese respaldo y no repitas la
+observación con ese código.
+
+```powershell
+$participantCode = 'P999'
+$firstSession = (Get-Date).ToUniversalTime().Date.AddDays(4).ToString('yyyy-MM-dd')
+& C:/CloudRAG/operator-iteration4/operator.ps1 status
+& C:/CloudRAG/operator-iteration4/operator.ps1 ip-reserve
+& C:/CloudRAG/operator-iteration4/operator.ps1 tls-prepare --first-session $firstSession
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose technical
+& C:/CloudRAG/operator-iteration4/operator.ps1 preflight
+& C:/CloudRAG/operator-iteration4/operator.ps1 invite $participantCode --cell 1 --profile without_experience
+```
+
+Aplica exactamente la espera de READY descrita en «Día de sesión», sin repetir
+`start`. Abre únicamente la URL verificada en preflight y completa la sesión
+sintética con el automatizador funcional previamente aprobado. El token se
+entrega en memoria al campo de contraseña: no lo guardes en la transcripción,
+capturas, argumentos de proceso ni archivos. Verifica las ocho respuestas v2,
+todos los instrumentos, cegamiento, exportación, ausencia de familiarización
+persistida y respaldo por generación y SHA-256. El ensayo no mide rendimiento
+en el equipo local. Cualquier falta conserva el smoke como fallido.
+
+Después del respaldo, ejecuta literalmente la sección «Recuperación» de este
+runbook, usando las generaciones que devuelve GCS, antes de borrar nada.
+Compara la exportación de la instancia nueva con la original mediante SHA-256.
+Luego ejecuta «Retiro y cierre del periodo» con el mismo código sintético: los
+modos de simulación y de ejecución deben dejar recibos separados y verificar
+vacíos GCS, versiones, soft-deleted y todas las copias inventariadas del disco.
+No retires ni purgues datos de iteraciones anteriores ni de otras personas.
+
+El simulacro de capacidad usa la instantánea vacía que preparó `tls-prepare`.
+Debe comprobar la misma URL, certificado, imagen y proyección de identidad en
+la zona alterna y al volver; registrar cada paso no sustituye READY.
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 failover --zone us-central1-b
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose technical
+& C:/CloudRAG/operator-iteration4/operator.ps1 preflight
+& C:/CloudRAG/operator-iteration4/operator.ps1 stop
+& C:/CloudRAG/operator-iteration4/operator.ps1 failback
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose technical
+& C:/CloudRAG/operator-iteration4/operator.ps1 preflight
+& C:/CloudRAG/operator-iteration4/operator.ps1 stop
+& C:/CloudRAG/operator-iteration4/operator.ps1 status
+& C:/CloudRAG/operator-iteration4/operator.ps1 ip-release
+```
+
+Si `us-central1-b` rechaza capacidad, usa la alternativa `us-central1-c` que
+define «Falta de capacidad». Sin READY en la alterna y en la primaria, el
+simulacro sigue incompleto. Al terminar exige `TERMINATED_VERIFIED` e IP
+liberada. El protocolo de reprogramación y la preparación al menos tres días
+antes siguen siendo necesarios para las sesiones reales de Enzo.
 
 Pendiente antes de dar este runbook por probado: instalar la imagen final y
 comprobar todos los comandos, rutas y mensajes con recibos reales.
