@@ -119,7 +119,16 @@ def verify(deployment, *, generating=False):
     return protocol
 
 
-def main():
+def streamlit_command(deployment):
+    return [sys.executable, '-m', 'streamlit', 'run', 'src/ui/app.py',
+            '--server.address', '127.0.0.1', '--server.port', '8501',
+            '--server.headless', 'true', '--server.fileWatcherType', 'none',
+            '--browser.gatherUsageStats', 'false',
+            *(['--browser.serverAddress', deployment['hostname'], '--browser.serverPort', '443']
+              if deployment.get('hostname') else [])]
+
+
+def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "operation",
@@ -128,7 +137,7 @@ def main():
     parser.add_argument("--deployment", default="/srv/cloudrag/deployment.json")
     parser.add_argument("--request")
     parser.add_argument("--output")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     deployment = json.loads(Path(args.deployment).read_text())
     configure(deployment)
     protocol = verify(deployment, generating=args.operation == "freeze")
@@ -141,28 +150,7 @@ def main():
     if args.operation == "freeze":
         print(json.dumps(freeze_settings(deployment, args.output)))
     elif args.operation == "serve":
-        os.execv(
-            sys.executable,
-            [
-                sys.executable,
-                "-m",
-                "streamlit",
-                "run",
-                "src/ui/app.py",
-                "--server.address",
-                "127.0.0.1",
-                "--server.port",
-                "8501",
-                "--server.headless",
-                "true",
-                "--server.fileWatcherType",
-                "none",
-                "--browser.gatherUsageStats",
-                "false",
-                *(["--browser.serverAddress", deployment['hostname'], "--browser.serverPort", "443"]
-                  if deployment.get('hostname') else []),
-            ],
-        )
+        os.execv(sys.executable, streamlit_command(deployment))
     elif args.operation == "test":
         os.execv(sys.executable, [sys.executable, "-m", "pytest", "-ra"])
     elif args.operation == "gate":
