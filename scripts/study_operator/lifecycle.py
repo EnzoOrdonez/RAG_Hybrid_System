@@ -84,13 +84,18 @@ class Operator:
         instances = self.cloud.command(['compute','instances','list'])
         no_other_gpu(instances,selected_id=observed['id'])
         periods = self.config.setdefault('period_ids',{})
+        new_period = purpose not in periods and self.config.get('purpose') != purpose
         periods.setdefault(purpose,self.config['period_id'] if self.config.get('purpose') == purpose else uuid.uuid4().hex)
         self.config.update(purpose=purpose,period_id=periods[purpose])
+        if new_period:
+            # New random period, never invited or written on a VM. Record its empty origin.
+            self.state['failover_data_reconciled'] = True
+            self.state['period_origin'] = dict(period_id=periods[purpose],status='NEW_UNINVITED_PERIOD')
         config = dict(self.config,zone=self.selected()['zone'],instance_id=self.selected()['id'],
                       native_deadline_utc=(self.now()+timedelta(hours=3)).isoformat())
         checked_config(config)
         self.reserve_cost('boot-'+self.now().strftime('%Y%m%dT%H%M%S%fZ'),
-            3*(self.config['official_rates']['compute_usd_h']+.005)+.25)
+            3*self.config['official_rates']['compute_usd_h']+.25)
         self.state.update(purpose=purpose,boot_started_utc=self.now().isoformat(),ready_verified=False)
         self.persist()
         script = self.cloud.root/'startup.sh'
@@ -140,6 +145,7 @@ class Operator:
                     raise OperatorError('El certificado externo difiere del recibo. Revisa la IP y repite preflight.')
         self.state.update(ready_verified=True,boot_id=value['boot_id'],ready=ready,
             guest_deadline_utc=value['guest_deadline_utc'],native_deadline_utc=value['native_deadline_utc'])
+        self.state['failover_data_reconciled'] = (value.get('session_count') == 0 and value.get('invitation_count') == 0)
         self.persist()
         return dict(status='READY_VERIFIED',url=ready['url'],purpose=self.state['purpose'],
                     start_to_ready_s=ready['start_to_ready_s'])
@@ -163,20 +169,28 @@ class Operator:
         if self.state.get('boot_started_utc'):
             began = datetime.fromisoformat(self.state.pop('boot_started_utc'))
             seconds = max(0,(self.now()-began).total_seconds())
-            self.state['cost']['estimated_usd'] += seconds/3600*(self.config['official_rates']['compute_usd_h']+.005)
-            self.state['cost']['reservations'] = {}
+            self.state['cost']['estimated_usd'] += seconds/3600*self.config['official_rates']['compute_usd_h']
+            self.state['cost']['reservations'] = {key:value for key,value in self.state['cost']['reservations'].items()
+                                                 if key.startswith('ip-')}
             self.state['last_estimated_vm_interval_s'] = seconds
         self.persist()
         return dict(status='TERMINATED_VERIFIED',retained_disk=True,metadata_disarmed=True)
 
     def invite(self, code, *, cell=None, profile=None):
         participant_code(code)
-        purpose_allowed(self.state.get('purpose'),self.root)
+        purpose = self.state.get('purpose')
+        purpose_allowed(purpose,self.root)
+        if purpose == 'study' and (cell is not None or profile is not None):
+            raise OperatorError('study usa la asignación congelada. Ejecuta invite con el código, sin --cell ni --profile.')
+        if purpose != 'study' and (cell not in {1,2,3,4} or profile not in {'with_experience','without_experience'}):
+            raise OperatorError('La invitación sintética exige --cell 1|2|3|4 y --profile with_experience|without_experience.')
         self.preflight()
         token = secrets.token_urlsafe(32)
         request = dict(operation='invite',participant_id=code,token_sha256=hashlib.sha256(token.encode()).hexdigest(),
                        cell=cell,profile=profile)
         self.bridge(request,private=True)
+        self.state['failover_data_reconciled'] = False
+        self.persist()
         # Caller prints only once to the interactive console. Never include in receipt objects.
         return token
 
@@ -196,7 +210,8 @@ class Operator:
             raise OperatorError('La IP está reservada, pero la VM corre. Ejecuta stop antes de asociarla.')
         self.attach_ip(selected,vm)
         self.state['reserved_address_id'] = str(observed['id'])
-        self.state.setdefault('ip_reserved_utc',self.now().isoformat())
+        self.state.setdefault('ip_reserved_utc',observed.get('creationTimestamp',self.now().isoformat()))
+        self.state.setdefault('ip_associated_utc',self.now().isoformat())
         self.persist()
         return dict(status='STATIC_IP_RESERVED',url='https://'+self.config['hostname'],idle_usd_day=.12,
                     unused_usd_day=.24,address_id=str(observed['id']))
@@ -232,9 +247,17 @@ class Operator:
         self.cloud.command(['compute','addresses','delete',name,'--region=us-central1'])
         self.state.pop('reserved_address_id',None)
         if self.state.get('ip_reserved_utc'):
-            interval = max(0,(self.now()-datetime.fromisoformat(self.state.pop('ip_reserved_utc'))).total_seconds())
-            # Conservatively charge the unused rate for the whole reservation interval.
-            self.state.setdefault('cost',dict(estimated_usd=0,margin_usd=0,reservations={}))['estimated_usd'] += interval/3600*.01
+            created = datetime.fromisoformat(self.state.pop('ip_reserved_utc'))
+            associated = datetime.fromisoformat(self.state.pop('ip_associated_utc',created.isoformat()))
+            unused_s = max(0,(associated-created).total_seconds())
+            associated_s = max(0,(self.now()-associated).total_seconds())
+            cost = self.state.setdefault('cost',dict(estimated_usd=0,margin_usd=0,reservations={}))
+            cost['estimated_usd'] += (unused_s*.01+associated_s*.005)/3600
+            # Rate uncertainty during short transfer gaps is a margin, not compute spend.
+            cost['margin_usd'] += self.state.get('ip_transfer_gap_margin_usd',0)
+            cost['reservations'] = {key:value for key,value in cost['reservations'].items() if not key.startswith('ip-')}
+            self.state['last_ip_interval'] = dict(unused_s=unused_s,associated_s=associated_s,
+                estimated_usd=(unused_s*.01+associated_s*.005)/3600)
         self.config.pop('static_ip',None)
         self.config.pop('hostname',None)
         self.persist()
@@ -283,7 +306,7 @@ class Operator:
             if (str(snapshot.get('id')) != self.config['prepared_snapshot']['id'] or snapshot.get('status') != 'READY'
                     or not snapshot.get('storageLocations') == ['us-central1']):
                 raise OperatorError('Instantánea distinta o no READY. Conserva los recursos y verifica el recibo preparado.')
-            self.reserve_cost('alternate-'+zone[-1],3*(self.config['official_rates']['compute_usd_h']+.005)+.25+.3287664)
+            self.reserve_cost('alternate-'+zone[-1],3*self.config['official_rates']['compute_usd_h']+.25+.3287664)
             # This explicit intent is recoverable even if create succeeds but its response is lost.
             self.state['alternate_creation_intent'] = dict(name=name,zone=zone,disk_name=name+'-boot',
                 disposable=True,preserve_snapshot=True,observed_utc=self.now().isoformat())
@@ -317,6 +340,9 @@ class Operator:
                     next_action='start con el mismo propósito; preflight verifica la identidad nueva')
 
     def transfer_ip(self, target):
+        # Reserve a separate upper bound for up to an hour detached at the differential rate.
+        self.state['ip_transfer_gap_margin_usd'] = self.state.get('ip_transfer_gap_margin_usd',0)+.005
+        self.persist()
         for item in [self.config['primary_vm'],*self.state.get('alternate_vms',[])]:
             observed = self.cloud.command(['compute','instances','describe',item['name'],'--zone='+item['zone']])
             checked_vm(observed,name=item['name'],instance_id=item['id'],zone=item['zone'])

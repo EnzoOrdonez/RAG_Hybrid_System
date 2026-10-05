@@ -99,9 +99,18 @@ def test_stop_idempotent_and_no_invitation_in_receipts(tmp_path):
     operator.state['purpose'] = 'smoke'
     requests = []
     operator.bridge = lambda request,**options: requests.append((request,options)) or {}
-    token = operator.invite('P999',cell=1,profile='novice')
+    token = operator.invite('P999',cell=1,profile='without_experience')
     assert len(token) >= 32 and 'token_sha256' in requests[0][0]
     assert token not in json.dumps(requests) and requests[0][1]['private']
+    assert operator.state['failover_data_reconciled'] is False
+
+
+def test_invitation_missing_synthetic_assignment_rejected_before_cloud_preflight(tmp_path):
+    operator,cloud = installation(tmp_path)
+    operator.state['purpose'] = 'smoke'
+    with pytest.raises(OperatorError,match='invitación sintética'):
+        operator.invite('P999')
+    assert not cloud.calls
 
 
 def test_purpose_change_gets_separate_persistent_period(tmp_path):
@@ -109,6 +118,19 @@ def test_purpose_change_gets_separate_persistent_period(tmp_path):
     operator.start('technical')
     assert operator.config['period_id'] != 'a'*32
     assert operator.config['period_ids']['technical'] == operator.config['period_id']
+    assert operator.state['period_origin']['status'] == 'NEW_UNINVITED_PERIOD'
+    assert operator.state['failover_data_reconciled']
+
+
+def test_compute_and_static_ip_reservations_are_not_charged_twice(tmp_path):
+    operator,_ = installation(tmp_path)
+    operator.state['cost'] = dict(estimated_usd=0,margin_usd=0,reservations={'ip-own':.72})
+    operator.start('smoke')
+    operator.bridge = lambda *args,**options:dict(failover_data_reconciled=True)
+    operator.now = lambda:datetime(2026,10,5,1,tzinfo=timezone.utc)
+    operator.stop()
+    assert operator.state['cost']['estimated_usd'] == pytest.approx(.706832276)
+    assert operator.state['cost']['reservations'] == {'ip-own':.72}
 
 
 def test_tls_preparation_and_capacity_fail_closed_before_start(tmp_path):

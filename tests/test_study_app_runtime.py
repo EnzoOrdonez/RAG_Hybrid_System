@@ -3,7 +3,7 @@ import threading
 
 import pytest
 
-from scripts.cloud_entrypoint import streamlit_command
+from scripts.cloud_entrypoint import freeze_settings, streamlit_command
 from scripts.study_operator.app_runtime import relays, run_child
 
 
@@ -70,3 +70,16 @@ def test_public_hostname_retains_loopback_bind_and_disables_telemetry():
     assert command[command.index('--browser.serverAddress')+1] == 'fixture.sslip.io'
     assert command[command.index('--browser.serverPort')+1] == '443'
     assert command[command.index('--browser.gatherUsageStats')+1] == 'false'
+
+
+def test_identity_freeze_retains_externally_anchored_preregistration(tmp_path,monkeypatch):
+    captured = []
+
+    def generate(settings,path):
+        captured.append(settings)
+        return settings
+
+    monkeypatch.setattr('scripts.environment_identity.generate',generate)
+    effective = freeze_settings({'preregistration':'/deployment/preregistration.md'},tmp_path/'deployment.json')
+    assert effective['preregistration'] == '/deployment/preregistration.md'
+    assert captured[0]['preregistration'] == effective['preregistration']

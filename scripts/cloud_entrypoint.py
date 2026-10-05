@@ -67,9 +67,9 @@ def freeze_settings(deployment, path):
         recipe_sha256=recipe,
         packages_sha256=hashlib.sha256(json.dumps(packages).encode()).hexdigest(),
         cloud=True,
-        preregistration=str(
+        preregistration=deployment.get('preregistration', str(
             ROOT / "docs/STUDY_GATE_PREREGISTRATION_AMENDMENT_2026-10-02.md"
-        ),
+        )),
     )
     settings = generate(settings, path.with_name("environment_identity.json"))
     atomic_json(path, settings)

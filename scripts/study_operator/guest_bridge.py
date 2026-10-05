@@ -78,7 +78,8 @@ def dispatch(request):
             raise ValueError('LIVE_CERTIFICATE_CHANGED')
         return dict(status='PREFLIGHT',ready=ready,boot_id=boot,metadata_unreachable=True,
                     guest_deadline_utc=active['guest_deadline_utc'],native_deadline_utc=active['native_deadline_utc'],
-                    active_session=backup['active_session'])
+                    active_session=backup['active_session'],session_count=backup['session_count'],
+                    invitation_count=backup['invitation_count'])
     if operation == 'invite':
         if (root/'maintenance.json').exists():
             raise ValueError('MAINTENANCE_ACTIVE')
