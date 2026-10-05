@@ -76,7 +76,7 @@ def snapshot(config):
     vendor = read_json(config["vendor_manifest"]) if config.get("cloud") else None
     recipes = dict(hybrid=SURVEY_DEPLOY.model_dump(), no_rag=STUDY_NO_RAG.model_dump())
     packages = sorted((d.metadata["Name"], d.version) for d in distributions())
-    return dict(
+    inventory = dict(
         schema_version=1,
         observed=observed,
         source=dict(
@@ -109,6 +109,17 @@ def snapshot(config):
             )
         },
     )
+    if config.get('service_mode'):
+        service_path = _external(config['service_policy_receipt'])
+        if digest(service_path) != config['service_policy_sha256']:
+            raise ValueError('Host service policy receipt changed')
+        service = read_json(service_path)
+        if service.get('mode') != config['service_mode'] or service.get('generation_options') != dict(
+                temperature=0, num_predict=1024, seed=42, num_ctx=4096):
+            raise ValueError('Host service policy differs')
+        inventory['service'] = dict(mode=config['service_mode'], policy=service,
+                                    policy_sha256=digest(service_path))
+    return inventory
 
 
 def generate(config, output):

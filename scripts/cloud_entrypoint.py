@@ -41,6 +41,9 @@ def configure(deployment):
         CLOUDRAG_BACKUP_BUCKET=deployment["bucket"],
         CLOUDRAG_BACKUP_PREFIX=deployment["backup_prefix"],
     )
+    if deployment.get('service_mode'):
+        os.environ['CLOUDRAG_ISOLATED_APP'] = '1'
+        os.environ['CLOUDRAG_BACKUP_SOCKET'] = deployment['backup_socket']
 
 
 def freeze_settings(deployment, path):
@@ -155,6 +158,8 @@ def main():
                 "none",
                 "--browser.gatherUsageStats",
                 "false",
+                *(["--browser.serverAddress", deployment['hostname'], "--browser.serverPort", "443"]
+                  if deployment.get('hostname') else []),
             ],
         )
     elif args.operation == "test":
@@ -179,7 +184,7 @@ def main():
             )
         print(json.dumps(receipts))
     elif args.operation == "invite":
-        request = json.loads(Path(args.request).read_text())
+        request = json.load(sys.stdin) if args.request == '-' else json.loads(Path(args.request).read_text())
         store.register_invitation_hash(
             request["token_sha256"], request["participant_id"],
             cell=request.get("cell"), profile=request.get("profile"),

@@ -73,13 +73,24 @@ def collect_identity(config):
         ),
     )
     if config.get("cloud"):
-        for field in ("id", "zone", "machine-type"):
-            request = urllib.request.Request(
-                "http://metadata.google.internal/computeMetadata/v1/instance/" + field,
-                headers={"Metadata-Flavor": "Google"},
-            )
-            with urllib.request.urlopen(request, timeout=3) as response:
-                result[field] = response.read().decode()
+        if config.get('host_runtime_receipt'):
+            from scripts.environment_identity import _external
+            from scripts.study_operator.host_identity import read_vm_receipt
+
+            result.update(read_vm_receipt(_external(config['host_runtime_receipt']),
+                zone=config['zone'], machine_type=config['machine_type'], instance_id=config.get('instance_id')))
+            if config.get('service_mode') == 'fresh_runner' and result['boot_id'] != config.get('service_boot_id'):
+                raise ValueError('Service identity belongs to another boot')
+        else:
+            if os.environ.get('CLOUDRAG_ISOLATED_APP') == '1':
+                raise ValueError('Isolated application requires host identity receipt')
+            for field in ("id", "zone", "machine-type"):
+                request = urllib.request.Request(
+                    "http://metadata.google.internal/computeMetadata/v1/instance/" + field,
+                    headers={"Metadata-Flavor": "Google"},
+                )
+                with urllib.request.urlopen(request, timeout=3) as response:
+                    result[field] = response.read().decode()
         if (
             result["zone"].split("/")[-1] != config["zone"]
             or result["machine-type"].split("/")[-1] != config["machine_type"]
