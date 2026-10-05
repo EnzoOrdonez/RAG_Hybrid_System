@@ -54,6 +54,47 @@ def test_missing_installation_has_human_action(tmp_path):
         Operator(tmp_path,None)
 
 
+def test_stopped_diagnostics_downloads_only_exact_technical_generation(tmp_path,monkeypatch):
+    import base64
+    import hashlib
+    from scripts.study_operator.bootstrap_failure import failure_summary
+    from scripts.study_operator.gcs import Storage
+
+    operator,cloud = installation(tmp_path)
+    cloud.owner_token = lambda:'fixture-token-only'
+    boot = tmp_path/'11111111-1111-4111-8111-111111111111'
+    boot.mkdir()
+    (boot/'failure.json').write_text('{"reason":"HOST_COMMAND_FAILED","error_type":"ValueError"}')
+    summary = failure_summary(boot,instance_id='123',image_id=operator.config['image_id'],commit=operator.config['commit'])
+    content = json.dumps(summary).encode()
+    name = 'iteration4/failed-boots/123/'+boot.name+'.json'
+    row = dict(name=name,generation='42',timeCreated='2026-10-05T00:00:00Z',size=len(content),
+        md5Hash=base64.b64encode(hashlib.md5(content).digest()).decode())
+    monkeypatch.setattr(Storage,'objects',lambda self,prefix:[row] if prefix=='iteration4/failed-boots/123/' else [])
+    reads=[]
+    def read(self,name,generation):
+        reads.append((name,generation))
+        return content
+    monkeypatch.setattr(Storage,'read',read)
+    result=operator.diagnostics()
+    assert reads==[(name,'42')]
+    assert result['provenance']['object_sha256']==hashlib.sha256(content).hexdigest()
+    assert result['session_content_excluded'] and result['failure']['reason']=='HOST_COMMAND_FAILED'
+    assert not any(args[:3]==['compute','instances','start'] for args,_ in cloud.calls)
+    row['md5Hash']='tampered'
+    with pytest.raises(OperatorError,match='alterado'):
+        operator.diagnostics()
+
+
+def test_stopped_diagnostics_without_archive_has_disk_recovery_action(tmp_path,monkeypatch):
+    from scripts.study_operator.gcs import Storage
+    operator,cloud=installation(tmp_path)
+    cloud.owner_token=lambda:'fixture-token-only'
+    monkeypatch.setattr(Storage,'objects',lambda self,prefix:[])
+    with pytest.raises(OperatorError,match='recuperación técnica del disco'):
+        operator.diagnostics()
+
+
 def test_start_idempotent_scope_budget_and_terminal_metadata(tmp_path):
     operator,cloud = installation(tmp_path)
     assert operator.start('smoke')['status'] == 'STARTED_SUPERVISED'

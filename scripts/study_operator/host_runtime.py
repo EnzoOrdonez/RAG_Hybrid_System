@@ -292,6 +292,23 @@ class Host:
             save_state(self.root/'stopped.json',dict(status='SERVICES_STOPPED' if not failed_cleanup else 'CLEANUP_ERRORS',
                 container_stop_errors=failed_cleanup,boot_id=self.boot,
                 elapsed_s=time.monotonic()-self.began,stopped_utc=datetime.now(timezone.utc).isoformat()))
+            if (self.root/'failure.json').is_file():
+                try:
+                    from scripts.study_operator.backup_agent import access_token
+                    from scripts.study_operator.bootstrap_failure import failure_summary
+                    from scripts.study_operator.gcs import Storage
+
+                    summary = failure_summary(self.root,instance_id=self.config['instance_id'],
+                        image_id=self.config['image_id'],commit=self.config['commit'])
+                    name = 'iteration4/failed-boots/'+str(self.config['instance_id'])+'/'+self.boot+'.json'
+                    receipt = Storage(self.config['technical_bucket'],access_token).create_technical(
+                        name,json.dumps(summary,sort_keys=True).encode())
+                    save_state(self.root/'failure-upload.json',receipt)
+                except Exception:
+                    try:
+                        save_state(self.root/'failure-upload.json',dict(status='TECHNICAL_UPLOAD_FAILED'))
+                    except OSError:
+                        pass  # A full disk must not postpone the independent shutdown.
             subprocess.run(['/sbin/shutdown','-h','now'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=10)
 
 

@@ -60,6 +60,13 @@ esperando ni repitas start. Conserva los recibos técnicos de ese arranque:
 comandos de arranque y sus códigos de salida. No copia sesiones, logs de
 acceso, claves de certificado ni el árbol del despliegue. Revisa el primer
 comando fallido en la ruta que devuelve el recibo antes de corregir y reiniciar.
+Si la VM ya está detenida, recupera del bucket técnico el último recibo de
+fallo de esa VM por generación, verifica checksum e identidad de imagen y
+commit, y guarda solo etiquetas de operación, códigos de salida y hashes de
+comandos. No vuelve a encenderla para leerlo. El recibo histórico no acredita
+READY. Si no existe un recibo compatible, conserva el disco y solicita su
+recuperación técnica; no repitas start para adivinar la causa. Un fallo al subir
+el recibo nunca retrasa intencionadamente el apagado del invitado.
 
 ```powershell
 $participantCode = Read-Host 'Código congelado de participante, por ejemplo P01'

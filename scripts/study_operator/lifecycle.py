@@ -66,15 +66,41 @@ class Operator:
                     retained_disk=True,deletion_protection=True,native_stop_s=10800)
 
     def diagnostics(self):
-        if self.observed()['status'] != 'RUNNING':
-            raise OperatorError('La VM está detenida. Revisa los últimos recibos en runs; no la enciendas solo para repetir un fallo.')
-        result = self.bridge(dict(operation='technical-evidence'))
+        observed = self.observed()
+        provenance = {}
+        if observed['status'] != 'RUNNING':
+            from scripts.study_operator.bootstrap_failure import validate_summary
+            from scripts.study_operator.gcs import Storage
+
+            storage = Storage(self.config['technical_bucket'],self.cloud.owner_token)
+            prefix = 'iteration4/failed-boots/'+str(observed['id'])+'/'
+            rows = storage.objects(prefix)
+            if not rows:
+                raise OperatorError('VM detenida sin recibo de fallo publicado. Conserva runs y el disco; no repitas start para adivinar la causa. Solicita recuperación técnica del disco.')
+            row = max(rows,key=lambda item:item['timeCreated'])
+            try:
+                content = storage.read(row['name'],row['generation'])
+                if (len(content) != int(row['size'])
+                        or base64.b64encode(hashlib.md5(content).digest()).decode() != row['md5Hash']):
+                    raise ValueError('FAILED_BOOT_OBJECT_CHECKSUM_CHANGED')
+                result = validate_summary(json.loads(content),instance_id=observed['id'],
+                    image_id=self.config['image_id'],commit=self.config['commit'])
+                if row['name'] != prefix+result['boot_id']+'.json':
+                    raise ValueError('FAILED_BOOT_OBJECT_NAME_CHANGED')
+            except (ValueError,KeyError,TypeError):
+                raise OperatorError('Recibo de fallo incompatible o alterado. Conserva el disco y los metadatos; no lo trates como READY ni repitas start.') from None
+            result = dict(result,files={'failure.json':result['failure']},source='IMMUTABLE_GCS_FAILURE_RECEIPT')
+            provenance = dict(object=row['name'],generation=str(row['generation']),
+                server_created=row['timeCreated'],object_sha256=hashlib.sha256(content).hexdigest())
+        else:
+            result = self.bridge(dict(operation='technical-evidence'))
         path = self.cloud.root/'technical-diagnostics.json'
         save_state(path,result)
         return dict(status='TECHNICAL_DIAGNOSTICS_SAVED',path=str(path),
                     sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
                     boot_id=result['boot_id'],receipt_count=len(result['files']),
-                    failure=result['files'].get('failure.json'),session_content_excluded=True,
+                      failure=result['files'].get('failure.json'),session_content_excluded=True,
+                      provenance=provenance,
                     next_action='Revisa el primer comando con exit_code distinto de cero; corrige su causa y ejecuta stop antes de otro start.')
 
     def reserve_cost(self, operation, amount):
