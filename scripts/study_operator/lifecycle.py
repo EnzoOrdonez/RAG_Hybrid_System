@@ -13,7 +13,7 @@ import uuid
 
 from scripts.study_operator.cloud_client import checked_vm, no_other_gpu, readiness
 from scripts.study_operator.deployment import checked_config
-from scripts.study_operator.policy import OperatorError, participant_code, purpose_allowed, session_margin
+from scripts.study_operator.policy import OperatorError, ReadyPending, participant_code, purpose_allowed, session_margin
 from scripts.study_operator.service_gateway import save_state
 
 
@@ -48,6 +48,8 @@ class Operator:
             input_data=json.dumps(request).encode(),json_output=False,private_output=private,timeout=timeout)
         try:
             result = json.loads(content)
+            if result.get('status') == 'WAITING' and request.get('operation') == 'preflight':
+                raise ReadyPending('El invitado sigue preparando READY. Espera dentro del límite de 15 minutos; no repitas start.')
             if result.get('status') == 'ERROR':
                 raise ValueError('remote refusal')
             return result
@@ -277,7 +279,7 @@ class Operator:
                 try:
                     result = self.preflight()
                     return dict(result,first_session=session.isoformat(),certificate_prepared_days_ahead=(session-self.now().date()).days)
-                except OperatorError:
+                except ReadyPending:
                     self.sleep(15)
             raise OperatorError('TLS no llegó a READY en 15 minutos. Conserva los recibos; revisa certificado y capacidad antes de repetir.')
         finally:
@@ -394,7 +396,8 @@ class Operator:
             confirm_deletion(operation,code,purpose,confirmation)
         self.maintenance()
         prefix = 'periods/'+self.config['period_id']+'/' + (code+'/' if code else '')
-        storage = Storage(self.config['sessions_bucket'],self.cloud.owner_token)
+        storage = Storage(self.config['sessions_bucket'],self.cloud.owner_token,
+                          creation_anchor=self.config.get('sessions_bucket_creation'))
         scope = hashlib.sha256((self.config['sessions_bucket']+'\0'+prefix).encode()).hexdigest()
         local = private_directory(self.root/'private'/'deletion'/scope)
         saved = local/'disk-plan.json'
@@ -449,7 +452,8 @@ class Operator:
         summary = dict(status=receipt['status'],remote_versions_empty=receipt['remote_versions_empty'],
             remote_soft_deleted_empty=receipt['remote_soft_deleted_empty'],disk_empty=receipt['disk']['empty'],
             downloaded_disk_files=len(verified),deleted_generations=receipt['deleted'],
-            private_receipt=str(local/'receipt.json'))
+            private_receipt=str(local/'receipt.json'),soft_delete_verification=storage.soft_delete_verification)
+        receipt['soft_delete_verification'] = storage.soft_delete_verification
         save_state(local/'receipt.json',receipt)
         return summary
 

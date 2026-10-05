@@ -4,7 +4,7 @@ import json
 import pytest
 
 from scripts.study_operator.lifecycle import Operator
-from scripts.study_operator.policy import OperatorError
+from scripts.study_operator.policy import OperatorError, ReadyPending
 
 
 class Cloud:
@@ -144,6 +144,28 @@ def test_tls_preparation_and_capacity_fail_closed_before_start(tmp_path):
     with pytest.raises(OperatorError,match='instantánea preparada'):
         operator.failover('us-central1-b')
     assert not cloud.calls
+
+
+def test_tls_waits_only_for_explicit_bootstrap_and_stops_on_fatal_error(tmp_path):
+    operator, _ = installation(tmp_path)
+    calls = []
+    operator.start = lambda purpose: calls.append('start')
+    operator.stop = lambda: calls.append('stop')
+    operator.sleep = lambda seconds: calls.append('wait')
+    results = iter([ReadyPending('booting'), {'status': 'READY_VERIFIED'}])
+    def preflight():
+        result = next(results)
+        if isinstance(result, Exception):
+            raise result
+        return result
+    operator.preflight = preflight
+    assert operator.tls_prepare('2026-10-08')['status'] == 'READY_VERIFIED'
+    assert calls == ['start', 'wait', 'stop']
+    calls.clear()
+    operator.preflight = lambda: (_ for _ in ()).throw(OperatorError('IAM rejected'))
+    with pytest.raises(OperatorError, match='IAM rejected'):
+        operator.tls_prepare('2026-10-08')
+    assert calls == ['start', 'stop']
 
 
 def test_ip_release_idempotent_and_no_tls_idle_charge(tmp_path):

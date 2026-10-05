@@ -7,10 +7,36 @@ import urllib.parse
 import urllib.request
 
 
+def zero_retention_history(anchor):
+    """Only creation and individually evidenced, non-retention setup mutations."""
+    if str(anchor.get('metageneration')) == '1':
+        return 'CREATION_GENERATION_ONE_ZERO_RETENTION'
+    rows = anchor.get('zero_retention_history', [])
+    expected = ['storage.buckets.create', 'storage.buckets.update',
+                'storage.setIamPermissions', 'storage.setIamPermissions']
+    if str(anchor.get('metageneration')) != '4' or [row.get('method') for row in rows] != expected:
+        raise ValueError('Soft delete history cannot be proved; preserve all copies')
+    for index, row in enumerate(rows):
+        command = row.get('command', [])
+        valid = ((index == 0 and command[1:4] == ['storage', 'buckets', 'create']
+                  and '--soft-delete-duration=0' in command)
+                 or (index == 1 and command[1:4] == ['storage', 'buckets', 'update']
+                     and '--no-versioning' in command and not any('soft-delete' in part for part in command))
+                 or (index > 1 and command[1:4] == ['storage', 'buckets', 'add-iam-policy-binding']
+                     and not any('soft-delete' in part for part in command)))
+        if (not valid or 'gs://' + anchor['name'] not in command or row.get('exit_code') != 0
+                or not row.get('server_timestamp') or not row.get('server_insert_id')
+                or any(len(row.get(key, '')) != 64 for key in ('audit_sha256', 'command_receipt_sha256'))):
+            raise ValueError('Soft delete history cannot be proved; preserve all copies')
+    return 'ANCHORED_ZERO_RETENTION_SETUP_HISTORY'
+
+
 class Storage:
-    def __init__(self, bucket, access_token):
+    def __init__(self, bucket, access_token, *, creation_anchor=None):
         self.bucket = bucket
         self.access_token = access_token
+        self.creation_anchor = creation_anchor
+        self.soft_delete_verification = None
 
     def request(self, path, *, params=None, data=None, method='GET', upload=False):
         base = 'https://storage.googleapis.com/' + ('upload/' if upload else '') + 'storage/v1/b/'
@@ -35,7 +61,29 @@ class Storage:
             params['softDeleted'] = 'true'
         result = []
         while True:
-            value = json.loads(self.request('/o', params=params))
+            try:
+                value = json.loads(self.request('/o', params=params))
+            except urllib.error.HTTPError as error:
+                if not soft_deleted or error.code != 400 or not self.creation_anchor:
+                    raise
+                failure = json.loads(error.read())
+                if 'Soft delete policy is required' not in failure.get('error',{}).get('message',''):
+                    raise
+                actual = json.loads(self.request(''))
+                keys = ('id','name','timeCreated','metageneration')
+                if (any(actual.get(key) != self.creation_anchor.get(key) for key in keys)
+                        or actual.get('name') != self.bucket
+                        or str(actual.get('softDeletePolicy',{}).get('retentionDurationSeconds')) != '0'
+                        or str(self.creation_anchor.get('softDeletePolicy',{}).get('retentionDurationSeconds')) != '0'):
+                    raise ValueError('Soft delete history cannot be proved; preserve all copies') from None
+                method = zero_retention_history(self.creation_anchor)
+                # Never call the HTTP400 response an empty API listing.
+                self.soft_delete_verification = dict(method=method,
+                    api_list_status='HTTP400_POLICY_REQUIRED',live_metadata=actual,
+                    creation_anchor=self.creation_anchor,no_soft_delete_history_verified=True)
+                return []
+            if soft_deleted:
+                self.soft_delete_verification = dict(method='API_LIST',api_list_status='SUCCESS')
             result.extend(value.get('items', []))
             if not value.get('nextPageToken'):
                 return result

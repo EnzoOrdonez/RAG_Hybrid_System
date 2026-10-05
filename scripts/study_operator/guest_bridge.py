@@ -50,6 +50,8 @@ def controller(active, request, *, maintenance=False):
 
 
 def dispatch(request):
+    if request.get('operation') == 'preflight' and not (ROOT/'active.json').is_file():
+        return dict(status='WAITING',reason='BOOTSTRAP_PENDING')
     active = json.loads((ROOT/'active.json').read_text(encoding='utf-8'))
     root = Path(active['boot_root'])
     boot = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
@@ -63,6 +65,8 @@ def dispatch(request):
                     not backup['invitation_count'],unfinished_session_preserved=backup['active_session'])
     if operation == 'preflight':
         ready_path = root/'ready.json'
+        if not ready_path.exists() and not (root/'failure.json').exists() and not (root/'maintenance.json').exists():
+            return dict(status='WAITING',reason='READY_PENDING')
         if not ready_path.exists() or (root/'maintenance.json').exists():
             raise ValueError('READY_NOT_AVAILABLE')
         observed = execute(['docker','inspect',active['app_container']])[0]

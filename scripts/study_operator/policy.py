@@ -10,6 +10,10 @@ class OperatorError(RuntimeError):
     """A readable refusal with the next action, without an underlying payload."""
 
 
+class ReadyPending(OperatorError):
+    """Only the explicit, bounded guest bootstrap state is retryable."""
+
+
 def purpose_allowed(purpose, operator_root, *, today=None):
     if purpose not in {'study', 'technical', 'smoke', 'rehearsal', 'pilot'}:
         raise OperatorError('Propósito inválido. Usa study, technical, smoke, rehearsal o pilot.')
