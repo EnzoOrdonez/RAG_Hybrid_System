@@ -166,6 +166,8 @@ def test_ip_creation_response_loss_remains_recoverable_and_rejects_foreign_addre
         if args[:3] == ['compute','addresses','list']:
             return live
         if args[:3] == ['compute','addresses','create']:
+            assert '--region=us-central1' in args
+            assert not any(arg.startswith('--ip-version=') for arg in args)
             marker = next(arg.removeprefix('--description=') for arg in args if arg.startswith('--description='))
             live.append(dict(name='owned-address',id='42',region='regions/us-central1',addressType='EXTERNAL',
                 address='203.0.113.8',description=marker,creationTimestamp='2026-10-05T00:00:00+00:00'))
@@ -183,6 +185,29 @@ def test_ip_creation_response_loss_remains_recoverable_and_rejects_foreign_addre
     live[0]['id'] = '43'
     with pytest.raises(OperatorError,match='creación propio'):
         operator.ip_reserve()
+
+
+def test_rejected_regional_ip_create_preserves_one_intent_and_budget_reservation(tmp_path):
+    operator,cloud = installation(tmp_path)
+    original = cloud.command
+    def command(args,**options):
+        if args[:3] == ['compute','addresses','list']:
+            return []
+        if args[:3] == ['compute','addresses','create']:
+            assert '--region=us-central1' in args
+            assert not any(arg.startswith('--ip-version=') for arg in args)
+            raise OperatorError('creation rejected')
+        return original(args,**options)
+    cloud.command = command
+    with pytest.raises(OperatorError,match='creation rejected'):
+        operator.ip_reserve()
+    intent = dict(operator.state['ip_creation_intent'])
+    reservations = dict(operator.state['cost']['reservations'])
+    operator.now = lambda:datetime(2026,10,5,1,tzinfo=timezone.utc)
+    with pytest.raises(OperatorError,match='creation rejected'):
+        operator.ip_reserve()
+    assert operator.state['ip_creation_intent'] == intent
+    assert operator.state['cost']['reservations'] == reservations
 
 
 def test_never_associated_ip_is_charged_at_unused_rate(tmp_path):

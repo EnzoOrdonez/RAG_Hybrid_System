@@ -244,12 +244,16 @@ class Operator:
         name = self.config['ip_name']
         addresses = self.cloud.command(['compute','addresses','list','--filter=name='+name])
         if not addresses:
-            self.reserve_cost('ip-'+self.now().strftime('%Y%m%dT%H%M%S%fZ'),.01*24*3)
-            intent = dict(name=name,region='us-central1',requested_utc=self.now().isoformat(),
-                          ownership_marker='CloudRAG-I4-owned-'+uuid.uuid4().hex)
+            intent = self.state.get('ip_creation_intent')
+            if intent and (intent.get('name') != name or intent.get('region') != 'us-central1'):
+                raise OperatorError('Hay otra reserva de IP pendiente. Concilia su recibo antes de crear una nueva.')
+            if not intent:
+                self.reserve_cost('ip-'+self.now().strftime('%Y%m%dT%H%M%S%fZ'),.01*24*3)
+                intent = dict(name=name,region='us-central1',requested_utc=self.now().isoformat(),
+                              ownership_marker='CloudRAG-I4-owned-'+uuid.uuid4().hex)
             self.state['ip_creation_intent'] = intent
             self.persist()
-            self.cloud.command(['compute','addresses','create',name,'--region=us-central1','--ip-version=IPV4',
+            self.cloud.command(['compute','addresses','create',name,'--region=us-central1',
                                 '--description='+intent['ownership_marker']])
         observed = self.cloud.command(['compute','addresses','describe',name,'--region=us-central1'])
         if not observed.get('region','').endswith('/us-central1') or observed.get('addressType') != 'EXTERNAL':
