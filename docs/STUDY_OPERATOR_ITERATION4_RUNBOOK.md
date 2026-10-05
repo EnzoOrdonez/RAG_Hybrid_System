@@ -117,6 +117,38 @@ Para volver a la zona original, con el mismo requisito de conciliación:
 & C:/CloudRAG/operator-iteration4/operator.ps1 preflight
 ```
 
+## Recuperación: información tomada del recibo, no inventada
+
+La restauración crea una instancia nueva de la app, en un almacén separado del
+original y sin admisión pública, con el mismo propósito, periodo, imagen y
+protocolo. No exige vaciar el almacén original. Toma ID y generaciones de los objetos del recibo de
+respaldo. La invitación restaurada queda revocada; se exporta de nuevo y se
+comprueba que el SHA-256 sea idéntico. Repetir el mismo respaldo verifica la
+copia anterior; una copia alterada se rechaza. Retiro y purga inventarían y
+borran también estos almacenes de recuperación. No se sobrescribe una sesión existente.
+
+```powershell
+$installation = Get-Content -LiteralPath C:/CloudRAG/operator-iteration4/installation.json -Raw | ConvertFrom-Json
+$env:CLOUDSDK_CORE_DISABLE_FILE_LOGGING = '1'
+$backupPrefix = 'gs://' + $installation.sessions_bucket + '/periods/' + $installation.period_id + '/' + $participantCode + '/'
+& $installation.gcloud storage ls ($backupPrefix + '**/full_session.json') --long --project=pure-loop-474323-a8 --quiet
+$sessionId = Read-Host 'ID de sesión de 32 caracteres hexadecimales mostrado en la ruta anterior'
+& $installation.gcloud storage objects describe ($backupPrefix + $sessionId + '/full_session.json') --format='json(name,generation,size,md5Hash)' --project=pure-loop-474323-a8 --quiet
+& $installation.gcloud storage objects describe ($backupPrefix + $sessionId + '/export_manifest.json') --format='json(name,generation,size,md5Hash)' --project=pure-loop-474323-a8 --quiet
+$fullGeneration = Read-Host 'generation de full_session.json mostrada arriba'
+$manifestGeneration = Read-Host 'generation de export_manifest.json mostrada arriba'
+& C:/CloudRAG/operator-iteration4/operator.ps1 restore $participantCode --session-id $sessionId --full-generation $fullGeneration --manifest-generation $manifestGeneration
+```
+
+
+Ejecuta esta sección con la VM RUNNING y el mismo propósito y periodo de la
+sesión respaldada, antes de withdraw, purge-study, stop o ip-release. Los
+listados muestran solo metadatos; no descargan ni imprimen consultas. Si no
+hay respaldo o no reconoces el código, conserva el error y no inventes ID ni
+generaciones. restore descarga las generaciones indicadas, valida el
+manifest SHA-256 y exporta la copia aislada para comparar. La app queda cerrada
+para mantenimiento; no emitas otra invitación hasta un nuevo start y preflight.
+
 ## Retiro y cierre del periodo
 
 Los comandos de borrado cierran la app primero y dejan la admisión bloqueada.
@@ -151,23 +183,6 @@ automáticamente. El recibo indica el directorio privado de descarga.
 Exige `TERMINATED_VERIFIED` y conserva disco, instantánea y buckets. La IP se
 libera al cerrar si no hay sesión agendada. No borres recursos originales.
 Un GO técnico no autoriza reclutar: requiere aprobación ética y B.4 aprobada.
-
-## Recuperación: información tomada del recibo, no inventada
-
-La restauración crea una instancia nueva de la app, en un almacén separado del
-original y sin admisión pública, con el mismo propósito, periodo, imagen y
-protocolo. No exige vaciar el almacén original. Toma ID y generaciones de los objetos del recibo de
-respaldo. La invitación restaurada queda revocada; se exporta de nuevo y se
-comprueba que el SHA-256 sea idéntico. Repetir el mismo respaldo verifica la
-copia anterior; una copia alterada se rechaza. Retiro y purga inventarían y
-borran también estos almacenes de recuperación. No se sobrescribe una sesión existente.
-
-```powershell
-$sessionId = Read-Host 'ID de sesión del recibo de respaldo (32 caracteres hexadecimales)'
-$fullGeneration = Read-Host 'Generación de full_session.json del recibo'
-$manifestGeneration = Read-Host 'Generación de export_manifest.json del recibo'
-& C:/CloudRAG/operator-iteration4/operator.ps1 restore $participantCode --session-id $sessionId --full-generation $fullGeneration --manifest-generation $manifestGeneration
-```
 
 Pendiente antes de dar este runbook por probado: instalar la imagen final y
 comprobar todos los comandos, rutas y mensajes con recibos reales.
