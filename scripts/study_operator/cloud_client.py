@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 import time
 
-from scripts.study_operator.policy import OperatorError
+from scripts.study_operator.policy import OperatorError, ReadyPending
 from scripts.study_operator.service_gateway import save_state
 
 
@@ -38,17 +38,35 @@ class Cloud:
         try:
             actual = argv
             if private_rpc:
-                from scripts.study_operator.windows_ssh import sdk_argv
+                from scripts.study_operator.windows_ssh import api_host_key_flags, sdk_argv
+
+                zones = [arg for arg in arguments if arg.startswith('--zone=')]
+                if len(zones) != 1 or zones[0].split('=', 1)[1] not in {'us-central1-a', 'us-central1-b', 'us-central1-c'}:
+                    raise ValueError('Managed SSH zone required')
+                keys = self.command(['compute', 'instances', 'get-guest-attributes', arguments[2],
+                    zones[0], '--query-path=hostkeys/'], timeout=min(timeout, 60))
+                if keys and keys.get('queryValue', {}).get('items') == []:
+                    raise ReadyPending('Aún faltan claves públicas del invitado. Espera y repite preflight dentro de 15 minutos; no aceptes una clave desconocida.')
+                # Keep -batch first after the proxy field for the exact SDK
+                # display inverse. PuTTY ignores SDK OpenSSH known_hosts options.
+                if any(arg.startswith('--ssh-flag=') for arg in arguments):
+                    raise ValueError('Managed RPC SSH flags cannot be overridden')
+                pinned = [*arguments, '--ssh-flag=-batch', *api_host_key_flags(keys)]
 
                 # dry-run returns before renewing the expiring metadata key.
                 # Authenticate a fixed no-op first, with no private stdin and
                 # no automatic host-key acceptance, then send the real bytes.
-                authenticate = [arg for arg in arguments if not arg.startswith('--command=')]
-                self.command([*authenticate, '--command=true', '--ssh-flag=-batch'],
+                authenticate = [arg for arg in pinned if not arg.startswith('--command=')]
+                self.command([*authenticate, '--command=true'],
                     json_output=False, timeout=min(timeout, 90))
-                dry = self.command([*arguments, '--dry-run', '--ssh-flag=-batch'],
+                dry = self.command([*pinned, '--dry-run'],
                     json_output=False, timeout=max(1, min(60, timeout-(time.monotonic()-began))))
                 actual = sdk_argv(dry, Path(self.sdk).parent/'sdk/plink.exe')
+                expected_pins = [arg.removeprefix('--ssh-flag=') for arg in pinned
+                                 if arg.startswith('--ssh-flag=SHA256:')]
+                actual_pins = [actual[index + 1] for index, arg in enumerate(actual[:-1]) if arg == '-hostkey']
+                if actual_pins != expected_pins:
+                    raise ValueError('SDK discarded authenticated host key pins')
                 transport = 'VALIDATED_SDK_DRYRUN_PLINK'
             remaining = max(1, timeout-(time.monotonic()-began))
             result = self.invoke(actual, input=input_data, capture_output=True, timeout=remaining, env=environment)
@@ -56,7 +74,12 @@ class Cloud:
             save_state(str(stem) + '-receipt.json', dict(command=argv, exit_code=124, started_utc=before,
                 ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began))
             raise OperatorError('Venció el límite de la herramienta. Conserva el recibo y verifica status antes de reintentar.') from None
-        except (OperatorError, ValueError, OSError):
+        except ReadyPending:
+            save_state(str(stem) + '-receipt.json', dict(command=argv, exit_code=1, started_utc=before,
+                ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began,
+                transport=transport, reason='PUBLIC_HOST_KEYS_PENDING'))
+            raise
+        except (OperatorError, ValueError, OSError, KeyError, TypeError):
             save_state(str(stem) + '-receipt.json', dict(command=argv, exit_code=1, started_utc=before,
                 ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began,
                 transport=transport, reason='SSH_TRANSPORT_REJECTED'))

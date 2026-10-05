@@ -170,7 +170,7 @@ class Operator:
         write_startup(script,config)
         selected = self.selected()
         self.cloud.command(['compute','instances','add-metadata',selected['name'],'--zone='+selected['zone'],
-            '--metadata-from-file=startup-script='+str(script)])
+            '--metadata-from-file=startup-script='+str(script),'--metadata=enable-guest-attributes=TRUE'])
         self.cloud.command(['compute','instances','start',selected['name'],'--zone='+selected['zone']],timeout=300)
         return dict(status='STARTED_SUPERVISED',next_action='preflight',purpose=purpose,maximum_ready_s=900)
 
@@ -484,6 +484,7 @@ class Operator:
                 '--service-account='+self.config['service_account'],'--scopes=storage-rw',
                 '--network='+self.config['network'],'--subnet='+self.config['subnet'],
                 '--address='+self.config['static_ip'],'--metadata-from-file=startup-script='+str(script),
+                '--metadata=enable-guest-attributes=TRUE',
                 '--tags=cloudrag-i3-managed','--description='+intent['ownership_marker']],timeout=600)
             observed = self.cloud.command(['compute','instances','describe',name,'--zone='+zone])
             alternate = dict(name=name,id=str(observed['id']),zone=zone)
