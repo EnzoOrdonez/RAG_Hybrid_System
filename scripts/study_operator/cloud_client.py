@@ -70,9 +70,18 @@ class Cloud:
                 transport = 'VALIDATED_SDK_DRYRUN_PLINK'
             remaining = max(1, timeout-(time.monotonic()-began))
             result = self.invoke(actual, input=input_data, capture_output=True, timeout=remaining, env=environment)
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as error:
+            # A timed-out public tool can still explain the transport failure.
+            # Private RPC/token output must stay in memory even on timeout.
+            if not private_output:
+                for suffix, partial in (('stdout', error.stdout), ('stderr', error.stderr)):
+                    partial = partial or b''
+                    if isinstance(partial, str):
+                        partial = partial.encode('utf-8')
+                    Path(str(stem) + '.' + suffix).write_bytes(partial)
             save_state(str(stem) + '-receipt.json', dict(command=argv, exit_code=124, started_utc=before,
-                ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began))
+                ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began,
+                partial_output_policy='PRIVATE_NOT_PERSISTED' if private_output else 'PUBLIC_PRESERVED'))
             raise OperatorError('Venció el límite de la herramienta. Conserva el recibo y verifica status antes de reintentar.') from None
         except ReadyPending:
             save_state(str(stem) + '-receipt.json', dict(command=argv, exit_code=1, started_utc=before,

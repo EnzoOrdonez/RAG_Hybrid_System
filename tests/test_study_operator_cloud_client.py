@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import subprocess
 
 import pytest
@@ -85,3 +86,23 @@ def test_boot_guest_keys_404_is_pending_but_other_404_stays_failure(tmp_path):
             '--zone=us-central1-c', '--query-path=hostkeys/'])
     with pytest.raises(OperatorError, match='rechaz'):
         cloud.command(['compute', 'instances', 'describe', 'fixture', '--zone=us-central1-c'])
+
+
+@pytest.mark.parametrize('private', [False, True])
+def test_timeout_partial_output_is_preserved_only_for_public_commands(tmp_path, private):
+    def timeout(*args, **kwargs):
+        raise subprocess.TimeoutExpired('fixture', 1, output=b'PUBLIC_OR_PRIVATE_SENTINEL',
+                                        stderr=b'TRANSPORT_FAILURE_DETAIL')
+
+    cloud = Cloud('fixture', 'pure-loop-474323-a8', tmp_path, invoke=timeout)
+    with pytest.raises(OperatorError, match='verifica status'):
+        cloud.command(['compute', 'ssh', 'fixture'], private_output=private, json_output=False)
+    receipt = json.loads((tmp_path/'0001-receipt.json').read_bytes())
+    assert receipt['exit_code'] == 124
+    assert receipt['partial_output_policy'] == ('PRIVATE_NOT_PERSISTED' if private else 'PUBLIC_PRESERVED')
+    if private:
+        assert not list(tmp_path.glob('*.stdout')) and not list(tmp_path.glob('*.stderr'))
+        assert 'PUBLIC_OR_PRIVATE_SENTINEL' not in ''.join(p.read_text() for p in tmp_path.iterdir())
+    else:
+        assert (tmp_path/'0001.stdout').read_bytes() == b'PUBLIC_OR_PRIVATE_SENTINEL'
+        assert (tmp_path/'0001.stderr').read_bytes() == b'TRANSPORT_FAILURE_DETAIL'
