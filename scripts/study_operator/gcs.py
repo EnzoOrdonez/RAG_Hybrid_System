@@ -1,4 +1,5 @@
 """Generation-bound GCS operations; bearer tokens are never returned or logged."""
+import base64
 import hashlib
 import json
 import urllib.error
@@ -57,3 +58,16 @@ class Storage:
     def delete(self, name, generation):
         self.request('/o/' + urllib.parse.quote(name, safe=''), method='DELETE',
                      params={'generation': generation, 'ifGenerationMatch': generation})
+
+    def create_technical(self, name, data):
+        """Creator-only write. The owner independently downloads this generation."""
+        if not name.startswith('iteration4/') or '..' in name.split('/'):
+            raise ValueError('Technical object outside permitted prefix')
+        metadata = json.loads(self.request('/o', params={'uploadType':'media', 'name':name, 'ifGenerationMatch':0},
+            data=data, method='POST', upload=True))
+        checksum = base64.b64encode(hashlib.md5(data).digest()).decode()
+        if (metadata.get('name') != name or not str(metadata.get('generation','')).isdigit()
+                or int(metadata.get('size',-1)) != len(data) or metadata.get('md5Hash') != checksum):
+            raise ValueError('Upload receipt checksum differs')
+        return dict(object=name,generation=str(metadata['generation']),sha256=hashlib.sha256(data).hexdigest(),
+                    bytes=len(data),server_created=metadata.get('timeCreated'),owner_download_verification_pending=True)
