@@ -1,4 +1,6 @@
 from copy import deepcopy
+from datetime import datetime,timezone
+from pathlib import Path
 
 import pytest
 
@@ -33,12 +35,17 @@ def standby(tmp_path, *, lose_reply=False):
                 selfLink='projects/p/zones/us-central1-b/disks/'+args[3],description=value(args,'description')))
         if args[:3] == ['compute','instances','create']:
             assert instances[0]['status'] == 'TERMINATED'
+            assert '--address=203.0.113.8' in args and '--no-address' not in args
+            startup_path = value(args,'metadata-from-file').removeprefix('startup-script=')
+            startup = Path(startup_path).read_text(encoding='utf-8')
+            assert 'host_runtime' in startup and 'Metadata-Flavor' in startup
             row = deepcopy(cloud.vm)
             row.update(name=args[3],id='777',zone='zones/us-central1-b',status='RUNNING',
                 description=value(args,'description'),creationTimestamp='2026-10-05T00:00:00+00:00',
                 lastStartTimestamp='2026-10-05T00:00:00+00:00')
+            row['metadata'] = dict(items=[dict(key='startup-script',value=startup)])
             row['disks'][0]['source'] = disks[0]['selfLink']
-            row['networkInterfaces'][0]['accessConfigs'] = []
+            row['networkInterfaces'][0]['accessConfigs'] = [dict(name='External NAT',natIP='203.0.113.8')]
             instances.append(row)
             if lose_reply:
                 raise OperatorError('create reply lost')
@@ -51,16 +58,22 @@ def standby(tmp_path, *, lose_reply=False):
     return operator,cloud,instances,disks,calls
 
 
-def test_standby_snapshot_identity_ownership_and_creation_cost_are_verified(tmp_path):
+def test_standby_keeps_acquired_capacity_and_accounts_for_one_uninterrupted_boot(tmp_path):
     operator,_,instances,disks,calls = standby(tmp_path)
-    assert operator.failover('us-central1-b')['status'] == 'ALTERNATE_PREPARED'
+    assert operator.failover('us-central1-b')['status'] == 'ALTERNATE_STARTED_SUPERVISED'
     marker = operator.state['alternate_vms'][0]['ownership_marker']
     assert instances[-1]['description'] == disks[0]['description'] == marker
-    assert operator.state['cost']['estimated_usd'] == pytest.approx(.706832276*120/3600)
-    assert 'alternate-b' not in operator.state['cost']['reservations']
-    assert calls[-1] == ['verified-transfer','777'] and instances[-1]['status'] == 'TERMINATED'
+    assert operator.state['cost']['estimated_usd'] == 0
+    assert 'alternate-b' in operator.state['cost']['reservations']
+    assert instances[-1]['status'] == 'RUNNING'
+    assert not any(args[:3] == ['compute','instances','stop'] for args in calls)
+    assert not any(args[0] == 'verified-transfer' for args in calls)
     assert operator.state['selected_vm']['id'] == '777'
+    operator.now = lambda:datetime(2026,10,5,0,2,tzinfo=timezone.utc)
+    operator.stop()
     estimate = operator.state['cost']['estimated_usd']
+    assert estimate == pytest.approx(.706832276*120/3600)
+    assert 'alternate-b' not in operator.state['cost']['reservations']
     operator.settle_alternate_creation(operator.selected())
     assert operator.state['cost']['estimated_usd'] == estimate
 
@@ -71,9 +84,26 @@ def test_lost_create_reply_adopts_only_its_marked_disk_and_vm_before_transfer(tm
         operator.failover('us-central1-b')
     assert operator.state['alternate_creation_intent']['source_snapshot_id'] == '456'
     assert not any(row[0] == 'verified-transfer' for row in calls)
-    assert operator.failover('us-central1-b')['status'] == 'ALTERNATE_PREPARED'
-    assert instances[-1]['status'] == 'TERMINATED'
+    assert operator.failover('us-central1-b')['status'] == 'ALTERNATE_STARTED_SUPERVISED'
+    assert instances[-1]['status'] == 'RUNNING'
     assert len(operator.state['alternate_vms']) == 1
+
+
+def test_study_failover_without_ethical_record_rejects_before_cloud_effect(tmp_path):
+    operator,_,_,_,calls = standby(tmp_path)
+    operator.state['purpose'] = 'study'
+    with pytest.raises(OperatorError,match='ética'):
+        operator.failover('us-central1-b')
+    assert not calls
+
+
+def test_lost_reply_with_changed_startup_is_not_admitted(tmp_path):
+    operator,_,instances,_,_ = standby(tmp_path,lose_reply=True)
+    with pytest.raises(OperatorError):
+        operator.failover('us-central1-b')
+    instances[-1]['metadata']['items'][0]['value'] = 'different startup'
+    with pytest.raises(OperatorError,match='arranque recuperable'):
+        operator.failover('us-central1-b')
 
 
 def test_foreign_vm_after_lost_reply_is_never_stopped_or_adopted(tmp_path):

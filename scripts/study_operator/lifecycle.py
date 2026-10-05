@@ -139,14 +139,9 @@ class Operator:
         self.state.pop('snapshot_empty_verified',None)
         self.persist()
         script = self.cloud.root/'startup.sh'
-        encoded = base64.b64encode(json.dumps(config).encode()).decode()
-        script.write_text('#!/bin/bash\nset -euo pipefail\npython3 - <<\'PY\'\n'
-            'import base64,json,subprocess,os\nfrom pathlib import Path\n'
-            'root=Path("/srv/cloudrag/iteration4");root.mkdir(exist_ok=True)\n'
-            'p=root/"launch-config.json"\np.write_bytes(base64.b64decode('+repr(encoded)+'))\nos.chmod(p,0o600)\n'
-            'c=json.loads(p.read_text())\nsubprocess.Popen(["python3","-B","-m","scripts.study_operator.host_runtime",'
-            '"--settings",str(p)],cwd=c["host_code"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)\n'
-            'PY\n',encoding='utf-8',newline='\n')
+        from scripts.study_operator.startup import write_startup
+
+        write_startup(script,config)
         selected = self.selected()
         self.cloud.command(['compute','instances','add-metadata',selected['name'],'--zone='+selected['zone'],
             '--metadata-from-file=startup-script='+str(script)])
@@ -367,6 +362,8 @@ class Operator:
         if not self.config.get('prepared_snapshot'):
             raise OperatorError('Falta la instantánea preparada y verificada. No se crea una VM a partir de un disco sin sellar.')
         prepared = self.config['prepared_snapshot']
+        purpose = self.state.get('purpose',self.config['purpose'])
+        purpose_allowed(purpose,self.root)
         if (prepared.get('image_id') != self.config['image_id'] or prepared.get('hostname') != self.config['hostname']
                 or prepared.get('certificate_sha256') != self.state.get('ready',{}).get('tls',{}).get('certificate_sha256')
                 or prepared.get('session_data') != 'ALL_I4_PERIODS_EMPTY_VERIFIED'):
@@ -376,7 +373,6 @@ class Operator:
         if not self.state.get('failover_data_reconciled',False):
             raise OperatorError('Conmutación bloqueada por inventario de datos no conciliado. Ejecuta el inventario y recuperación indicados en el runbook.')
         instances = self.cloud.command(['compute','instances','list'])
-        no_other_gpu(instances,selected_id='none')
         # A refreshed IP/certificate/image uses a new snapshot and a new standby,
         # never silently reuses an old disk containing the previous environment.
         name = 'cloudrag-i4-alternate-'+zone[-1]+'-'+prepared['id'][-12:]
@@ -394,14 +390,27 @@ class Operator:
             disk = self.cloud.command(['compute','disks','describe',source.rsplit('/',1)[-1],'--zone='+zone])
             if disk.get('selfLink') != source or str(disk.get('sourceSnapshotId')) != prepared['id'] or disk.get('description') != marker:
                 raise OperatorError('Disco alterno distinto de la instantánea propia. No se arranca ni se transfiere la IP.')
+            no_other_gpu(instances,selected_id=alternate['id'])
             if not owned:
                 self.state.setdefault('alternate_vms',[]).append(dict(alternate,disposable=True,
                     disk_name=disk['name'],disk_id=str(disk['id']),ownership_marker=marker,
                     created_utc=existing[0]['creationTimestamp']))
                 self.persist()
-            if existing[0]['status'] != 'TERMINATED':
-                self.cloud.command(['compute','instances','stop',name,'--zone='+zone],timeout=600)
+            if existing[0]['status'] == 'RUNNING':
+                startup = next((row['value'] for row in existing[0].get('metadata',{}).get('items',[])
+                                if row['key'] == 'startup-script'),None)
+                if (not intent.get('start_requested_utc') or intent.get('name') != name
+                        or not startup or hashlib.sha256(startup.encode()).hexdigest() != intent.get('startup_sha256')):
+                    raise OperatorError('La alterna corre sin un arranque recuperable. Verifica status y stop; no se adopta una sesión en vivo.')
+                self.state.update(selected_vm=alternate,purpose=intent['purpose'],ready_verified=False,
+                    boot_started_utc=intent['start_requested_utc'])
+                self.state.setdefault('alternate_creation_cost_settled_ids',[]).append(alternate['id'])
+                self.state.pop('alternate_creation_intent',None)
+                self.persist()
+                return dict(status='ALTERNATE_STARTED_SUPERVISED',zone=zone,url='https://'+self.config['hostname'],
+                            next_action='preflight; capacidad conservada tras recuperar la creación')
         else:
+            no_other_gpu(instances,selected_id='none')
             snapshot = self.cloud.command(['compute','snapshots','describe',self.config['prepared_snapshot']['name']])
             if (str(snapshot.get('id')) != self.config['prepared_snapshot']['id'] or snapshot.get('status') != 'READY'
                     or not snapshot.get('storageLocations') == ['us-central1']):
@@ -428,12 +437,27 @@ class Operator:
                         or str(disks[0].get('sourceSnapshotId')) != str(snapshot['id'])
                         or disks[0].get('description') != intent['ownership_marker']):
                     raise OperatorError('Disco alterno no coincide con la instantánea. No se recrea ni se borra.')
+            requested = self.now().isoformat()
+            config = dict(self.config,zone=zone,purpose=purpose,start_requested_utc=requested,
+                          native_deadline_utc=(self.now()+timedelta(hours=3)).isoformat())
+            checked_config(config)
+            from scripts.study_operator.startup import write_startup
+
+            script = write_startup(self.cloud.root/'alternate-startup.sh',config,discover_instance=True)
+            # Detach only after all source VMs are stopped. Create with the same
+            # IP and startup already armed; STOP would discard acquired capacity.
+            self.detach_ip_for_creation()
+            intent.update(start_requested_utc=requested,purpose=purpose,
+                          startup_sha256=hashlib.sha256(script.read_bytes()).hexdigest())
+            self.state['alternate_creation_intent'] = intent
+            self.persist()
             self.cloud.command(['compute','instances','create',name,'--zone='+zone,'--machine-type=g2-standard-4',
                 '--accelerator=type=nvidia-l4,count=1','--provisioning-model=STANDARD','--maintenance-policy=TERMINATE',
                 '--disk=name='+disk_name+',boot=yes,auto-delete=no','--deletion-protection',
                 '--max-run-duration=3h','--instance-termination-action=STOP',
                 '--service-account='+self.config['service_account'],'--scopes=storage-rw',
-                '--network='+self.config['network'],'--subnet='+self.config['subnet'],'--no-address',
+                '--network='+self.config['network'],'--subnet='+self.config['subnet'],
+                '--address='+self.config['static_ip'],'--metadata-from-file=startup-script='+str(script),
                 '--tags=cloudrag-i3-managed','--description='+intent['ownership_marker']],timeout=600)
             observed = self.cloud.command(['compute','instances','describe',name,'--zone='+zone])
             alternate = dict(name=name,id=str(observed['id']),zone=zone)
@@ -441,7 +465,14 @@ class Operator:
             self.state.setdefault('alternate_vms',[]).append(dict(alternate,disposable=True,disk_name=disk_name,
                 ownership_marker=intent['ownership_marker'],created_utc=observed['creationTimestamp']))
             self.persist()
-            self.cloud.command(['compute','instances','stop',name,'--zone='+zone],timeout=600)
+            self.state.update(selected_vm=alternate,purpose=purpose,ready_verified=False,boot_started_utc=requested)
+            # The automatic create interval belongs to this uninterrupted boot;
+            # stop accounts for it once, never again as a separate creation boot.
+            self.state.setdefault('alternate_creation_cost_settled_ids',[]).append(alternate['id'])
+            self.state.pop('alternate_creation_intent',None)
+            self.persist()
+            return dict(status='ALTERNATE_STARTED_SUPERVISED',zone=zone,url='https://'+self.config['hostname'],
+                        next_action='preflight; no se libera la capacidad antes de READY')
         self.settle_alternate_creation(alternate)
         self.transfer_ip(alternate)
         self.state['selected_vm'] = alternate
@@ -449,6 +480,20 @@ class Operator:
         self.persist()
         return dict(status='ALTERNATE_PREPARED',zone=zone,url='https://'+self.config['hostname'],
                     next_action='start con el mismo propósito; preflight verifica la identidad nueva')
+
+    def detach_ip_for_creation(self):
+        for item in [self.config['primary_vm'],*[row for row in self.state.get('alternate_vms',[]) if not row.get('disposed')]]:
+            observed = self.cloud.command(['compute','instances','describe',item['name'],'--zone='+item['zone']])
+            checked_vm(observed,name=item['name'],instance_id=item['id'],zone=item['zone'])
+            if observed['status'] != 'TERMINATED':
+                raise OperatorError('Hay una VM activa. Detén todas antes de crear la alterna con la IP.')
+            for interface in observed['networkInterfaces']:
+                for access in interface.get('accessConfigs',[]):
+                    if access.get('natIP') == self.config['static_ip']:
+                        self.cloud.command(['compute','instances','delete-access-config',item['name'],'--zone='+item['zone'],
+                            '--network-interface='+interface['name'],'--access-config-name='+access['name']])
+        self.state['ip_transfer_gap_margin_usd'] = self.state.get('ip_transfer_gap_margin_usd',0)+.005
+        self.persist()
 
     def settle_alternate_creation(self, alternate):
         settled = self.state.setdefault('alternate_creation_cost_settled_ids',[])
