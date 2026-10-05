@@ -66,7 +66,8 @@ El cronómetro conserva la frontera de la app: la consulta pasa por
 evaluación. Incluye recuperación, generación, NLI y toda espera del servicio
 para descargar, reiniciar y cargar el runner. Preparación, observación en
 reposo, escritura posterior de evidencia y transporte desde Lima quedan
-fuera de ese cronómetro. La latencia HTTPS desde Lima se describe por separado.
+fuera de ese cronómetro. No se realiza una medición local de rendimiento:
+los tiempos se miden en la VM y el navegador se usa para el smoke funcional.
 
 Se mantienen 600 segundos por llamada, 900 de preparación y 7.200 por ventana,
 sin modificar una frontera durante la medición. El supervisor de trabajo
