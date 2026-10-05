@@ -31,7 +31,7 @@ def read_plan(plan):
     return result
 
 
-def restore_closed(store, export_data, manifest_data, objects):
+def restore_closed(store, export_data, manifest_data, objects, *, allow_replay=False):
     """Restore a verified closed session to a new app store and reproduce its export."""
     from src.ui.components.study_sessions import StudySession
 
@@ -48,6 +48,29 @@ def restore_closed(store, export_data, manifest_data, objects):
             or any(not str(row.get('generation','')).isdigit() for row in objects.values())):
         raise OperatorError('Respaldo cerrado o identidad inválidos. No restaures sobre otra configuración.')
     store.freeze()
+    if allow_replay and (store.root/sid/'full_session.json').is_file():
+        folder = store.root/sid
+        admissions = store._read()
+        checkpoint = {key:payload[key] for key in StudySession(store,sid,payload['assignment']).data}
+        if json.loads(folder.joinpath('study_checkpoint.json').read_text()) != checkpoint:
+            raise OperatorError('Checkpoint restaurado alterado. Conserva la copia y revisa antes de repetir.')
+        if (folder.joinpath('full_session.json').read_bytes() != export_data
+                or folder.joinpath('export_manifest.json').read_bytes() != manifest_data
+                or json.loads(folder.joinpath('backup_state.json').read_text()).get('objects') != objects
+                or admissions.get('active') is not None
+                or any(not row.get('revoked') for row in admissions['invitations'].values())
+                or len(list(store.root.glob('*/study_checkpoint.json'))) != 1):
+            raise OperatorError('Copia de recuperación previa distinta. Conserva ambos respaldos; no se sobrescribe.')
+        bucket = os.environ.pop('CLOUDRAG_BACKUP_BUCKET',None)
+        try:
+            actual = StudySession.load(store,sid).export().read_bytes()
+        finally:
+            if bucket is not None:
+                os.environ['CLOUDRAG_BACKUP_BUCKET'] = bucket
+        if actual != export_data:
+            raise OperatorError('Checkpoint restaurado alterado. Conserva la copia y revisa antes de repetir.')
+        return dict(status='RESTORED_VERIFIED',session_id=sid,participant_code=code,export_sha256=digest,
+                    invitation_revoked=True,replayed=True)
     if store.path.exists() or any(store.root.glob('*/study_checkpoint.json')) or (store.root/sid).exists():
         raise OperatorError('La restauración exige una instancia de app vacía. Conserva su almacenamiento actual.')
     with store.lock:
@@ -116,7 +139,7 @@ def dispatch(request, deployment, *, maintenance=False):
         return dict(status='EXPORTED_PRIVATE',export=export_by_code([
             json.loads(path.read_text(encoding='utf-8')) for path in store.root.glob('*/full_session.json')]))
     return restore_closed(store,base64.b64decode(request['full_session_base64'],validate=True),
-        base64.b64decode(request['manifest_base64'],validate=True),request['objects'])
+        base64.b64decode(request['manifest_base64'],validate=True),request['objects'],allow_replay=True)
 
 
 def main():

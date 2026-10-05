@@ -195,12 +195,16 @@ def test_tls_preparation_and_capacity_fail_closed_before_start(tmp_path):
     assert not cloud.calls
 
 
-def test_tls_waits_only_for_explicit_bootstrap_and_stops_on_fatal_error(tmp_path):
+def test_tls_waits_only_for_explicit_bootstrap_and_stops_on_fatal_error(tmp_path,monkeypatch):
     operator, _ = installation(tmp_path)
     calls = []
     operator.start = lambda purpose: calls.append('start')
     operator.stop = lambda: calls.append('stop')
     operator.sleep = lambda seconds: calls.append('wait')
+    operator.maintenance = lambda: calls.append('maintenance')
+    operator.bridge = lambda request:dict(status='ALL_I4_PERIODS_EMPTY')
+    operator.state['ready'] = dict(tls=dict(certificate_sha256='d'*64))
+    monkeypatch.setattr('scripts.study_operator.prepared_snapshot.prepare',lambda *args:dict(status='READY'))
     results = iter([ReadyPending('booting'), {'status': 'READY_VERIFIED'}])
     def preflight():
         result = next(results)
@@ -209,7 +213,7 @@ def test_tls_waits_only_for_explicit_bootstrap_and_stops_on_fatal_error(tmp_path
         return result
     operator.preflight = preflight
     assert operator.tls_prepare('2026-10-08')['status'] == 'READY_VERIFIED'
-    assert calls == ['start', 'wait', 'stop']
+    assert calls == ['start', 'wait', 'maintenance', 'stop']
     calls.clear()
     operator.preflight = lambda: (_ for _ in ()).throw(OperatorError('IAM rejected'))
     with pytest.raises(OperatorError, match='IAM rejected'):

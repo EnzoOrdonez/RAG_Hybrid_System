@@ -26,7 +26,11 @@ $firstSession = Read-Host 'Fecha de la primera sesión (AAAA-MM-DD), al menos 3 
 ```
 
 `tls-prepare` enciende con propósito técnico, verifica el certificado público y
-detiene la VM. La IP sigue asociada y el certificado privado queda en el disco
+detiene la VM y prepara una instantánea regional ligada a esa imagen, IP y
+certificado. Antes de copiar el disco, exige que todos los periodos de iteración
+4 y todas las instancias de recuperación estén vacíos: descarga y purga los
+datos del periodo anterior antes de esta preparación. No crea una instantánea
+con datos de participantes. La IP sigue asociada y el certificado privado queda en el disco
 persistente, fuera del repositorio y del paquete de auditoría. Caddy lo reutiliza
 y renueva. Si se libera la IP, una reserva posterior puede devolver otra: repite
 la preparación con anticipación. No aceptes una excepción de certificado.
@@ -120,10 +124,13 @@ Un GO técnico no autoriza reclutar: requiere aprobación ética y B.4 aprobada.
 
 ## Recuperación: información tomada del recibo, no inventada
 
-La restauración exige una instancia vacía de la app con el mismo propósito,
-periodo y protocolo. Toma ID y generaciones de los objetos del recibo de
+La restauración crea una instancia nueva de la app, en un almacén separado del
+original y sin admisión pública, con el mismo propósito, periodo, imagen y
+protocolo. No exige vaciar el almacén original. Toma ID y generaciones de los objetos del recibo de
 respaldo. La invitación restaurada queda revocada; se exporta de nuevo y se
-comprueba que el SHA-256 sea idéntico. No se sobrescribe una sesión existente.
+comprueba que el SHA-256 sea idéntico. Repetir el mismo respaldo verifica la
+copia anterior; una copia alterada se rechaza. Retiro y purga inventarían y
+borran también estos almacenes de recuperación. No se sobrescribe una sesión existente.
 
 ```powershell
 $sessionId = Read-Host 'ID de sesión del recibo de respaldo (32 caracteres hexadecimales)'
@@ -132,6 +139,5 @@ $manifestGeneration = Read-Host 'Generación de export_manifest.json del recibo'
 & C:/CloudRAG/operator-iteration4/operator.ps1 restore $participantCode --session-id $sessionId --full-generation $fullGeneration --manifest-generation $manifestGeneration
 ```
 
-Pendiente antes de dar este runbook por probado: instalar la imagen final,
-documentar y probar literalmente la selección de una instancia vacía para
-recuperación, y comprobar todas las rutas y mensajes con recibos reales.
+Pendiente antes de dar este runbook por probado: instalar la imagen final y
+comprobar todos los comandos, rutas y mensajes con recibos reales.

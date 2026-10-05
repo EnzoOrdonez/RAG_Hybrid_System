@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta, timezone
 import hashlib
 import json
 from pathlib import Path
+import re
 import secrets
 import shlex
 import socket
@@ -71,6 +72,8 @@ class Operator:
         for resource in self.state.get('alternate_vms',[]):
             if resource.get('created_utc') and not resource.get('disposed'):
                 retention += max(0,(self.now()-datetime.fromisoformat(resource['created_utc'])).total_seconds())/86400*.3287664
+        for resource in self.state.get('snapshots',[]):
+            retention += max(0,(self.now()-datetime.fromisoformat(resource['created_utc'])).total_seconds())/86400*resource['idle_usd_day']
         # The initial IP reservation covers its first72h conservatively. Include
         # any excess elapsed charge before reserving another paid operation.
         active_ip_extra = 0
@@ -117,6 +120,7 @@ class Operator:
         self.reserve_cost('boot-'+self.now().strftime('%Y%m%dT%H%M%S%fZ'),
             3*self.config['official_rates']['compute_usd_h']+.25)
         self.state.update(purpose=purpose,boot_started_utc=self.now().isoformat(),ready_verified=False)
+        self.state.pop('snapshot_empty_verified',None)
         self.persist()
         script = self.cloud.root/'startup.sh'
         encoded = base64.b64encode(json.dumps(config).encode()).decode()
@@ -306,16 +310,29 @@ class Operator:
             raise OperatorError('tls-prepare exige al menos 3 días antes de la sesión. Reprograma la preparación y conserva el certificado.')
         self.start('technical')
         began = time.monotonic()
+        result = None
         try:
             while time.monotonic()-began < 900:
                 try:
                     result = self.preflight()
-                    return dict(result,first_session=session.isoformat(),certificate_prepared_days_ahead=(session-self.now().date()).days)
+                    self.maintenance()
+                    proof = self.bridge(dict(operation='snapshot-safety'))
+                    if proof.get('status') != 'ALL_I4_PERIODS_EMPTY':
+                        raise OperatorError('Persisten copias del estudio. Purga todos los periodos antes de preparar contingencia.')
+                    self.state['snapshot_empty_verified'] = True
+                    self.persist()
+                    break
                 except ReadyPending:
                     self.sleep(15)
-            raise OperatorError('TLS no llegó a READY en 15 minutos. Conserva los recibos; revisa certificado y capacidad antes de repetir.')
+            if result is None:
+                raise OperatorError('TLS no llegó a READY en 15 minutos. Conserva los recibos; revisa certificado y capacidad antes de repetir.')
         finally:
             self.stop()
+        from scripts.study_operator.prepared_snapshot import prepare
+
+        snapshot = prepare(self,self.state['ready']['tls']['certificate_sha256'])
+        return dict(result,first_session=session.isoformat(),
+                    certificate_prepared_days_ahead=(session-self.now().date()).days,prepared_snapshot=snapshot)
 
     def failover(self, zone):
         if zone not in {'us-central1-b','us-central1-c'}:
@@ -324,6 +341,11 @@ class Operator:
             return dict(status='ALREADY_SELECTED',next_action='start y preflight')
         if not self.config.get('prepared_snapshot'):
             raise OperatorError('Falta la instantánea preparada y verificada. No se crea una VM a partir de un disco sin sellar.')
+        prepared = self.config['prepared_snapshot']
+        if (prepared.get('image_id') != self.config['image_id'] or prepared.get('hostname') != self.config['hostname']
+                or prepared.get('certificate_sha256') != self.state.get('ready',{}).get('tls',{}).get('certificate_sha256')
+                or prepared.get('session_data') != 'ALL_I4_PERIODS_EMPTY_VERIFIED'):
+            raise OperatorError('Contingencia desactualizada para la IP, imagen o certificado. Ejecuta tls-prepare antes de la sesión.')
         self.stop()
         # Closed sessions and pending checkpoints must be reconciled before switching disks.
         if not self.state.get('failover_data_reconciled',False):
@@ -432,7 +454,16 @@ class Operator:
         storage = Storage(self.config['sessions_bucket'],self.cloud.owner_token,
                           creation_anchor=self.config.get('sessions_bucket_creation'))
         scope = hashlib.sha256((self.config['sessions_bucket']+'\0'+prefix).encode()).hexdigest()
-        local = private_directory(self.root/'private'/'deletion'/scope)
+        transactions = self.state.setdefault('deletion_transactions',{})
+        transaction = transactions.get(scope)
+        if not transaction:
+            transaction = uuid.uuid4().hex
+            if not dry_run:
+                transactions[scope] = transaction
+                self.persist()
+        if not re.fullmatch('[a-f0-9]{32}',transaction):
+            raise OperatorError('Recibo de borrado no válido. Conserva las descargas y revisa active.json.')
+        local = private_directory(self.root/'private'/'deletion'/scope/transaction)
         saved = local/'disk-plan.json'
         if saved.exists():
             plan = json.loads(saved.read_text(encoding='utf-8'))
@@ -442,7 +473,7 @@ class Operator:
                 save_state(saved,plan)
         if dry_run:
             remote = execute(storage,prefix,local,dry_run=True)
-            return dict(status='DRY_RUN',disk_files=len(plan['files']),session_count=len(plan['session_codes']),
+            return dict(status='DRY_RUN',disk_files=len(plan['files']),session_count=plan['session_count'],
                         remote_objects=len(remote['objects']),deletion_count=0,admission_closed=True)
         receipts_path = local/'disk-downloads.json'
         if receipts_path.exists():
@@ -456,7 +487,7 @@ class Operator:
                 data = base64.b64decode(row.pop('content_base64'),validate=True)
                 if len(data) != row['bytes'] or hashlib.sha256(data).hexdigest() != row['sha256']:
                     raise OperatorError('SHA-256 descargado del disco distinto. Conserva todas las copias; no se borra.')
-                path = local/'disk'/row['kind']/row['relative']
+                path = local/'disk'/row['store_id']/row['kind']/row['relative']
                 if not path.resolve().is_relative_to(local):
                     raise OperatorError('Descarga fuera del directorio privado. No se borra.')
                 path.parent.mkdir(parents=True,exist_ok=True)
@@ -470,7 +501,8 @@ class Operator:
 
                         os.fsync(stream.fileno())
                 verified.append(dict(row,local_path=str(path)))
-            if any((row['path'],row['sha256']) not in {(item['path'],item['sha256']) for item in verified} for row in plan['files']):
+            if any((row['store_id'],row['path'],row['sha256']) not in {
+                    (item['store_id'],item['path'],item['sha256']) for item in verified} for row in plan['files']):
                 raise OperatorError('Faltan copias locales del inventario. No se borra ninguna copia remota.')
             save_state(receipts_path,verified)
 
@@ -488,6 +520,8 @@ class Operator:
             private_receipt=str(local/'receipt.json'),soft_delete_verification=storage.soft_delete_verification)
         receipt['soft_delete_verification'] = storage.soft_delete_verification
         save_state(local/'receipt.json',receipt)
+        self.state['deletion_transactions'].pop(scope,None)
+        self.persist()
         return summary
 
     def export_anonymized(self):
@@ -505,8 +539,6 @@ class Operator:
         from scripts.study_operator.gcs import Storage
 
         participant_code(code)
-        import re
-
         if not re.fullmatch('[a-f0-9]{32}',session_id) or not str(full_generation).isdigit() or not str(manifest_generation).isdigit():
             raise OperatorError('ID o generaciones inválidos. Usa el inventario del respaldo verificado.')
         self.maintenance()
