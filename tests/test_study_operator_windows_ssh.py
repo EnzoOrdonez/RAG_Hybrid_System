@@ -6,7 +6,7 @@ import subprocess
 import pytest
 
 from scripts.study_operator.cloud_client import Cloud
-from scripts.study_operator.policy import OperatorError
+from scripts.study_operator.policy import OperatorError, ReadyPending
 from scripts.study_operator.windows_ssh import api_host_key_flags, sdk_argv, windows_argv
 
 
@@ -131,3 +131,17 @@ def test_cli_json_contract_mismatch_is_readable_and_never_reaches_ssh(tmp_path):
     with pytest.raises(OperatorError,match='clave del host'):
         cloud.command(rpc_args(),input_data=b'PRIVATE_NEVER_SENT',json_output=False)
     assert len(calls)==1
+
+
+def test_boot_keys_not_published_yet_waits_without_private_ssh(tmp_path):
+    calls = []
+    def invoke(argv, **options):
+        calls.append(argv)
+        assert 'get-guest-attributes' in argv and options['input'] is None
+        return subprocess.CompletedProcess(argv, 1, b'',
+            b"HTTPError 404: The resource 'hostkeys/' of type 'Guest Attribute' was not found.")
+    cloud = Cloud('fixture', 'pure-loop-474323-a8', tmp_path, invoke=invoke)
+    with pytest.raises(ReadyPending, match='claves'):
+        cloud.command(rpc_args(), input_data=b'PRIVATE_NEVER_SENT', json_output=False)
+    assert len(calls) == 1
+    assert json.loads((tmp_path/'0001-receipt.json').read_bytes())['reason'] == 'PUBLIC_HOST_KEYS_PENDING'

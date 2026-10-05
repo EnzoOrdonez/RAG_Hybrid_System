@@ -100,6 +100,11 @@ class Cloud:
             private_output_not_persisted=private_output, transport=transport)
         save_state(str(stem) + '-receipt.json', receipt)
         if result.returncode:
+            if (arguments[:3] == ['compute', 'instances', 'get-guest-attributes']
+                    and '--query-path=hostkeys/' in arguments
+                    and b'HTTPError 404' in stderr and b"'hostkeys/'" in stderr
+                    and b'Guest Attribute' in stderr):
+                raise ReadyPending('Aún faltan claves públicas del invitado. Espera y repite preflight dentro de 15 minutos; no aceptes una clave desconocida.')
             # Capacity is a resource error, not a measured gate failure.
             if b'ZONE_RESOURCE_POOL_EXHAUSTED' in stderr or b'does not have enough resources' in stderr:
                 raise OperatorError('ZONE_RESOURCE_POOL_EXHAUSTED: ejecuta failover a us-central1-b o us-central1-c; si ambas fallan, reprograma según el runbook.')

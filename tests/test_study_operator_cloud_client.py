@@ -4,7 +4,7 @@ import subprocess
 import pytest
 
 from scripts.study_operator.cloud_client import Cloud, checked_vm, no_other_gpu, readiness
-from scripts.study_operator.policy import OperatorError
+from scripts.study_operator.policy import OperatorError, ReadyPending
 
 
 def test_secret_output_and_private_download_never_written(tmp_path):
@@ -74,3 +74,14 @@ def test_new_client_preserves_prior_command_receipts(tmp_path):
     Cloud('fixture', 'pure-loop-474323-a8', tmp_path, invoke=invoke).command(['compute', 'instances', 'list'])
     assert (tmp_path / '0001-receipt.json').read_bytes() == original
     assert (tmp_path / '0002-receipt.json').exists()
+
+
+def test_boot_guest_keys_404_is_pending_but_other_404_stays_failure(tmp_path):
+    error = b"HTTPError 404: The resource 'hostkeys/' of type 'Guest Attribute' was not found."
+    cloud = Cloud('fixture', 'pure-loop-474323-a8', tmp_path,
+        invoke=lambda argv, **kwargs: subprocess.CompletedProcess(argv, 1, b'', error))
+    with pytest.raises(ReadyPending, match='claves'):
+        cloud.command(['compute', 'instances', 'get-guest-attributes', 'fixture',
+            '--zone=us-central1-c', '--query-path=hostkeys/'])
+    with pytest.raises(OperatorError, match='rechaz'):
+        cloud.command(['compute', 'instances', 'describe', 'fixture', '--zone=us-central1-c'])
