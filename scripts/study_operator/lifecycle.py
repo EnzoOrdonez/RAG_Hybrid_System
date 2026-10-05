@@ -100,6 +100,7 @@ class Operator:
             active_ip_extra = max(0,elapsed-sum(value for key,value in cost['reservations'].items() if key.startswith('ip-')))
         total = (inherited.get('estimated_usd',0)+inherited.get('margin_usd',0)+cost['estimated_usd']+
                  cost['margin_usd']+sum(cost['reservations'].values())+amount+retention+active_ip_extra)
+        total += self.state.get('ip_transfer_gap_margin_usd',0)
         if not 0 <= total < 90:
             raise OperatorError('El costo reservado alcanza el corte de USD90. Mantén apagada la VM y concilia el ledger.')
         cost['reservations'][operation] = amount
@@ -372,11 +373,30 @@ class Operator:
             raise OperatorError('Conmutación bloqueada por inventario de datos no conciliado. Ejecuta el inventario y recuperación indicados en el runbook.')
         instances = self.cloud.command(['compute','instances','list'])
         no_other_gpu(instances,selected_id='none')
-        name = 'cloudrag-i4-alternate-'+zone[-1]+'-'+self.config['period_id'][:8]
+        # A refreshed IP/certificate/image uses a new snapshot and a new standby,
+        # never silently reuses an old disk containing the previous environment.
+        name = 'cloudrag-i4-alternate-'+zone[-1]+'-'+prepared['id'][-12:]
         existing = [row for row in instances if row['name'] == name]
         if existing:
             alternate = dict(name=name,id=str(existing[0]['id']),zone=zone)
             checked_vm(existing[0],name=name,instance_id=alternate['id'],zone=zone)
+            owned = next((row for row in self.state.get('alternate_vms',[]) if row['id'] == alternate['id']),None)
+            intent = self.state.get('alternate_creation_intent',{})
+            marker = owned.get('ownership_marker') if owned else intent.get('ownership_marker')
+            if (not marker or existing[0].get('description') != marker
+                    or (not owned and (intent.get('name') != name or intent.get('source_snapshot_id') != prepared['id']))):
+                raise OperatorError('VM alterna sin prueba de creación propia. No se adopta ni se asocia la IP; revisa el intento conservado.')
+            source = existing[0]['disks'][0]['source']
+            disk = self.cloud.command(['compute','disks','describe',source.rsplit('/',1)[-1],'--zone='+zone])
+            if disk.get('selfLink') != source or str(disk.get('sourceSnapshotId')) != prepared['id'] or disk.get('description') != marker:
+                raise OperatorError('Disco alterno distinto de la instantánea propia. No se arranca ni se transfiere la IP.')
+            if not owned:
+                self.state.setdefault('alternate_vms',[]).append(dict(alternate,disposable=True,
+                    disk_name=disk['name'],disk_id=str(disk['id']),ownership_marker=marker,
+                    created_utc=existing[0]['creationTimestamp']))
+                self.persist()
+            if existing[0]['status'] != 'TERMINATED':
+                self.cloud.command(['compute','instances','stop',name,'--zone='+zone],timeout=600)
         else:
             snapshot = self.cloud.command(['compute','snapshots','describe',self.config['prepared_snapshot']['name']])
             if (str(snapshot.get('id')) != self.config['prepared_snapshot']['id'] or snapshot.get('status') != 'READY'
@@ -384,16 +404,25 @@ class Operator:
                 raise OperatorError('Instantánea distinta o no READY. Conserva los recursos y verifica el recibo preparado.')
             self.reserve_cost('alternate-'+zone[-1],3*self.config['official_rates']['compute_usd_h']+.25+.3287664)
             # This explicit intent is recoverable even if create succeeds but its response is lost.
-            self.state['alternate_creation_intent'] = dict(name=name,zone=zone,disk_name=name+'-boot',
-                disposable=True,preserve_snapshot=True,observed_utc=self.now().isoformat())
+            intent = self.state.get('alternate_creation_intent')
+            if intent and (intent.get('name') != name or intent.get('source_snapshot_id') != prepared['id']):
+                raise OperatorError('Hay otro intento de contingencia pendiente. Concilia sus recursos antes de crear otra VM.')
+            if not intent:
+                intent = dict(name=name,zone=zone,disk_name=name+'-boot',source_snapshot_id=prepared['id'],
+                    ownership_marker='CloudRAG-I4-alternate-'+uuid.uuid4().hex,
+                    disposable=True,preserve_snapshot=True,observed_utc=self.now().isoformat())
+            self.state['alternate_creation_intent'] = intent
             self.persist()
             disk_name = name+'-boot'
             disks = self.cloud.command(['compute','disks','list','--filter=name='+disk_name])
             if not disks:
                 self.cloud.command(['compute','disks','create',disk_name,'--zone='+zone,'--size=100GB',
-                    '--type=pd-balanced','--source-snapshot='+snapshot['name']],timeout=600)
+                    '--type=pd-balanced','--source-snapshot='+snapshot['name'],
+                    '--description='+intent['ownership_marker']],timeout=600)
             else:
-                if len(disks) != 1 or not disks[0]['zone'].endswith('/'+zone) or str(disks[0].get('sourceSnapshotId')) != str(snapshot['id']):
+                if (len(disks) != 1 or not disks[0]['zone'].endswith('/'+zone)
+                        or str(disks[0].get('sourceSnapshotId')) != str(snapshot['id'])
+                        or disks[0].get('description') != intent['ownership_marker']):
                     raise OperatorError('Disco alterno no coincide con la instantánea. No se recrea ni se borra.')
             self.cloud.command(['compute','instances','create',name,'--zone='+zone,'--machine-type=g2-standard-4',
                 '--accelerator=type=nvidia-l4,count=1','--provisioning-model=STANDARD','--maintenance-policy=TERMINATE',
@@ -401,20 +430,48 @@ class Operator:
                 '--max-run-duration=3h','--instance-termination-action=STOP',
                 '--service-account='+self.config['service_account'],'--scopes=storage-rw',
                 '--network='+self.config['network'],'--subnet='+self.config['subnet'],'--no-address',
-                '--tags=cloudrag-i3-managed'],timeout=600)
+                '--tags=cloudrag-i3-managed','--description='+intent['ownership_marker']],timeout=600)
             observed = self.cloud.command(['compute','instances','describe',name,'--zone='+zone])
             alternate = dict(name=name,id=str(observed['id']),zone=zone)
             checked_vm(observed,name=name,instance_id=alternate['id'],zone=zone)
             self.state.setdefault('alternate_vms',[]).append(dict(alternate,disposable=True,disk_name=disk_name,
-                                                                 created_utc=self.now().isoformat()))
+                ownership_marker=intent['ownership_marker'],created_utc=observed['creationTimestamp']))
             self.persist()
             self.cloud.command(['compute','instances','stop',name,'--zone='+zone],timeout=600)
+        self.settle_alternate_creation(alternate)
         self.transfer_ip(alternate)
         self.state['selected_vm'] = alternate
         self.state.pop('alternate_creation_intent',None)
         self.persist()
         return dict(status='ALTERNATE_PREPARED',zone=zone,url='https://'+self.config['hostname'],
                     next_action='start con el mismo propósito; preflight verifica la identidad nueva')
+
+    def settle_alternate_creation(self, alternate):
+        settled = self.state.setdefault('alternate_creation_cost_settled_ids',[])
+        if alternate['id'] in settled:
+            return
+        observed = self.cloud.command(['compute','instances','describe',alternate['name'],'--zone='+alternate['zone']])
+        checked_vm(observed,name=alternate['name'],instance_id=alternate['id'],zone=alternate['zone'])
+        if observed['status'] != 'TERMINATED':
+            raise OperatorError('STOP de la VM alterna no confirmado. No se transfiere la IP; verifica status.')
+        try:
+            seconds = (datetime.fromisoformat(observed['lastStopTimestamp'])-
+                       datetime.fromisoformat(observed['lastStartTimestamp'])).total_seconds()
+        except (KeyError,ValueError):
+            raise OperatorError('Faltan timestamps de creación y STOP. Conserva la reserva y concilia el costo antes de usar la alterna.') from None
+        if seconds < 0:
+            raise OperatorError('Timestamps de cómputo inconsistentes. Conserva la reserva; no se transfiere la IP.')
+        cost = self.state.setdefault('cost',dict(estimated_usd=0,margin_usd=0,reservations={}))
+        estimate = seconds/3600*self.config['official_rates']['compute_usd_h']
+        cost['estimated_usd'] += estimate
+        cost['margin_usd'] += .25
+        cost['reservations'].pop('alternate-'+alternate['zone'][-1],None)
+        settled.append(alternate['id'])
+        self.persist()
+        save_state(self.cloud.root/('alternate-creation-cost-'+alternate['id']+'.json'),dict(
+            vm_id=alternate['id'],seconds=seconds,compute_estimate_usd=estimate,invoiced=False,
+            source_timestamps=dict(start=observed['lastStartTimestamp'],stop=observed['lastStopTimestamp']),
+            operations_margin_usd=.25,external_ip_assigned=False))
 
     def transfer_ip(self, target):
         # Reserve a separate upper bound for up to an hour detached at the differential rate.
