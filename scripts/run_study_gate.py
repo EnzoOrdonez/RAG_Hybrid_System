@@ -1,6 +1,7 @@
 """Auditable two-window gate; only a verified real aggregate may decide GO."""
 
 import argparse
+from contextlib import ExitStack
 from datetime import datetime, timezone
 import json
 import math
@@ -354,9 +355,18 @@ def make_app_adapter(
                 ),
             )
             captured = []
-            study_service.answer(
-                session, pipeline_factory, clock=clock, capture=captured.append
-            )
+            rerank_records = []
+            from scripts.study_operator.rerank_observer import observe, report
+
+            with ExitStack() as stack:
+                def observed_factory(condition):
+                    pipeline = pipeline_factory(condition)
+                    stack.enter_context(observe(pipeline, rerank_records))
+                    return pipeline
+
+                study_service.answer(
+                    session, observed_factory, clock=clock, capture=captured.append
+                )
             attempt = session.pending
             atomic_json(
                 Path(evidence_root) / (planned["attempt_id"] + "-response.json"),
@@ -367,6 +377,8 @@ def make_app_adapter(
                     Path(evidence_root) / (planned["attempt_id"] + "-pipeline.json"),
                     captured[0].model_dump(mode="json"),
                 )
+                atomic_json(Path(evidence_root) / (planned["attempt_id"] + "-rerank.json"),
+                            report(rerank_records, captured[0]))
             error = attempt["error"]
             return (
                 attempt["elapsed_ms"] / 1000 if error is None else None,
@@ -386,13 +398,19 @@ def make_app_adapter(
             atomic_json(path, dict(planned, question=question, status="running"))
         try:
             captured = []
-            payload, _ = execute_query(
-                planned["condition"],
-                question,
-                pipeline_factory,
-                clock=clock,
-                capture=captured.append,
-            )
+            rerank_records = []
+            from scripts.study_operator.rerank_observer import observe, report
+
+            with ExitStack() as stack:
+                def observed_factory(condition):
+                    pipeline = pipeline_factory(condition)
+                    stack.enter_context(observe(pipeline, rerank_records))
+                    return pipeline
+
+                payload, _ = execute_query(
+                    planned["condition"], question, observed_factory,
+                    clock=clock, capture=captured.append,
+                )
             elapsed = timer.elapsed_ms() / 1000
             if evidence_root:
                 atomic_json(
@@ -405,6 +423,8 @@ def make_app_adapter(
                         / (planned["attempt_id"] + "-pipeline.json"),
                         captured[0].model_dump(mode="json"),
                     )
+                    atomic_json(Path(evidence_root) / (planned["attempt_id"] + "-rerank.json"),
+                                report(rerank_records, captured[0]))
             return elapsed, True, None
         except Exception as exc:
             return None, False, type(exc).__name__
