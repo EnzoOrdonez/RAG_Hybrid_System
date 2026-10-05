@@ -45,7 +45,7 @@ class Cloud:
                     raise ValueError('Managed SSH zone required')
                 keys = self.command(['compute', 'instances', 'get-guest-attributes', arguments[2],
                     zones[0], '--query-path=hostkeys/'], timeout=min(timeout, 60))
-                if keys and keys.get('queryValue', {}).get('items') == []:
+                if isinstance(keys, list) and not keys:
                     raise ReadyPending('Aún faltan claves públicas del invitado. Espera y repite preflight dentro de 15 minutos; no aceptes una clave desconocida.')
                 # Keep -batch first after the proxy field for the exact SDK
                 # display inverse. PuTTY ignores SDK OpenSSH known_hosts options.

@@ -9,17 +9,22 @@ from pathlib import Path
 
 def api_host_key_flags(value):
     """Pin public host keys returned by the authenticated Google API."""
-    rows = value['queryValue']['items']
+    # gcloud's get-guest-attributes command flattens REST queryValue.items.
+    if not isinstance(value, list):
+        raise ValueError('SDK guest attributes must be a row list')
+    rows = value
     flags, seen = [], set()
     for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError('Invalid SDK guest attribute row')
         if row.get('namespace') != 'hostkeys':
             continue
-        algorithm = row['key']
+        algorithm = row.get('key')
         if algorithm not in {'ssh-rsa', 'ssh-ed25519', 'ecdsa-sha2-nistp256'}:
             raise ValueError('Unsupported API host key algorithm')
         if algorithm in seen:
             raise ValueError('Duplicate API host key algorithm')
-        encoded = row['value']
+        encoded = row.get('value')
         if not isinstance(encoded, str) or len(encoded) > 16384:
             raise ValueError('Invalid API host key')
         decoded = base64.b64decode(encoded, validate=True)

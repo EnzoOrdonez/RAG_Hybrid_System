@@ -15,8 +15,8 @@ pytestmark = pytest.mark.skipif(os.name != 'nt', reason='Windows SDK/PuTTY stdin
 
 def api_keys():
     wire = (11).to_bytes(4, 'big') + b'ssh-ed25519' + (32).to_bytes(4, 'big') + b'\x01'*32
-    return {'queryValue': {'items': [{'namespace':'hostkeys','key':'ssh-ed25519',
-                                     'value':base64.b64encode(wire).decode()}]}}
+    return [{'namespace':'hostkeys','key':'ssh-ed25519',
+             'value':base64.b64encode(wire).decode()}]
 
 
 def rpc_args():
@@ -119,3 +119,15 @@ def test_missing_or_discarded_public_host_key_never_sends_private_bytes(tmp_path
     with pytest.raises(OperatorError,match='clave del host'):
         cloud.command(rpc_args(),input_data=b'PRIVATE_NEVER_SENT',json_output=False)
     assert len(calls)==3
+
+
+def test_cli_json_contract_mismatch_is_readable_and_never_reaches_ssh(tmp_path):
+    calls=[]
+    def invoke(argv, **options):
+        calls.append(argv)
+        assert 'get-guest-attributes' in argv and options['input'] is None
+        return subprocess.CompletedProcess(argv,0,b'{"unexpected":"REST_WRAPPER"}',b'')
+    cloud=Cloud('gcloud-fixture','pure-loop-474323-a8',tmp_path,invoke=invoke)
+    with pytest.raises(OperatorError,match='clave del host'):
+        cloud.command(rpc_args(),input_data=b'PRIVATE_NEVER_SENT',json_output=False)
+    assert len(calls)==1

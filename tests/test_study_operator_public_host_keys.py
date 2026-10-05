@@ -12,7 +12,7 @@ def key(algorithm='ssh-ed25519'):
 def test_authenticated_api_wire_key_produces_exact_public_pin():
     row,data=key()
     digest=base64.b64encode(hashlib.sha256(data).digest()).decode().rstrip('=')
-    assert api_host_key_flags({'queryValue':{'items':[row]}})==['--ssh-flag=-hostkey','--ssh-flag=SHA256:'+digest]
+    assert api_host_key_flags([row])==['--ssh-flag=-hostkey','--ssh-flag=SHA256:'+digest]
 
 
 @pytest.mark.parametrize('mutation',['duplicate','wire_type','newline','unknown','empty'])
@@ -30,4 +30,10 @@ def test_untrusted_host_key_data_fails_closed(mutation):
     elif mutation=='empty':
         rows=[]
     with pytest.raises(ValueError):
-        api_host_key_flags({'queryValue':{'items':rows}})
+        api_host_key_flags(rows)
+
+
+@pytest.mark.parametrize('value',[{'queryValue':{'items':[]}},None,7,[None]])
+def test_sdk_shape_is_not_assumed_from_the_rest_api(value):
+    with pytest.raises(ValueError):
+        api_host_key_flags(value)
