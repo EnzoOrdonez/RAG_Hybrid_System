@@ -41,7 +41,6 @@ def app_command(config, boot_root, session_root, name, *, operation='serve', req
     argv = ['docker', 'run', '--rm=false', '--name', name, '--network', 'none', '--gpus', 'all',
             '--user', '10001:10001', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges',
             '--read-only', '--log-driver', 'none', '--tmpfs', '/tmp:rw,nosuid,nodev,size=512m',
-            '--tmpfs', '/opt/cloudrag/repository/data/llm_cache:rw,nosuid,nodev,size=8m,uid=10001,gid=10001',
             '-e', 'HOME=/tmp', '-e', 'CLOUDRAG_IMAGE_ID=' + config['image_id'],
             '-e', 'CLOUDRAG_ISOLATED_APP=1', '-e', 'CLOUDRAG_ISOLATED_SERVICE=1',
             '-e', 'CUDA_VISIBLE_DEVICES=0', '-e', 'CLOUDRAG_DEMO_GPU=1',
@@ -77,8 +76,13 @@ def assert_isolation(observed, expected_image):
                  '/opt/cloudrag/repository/data/indices'):
         if path not in mounts or mounts[path]['RW']:
             raise OperatorError('Montaje de solo lectura cambiado. Detén la admisión y revisa el recibo.')
-    if '/opt/cloudrag/repository/data/llm_cache' not in host.get('Tmpfs', {}):
-        raise OperatorError('Directorio transitorio de caché sin tmpfs. Detén la admisión y revisa los montajes.')
+    cache = PurePosixPath('/opt/cloudrag/repository/data/llm_cache')
+    covered = [PurePosixPath(path) for path in (host.get('Tmpfs') or {})]
+    covered.extend(PurePosixPath(m['Destination']) for m in observed['Mounts'])
+    if any(path.is_relative_to(cache) or cache.is_relative_to(path) for path in covered):
+        raise OperatorError('Un montaje oculta archivos versionados de caché. Mantén el checkout de solo lectura, sin superponer esa ruta; cache_enabled permanece False.')
+    if '/tmp' not in (host.get('Tmpfs') or {}):
+        raise OperatorError('Falta el directorio temporal en memoria. Mantén el checkout de solo lectura y revisa tmpfs de /tmp.')
     return {'container_isolation_verified': True}
 
 
