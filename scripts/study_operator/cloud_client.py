@@ -27,17 +27,42 @@ class Cloud:
         if json_output:
             argv.append('--format=json')
         environment = dict(os.environ, CLOUDSDK_CORE_DISABLE_FILE_LOGGING='1', CLOUDSDK_CORE_DISABLE_PROMPTS='1',
-                           CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED='False', PYTHONUTF8='1')
+                           CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED='False', PYTHONUTF8='1',
+                           CLOUDSDK_SSH_PUTTY_FORCE_CONNECT='False')
         before, began = datetime.now(timezone.utc).isoformat(), time.monotonic()
         save_state(str(stem) + '-intent.json', dict(command=argv, started_utc=before,
             output_policy='MEMORY_ONLY_PRIVATE' if private_output else 'TECHNICAL_JSON',
             stdin_policy='MEMORY_ONLY_NOT_LOGGED', status='STARTED'))
+        transport = 'SDK'
+        private_rpc = os.name == 'nt' and input_data is not None and arguments[:2] == ['compute', 'ssh']
         try:
-            result = self.invoke(argv, input=input_data, capture_output=True, timeout=timeout, env=environment)
+            actual = argv
+            if private_rpc:
+                from scripts.study_operator.windows_ssh import sdk_argv
+
+                # dry-run returns before renewing the expiring metadata key.
+                # Authenticate a fixed no-op first, with no private stdin and
+                # no automatic host-key acceptance, then send the real bytes.
+                authenticate = [arg for arg in arguments if not arg.startswith('--command=')]
+                self.command([*authenticate, '--command=true', '--ssh-flag=-batch'],
+                    json_output=False, timeout=min(timeout, 90))
+                dry = self.command([*arguments, '--dry-run', '--ssh-flag=-batch'],
+                    json_output=False, timeout=max(1, min(60, timeout-(time.monotonic()-began))))
+                actual = sdk_argv(dry, Path(self.sdk).parent/'sdk/plink.exe')
+                transport = 'VALIDATED_SDK_DRYRUN_PLINK'
+            remaining = max(1, timeout-(time.monotonic()-began))
+            result = self.invoke(actual, input=input_data, capture_output=True, timeout=remaining, env=environment)
         except subprocess.TimeoutExpired:
             save_state(str(stem) + '-receipt.json', dict(command=argv, exit_code=124, started_utc=before,
                 ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began))
             raise OperatorError('Venció el límite de la herramienta. Conserva el recibo y verifica status antes de reintentar.') from None
+        except (OperatorError, ValueError, OSError):
+            save_state(str(stem) + '-receipt.json', dict(command=argv, exit_code=1, started_utc=before,
+                ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began,
+                transport=transport, reason='SSH_TRANSPORT_REJECTED'))
+            if private_rpc:
+                raise OperatorError('El transporte SSH no pudo verificarse. Conserva runs, revisa la clave del host y status; no repitas start ni aceptes una clave cambiada.') from None
+            raise OperatorError('No se pudo ejecutar Google Cloud. Conserva runs y verifica la instalación del SDK antes de repetir; no crees recursos a ciegas.') from None
         stdout, stderr = result.stdout, result.stderr
         if isinstance(stdout, str):
             stdout = stdout.encode('utf-8')
@@ -49,7 +74,7 @@ class Cloud:
         receipt = dict(command=argv, started_utc=before, ended_utc=datetime.now(timezone.utc).isoformat(),
             duration_s=time.monotonic()-began, exit_code=result.returncode,
             stdout_sha256=hashlib.sha256(stdout).hexdigest(), stderr_sha256=hashlib.sha256(stderr).hexdigest(),
-            private_output_not_persisted=private_output)
+            private_output_not_persisted=private_output, transport=transport)
         save_state(str(stem) + '-receipt.json', receipt)
         if result.returncode:
             # Capacity is a resource error, not a measured gate failure.
