@@ -62,6 +62,23 @@ caduca a las 24 horas o al completar la sesión. Se puede revocar sin borrar dat
 
 ## Falta de capacidad
 
+Al cerrar cada jornada, después de completar y respaldar todas sus sesiones,
+archiva las copias locales del disco. GCS sigue guardando sus respaldos por
+código durante el periodo; también quedan descargas privadas verificadas en
+el equipo del investigador. Una sesión abierta o un respaldo distinto bloquea
+el archivo. En `study`, confirma escribiendo `ARCHIVAR`. El comando cierra la
+app; ejecuta `stop` después, antes de dejar el servidor para el día siguiente.
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 archive-local
+& C:/CloudRAG/operator-iteration4/operator.ps1 archive-local --execute
+& C:/CloudRAG/operator-iteration4/operator.ps1 stop
+```
+
+Así el disco de origen queda vacío y conciliado antes de un posible stockout
+en el próximo arranque. El operador consulta GCS antes de emitir una invitación
+y rechaza un código ya respaldado aunque su copia de disco esté archivada.
+
 Ante `ZONE_RESOURCE_POOL_EXHAUSTED`, conserva el error. Una conmutación exige que
 el operador haya comprobado que no quedan sesiones, invitaciones ni copias
 pendientes en el disco activo. La política conservadora impide conmutar durante

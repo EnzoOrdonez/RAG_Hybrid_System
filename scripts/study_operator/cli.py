@@ -32,7 +32,7 @@ def parser():
     tls.add_argument('--first-session',required=True)
     alternate = sub.add_parser('failover')
     alternate.add_argument('--zone',required=True,choices=('us-central1-b','us-central1-c'))
-    for name in ('purge-study','withdraw'):
+    for name in ('purge-study','withdraw','archive-local'):
         command = sub.add_parser(name)
         if name == 'withdraw':
             command.add_argument('code')
@@ -65,12 +65,13 @@ def main(argv=None):
             save_state(run/'receipt.json',dict(status='INVITATION_HASH_REGISTERED',ttl_hours=24,token_not_persisted=True))
             print('Token (se muestra una sola vez): '+token)
             return 0
-        if operation in {'withdraw','purge-study'}:
+        if operation in {'withdraw','purge-study','archive-local'}:
             confirmation = None
             if args.execute and operator.state.get('purpose') == 'study':
                 if not sys.stdin.isatty():
                     raise OperatorError('El borrado study exige confirmar en consola. No uses stdin redirigido.')
-                confirmation = input('Escribe '+(args.code if operation == 'withdraw' else 'PURGAR')+': ')
+                confirmation = input('Escribe '+(args.code if operation == 'withdraw' else
+                                                'ARCHIVAR' if operation == 'archive-local' else 'PURGAR')+': ')
             result = operator.delete_sessions(operation,code=getattr(args,'code',None),
                 dry_run=not args.execute,confirmation=confirmation)
         elif operation == 'start':

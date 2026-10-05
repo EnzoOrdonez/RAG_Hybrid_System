@@ -53,7 +53,7 @@ def _save(path, value):
             os.close(fd)
 
 
-def execute(storage, prefix, local_download, *, dry_run=True, disk_cleanup=None):
+def execute(storage, prefix, local_download, *, dry_run=True, disk_cleanup=None, retain_remote=False):
     planned = inventory(storage, prefix)
     if dry_run:
         return {'status': 'DRY_RUN', 'scope_sha256': hashlib.sha256(prefix.encode()).hexdigest(),
@@ -68,6 +68,8 @@ def execute(storage, prefix, local_download, *, dry_run=True, disk_cleanup=None)
             getattr(state_path.lstat(), 'st_file_attributes', 0) & 0x400):
         raise OperatorError('Recibo de borrado enlazado. Usa un directorio privado real.')
     previous = json.loads(state_path.read_text(encoding='utf-8')) if state_path.exists() else None
+    if previous and previous.get('retain_remote',False) != retain_remote:
+        raise OperatorError('Propósito de transacción distinto. Conserva el recibo; no mezcles archivo local y purga.')
     if previous and previous['stage'] == 'COMPLETE':
         if planned:
             raise OperatorError('Hay datos nuevos tras un borrado completo. Usa una transacción nueva; no reutilices su recibo.')
@@ -85,7 +87,7 @@ def execute(storage, prefix, local_download, *, dry_run=True, disk_cleanup=None)
             raise OperatorError('Faltan objetos antes de verificar todas las descargas. Conserva el recibo y revisa el servidor.')
     else:
         previous = dict(schema_version=1, scope_sha256=scope, stage='DOWNLOADING',
-                        objects=planned, verified_downloads=[], deleted_generations=[])
+                        objects=planned, verified_downloads=[], deleted_generations=[],retain_remote=retain_remote)
         _save(state_path, previous)
     receipts = []
     for item in previous['objects']:
@@ -123,6 +125,17 @@ def execute(storage, prefix, local_download, *, dry_run=True, disk_cleanup=None)
     if inventory(storage, prefix) != planned:
         raise OperatorError('Cambió el inventario durante la descarga. No se borra; vuelve a congelar la admisión.')
     previous['verified_downloads'] = receipts
+    if retain_remote:
+        previous['stage'] = 'ARCHIVE_DISK_CLEANUP'
+        _save(state_path,previous)
+        disk = disk_cleanup(receipts)
+        if inventory(storage,prefix) != planned or not disk.get('empty'):
+            raise OperatorError('Archivo local no completo. Conserva las copias; no se borró ningún objeto del bucket.')
+        previous['stage'] = 'COMPLETE_RETAINED_REMOTE'
+        previous['disk'] = disk
+        _save(state_path,previous)
+        return dict(status='ARCHIVED_LOCAL_VERIFIED',verified_downloads=receipts,deleted=0,disk=disk,
+                    remote_objects_retained=len(planned),scope_sha256=scope,transaction=str(state_path))
     previous['stage'] = 'DELETING'
     _save(state_path, previous)
     for item in planned:

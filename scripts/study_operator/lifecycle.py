@@ -210,6 +210,11 @@ class Operator:
         if purpose != 'study' and (cell not in {1,2,3,4} or profile not in {'with_experience','without_experience'}):
             raise OperatorError('La invitación sintética exige --cell 1|2|3|4 y --profile with_experience|without_experience.')
         self.preflight()
+        from scripts.study_operator.gcs import Storage
+
+        prefix = 'periods/'+self.config['period_id']+'/'+code+'/'
+        if Storage(self.config['sessions_bucket'],self.cloud.owner_token).objects(prefix):
+            raise OperatorError('El código ya tiene una sesión respaldada en este periodo. No repitas la observación; revisa su recibo.')
         token = secrets.token_urlsafe(32)
         request = dict(operation='invite',participant_id=code,token_sha256=hashlib.sha256(token.encode()).hexdigest(),
                        cell=cell,profile=profile)
@@ -443,17 +448,21 @@ class Operator:
 
         purpose = self.state.get('purpose')
         purpose_allowed(purpose,self.root)
-        if operation not in {'withdraw','purge-study'}:
-            raise OperatorError('Operación de borrado inválida. Usa withdraw o purge-study.')
+        if operation not in {'withdraw','purge-study','archive-local'}:
+            raise OperatorError('Operación de mantenimiento inválida. Usa withdraw, purge-study o archive-local.')
         if operation == 'withdraw':
             participant_code(code)
         if not dry_run:
-            confirm_deletion(operation,code,purpose,confirmation)
+            if operation == 'archive-local':
+                if purpose == 'study' and confirmation != 'ARCHIVAR':
+                    raise OperatorError('Escribe ARCHIVAR en consola para retirar las copias de disco y conservar GCS.')
+            else:
+                confirm_deletion(operation,code,purpose,confirmation)
         self.maintenance()
         prefix = 'periods/'+self.config['period_id']+'/' + (code+'/' if code else '')
         storage = Storage(self.config['sessions_bucket'],self.cloud.owner_token,
                           creation_anchor=self.config.get('sessions_bucket_creation'))
-        scope = hashlib.sha256((self.config['sessions_bucket']+'\0'+prefix).encode()).hexdigest()
+        scope = hashlib.sha256((operation+'\0'+self.config['sessions_bucket']+'\0'+prefix).encode()).hexdigest()
         transactions = self.state.setdefault('deletion_transactions',{})
         transaction = transactions.get(scope)
         if not transaction:
@@ -507,22 +516,32 @@ class Operator:
             save_state(receipts_path,verified)
 
         def disk_cleanup(downloads):
+            if operation == 'archive-local':
+                from scripts.study_operator.archive_local import verified_closed_copies
+
+                verified_closed_copies(verified,downloads)
             result = self.bridge(dict(operation='clean-disk',plan=plan,verified_downloads=verified),private=True)['result']
             return result
 
-        receipt = execute(storage,prefix,local,dry_run=False,disk_cleanup=disk_cleanup)
+        receipt = execute(storage,prefix,local,dry_run=False,disk_cleanup=disk_cleanup,
+                          retain_remote=operation=='archive-local')
         if not code:
             self.state['failover_data_reconciled'] = True
             self.persist()
-        summary = dict(status=receipt['status'],remote_versions_empty=receipt['remote_versions_empty'],
-            remote_soft_deleted_empty=receipt['remote_soft_deleted_empty'],disk_empty=receipt['disk']['empty'],
+        summary = dict(status=receipt['status'],remote_versions_empty=receipt.get('remote_versions_empty',False),
+            remote_soft_deleted_empty=receipt.get('remote_soft_deleted_empty',False),disk_empty=receipt['disk']['empty'],
             downloaded_disk_files=len(verified),deleted_generations=receipt['deleted'],
             private_receipt=str(local/'receipt.json'),soft_delete_verification=storage.soft_delete_verification)
+        if operation == 'archive-local':
+            summary['remote_objects_retained'] = receipt['remote_objects_retained']
         receipt['soft_delete_verification'] = storage.soft_delete_verification
         save_state(local/'receipt.json',receipt)
         self.state['deletion_transactions'].pop(scope,None)
         self.persist()
         return summary
+
+    def archive_local(self, *, dry_run=True, confirmation=None):
+        return self.delete_sessions('archive-local',dry_run=dry_run,confirmation=confirmation)
 
     def export_anonymized(self):
         self.maintenance()

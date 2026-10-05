@@ -91,11 +91,14 @@ def test_start_rejects_other_gpu_and_changed_identity(tmp_path):
         operator.start('smoke')
 
 
-def test_stop_idempotent_and_no_invitation_in_receipts(tmp_path):
+def test_stop_idempotent_and_no_invitation_in_receipts(tmp_path,monkeypatch):
     operator,cloud = installation(tmp_path)
     assert operator.stop()['status'] == 'TERMINATED_VERIFIED'
     assert not any(args[:3] == ['compute','instances','stop'] for args,_ in cloud.calls)
     operator.preflight = lambda:dict(status='READY_VERIFIED')
+    cloud.owner_token = lambda:'synthetic-fixture-no-network'
+    monkeypatch.setattr('scripts.study_operator.gcs.Storage',lambda *args,**options:
+                        type('Empty',(),{'objects':lambda self,prefix:[]})())
     operator.state['purpose'] = 'smoke'
     requests = []
     operator.bridge = lambda request,**options: requests.append((request,options)) or {}
@@ -103,6 +106,18 @@ def test_stop_idempotent_and_no_invitation_in_receipts(tmp_path):
     assert len(token) >= 32 and 'token_sha256' in requests[0][0]
     assert token not in json.dumps(requests) and requests[0][1]['private']
     assert operator.state['failover_data_reconciled'] is False
+
+
+def test_archived_code_cannot_be_reinvited_from_empty_disk(tmp_path,monkeypatch):
+    operator,cloud = installation(tmp_path)
+    operator.state['purpose'] = 'smoke'
+    operator.preflight = lambda:dict(status='READY_VERIFIED')
+    cloud.owner_token = lambda:'synthetic-fixture-no-network'
+    monkeypatch.setattr('scripts.study_operator.gcs.Storage',lambda *args,**options:
+                        type('Backed',(),{'objects':lambda self,prefix:[{'name':prefix+'full_session.json'}]})())
+    operator.bridge = lambda *args,**options:pytest.fail('No new invitation hash may reach the guest')
+    with pytest.raises(OperatorError,match='ya tiene una sesión'):
+        operator.invite('P999',cell=1,profile='without_experience')
 
 
 def test_invitation_missing_synthetic_assignment_rejected_before_cloud_preflight(tmp_path):
