@@ -46,6 +46,7 @@ def app_command(config, boot_root, session_root, name, *, operation='serve', req
             '-e', 'CUDA_VISIBLE_DEVICES=0', '-e', 'CLOUDRAG_DEMO_GPU=1',
             *bind(config['asset_root'] + '/data/models', '/opt/cloudrag/repository/data/models'),
             *bind(config['asset_root'] + '/data/indices', '/opt/cloudrag/repository/data/indices'),
+            *bind(root / 'embeddings-initialization', '/opt/cloudrag/repository/data/embeddings'),
             *bind(root / 'config', '/reviewed'), *bind(root / 'meta', '/deployment', operation != 'freeze'),
             *bind(root / 'sockets', '/service'), *bind(root / 'web', '/web', False),
             *bind(PurePosixPath(session_root).parent / 'private-inventory', '/private-inventory', False),
@@ -73,7 +74,7 @@ def assert_isolation(observed, expected_image):
     if any(m.get('Destination') == '/var/run/docker.sock' for m in observed['Mounts']):
         raise OperatorError('Docker socket expuesto a la app. Detén el despliegue y corrige los montajes.')
     for path in ('/service', '/deployment', '/reviewed', '/opt/cloudrag/repository/data/models',
-                 '/opt/cloudrag/repository/data/indices'):
+                 '/opt/cloudrag/repository/data/indices', '/opt/cloudrag/repository/data/embeddings'):
         if path not in mounts or mounts[path]['RW']:
             raise OperatorError('Montaje de solo lectura cambiado. Detén la admisión y revisa el recibo.')
     cache = PurePosixPath('/opt/cloudrag/repository/data/llm_cache')

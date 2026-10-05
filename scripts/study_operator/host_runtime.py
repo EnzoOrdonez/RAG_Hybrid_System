@@ -104,7 +104,10 @@ class Host:
         return self.step(command, timeout=300, capture=detached)
 
     def prepare(self):
-        for directory in ('meta','config','sockets','web','caddy-config'):
+        # Frozen EmbeddingManager initializes this ignored directory even for
+        # query-only retrieval. Provide it empty and read-only; do not mask
+        # tracked source, model/index bytes or the disabled LLM cache.
+        for directory in ('meta','config','sockets','web','caddy-config','embeddings-initialization'):
             path = self.root / directory
             path.mkdir(mode=0o750)
             os.chown(path, 10001 if directory in {'meta','web'} else 0, 10001)

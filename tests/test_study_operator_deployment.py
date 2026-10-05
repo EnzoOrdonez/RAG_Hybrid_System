@@ -37,6 +37,7 @@ def test_app_and_freeze_share_service_and_generation_environment():
         assert 'CLOUDRAG_DEMO_GPU=1' in command and 'CUDA_VISIBLE_DEVICES=0' in command
         assert not any('/opt/cloudrag/repository/data/llm_cache:' in argument for argument in command)
         assert 'type=bind,source=/srv/cloudrag/assets/data/models,target=/opt/cloudrag/repository/data/models,readonly' in command
+        assert 'type=bind,source=/srv/cloudrag/iteration4/boot/embeddings-initialization,target=/opt/cloudrag/repository/data/embeddings,readonly' in command
         assert '/service/generation.sock' in command
     assert 'type=bind,source=/srv/cloudrag/iteration4/boot/meta,target=/deployment,readonly' in serving
     assert 'type=bind,source=/srv/cloudrag/iteration4/boot/meta,target=/deployment' in freezing
@@ -49,7 +50,20 @@ def isolated():
             Tmpfs={'/tmp':'rw,size=512m'}),
         Mounts=[dict(Destination=p, RW=False) for p in
             ['/service','/deployment','/reviewed','/opt/cloudrag/repository/data/models',
-             '/opt/cloudrag/repository/data/indices']])
+             '/opt/cloudrag/repository/data/indices','/opt/cloudrag/repository/data/embeddings']])
+
+
+@pytest.mark.parametrize('mutation', ['missing','writable'])
+def test_embedding_initialization_cannot_write_query_caches(mutation):
+    value = isolated()
+    mount = next(row for row in value['Mounts']
+                 if row['Destination'] == '/opt/cloudrag/repository/data/embeddings')
+    if mutation == 'missing':
+        value['Mounts'].remove(mount)
+    else:
+        mount['RW'] = True
+    with pytest.raises(OperatorError, match='solo lectura'):
+        assert_isolation(value, 'sha256:'+'b'*64)
 
 
 @pytest.mark.parametrize('mutation', ['network','pid','socket','logs','mount','cache','cache_file','source_parent'])
