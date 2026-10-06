@@ -5,6 +5,14 @@ la instalación nueva sellada en `C:/CloudRAG/operator-iteration4`, con su
 `installation.json`, imagen preparada y recibos. No se usa el operador anterior.
 El ensayo literal, la aceptación del estímulo y la compuerta nueva están pendientes.
 
+Usa PowerShell sin administrador, el SDK de Google Cloud ya autenticado y el
+cliente existente `C:/Windows/System32/OpenSSH/ssh.exe`. Las llamadas privadas
+usan ese cliente con claves públicas verificadas por la API y configuración
+SSH aislada. La clave existente del SDK conserva su ubicación; no la copies
+ni la imprimas. Si falta un requisito, conserva el recibo y corrige la
+instalación antes de `start`. No se crean credenciales ni se aceptan claves
+de host desconocidas para sortear el preflight.
+
 ## Preparación de una sesión, al menos tres días antes
 
 Abre PowerShell sin administrador. No uses `Start-Transcript`, redirecciones ni
