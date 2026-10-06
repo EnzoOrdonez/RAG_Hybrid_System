@@ -38,7 +38,7 @@ class Cloud:
         try:
             actual = argv
             if private_rpc:
-                from scripts.study_operator.windows_ssh import api_host_key_flags, sdk_argv
+                from scripts.study_operator.windows_ssh import api_host_key_flags, native_argv, native_run, sdk_argv
 
                 zones = [arg for arg in arguments if arg.startswith('--zone=')]
                 if len(zones) != 1 or zones[0].split('=', 1)[1] not in {'us-central1-a', 'us-central1-b', 'us-central1-c'}:
@@ -67,9 +67,18 @@ class Cloud:
                 actual_pins = [actual[index + 1] for index, arg in enumerate(actual[:-1]) if arg == '-hostkey']
                 if actual_pins != expected_pins:
                     raise ValueError('SDK discarded authenticated host key pins')
-                transport = 'VALIDATED_SDK_DRYRUN_PLINK'
+                vm = self.command(['compute', 'instances', 'describe', arguments[2], zones[0]],
+                    timeout=max(1, min(60, timeout-(time.monotonic()-began))))
+                if (vm['name'] != arguments[2]
+                        or vm['zone'].split('/')[-1] != zones[0].split('=', 1)[1]):
+                    raise ValueError('Authenticated VM identity differs')
+                actual = native_argv(actual, keys, sdk=self.sdk,
+                    target=dict(name=vm['name'], id=str(vm['id']), zone=vm['zone'].split('/')[-1]),
+                    known_hosts=Path(str(stem)+'-public-hostkeys'))
+                transport = 'WINDOWS_OPENSSH_IAP_PINNED'
             remaining = max(1, timeout-(time.monotonic()-began))
-            result = self.invoke(actual, input=input_data, capture_output=True, timeout=remaining, env=environment)
+            invoke = native_run if private_rpc and self.invoke is subprocess.run else self.invoke
+            result = invoke(actual, input=input_data, capture_output=True, timeout=remaining, env=environment)
         except subprocess.TimeoutExpired as error:
             # A timed-out public tool can still explain the transport failure.
             # Private RPC/token output must stay in memory even on timeout.

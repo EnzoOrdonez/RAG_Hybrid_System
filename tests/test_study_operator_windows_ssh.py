@@ -2,15 +2,28 @@ import base64
 import json
 import os
 import subprocess
+from pathlib import Path
 
 import pytest
 
 from scripts.study_operator.cloud_client import Cloud
 from scripts.study_operator.policy import OperatorError, ReadyPending
-from scripts.study_operator.windows_ssh import api_host_key_flags, sdk_argv, windows_argv
+from scripts.study_operator.windows_ssh import api_host_key_flags, native_argv, sdk_argv, windows_argv
 
 
 pytestmark = pytest.mark.skipif(os.name != 'nt', reason='Windows SDK/PuTTY stdin and native argv contract')
+
+
+@pytest.fixture(autouse=True)
+def owned_client_files(tmp_path, monkeypatch):
+    import scripts.study_operator.windows_ssh as module
+    ssh, key = tmp_path/'ssh.exe', tmp_path/'synthetic-key'
+    ssh.write_bytes(b'')
+    key.write_bytes(b'SYNTHETIC_NOT_A_PRIVATE_KEY')
+    original = module.native_argv
+    monkeypatch.setattr(module, 'native_argv', lambda *args, **kwargs:
+                        original(*args, **kwargs, ssh=ssh, key=key))
+    return ssh, key
 
 
 def api_keys():
@@ -20,7 +33,7 @@ def api_keys():
 
 
 def rpc_args():
-    return ['compute', 'ssh', 'fixture', '--zone=us-central1-b']
+    return ['compute', 'ssh', 'cloudrag-fixture', '--zone=us-central1-b']
 
 
 def test_sdk_nested_iap_display_recovers_exact_arguments(tmp_path):
@@ -44,7 +57,9 @@ def test_rpc_private_stdin_and_output_bypass_sdk_mediation(tmp_path):
     executable = tmp_path/'SDK path/sdk/plink.exe'
     sdk = executable.parent.parent/'gcloud.cmd'
     fingerprint = api_host_key_flags(api_keys())[1].removeprefix('--ssh-flag=')
-    command = subprocess.list2cmdline([str(executable), '-batch', '-hostkey', fingerprint, 'host', 'fixed-command']).encode()
+    proxy = 'gcloud compute start-iap-tunnel cloudrag-fixture 22 --zone=us-central1-b --project=pure-loop-474323-a8'
+    command = subprocess.list2cmdline([str(executable), '-T', '-proxycmd', proxy,
+        '-batch', '-hostkey', fingerprint, 'user@compute.123', 'sudo', '-n', 'python3', '-B', '-']).encode()
     calls = []
 
     def invoke(argv, **kwargs):
@@ -59,14 +74,20 @@ def test_rpc_private_stdin_and_output_bypass_sdk_mediation(tmp_path):
         if '--dry-run' in argv:
             assert kwargs['input'] is None
             return subprocess.CompletedProcess(argv, 0, command, b'')
-        assert argv[0] == str(executable) and kwargs['input'] == secret
+        if argv[1:4] == ['compute', 'instances', 'describe']:
+            assert kwargs['input'] is None
+            return subprocess.CompletedProcess(argv, 0, json.dumps(dict(
+                name='cloudrag-fixture', id='123', zone='zones/us-central1-b')).encode(), b'')
+        assert Path(argv[0]).name == 'ssh.exe' and kwargs['input'] == secret
+        assert 'StrictHostKeyChecking=yes' in argv and 'UpdateHostKeys=no' in argv
         assert kwargs['env']['CLOUDSDK_SSH_PUTTY_FORCE_CONNECT'] == 'False'
         return subprocess.CompletedProcess(argv, 0, secret, b'')
 
     cloud = Cloud(str(sdk), 'pure-loop-474323-a8', tmp_path/'runs', invoke=invoke)
     assert cloud.command(rpc_args(), input_data=secret,
         private_output=True, json_output=False) == secret
-    assert len(calls) == 4
+    assert len(calls) == 5
+    assert json.loads((cloud.root/'0001-receipt.json').read_bytes())['transport'] == 'WINDOWS_OPENSSH_IAP_PINNED'
     assert secret.decode() not in ''.join(path.read_text() for path in cloud.root.iterdir())
 
 
@@ -145,3 +166,73 @@ def test_boot_keys_not_published_yet_waits_without_private_ssh(tmp_path):
         cloud.command(rpc_args(), input_data=b'PRIVATE_NEVER_SENT', json_output=False)
     assert len(calls) == 1
     assert json.loads((tmp_path/'0001-receipt.json').read_bytes())['reason'] == 'PUBLIC_HOST_KEYS_PENDING'
+
+
+def native_fixture(tmp_path):
+    sdk = tmp_path/'SDK path/bin/gcloud.cmd'
+    pins = api_host_key_flags(api_keys())[1].removeprefix('--ssh-flag=')
+    proxy = 'gcloud start-iap-tunnel cloudrag-fixture 22 --zone=us-central1-b --project=pure-loop-474323-a8'
+    argv = [str(sdk.parent/'sdk/plink.exe'), '-T', '-proxycmd', proxy, '-batch',
+            '-hostkey', pins, 'user@compute.123', 'sudo', '-n', 'python3', '-B', '-']
+    target = dict(name='cloudrag-fixture', id='123', zone='us-central1-b')
+    return sdk, argv, target
+
+
+@pytest.mark.parametrize('change', ['id', 'zone', 'key', 'command', 'alias', 'executable'])
+def test_native_target_and_pins_fail_closed(tmp_path, owned_client_files, change):
+    sdk, argv, target = native_fixture(tmp_path)
+    rows = api_keys()
+    if change == 'id':
+        target['id'] = '124'
+    elif change == 'zone':
+        target['zone'] = 'europe-west1-b'
+    elif change == 'key':
+        rows[0]['value'] = base64.b64encode(b'wrong').decode()
+    elif change == 'command':
+        argv[-5] = 'other'
+    elif change == 'alias':
+        argv[argv.index('user@compute.123')] = 'user@compute.124'
+    else:
+        argv[0] = 'other.exe'
+    with pytest.raises(ValueError):
+        native_argv(argv, rows, sdk=sdk, target=target, known_hosts=tmp_path/'pins',
+                    ssh=owned_client_files[0], key=owned_client_files[1])
+    assert not (tmp_path/'pins').exists()
+
+
+def test_native_pins_are_public_and_config_is_isolated(tmp_path, owned_client_files):
+    sdk, argv, target = native_fixture(tmp_path)
+    actual = native_argv(argv, api_keys(), sdk=sdk, target=target, known_hosts=tmp_path/'pins',
+                         ssh=owned_client_files[0], key=owned_client_files[1])
+    assert actual[1:4] == ['-F', 'NUL', '-T']
+    assert actual[-6:] == ['user@compute.123', 'sudo', '-n', 'python3', '-B', '-']
+    assert 'StrictHostKeyChecking=yes' in actual and 'GlobalKnownHostsFile=NUL' in actual
+    assert 'PasswordAuthentication=no' in actual and 'CheckHostIP=no' in actual
+    assert (tmp_path/'pins').read_text().startswith('compute.123 ssh-ed25519 ')
+    with pytest.raises(FileExistsError):
+        native_argv(argv, api_keys(), sdk=sdk, target=target, known_hosts=tmp_path/'pins',
+                    ssh=owned_client_files[0], key=owned_client_files[1])
+
+
+def test_native_timeout_kills_only_owned_child_tree_and_preserves_private_ram(monkeypatch):
+    import scripts.study_operator.windows_ssh as module
+    sentinel = b'PRIVATE_NATIVE_TIMEOUT_SENTINEL'
+    killed = []
+
+    class Child:
+        pid = 1234
+        calls = 0
+
+        def communicate(self, **options):
+            self.calls += 1
+            if self.calls == 1:
+                assert options['input'] == sentinel
+                raise subprocess.TimeoutExpired('ssh', 1)
+            return sentinel, b''
+
+    monkeypatch.setattr(module.subprocess, 'Popen', lambda *a, **k: Child())
+    monkeypatch.setattr(module.subprocess, 'run', lambda argv, **options: killed.append(argv))
+    with pytest.raises(subprocess.TimeoutExpired) as error:
+        module.native_run(['ssh.exe'], input=sentinel, capture_output=True, timeout=1, env={})
+    assert error.value.stdout == sentinel
+    assert killed == [['taskkill', '/PID', '1234', '/T', '/F']]
