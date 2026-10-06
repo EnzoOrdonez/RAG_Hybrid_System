@@ -41,7 +41,7 @@ def app_command(config, boot_root, session_root, name, *, operation='serve', req
     argv = ['docker', 'run', '--rm=false', '--name', name, '--network', 'none', '--gpus', 'all',
             '--user', '10001:10001', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges',
             '--read-only', '--log-driver', 'none', '--tmpfs', '/tmp:rw,nosuid,nodev,size=512m',
-            '-e', 'HOME=/tmp', '-e', 'CLOUDRAG_IMAGE_ID=' + config['image_id'],
+            '-e', 'HOME=/tmp', '-e', 'USER=cloudrag', '-e', 'CLOUDRAG_IMAGE_ID=' + config['image_id'],
             '-e', 'CLOUDRAG_ISOLATED_APP=1', '-e', 'CLOUDRAG_ISOLATED_SERVICE=1',
             '-e', 'CUDA_VISIBLE_DEVICES=0', '-e', 'CLOUDRAG_DEMO_GPU=1',
             *bind(config['asset_root'] + '/data/models', '/opt/cloudrag/repository/data/models'),
@@ -68,7 +68,8 @@ def assert_isolation(observed, expected_image):
             or set(host.get('CapDrop', [])) != {'ALL'}
             or 'no-new-privileges' not in [x.split('=')[0] for x in host.get('SecurityOpt', [])]
             or host.get('LogConfig', {}).get('Type') != 'none'
-            or observed['Config'].get('User') != '10001:10001'):
+            or observed['Config'].get('User') != '10001:10001'
+            or 'USER=cloudrag' not in observed['Config'].get('Env', [])):
         raise OperatorError('Contenedor sin aislamiento mínimo. Mantén cerrada la admisión y revisa el arranque.')
     mounts = {m['Destination']: m for m in observed['Mounts']}
     if any(m.get('Destination') == '/var/run/docker.sock' for m in observed['Mounts']):

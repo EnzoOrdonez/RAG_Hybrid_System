@@ -1,4 +1,7 @@
 import copy
+import getpass
+import sys
+from types import SimpleNamespace
 import pytest
 
 from scripts.study_operator.deployment import app_command, assert_isolation, caddyfile, checked_config
@@ -43,8 +46,27 @@ def test_app_and_freeze_share_service_and_generation_environment():
     assert 'type=bind,source=/srv/cloudrag/iteration4/boot/meta,target=/deployment' in freezing
 
 
+def test_numeric_uid_without_passwd_uses_technical_runtime_user(monkeypatch):
+    """Torch's default cache path must work without a named /etc/passwd entry."""
+    def unknown_uid(uid):
+        raise KeyError(uid)
+    monkeypatch.setitem(sys.modules, 'pwd', SimpleNamespace(getpwuid=unknown_uid))
+    monkeypatch.setattr(getpass.os, 'getuid', lambda: 10001, raising=False)
+    monkeypatch.setattr(getpass.os, 'environ', {})
+    with pytest.raises((KeyError, OSError)):
+        getpass.getuser()
+    command = app_command(config(), '/srv/cloudrag/iteration4/boot',
+                          '/srv/cloudrag/iteration4/sessions', 'app')
+    environment = dict(argument.split('=', 1) for index, argument in enumerate(command)
+                       if index and command[index-1] == '-e')
+    monkeypatch.setattr(getpass.os, 'environ', environment)
+    assert getpass.getuser() == 'cloudrag'
+    assert environment['HOME'] == '/tmp'
+    assert command[command.index('--user')+1] == '10001:10001'
+
+
 def isolated():
-    return dict(Image='sha256:'+'b'*64, Config={'User':'10001:10001'},
+    return dict(Image='sha256:'+'b'*64, Config={'User':'10001:10001', 'Env':['USER=cloudrag']},
         HostConfig=dict(NetworkMode='none', PidMode='', ReadonlyRootfs=True, CapDrop=['ALL'],
             SecurityOpt=['no-new-privileges'], LogConfig={'Type':'none'},
             Tmpfs={'/tmp':'rw,size=512m'}),
@@ -66,10 +88,12 @@ def test_embedding_initialization_cannot_write_query_caches(mutation):
         assert_isolation(value, 'sha256:'+'b'*64)
 
 
-@pytest.mark.parametrize('mutation', ['network','pid','socket','logs','mount','cache','cache_file','source_parent'])
+@pytest.mark.parametrize('mutation', ['network','pid','socket','logs','mount','cache','cache_file','source_parent','runtime_user'])
 def test_actual_docker_isolation_rejects_escape_paths(mutation):
     value = copy.deepcopy(isolated())
-    if mutation in ('network','pid'):
+    if mutation == 'runtime_user':
+        value['Config']['Env'] = ['USER=root']
+    elif mutation in ('network','pid'):
         value['HostConfig']['NetworkMode' if mutation == 'network' else 'PidMode'] = 'host'
     elif mutation == 'socket':
         value['Mounts'].append(dict(Destination='/var/run/docker.sock',RW=False))
