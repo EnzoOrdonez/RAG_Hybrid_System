@@ -170,7 +170,13 @@ para mantenimiento; no emitas otra invitación hasta un nuevo start y preflight.
 Los comandos de borrado cierran la app primero y dejan la admisión bloqueada.
 Sin `--execute` solo inventarían. La ejecución descarga todas las generaciones
 y las copias de disco al almacenamiento privado local, verifica SHA-256, borra
-el ámbito y verifica listados normales, con versiones y soft-deleted vacíos.
+el ámbito y verifica listados normales y con versiones vacíos. Si la API de
+soft-deleted devuelve `HTTP400_POLICY_REQUIRED` por retención cero, exige la
+identidad y el historial inicial anclado de retención cero sin modificaciones
+posteriores; el recibo distingue ese método de un listado API vacío exitoso.
+Un error distinto o un historial incompleto bloquea la eliminación. No se
+activa soft delete para obtener un listado. La precisión está documentada en
+`docs/STUDY_ITERATION4_SOFT_DELETE_VERIFICATION_2026-10-05.md`.
 Las descargas privadas siguen bajo custodia del investigador: retirar datos del
 servidor no equivale a autorizar conservarlos para análisis tras un retiro.
 Enzo debe resolver también esas copias privadas y su lista separada conforme a
