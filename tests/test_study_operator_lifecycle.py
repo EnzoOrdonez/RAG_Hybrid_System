@@ -313,7 +313,7 @@ def test_absent_owned_ip_settles_once_and_invalidates_live_tls_state(tmp_path):
     operator.state.update(reserved_address_id='42',
         ip_reserved_utc='2026-10-03T00:00:00+00:00',
         ip_associated_utc='2026-10-03T00:00:00+00:00',
-        ready={'status':'READY_VERIFIED'},snapshots=[{'id':'preserved-fixture'}],
+        ready={'status':'READY_VERIFIED'},ready_verified=True,snapshots=[{'id':'preserved-fixture'}],
         cost=dict(estimated_usd=0,margin_usd=0,reservations={'ip-own':.72,'other':.25}))
     operator.config['prepared_snapshot']={'id':'preserved-fixture'}
     assert operator.ip_release()['status']=='ALREADY_RELEASED'
@@ -321,6 +321,7 @@ def test_absent_owned_ip_settles_once_and_invalidates_live_tls_state(tmp_path):
     assert 'ip_reserved_utc' not in operator.state and 'ip_associated_utc' not in operator.state
     assert 'static_ip' not in operator.config and 'hostname' not in operator.config
     assert 'prepared_snapshot' not in operator.config and 'ready' not in operator.state
+    assert operator.state['ready_verified'] is False
     assert operator.state['snapshots']==[{'id':'preserved-fixture'}]
     assert operator.state['cost']['estimated_usd']==pytest.approx(.48)
     assert operator.state['cost']['reservations']=={'other':.25}
@@ -330,6 +331,7 @@ def test_absent_owned_ip_settles_once_and_invalidates_live_tls_state(tmp_path):
     reloaded=Operator(operator.root,cloud,now=operator.now)
     assert reloaded.ip_release()['status']=='ALREADY_RELEASED'
     assert reloaded.state['cost']['estimated_usd']==pytest.approx(.48)
+    assert reloaded.state['ready_verified'] is False
     assert not any(args[:3]==['compute','instances','describe'] for args,_ in cloud.calls)
 
 

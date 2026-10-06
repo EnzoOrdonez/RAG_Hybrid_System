@@ -366,6 +366,7 @@ class Operator:
         self.state.pop('ip_associated_utc',None)
         self.state.pop('ip_creation_intent',None)
         self.state.pop('ready',None)
+        self.state['ready_verified'] = False
         self.config.pop('static_ip',None)
         self.config.pop('hostname',None)
         self.config.pop('prepared_snapshot',None)
