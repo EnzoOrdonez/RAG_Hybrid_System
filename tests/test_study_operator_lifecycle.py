@@ -306,3 +306,80 @@ def test_ip_release_idempotent_and_no_tls_idle_charge(tmp_path):
     operator,cloud = installation(tmp_path)
     assert operator.ip_release()['status'] == 'ALREADY_RELEASED'
     assert not any(args[:3] == ['compute','addresses','delete'] for args,_ in cloud.calls)
+
+
+def test_absent_owned_ip_settles_once_and_invalidates_live_tls_state(tmp_path):
+    operator,cloud = installation(tmp_path)
+    operator.state.update(reserved_address_id='42',
+        ip_reserved_utc='2026-10-03T00:00:00+00:00',
+        ip_associated_utc='2026-10-03T00:00:00+00:00',
+        ready={'status':'READY_VERIFIED'},snapshots=[{'id':'preserved-fixture'}],
+        cost=dict(estimated_usd=0,margin_usd=0,reservations={'ip-own':.72,'other':.25}))
+    operator.config['prepared_snapshot']={'id':'preserved-fixture'}
+    assert operator.ip_release()['status']=='ALREADY_RELEASED'
+    assert 'reserved_address_id' not in operator.state
+    assert 'ip_reserved_utc' not in operator.state and 'ip_associated_utc' not in operator.state
+    assert 'static_ip' not in operator.config and 'hostname' not in operator.config
+    assert 'prepared_snapshot' not in operator.config and 'ready' not in operator.state
+    assert operator.state['snapshots']==[{'id':'preserved-fixture'}]
+    assert operator.state['cost']['estimated_usd']==pytest.approx(.48)
+    assert operator.state['cost']['reservations']=={'other':.25}
+    receipt=json.loads((cloud.root/'ip-release-settlement.json').read_text())
+    assert receipt['estimation_method']=='UNUSED_RATE_UPPER_UNTIL_OBSERVED_RELEASE'
+    assert receipt['address_id']=='42' and receipt['snapshot_resources_preserved']
+    reloaded=Operator(operator.root,cloud,now=operator.now)
+    assert reloaded.ip_release()['status']=='ALREADY_RELEASED'
+    assert reloaded.state['cost']['estimated_usd']==pytest.approx(.48)
+    assert not any(args[:3]==['compute','instances','describe'] for args,_ in cloud.calls)
+
+
+def test_lost_ip_delete_response_can_reconcile_then_reserve_new_owned_id(tmp_path):
+    operator,cloud = installation(tmp_path)
+    live=[dict(name='owned-address',id='42',address='203.0.113.8')]
+    original=cloud.command
+    def command(args,**options):
+        cloud.calls.append((args,options))
+        if args[:3]==['compute','addresses','list']:
+            return live
+        if args[:3]==['compute','addresses','delete']:
+            live.clear()
+            raise OperatorError('response lost')
+        if args[:3]==['compute','addresses','create']:
+            marker=next(arg.removeprefix('--description=') for arg in args if arg.startswith('--description='))
+            live.append(dict(name='owned-address',id='43',region='regions/us-central1',addressType='EXTERNAL',
+                address='203.0.113.9',description=marker,creationTimestamp='2026-10-05T00:00:00+00:00'))
+            return None
+        if args[:3]==['compute','addresses','describe']:
+            return live[0]
+        return original(args,**options)
+    cloud.command=command
+    operator.state.update(reserved_address_id='42',ip_reserved_utc='2026-10-04T00:00:00+00:00',
+        cost=dict(estimated_usd=0,margin_usd=0,reservations={'ip-old':.72}))
+    with pytest.raises(OperatorError,match='response lost'):
+        operator.ip_release()
+    assert operator.state['reserved_address_id']=='42'
+    assert operator.ip_release()['status']=='ALREADY_RELEASED'
+    assert operator.state['cost']['estimated_usd']==pytest.approx(.24)
+    assert operator.ip_reserve()['address_id']=='43'
+    assert operator.config['hostname']=='203.0.113.9.sslip.io'
+    assert sum(args[:3]==['compute','addresses','delete'] for args,_ in cloud.calls)==1
+
+
+def test_absent_owned_ip_without_reservation_time_blocks_new_paid_effect(tmp_path):
+    operator,cloud = installation(tmp_path)
+    operator.state['reserved_address_id']='42'
+    with pytest.raises(OperatorError,match='fecha.*IP'):
+        operator.ip_reserve()
+    assert not any(args[:3]==['compute','addresses','create'] for args,_ in cloud.calls)
+    assert operator.state['reserved_address_id']=='42'
+
+
+def test_unknown_ip_detachment_uses_unused_rate_upper_before_paid_effect(tmp_path):
+    operator,cloud = installation(tmp_path)
+    operator.config['cost']=dict(estimated_usd=88.8,margin_usd=0)
+    operator.state.update(reserved_address_id='42',ip_reserved_utc='2026-09-30T00:00:00+00:00',
+        ip_associated_utc='2026-09-30T00:00:00+00:00',
+        cost=dict(estimated_usd=0,margin_usd=0,reservations={'ip-old':.72}))
+    with pytest.raises(OperatorError,match='USD90'):
+        operator.reserve_cost('fixture-paid-effect',.1)
+    assert not cloud.calls

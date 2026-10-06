@@ -115,14 +115,11 @@ class Operator:
                 retention += max(0,(self.now()-datetime.fromisoformat(resource['created_utc'])).total_seconds())/86400*.3287664
         for resource in self.state.get('snapshots',[]):
             retention += max(0,(self.now()-datetime.fromisoformat(resource['created_utc'])).total_seconds())/86400*resource['idle_usd_day']
-        # The initial IP reservation covers its first72h conservatively. Include
-        # any excess elapsed charge before reserving another paid operation.
+        # Initial reservation covers72h. Transfer gaps or external cleanup may
+        # invalidate the first association timestamp; use the unused-rate upper.
         active_ip_extra = 0
         if self.state.get('ip_reserved_utc'):
-            created = datetime.fromisoformat(self.state['ip_reserved_utc'])
-            associated = datetime.fromisoformat(self.state.get('ip_associated_utc',self.now().isoformat()))
-            elapsed = (max(0,(associated-created).total_seconds())*.01+
-                       max(0,(self.now()-associated).total_seconds())*.005)/3600
+            elapsed = self.ip_charge_upper()['estimated_usd']
             active_ip_extra = max(0,elapsed-sum(value for key,value in cost['reservations'].items() if key.startswith('ip-')))
         total = (inherited.get('estimated_usd',0)+inherited.get('margin_usd',0)+cost['estimated_usd']+
                  cost['margin_usd']+sum(cost['reservations'].values())+amount+retention+active_ip_extra)
@@ -268,6 +265,9 @@ class Operator:
             intent = self.state.get('ip_creation_intent')
             if intent and (intent.get('name') != name or intent.get('region') != 'us-central1'):
                 raise OperatorError('Hay otra reserva de IP pendiente. Concilia su recibo antes de crear una nueva.')
+            if self.state.get('reserved_address_id') or self.state.get('ip_reserved_utc'):
+                self.finish_ip_release('ABSENT_BEFORE_NEW_RESERVATION')
+                intent = self.state.get('ip_creation_intent')
             if not intent:
                 self.reserve_cost('ip-'+self.now().strftime('%Y%m%dT%H%M%S%fZ'),.01*24*3)
                 intent = dict(name=name,region='us-central1',requested_utc=self.now().isoformat(),
@@ -315,9 +315,16 @@ class Operator:
         name = self.config['ip_name']
         addresses = self.cloud.command(['compute','addresses','list','--filter=name='+name])
         if not addresses:
+            if self.state.get('reserved_address_id') or self.state.get('ip_reserved_utc'):
+                self.finish_ip_release('ABSENT_AFTER_EXTERNAL_CLEANUP_OR_LOST_RESPONSE')
             return dict(status='ALREADY_RELEASED')
         if len(addresses) != 1 or str(addresses[0]['id']) != self.state.get('reserved_address_id'):
             raise OperatorError('La IP no coincide con el ID reservado por este operador. No se libera; revisa el recibo.')
+        # Recover only from the live, identity-checked resource's server date.
+        if not self.state.get('ip_reserved_utc') and addresses[0].get('creationTimestamp'):
+            self.state['ip_reserved_utc'] = addresses[0]['creationTimestamp']
+            self.persist()
+        self.ip_charge_upper()  # Reject incomplete accounting before deletion.
         for item in [self.config['primary_vm'],*[row for row in self.state.get('alternate_vms',[]) if not row.get('disposed')]]:
             observed = self.cloud.command(['compute','instances','describe',item['name'],'--zone='+item['zone']])
             checked_vm(observed,name=item['name'],instance_id=item['id'],zone=item['zone'])
@@ -329,23 +336,43 @@ class Operator:
                         self.cloud.command(['compute','instances','delete-access-config',item['name'],'--zone='+item['zone'],
                             '--network-interface='+interface['name'],'--access-config-name='+access['name']])
         self.cloud.command(['compute','addresses','delete',name,'--region=us-central1'])
+        self.finish_ip_release('OWNER_DELETE_ACKNOWLEDGED')
+        return dict(status='STATIC_IP_RELEASED_VERIFIED',https_idle_usd_day=0)
+
+    def ip_charge_upper(self):
+        try:
+            created = datetime.fromisoformat(self.state['ip_reserved_utc'])
+            now = self.now()
+            if created.tzinfo is None or now.tzinfo is None or created > now:
+                raise ValueError('Invalid reservation time')
+        except (KeyError,TypeError,ValueError):
+            raise OperatorError('Falta una fecha válida de reserva de IP. Conserva el estado y concilia su recibo antes de otra operación pagada.') from None
+        seconds = (now-created).total_seconds()
+        rate = self.config.get('official_rates',{}).get('unused_ip_usd_h',.01)
+        return dict(elapsed_s=seconds,estimated_usd=seconds/3600*rate,rate_upper_usd_h=rate,
+                    estimation_method='UNUSED_RATE_UPPER_UNTIL_OBSERVED_RELEASE',observed_utc=now.isoformat(),
+                    not_invoice=True,association_intervals_not_inferred=True)
+
+    def finish_ip_release(self, method):
+        charge = self.ip_charge_upper()
+        cost = self.state.setdefault('cost',dict(estimated_usd=0,margin_usd=0,reservations={}))
+        cost['estimated_usd'] += charge['estimated_usd']
+        cost['margin_usd'] += self.state.pop('ip_transfer_gap_margin_usd',0)
+        cost['reservations'] = {key:value for key,value in cost['reservations'].items() if not key.startswith('ip-')}
+        self.state['last_ip_interval'] = dict(charge,release_method=method,
+            address_id=self.state.get('reserved_address_id'))
         self.state.pop('reserved_address_id',None)
-        if self.state.get('ip_reserved_utc'):
-            created = datetime.fromisoformat(self.state.pop('ip_reserved_utc'))
-            associated = datetime.fromisoformat(self.state.pop('ip_associated_utc',self.now().isoformat()))
-            unused_s = max(0,(associated-created).total_seconds())
-            associated_s = max(0,(self.now()-associated).total_seconds())
-            cost = self.state.setdefault('cost',dict(estimated_usd=0,margin_usd=0,reservations={}))
-            cost['estimated_usd'] += (unused_s*.01+associated_s*.005)/3600
-            # Rate uncertainty during short transfer gaps is a margin, not compute spend.
-            cost['margin_usd'] += self.state.get('ip_transfer_gap_margin_usd',0)
-            cost['reservations'] = {key:value for key,value in cost['reservations'].items() if not key.startswith('ip-')}
-            self.state['last_ip_interval'] = dict(unused_s=unused_s,associated_s=associated_s,
-                estimated_usd=(unused_s*.01+associated_s*.005)/3600)
+        self.state.pop('ip_reserved_utc',None)
+        self.state.pop('ip_associated_utc',None)
+        self.state.pop('ip_creation_intent',None)
+        self.state.pop('ready',None)
         self.config.pop('static_ip',None)
         self.config.pop('hostname',None)
+        self.config.pop('prepared_snapshot',None)
         self.persist()
-        return dict(status='STATIC_IP_RELEASED_VERIFIED',https_idle_usd_day=0)
+        save_state(self.cloud.root/'ip-release-settlement.json',dict(
+            status='IP_RELEASE_RECONCILED',**self.state['last_ip_interval'],
+            live_tls_state_invalidated=True,snapshot_resources_preserved=True))
 
     def tls_prepare(self, first_session):
         try:

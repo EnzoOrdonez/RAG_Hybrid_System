@@ -206,6 +206,18 @@ Exige `TERMINATED_VERIFIED` y conserva disco, instantánea y buckets. La IP se
 libera al cerrar si no hay sesión agendada. No borres recursos originales.
 Un GO técnico no autoriza reclutar: requiere aprobación ética y B.4 aprobada.
 
+Si el supervisor independiente ya liberó la IP, `ip-release` comprueba su
+ausencia y concilia una sola vez el ID y la reserva anteriores. Conserva el
+recibo `ip-release-settlement.json` dentro del directorio de ejecución que
+devuelve el operador. La estimación usa el extremo superior de la tarifa de
+IP sin asociar hasta la observación de ausencia; no supone asociación continua
+ni una fecha de liberación desconocida y no es factura. Se invalidan READY y
+la referencia de contingencia del certificado anterior, conservando todas las
+instantáneas y sus recibos. La siguiente reserva obtiene su propio ID y exige
+otra preparación TLS. Si falta una fecha válida de creación, conserva el estado
+y concilia los recibos anteriores antes de otra operación pagada; no inventes
+la fecha ni edites los hashes para continuar.
+
 ## Ensayo técnico literal, sin participantes ni registro ético real
 
 Esta sección es el recorrido de aceptación del operador. Solo usa datos
