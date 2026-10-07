@@ -62,6 +62,13 @@ def test_two_blocks_app_disconnect_export_and_practice_privacy(tmp_path, monkeyp
             f'{i + 1}. {left} — {right}' for i, (left, right) in enumerate(protocol['config']['ueq_s']['items'])]
         assert all(r.options == [str(i) for i in range(1, 8)] for r in app.radio[10:18])
         assert [r.label for r in app.radio[18:]] == [item['text'] for item in protocol['config']['likert']]
+        assert [caption.value for caption in app.caption] == [
+            '1 = Totalmente en desacuerdo · 5 = Totalmente de acuerdo',
+            protocol['config']['ueq_s']['instruction'],
+            '1 = palabra de la izquierda · 7 = palabra de la derecha',
+            '1 = Totalmente en desacuerdo · 5 = Totalmente de acuerdo',
+        ]
+        assert all(r.options == [str(i) for i in range(1, 6)] for r in app.radio[18:])
         if block == 0:
             click(app, 'Guardar respuestas del bloque')
             assert app.error and store.admit(token).data['instruments'] == []

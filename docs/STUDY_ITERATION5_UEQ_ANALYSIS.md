@@ -30,6 +30,12 @@ una instrucción estandarizada atribuida al manual. El minuto es una estimación
 que deberá comprobarse en el piloto; no es una duración medida. Ambos sistemas
 reciben los mismos pares e instrucción sin revelar su condición. La leyenda
 exacta del UEQ-S es «1 = palabra de la izquierda · 7 = palabra de la derecha».
+Al terminar sus ocho ítems se repite, antes de los Likert, su leyenda existente:
+«1 = Totalmente en desacuerdo · 5 = Totalmente de acuerdo». Así la escala de
+siete posiciones del UEQ-S no queda como última instrucción para los Likert.
+No cambian sus textos, opciones, orden ni puntuación; ambas condiciones muestran
+la misma separación. La regresión verifica las cuatro leyendas en su orden y
+las opciones de cinco posiciones de los diez Likert en ambos bloques.
 
 El protocolo nuevo es versión 2 y la sesión/exportación versión 4. Sus ocho
 posiciones y las tres puntuaciones se guardan en `instruments[].ueq_s` y

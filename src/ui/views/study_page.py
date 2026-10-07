@@ -134,6 +134,7 @@ def _flow(session, view):
                 for i, (left, right) in enumerate(config['ueq_s']['items']):
                     st.radio(f'{i + 1}. {left} — {right}', range(1, 8), index=None,
                              horizontal=True, key=f'ueq_{block}_{i}')
+                st.caption('1 = Totalmente en desacuerdo · 5 = Totalmente de acuerdo')
             for item in config['likert']:
                 st.radio(item['text'], range(1, 6), index=None, horizontal=True, key=f'likert_{block}_{item["id"]}')
             st.form_submit_button('Guardar respuestas del bloque', on_click=submit)
