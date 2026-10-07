@@ -230,9 +230,7 @@ class Build:
             if (len(mount) != 1 or not mount[0]['source'].startswith('/dev/')
                     or mount[0]['target'] != '/' or mount[0]['fstype'] != 'ext4'):
                 raise ValueError('Durability temporary path is not on the restored persistent root disk')
-            summaries = re.findall(r'=+ ([^\r\n]+) =+', (destination/'posix-durability.stdout').read_text(encoding='utf-8'))
-            if (not summaries or not re.search(r'\b7 passed\b',summaries[-1])
-                    or re.search(r'\b(?:failed|error|errors|skipped|deselected)\b',summaries[-1])):
+            if not seven_posix_passed((destination/'posix-durability.stdout').read_text(encoding='utf-8')):
                 raise ValueError('All seven POSIX durability tests must pass without exclusions')
         proof = dict(status='TECHNICAL_BUILD_'+manifest['status']+'_DOWNLOADED_VERIFIED',label=label,
             commit=job['commit'],image_id=manifest['image_id'],files=receipts,
@@ -249,6 +247,12 @@ class Build:
             atomic_json(target,proof)
         self.state.update(lambda state:state['build_jobs'][label].update(status=proof['status'],download_proof=str(target)))
         return proof
+
+
+def seven_posix_passed(output):
+    """Accept pytest normal and quiet terminal summaries, never progress text."""
+    lines = [line.strip().strip('=').strip() for line in output.splitlines() if line.strip()]
+    return bool(lines and re.fullmatch(r'7 passed in [0-9]+\.[0-9]+s(?: \([^\r\n]+\))?', lines[-1]))
 
 
 def main(argv=None):

@@ -212,3 +212,20 @@ def test_storage_iam_does_not_fabricate_app_metadata_isolation(tmp_path,monkeypa
     for reachable in (None,True):
         with pytest.raises(OperatorError,match='metadatos'):
             validate_minimal_iam(cloud.vm,{},sessions,technical,metadata_reachable=reachable,**kwargs)
+
+
+@pytest.mark.parametrize('output',[
+    '....... [100%]\n7 passed in 1.54s\n',
+    '================ 7 passed in 1.00s ================\n',
+])
+def test_posix_terminal_summary_supports_actual_quiet_and_normal_pytest(output):
+    assert cpu_build.seven_posix_passed(output)
+
+
+@pytest.mark.parametrize('output',[
+    '', '7 passed', '17 passed in 1.54s', '7 passed, 1 skipped in 1.54s',
+    '7 passed, 1 failed in 1.54s', '7 passed in 1.54s\nERROR: later failure',
+    'progress says 7 passed in 1.54s',
+])
+def test_posix_terminal_summary_rejects_incomplete_or_excluded_results(output):
+    assert not cpu_build.seven_posix_passed(output)
