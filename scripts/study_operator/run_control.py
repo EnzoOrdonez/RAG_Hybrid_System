@@ -12,6 +12,8 @@ from pathlib import Path
 import subprocess
 import time
 
+from filelock import FileLock
+
 from src.ui.components.session_storage import atomic_json
 
 
@@ -48,16 +50,30 @@ class Recorder:
 
     def checkpoint(self, next_action):
         path = self.root / 'STATE.json'
-        state = json.loads(path.read_bytes())
-        tasks = set(state.get('scheduled_tasks', []))
-        for receipt in self.root.glob('*-task-receipt.json'):
-            row = json.loads(receipt.read_text(encoding='utf-8-sig'))
-            if row.get('task', '').startswith('CloudRAG-I5-'):
-                tasks.add(row['task'])
-        state.update(updated_utc=utc(), phase=self.phase, agent=self.agent,
-                     model=self.model, next_action=next_action, worker_pid=os.getpid(),
-                     scheduled_tasks=sorted(tasks))
-        atomic_json(path, state)
+        with FileLock(str(self.root/'state.lock'), timeout=10):
+            state = json.loads(path.read_bytes())
+            tasks = set(state.get('scheduled_tasks', []))
+            for receipt in self.root.glob('*-task-receipt.json'):
+                row = json.loads(receipt.read_text(encoding='utf-8-sig'))
+                if row.get('task', '').startswith('CloudRAG-I5-'):
+                    tasks.add(row['task'])
+            state.update(updated_utc=utc(), phase=self.phase, agent=self.agent,
+                         model=self.model, next_action=next_action, worker_pid=os.getpid(),
+                         scheduled_tasks=sorted(tasks))
+            atomic_json(path, state)
+            active = []
+            for receipt in self.root.glob('*-active.json'):
+                row = json.loads(receipt.read_bytes())
+                if row.get('status') == 'RUNNING':
+                    active.append(row)
+            handover = dict(agent=self.agent, model=self.model, phase=self.phase,
+                next_action=next_action, deadline_utc=state.get('deadline_utc'),
+                resources=state.get('resources', []), cost=state.get('cost', {}),
+                resource_intents=state.get('resource_intents', []),
+                open_exposures=state.get('open_exposures', {}), tasks=sorted(tasks),
+                independent_safety=state.get('independent_safety', {}), active_jobs=active)
+            (self.root/'HANDOVER.md').write_text('# Relevo\nNo repetir efectos sin verificar en vivo.\n\n```json\n'
+                +json.dumps(handover, indent=2, ensure_ascii=False)+'\n```\n', encoding='utf-8')
         atomic_json(self.root / 'worker-heartbeat.json', dict(at=utc(), pid=os.getpid()))
 
     def run(self, command):
@@ -127,11 +143,6 @@ def main(argv=None):
     atomic_json(active, dict(status='TERMINAL', pid=os.getpid(), receipt=str(terminal), ended_utc=utc()))
     recorder.checkpoint(plan.get('next_action', 'Inspect ' + terminal.name) if failed is None
                         else 'Diagnose ' + terminal.name + '; no automatic replay')
-    (root / 'HANDOVER.md').write_text(
-        f'# Relevo\n{recorder.agent}, {recorder.model}; fase {recorder.phase}.\n'
-        f'Resultado {terminal.name}: {outcome["status"]}.\n'
-        'Recursos y tareas: STATE.json; no se infiere limpieza de un proceso terminado.\n'
-        f'Siguiente: {json.loads((root / "STATE.json").read_bytes())["next_action"]}\n', encoding='utf-8')
     return 0 if failed is None else 1
 
 
