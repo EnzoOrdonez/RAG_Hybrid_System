@@ -58,9 +58,10 @@ class Cloud:
                 # no automatic host-key acceptance, then send the real bytes.
                 authenticate = [arg for arg in pinned if not arg.startswith('--command=')]
                 self.command([*authenticate, '--command=true'],
-                    json_output=False, timeout=min(timeout, 90))
+                    json_output=False, private_output=True, timeout=min(timeout, 90))
                 dry = self.command([*pinned, '--dry-run'],
-                    json_output=False, timeout=max(1, min(60, timeout-(time.monotonic()-began))))
+                    json_output=False, private_output=True,
+                    timeout=max(1, min(60, timeout-(time.monotonic()-began))))
                 actual = sdk_argv(dry, Path(self.sdk).parent/'sdk/plink.exe')
                 expected_pins = [arg.removeprefix('--ssh-flag=') for arg in pinned
                                  if arg.startswith('--ssh-flag=SHA256:')]
@@ -68,7 +69,7 @@ class Cloud:
                 if actual_pins != expected_pins:
                     raise ValueError('SDK discarded authenticated host key pins')
                 vm = self.command(['compute', 'instances', 'describe', arguments[2], zones[0]],
-                    timeout=max(1, min(60, timeout-(time.monotonic()-began))))
+                    private_output=True, timeout=max(1, min(60, timeout-(time.monotonic()-began))))
                 if (vm['name'] != arguments[2]
                         or vm['zone'].split('/')[-1] != zones[0].split('=', 1)[1]):
                     raise ValueError('Authenticated VM identity differs')

@@ -89,6 +89,8 @@ def test_rpc_private_stdin_and_output_bypass_sdk_mediation(tmp_path):
     assert len(calls) == 5
     assert json.loads((cloud.root/'0001-receipt.json').read_bytes())['transport'] == 'WINDOWS_OPENSSH_IAP_PINNED'
     assert secret.decode() not in ''.join(path.read_text() for path in cloud.root.iterdir())
+    # SDK dry-run includes the local SSH username; keep it in memory too.
+    assert 'user@compute.123' not in ''.join(path.read_text() for path in cloud.root.iterdir())
 
 
 def test_changed_sdk_executable_never_runs_remote_child(tmp_path):
