@@ -140,6 +140,7 @@ class Controller:
         with declaration.open('a', encoding='utf-8') as stream:
             stream.write(f'\nBEFORE: own disposable CPU VM {name}, cloned PD {disk}, IAP rule {rule_name}, '
                 'retained Docker proof containers cloudrag-i5-restore-<CPU_ID>-source/-missing/-user and their 256MiB tmpfs. '
+                'Own retained image export /var/tmp/cloudrag-i5-restore-config-<CPU_ID>.tar (up to6GiB) before hashing its config; '
                 'Original VM/disk, all snapshot candidates and buckets preserved until explicit qualified retention plan.\n')
         with (self.root/'COST_LEDGER.md').open('a', encoding='utf-8') as stream:
             stream.write(f'\nBEFORE CPU restoration: official catalog {quote["catalog_receipt_sha256"]}; '

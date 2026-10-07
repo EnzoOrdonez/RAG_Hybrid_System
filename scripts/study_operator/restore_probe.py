@@ -5,6 +5,7 @@ from pathlib import Path
 from pathlib import PurePosixPath
 import subprocess
 import sys
+import tarfile
 import time
 from urllib.request import Request, urlopen
 
@@ -70,6 +71,64 @@ def image_files(image, expected, prefix, *, invoke=subprocess.run):
         stdout_sha256=hashlib.sha256(result.stdout).hexdigest(), stderr_sha256=hashlib.sha256(result.stderr).hexdigest())
 
 
+def image_configuration(image, export, *, invoke=subprocess.run):
+    """Hash the exported config, independent of Docker's private storage driver."""
+    inspected = invoke(['docker', 'image', 'inspect', image], capture_output=True, timeout=30)
+    if inspected.returncode or len(inspected.stdout) > 2**20:
+        raise ValueError('Restored image inspection failed')
+    rows = json.loads(inspected.stdout)
+    if len(rows) != 1 or rows[0]['Id'] != image:
+        raise ValueError('Restored image ID differs')
+    export = Path(export)
+    if export.is_symlink():
+        raise ValueError('Image export must not be a symlink')
+    if not export.exists():
+        saved = invoke(['docker', 'image', 'save', '--output='+str(export), image],
+                       capture_output=True, timeout=360)
+        if saved.returncode:
+            raise ValueError('Restored image export failed')
+    with tarfile.open(export, 'r:') as archive:
+        member = archive.getmember('manifest.json')
+        if not member.isfile() or member.size > 2**20:
+            raise ValueError('Image export manifest invalid')
+        manifest = json.load(archive.extractfile(member))
+        if len(manifest) != 1:
+            raise ValueError('One image export required')
+        name = manifest[0]['Config']
+        if PurePosixPath(name).is_absolute() or '..' in PurePosixPath(name).parts:
+            raise ValueError('Unsafe image configuration member')
+        member = archive.getmember(name)
+        if not member.isfile() or member.size > 2**20:
+            raise ValueError('Image configuration member invalid')
+        data = archive.extractfile(member).read()
+        config_digest = hashlib.sha256(data).hexdigest()
+        descriptor = rows[0].get('Descriptor')
+        if descriptor is not None:
+            # Containerd's image ID is a manifest digest; classic Docker's is
+            # a config digest. Hash the correct domain and its config link.
+            if (descriptor.get('digest') != image or descriptor.get('mediaType') not in {
+                    'application/vnd.oci.image.manifest.v1+json',
+                    'application/vnd.docker.distribution.manifest.v2+json'}):
+                raise ValueError('Unsupported or altered image descriptor')
+            root = archive.getmember('blobs/sha256/'+image.removeprefix('sha256:'))
+            if not root.isfile() or root.size > 2**20 or root.size != descriptor['size']:
+                raise ValueError('Image manifest member invalid')
+            manifest_data = archive.extractfile(root).read()
+            if hashlib.sha256(manifest_data).hexdigest() != image.removeprefix('sha256:'):
+                raise ValueError('Image manifest digest differs')
+            config_descriptor = json.loads(manifest_data)['config']
+            if config_descriptor['digest'] != 'sha256:'+config_digest or config_descriptor['size'] != len(data):
+                raise ValueError('Image manifest configuration differs')
+        elif config_digest != image.removeprefix('sha256:'):
+            raise ValueError('Cached image configuration differs from image identity')
+    if json.loads(data)['config']['WorkingDir'] != '/opt/cloudrag/repository':
+        raise ValueError('Image repository working directory differs')
+    return dict(image_id=image, config_sha256=config_digest,
+                method='DOCKER_EXPORTED_CONFIG_BYTES_HASHED',
+                config_link='OCI_MANIFEST' if descriptor is not None else 'CLASSIC_CONFIG_ID',
+                export_bytes=export.stat().st_size)
+
+
 def run(spec, *, metadata=None, invoke=subprocess.run, stage_observer=lambda stage: None, boot_id=None):
     stage_observer('GUEST_IDENTITY')
     if metadata is None:
@@ -93,12 +152,8 @@ def run(spec, *, metadata=None, invoke=subprocess.run, stage_observer=lambda sta
     stage_observer('ARTIFACT_FILES')
     assets = files(spec['asset_root'], asset_files)
     stage_observer('IMAGE_CONFIG')
-    digest = spec['image_id'].removeprefix('sha256:')
-    image = Path(spec.get('docker_root', '/var/lib/docker'))/'image/overlay2/imagedb/content/sha256'/digest
-    if sha(image) != digest:
-        raise ValueError('Cached image configuration differs from image identity')
-    if json.loads(image.read_bytes())['config']['WorkingDir'] != '/opt/cloudrag/repository':
-        raise ValueError('Image repository working directory differs')
+    configuration = image_configuration(spec['image_id'], spec.get('image_export_path',
+        '/var/tmp/cloudrag-i5-restore-config-'+spec['cpu_vm_id']+'.tar'), invoke=invoke)
     stage_observer('FROZEN_IMAGE_FILES')
     source = image_files(spec['image_id'], {**spec['source_files'], **repository_artifacts},
         'cloudrag-i5-restore-'+spec['cpu_vm_id'], invoke=invoke)
@@ -123,6 +178,7 @@ def run(spec, *, metadata=None, invoke=subprocess.run, stage_observer=lambda sta
         source_snapshot_id=spec['source_snapshot_id'], restored_disk_id=spec['restored_disk_id'],
         cpu_vm_id=spec['cpu_vm_id'], zone=spec['zone'], source=source, host_infrastructure=host, artifacts=artifacts,
         all_expected_files_verified=True, image_config_verified=True,
+        image_configuration=configuration,
         image_id=spec['image_id'], model_manifest_and_blobs_verified=True,
         runtime_user_pair=pair, boot_id=boot_id or Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
         session_content_not_read_or_exported=True)

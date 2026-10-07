@@ -1,10 +1,12 @@
 import hashlib
 import json
+import io
+import tarfile
 from types import SimpleNamespace
 
 import pytest
 
-from scripts.study_operator.restore_probe import files, image_files, observed, run, runtime_pair
+from scripts.study_operator.restore_probe import files, image_configuration, image_files, observed, run, runtime_pair
 
 
 def test_restore_files_are_really_hashed_and_unsafe_or_changed_paths_fail(tmp_path):
@@ -82,9 +84,9 @@ def test_restoration_checks_image_host_assets_and_model_blobs_before_qualifying(
     (assets/'data/indices/index').write_bytes(b'index bytes')
     config = json.dumps({'config': {'WorkingDir': '/opt/cloudrag/repository'}}).encode()
     image_digest = hashlib.sha256(config).hexdigest()
-    image_file = docker/'image/overlay2/imagedb/content/sha256'/image_digest
-    image_file.parent.mkdir(parents=True)
-    image_file.write_bytes(config)
+    docker.mkdir()
+    export = docker/'image.tar'
+    write_export(export, config)
     blobs = models/'blobs'
     blobs.mkdir(parents=True)
     blob = b'model bytes'
@@ -95,7 +97,7 @@ def test_restoration_checks_image_host_assets_and_model_blobs_before_qualifying(
     manifest.write_text(json.dumps(dict(config={'digest': 'sha256:'+blob_digest}, layers=[])))
     frozen = {'src/frozen.py': hashlib.sha256(b'code').hexdigest()}
     spec = dict(cpu_vm_id='123', restored_disk_id='456', source_snapshot_id='789', zone='us-central1-a',
-        code_root=str(host), asset_root=str(assets), docker_root=str(docker), image_id='sha256:'+image_digest,
+        code_root=str(host), asset_root=str(assets), image_export_path=str(export), image_id='sha256:'+image_digest,
         source_files=frozen, host_infrastructure_files={'infra.py': hashlib.sha256(b'infrastructure').hexdigest()},
         artifact_files={'data/indices/index': hashlib.sha256(b'index bytes').hexdigest(),
             'data/evaluation/test_queries.json': hashlib.sha256(b'Git tracked queries').hexdigest()},
@@ -103,6 +105,8 @@ def test_restoration_checks_image_host_assets_and_model_blobs_before_qualifying(
         model_digest=hashlib.sha256(manifest.read_bytes()).hexdigest())
 
     def invoke(argv, **options):
+        if argv[:3] == ['docker', 'image', 'inspect']:
+            return SimpleNamespace(returncode=0, stdout=json.dumps([dict(Id=spec['image_id'])]).encode(), stderr=b'')
         if any(arg.endswith('-source') for arg in argv):
             return SimpleNamespace(returncode=0, stdout=json.dumps({**frozen,
                 'data/evaluation/test_queries.json': hashlib.sha256(b'Git tracked queries').hexdigest()}).encode(), stderr=b'')
@@ -124,3 +128,66 @@ def test_restoration_checks_image_host_assets_and_model_blobs_before_qualifying(
     (assets/'data/indices/index').write_bytes(b'corrupted index')
     failed = observed(spec, metadata=metadata, invoke=invoke, boot_id='synthetic-boot')
     assert failed['status'] == 'CPU_PROBE_FAILED' and failed['stage'] == 'ARTIFACT_FILES'
+
+
+def write_export(path, config):
+    with tarfile.open(path, 'w') as archive:
+        for name, data in [('manifest.json', json.dumps([dict(Config='config.json', Layers=[])]).encode()),
+                           ('config.json', config)]:
+            member = tarfile.TarInfo(name)
+            member.size = len(data)
+            archive.addfile(member, io.BytesIO(data))
+
+
+def test_exported_configuration_is_hashed_without_storage_layout_assumptions(tmp_path):
+    config = json.dumps(dict(config=dict(WorkingDir='/opt/cloudrag/repository'))).encode()
+    image = 'sha256:'+hashlib.sha256(config).hexdigest()
+    export = tmp_path/'config-export.tar'
+    calls = []
+
+    def invoke(argv, **options):
+        calls.append(argv)
+        if argv[2] == 'save':
+            write_export(export, config)
+            return SimpleNamespace(returncode=0, stdout=b'', stderr=b'')
+        return SimpleNamespace(returncode=0, stdout=json.dumps([dict(Id=image)]).encode(), stderr=b'')
+
+    assert image_configuration(image, export, invoke=invoke)['config_sha256'] == image[7:]
+    assert len(calls) == 2 and calls[-1] == ['docker', 'image', 'save', '--output='+str(export), image]
+    write_export(export, b'changed config')
+    with pytest.raises(ValueError, match='configuration differs'):
+        image_configuration(image, export, invoke=invoke)
+    with pytest.raises(ValueError, match='ID differs'):
+        image_configuration(image, export, invoke=lambda *a, **k:
+            SimpleNamespace(returncode=0, stdout=b'[{"Id":"other"}]', stderr=b''))
+
+
+def test_containerd_manifest_id_must_link_the_exact_exported_config(tmp_path):
+    config = json.dumps(dict(config=dict(WorkingDir='/opt/cloudrag/repository'))).encode()
+    config_sha = hashlib.sha256(config).hexdigest()
+    manifest = json.dumps(dict(schemaVersion=2, config=dict(digest='sha256:'+config_sha, size=len(config)))).encode()
+    image = 'sha256:'+hashlib.sha256(manifest).hexdigest()
+    export = tmp_path/'oci-image.tar'
+    descriptor = dict(digest=image, mediaType='application/vnd.oci.image.manifest.v1+json', size=len(manifest))
+
+    def write(config_bytes, manifest_bytes):
+        with tarfile.open(export, 'w') as archive:
+            for name, data in [('manifest.json', b'[{"Config":"config.json"}]'), ('config.json', config_bytes),
+                               ('blobs/sha256/'+image[7:], manifest_bytes)]:
+                member = tarfile.TarInfo(name)
+                member.size = len(data)
+                archive.addfile(member, io.BytesIO(data))
+
+    def invoke(*argv, **options):
+        return SimpleNamespace(returncode=0, stdout=json.dumps([dict(Id=image, Descriptor=descriptor)]).encode(), stderr=b'')
+
+    write(config, manifest)
+    result = image_configuration(image, export, invoke=invoke)
+    assert result['config_link'] == 'OCI_MANIFEST' and result['config_sha256'] == config_sha
+    assert result['config_sha256'] != image[7:]
+    write(b'changed config', manifest)
+    with pytest.raises(ValueError, match='configuration differs'):
+        image_configuration(image, export, invoke=invoke)
+    write(config, manifest.replace(b'2', b'3', 1))
+    with pytest.raises(ValueError, match='manifest digest differs'):
+        image_configuration(image, export, invoke=invoke)

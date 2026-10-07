@@ -91,3 +91,25 @@ se exige la suma completa de ambas ubicaciones; no se omite una entrada, caché
 o archivo pendiente del manifiesto. Esta corrección de ubicación se publica y
 prueba antes de una nueva ejecución sobre el mismo clon. Ambos ensayos fallidos
 y sus respectivos STOP permanecen inmutables.
+
+El tercer ensayo verificó las ubicaciones de los activos, pero falló en
+IMAGE_CONFIG: la ruta privada de almacenamiento de Docker asumida por el
+controlador no existe. No se infiere el driver ni otra ruta privada. Se cierra
+ese método de lectura y se usa la interfaz documentada `docker image inspect`
+y `docker image save --output`: el ID observado debe coincidir y se verifican
+los bytes de la configuración exportada. En el almacén clásico su hash es el
+ID; en containerd el ID identifica el manifiesto OCI, cuyo hash se verifica
+primero y cuya referencia a la configuración debe coincidir con su hash y tamaño.
+El archivo de exportación propio se conserva y declara antes de crearse.
+Las pruebas incluyen configuración alterada e ID distinto. No se reconstruye
+la imagen, no se cambia el criterio y no se reemplaza ninguno de los tres fallos.
+Fuentes: [inspect](https://docs.docker.com/reference/cli/docker/image/inspect/)
+y [save](https://docs.docker.com/reference/cli/docker/image/save/).
+
+La lectura de `i4-build03/image-inspect.stdout` del paquete sellado confirma
+que la imagen heredada usa un descriptor de manifiesto OCI y GraphDriver nulo.
+Este es un defecto de dominio de hash en el controlador, detectado antes del
+siguiente ensayo; no una alteración del entorno. Se añaden casos de manifiesto
+y configuración modificados. La identidad del ID se deriva de la instalación,
+sin introducir a mano hashes. Fuente de la implementación de Docker:
+[inspección containerd](https://github.com/moby/moby/blob/master/daemon/containerd/image_inspect.go).
