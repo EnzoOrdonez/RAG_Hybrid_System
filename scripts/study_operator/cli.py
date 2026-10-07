@@ -24,6 +24,8 @@ def parser():
     start.add_argument('--purpose',required=True,choices=('study','technical','smoke','rehearsal','pilot'))
     for name in ('status','preflight','stop','diagnostics','ip-reserve','ip-release','failback','export-anonymized'):
         sub.add_parser(name)
+    for name in ('iap-prepare', 'iap-release'):
+        sub.add_parser(name)
     invite = sub.add_parser('invite')
     invite.add_argument('code')
     invite.add_argument('--cell',type=int,choices=(1,2,3,4))
@@ -89,6 +91,10 @@ def main(argv=None):
             from scripts.study_operator.bootstrap import bootstrap
 
             result = bootstrap(operator, args.zone)
+        elif operation in {'iap-prepare', 'iap-release'}:
+            from scripts.study_operator import iap_access
+
+            result = getattr(iap_access, 'prepare' if operation == 'iap-prepare' else 'release')(operator)
         elif operation == 'revoke':
             operator.preflight()
             result = operator.bridge(dict(operation='revoke',participant_id=args.code),private=True)

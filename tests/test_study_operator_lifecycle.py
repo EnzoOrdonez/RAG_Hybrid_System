@@ -54,6 +54,18 @@ def test_missing_installation_has_human_action(tmp_path):
         Operator(tmp_path,None)
 
 
+def test_stop_keeps_storage_and_transfer_bounds_after_settling_compute(tmp_path):
+    operator, _ = installation(tmp_path)
+    operator.state.update(boot_started_utc='2026-10-04T23:00:00+00:00',
+        cost=dict(estimated_usd=0, margin_usd=0, reservations={
+            'boot-fixture': 3, 'disk-retention-primary-fixture': 1,
+            'snapshot-transfer-primary-fixture': 2, 'ip-fixture': .72}))
+    assert operator.stop()['status'] == 'TERMINATED_VERIFIED'
+    assert operator.state['cost']['estimated_usd'] > 0
+    assert operator.state['cost']['reservations'] == {
+        'disk-retention-primary-fixture': 1, 'snapshot-transfer-primary-fixture': 2, 'ip-fixture': .72}
+
+
 def test_stopped_diagnostics_downloads_only_exact_technical_generation(tmp_path,monkeypatch):
     import base64
     import hashlib

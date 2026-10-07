@@ -41,6 +41,7 @@ def derive(base, *, build, restoration, snapshot, costs, quote, original, subnet
         period_id=uuid.uuid4().hex, python=str(python), audit_run=str(package),
         primary_vm=dict(name=original['name'], id=str(original['id']), zone=original['zone'].split('/')[-1]),
         instance_id=str(original['id']), ip_name='cloudrag-i5-static-'+selected_region+'-'+Path(package).name.removeprefix('iteration5-run-').lower(),
+        iap_name='cloudrag-i5-owner-'+Path(package).name.removeprefix('iteration5-run-').lower()+'-iap',
         bootstrap_inputs=inputs, fingerprint=fingerprint, reviewed_config=inputs['root']+'/reviewed',
         artifact_manifest=inputs['root']+'/deployment-artifacts.json',
         preregistration_file=inputs['root']+'/service-preregistration.md',
@@ -55,6 +56,7 @@ def derive(base, *, build, restoration, snapshot, costs, quote, original, subnet
     result['official_rates']['compute_usd_h'] = float(quote['usd_per_hour'])
     result['official_rates']['persistent_disk_gib_usd_h'] = .1/730
     result['official_rates']['snapshot_gib_usd_h'] = .05/730
+    result['official_rates']['snapshot_transfer_na_usd_gib'] = costs['regional_transfer_upper_basis']['rate_usd_gib']
     result['configuration_provenance'] = dict(cpu_restoration_verified=True, live_original_terminated=True,
         official_quote=quote, service_not_changed=True, rag_not_changed=True, ethics_record_not_created=True,
         old_operators_not_modified=True, fresh_gpu_identity_pending=True)

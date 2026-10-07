@@ -37,16 +37,19 @@ def fixture(tmp_path, *, lost_reply=False, stockout=False):
         if args[:3] == ['compute', 'instances', 'list']:
             return [cloud.vm, *vms]
         if args[:3] == ['compute', 'disks', 'list']:
-            return disks
+            wanted = next(a.split('=', 2)[2] for a in args if a.startswith('--filter=name='))
+            return [row for row in disks if row['name'] == wanted]
         if args[:3] == ['compute', 'disks', 'create']:
             marker = next(a.split('=', 1)[1] for a in args if a.startswith('--description='))
-            disks.append(dict(name=args[3], id='777', zone='zones/us-central1-b', sourceSnapshotId='900',
+            zone = next(a.split('=', 1)[1] for a in args if a.startswith('--zone='))
+            disks.append(dict(name=args[3], id=str(777+len(disks)), zone='zones/'+zone, sourceSnapshotId='900',
                 description=marker, selfLink='disks/'+args[3], creationTimestamp='2026-10-05T00:00:00+00:00'))
             return
         if args[:3] == ['compute', 'instances', 'create']:
             saved = json.loads((operator.root/'active.json').read_bytes())
-            assert saved['audit_resources'][0]['id'] == '777'
-            assert saved['primary_creation_intent']['disk_name'] == disks[0]['name']
+            disk = next(row for row in disks if row['name'] == args[3]+'-boot')
+            assert any(row['id'] == disk['id'] for row in saved['audit_resources'])
+            assert saved['primary_creation_intent']['disk_name'] == disk['name']
             assert '--max-run-duration=3h' in args and '--instance-termination-action=STOP' in args
             assert '--deletion-protection' in args and '--scopes=storage-rw' in args
             assert '--provisioning-model=STANDARD' in args
@@ -56,9 +59,10 @@ def fixture(tmp_path, *, lost_reply=False, stockout=False):
                 raise OperatorError('ZONE_RESOURCE_POOL_EXHAUSTED')
             script = next(a.split('=', 2)[2] for a in args if a.startswith('--metadata-from-file=startup-script='))
             marker = next(a.split('=', 1)[1] for a in args if a.startswith('--description='))
-            vms.append(dict(name=args[3], id='998', zone='zones/us-central1-b', status='RUNNING',
+            zone = next(a.split('=', 1)[1] for a in args if a.startswith('--zone='))
+            vms.append(dict(name=args[3], id='998', zone='zones/'+zone, status='RUNNING',
                 machineType='machines/g2-standard-4', deletionProtection=True,
-                disks=[dict(autoDelete=False, source=disks[0]['selfLink'])], description=marker,
+                disks=[dict(autoDelete=False, source=disk['selfLink'])], description=marker,
                 scheduling=dict(maxRunDuration=dict(seconds='10800'), instanceTerminationAction='STOP'),
                 creationTimestamp='2026-10-05T00:00:00+00:00',
                 metadata=dict(items=[dict(key='startup-script', value=Path(script).read_text())])))
@@ -103,6 +107,38 @@ def test_bootstrap_recovers_lost_reply_without_second_create(tmp_path):
     with pytest.raises(OperatorError, match='CREATE_RESPONSE_LOST'):
         bootstrap(operator, 'us-central1-b')
     assert bootstrap(operator, 'us-central1-b')['vm_id'] == vms[0]['id']
+    assert len(creates) == 1
+
+
+def test_bootstrap_next_zone_only_after_stockout_and_actual_vm_absence(tmp_path):
+    operator, _, disks, vms, creates, _ = fixture(tmp_path, stockout=True)
+    with pytest.raises(OperatorError, match='ZONE_RESOURCE_POOL_EXHAUSTED'):
+        bootstrap(operator, 'us-central1-a')
+    with pytest.raises(OperatorError, match='ZONE_RESOURCE_POOL_EXHAUSTED'):
+        bootstrap(operator, 'us-central1-b')
+    assert not vms and len(creates) == len(disks) == 2
+    assert len(operator.state['primary_capacity_attempts']) == 1
+    assert operator.state['primary_capacity_attempts'][0]['zone'] == 'us-central1-a'
+    assert operator.state['primary_creation_intent']['zone'] == 'us-central1-b'
+    assert len({r['id'] for r in operator.state['audit_resources']}) == 2
+    reservations = operator.state['cost']['reservations']
+    assert all('disk-retention-primary-'+z in reservations for z in ('us-central1-a', 'us-central1-b'))
+
+
+def test_bootstrap_zone_change_rejects_uncertain_create_reply_instead_of_allocating_second_gpu(tmp_path):
+    operator, _, _, _, creates, _ = fixture(tmp_path, lost_reply=True)
+    with pytest.raises(OperatorError, match='CREATE_RESPONSE_LOST'):
+        bootstrap(operator, 'us-central1-a')
+    with pytest.raises(OperatorError, match='Concilia'):
+        bootstrap(operator, 'us-central1-b')
+    assert len(creates) == 1
+
+
+def test_bootstrap_completed_primary_requires_failover_for_another_zone(tmp_path):
+    operator, _, _, _, creates, _ = fixture(tmp_path)
+    bootstrap(operator, 'us-central1-a')
+    with pytest.raises(OperatorError, match='failover'):
+        bootstrap(operator, 'us-central1-b')
     assert len(creates) == 1
 
 

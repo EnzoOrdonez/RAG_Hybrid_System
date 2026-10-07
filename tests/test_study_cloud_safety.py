@@ -145,3 +145,23 @@ def test_network_mismatch_blocks_every_destructive_effect(tmp_path,change):
     with pytest.raises(ValueError):
         close_network(tmp_path,cloud,value,[vm])
     assert not any(a[2] in {'delete','delete-access-config'} for a in calls)
+
+
+@pytest.mark.parametrize('foreign', [False, True])
+def test_independent_network_cleanup_recovers_lost_creation_response(tmp_path, foreign):
+    value, vm, rows, calls, cloud = network_fixture(tmp_path)
+    value['resources'] = value['resources'][:1]
+    value['resource_intents'] = [dict(type='firewall', name='cloudrag-i5-fixture-iap',
+        disposable=True, ownership_marker='CloudRAG-I5-fixture')]
+    (tmp_path/'STATE.json').write_text(json.dumps(value))
+    if foreign:
+        rows['firewall-rules'][0]['description'] = 'foreign'
+        with pytest.raises(ValueError, match='identity'):
+            close_network(tmp_path, cloud, value, [vm])
+        assert not any(args[2] == 'delete' for args in calls)
+    else:
+        result = close_network(tmp_path, cloud, value, [vm])
+        assert len(result) == 1 and result[0]['id'] == '43'
+        current = json.loads((tmp_path/'STATE.json').read_bytes())
+        assert current['resources'][-1]['disposed']
+        assert current['resource_intents'][0]['disposed']

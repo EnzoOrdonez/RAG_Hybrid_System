@@ -8,7 +8,7 @@ import uuid
 from scripts.study_operator.cloud_client import checked_vm, no_other_gpu
 from scripts.study_operator.deployment import checked_config
 from scripts.study_operator.policy import OperatorError
-from scripts.study_operator.region_scope import US_L4_ZONES
+from scripts.study_operator.region_scope import US_L4_ZONES, region
 from scripts.study_operator.startup import write_startup
 
 
@@ -35,12 +35,14 @@ def qualified_snapshot(operator):
 
 def bootstrap(operator, zone):
     config, state, cloud = operator.config, operator.state, operator.cloud
-    if zone not in US_L4_ZONES or zone != config['zone']:
+    if zone not in US_L4_ZONES or region(zone) != region(config['zone']):
         raise OperatorError('La zona no coincide con la instalación revisada. Prepara subred, IP, tarifa e identidad propias antes de bootstrap.')
     if state.get('primary_bootstrap_complete'):
+        if zone != operator.selected()['zone']:
+            raise OperatorError('Ya existe un primario final. Usa failover con su instantánea preparada; bootstrap no crea otro.')
         vm = operator.observed()
         return dict(status='PRIMARY_ALREADY_CREATED', vm_id=str(vm['id']), next_action='status y preflight')
-    checked_config(config)
+    checked_config(dict(config, zone=zone))
     snapshot = qualified_snapshot(operator)
     addresses = cloud.command(['compute', 'addresses', 'list', '--filter=name='+config['ip_name']])
     if (len(addresses) != 1 or str(addresses[0]['id']) != state.get('reserved_address_id')
@@ -59,10 +61,23 @@ def bootstrap(operator, zone):
         raise OperatorError('Detén y verifica la VM original antes de bootstrap; su disco se conserva.')
     instances = cloud.command(['compute', 'instances', 'list'])
     intent = state.get('primary_creation_intent')
+    if intent and intent['zone'] != zone:
+        if (intent.get('capacity_error_code') != 'ZONE_RESOURCE_POOL_EXHAUSTED'
+                or any(row['name'] == intent['name'] for row in instances)):
+            raise OperatorError('La creación anterior no terminó con stockout y ausencia verificados. Concilia ese intento antes de otra zona.')
+        no_other_gpu(instances, selected_id='none')
+        state.setdefault('primary_capacity_attempts', []).append(dict(intent,
+            absence_verified_utc=operator.now().isoformat()))
+        state.pop('primary_creation_intent')
+        operator.persist()
+        intent = None
+    config['zone'] = zone
     if not intent:
         no_other_gpu(instances, selected_id='none')
-        operator.reserve_cost('bootstrap-primary', 3*config['official_rates']['compute_usd_h']+.25)
-        operator.reserve_cost('disk-retention-primary', 100*config['official_rates']['persistent_disk_gib_usd_h']*72)
+        operator.reserve_cost('bootstrap-primary-'+zone, 3*config['official_rates']['compute_usd_h']+.25)
+        operator.reserve_cost('disk-retention-primary-'+zone, 100*config['official_rates']['persistent_disk_gib_usd_h']*72)
+        if region(zone) != 'us-central1':
+            operator.reserve_cost('snapshot-transfer-primary-'+zone, 100*config['official_rates']['snapshot_transfer_na_usd_gib'])
         name = 'cloudrag-i5-primary-'+zone.replace('us-', '')+'-'+snapshot['id'][-12:]
         intent = dict(name=name, disk_name=name+'-boot', zone=zone, source_snapshot_id=str(snapshot['id']),
                       ownership_marker='CloudRAG-I5-primary-'+uuid.uuid4().hex)
@@ -96,13 +111,19 @@ def bootstrap(operator, zone):
         operator.detach_ip_for_creation()
         intent.update(start_requested_utc=requested.isoformat(), startup_sha256=hashlib.sha256(script.read_bytes()).hexdigest())
         operator.persist()
-        cloud.command(['compute', 'instances', 'create', intent['name'], '--zone='+zone, '--machine-type=g2-standard-4',
-            '--accelerator=type=nvidia-l4,count=1', '--provisioning-model=STANDARD', '--maintenance-policy=TERMINATE',
-            '--disk=name='+disk['name']+',boot=yes,auto-delete=no', '--deletion-protection', '--max-run-duration=3h',
-            '--instance-termination-action=STOP', '--service-account='+config['service_account'], '--scopes=storage-rw',
-            '--network='+config['network'], '--subnet='+config['subnet'], '--address='+config['static_ip'],
-            '--metadata-from-file=startup-script='+str(script), '--metadata=enable-guest-attributes=TRUE',
-            '--tags=cloudrag-i3-managed', '--description='+intent['ownership_marker']], timeout=600)
+        try:
+            cloud.command(['compute', 'instances', 'create', intent['name'], '--zone='+zone, '--machine-type=g2-standard-4',
+                '--accelerator=type=nvidia-l4,count=1', '--provisioning-model=STANDARD', '--maintenance-policy=TERMINATE',
+                '--disk=name='+disk['name']+',boot=yes,auto-delete=no', '--deletion-protection', '--max-run-duration=3h',
+                '--instance-termination-action=STOP', '--service-account='+config['service_account'], '--scopes=storage-rw',
+                '--network='+config['network'], '--subnet='+config['subnet'], '--address='+config['static_ip'],
+                '--metadata-from-file=startup-script='+str(script), '--metadata=enable-guest-attributes=TRUE',
+                '--tags=cloudrag-i3-managed', '--description='+intent['ownership_marker']], timeout=600)
+        except OperatorError as error:
+            if str(error).startswith('ZONE_RESOURCE_POOL_EXHAUSTED'):
+                intent['capacity_error_code'] = 'ZONE_RESOURCE_POOL_EXHAUSTED'
+                operator.persist()
+            raise
         existing = [cloud.command(['compute', 'instances', 'describe', intent['name'], '--zone='+zone])]
     if len(existing) != 1:
         raise OperatorError('Bootstrap sin una única VM propia. Conserva el intento y verifica el inventario.')

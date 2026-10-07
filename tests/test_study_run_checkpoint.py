@@ -139,3 +139,21 @@ def test_invalid_cost_not_admitted(tmp_path, monkeypatch, invalid):
 def test_future_operator_without_active_audit_does_not_touch_old_package():
     bridge.checkpoint({}, {})
     bridge.admit({}, {}, 1, now=NOW)
+
+
+def test_owner_network_absence_updates_supervisor_and_rejects_false_disposal(tmp_path, monkeypatch):
+    root, config, owner = fixture(tmp_path, monkeypatch)
+    row = dict(type='firewall', name='cloudrag-i5-fixture-iap', id='777', ownership_marker='CloudRAG-I5-IAP-fixture')
+    owner.update(audit_resources=[row], iap_creation_intent=dict(name=row['name'], ownership_marker=row['ownership_marker']))
+    bridge.checkpoint(config, owner, now=NOW)
+    row['disposed'] = True
+    before = (root/'STATE.json').read_bytes()
+    with pytest.raises(OperatorError, match='Retiro'):
+        bridge.checkpoint(config, owner, now=NOW)
+    assert (root/'STATE.json').read_bytes() == before
+    row.update(absence_verified=True, absence_verified_utc=NOW.isoformat())
+    owner.pop('iap_creation_intent')
+    bridge.checkpoint(config, owner, now=NOW)
+    state = json.loads((root/'STATE.json').read_bytes())
+    assert state['resources'][0]['disposed'] and state['resources'][0]['absence_verified']
+    assert state['resource_intents'][0]['disposed']

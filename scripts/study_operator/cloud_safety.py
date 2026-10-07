@@ -60,6 +60,34 @@ def close_network(root, cloud, state, stopped):
     """Release only ID-bound own temporary IPs/IAP rules after every VM stops."""
     if any(vm['status'] != 'TERMINATED' for vm in stopped):
         raise ValueError('Network cleanup requires all owned VMs terminated')
+    # Reconcile a successful creation whose response was lost. Intent markers
+    # were persisted before the effect; a name alone never proves ownership.
+    for intent in state.get('resource_intents', []):
+        kind = intent['type']
+        if kind not in {'address', 'firewall'} or intent.get('disposed'):
+            continue
+        if any(row['type'] == kind and row['name'] == intent['name'] for row in state['resources']):
+            continue
+        if (not intent['name'].startswith('cloudrag-i5-')
+                or not intent['ownership_marker'].startswith('CloudRAG-I5-')
+                or kind == 'firewall' and not intent['name'].endswith('-iap')):
+            raise ValueError('Unreconciled network intent outside own scope')
+        group = 'addresses' if kind == 'address' else 'firewall-rules'
+        rows = cloud.command(['compute', group, 'list', '--filter=name='+intent['name']], private_output=True)
+        if len(rows) > 1 or rows and (rows[0].get('description') != intent['ownership_marker']
+                or not str(rows[0].get('id')).isdigit()
+                or kind == 'address' and rows[0].get('region', '').split('/')[-1] != intent['region']):
+            raise ValueError('Lost network creation response lacks verified own identity')
+        if rows:
+            reconciled = dict(intent, id=str(rows[0]['id']))
+            state['resources'].append(reconciled)
+            with FileLock(str(Path(root)/'state.lock'), timeout=10):
+                path = Path(root)/'STATE.json'
+                current = json.loads(path.read_bytes())
+                if any(row['type'] == kind and row['name'] == intent['name'] for row in current['resources']):
+                    raise ValueError('Network reconciliation state changed')
+                current['resources'].append(reconciled)
+                atomic_json(path, current)
     results = []
     for row in state.get('resources', []):
         kind = row['type']
@@ -111,6 +139,9 @@ def close_network(root, cloud, state, stopped):
             if len(matches) != 1:
                 raise ValueError('Network owner state changed')
             matches[0].update(disposed=True,absence_verified=True,disposal_receipt=str(target))
+            for intent in current.get('resource_intents', []):
+                if intent['type'] == kind and intent['name'] == row['name']:
+                    intent.update(disposed=True, absence_verified=True)
             atomic_json(path,current)
         results.append(json.loads(target.read_bytes()))
     return results

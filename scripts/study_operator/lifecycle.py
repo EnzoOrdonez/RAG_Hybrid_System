@@ -237,7 +237,7 @@ class Operator:
             self.state['cost']['estimated_usd'] += seconds/3600*self.config['official_rates']['compute_usd_h']
             self.state['cost']['margin_usd'] += .25
             self.state['cost']['reservations'] = {key:value for key,value in self.state['cost']['reservations'].items()
-                                                 if key.startswith(('ip-','disk-retention-'))}
+                                                 if key.startswith(('ip-','disk-retention-','snapshot-transfer-'))}
             self.state['last_estimated_vm_interval_s'] = seconds
         self.persist()
         return dict(status='TERMINATED_VERIFIED',retained_disk=True,metadata_disarmed=True)

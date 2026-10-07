@@ -18,7 +18,8 @@ def fixture(tmp_path):
         model_manifest_and_blobs_verified=True, source=dict(files=19), artifacts=dict(files=79),
         runtime_user_pair=dict(status='PAIRED_RUNTIME_USER_SUPPORTED'))
     return base, dict(build=build, restoration=proof, snapshot=dict(name='final', id='900', status='READY'),
-        costs=dict(not_invoice=True, cost=dict(as_of_utc='2026-10-07T00:00:00Z', estimated_spend_usd=13,
+        costs=dict(not_invoice=True, regional_transfer_upper_basis=dict(rate_usd_gib=.02),
+                   cost=dict(as_of_utc='2026-10-07T00:00:00Z', estimated_spend_usd=13,
             reserved_retention_and_closure_usd=24, current_idle_upper_usd_day=.429)),
         quote=dict(machine='g2-standard-4', region='us-west1', usd_per_hour='.706832255'),
         original=dict(name='original', id='123', zone='zones/us-central1-a', status='TERMINATED'),

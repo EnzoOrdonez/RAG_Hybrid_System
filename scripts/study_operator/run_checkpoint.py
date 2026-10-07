@@ -80,7 +80,20 @@ def checkpoint(config, owner, *, now=None):
         state = json.loads((root/'STATE.json').read_bytes())
         if state['status'] not in {'ACTIVE', 'CLOSING'}:
             return  # Never rewrite a closed/sealed package, including on stop.
-        additions = [own_row(row['type'], row) for row in owner.get('audit_resources', [])]
+        for row in owner.get('audit_resources', []):
+            if not row.get('disposed'):
+                continue
+            checked = own_row(row['type'], row)
+            matches = [r for r in state['resources'] if r['type'] == checked['type'] and r['name'] == checked['name']]
+            if (len(matches) != 1 or matches[0]['id'] != checked['id']
+                    or matches[0].get('ownership_marker') != checked['ownership_marker']
+                    or row.get('absence_verified') is not True or not row.get('absence_verified_utc')):
+                raise OperatorError('Retiro sin identidad y ausencia verificadas. Conserva el estado y consulta la API antes de conciliarlo.')
+            matches[0].update(disposed=True, absence_verified=True, absence_verified_utc=row['absence_verified_utc'])
+            for intent in state.get('resource_intents', []):
+                if intent['type'] == checked['type'] and intent['name'] == checked['name']:
+                    intent.update(disposed=True, absence_verified=True)
+        additions = [own_row(row['type'], row) for row in owner.get('audit_resources', []) if not row.get('disposed')]
         for row in owner.get('alternate_vms', []):
             if row.get('disposed'):
                 continue
@@ -117,6 +130,10 @@ def checkpoint(config, owner, *, now=None):
         if snapshot_intent:
             intents.append(dict(type='snapshot', name=snapshot_intent['name'], disposable=True,
                 ownership_marker=snapshot_intent['ownership_marker']))
+        iap_intent = owner.get('iap_creation_intent')
+        if iap_intent:
+            intents.append(dict(type='firewall', name=iap_intent['name'], disposable=True,
+                ownership_marker=iap_intent['ownership_marker']))
         for row in intents:
             if (not row['name'].startswith('cloudrag-i5-') or not row['ownership_marker'].startswith('CloudRAG-I5-')
                     or row['type'] in {'vm', 'disk'} and not row['zone'].startswith('us-')):
