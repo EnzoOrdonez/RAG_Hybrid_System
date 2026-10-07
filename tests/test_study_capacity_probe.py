@@ -63,6 +63,11 @@ def test_exhausted_round_visits_three_zones_with_bound_and_no_public_app(tmp_pat
     result = probe.central(snapshot,'study-net','study-subnet')
     assert result['status'] == 'COMPLETED' and len(result['results']) == 3
     assert all(r['status'] == 'CAPACITY_EXHAUSTED' and r['stopped_verified'] for r in result['results'])
+    state=json.loads((tmp_path/'STATE.json').read_bytes())
+    assert state['open_exposures']['capacity-round-1-us-central1-a']['maximum_usd']==0
+    assert state['open_exposures']['capacity-round-1-us-central1-b']['maximum_usd']>0  # Keep owned disk exposure.
+    assert all(r['compute_upper_released_after_stop_usd']==pytest.approx(2.1)
+               for r in state['open_exposures'].values())
     creates = [a for a in cloud.calls if a[1:3] == ['instances','create']]
     assert len(creates) == 2
     for argv in creates:

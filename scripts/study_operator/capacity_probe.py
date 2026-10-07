@@ -76,11 +76,16 @@ class Probe:
             raise ValueError('Original must be stopped without an external IP before capacity-only probing')
         return vm
 
+    def creation_arguments(self,*args):
+        return create_args(*args)
+
+    def extra_exposure(self,zone,state,quote):
+        return (100*.000136986*max(0,(datetime.fromisoformat(state['closure_reserved_utc'])-self.now()).total_seconds())/3600
+                if zone != ZONES[0] else 0)
+
     def attempt(self,zone,number,snapshot,network,subnet,quote):
         state = json.loads((self.root/'STATE.json').read_bytes())
-        exposure = 3*float(quote['usd_per_hour'])
-        if zone != ZONES[0]:
-            exposure += 100*.000136986*max(0,(datetime.fromisoformat(state['closure_reserved_utc'])-self.now()).total_seconds())/3600
+        exposure = 3*float(quote['usd_per_hour'])+self.extra_exposure(zone,state,quote)
         key = 'capacity-round-'+str(number)+'-'+zone
         def reserve(value):
             opened = value.setdefault('open_exposures',{})
@@ -102,7 +107,8 @@ class Probe:
                 'no public IP, no participant app, no terminal study jobs. Startup override removed after STOP.\n')
         with (self.root/'COST_LEDGER.md').open('a',encoding='utf-8') as stream:
             stream.write('\nBEFORE '+key+': '+json.dumps(quote)+'; reserved upper USD '+str(exposure)+
-                '; disk100GiB pd-balanced .000136986/GiBh through closure if needed. Reservation is not spend.\n')
+                '; additional disk/transfer upper USD '+str(exposure-3*float(quote['usd_per_hour']))+
+                ' through closure if needed. Reservation is not spend.\n')
         no_other_gpu(self.cloud.command(['compute','instances','list']),selected_id='NO_SELECTED_RUNNING_VM')
         if zone == ZONES[0]:
             vm = self.original(state)
@@ -141,7 +147,7 @@ class Probe:
             if vm:
                 self.cloud.command(['compute','instances','start',vm['name'],'--zone='+zone],timeout=600)
             else:
-                self.cloud.command(create_args(name,disk_name,zone,startup,marker,network,subnet),timeout=600)
+                self.cloud.command(self.creation_arguments(name,disk_name,zone,startup,marker,network,subnet),timeout=600)
             live = self.cloud.command(['compute','instances','list','--filter=name='+(vm['name'] if vm else name)])
             if len(live) != 1 or live[0]['status'] != 'RUNNING':
                 raise ValueError('Capacity start was not observed RUNNING')
@@ -178,6 +184,16 @@ class Probe:
                            stopped_verified=True,not_a_measurement_or_ready=True,
                            compute_interval_upper_s=(end-began).total_seconds() if live else 0)
             atomic_json(self.root/(key+'-receipt.json'),receipt)
+            if receipt['status'] in {'CAPACITY_EXHAUSTED','L4_RUNNING_OBSERVED_NOT_READY'}:
+                # Budget reservation is not spend. Keep disk/transfer exposure;
+                # release only the compute component after a terminal STOP proof.
+                def release(value):
+                    row = value['open_exposures'][key]
+                    released = 3*float(quote['usd_per_hour'])
+                    row['maximum_usd'] = max(0,row['maximum_usd']-released)
+                    row['compute_upper_released_after_stop_usd'] = released
+                    row['terminal_stop_receipt'] = str(self.root/(key+'-receipt.json'))
+                self.update(release)
         if operation_error:
             raise operation_error
         return receipt
