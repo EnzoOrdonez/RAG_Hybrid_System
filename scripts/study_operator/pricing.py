@@ -88,6 +88,24 @@ def quote_archive(folder, machine, region):
                 **machine_quote(rows, machine, region))
 
 
+def disk_quote_archive(folder, region):
+    """Keep the official monthly unit; hourly conversion is an explicit estimate."""
+    verified = quote_archive(folder,'g2-standard-4',region)
+    rows = [row for page in sorted(Path(folder).glob('page-*.json'))
+            for row in json.loads(page.read_bytes())['skus']
+            if region in row.get('serviceRegions',[])
+            and row.get('category',{}).get('usageType') == 'OnDemand'
+            and re.fullmatch(r'Balanced PD Capacity(?: in .+)?',row['description'])]
+    if len(rows) != 1:
+        raise ValueError('Ambiguous or missing zonal balanced PD SKU')
+    rate = unit_rate(rows[0])
+    if rate['usage_unit'] != 'GiBy.mo':
+        raise ValueError('Explicit monthly storage unit required')
+    return dict(region=region,sku_id=rows[0]['skuId'],description=rows[0]['description'],**rate,
+        estimated_usd_gib_h=str(Decimal(rate['usd_per_usage_unit'])/Decimal(730)),
+        estimated_month_hours=730,catalog_receipt_sha256=verified['catalog_receipt_sha256'])
+
+
 def download(cloud, destination, *, open_url=urlopen, max_pages=100, seconds=1200):
     destination = Path(destination)
     destination.mkdir(exist_ok=False)

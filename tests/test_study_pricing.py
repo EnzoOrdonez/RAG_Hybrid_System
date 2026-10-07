@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from scripts.study_operator.pricing import candidates, download, machine_quote, unit_rate
+from scripts.study_operator.pricing import candidates, download, machine_quote, unit_rate, disk_quote_archive
 
 
 def sku():
@@ -59,3 +59,20 @@ def test_machine_quote_selects_standard_sk_us_and_units_only():
         machine_quote([core, core, ram], 'e2-standard-2', 'us-central1')
     with pytest.raises(ValueError, match='US'):
         machine_quote([core, ram], 'e2-standard-2', 'europe-west1')
+
+
+def test_regional_disk_quote_keeps_monthly_unit_and_rejects_ambiguity(tmp_path,monkeypatch):
+    monkeypatch.setattr('scripts.study_operator.pricing.quote_archive',lambda *a:dict(catalog_receipt_sha256='c'*64))
+    row=sku()
+    row.update(description='Balanced PD Capacity in Northern Virginia',serviceRegions=['us-east4'])
+    row['pricingInfo'][0]['pricingExpression']['usageUnit']='GiBy.mo'
+    page=tmp_path/'page-000.json'
+    page.write_text(json.dumps(dict(skus=[row])))
+    result=disk_quote_archive(tmp_path,'us-east4')
+    assert result['usage_unit']=='GiBy.mo' and result['estimated_month_hours']==730
+    assert float(result['estimated_usd_gib_h'])==pytest.approx(.021/730)
+    with pytest.raises(ValueError,match='missing'):
+        disk_quote_archive(tmp_path,'us-west1')
+    page.write_text(json.dumps(dict(skus=[row,row])))
+    with pytest.raises(ValueError,match='Ambiguous'):
+        disk_quote_archive(tmp_path,'us-east4')
