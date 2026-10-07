@@ -61,14 +61,21 @@ def execute(root, cloud, inventory, removal_plan, restoration):
         kind = row['resource_kind']
         if kind not in GROUP or str(row['id']) in {
                 *removal_plan['preserved_ids'].values(), removal_plan['qualified_snapshot_id'],
-                removal_plan['cpu_vm_id'], removal_plan['restored_disk_id']}:
+                *([] if removal_plan.get('retire_cpu_probe') else
+                  [removal_plan['cpu_vm_id'], removal_plan['restored_disk_id']])}:
             raise ValueError('Removal intersects protected IDs')
-        if not row['name'].startswith('cloudrag-i4-'):
+        marker = removal_plan.get('owned_resource_markers', {}).get(str(row['id']))
+        if marker:
+            if not row['name'].startswith('cloudrag-i5-') or not marker.startswith('CloudRAG-I5-'):
+                raise ValueError('Own removal outside recorded I5 namespace')
+        elif not row['name'].startswith('cloudrag-i4-'):
             raise ValueError('Removal outside authorized I4 namespace')
         intent = root/('retention-delete-'+str(row['id'])+'-intent.json')
         receipt_path = root/('retention-delete-'+str(row['id'])+'-receipt.json')
         protections(cloud, inventory, removal_plan)
         live = selected(cloud, kind, row)
+        if live is not None and marker and live.get('description') != marker:
+            raise ValueError('Own removal ownership marker changed')
         if live is None and not intent.exists():
             raise ValueError('Unaccounted missing resource; no deletion success inferred')
         if not intent.exists():

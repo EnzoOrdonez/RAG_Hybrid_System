@@ -21,7 +21,7 @@ LISTS = {
 FIELDS = {
     'vms': ('name', 'id', 'zone', 'status', 'machineType', 'creationTimestamp', 'description',
             'labels', 'disks', 'deletionProtection', 'scheduling'),
-    'disks': ('name', 'id', 'zone', 'sizeGb', 'type', 'sourceSnapshot', 'sourceSnapshotId',
+    'disks': ('name', 'id', 'zone', 'sizeGb', 'type', 'description', 'sourceSnapshot', 'sourceSnapshotId',
               'sourceImage', 'sourceImageId', 'creationTimestamp', 'labels', 'users', 'selfLink'),
     'snapshots': ('name', 'id', 'status', 'diskSizeGb', 'storageBytes', 'storageLocations',
                   'sourceDisk', 'sourceDiskId', 'creationTimestamp', 'labels', 'description'),
