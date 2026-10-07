@@ -98,7 +98,8 @@ def plan(inventory, qualified_snapshot_id, restoration, *, inherited_resources):
                     for v in inventory['resources']['vms'] if str(v['id']) != preserved['vm'])
                     for u in row.get('users', [])):
                 raise ValueError('Disk attached to an unaccounted instance')
-            removals.append(dict(type=kind, **row))
+            # API disks already have a type URL; preserve it in the inventory.
+            removals.append(dict(resource_kind=kind, **row))
     return dict(status='PLANNED_NOT_DELETED', preserved_ids=preserved,
                 qualified_snapshot_id=str(qualified_snapshot_id), listing_sha256=inventory['listing_sha256'],
                 cpu_vm_id=restoration['cpu_vm_id'], restored_disk_id=restoration['restored_disk_id'],

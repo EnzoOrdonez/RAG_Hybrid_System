@@ -15,7 +15,8 @@ def fixture():
     rows = dict(vms=[original, alternate, dict(id='6', name='cloudrag-i5-cpu', status='TERMINATED')],
         disks=[dict(id='2', name='cloudrag-study-l4-20261002', zone='zones/us-central1-a'),
                dict(id='5', name='cloudrag-i5-cpu-boot', sourceSnapshotId='3'),
-               dict(id='8', name='cloudrag-i4-test-boot', zone='zones/us-central1-b', users=['vm/cloudrag-i4-test'])],
+               dict(id='8', name='cloudrag-i4-test-boot', zone='zones/us-central1-b',
+                    type='zones/us-central1-b/diskTypes/pd-balanced', users=['vm/cloudrag-i4-test'])],
         snapshots=[dict(id='3', name='cloudrag-i4-final', status='READY'),
                    dict(id='4', name='cloudrag-i4-old', status='READY')])
     inventory = dict(resources=rows, listing_sha256=digest(rows), protected_ids=dict(vm='1', disk='2'))
@@ -26,6 +27,8 @@ def fixture():
         for group, kind in [('vms', 'vm'), ('disks', 'disk'), ('snapshots', 'snapshot')]
         for r in rows[group] if r['name'].startswith('cloudrag-i4-')]
     removal = plan(inventory, '3', proof, inherited_resources=inherited)
+    assert removal['removals'][1]['type'] == 'zones/us-central1-b/diskTypes/pd-balanced'
+    assert removal['removals'][1]['resource_kind'] == 'disks'
     return inventory, proof, removal, inherited
 
 

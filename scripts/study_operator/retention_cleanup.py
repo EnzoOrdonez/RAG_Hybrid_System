@@ -58,7 +58,7 @@ def execute(root, cloud, inventory, removal_plan, restoration):
         raise ValueError('Pinned inventory/restoration changed')
     results = []
     for row in removal_plan['removals']:
-        kind = row['type']
+        kind = row['resource_kind']
         if kind not in GROUP or str(row['id']) in {
                 *removal_plan['preserved_ids'].values(), removal_plan['qualified_snapshot_id'],
                 removal_plan['cpu_vm_id'], removal_plan['restored_disk_id']}:
