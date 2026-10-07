@@ -16,6 +16,7 @@ from scripts.study_operator.cloud_client import checked_vm, no_other_gpu, readin
 from scripts.study_operator.deployment import checked_config
 from scripts.study_operator.policy import OperatorError, ReadyPending, participant_code, purpose_allowed, session_margin
 from scripts.study_operator.service_gateway import save_state
+from scripts.study_operator.region_scope import region
 
 
 class Operator:
@@ -25,7 +26,7 @@ class Operator:
         try:
             self.config = json.loads((self.root/'installation.json').read_text(encoding='utf-8'))
         except (OSError,ValueError):
-            raise OperatorError('Falta installation.json válido. Usa la instalación sellada de iteración 4; no copies el operador anterior.') from None
+            raise OperatorError('Falta installation.json válido. Usa la instalación sellada de iteración 5; no copies el operador anterior.') from None
         self.state_path = self.root/'active.json'
         self.state = json.loads(self.state_path.read_text(encoding='utf-8')) if self.state_path.exists() else {}
 
@@ -260,29 +261,30 @@ class Operator:
 
     def ip_reserve(self):
         name = self.config['ip_name']
+        ip_region = region(self.selected()['zone'])
         addresses = self.cloud.command(['compute','addresses','list','--filter=name='+name])
         if not addresses:
             intent = self.state.get('ip_creation_intent')
-            if intent and (intent.get('name') != name or intent.get('region') != 'us-central1'):
+            if intent and (intent.get('name') != name or intent.get('region') != ip_region):
                 raise OperatorError('Hay otra reserva de IP pendiente. Concilia su recibo antes de crear una nueva.')
             if self.state.get('reserved_address_id') or self.state.get('ip_reserved_utc'):
                 self.finish_ip_release('ABSENT_BEFORE_NEW_RESERVATION')
                 intent = self.state.get('ip_creation_intent')
             if not intent:
                 self.reserve_cost('ip-'+self.now().strftime('%Y%m%dT%H%M%S%fZ'),.01*24*3)
-                intent = dict(name=name,region='us-central1',requested_utc=self.now().isoformat(),
-                              ownership_marker='CloudRAG-I4-owned-'+uuid.uuid4().hex)
+                intent = dict(name=name,region=ip_region,requested_utc=self.now().isoformat(),
+                              ownership_marker='CloudRAG-I5-owned-'+uuid.uuid4().hex)
             self.state['ip_creation_intent'] = intent
             self.persist()
-            self.cloud.command(['compute','addresses','create',name,'--region=us-central1',
+            self.cloud.command(['compute','addresses','create',name,'--region='+ip_region,
                                 '--description='+intent['ownership_marker']])
-        observed = self.cloud.command(['compute','addresses','describe',name,'--region=us-central1'])
-        if not observed.get('region','').endswith('/us-central1') or observed.get('addressType') != 'EXTERNAL':
-            raise OperatorError('La IP no es externa regional en us-central1. Conserva el recurso y revisa su recibo.')
+        observed = self.cloud.command(['compute','addresses','describe',name,'--region='+ip_region])
+        if not observed.get('region','').endswith('/'+ip_region) or observed.get('addressType') != 'EXTERNAL':
+            raise OperatorError('La IP no es externa en la región de esta instalación. Conserva el recurso y revisa su recibo.')
         owned_id = self.state.get('reserved_address_id')
         intent = self.state.get('ip_creation_intent',{})
         if ((owned_id and str(observed['id']) != owned_id)
-                or (not owned_id and (intent.get('name') != name or intent.get('region') != 'us-central1'
+                or (not owned_id and (intent.get('name') != name or intent.get('region') != ip_region
                                       or observed.get('description') != intent.get('ownership_marker')))):
             raise OperatorError('La IP no acredita el intento de creación propio. No se asocia ni se libera; revisa los recibos.')
         self.config.update(static_ip=observed['address'],hostname=observed['address']+'.sslip.io')
@@ -313,6 +315,7 @@ class Operator:
 
     def ip_release(self):
         name = self.config['ip_name']
+        ip_region = region(self.selected()['zone'])
         addresses = self.cloud.command(['compute','addresses','list','--filter=name='+name])
         if not addresses:
             if self.state.get('reserved_address_id') or self.state.get('ip_reserved_utc'):
@@ -320,6 +323,8 @@ class Operator:
             return dict(status='ALREADY_RELEASED')
         if len(addresses) != 1 or str(addresses[0]['id']) != self.state.get('reserved_address_id'):
             raise OperatorError('La IP no coincide con el ID reservado por este operador. No se libera; revisa el recibo.')
+        if not addresses[0].get('region','').endswith('/'+ip_region):
+            raise OperatorError('La IP pertenece a otra región. No se libera ni se transfiere; concilia la reubicación.')
         # Recover only from the live, identity-checked resource's server date.
         if not self.state.get('ip_reserved_utc') and addresses[0].get('creationTimestamp'):
             self.state['ip_reserved_utc'] = addresses[0]['creationTimestamp']
@@ -335,7 +340,7 @@ class Operator:
                     if access.get('natIP') == addresses[0]['address']:
                         self.cloud.command(['compute','instances','delete-access-config',item['name'],'--zone='+item['zone'],
                             '--network-interface='+interface['name'],'--access-config-name='+access['name']])
-        self.cloud.command(['compute','addresses','delete',name,'--region=us-central1'])
+        self.cloud.command(['compute','addresses','delete',name,'--region='+ip_region])
         self.finish_ip_release('OWNER_DELETE_ACKNOWLEDGED')
         return dict(status='STATIC_IP_RELEASED_VERIFIED',https_idle_usd_day=0)
 
@@ -409,8 +414,8 @@ class Operator:
                     certificate_prepared_days_ahead=(session-self.now().date()).days,prepared_snapshot=snapshot)
 
     def failover(self, zone):
-        if zone not in {'us-central1-b','us-central1-c'}:
-            raise OperatorError('Zona alterna inválida. Usa us-central1-b o us-central1-c.')
+        if region(zone) != region(self.selected()['zone']):
+            raise OperatorError('Una IP regional no se puede transferir a otra región. La reubicación exige subred, IP, certificado y anexo propios antes de medir; usa el runbook de reubicación.')
         if self.selected()['zone'] == zone:
             return dict(status='ALREADY_SELECTED',next_action='start y preflight')
         if not self.config.get('prepared_snapshot'):

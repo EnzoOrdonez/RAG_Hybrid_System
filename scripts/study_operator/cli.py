@@ -11,12 +11,14 @@ from filelock import FileLock
 from scripts.study_operator.cloud_client import Cloud
 from scripts.study_operator.lifecycle import Operator
 from scripts.study_operator.policy import OperatorError
+from scripts.study_operator.region_scope import US_L4_ZONES
+from scripts.study_operator.run_control import require_limited
 from scripts.study_operator.service_gateway import save_state
 
 
 def parser():
-    value = argparse.ArgumentParser(description='Operador CloudRAG iteración 4; sin participantes en ensayos.')
-    value.add_argument('--root',default='C:/CloudRAG/operator-iteration4')
+    value = argparse.ArgumentParser(description='Operador CloudRAG iteración 5; sin participantes en ensayos.')
+    value.add_argument('--root',default='C:/CloudRAG/operator-iteration5')
     sub = value.add_subparsers(dest='operation',required=True)
     start = sub.add_parser('start')
     start.add_argument('--purpose',required=True,choices=('study','technical','smoke','rehearsal','pilot'))
@@ -31,7 +33,7 @@ def parser():
     tls = sub.add_parser('tls-prepare')
     tls.add_argument('--first-session',required=True)
     alternate = sub.add_parser('failover')
-    alternate.add_argument('--zone',required=True,choices=('us-central1-b','us-central1-c'))
+    alternate.add_argument('--zone',required=True,choices=sorted(US_L4_ZONES))
     for name in ('purge-study','withdraw','archive-local'):
         command = sub.add_parser(name)
         if name == 'withdraw':
@@ -47,9 +49,10 @@ def parser():
 
 def main(argv=None):
     args = parser().parse_args(argv)
+    require_limited()
     root = Path(args.root).resolve()
-    if root != Path('C:/CloudRAG/operator-iteration4').resolve():
-        raise OperatorError('Raíz no autorizada. Usa C:/CloudRAG/operator-iteration4; los operadores anteriores quedan congelados.')
+    if root != Path('C:/CloudRAG/operator-iteration5').resolve():
+        raise OperatorError('Raíz no autorizada. Usa C:/CloudRAG/operator-iteration5; los operadores anteriores quedan congelados.')
     root.mkdir(parents=True,exist_ok=True)
     run = root/'runs'/(datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'-'+uuid.uuid4().hex[:8])
     run.mkdir(parents=True)

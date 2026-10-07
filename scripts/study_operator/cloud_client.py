@@ -3,12 +3,14 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import time
 
 from scripts.study_operator.policy import OperatorError, ReadyPending
 from scripts.study_operator.service_gateway import save_state
+from scripts.study_operator.region_scope import US_L4_ZONES
 
 
 class Cloud:
@@ -20,7 +22,7 @@ class Cloud:
         self.sequence = max((int(p.name.split('-')[0]) for p in self.root.glob('*-intent.json')
                              if p.name.split('-')[0].isdigit()), default=0)
 
-    def command(self, arguments, *, private_output=False, input_data=None, timeout=180, json_output=True):
+    def command(self, arguments, *, private_output=True, input_data=None, timeout=180, json_output=True):
         self.sequence += 1
         stem = self.root / f'{self.sequence:04d}'
         argv = [self.sdk, *arguments, '--project=' + self.project, '--quiet']
@@ -41,7 +43,7 @@ class Cloud:
                 from scripts.study_operator.windows_ssh import api_host_key_flags, native_argv, native_run, sdk_argv
 
                 zones = [arg for arg in arguments if arg.startswith('--zone=')]
-                if len(zones) != 1 or zones[0].split('=', 1)[1] not in {'us-central1-a', 'us-central1-b', 'us-central1-c'}:
+                if len(zones) != 1 or zones[0].split('=', 1)[1] not in US_L4_ZONES:
                     raise ValueError('Managed SSH zone required')
                 keys = self.command(['compute', 'instances', 'get-guest-attributes', arguments[2],
                     zones[0], '--query-path=hostkeys/'], timeout=min(timeout, 60))
@@ -117,6 +119,16 @@ class Cloud:
             duration_s=time.monotonic()-began, exit_code=result.returncode,
             stdout_sha256=hashlib.sha256(stdout).hexdigest(), stderr_sha256=hashlib.sha256(stderr).hexdigest(),
             private_output_not_persisted=private_output, transport=transport)
+        if (result.returncode and len(arguments) > 2 and arguments[:2] == ['compute', 'instances']
+                and arguments[2] in {'start', 'create'}):
+            match = re.search(rb'\b(ZONE_RESOURCE_POOL_EXHAUSTED(?:_WITH_DETAILS)?)\b', stderr)
+            if match:
+                receipt['cloud_error_code'] = match[0].decode('ascii')
+                # Capacity errors are technical evidence, but an SDK footer
+                # containing identity/credentials must still remain in memory.
+                if (re.fullmatch(rb'[\t\r\n\x20-\x7e]*', stderr)
+                        and not re.search(rb'@|\b(?:Bearer|token|Authorization|ya29)\b|\b\d{1,3}(?:\.\d{1,3}){3}\b', stderr, re.I)):
+                    receipt['capacity_error_text'] = stderr.decode('utf-8', errors='strict')
         save_state(str(stem) + '-receipt.json', receipt)
         if result.returncode:
             if (arguments[:3] == ['compute', 'instances', 'get-guest-attributes']
@@ -126,7 +138,7 @@ class Cloud:
                 raise ReadyPending('Aún faltan claves públicas del invitado. Espera y repite preflight dentro de 15 minutos; no aceptes una clave desconocida.')
             # Capacity is a resource error, not a measured gate failure.
             if b'ZONE_RESOURCE_POOL_EXHAUSTED' in stderr or b'does not have enough resources' in stderr:
-                raise OperatorError('ZONE_RESOURCE_POOL_EXHAUSTED: ejecuta failover a us-central1-b o us-central1-c; si ambas fallan, reprograma según el runbook.')
+                raise OperatorError('ZONE_RESOURCE_POOL_EXHAUSTED: respeta las rondas de us-central1 y el orden de regiones medido; usa el runbook de contingencia, identidad y smoke antes de una sesión.')
             raise OperatorError('Google Cloud rechazó la operación. Revisa su recibo, verifica status y corrige la causa antes de repetir.')
         if json_output:
             try:
@@ -144,8 +156,8 @@ class Cloud:
 
 
 def checked_vm(observed, *, name, instance_id, zone):
-    if zone not in {'us-central1-a', 'us-central1-b', 'us-central1-c'}:
-        raise OperatorError('Zona fuera del ámbito. Solo se admite us-central1.')
+    if zone not in US_L4_ZONES:
+        raise OperatorError('Zona fuera del ámbito L4 verificado de EE.UU. Revisa el catálogo antes de encender.')
     if (observed.get('name') != name or str(observed.get('id')) != str(instance_id)
             or observed.get('zone', '').split('/')[-1] != zone
             or observed.get('machineType', '').split('/')[-1] != 'g2-standard-4'

@@ -18,7 +18,7 @@ def config():
         ollama_models='/srv/cloudrag/models', host_code='/srv/cloudrag/iteration4/code')
 
 
-@pytest.mark.parametrize('key,value', [('zone','us-east1-b'), ('project','other'),
+@pytest.mark.parametrize('key,value', [('zone','europe-west1-b'), ('project','other'),
     ('hostname','other.sslip.io'), ('ollama_image','ollama:latest'), ('host_code','/etc'),
     ('period_id','../anything')])
 def test_installation_scope_is_fail_closed(key, value):
@@ -26,6 +26,16 @@ def test_installation_scope_is_fail_closed(key, value):
     value_config[key] = value
     with pytest.raises((OperatorError, ValueError)):
         checked_config(value_config)
+
+
+@pytest.mark.parametrize('zone', ['us-east1-b','us-west4-c','us-west1-a'])
+def test_authorized_us_regions_keep_frozen_generation_and_isolation(zone):
+    value = config()
+    value['zone'] = zone
+    assert checked_config(value)['zone'] == zone
+    command = app_command(value,'/srv/cloudrag/iteration5/boot','/srv/cloudrag/iteration5/sessions','app')
+    assert command[command.index('--network')+1] == 'none'
+    assert 'USER=cloudrag' in command
 
 
 def test_app_and_freeze_share_service_and_generation_environment():

@@ -17,7 +17,7 @@ from scripts.study_operator.deployment import app_command, assert_isolation, bin
 from scripts.study_operator.service_gateway import save_state
 
 
-ROOT = Path('/srv/cloudrag/iteration4')
+ROOT = Path('/srv/cloudrag/iteration5')
 
 
 def ready_elapsed(requested, now=None):

@@ -37,7 +37,7 @@ def write_startup(path, config, *, discover_instance=False):
         )
     path.write_text('#!/bin/bash\nset -euo pipefail\npython3 - <<\'PY\'\n'
         'import base64,json,subprocess,os\nfrom pathlib import Path\n'
-        'root=Path("/srv/cloudrag/iteration4");root.mkdir(exist_ok=True)\n'
+        'root=Path("/srv/cloudrag/iteration5");root.mkdir(exist_ok=True)\n'
         'c=json.loads(base64.b64decode('+repr(encoded)+'))\n'+discovery+host_key_publication()+
         'p=root/"launch-config.json"\np.write_text(json.dumps(c))\nos.chmod(p,0o600)\n'
         'subprocess.Popen(["python3","-B","-m","scripts.study_operator.host_runtime",'

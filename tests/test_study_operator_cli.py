@@ -18,6 +18,12 @@ def test_human_operator_commands_parse_without_extra_information(argv,operation)
 
 
 def test_cloud_region_and_profiles_are_restricted():
-    for argv in [['failover','--zone','us-east1-b'],['invite','P999','--profile','invented']]:
+    for argv in [['failover','--zone','europe-west4-a'],['invite','P999','--profile','invented']]:
         with pytest.raises(SystemExit):
             parser().parse_args(argv)
+
+
+def test_operator5_root_and_api_listed_us_zone_parse():
+    result = parser().parse_args(['failover', '--zone', 'us-west4-c'])
+    assert result.root == 'C:/CloudRAG/operator-iteration5'
+    assert result.zone == 'us-west4-c'

@@ -4,16 +4,17 @@ import re
 from pathlib import PurePosixPath
 
 from scripts.study_operator.policy import OperatorError
+from scripts.study_operator.region_scope import US_L4_ZONES
 
 
 def checked_config(value):
     if (value.get('schema_version') != 1 or value.get('project') != 'pure-loop-474323-a8'
-            or value.get('zone') not in {'us-central1-a', 'us-central1-b', 'us-central1-c'}
+            or value.get('zone') not in US_L4_ZONES
             or value.get('machine_type') != 'g2-standard-4'
             or value.get('sessions_bucket') != 'cloudrag-study-i4-103950017681-20261004'
             or value.get('technical_bucket') != 'cloudrag-study-103950017681-20261002'
             or value.get('purpose') not in {'study', 'technical', 'smoke', 'rehearsal', 'pilot'}):
-        raise OperatorError('Instalación fuera del ámbito. Revisa el archivo de instalación de iteración 4.')
+        raise OperatorError('Instalación fuera del ámbito. Revisa el archivo de instalación de iteración 5.')
     for key, pattern in [('image_id', r'sha256:[a-f0-9]{64}'), ('commit', r'[a-f0-9]{40}'),
                          ('model_digest', r'[a-f0-9]{64}'), ('period_id', r'[a-f0-9]{32}')]:
         if not re.fullmatch(pattern, str(value.get(key, ''))):

@@ -100,7 +100,7 @@ def test_start_idempotent_scope_budget_and_terminal_metadata(tmp_path):
     assert operator.start('smoke')['status'] == 'STARTED_SUPERVISED'
     script = (cloud.root/'startup.sh').read_text()
     assert 'stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL' in script
-    assert 'host_runtime' in script and '/srv/cloudrag/iteration4' in script
+    assert 'host_runtime' in script and '/srv/cloudrag/iteration5' in script
     assert operator.start('smoke')['status'] == 'ALREADY_RUNNING'
     assert sum(args[:3] == ['compute','instances','start'] for args,_ in cloud.calls) == 1
     assert operator.state['cost']['reservations']
@@ -253,7 +253,7 @@ def test_rejected_regional_ip_create_preserves_one_intent_and_budget_reservation
 
 def test_never_associated_ip_is_charged_at_unused_rate(tmp_path):
     operator,cloud = installation(tmp_path)
-    address = dict(name='owned-address',id='42',address='203.0.113.8')
+    address = dict(name='owned-address',id='42',address='203.0.113.8',region='regions/us-central1')
     original = cloud.command
     cloud.command = lambda args,**options: [address] if args[:3] == ['compute','addresses','list'] else original(args,**options)
     operator.state.update(reserved_address_id='42',ip_reserved_utc='2026-10-05T00:00:00+00:00',
@@ -269,7 +269,7 @@ def test_tls_preparation_and_capacity_fail_closed_before_start(tmp_path):
         operator.tls_prepare('2026-10-07')
     with pytest.raises(OperatorError,match='Fecha inválida'):
         operator.tls_prepare('unscheduled')
-    with pytest.raises(OperatorError,match='Zona alterna'):
+    with pytest.raises(OperatorError,match='otra región'):
         operator.failover('us-east1-b')
     with pytest.raises(OperatorError,match='instantánea preparada'):
         operator.failover('us-central1-b')
@@ -308,6 +308,50 @@ def test_ip_release_idempotent_and_no_tls_idle_charge(tmp_path):
     assert not any(args[:3] == ['compute','addresses','delete'] for args,_ in cloud.calls)
 
 
+def test_foreign_region_ip_rejected_before_vm_detach_or_delete(tmp_path):
+    operator,cloud = installation(tmp_path)
+    original = cloud.command
+    address = dict(name='owned-address',id='42',region='regions/us-east1',address='203.0.113.8')
+    cloud.command = lambda args,**options: [address] if args[:3] == ['compute','addresses','list'] else original(args,**options)
+    operator.state['reserved_address_id'] = '42'
+    with pytest.raises(OperatorError,match='otra región'):
+        operator.ip_release()
+    assert not cloud.calls  # Even VM describe/detach is forbidden after the mismatch.
+
+
+def test_regional_ip_reservation_uses_selected_us_region(tmp_path):
+    operator,cloud = installation(tmp_path)
+    operator.config['primary_vm']['zone'] = 'us-west4-a'
+    operator.config['zone'] = 'us-west4-a'
+    cloud.vm['zone'] = 'zones/us-west4-a'
+    original = cloud.command
+    addresses = []
+    def command(args,**options):
+        cloud.calls.append((args,options))
+        if args[:3] == ['compute','addresses','list']:
+            return addresses
+        if args[:3] == ['compute','addresses','create']:
+            assert '--region=us-west4' in args
+            marker = next(arg.split('=',1)[1] for arg in args if arg.startswith('--description='))
+            addresses.append(dict(name='owned-address',id='42',region='regions/us-west4',
+                addressType='EXTERNAL',address='203.0.113.8',description=marker,
+                creationTimestamp='2026-10-05T00:00:00+00:00'))
+            return None
+        if args[:3] == ['compute','addresses','describe']:
+            assert '--region=us-west4' in args
+            return addresses[0]
+        return original(args,**options)
+    cloud.command = command
+    assert operator.ip_reserve()['address_id'] == '42'
+    assert operator.state['ip_associated_utc']
+    assert not any('--region=us-central1' in args for args,_ in cloud.calls)
+    assert operator.failover('us-west4-a')['status'] == 'ALREADY_SELECTED'
+    with pytest.raises(OperatorError,match='instantánea preparada'):
+        operator.failover('us-west4-c')
+    with pytest.raises(OperatorError,match='otra región'):
+        operator.failover('us-central1-b')
+
+
 def test_absent_owned_ip_settles_once_and_invalidates_live_tls_state(tmp_path):
     operator,cloud = installation(tmp_path)
     operator.state.update(reserved_address_id='42',
@@ -337,7 +381,7 @@ def test_absent_owned_ip_settles_once_and_invalidates_live_tls_state(tmp_path):
 
 def test_lost_ip_delete_response_can_reconcile_then_reserve_new_owned_id(tmp_path):
     operator,cloud = installation(tmp_path)
-    live=[dict(name='owned-address',id='42',address='203.0.113.8')]
+    live=[dict(name='owned-address',id='42',address='203.0.113.8',region='regions/us-central1')]
     original=cloud.command
     def command(args,**options):
         cloud.calls.append((args,options))

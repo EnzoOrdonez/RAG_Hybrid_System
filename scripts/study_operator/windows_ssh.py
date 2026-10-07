@@ -8,6 +8,8 @@ from pathlib import Path
 import re
 import subprocess
 
+from scripts.study_operator.region_scope import US_L4_ZONES
+
 
 def api_host_key_flags(value):
     """Pin public host keys returned by the authenticated Google API."""
@@ -85,7 +87,7 @@ def sdk_argv(content, expected_plink):
 
 def native_argv(plink, rows, *, sdk, target, known_hosts, ssh=None, key=None):
     """Translate only the reviewed IAP RPC; no ambient SSH configuration."""
-    if (target['zone'] not in {'us-central1-a', 'us-central1-b', 'us-central1-c'}
+    if (target['zone'] not in US_L4_ZONES
             or not re.fullmatch(r'cloudrag-[a-z0-9-]+', target['name'])
             or not re.fullmatch(r'[0-9]+', str(target['id']))):
         raise ValueError('Managed IAP target required')

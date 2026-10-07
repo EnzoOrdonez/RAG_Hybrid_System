@@ -17,6 +17,29 @@ def test_secret_output_and_private_download_never_written(tmp_path):
     assert not list(tmp_path.glob('*.stdout'))
 
 
+def test_owner_compute_metadata_is_private_by_default(tmp_path):
+    content = dict(metadata={'ssh-keys': 'PERSON_EMAIL_CANARY@example.invalid'},
+                   unneeded='CLIENT_IP_AND_UA_CANARY')
+    cloud = Cloud('fixture', 'pure-loop-474323-a8', tmp_path,
+        invoke=lambda *a, **k: subprocess.CompletedProcess([], 0, json.dumps(content).encode(), b''))
+    assert cloud.command(['compute', 'instances', 'list']) == content
+    assert not list(tmp_path.glob('*.stdout'))
+    assert 'CANARY' not in ''.join(p.read_text() for p in tmp_path.iterdir())
+
+
+@pytest.mark.parametrize('private_suffix', [b'', b' identity PERSON_EMAIL_CANARY@example.invalid'])
+def test_capacity_code_preserved_but_personal_footer_not_written(tmp_path, private_suffix):
+    error = b'ZONE_RESOURCE_POOL_EXHAUSTED: zone us-central1-a lacks available resources'+private_suffix
+    cloud = Cloud('fixture', 'pure-loop-474323-a8', tmp_path,
+        invoke=lambda *a, **k: subprocess.CompletedProcess([], 1, b'', error))
+    with pytest.raises(OperatorError, match='ZONE_RESOURCE_POOL_EXHAUSTED'):
+        cloud.command(['compute', 'instances', 'start', 'fixture', '--zone=us-central1-a'])
+    receipt = json.loads((tmp_path/'0001-receipt.json').read_bytes())
+    assert receipt['cloud_error_code'] == 'ZONE_RESOURCE_POOL_EXHAUSTED'
+    assert ('capacity_error_text' in receipt) == (not private_suffix)
+    assert 'PERSON_EMAIL_CANARY' not in json.dumps(receipt)
+
+
 def test_timeout_and_malformed_json_return_actionable_errors(tmp_path):
     def timeout(*args, **kwargs):
         raise subprocess.TimeoutExpired('synthetic tool', 1)
