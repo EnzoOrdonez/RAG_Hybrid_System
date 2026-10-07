@@ -59,7 +59,7 @@ def census(cloud, inherited_state):
     return result
 
 
-def plan(inventory, qualified_snapshot_id, restoration):
+def plan(inventory, qualified_snapshot_id, restoration, *, inherited_resources):
     """No names, timestamp recency, or synthetic unit result qualifies a snapshot."""
     if digest(inventory['resources']) != inventory['listing_sha256']:
         raise ValueError('Retention listing changed')
@@ -69,16 +69,28 @@ def plan(inventory, qualified_snapshot_id, restoration):
     if (restoration.get('status') != 'CPU_RESTORATION_VERIFIED' or restoration.get('synthetic') is not False
             or str(restoration.get('source_snapshot_id')) != str(qualified_snapshot_id)
             or not restoration.get('all_expected_files_verified') or not restoration.get('image_config_verified')
-            or not restoration.get('restored_disk_id') or not restoration.get('cpu_vm_id')):
+            or not restoration.get('model_manifest_and_blobs_verified')
+            or not restoration.get('restored_disk_id') or not restoration.get('cpu_vm_id')
+            or restoration.get('source', {}).get('files') != 19
+            or restoration.get('artifacts', {}).get('files') != 79):
         raise ValueError('Real CPU restoration receipt required before deletion')
     preserved = inventory['protected_ids']
+    cpu = [r for r in inventory['resources']['vms'] if str(r['id']) == restoration['cpu_vm_id']]
+    clone = [r for r in inventory['resources']['disks'] if str(r['id']) == restoration['restored_disk_id']]
+    if (len(cpu) != 1 or cpu[0]['status'] != 'TERMINATED' or len(clone) != 1
+            or str(clone[0].get('sourceSnapshotId')) != str(qualified_snapshot_id)):
+        raise ValueError('Restored CPU and disk must remain observed and stopped')
+    allowed = {(r['type'], str(r['id'])): r for r in inherited_resources if r.get('inherited')}
+    keep = {preserved['vm'], preserved['disk'], str(qualified_snapshot_id),
+            restoration['cpu_vm_id'], restoration['restored_disk_id']}
     removals = []
     for kind in ('vms', 'disks', 'snapshots'):
         for row in inventory['resources'][kind]:
-            if str(row['id']) in {preserved['vm'], preserved['disk'], str(qualified_snapshot_id)}:
+            if str(row['id']) in keep:
                 continue
             # Only the expressly inherited test namespace can be considered.
-            if not row['name'].startswith('cloudrag-i4-'):
+            legacy = allowed.get(({'vms': 'vm', 'disks': 'disk', 'snapshots': 'snapshot'}[kind], str(row['id'])))
+            if not legacy or legacy['name'] != row['name'] or not row['name'].startswith('cloudrag-i4-'):
                 raise ValueError('Resource outside authorized redundant test inventory')
             if kind == 'vms' and row['status'] != 'TERMINATED':
                 raise ValueError('Test VM must be stopped before disposal')
@@ -89,6 +101,7 @@ def plan(inventory, qualified_snapshot_id, restoration):
             removals.append(dict(type=kind, **row))
     return dict(status='PLANNED_NOT_DELETED', preserved_ids=preserved,
                 qualified_snapshot_id=str(qualified_snapshot_id), listing_sha256=inventory['listing_sha256'],
+                cpu_vm_id=restoration['cpu_vm_id'], restored_disk_id=restoration['restored_disk_id'],
                 restoration_receipt_sha256=digest(restoration), removals=removals,
                 buckets_and_file_evidence_never_deleted=True)
 

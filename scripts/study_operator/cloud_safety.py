@@ -38,8 +38,12 @@ def targets(state, observed):
         intent = intents.get(vm['name'])
         zone = vm['zone'].split('/')[-1]
         if recorded:
+            if recorded.get('disposed'):
+                raise ValueError('Disposed VM reappeared; closure identity is unsafe')
             if recorded['name'] != vm['name'] or recorded['zone'] != zone:
                 raise ValueError('Recorded resource identity changed')
+        elif any(r['name'] == vm['name'] for r in known.values()):
+            raise ValueError('Recorded VM name reappeared with another ID')
         elif intent:
             if (not vm['name'].startswith('cloudrag-i5-') or vm.get('description') != intent['ownership_marker']
                     or intent['zone'] != zone or not intent['ownership_marker'].startswith('CloudRAG-I5-')):
@@ -64,7 +68,10 @@ def close(root, cloud):
     selected = targets(state, before)
     if not selected:
         raise ValueError('No owned VM observed; empty census cannot prove safe closure')
-    recorded_ids = {str(row['id']) for row in state.get('resources', []) if row['type'] == 'vm'}
+    recorded_ids = {str(row['id']) for row in state.get('resources', [])
+                    if row['type'] == 'vm' and not row.get('disposed')}
+    if any(row.get('disposed') and not row.get('absence_verified') for row in state.get('resources', [])):
+        raise ValueError('Disposed resource lacks API absence evidence')
     if not recorded_ids.issubset({str(row['id']) for row in selected}):
         raise ValueError('Recorded VM missing from closure census')
     for vm in selected:

@@ -76,3 +76,21 @@ def test_empty_census_does_not_prove_closure(tmp_path):
     with pytest.raises(ValueError, match='empty census'):
         close(tmp_path, Cloud())
     assert not list(tmp_path.glob('safety-close-*.json'))
+
+
+def test_disposed_vm_is_not_expected_alive_but_reappearance_is_rejected(tmp_path):
+    value = state()
+    value['resources'].append(dict(type='vm', id='456', name='cloudrag-i4-test',
+        zone='us-central1-b', disposed=True, absence_verified=True))
+    original = dict(id='123', name='original', zone='zones/us-central1-a', status='TERMINATED')
+    (tmp_path/'STATE.json').write_text(json.dumps(value))
+
+    class Cloud:
+        def command(self, argv, **kwargs):
+            assert argv == ['compute', 'instances', 'list']
+            return [original]
+
+    assert close(tmp_path, Cloud())['status'] == 'OWN_VMS_TERMINATED_VERIFIED'
+    for identity in ('456', '789'):
+        with pytest.raises(ValueError, match='reappeared'):
+            targets(value, [dict(id=identity, name='cloudrag-i4-test', zone='zones/us-central1-b')])
