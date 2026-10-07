@@ -74,7 +74,7 @@ def prepare(repo, vendor, root, label, *, run, python):
         vendor_manifest_sha256=file_hash(vendor/'manifest.json'),vendor_revision=manifest['revision'],
         requirements_lock_sha256=file_hash(repo/'requirements-lock.txt'),pins_preserved=True,
         at=datetime.now(timezone.utc).isoformat(),build_not_started=True)
-    with (root/('build-context-'+label+'-receipt.json')).open('x',encoding='utf-8') as stream:
+    with (root/('build-context-'+label+'-inventory.json')).open('x',encoding='utf-8') as stream:
         json.dump(result,stream,indent=2)
     return result
 

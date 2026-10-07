@@ -49,6 +49,8 @@ def test_context_preserves_vendor_lock_and_git_source_without_overwrite(tmp_path
     repo,vendor,root = inputs(tmp_path)
     result = prepare(repo,vendor,root,'candidate01',run=runner(repo,root),python='fixture-python')
     assert result['pins_preserved'] and result['build_not_started'] and result['vendor_files'] == 1
+    assert json.loads((root/'build-context-candidate01-inventory.json').read_bytes()) == result
+    assert not (root/'build-context-candidate01-receipt.json').exists()  # Reserved to the command recorder.
     assert (root/'build-context-candidate01/repository/requirements-lock.txt').read_bytes() == (repo/'requirements-lock.txt').read_bytes()
     with tarfile.open(result['bundle']) as archive:
         assert 'repository/.git' in archive.getnames()
