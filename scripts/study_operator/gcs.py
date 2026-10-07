@@ -32,11 +32,24 @@ def zero_retention_history(anchor):
 
 
 class Storage:
-    def __init__(self, bucket, access_token, *, creation_anchor=None):
+    def __init__(self, bucket, access_token, *, creation_anchor=None, policy_history=None):
         self.bucket = bucket
         self.access_token = access_token
         self.creation_anchor = creation_anchor
         self.soft_delete_verification = None
+        self.policy_history = policy_history
+        self.policy_verification = None
+
+    def verify_zero_retention(self):
+        from scripts.study_operator.bucket_history import validate
+
+        if self.policy_history is None or self.creation_anchor is None:
+            raise ValueError('Live audit policy verifier required; preserve all copies')
+        before = json.loads(self.request(''))
+        history = self.policy_history(before)
+        after = json.loads(self.request(''))
+        self.policy_verification = validate(before, after, self.creation_anchor, history)
+        return self.policy_verification
 
     def request(self, path, *, params=None, data=None, method='GET', upload=False):
         base = 'https://storage.googleapis.com/' + ('upload/' if upload else '') + 'storage/v1/b/'

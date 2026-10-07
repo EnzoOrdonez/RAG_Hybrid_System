@@ -10,10 +10,8 @@ from scripts.study_operator.policy import OperatorError
 def inventory(storage, prefix):
     if not prefix or not prefix.endswith('/') or '..' in PurePosixPath(prefix).parts:
         raise OperatorError('Prefijo de borrado inválido. Usa el inventario del periodo de sesiones.')
+    storage.verify_zero_retention()
     objects = storage.objects(prefix, versions=True)
-    soft = storage.objects(prefix, soft_deleted=True)
-    if soft:
-        raise OperatorError('Hay copias soft-deleted. No se puede prometer borrado definitivo; revisa la política del bucket.')
     result = []
     for item in objects:
         name = item['name']
@@ -73,12 +71,22 @@ def execute(storage, prefix, local_download, *, dry_run=True, disk_cleanup=None,
     if previous and previous['stage'] == 'COMPLETE':
         if planned:
             raise OperatorError('Hay datos nuevos tras un borrado completo. Usa una transacción nueva; no reutilices su recibo.')
+        for item in previous['verified_downloads']:
+            path = root/item['relative']/(item['generation']+'.download')
+            if (not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(root)
+                    or path.stat().st_size != item['size']
+                    or hashlib.sha256(path.read_bytes()).hexdigest() != item['sha256']):
+                raise OperatorError('Descarga verificada alterada. Conserva el recibo; no se acredita el borrado.')
+        if storage.objects(prefix):
+            raise OperatorError('Listado normal no vacío. Conserva el recibo y congela la admisión.')
         disk = disk_cleanup(previous['verified_downloads'])
         if not disk.get('empty'):
             raise OperatorError('Borrado no completo en disco. Mantén bloqueada la admisión.')
         return {'status': 'DELETED_VERIFIED', 'scope_sha256': scope, 'deleted': 0,
                 'previous_transaction': str(state_path), 'remote_versions_empty': True,
-                'remote_soft_deleted_empty': True, 'disk': disk}
+                'normal_objects_empty': True, 'verified_downloads': previous['verified_downloads'],
+                'zero_retention_policy_verified': True, 'policy_verification': storage.policy_verification,
+                'disk': disk}
     if previous:
         original = previous['objects']
         if any(item not in original for item in planned):
@@ -137,19 +145,24 @@ def execute(storage, prefix, local_download, *, dry_run=True, disk_cleanup=None,
         return dict(status='ARCHIVED_LOCAL_VERIFIED',verified_downloads=receipts,deleted=0,disk=disk,
                     remote_objects_retained=len(planned),scope_sha256=scope,transaction=str(state_path))
     previous['stage'] = 'DELETING'
+    previous['policy_verification_before_delete'] = storage.policy_verification
     _save(state_path, previous)
     for item in planned:
+        storage.verify_zero_retention()
         storage.delete(item['object'], item['generation'])
         previous['deleted_generations'].append([item['object'], item['generation']])
         _save(state_path, previous)
     previous['stage'] = 'DISK_CLEANUP'
     _save(state_path, previous)
     disk = disk_cleanup(receipts)
-    if storage.objects(prefix, versions=True) or storage.objects(prefix, soft_deleted=True) or not disk.get('empty'):
+    storage.verify_zero_retention()
+    if storage.objects(prefix) or storage.objects(prefix, versions=True) or not disk.get('empty'):
         raise OperatorError('Borrado no completo. Mantén bloqueada la admisión y revisa el recibo de limpieza.')
     previous['stage'] = 'COMPLETE'
     previous['disk'] = disk
+    previous['policy_verification_after_delete'] = storage.policy_verification
     _save(state_path, previous)
     return {'status': 'DELETED_VERIFIED', 'scope_sha256': scope, 'transaction': str(state_path),
             'verified_downloads': receipts, 'deleted': len(receipts), 'disk': disk,
-            'remote_versions_empty': True, 'remote_soft_deleted_empty': True}
+            'remote_versions_empty': True, 'normal_objects_empty': True,
+            'zero_retention_policy_verified': True, 'policy_verification': storage.policy_verification}

@@ -618,6 +618,7 @@ class Operator:
         self.persist()
 
     def delete_sessions(self, operation, *, code=None, dry_run=True, confirmation=None):
+        from scripts.study_operator.bucket_history import collect
         from scripts.study_operator.deletion import execute, private_directory
         from scripts.study_operator.gcs import Storage
         from scripts.study_operator.policy import confirm_deletion
@@ -637,7 +638,9 @@ class Operator:
         self.maintenance()
         prefix = 'periods/'+self.config['period_id']+'/' + (code+'/' if code else '')
         storage = Storage(self.config['sessions_bucket'],self.cloud.owner_token,
-                          creation_anchor=self.config.get('sessions_bucket_creation'))
+                          creation_anchor=self.config.get('sessions_bucket_creation'),
+                          policy_history=lambda metadata: collect(self.cloud.owner_token,self.config['project'],
+                              self.config['sessions_bucket'],metadata))
         scope = hashlib.sha256((operation+'\0'+self.config['sessions_bucket']+'\0'+prefix).encode()).hexdigest()
         transactions = self.state.setdefault('deletion_transactions',{})
         transaction = transactions.get(scope)
@@ -705,12 +708,13 @@ class Operator:
             self.state['failover_data_reconciled'] = True
             self.persist()
         summary = dict(status=receipt['status'],remote_versions_empty=receipt.get('remote_versions_empty',False),
-            remote_soft_deleted_empty=receipt.get('remote_soft_deleted_empty',False),disk_empty=receipt['disk']['empty'],
+            zero_retention_policy_verified=receipt.get('zero_retention_policy_verified',False),
+            normal_objects_empty=receipt.get('normal_objects_empty',False),disk_empty=receipt['disk']['empty'],
             downloaded_disk_files=len(verified),deleted_generations=receipt['deleted'],
-            private_receipt=str(local/'receipt.json'),soft_delete_verification=storage.soft_delete_verification)
+            private_receipt=str(local/'receipt.json'),policy_verification=storage.policy_verification)
         if operation == 'archive-local':
             summary['remote_objects_retained'] = receipt['remote_objects_retained']
-        receipt['soft_delete_verification'] = storage.soft_delete_verification
+        receipt['policy_verification'] = storage.policy_verification
         save_state(local/'receipt.json',receipt)
         self.state['deletion_transactions'].pop(scope,None)
         self.persist()

@@ -11,10 +11,18 @@ class MemoryStorage:
                      'study/period/P999/synthetic/export_manifest.json': b'{"files":{}}'}
         self.deleted = []
         self.soft = []
+        self.policy_verification = None
+
+    def verify_zero_retention(self):
+        if self.soft:
+            raise OperatorError('Hay copias soft-deleted; no se borra')
+        self.policy_verification = dict(soft_delete_retention_seconds=0,
+            versioning_enabled=False, complete_history=True, synthetic=True)
+        return self.policy_verification
 
     def objects(self, prefix, *, versions=False, soft_deleted=False):
         if soft_deleted:
-            return self.soft
+            pytest.fail('Iteration 5 never treats a soft-deleted listing error as absence')
         return [{'name': name, 'generation': '100', 'size': len(data)}
                 for name, data in sorted(self.data.items()) if name.startswith(prefix)]
 
@@ -51,7 +59,8 @@ def test_every_generation_downloaded_before_any_remote_delete(tmp_path):
     storage.delete = delete
     result = execute(storage, 'study/period/P999/', tmp_path, dry_run=False, disk_cleanup=lambda rows: {'empty': True})
     assert result['status'] == 'DELETED_VERIFIED'
-    assert result['remote_versions_empty'] and result['remote_soft_deleted_empty']
+    assert result['remote_versions_empty'] and result['normal_objects_empty']
+    assert result['zero_retention_policy_verified'] and 'remote_soft_deleted_empty' not in result
     assert all(len(row['sha256']) == 64 for row in result['verified_downloads'])
 
 

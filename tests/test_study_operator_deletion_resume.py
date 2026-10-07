@@ -73,3 +73,12 @@ def test_resume_rejects_new_remote_objects_after_disk_failure(tmp_path):
     with pytest.raises(OperatorError, match='inventario'):
         execute(storage, PREFIX, tmp_path, dry_run=False, disk_cleanup=lambda rows: {'empty': True})
     assert storage.data
+
+
+def test_complete_replay_does_not_reaccredit_a_tampered_local_download(tmp_path):
+    storage = MemoryStorage()
+    execute(storage, PREFIX, tmp_path, dry_run=False, disk_cleanup=lambda rows: {'empty': True})
+    next(tmp_path.rglob('*.download')).write_bytes(b'changed after completed transaction')
+    with pytest.raises(OperatorError, match='alterada'):
+        execute(storage, PREFIX, tmp_path, dry_run=False,
+            disk_cleanup=lambda rows: pytest.fail('corrupt backup must fail before disk cleanup'))
