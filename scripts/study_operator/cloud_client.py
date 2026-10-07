@@ -171,7 +171,8 @@ def checked_vm(observed, *, name, instance_id, zone):
 
 def no_other_gpu(instances, *, selected_id):
     for item in instances:
-        if str(item.get('id')) != str(selected_id) and item.get('guestAccelerators') and item.get('status') != 'TERMINATED':
+        gpu = bool(item.get('guestAccelerators')) or item.get('machineType', '').split('/')[-1].startswith('g2-')
+        if str(item.get('id')) != str(selected_id) and gpu and item.get('status') != 'TERMINATED':
             raise OperatorError('Hay otra VM con GPU activa. Detén y verifica esa VM antes de encender otra.')
 
 

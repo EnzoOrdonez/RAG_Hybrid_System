@@ -27,3 +27,9 @@ def test_operator5_root_and_api_listed_us_zone_parse():
     result = parser().parse_args(['failover', '--zone', 'us-west4-c'])
     assert result.root == 'C:/CloudRAG/operator-iteration5'
     assert result.zone == 'us-west4-c'
+
+
+def test_bootstrap_configuration_and_private_iap_parse():
+    assert parser().parse_args(['configure-bootstrap', '--config', 'derived.json']).config == 'derived.json'
+    for operation in ('iap-prepare', 'iap-release'):
+        assert parser().parse_args([operation]).operation == operation

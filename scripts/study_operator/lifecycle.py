@@ -300,6 +300,11 @@ class Operator:
         self.state['reserved_address_region'] = ip_region
         self.state['ip_ownership_marker'] = observed.get('description')
         self.state.setdefault('ip_reserved_utc',observed.get('creationTimestamp',self.now().isoformat()))
+        if name.startswith('cloudrag-i5-'):
+            audit_ip = dict(type='address', name=name, id=str(observed['id']), region=ip_region,
+                ownership_marker=self.state['ip_ownership_marker'], created_utc=self.state['ip_reserved_utc'])
+            if audit_ip not in self.state.setdefault('audit_resources', []):
+                self.state['audit_resources'].append(audit_ip)
         self.persist()  # Recoverable even if association fails or its response is lost.
         selected = self.selected()
         vm = self.observed()
@@ -380,6 +385,9 @@ class Operator:
         cost['reservations'] = {key:value for key,value in cost['reservations'].items() if not key.startswith('ip-')}
         self.state['last_ip_interval'] = dict(charge,release_method=method,
             address_id=self.state.get('reserved_address_id'))
+        for row in self.state.get('audit_resources', []):
+            if row['type'] == 'address' and row['id'] == self.state.get('reserved_address_id'):
+                row.update(disposed=True, absence_verified=True, absence_verified_utc=self.now().isoformat())
         self.state.pop('reserved_address_id',None)
         self.state.pop('reserved_address_region',None)
         self.state.pop('ip_reserved_utc',None)

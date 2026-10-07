@@ -54,6 +54,8 @@ def test_pending_bootstrap_ip_releases_in_actual_new_region(tmp_path):
     assert operator.ip_release()['status'] == 'STATIC_IP_RELEASED_VERIFIED'
     assert not addresses and 'reserved_address_region' not in operator.state
     assert 'static_ip' not in operator.config
+    assert operator.state['audit_resources'][0]['disposed']
+    assert operator.state['audit_resources'][0]['absence_verified']
 
 
 def test_region_cannot_be_changed_while_old_ip_is_reserved(tmp_path):

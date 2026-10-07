@@ -63,6 +63,8 @@ def test_native_protection_or_other_gpu_fails_before_start():
     with pytest.raises(OperatorError, match='otra VM'):
         no_other_gpu([dict(id='2', status='RUNNING', guestAccelerators=[{}])], selected_id='1')
     assert no_other_gpu([dict(id='2', status='TERMINATED', guestAccelerators=[{}])], selected_id='1') is None
+    with pytest.raises(OperatorError, match='otra VM'):
+        no_other_gpu([dict(id='2', status='RUNNING', machineType='machineTypes/g2-standard-4')], selected_id='1')
 
 
 def test_missing_or_invalid_ready_has_message_instead_of_stopiteration():

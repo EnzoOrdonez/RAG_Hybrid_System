@@ -38,6 +38,8 @@ def parser():
     alternate.add_argument('--zone',required=True,choices=sorted(US_L4_ZONES))
     bootstrap = sub.add_parser('bootstrap')
     bootstrap.add_argument('--zone', required=True, choices=sorted(US_L4_ZONES))
+    configuration = sub.add_parser('configure-bootstrap')
+    configuration.add_argument('--config', required=True)
     for name in ('purge-study','withdraw','archive-local'):
         command = sub.add_parser(name)
         if name == 'withdraw':
@@ -91,6 +93,10 @@ def main(argv=None):
             from scripts.study_operator.bootstrap import bootstrap
 
             result = bootstrap(operator, args.zone)
+        elif operation == 'configure-bootstrap':
+            from scripts.study_operator.bootstrap_region import from_file
+
+            result = from_file(operator, args.config)
         elif operation in {'iap-prepare', 'iap-release'}:
             from scripts.study_operator import iap_access
 
