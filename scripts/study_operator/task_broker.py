@@ -25,6 +25,10 @@ def checked_request(root, app, request):
         raise ValueError('Foreign plan scope')
     if not 1 <= request['native_minutes'] <= 180 or type(request['native_minutes']) is not int:
         raise ValueError('Finite native job limit required')
+    if 'not_before_utc' in request:
+        not_before = datetime.fromisoformat(request['not_before_utc'])
+        if not_before.tzinfo is None:
+            raise ValueError('Aware scheduled admission timestamp required')
     for command in plan['commands']:
         validate_command(command)
     return path
@@ -45,6 +49,8 @@ def dispatch(root, app, *, invoke=subprocess.run):
                 continue
             request = json.loads(request_path.read_bytes())
             path = checked_request(root, app, request)
+            if request.get('not_before_utc') and datetime.now(timezone.utc) < datetime.fromisoformat(request['not_before_utc']):
+                continue
             started, begin = datetime.now(timezone.utc).isoformat(), time.monotonic()
             argv = ['powershell', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File',
                     str(app/'scripts/study_operator/register_job.ps1'), '-Plan', str(path),

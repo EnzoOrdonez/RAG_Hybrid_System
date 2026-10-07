@@ -55,3 +55,34 @@ def test_queue_dispatch_is_once_only_and_fails_closed_after_deadline(tmp_path):
     state['status'] = 'CLOSING'
     (root/'STATE.json').write_text(json.dumps(state))
     assert dispatch(root, app, invoke=invoke)['status'] == 'ADMISSION_CLOSED'
+
+
+def test_future_admission_waits_without_sleep_or_registration_then_dispatches(tmp_path,monkeypatch):
+    import scripts.study_operator.task_broker as module
+    root,app,request = fixture(tmp_path)
+    now = datetime.now(timezone.utc)
+    request['not_before_utc'] = (now+timedelta(minutes=45)).isoformat()
+    (root/'STATE.json').write_text(json.dumps(dict(status='ACTIVE',agent='Fixture',model='Fixture',
+        closure_reserved_utc=(now+timedelta(hours=2)).isoformat())))
+    (root/'task-queue').mkdir()
+    (root/'task-queue/test.request.json').write_text(json.dumps(request))
+    calls = []
+    def invoke(argv,**options):
+        calls.append(argv)
+        return SimpleNamespace(returncode=0,stdout=b'fixture',stderr=b'')
+    assert dispatch(root,app,invoke=invoke)['dispatched'] == 0 and not calls
+    assert not (root/'task-queue/test.request.receipt.json').exists()
+    class Later(datetime):
+        @classmethod
+        def now(cls,tz=None):
+            return now+timedelta(minutes=46)
+    monkeypatch.setattr(module,'datetime',Later)
+    assert dispatch(root,app,invoke=invoke)['dispatched'] == 1 and len(calls) == 1
+    assert dispatch(root,app,invoke=invoke)['dispatched'] == 0
+
+
+def test_naive_future_admission_is_rejected_before_registration(tmp_path):
+    root,app,request = fixture(tmp_path)
+    request['not_before_utc'] = '2026-10-07T12:00:00'
+    with pytest.raises(ValueError,match='Aware'):
+        checked_request(root,app,request)
