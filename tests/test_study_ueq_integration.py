@@ -1,6 +1,8 @@
 import copy
+import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -10,10 +12,23 @@ from src.evaluation.study_analysis import UEQ_FAMILY, analyze, bh
 from src.ui.components.session_storage import SessionStorageError, atomic_json
 from src.ui.components.study_protocol import LIKERT_IDS, digest, sus_score
 from src.ui.components.study_sessions import StudySession, StudyStore
-from src.ui.components.study_ueq import score
+from src.ui.components.study_ueq import score, SOURCE_FILE
 from tests.study_helpers import configured
 from tests.test_study_analysis import sample
 from tests.test_study_sessions import finish, response
+
+
+def test_example_ueq_binding_matches_git_canonical_bytes_on_both_platforms():
+    root=Path(__file__).resolve().parents[1]
+    raw=subprocess.check_output(['git','-C',str(root),'hash-object','--no-filters',str(SOURCE_FILE)],timeout=30)
+    normalized=subprocess.check_output(['git','-C',str(root),'hash-object',
+        '--path=config/UEQS_ES_official.json',str(SOURCE_FILE)],timeout=30)
+    exported=SOURCE_FILE.read_bytes()
+    reference=json.loads((root/'config/study.example.json').read_bytes())
+    assert raw==normalized
+    assert b'\r' not in exported
+    assert reference['ueq_s_source_sha256']==hashlib.sha256(exported).hexdigest()
+    assert reference['ueq_s']==json.loads(exported)
 
 
 def current_sample(n=20):

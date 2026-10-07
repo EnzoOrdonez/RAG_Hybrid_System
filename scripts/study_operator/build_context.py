@@ -27,6 +27,19 @@ def vendor_inventory(root):
     return manifest
 
 
+def study_reference(repository):
+    """Check the actual cloned bytes, before spending a paid build attempt."""
+    repository=Path(repository)
+    source=repository/'config/UEQS_ES_official.json'
+    reference=json.loads((repository/'config/study.example.json').read_bytes())
+    data=source.read_bytes()
+    if (b'\r' in data or reference.get('schema_version')!=2
+            or reference.get('ueq_s')!=json.loads(data)
+            or reference.get('ueq_s_source_sha256')!=file_hash(source)):
+        raise ValueError('Published UEQ-S reference does not match canonical cloned source bytes')
+    return dict(source_sha256=file_hash(source),source_bytes=len(data),canonical_eol='LF')
+
+
 def prepare(repo, vendor, root, label, *, run, python):
     repo, vendor, root = Path(repo), Path(vendor), Path(root)
     if not label.isalnum() or len(label) > 16:
@@ -59,6 +72,7 @@ def prepare(repo, vendor, root, label, *, run, python):
     command('clone-status', ['git','-C',context/'repository','status','--porcelain'])
     if output('clone-status'):
         raise ValueError('Detached source clone is not clean')
+    ueq=study_reference(context/'repository')
     shutil.copytree(vendor, context/'vendor')
     if vendor_inventory(context/'vendor') != manifest:
         raise ValueError('Copied private vendor differs')
@@ -73,7 +87,7 @@ def prepare(repo, vendor, root, label, *, run, python):
         sha256=file_hash(archive),bytes=archive.stat().st_size,vendor_files=len(manifest['files']),
         vendor_manifest_sha256=file_hash(vendor/'manifest.json'),vendor_revision=manifest['revision'],
         requirements_lock_sha256=file_hash(repo/'requirements-lock.txt'),pins_preserved=True,
-        at=datetime.now(timezone.utc).isoformat(),build_not_started=True)
+        at=datetime.now(timezone.utc).isoformat(),build_not_started=True,ueq_s_cloned_reference=ueq)
     with (root/('build-context-'+label+'-inventory.json')).open('x',encoding='utf-8') as stream:
         json.dump(result,stream,indent=2)
     return result
