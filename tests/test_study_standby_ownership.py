@@ -32,7 +32,8 @@ def standby(tmp_path, *, lose_reply=False):
             return disks[0]
         if args[:3] == ['compute','disks','create']:
             disks.append(dict(name=args[3],id='789',zone='zones/us-central1-b',sourceSnapshotId='456',
-                selfLink='projects/p/zones/us-central1-b/disks/'+args[3],description=value(args,'description')))
+                selfLink='projects/p/zones/us-central1-b/disks/'+args[3],description=value(args,'description'),
+                creationTimestamp='2026-10-05T00:00:00+00:00'))
         if args[:3] == ['compute','instances','create']:
             assert instances[0]['status'] == 'TERMINATED'
             assert '--address=203.0.113.8' in args and '--no-address' not in args
@@ -69,6 +70,7 @@ def test_standby_keeps_acquired_capacity_and_accounts_for_one_uninterrupted_boot
     assert not any(args[:3] == ['compute','instances','stop'] for args in calls)
     assert not any(args[0] == 'verified-transfer' for args in calls)
     assert operator.state['selected_vm']['id'] == '777'
+    assert operator.state['alternate_vms'][0]['disk_id'] == operator.state['audit_resources'][0]['id'] == '789'
     operator.now = lambda:datetime(2026,10,5,0,2,tzinfo=timezone.utc)
     operator.stop()
     estimate = operator.state['cost']['estimated_usd']

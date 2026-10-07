@@ -13,7 +13,7 @@ def prepare(operator, certificate_sha256):
     if observed['status'] != 'TERMINATED' or not operator.state.get('snapshot_empty_verified'):
         raise OperatorError('La instantánea exige STOP y todos los periodos vacíos verificados. Purga y repite tls-prepare.')
     key = hashlib.sha256((operator.config['image_id']+'\0'+operator.config['hostname']+'\0'+certificate_sha256).encode()).hexdigest()
-    name = 'cloudrag-i4-ready-'+key[:24]
+    name = 'cloudrag-i5-ready-'+key[:24]
     source = observed['disks'][0]['source']
     disk_name = source.rsplit('/',1)[-1]
     disk = operator.cloud.command(['compute','disks','describe',disk_name,'--zone='+selected['zone']])
@@ -27,7 +27,7 @@ def prepare(operator, certificate_sha256):
         operator.reserve_cost('snapshot-'+key[:12],100*.000068493*24*7)
         intent = dict(name=name,source_disk_id=str(disk['id']),image_id=operator.config['image_id'],
                       certificate_sha256=certificate_sha256,hostname=operator.config['hostname'],
-                      ownership_marker='CloudRAG-I4-ready-'+key,requested_utc=operator.now().isoformat())
+                      ownership_marker='CloudRAG-I5-ready-'+key,requested_utc=operator.now().isoformat())
         operator.state['snapshot_creation_intent'] = intent
         operator.persist()
         operator.cloud.command(['compute','snapshots','create',name,'--source-disk='+disk_name,
@@ -43,6 +43,7 @@ def prepare(operator, certificate_sha256):
         source_vm_id=selected['id'],image_id=operator.config['image_id'],
         hostname=operator.config['hostname'],certificate_sha256=certificate_sha256,
         storage_bytes=int(snapshot['storageBytes']),created_utc=snapshot['creationTimestamp'],
+        ownership_marker=snapshot.get('description'),
         idle_usd_day=int(snapshot['storageBytes'])/2**30*.000068493*24,
         session_data='ALL_I4_PERIODS_EMPTY_VERIFIED',retain_at_closure=True)
     operator.config['prepared_snapshot'] = result

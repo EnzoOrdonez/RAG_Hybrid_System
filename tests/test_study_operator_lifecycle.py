@@ -255,12 +255,33 @@ def test_never_associated_ip_is_charged_at_unused_rate(tmp_path):
     operator,cloud = installation(tmp_path)
     address = dict(name='owned-address',id='42',address='203.0.113.8',region='regions/us-central1')
     original = cloud.command
-    cloud.command = lambda args,**options: [address] if args[:3] == ['compute','addresses','list'] else original(args,**options)
+    live = [address]
+    def command(args,**options):
+        if args[:3] == ['compute','addresses','list']:
+            return live
+        if args[:3] == ['compute','addresses','delete']:
+            live.clear()
+        return original(args,**options)
+    cloud.command = command
     operator.state.update(reserved_address_id='42',ip_reserved_utc='2026-10-05T00:00:00+00:00',
         cost=dict(estimated_usd=0,margin_usd=0,reservations={'ip-own':.72}))
     operator.now = lambda:datetime(2026,10,5,1,tzinfo=timezone.utc)
     operator.ip_release()
     assert operator.state['cost']['estimated_usd'] == pytest.approx(.01)
+
+
+def test_ip_delete_ack_without_api_absence_never_settles(tmp_path):
+    operator,cloud = installation(tmp_path)
+    original = cloud.command
+    address = dict(name='owned-address',id='42',address='203.0.113.8',region='regions/us-central1')
+    cloud.command = lambda args,**options: [address] if args[:3] == ['compute','addresses','list'] else original(args,**options)
+    operator.state.update(reserved_address_id='42',ip_reserved_utc='2026-10-05T00:00:00+00:00',
+        cost=dict(estimated_usd=0,margin_usd=0,reservations={'ip-own':.72}))
+    operator.now = lambda:datetime(2026,10,5,1,tzinfo=timezone.utc)
+    with pytest.raises(OperatorError,match='sigue en la API'):
+        operator.ip_release()
+    assert operator.state['reserved_address_id'] == '42'
+    assert operator.state['cost']['estimated_usd'] == 0
 
 
 def test_tls_preparation_and_capacity_fail_closed_before_start(tmp_path):

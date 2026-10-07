@@ -31,6 +31,9 @@ class Operator:
         self.state = json.loads(self.state_path.read_text(encoding='utf-8')) if self.state_path.exists() else {}
 
     def persist(self):
+        from scripts.study_operator.run_checkpoint import checkpoint
+
+        checkpoint(self.config,self.state,now=self.now())
         save_state(self.root/'installation.json',self.config)
         save_state(self.state_path,self.state)
 
@@ -105,6 +108,9 @@ class Operator:
                     next_action='Revisa el primer comando con exit_code distinto de cero; corrige su causa y ejecuta stop antes de otro start.')
 
     def reserve_cost(self, operation, amount):
+        from scripts.study_operator.run_checkpoint import admit
+
+        admit(self.config,self.state,amount,now=self.now())
         cost = self.state.setdefault('cost',dict(estimated_usd=0,margin_usd=0,reservations={}))
         inherited = self.config.get('cost',{})
         retention = 0
@@ -289,6 +295,7 @@ class Operator:
             raise OperatorError('La IP no acredita el intento de creación propio. No se asocia ni se libera; revisa los recibos.')
         self.config.update(static_ip=observed['address'],hostname=observed['address']+'.sslip.io')
         self.state['reserved_address_id'] = str(observed['id'])
+        self.state['ip_ownership_marker'] = observed.get('description')
         self.state.setdefault('ip_reserved_utc',observed.get('creationTimestamp',self.now().isoformat()))
         self.persist()  # Recoverable even if association fails or its response is lost.
         selected = self.selected()
@@ -341,7 +348,9 @@ class Operator:
                         self.cloud.command(['compute','instances','delete-access-config',item['name'],'--zone='+item['zone'],
                             '--network-interface='+interface['name'],'--access-config-name='+access['name']])
         self.cloud.command(['compute','addresses','delete',name,'--region='+ip_region])
-        self.finish_ip_release('OWNER_DELETE_ACKNOWLEDGED')
+        if self.cloud.command(['compute','addresses','list','--filter=name='+name]):
+            raise OperatorError('La IP sigue en la API tras delete. Conserva su ID y el recibo; no se declara liberada.')
+        self.finish_ip_release('OWNER_DELETE_ABSENCE_VERIFIED')
         return dict(status='STATIC_IP_RELEASED_VERIFIED',https_idle_usd_day=0)
 
     def ip_charge_upper(self):
@@ -434,7 +443,7 @@ class Operator:
         instances = self.cloud.command(['compute','instances','list'])
         # A refreshed IP/certificate/image uses a new snapshot and a new standby,
         # never silently reuses an old disk containing the previous environment.
-        name = 'cloudrag-i4-alternate-'+zone[-1]+'-'+prepared['id'][-12:]
+        name = 'cloudrag-i5-alternate-'+zone[-1]+'-'+prepared['id'][-12:]
         existing = [row for row in instances if row['name'] == name]
         if existing:
             alternate = dict(name=name,id=str(existing[0]['id']),zone=zone)
@@ -481,7 +490,7 @@ class Operator:
                 raise OperatorError('Hay otro intento de contingencia pendiente. Concilia sus recursos antes de crear otra VM.')
             if not intent:
                 intent = dict(name=name,zone=zone,disk_name=name+'-boot',source_snapshot_id=prepared['id'],
-                    ownership_marker='CloudRAG-I4-alternate-'+uuid.uuid4().hex,
+                    ownership_marker='CloudRAG-I5-alternate-'+uuid.uuid4().hex,
                     disposable=True,preserve_snapshot=True,observed_utc=self.now().isoformat())
             self.state['alternate_creation_intent'] = intent
             self.persist()
@@ -491,11 +500,17 @@ class Operator:
                 self.cloud.command(['compute','disks','create',disk_name,'--zone='+zone,'--size=100GB',
                     '--type=pd-balanced','--source-snapshot='+snapshot['name'],
                     '--description='+intent['ownership_marker']],timeout=600)
-            else:
-                if (len(disks) != 1 or not disks[0]['zone'].endswith('/'+zone)
-                        or str(disks[0].get('sourceSnapshotId')) != str(snapshot['id'])
-                        or disks[0].get('description') != intent['ownership_marker']):
-                    raise OperatorError('Disco alterno no coincide con la instantánea. No se recrea ni se borra.')
+                disks = self.cloud.command(['compute','disks','list','--filter=name='+disk_name])
+            if (len(disks) != 1 or not disks[0]['zone'].endswith('/'+zone)
+                    or str(disks[0].get('sourceSnapshotId')) != str(snapshot['id'])
+                    or disks[0].get('description') != intent['ownership_marker']):
+                raise OperatorError('Disco alterno no coincide con la instantánea. No se recrea ni se borra.')
+            disk = disks[0]
+            audit_disk = dict(type='disk',name=disk_name,id=str(disk['id']),zone=zone,
+                ownership_marker=intent['ownership_marker'],created_utc=disk['creationTimestamp'])
+            if audit_disk not in self.state.setdefault('audit_resources',[]):
+                self.state['audit_resources'].append(audit_disk)
+            self.persist()  # A failed VM create must not orphan the already-paid disk.
             requested = self.now().isoformat()
             config = dict(self.config,zone=zone,purpose=purpose,start_requested_utc=requested,
                           native_deadline_utc=(self.now()+timedelta(hours=3)).isoformat())
@@ -523,7 +538,7 @@ class Operator:
             alternate = dict(name=name,id=str(observed['id']),zone=zone)
             checked_vm(observed,name=name,instance_id=alternate['id'],zone=zone)
             self.state.setdefault('alternate_vms',[]).append(dict(alternate,disposable=True,disk_name=disk_name,
-                ownership_marker=intent['ownership_marker'],created_utc=observed['creationTimestamp']))
+                disk_id=str(disk['id']),ownership_marker=intent['ownership_marker'],created_utc=observed['creationTimestamp']))
             self.persist()
             self.state.update(selected_vm=alternate,purpose=purpose,ready_verified=False,boot_started_utc=requested)
             # The automatic create interval belongs to this uninterrupted boot;
