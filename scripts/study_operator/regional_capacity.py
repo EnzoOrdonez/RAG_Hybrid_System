@@ -1,4 +1,4 @@
-"""US-only regional capacity after three exhausted central rounds; never READY."""
+"""US-only capacity after three central rounds and latest exhaustion; never READY."""
 import argparse
 from datetime import datetime
 import hashlib
@@ -22,9 +22,20 @@ SNAPSHOT_TRANSFER_SOURCE = 'https://cloud.google.com/compute/disks-image-pricing
 
 def admission_order(state,latency,catalog):
     rounds = state.get('capacity_rounds',[])
+    allowed = {'CAPACITY_EXHAUSTED','L4_RUNNING_OBSERVED_NOT_READY'}
     if (len(rounds)!=3 or any(r['status']!='COMPLETED' or len(r['results'])!=3
-            or any(v['status']!='CAPACITY_EXHAUSTED' or not v['stopped_verified'] for v in r['results']) for r in rounds)):
-        raise ValueError('Three complete exhausted central rounds required before another region')
+            or any(v['status'] not in allowed or not v['stopped_verified'] for v in r['results']) for r in rounds)
+            or any(v['status']!='CAPACITY_EXHAUSTED' for v in rounds[-1]['results'])):
+        raise ValueError('Three complete central rounds and latest exhaustion required before another region')
+    # An earlier, stopped capacity observation does not reserve that capacity.
+    # The latest complete round must show no capacity in all three central zones.
+    for index,row in enumerate(rounds):
+        if (row.get('round') != index+1
+                or [v.get('zone') for v in row['results']] != ['us-central1-a','us-central1-b','us-central1-c']):
+            raise ValueError('Central round identities or zone census changed')
+        at = datetime.fromisoformat(row['at'])
+        if at.tzinfo is None or (index and (at-datetime.fromisoformat(rounds[index-1]['at'])).total_seconds()<2700):
+            raise ValueError('Three central rounds require aware timestamps and 45-minute separation')
     digest=hashlib.sha256(json.dumps(catalog,sort_keys=True).encode()).hexdigest()
     observed=zones(catalog)
     if (latency['status']!='DESCRIPTIVE_REGION_LATENCY_NOT_CAPACITY'

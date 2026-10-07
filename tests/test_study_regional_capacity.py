@@ -17,7 +17,8 @@ def inputs():
         catalog_sha256=hashlib.sha256(json.dumps(catalog,sort_keys=True).encode()).hexdigest(),
         unresolved_regions=[],after_central_rounds_order=['us-west1','us-east4'],results=results)
     rounds=[dict(round=i+1,status='COMPLETED',at=f'2026-10-07T0{i}:00:00Z',results=[
-        dict(status='CAPACITY_EXHAUSTED',stopped_verified=True) for _ in range(3)]) for i in range(3)]
+        dict(status='CAPACITY_EXHAUSTED',stopped_verified=True,zone='us-central1-'+z)
+        for z in 'abc']) for i in range(3)]
     return dict(capacity_rounds=rounds),latency,catalog
 
 
@@ -29,13 +30,39 @@ def test_regional_admission_rejects_unmet_central_or_latency_prerequisites(bad):
     if bad=='incomplete':
         state['capacity_rounds'][2]['status']='RUNNING'
     if bad=='capacity-success':
-        state['capacity_rounds'][1]['results'][0]['status']='L4_RUNNING_OBSERVED_NOT_READY'
+        state['capacity_rounds'][2]['results'][0]['status']='L4_RUNNING_OBSERVED_NOT_READY'
     if bad=='order':
         latency['after_central_rounds_order'].reverse()
     if bad=='catalog':
         catalog.append(dict(name='nvidia-l4',zone='zones/us-west4-a'))
     if bad=='sample':
         latency['results'][0]['samples'][0]['status']='FAILED'
+    with pytest.raises(ValueError):
+        admission_order(state,latency,catalog)
+
+
+def test_stopped_earlier_capacity_does_not_block_latest_exhausted_round():
+    state,latency,catalog=inputs()
+    state['capacity_rounds'][1]['results'][2]['status']='L4_RUNNING_OBSERVED_NOT_READY'
+    assert [r for r,_ in admission_order(state,latency,catalog)] == ['us-west1','us-east4']
+    state['capacity_rounds'][1]['results'][2]['stopped_verified']=False
+    with pytest.raises(ValueError,match='complete central rounds'):
+        admission_order(state,latency,catalog)
+
+
+@pytest.mark.parametrize('bad',['zone-duplicate','round-id','interval','naive-time','tool-error'])
+def test_regional_admission_requires_actual_complete_spaced_census(bad):
+    state,latency,catalog=inputs()
+    if bad=='zone-duplicate':
+        state['capacity_rounds'][0]['results'][1]['zone']='us-central1-a'
+    if bad=='round-id':
+        state['capacity_rounds'][1]['round']=1
+    if bad=='interval':
+        state['capacity_rounds'][1]['at']='2026-10-07T00:44:59Z'
+    if bad=='naive-time':
+        state['capacity_rounds'][0]['at']='2026-10-07T00:00:00'
+    if bad=='tool-error':
+        state['capacity_rounds'][0]['results'][0]['status']='TOOL_OR_RESOURCE_ERROR_NOT_CAPACITY'
     with pytest.raises(ValueError):
         admission_order(state,latency,catalog)
 

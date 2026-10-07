@@ -1,8 +1,13 @@
 # Capacidad regional después de las rondas centrales
 
 El controlador `scripts.study_operator.regional_capacity` exige tres rondas
-centrales completas con las tres zonas agotadas y apagado verificado. Conserva
-todos los intentos. El catálogo de aceleradores debe coincidir con el hash del
+centrales completas separadas por al menos 45 minutos, con las tres zonas
+agotadas en la última ronda y apagado verificado en todas. Una observación
+anterior de capacidad que se detuvo no reserva esa GPU ni demuestra capacidad
+actual; se conserva como tal y no se reetiqueta como agotamiento. Una ronda
+incompleta, un error de herramienta o una GPU sin STOP verificado bloquean el
+avance. Los IDs ordinales y el censo de zonas deben coincidir. Conserva todos
+los intentos. El catálogo de aceleradores debe coincidir con el hash del
 archivo de latencia y todas las regiones deben tener cinco peticiones válidas.
 Las regiones se visitan por mediana de latencia y las zonas por el orden fijo del
 catálogo. El catálogo describe el tipo L4, no garantiza stock.
