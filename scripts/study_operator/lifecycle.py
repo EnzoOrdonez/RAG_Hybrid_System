@@ -267,7 +267,9 @@ class Operator:
 
     def ip_reserve(self):
         name = self.config['ip_name']
-        ip_region = region(self.selected()['zone'])
+        ip_region = region(self.config['zone'])
+        if self.state.get('reserved_address_region') not in (None, ip_region):
+            raise OperatorError('La región cambió mientras hay otra IP reservada. Libera la IP anterior y conserva su recibo antes de reubicar.')
         addresses = self.cloud.command(['compute','addresses','list','--filter=name='+name])
         if not addresses:
             intent = self.state.get('ip_creation_intent')
@@ -295,6 +297,7 @@ class Operator:
             raise OperatorError('La IP no acredita el intento de creación propio. No se asocia ni se libera; revisa los recibos.')
         self.config.update(static_ip=observed['address'],hostname=observed['address']+'.sslip.io')
         self.state['reserved_address_id'] = str(observed['id'])
+        self.state['reserved_address_region'] = ip_region
         self.state['ip_ownership_marker'] = observed.get('description')
         self.state.setdefault('ip_reserved_utc',observed.get('creationTimestamp',self.now().isoformat()))
         self.persist()  # Recoverable even if association fails or its response is lost.
@@ -302,12 +305,14 @@ class Operator:
         vm = self.observed()
         if vm['status'] != 'TERMINATED':
             raise OperatorError('La IP está reservada, pero la VM corre. Ejecuta stop antes de asociarla.')
-        self.attach_ip(selected,vm)
-        self.state.setdefault('ip_associated_utc',self.now().isoformat())
+        association_pending = region(selected['zone']) != ip_region
+        if not association_pending:
+            self.attach_ip(selected,vm)
+            self.state.setdefault('ip_associated_utc',self.now().isoformat())
         self.state.pop('ip_creation_intent',None)
         self.persist()
-        return dict(status='STATIC_IP_RESERVED',url='https://'+self.config['hostname'],idle_usd_day=.12,
-                    unused_usd_day=.24,address_id=str(observed['id']))
+        return dict(status='STATIC_IP_RESERVED',url='https://'+self.config['hostname'],idle_usd_day=.24 if association_pending else .12,
+                    unused_usd_day=.24,address_id=str(observed['id']),association_pending_bootstrap=association_pending)
 
     def attach_ip(self, selected, observed):
         interface = observed['networkInterfaces'][0]
@@ -322,7 +327,7 @@ class Operator:
 
     def ip_release(self):
         name = self.config['ip_name']
-        ip_region = region(self.selected()['zone'])
+        ip_region = self.state.get('reserved_address_region',region(self.config['zone']))
         addresses = self.cloud.command(['compute','addresses','list','--filter=name='+name])
         if not addresses:
             if self.state.get('reserved_address_id') or self.state.get('ip_reserved_utc'):
@@ -376,6 +381,7 @@ class Operator:
         self.state['last_ip_interval'] = dict(charge,release_method=method,
             address_id=self.state.get('reserved_address_id'))
         self.state.pop('reserved_address_id',None)
+        self.state.pop('reserved_address_region',None)
         self.state.pop('ip_reserved_utc',None)
         self.state.pop('ip_associated_utc',None)
         self.state.pop('ip_creation_intent',None)

@@ -92,7 +92,7 @@ def checkpoint(config, owner, *, now=None):
         ip_intent = owner.get('ip_creation_intent', {})
         if owner.get('reserved_address_id'):
             additions.append(own_row('address', dict(name=config['ip_name'], id=owner['reserved_address_id'],
-                region=ip_intent.get('region', config['primary_vm']['zone'].rsplit('-', 1)[0]),
+                region=owner.get('reserved_address_region') or ip_intent.get('region', config.get('zone', config['primary_vm']['zone']).rsplit('-', 1)[0]),
                 created_utc=owner.get('ip_reserved_utc')), marker=owner.get('ip_ownership_marker') or ip_intent.get('ownership_marker')))
         for row in additions:
             if any(r['type'] == row['type'] and r['id'] == row['id'] and r['name'] != row['name'] for r in state['resources']):
