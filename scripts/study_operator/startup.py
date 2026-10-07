@@ -23,6 +23,9 @@ def host_key_publication(public_root='/etc/ssh'):
 
 
 def write_startup(path, config, *, discover_instance=False):
+    from scripts.study_operator.startup_inputs import staging_program
+
+    staging = staging_program(config)
     encoded = base64.b64encode(json.dumps(config).encode()).decode()
     discovery = ''
     if discover_instance:
@@ -38,7 +41,7 @@ def write_startup(path, config, *, discover_instance=False):
     path.write_text('#!/bin/bash\nset -euo pipefail\npython3 - <<\'PY\'\n'
         'import base64,json,subprocess,os\nfrom pathlib import Path\n'
         'root=Path("/srv/cloudrag/iteration5");root.mkdir(exist_ok=True)\n'
-        'c=json.loads(base64.b64decode('+repr(encoded)+'))\n'+discovery+host_key_publication()+
+        'c=json.loads(base64.b64decode('+repr(encoded)+'))\n'+discovery+staging+host_key_publication()+
         'p=root/"launch-config.json"\np.write_text(json.dumps(c))\nos.chmod(p,0o600)\n'
         'subprocess.Popen(["python3","-B","-m","scripts.study_operator.host_runtime",'
         '"--settings",str(p)],cwd=c["host_code"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)\n'

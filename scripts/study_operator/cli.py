@@ -34,6 +34,8 @@ def parser():
     tls.add_argument('--first-session',required=True)
     alternate = sub.add_parser('failover')
     alternate.add_argument('--zone',required=True,choices=sorted(US_L4_ZONES))
+    bootstrap = sub.add_parser('bootstrap')
+    bootstrap.add_argument('--zone', required=True, choices=sorted(US_L4_ZONES))
     for name in ('purge-study','withdraw','archive-local'):
         command = sub.add_parser(name)
         if name == 'withdraw':
@@ -83,6 +85,10 @@ def main(argv=None):
             result = operator.tls_prepare(args.first_session)
         elif operation == 'failover':
             result = operator.failover(args.zone)
+        elif operation == 'bootstrap':
+            from scripts.study_operator.bootstrap import bootstrap
+
+            result = bootstrap(operator, args.zone)
         elif operation == 'revoke':
             operator.preflight()
             result = operator.bridge(dict(operation='revoke',participant_id=args.code),private=True)
