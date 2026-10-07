@@ -57,3 +57,27 @@ El disco, la VM de prueba, los contenedores retenidos y la regla IAP se declaran
 desechables antes de crearse y solo se retiran tras registrar sus metadatos.
 El candidato se vuelve a comprobar después del build final; el primer clon no
 se presenta como instantánea de la imagen final con UEQ-S.
+
+## Enmienda de observabilidad, anterior al segundo ensayo
+
+El primer ensayo conservó un fallo de la ejecución privada por SSH y un STOP
+verificado, pero no dejó la etapa del fallo: el stderr privado se representó
+solo por su hash. No se atribuye ese fallo a una causa inventada ni se borra nada.
+El segundo ensayo incorpora un resultado JSON de error por etapa y clase de
+excepción, con la versión de Python, sin mensaje privado ni traceback del
+invitado. Reutiliza el mismo clon detenido y reserva por separado otro máximo
+de dos horas de CPU. Conserva el recibo STOP anterior y sus registros originales.
+No cambian los criterios de coincidencia, la instantánea ni la lógica del RAG.
+Si revela un defecto, se registra antes de corregir y no se transforma este
+ensayo diagnóstico en evidencia de restauración aprobada.
+
+La lectura del instalador heredado confirmó una incompatibilidad del controlador:
+`host_code` solo recibe `scripts/study_operator`, no un checkout completo. La
+prueba verifica allí los hashes de infraestructura declarados en la instalación
+y verifica los 19 archivos congelados dentro de la misma imagen Docker
+restaurada, cuya configuración y directorio de trabajo se comprueban primero.
+El contenedor de lectura de fuente también se retiene, sin red, GPU ni registros
+de Docker. No se sustituye ningún hash ni se reconstruye la imagen para aprobar.
+El primer error remoto sigue sin atribución exacta; el segundo ensayo dará una
+etapa explícita si falla. Esta corrección verifica el objeto correcto sin mover
+el criterio de identidad del RAG.

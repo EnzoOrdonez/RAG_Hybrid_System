@@ -55,6 +55,16 @@ def create_arguments(name, disk, startup, marker, installation):
         '--tags='+name+'-iap', '--description='+marker]
 
 
+def record_stop(root, label, value):
+    """Each attempt keeps its original STOP evidence, including failed trials."""
+    root = Path(root)
+    target = root/f'cpu-restoration-{label}-stop.json'
+    if target.exists():
+        target = root/('cpu-restoration-'+label+'-stop-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'.json')
+    atomic_json(target, value)
+    return target
+
+
 class Controller:
     def __init__(self, package, cloud, *, label='bootstrap01'):
         if not re.fullmatch('[a-z][a-z0-9-]{0,15}', label):
@@ -129,7 +139,7 @@ class Controller:
         declaration = self.root/'DESTRUCTION_LOG.md'
         with declaration.open('a', encoding='utf-8') as stream:
             stream.write(f'\nBEFORE: own disposable CPU VM {name}, cloned PD {disk}, IAP rule {rule_name}, '
-                'retained Docker proof containers cloudrag-i5-restore-<CPU_ID>-missing/-user and their 256MiB tmpfs. '
+                'retained Docker proof containers cloudrag-i5-restore-<CPU_ID>-source/-missing/-user and their 256MiB tmpfs. '
                 'Original VM/disk, all snapshot candidates and buckets preserved until explicit qualified retention plan.\n')
         with (self.root/'COST_LEDGER.md').open('a', encoding='utf-8') as stream:
             stream.write(f'\nBEFORE CPU restoration: official catalog {quote["catalog_receipt_sha256"]}; '
@@ -176,6 +186,22 @@ class Controller:
                 or vm['scheduling'].get('maxRunDuration', {}).get('seconds') != '7200'):
             raise ValueError('CPU VM protections, scope, disk or native STOP differ')
         self.observed_resource('vm', vm, marker)
+        if vms and vm['status'] == 'TERMINATED':
+            # Reuse the same owned clone after a corrected, preserved failure.
+            # A fresh boot has a fresh compute exposure; never hide it in the
+            # first boot's reservation or create an unnecessary second disk.
+            key = 'cpu-restoration-resume-'+self.label+'-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+            def reserve_resume(state):
+                total = sum(r['maximum_usd'] for r in state.get('open_exposures', {}).values())
+                admission(state, total+2*float(quote['usd_per_hour']))
+                state.setdefault('open_exposures', {})[key] = dict(maximum_usd=2*float(quote['usd_per_hour']),
+                    not_billed_spend=True, reason='OWN_STOPPED_CPU_CLONE_NEW_BOOT', at=datetime.now(timezone.utc).isoformat())
+            self.update(reserve_resume)
+            self.cloud.command(['compute', 'instances', 'start', name, '--zone=us-central1-a'],
+                private_output=True, timeout=600)
+            vm = self.cloud.command(['compute', 'instances', 'describe', name, '--zone=us-central1-a'], private_output=True)
+            if str(vm['id']) != str(vms[0]['id']) or vm['status'] != 'RUNNING':
+                raise ValueError('Owned CPU resume identity/status differs')
         return dict(vm=vm, disk=observed_disk, snapshot=snapshot)
 
     def stop_owned_after_prepare_failure(self):
@@ -202,11 +228,12 @@ class Controller:
             source_snapshot_id=str(resources['snapshot']['id']), zone='us-central1-a',
             code_root=installation['host_code'], asset_root=installation['asset_root'],
             source_files=baseline['rag']['modules'], artifact_files=artifacts['files'],
+            host_infrastructure_files=installation['host_infrastructure_sha256'],
             image_id=installation['image_id'], ollama_models=installation['ollama_models'],
             model_digest=installation['model_digest'])
         source = Path(__file__).with_name('restore_probe.py').read_text(encoding='utf-8')
         payload = (source+'\nimport base64\nspec=json.loads(base64.b64decode('+repr(base64.b64encode(json.dumps(spec).encode()).decode())+'))\n'
-                   'print(json.dumps(run(spec)))\n').encode()
+                   'print(json.dumps(observed(spec)))\n').encode()
         result = None
         try:
             deadline = time.monotonic()+600
@@ -225,6 +252,10 @@ class Controller:
                 '--tunnel-through-iap', '--ssh-key-expire-after=10m', '--command=sudo -n python3 -B -'],
                 input_data=payload, private_output=True, json_output=False, timeout=900)
             result = json.loads(raw)
+            if result.get('status') == 'CPU_PROBE_FAILED' and result.get('cpu_vm_id') == str(vm['id']):
+                target = self.root/('cpu-probe-failure-'+self.label+'-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'.json')
+                atomic_json(target, result)
+                raise ValueError('CPU probe failed at '+result['stage']+'; '+result['failure_code']+'; receipt='+target.name)
             if result.get('status') != 'CPU_RESTORATION_VERIFIED' or result['cpu_vm_id'] != str(vm['id']):
                 raise ValueError('Guest proof contract differs')
             atomic_json(self.root/f'cpu-restoration-{self.label}-proof.json', result)
@@ -233,8 +264,14 @@ class Controller:
             stopped = self.cloud.command(['compute', 'instances', 'describe', vm['name'], '--zone=us-central1-a'], private_output=True)
             if str(stopped['id']) != str(vm['id']) or stopped['status'] != 'TERMINATED':
                 raise ValueError('CPU STOP not verified; native limit remains armed')
-            atomic_json(self.root/f'cpu-restoration-{self.label}-stop.json', dict(id=str(vm['id']), status='TERMINATED',
+            stop_path = record_stop(self.root, self.label, dict(id=str(vm['id']), status='TERMINATED',
                 at=datetime.now(timezone.utc).isoformat(), source_snapshot_preserved=True))
+            def stopped_state(state):
+                state['latest_cpu_stop_receipt'] = str(stop_path)
+                for row in state['resources']:
+                    if row['type'] == 'vm' and str(row['id']) == str(vm['id']):
+                        row['status'] = 'TERMINATED'
+            self.update(stopped_state)
         return result
 
 
