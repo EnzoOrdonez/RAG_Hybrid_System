@@ -52,7 +52,7 @@ def session_margin(guest_deadline, native_deadline, *, now=None):
     return {'remaining_seconds': seconds, 'minimum_seconds': 4200}
 
 
-def validate_minimal_iam(vm, project_policy, session_policy, technical_policy, *, sa, bucket, metadata_reachable):
+def validate_storage_iam(vm, project_policy, session_policy, technical_policy, *, sa, bucket):
     accounts = vm.get('serviceAccounts', [])
     expected_scope = 'https://www.googleapis.com/auth/devstorage.read_write'
     if len(accounts) != 1 or accounts[0].get('email') != sa or set(accounts[0].get('scopes', [])) != {expected_scope}:
@@ -67,6 +67,11 @@ def validate_minimal_iam(vm, project_policy, session_policy, technical_policy, *
     expression = "resource.name.startsWith('projects/_/buckets/" + bucket + "/objects/iteration4/')"
     if len(bindings) != 1 or bindings[0]['role'] != 'roles/storage.objectCreator' or bindings[0].get('condition', {}).get('expression') != expression:
         raise OperatorError('Permiso de evidencia demasiado amplio. Limítalo al prefijo iteration4.')
+    return {'storage_iam_verified': True}
+
+
+def validate_minimal_iam(vm, project_policy, session_policy, technical_policy, *, sa, bucket, metadata_reachable):
+    validate_storage_iam(vm,project_policy,session_policy,technical_policy,sa=sa,bucket=bucket)
     if metadata_reachable is not False:
         raise OperatorError('El contenedor alcanza metadatos o no se probó su aislamiento. Revisa network=none y los relays Unix.')
     return {'minimal_iam_verified': True, 'metadata_reachable': False}
