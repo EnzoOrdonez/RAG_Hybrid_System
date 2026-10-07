@@ -171,8 +171,24 @@ class Build:
             self.stopped(resource)
             raise
 
+    def collection_owner(self,label,job):
+        """A delayed collector must never stop the CPU serving a newer build."""
+        resource = self.resource()
+        state = json.loads((self.root/'STATE.json').read_bytes())
+        jobs = state.get('build_jobs',{})
+        owner = jobs.get(label,{})
+        if (owner.get('vm_id') != resource['id'] or job.get('instance_id') != resource['id']
+                or owner.get('commit') != job.get('commit')):
+            raise ValueError('Collector lacks the recorded build and CPU ownership')
+        active = {'INTENT','LAUNCH_ATTEMPTED','RUNNING'}
+        if any(name != label and row.get('vm_id') == resource['id']
+               and row.get('status') in active for name,row in jobs.items()):
+            raise ValueError('Stale collector cannot stop CPU assigned to another active build')
+        return resource
+
     def collect(self,label):
         job = json.loads((self.root/('cpu-build-'+label+'-job-input.json')).read_bytes())
+        self.collection_owner(label,job)
         storage = Storage(TECHNICAL,self.cloud.owner_token)
         name = job['prefix']+'/manifest.json'
         objects = storage.objects(job['prefix']+'/')
@@ -222,7 +238,7 @@ class Build:
             commit=job['commit'],image_id=manifest['image_id'],files=receipts,
             manifest=dict(object=name,generation=str(candidates[0]['generation']),sha256=hashlib.sha256(manifest_data).hexdigest()),
             final_gpu_acceptance_not_inferred=True)
-        resource = self.resource()
+        resource = self.collection_owner(label,job)
         self.stopped(resource)
         proof['cpu_stopped_verified'] = True
         target = self.root/('linux-build-'+label+'-download-proof.json')

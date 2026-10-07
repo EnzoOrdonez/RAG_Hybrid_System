@@ -128,9 +128,10 @@ def test_transport_failure_stops_and_preserves_counted_attempt(tmp_path,monkeypa
 
 def objects(tmp_path,monkeypatch,build,*,bad_hash=False,bad_mount=False,missing=False):
     prefix='iteration4/iteration5/fixture/final01'
-    job=dict(prefix=prefix,commit='a'*40)
+    job=dict(prefix=prefix,commit='a'*40,instance_id='1')
     (tmp_path/'cpu-build-final01-job-input.json').write_text(json.dumps(job))
-    build.state.update(lambda state:state.update(build_jobs=dict(final01=dict(status='RUNNING'))))
+    build.state.update(lambda state:state.update(build_jobs=dict(final01=dict(
+        status='RUNNING',vm_id='1',commit='a'*40))))
     data={name:json.dumps(dict(exit_code=0)).encode() for name in
         ('pip-check.receipt.json','linux-full.receipt.json','linux-filtered.receipt.json',
          'posix-durability.receipt.json','isolated-runtime-user.receipt.json')}
@@ -167,6 +168,29 @@ def test_collect_checks_each_generation_and_stops_before_proof(tmp_path,monkeypa
     assert proof['manifest']['generation']=='99'
     assert cloud.vm['status']=='TERMINATED'
     assert build.collect('final01')==proof  # Idempotent verified download, never overwrite different evidence.
+
+
+@pytest.mark.parametrize('status',['INTENT','LAUNCH_ATTEMPTED','RUNNING'])
+def test_delayed_collector_never_stops_cpu_reused_for_another_build(tmp_path,monkeypatch,status):
+    build,cloud,*_=fixture(tmp_path,monkeypatch)
+    objects(tmp_path,monkeypatch,build)
+    build.state.update(lambda state:state['build_jobs'].update(final02=dict(
+        status=status,vm_id='1',commit='b'*40)))
+    cloud.vm['status']='RUNNING'
+    with pytest.raises(ValueError,match='Stale collector'):
+        build.collect('final01')
+    assert not cloud.calls
+    assert cloud.vm['status']=='RUNNING'
+    assert not (tmp_path/'linux-build-final01-evidence').exists()
+
+
+def test_collector_rejects_unrecorded_cpu_before_cloud_access(tmp_path,monkeypatch):
+    build,cloud,*_=fixture(tmp_path,monkeypatch)
+    objects(tmp_path,monkeypatch,build)
+    build.state.update(lambda state:state['build_jobs']['final01'].update(vm_id='replacement'))
+    with pytest.raises(ValueError,match='ownership'):
+        build.collect('final01')
+    assert not cloud.calls
 
 
 @pytest.mark.parametrize('failure',['hash','mount','missing','stop'])
