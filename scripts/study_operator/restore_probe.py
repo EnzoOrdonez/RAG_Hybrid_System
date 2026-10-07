@@ -83,8 +83,15 @@ def run(spec, *, metadata=None, invoke=subprocess.run, stage_observer=lambda sta
         raise ValueError('Guest CPU identity differs from owner receipt')
     stage_observer('HOST_INFRASTRUCTURE_FILES')
     host = files(spec['code_root'], spec['host_infrastructure_files'])
+    # The effective repository is the image plus its read-only runtime binds.
+    # Git-tracked evaluation queries live in the image, not the HF/index root.
+    asset_files = {name: value for name, value in spec['artifact_files'].items()
+                   if name.startswith(('data/models/', 'data/indices/'))}
+    repository_artifacts = {name: value for name, value in spec['artifact_files'].items() if name not in asset_files}
+    if set(repository_artifacts) & set(spec['source_files']):
+        raise ValueError('Ambiguous restoration source/artifact membership')
     stage_observer('ARTIFACT_FILES')
-    artifacts = files(spec['asset_root'], spec['artifact_files'])
+    assets = files(spec['asset_root'], asset_files)
     stage_observer('IMAGE_CONFIG')
     digest = spec['image_id'].removeprefix('sha256:')
     image = Path(spec.get('docker_root', '/var/lib/docker'))/'image/overlay2/imagedb/content/sha256'/digest
@@ -93,7 +100,12 @@ def run(spec, *, metadata=None, invoke=subprocess.run, stage_observer=lambda sta
     if json.loads(image.read_bytes())['config']['WorkingDir'] != '/opt/cloudrag/repository':
         raise ValueError('Image repository working directory differs')
     stage_observer('FROZEN_IMAGE_FILES')
-    source = image_files(spec['image_id'], spec['source_files'], 'cloudrag-i5-restore-'+spec['cpu_vm_id'], invoke=invoke)
+    source = image_files(spec['image_id'], {**spec['source_files'], **repository_artifacts},
+        'cloudrag-i5-restore-'+spec['cpu_vm_id'], invoke=invoke)
+    source.update(verified_combined_files=source['files'], files=len(spec['source_files']),
+        artifact_files=len(repository_artifacts))
+    artifacts = dict(files=len(spec['artifact_files']), host_files=assets['files'],
+        image_files=len(repository_artifacts), all_expected_files_verified=True)
     # Manifest digest and every referenced layer/config blob must survive restore.
     stage_observer('OLLAMA_MANIFEST')
     manifest = Path(spec['ollama_models'])/'manifests/registry.ollama.ai/library/granite4.1/8b'

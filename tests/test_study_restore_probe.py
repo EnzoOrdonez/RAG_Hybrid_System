@@ -78,7 +78,8 @@ def test_restoration_checks_image_host_assets_and_model_blobs_before_qualifying(
     host.mkdir()
     assets.mkdir()
     (host/'infra.py').write_bytes(b'infrastructure')
-    (assets/'index').write_bytes(b'index bytes')
+    (assets/'data/indices').mkdir(parents=True)
+    (assets/'data/indices/index').write_bytes(b'index bytes')
     config = json.dumps({'config': {'WorkingDir': '/opt/cloudrag/repository'}}).encode()
     image_digest = hashlib.sha256(config).hexdigest()
     image_file = docker/'image/overlay2/imagedb/content/sha256'/image_digest
@@ -96,12 +97,15 @@ def test_restoration_checks_image_host_assets_and_model_blobs_before_qualifying(
     spec = dict(cpu_vm_id='123', restored_disk_id='456', source_snapshot_id='789', zone='us-central1-a',
         code_root=str(host), asset_root=str(assets), docker_root=str(docker), image_id='sha256:'+image_digest,
         source_files=frozen, host_infrastructure_files={'infra.py': hashlib.sha256(b'infrastructure').hexdigest()},
-        artifact_files={'index': hashlib.sha256(b'index bytes').hexdigest()}, ollama_models=str(models),
+        artifact_files={'data/indices/index': hashlib.sha256(b'index bytes').hexdigest(),
+            'data/evaluation/test_queries.json': hashlib.sha256(b'Git tracked queries').hexdigest()},
+        ollama_models=str(models),
         model_digest=hashlib.sha256(manifest.read_bytes()).hexdigest())
 
     def invoke(argv, **options):
         if any(arg.endswith('-source') for arg in argv):
-            return SimpleNamespace(returncode=0, stdout=json.dumps(frozen).encode(), stderr=b'')
+            return SimpleNamespace(returncode=0, stdout=json.dumps({**frozen,
+                'data/evaluation/test_queries.json': hashlib.sha256(b'Git tracked queries').hexdigest()}).encode(), stderr=b'')
         if any(arg.endswith('-missing') for arg in argv):
             return SimpleNamespace(returncode=1, stdout=b'', stderr=b'getpwuid: 10001')
         return SimpleNamespace(returncode=0, stdout=b'RUNTIME_IMPORT_OK:cloudrag', stderr=b'')
@@ -111,7 +115,12 @@ def test_restoration_checks_image_host_assets_and_model_blobs_before_qualifying(
     result = run(spec, metadata=metadata, invoke=invoke, boot_id='synthetic-boot')
     assert result['all_expected_files_verified'] and result['image_config_verified']
     assert result['model_manifest_and_blobs_verified']
+    assert result['source']['files'] == 1 and result['source']['verified_combined_files'] == 2
+    assert result['artifacts']['files'] == 2 and result['artifacts']['host_files'] == result['artifacts']['image_files'] == 1
     assert result['runtime_user_pair']['status'] == 'PAIRED_RUNTIME_USER_SUPPORTED'
     (blobs/('sha256-'+blob_digest)).write_bytes(b'corrupted')
     failed = observed(spec, metadata=metadata, invoke=invoke, boot_id='synthetic-boot')
     assert failed['status'] == 'CPU_PROBE_FAILED' and failed['stage'] == 'OLLAMA_BLOBS'
+    (assets/'data/indices/index').write_bytes(b'corrupted index')
+    failed = observed(spec, metadata=metadata, invoke=invoke, boot_id='synthetic-boot')
+    assert failed['status'] == 'CPU_PROBE_FAILED' and failed['stage'] == 'ARTIFACT_FILES'

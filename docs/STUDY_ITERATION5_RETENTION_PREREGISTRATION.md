@@ -81,3 +81,13 @@ de Docker. No se sustituye ningún hash ni se reconstruye la imagen para aprobar
 El primer error remoto sigue sin atribución exacta; el segundo ensayo dará una
 etapa explícita si falla. Esta corrección verifica el objeto correcto sin mover
 el criterio de identidad del RAG.
+
+El ensayo diagnóstico informó FileNotFoundError en ARTIFACT_FILES y confirmó
+Python 3.12.3. La comprobación se ajusta al mismo espacio de archivos efectivo
+que `cloud_entrypoint.verify_manifest`: índices y modelos se leen en los binds
+del directorio de activos; los artefactos restantes, incluido el catálogo de
+consultas versionado, se leen dentro de la imagen. Se conservan los 79 hashes y
+se exige la suma completa de ambas ubicaciones; no se omite una entrada, caché
+o archivo pendiente del manifiesto. Esta corrección de ubicación se publica y
+prueba antes de una nueva ejecución sobre el mismo clon. Ambos ensayos fallidos
+y sus respectivos STOP permanecen inmutables.
