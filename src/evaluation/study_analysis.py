@@ -9,6 +9,8 @@ from src.evaluation.decline_classifier import CLASSIFIER_VERSION, DISPLAY_LABELS
 
 from src.ui.components.session_storage import read_json
 from src.ui.components.study_protocol import LIKERT_IDS, digest, scores, sus_score
+from src.ui.components.study_ueq import score as ueq_score
+from src.evaluation.study_statistics import paired
 
 
 def read_exports(paths):
@@ -32,7 +34,8 @@ def bh(pvalues):
     return result.tolist()
 
 
-def paired(differences, *, seed=42, resamples=10000):
+def legacy_paired(differences, *, seed=42, resamples=10000):
+    """Read-only schema-3 historical analysis; never used for schema-4 study data."""
     d = np.asarray(differences, dtype=float)
     n = len(d)
     if not np.isfinite(d).all():
@@ -103,7 +106,7 @@ def declination_descriptive(records):
                 conditions=conditions)
 
 
-def analyze(records):
+def legacy_analyze(records):
     """Primary contrast hybrid minus no_rag; fixed BH family SUS/F/U.
 
     Profiles and R/I are descriptive. Pilots, abandoned and missing pairs never
@@ -136,7 +139,7 @@ def analyze(records):
         values = {b['condition']: outcomes(b) for b in blocks}
         errors += sum(a['status'] == 'error' for a in row['attempts'])
         included.append((row, values))
-    contrasts = {name: paired([v['hybrid'][name] - v['no_rag'][name] for _, v in included]) for name in ('SUS', 'F', 'U')}
+    contrasts = {name: legacy_paired([v['hybrid'][name] - v['no_rag'][name] for _, v in included]) for name in ('SUS', 'F', 'U')}
     for result, adjusted in zip(contrasts.values(), bh([r['p'] for r in contrasts.values()]), strict=True):
         result.update(p_bh=adjusted, significant_bh=adjusted < .05 and result['n'] >= 2)
     descriptive = {condition: {key: [v[condition][key] for _, v in included]
@@ -150,6 +153,91 @@ def analyze(records):
         correct = next('Sistema ' + label for label, condition in r['labels'].items() if condition == 'hybrid')
         blind['correct' if choice == correct else 'unsure' if choice == 'No sabría decir' else 'incorrect'] += 1
     return dict(schema_version=1, certainty='computed_from_supplied_exports', contrast='hybrid minus no_rag',
+        bootstrap=dict(seed=42, resamples=10000, unit='participant_pair', interval='percentile_95'),
+        included=[r['assignment']['participant_id'] for r, _ in included], excluded=excluded,
+        contrasts=contrasts, descriptive=descriptive, profiles_descriptive=profiles,
+        declination_descriptive=declination_descriptive([r for r, _ in included]),
+        blinding=dict(blind, denominator=len(included), accuracy=blind['correct']/len(included) if included else None),
+        comparative={key: dict(Counter(r['comparative'][key] for r, _ in included)) for key in ('C1', 'C2', 'C3')},
+        qualitative=[dict(participant_id=r['assignment']['participant_id'], comparative=r['comparative']['C4'],
+            blinding_reason=r['blinding']['reason'], free_queries=[a for a in r['attempts'] if a['analysis_role'] == 'free_query'])
+            for r, _ in included], technical_errors_in_included_sessions=errors)
+
+
+UEQ_FAMILY = ('UEQ_S_pragmatic', 'UEQ_S_hedonic')
+
+
+def current_outcomes(block):
+    value = outcomes(block)
+    ueq = ueq_score(block.get('ueq_s'))
+    if block.get('ueq_s_scores') != ueq:
+        raise ValueError('UEQ-S score does not match complete raw items')
+    value.update(block['likert'])
+    value.update(UEQ_S_pragmatic=ueq['pragmatic'], UEQ_S_hedonic=ueq['hedonic'],
+                 UEQ_S_overall=ueq['overall'], F3_reversed=6-block['likert']['F3'])
+    return value
+
+
+def analyze(records):
+    """Executable I5 plan: SUS primary; BH only two primary UEQ-S scale p values.
+
+    Legacy schema 3 is explicitly archived and never pooled or imputed into schema 4.
+    All custom Likert items, profiles and UEQ-S overall are descriptive.
+    """
+    records = list(records)
+    schemas = {row.get('schema_version') for row in records}
+    if not schemas.issubset({3, 4}) or len(schemas) > 1:
+        raise ValueError('Do not pool legacy schema 3 and UEQ-S schema 4 or unknown schemas')
+    if schemas == {3}:
+        result = legacy_analyze(records)
+        result.update(analysis_plan_id='legacy-schema3-archived', study_schema_version=3,
+                      not_iteration5_analysis=True, UEQ_S='NOT_COLLECTED_NO_IMPUTATION')
+        return result
+    included, excluded, seen, slots, identity = [], [], set(), set(), None
+    errors = 0
+    for row in records:
+        pid = row['assignment']['participant_id']
+        if row['purpose'] != 'study' or row['stage'] != 'complete':
+            excluded.append(dict(participant_id=pid, reason='non_study' if row['purpose'] != 'study' else row['stage']))
+            continue
+        if pid in seen or row['assignment']['primary_slot'] in slots:
+            raise ValueError('Duplicate participant/primary slot')
+        seen.add(pid)
+        slots.add(row['assignment']['primary_slot'])
+        current = (row['protocol_fingerprint'], row['labels'])
+        if identity is not None and current != identity:
+            raise ValueError('Do not pool different frozen study configurations')
+        identity = current
+        blocks = row['instruments']
+        if len(blocks) != 2 or {b['condition'] for b in blocks} != {'hybrid', 'no_rag'}:
+            excluded.append(dict(participant_id=pid, reason='missing_pair'))
+            continue
+        if any(row['labels'].get(b['label']) != b['condition'] for b in blocks):
+            raise ValueError('Block label differs from frozen mapping')
+        values = {b['condition']: current_outcomes(b) for b in blocks}
+        errors += sum(a['status'] == 'error' for a in row['attempts'])
+        included.append((row, values))
+    contrasts = {name: paired([v['hybrid'][name] - v['no_rag'][name] for _, v in included])
+                 for name in ('SUS', *UEQ_FAMILY)}
+    primary_ueq = [contrasts[name]['p'] for name in UEQ_FAMILY]
+    adjusted = bh(primary_ueq) if all(p is not None for p in primary_ueq) else [None, None]
+    for name, p in zip(UEQ_FAMILY, adjusted, strict=True):
+        contrasts[name].update(p_bh=p, significant_bh=None if p is None else p < .05)
+    descriptive_keys = (*LIKERT_IDS, 'F3_reversed', 'R2_reversed', 'F', 'U', 'UEQ_S_overall')
+    descriptive = {condition: {key: [v[condition][key] for _, v in included] for key in descriptive_keys}
+                   for condition in ('hybrid', 'no_rag')}
+    profiles = {profile: {name: [v['hybrid'][name] - v['no_rag'][name] for r, v in included
+                 if r['assignment']['profile'] == profile] for name in ('SUS', *UEQ_FAMILY, 'UEQ_S_overall', 'F', 'U')}
+                 for profile in ('without_experience', 'with_experience')}
+    blind = Counter()
+    for row, _ in included:
+        correct = next('Sistema ' + label for label, condition in row['labels'].items() if condition == 'hybrid')
+        choice = row['blinding']['choice']
+        blind['correct' if choice == correct else 'unsure' if choice == 'No sabría decir' else 'incorrect'] += 1
+    return dict(schema_version=2, study_schema_version=4, analysis_plan_id='iteration5-shapiro-paired-ueq-bh-v1',
+        certainty='computed_from_supplied_exports', contrast='hybrid minus no_rag',
+        primary_endpoint='SUS', multiplicity=dict(method='Benjamini-Hochberg', family=list(UEQ_FAMILY),
+            primary_UEQ_p_only=True, SUS_adjusted=False, Likert_inference=False),
         bootstrap=dict(seed=42, resamples=10000, unit='participant_pair', interval='percentile_95'),
         included=[r['assignment']['participant_id'] for r, _ in included], excluded=excluded,
         contrasts=contrasts, descriptive=descriptive, profiles_descriptive=profiles,

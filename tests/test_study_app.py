@@ -9,6 +9,7 @@ import pytest
 
 from src.ui.components import study_runtime as runtime
 from src.ui.components.study_sessions import StudyStore
+from src.ui.components.study_ueq import score
 from tests.study_helpers import configured
 
 
@@ -55,7 +56,15 @@ def test_two_blocks_app_disconnect_export_and_practice_privacy(tmp_path, monkeyp
             if block == 1:
                 assert not app.expander
             click(app, 'Continuar')
-        assert len(app.radio) == 20
+        assert len(app.radio) == 28
+        assert [r.label for r in app.radio[:10]] == protocol['config']['sus']['items']
+        assert [r.label for r in app.radio[10:18]] == [
+            f'{i + 1}. {left} — {right}' for i, (left, right) in enumerate(protocol['config']['ueq_s']['items'])]
+        assert all(r.options == [str(i) for i in range(1, 8)] for r in app.radio[10:18])
+        assert [r.label for r in app.radio[18:]] == [item['text'] for item in protocol['config']['likert']]
+        if block == 0:
+            click(app, 'Guardar respuestas del bloque')
+            assert app.error and store.admit(token).data['instruments'] == []
         for r in app.radio:
             r.set_value(3)
         click(app, 'Guardar respuestas del bloque')
@@ -74,6 +83,8 @@ def test_two_blocks_app_disconnect_export_and_practice_privacy(tmp_path, monkeyp
     payload = json.loads(exported.read_text(encoding='utf-8'))
     assert payload['stage'] == 'complete' and len(payload['attempts']) == 8
     assert len(payload['instruments']) == 2 and len(calls) == 10
+    assert all(block['ueq_s'] == [3]*8 and block['ueq_s_scores'] == score([3]*8)
+               for block in payload['instruments'])
     assert 'PRACTICE_ONLY' not in exported.read_text(encoding='utf-8')
     assert protocol['config']['familiarization'] not in exported.read_text(encoding='utf-8')
 

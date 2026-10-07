@@ -13,6 +13,8 @@ import uuid
 
 from filelock import FileLock
 
+from src.ui.components.study_ueq import score as ueq_score
+
 from src.ui.components.session_storage import (
     InvitationStore,
     SessionConflict,
@@ -58,11 +60,12 @@ class StudyStore(InvitationStore):
             )
         super().__init__(root)
         self.protocol, self.purpose = protocol, purpose
+        self.schema_version = 4 if protocol['config'].get('schema_version') == 2 else 3
         self.seal = root / "_study_protocol.json"
 
     def freeze(self):
         expected = dict(
-            schema_version=3,
+            schema_version=self.schema_version,
             fingerprint=self.protocol["fingerprint"],
             hashes=self.protocol["hashes"],
             purpose=self.purpose,
@@ -82,7 +85,7 @@ class StudyStore(InvitationStore):
 
     def check(self):
         if not self.seal.exists() or read_json(self.seal) != dict(
-            schema_version=3,
+            schema_version=self.schema_version,
             fingerprint=self.protocol["fingerprint"],
             hashes=self.protocol["hashes"],
             purpose=self.purpose,
@@ -282,7 +285,7 @@ class StudySession:
         self.store, self.session_id = store, sid
         self.path = session_path(store.root, sid) / "study_checkpoint.json"
         self.data = dict(
-            schema_version=3,
+            schema_version=store.schema_version,
             session_id=sid,
             revision=0,
             assignment=assignment,
@@ -361,7 +364,7 @@ class StudySession:
             obj = cls(store, sid, data["assignment"])
             if (
                 set(data) != set(obj.data)
-                or data["schema_version"] != 3
+                or data["schema_version"] != store.schema_version
                 or data["session_id"] != sid
                 or data["purpose"] != store.purpose
                 or data["protocol_fingerprint"] != store.protocol["fingerprint"]
@@ -411,6 +414,10 @@ class StudySession:
                 for a in data["attempts"]
             ):
                 raise ValueError("Practice must never be persisted")
+            if store.schema_version == 4:
+                for block in data['instruments']:
+                    if block.get('ueq_s_scores') != ueq_score(block.get('ueq_s')):
+                        raise ValueError('Invalid stored UEQ-S score or incomplete raw items')
             obj.data = data
             return obj
         except (ValueError, KeyError, TypeError, StopIteration) as exc:
@@ -518,11 +525,17 @@ class StudySession:
             self.data["task_index"] += 1
         self.save()
 
-    def submit_instruments(self, sus, likert):
+    def submit_instruments(self, sus, likert, ueq_s=None):
         self.require("instruments")
         if set(likert) != set(LIKERT_IDS):
             raise ValueError("Complete all block items")
         scores(list(likert.values()), 10)
+        ueq = {}
+        if self.store.schema_version == 4:
+            ueq = dict(ueq_s=list(ueq_s) if isinstance(ueq_s, (list, tuple)) else ueq_s,
+                       ueq_s_scores=ueq_score(ueq_s))
+        elif ueq_s is not None:
+            raise ValueError('Do not add UEQ-S to a legacy session')
         self.data["instruments"].append(
             dict(
                 block_index=self.data["block_index"],
@@ -531,6 +544,7 @@ class StudySession:
                 sus_score=sus_score(sus),
                 likert=dict(likert),
                 timestamp=time.time(),
+                **ueq,
             )
         )
         if self.data["block_index"] == 0:

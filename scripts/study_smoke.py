@@ -19,6 +19,7 @@ from src.ui.components.session_storage import atomic_json, read_json  # noqa: E4
 from src.ui.components.study_backup import backup_export  # noqa: E402
 from src.ui.components.study_protocol import CELLS, LIKERT_IDS, ROOT, digest, sus_score, verify_draw  # noqa: E402
 from src.ui.components.study_sessions import StudyStore  # noqa: E402
+from src.ui.components.study_ueq import score as ueq_score  # noqa: E402
 
 MARKER = 'SMOKE_NOT_GATE'
 
@@ -76,7 +77,8 @@ def plan(config_dir, root, backup):
 
 
 def validate_export(row, protocol):
-    if (row.get('schema_version') != 3 or row.get('purpose') != 'smoke'
+    schema = 4 if protocol['config'].get('schema_version') == 2 else 3
+    if (row.get('schema_version') != schema or row.get('purpose') != 'smoke'
             or row.get('stage') != 'complete' or row.get('gate_marker') != MARKER
             or row.get('analysis_excluded') is not True
             or row.get('instrument_responses_synthetic') is not True
@@ -109,6 +111,8 @@ def validate_export(row, protocol):
                 or set(block['likert']) != set(LIKERT_IDS)
                 or any(v not in (1, 2, 3, 4, 5) for v in block['likert'].values())):
             raise ValueError('Incomplete SUS/Likert')
+        if schema == 4 and block.get('ueq_s_scores') != ueq_score(block.get('ueq_s')):
+            raise ValueError('Incomplete or invalid UEQ-S')
     if (set(row['comparative'] or {}) != {'C1', 'C2', 'C3', 'C4'}
             or row['blinding']['choice'] not in protocol['config']['blinding_choices']):
         raise ValueError('Comparative/blinding incomplete')
@@ -118,8 +122,11 @@ def validate_export(row, protocol):
                    or e['kind'] != 'familiarization_done' for e in row['events'])
             or protocol['config']['familiarization'] in json.dumps(row, ensure_ascii=False)):
         raise ValueError('Practice privacy structure or clean-smoke criterion violated')
-    return dict(tasks=6, free_queries=2, SUS=2, Likert=2, comparative=4, blinding=1,
-                classes=dict(Counter(a['decline_class'] for a in attempts)))
+    counts = dict(tasks=6, free_queries=2, SUS=2, Likert=2, comparative=4, blinding=1,
+                  classes=dict(Counter(a['decline_class'] for a in attempts)))
+    if schema == 4:
+        counts['UEQ_S'] = 2
+    return counts
 
 
 def verify(root, config_dir, backup):

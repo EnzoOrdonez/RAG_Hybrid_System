@@ -202,7 +202,8 @@ def export_by_code(sessions):
             else:
                 item.update(question=attempt.get('question'), answer=attempt.get('answer'))
             attempts.append(item)
-        instruments = [{key: row.get(key) for key in ('condition', 'sus', 'sus_score', 'likert')}
+        instruments = [{key: row.get(key) for key in ('condition', 'sus', 'sus_score', 'ueq_s', 'ueq_s_scores', 'likert')
+                        if key in row}
                        for row in session.get('instruments', [])]
         comparative = session.get('comparative') or {}
         blinding = session.get('blinding') or {}

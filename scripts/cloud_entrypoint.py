@@ -94,6 +94,8 @@ def verify(deployment, *, generating=False):
     ):
         raise ValueError("Artifact trust anchor changed")
     protocol = verify_draw(deployment["config_dir"])
+    if protocol['config'].get('schema_version') != 2:
+        raise ValueError('UEQ-S schema 2 is required for this deployment; upgrade and reseal the study draw')
     if protocol["fingerprint"] != deployment["fingerprint"] or not protocol[
         "config"
     ].get("task_evidence_sha256"):

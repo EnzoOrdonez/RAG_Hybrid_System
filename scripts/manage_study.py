@@ -33,7 +33,7 @@ def consolidate(store, output):
     output.mkdir(parents=True)
     atomic_json(
         output / "sessions.json",
-        dict(schema_version=3, sessions=rows, source_hashes=hashes),
+        dict(schema_version=store.schema_version, sessions=rows, source_hashes=hashes),
     )
     atomic_json(output / "analysis.json", analyze(rows))
     dictionary = ROOT / "docs/STUDY_DATA_DICTIONARY.md"

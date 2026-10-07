@@ -31,7 +31,7 @@ def complete_block(session):
         service.answer(session, lambda _: SimpleNamespace(query=lambda q: response()), 'FREE_SENTINEL')
         session.shown()
         session.acknowledge()
-    session.submit_instruments([3]*10, {k: 3 for k in LIKERT_IDS})
+    session.submit_instruments([3]*10, {k: 3 for k in LIKERT_IDS}, [4]*8)
 
 
 def finish(session):
@@ -152,7 +152,7 @@ def test_stale_tab_cannot_overwrite_state(active):
 def test_no_switch_to_second_system_before_block_instruments(active):
     _, session, _ = active
     with pytest.raises(ValueError):
-        session.submit_instruments([3]*10, {k: 3 for k in LIKERT_IDS})
+        session.submit_instruments([3]*10, {k: 3 for k in LIKERT_IDS}, [4]*8)
     session.familiarization_done()
     assert session.data['block_index'] == 0
     with pytest.raises(ValueError):

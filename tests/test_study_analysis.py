@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from scripts.manage_study import consolidate, main
-from src.evaluation.study_analysis import analyze, bh, outcomes, paired, read_exports
+from src.evaluation.study_analysis import analyze, bh, outcomes, legacy_paired as paired, read_exports
 from src.ui.components.study_protocol import LIKERT_IDS, digest, sus_score
 from src.ui.components.study_sessions import StudyStore
 from tests.study_helpers import configured

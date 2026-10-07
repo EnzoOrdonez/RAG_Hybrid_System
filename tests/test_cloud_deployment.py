@@ -94,7 +94,7 @@ def test_unsealed_existing_study_checkpoint_is_never_reused(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "fault", ["build", "dirty", "artifact", "seal", "model", "ollama"]
+    "fault", ["build", "dirty", "artifact", "seal", "model", "ollama", "legacy_ueq"]
 )
 def test_startup_rejects_changed_deployment_identity(monkeypatch, fault):
     deployment = dict(
@@ -123,11 +123,12 @@ def test_startup_rejects_changed_deployment_identity(monkeypatch, fault):
         "verify_draw",
         lambda _: dict(
             fingerprint="bad" if fault == "seal" else "seal",
-            config={"task_evidence_sha256": "evidence"},
+            config={"schema_version": 1 if fault == "legacy_ueq" else 2, "task_evidence_sha256": "evidence"},
         ),
     )
 
     def urlopen(url, **kw):
+        assert fault != 'legacy_ueq', 'Reject legacy protocol before accessing any live model'
         result = (
             {
                 "models": [

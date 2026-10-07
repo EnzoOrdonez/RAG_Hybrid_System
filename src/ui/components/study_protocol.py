@@ -6,6 +6,8 @@ import json
 import random
 from pathlib import Path
 
+from src.ui.components.study_ueq import SOURCE_FILE as UEQ_SOURCE_FILE, instrument as ueq_instrument
+
 ROOT = Path(__file__).resolve().parents[3]
 INVALID_TASKS = frozenset(
     ("q005", "q007", "q013", "q017", "q028", "q066", "q073", "q074")
@@ -46,11 +48,17 @@ def load_protocol(config_path, assignment_path):
         (ROOT / "config/study.example.json").read_text(encoding="utf-8")
     )
     if (
-        config.get("schema_version") != 1
+        config.get("schema_version") not in (1, 2)
         or set(config.get("labels", {})) != {"A", "B"}
         or set(config["labels"].values()) != {"hybrid", "no_rag"}
     ):
         raise ValueError("Fill the fixed A/B mapping")
+    if config['schema_version'] == 2:
+        if (config.get('ueq_s') != ueq_instrument()
+                or config.get('ueq_s_source_sha256') != digest(UEQ_SOURCE_FILE)):
+            raise ValueError('Literal UEQ-S source or instrument changed')
+    elif 'ueq_s' in config or 'ueq_s_source_sha256' in config:
+        raise ValueError('Legacy protocol cannot silently acquire UEQ-S')
     source_path = ROOT / "config/SUS_ES_Sevilla2020_sistema.json"
     source = json.loads(source_path.read_text(encoding="utf-8"))
     if (
@@ -177,14 +185,15 @@ def load_protocol(config_path, assignment_path):
     fingerprint = hashlib.sha256(
         json.dumps(hashes, sort_keys=True).encode()
     ).hexdigest()
+    paths = dict(config=str(config_path), assignments=str(assignment_path), queries=str(queries_path))
+    if config['schema_version'] == 2:
+        hashes['ueq_s_source'] = digest(UEQ_SOURCE_FILE)
+        paths['ueq_s_source'] = str(UEQ_SOURCE_FILE)
+        fingerprint = hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
     return dict(
         config=config,
         assignments={r["participant_id"]: r for r in assignments},
-        paths=dict(
-            config=str(config_path),
-            assignments=str(assignment_path),
-            queries=str(queries_path),
-        ),
+        paths=paths,
         queries=catalog,
         hashes=hashes,
         fingerprint=fingerprint,

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "source_url": "https://www.ueq-online.org/Material/UEQS_Items.pdf",
+  "source_sha256": "9f1dcc81ff76235122a2b3f0db38a74f36fe773fa9255693d6504a70cd08be20",
+  "handbook_url": "https://www.ueq-online.org/Material/Handbook.pdf",
+  "handbook_sha256": "dec2f15c16b8501558ba420d6dc32dbe89ec3f670c954b3c014d067a5e8dde87",
+  "source_language": "Spanish",
+  "source_page": 1,
+  "items": [
+    [
+      "obstructivo",
+      "impulsor de apoyo"
+    ],
+    [
+      "complicado",
+      "facil"
+    ],
+    [
+      "ineficiente",
+      "eficiente"
+    ],
+    [
+      "confuso",
+      "claro"
+    ],
+    [
+      "aburrido",
+      "emocionante"
+    ],
+    [
+      "no interesante",
+      "interesante"
+    ],
+    [
+      "convencional",
+      "original"
+    ],
+    [
+      "convencional",
+      "novedoso"
+    ]
+  ],
+  "instruction": "Para cada par de palabras, marca una de las siete posiciones según tu experiencia con este sistema. No hay respuestas correctas o incorrectas. Esta parte toma aproximadamente un minuto.",
+  "instruction_source": "application UX; not a standardized UEQ-S instruction",
+  "positions": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "negative_on_left": true,
+  "scoring": "position minus 4; pragmatic items 1..4; hedonic 5..8; overall all 8"
+}

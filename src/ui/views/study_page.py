@@ -114,17 +114,26 @@ def _flow(session, view):
         block = session.data['block_index']
         def submit():
             sus = [st.session_state[f'sus_{block}_{i}'] for i in range(10)]
+            ueq = ([st.session_state[f'ueq_{block}_{i}'] for i in range(8)]
+                   if session.store.schema_version == 4 else None)
             likert = {item['id']: st.session_state[f'likert_{block}_{item["id"]}'] for item in config['likert']}
-            if None in sus or None in likert.values():
+            if None in sus or None in likert.values() or (ueq is not None and None in ueq):
                 st.error('Responde todos los ítems antes de continuar.')
             else:
                 try:
-                    session.submit_instruments(sus, likert)
+                    session.submit_instruments(sus, likert, ueq)
                 except Exception:
                     st.error('La sesión cambió o no se pudo guardar. Contacta al coordinador y vuelve a comprobar las respuestas.')
         with st.form('block_' + str(block)):
             for i, text in enumerate(config['sus']['items']):
                 st.radio(text, range(1, 6), index=None, horizontal=True, key=f'sus_{block}_{i}')
+            if session.store.schema_version == 4:
+                st.markdown('**UEQ-S**')
+                st.caption(config['ueq_s']['instruction'])
+                st.caption('1 = palabra de la izquierda · 7 = palabra de la derecha')
+                for i, (left, right) in enumerate(config['ueq_s']['items']):
+                    st.radio(f'{i + 1}. {left} — {right}', range(1, 8), index=None,
+                             horizontal=True, key=f'ueq_{block}_{i}')
             for item in config['likert']:
                 st.radio(item['text'], range(1, 6), index=None, horizontal=True, key=f'likert_{block}_{item["id"]}')
             st.form_submit_button('Guardar respuestas del bloque', on_click=submit)

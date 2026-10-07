@@ -1,6 +1,9 @@
 {
-  "schema_version": 1,
-  "labels": {"A": "", "B": ""},
+  "schema_version": 2,
+  "labels": {
+    "A": "",
+    "B": ""
+  },
   "sus_source_sha256": "15f6ebf953df8adcf2fdfed5bfcb6e9cf65941e719df5ec48f4aeebc955d5fa9",
   "randomization": {
     "ab_seed": 20260928,
@@ -24,7 +27,10 @@
   "sus": {
     "source": "Sevilla-Gonzalez et al. (2020), JMIR Human Factors 7(4), e21161, Multimedia Appendix 2 (CC BY 4.0). Sustitución declarada: «herramienta»/«herramienta electrónica» → «sistema», con concordancia (esta→este, la→el, de la→del). Resto literal, incluida la puntuación original.",
     "instruction": "Por favor seleccione de cada uno de los enunciados la opción que mejor describa su experiencia con el sistema. Un puntaje de 1 significa que usted se encuentra totalmente en desacuerdo con el enunciado, mientras que un puntaje en 5 significa que está totalmente de acuerdo, un puntaje de 3 significaría que usted se encuentra neutral con el enunciado.",
-    "scale_labels": {"1": "Totalmente en desacuerdo", "5": "Totalmente de acuerdo"},
+    "scale_labels": {
+      "1": "Totalmente en desacuerdo",
+      "5": "Totalmente de acuerdo"
+    },
     "items": [
       "Me gustaría usar este sistema frecuentemente.",
       "Considero que este sistema es innecesariamente complejo",
@@ -131,5 +137,62 @@
     "Sistema B",
     "No sabría decir"
   ],
-  "blinding_reason": "¿En qué lo notaste?"
+  "blinding_reason": "¿En qué lo notaste?",
+  "ueq_s": {
+    "schema_version": 1,
+    "source_url": "https://www.ueq-online.org/Material/UEQS_Items.pdf",
+    "source_sha256": "9f1dcc81ff76235122a2b3f0db38a74f36fe773fa9255693d6504a70cd08be20",
+    "handbook_url": "https://www.ueq-online.org/Material/Handbook.pdf",
+    "handbook_sha256": "dec2f15c16b8501558ba420d6dc32dbe89ec3f670c954b3c014d067a5e8dde87",
+    "source_language": "Spanish",
+    "source_page": 1,
+    "items": [
+      [
+        "obstructivo",
+        "impulsor de apoyo"
+      ],
+      [
+        "complicado",
+        "facil"
+      ],
+      [
+        "ineficiente",
+        "eficiente"
+      ],
+      [
+        "confuso",
+        "claro"
+      ],
+      [
+        "aburrido",
+        "emocionante"
+      ],
+      [
+        "no interesante",
+        "interesante"
+      ],
+      [
+        "convencional",
+        "original"
+      ],
+      [
+        "convencional",
+        "novedoso"
+      ]
+    ],
+    "instruction": "Para cada par de palabras, marca una de las siete posiciones según tu experiencia con este sistema. No hay respuestas correctas o incorrectas. Esta parte toma aproximadamente un minuto.",
+    "instruction_source": "application UX; not a standardized UEQ-S instruction",
+    "positions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "negative_on_left": true,
+    "scoring": "position minus 4; pragmatic items 1..4; hedonic 5..8; overall all 8"
+  },
+  "ueq_s_source_sha256": "32296139985807d5b5d819e7e6fc7f4979c58ece08a15c91e0216e13e83d6b34"
 }

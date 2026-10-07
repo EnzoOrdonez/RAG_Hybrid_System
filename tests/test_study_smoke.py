@@ -48,7 +48,7 @@ def test_synthetic_package_verifies_export_and_backup_idempotently(package, monk
     result = smoke.verify(root, config, backup)
     assert result['marker'] == 'SMOKE_NOT_GATE'
     assert result['counts'] == dict(tasks=6, free_queries=2, SUS=2, Likert=2, comparative=4, blinding=1,
-                                    classes={'answered': 8})
+                                    classes={'answered': 8}, UEQ_S=2)
     assert row['instrument_responses_synthetic'] is True
     assert smoke.verify(root, config, backup) == result
     assert export.read_bytes() == before

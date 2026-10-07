@@ -96,7 +96,7 @@ def test_failed_publication_preserves_checkpoint_and_rolls_back_memory(active, m
             elif flush == 'result':
                 session.finish(answer='UNCOMMITTED', elapsed_ms=12)
             else:
-                session.submit_instruments([3] * 10, {k: 3 for k in LIKERT_IDS})
+                session.submit_instruments([3] * 10, {k: 3 for k in LIKERT_IDS}, [4]*8)
     assert session.path.read_bytes() == before
     assert session.data == state
     assert not list(session.path.parent.glob('.pending-*'))
@@ -110,7 +110,7 @@ def test_failed_publication_preserves_checkpoint_and_rolls_back_memory(active, m
         reloaded.begin()
         assert len(reloaded.data['attempts']) == 1
     else:
-        reloaded.submit_instruments([3] * 10, {k: 3 for k in LIKERT_IDS})
+        reloaded.submit_instruments([3] * 10, {k: 3 for k in LIKERT_IDS}, [4]*8)
         assert len(reloaded.data['instruments']) == 1
 
 
