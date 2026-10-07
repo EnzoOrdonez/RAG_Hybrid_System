@@ -56,6 +56,66 @@ def targets(state, observed):
     return selected
 
 
+def close_network(root, cloud, state, stopped):
+    """Release only ID-bound own temporary IPs/IAP rules after every VM stops."""
+    if any(vm['status'] != 'TERMINATED' for vm in stopped):
+        raise ValueError('Network cleanup requires all owned VMs terminated')
+    results = []
+    for row in state.get('resources', []):
+        kind = row['type']
+        if kind not in {'address','firewall'} or row.get('inherited') or not row.get('disposable'):
+            continue
+        marker = row.get('ownership_marker','')
+        if (not row['name'].startswith('cloudrag-i5-') or not marker.startswith('CloudRAG-I5-')
+                or kind == 'firewall' and not row['name'].endswith('-iap')):
+            raise ValueError('Network resource lacks authorized own scope')
+        group = 'addresses' if kind == 'address' else 'firewall-rules'
+        def observed():
+            matches = cloud.command(['compute',group,'list','--filter=name='+row['name']], private_output=True)
+            if len(matches) > 1 or matches and (str(matches[0]['id']) != str(row['id'])
+                    or matches[0].get('description') != marker):
+                raise ValueError('Own network resource identity changed; no deletion')
+            return matches[0] if matches else None
+        live = observed()
+        if live and row.get('disposed'):
+            raise ValueError('Disposed own network resource reappeared')
+        if live:
+            if kind == 'address':
+                region = row.get('region','')
+                if not region.startswith('us-') or live.get('region','').split('/')[-1] != region:
+                    raise ValueError('Own IP region changed; no detachment or deletion')
+                for vm in stopped:
+                    for interface in vm.get('networkInterfaces',[]):
+                        for access in interface.get('accessConfigs',[]):
+                            if access.get('natIP') == live['address']:
+                                cloud.command(['compute','instances','delete-access-config',vm['name'],
+                                    '--zone='+vm['zone'].split('/')[-1], '--network-interface='+interface['name'],
+                                    '--access-config-name='+access['name']], private_output=True)
+            with (Path(root)/'DESTRUCTION_LOG.md').open('a',encoding='utf-8') as stream:
+                stream.write('\nBEFORE independent closure: own disposable '+kind+' '+row['name']+
+                             ' ID='+str(row['id'])+'; no inherited rule or IP deleted.\n')
+            cloud.command(['compute',group,'delete',row['name'],
+                           *(['--region='+row['region']] if kind == 'address' else [])],
+                          private_output=True,timeout=180)
+        if observed() is not None:
+            raise ValueError('Network resource absence not verified')
+        result = dict(type=kind,name=row['name'],id=str(row['id']),status='OWN_NETWORK_ABSENCE_VERIFIED',
+                      at=datetime.now(timezone.utc).isoformat())
+        target = Path(root)/('safety-network-'+kind+'-'+str(row['id'])+'.json')
+        if not target.exists():
+            atomic_json(target,result)
+        with FileLock(str(Path(root)/'state.lock'),timeout=10):
+            path = Path(root)/'STATE.json'
+            current = json.loads(path.read_bytes())
+            matches = [item for item in current['resources'] if item['type'] == kind and str(item['id']) == str(row['id'])]
+            if len(matches) != 1:
+                raise ValueError('Network owner state changed')
+            matches[0].update(disposed=True,absence_verified=True,disposal_receipt=str(target))
+            atomic_json(path,current)
+        results.append(json.loads(target.read_bytes()))
+    return results
+
+
 def close(root, cloud):
     root = Path(root)
     state_path = root/'STATE.json'
@@ -83,11 +143,13 @@ def close(root, cloud):
     if {str(row['id']) for row in selected_after} != original_ids:
         raise ValueError('Closure census changed; native STOP remains necessary')
     all_stopped = all(row['status'] == 'TERMINATED' for row in selected_after)
+    network = close_network(root,cloud,state,selected_after) if all_stopped else []
     def projection(rows):
         return [{key: row[key] for key in ('name', 'id', 'zone', 'status')} for row in rows]
     receipt = dict(status='OWN_VMS_TERMINATED_VERIFIED' if all_stopped else 'STOP_PENDING_NOT_SAFE',
                    at=datetime.now(timezone.utc).isoformat(), before=projection(selected), after=projection(selected_after),
-                   disks_buckets_snapshots_not_deleted=True, further_network_and_retention_audit_required=True)
+                   disks_buckets_snapshots_not_deleted=True, own_network_receipts=network,
+                   further_network_and_retention_audit_required=True)
     target = root/('safety-close-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'.json')
     atomic_json(target, receipt)
     with FileLock(str(root/'state.lock'), timeout=10):
