@@ -86,3 +86,42 @@ def test_physical_gpu_uuid_is_excluded_but_driver_and_numerical_controls_remain(
     assert software_projection(inventory) == software_projection(other)
     other['observed']['gpu'] = 'GPU-other, NVIDIA L4, changed-driver, 23034 MiB'
     assert software_projection(inventory) != software_projection(other)
+
+
+def test_directory_analyzer_requires_complete_sealed_census_and_never_claims_synthetic_acceptance(tmp_path):
+    import json
+    from scripts.study_operator.stimulus_evidence import analyze_directory
+
+    directory = tmp_path/'coded-P999'
+    directory.mkdir()
+    for proof in fixture():
+        (directory/(str(proof['boot_index'])+'.json')).write_text(json.dumps(proof))
+    protocol = dict(config=CONFIG,fingerprint='c'*64)
+    output = tmp_path/'summary.json'
+    result = analyze_directory(directory,protocol,output)
+    assert result['status'] == 'SYNTHETIC_NOT_ACCEPTANCE' and len(result['inputs']) == 12
+    assert 'This is a synthetic answer' not in output.read_text()
+    with pytest.raises(ValueError):
+        analyze_directory(directory,protocol,output)
+    protocol['fingerprint'] = 'f'*64
+    with pytest.raises(ValueError,match='protocol'):
+        analyze_directory(directory,protocol,tmp_path/'wrong-seal.json')
+
+
+def test_module_entrypoint_analyzes_synthetic_data_without_import_order_failure(tmp_path,monkeypatch,capsys):
+    import json
+    import runpy
+    import sys
+    from src.ui.components import study_protocol
+
+    directory = tmp_path/'coded-P999'
+    directory.mkdir()
+    for proof in fixture():
+        (directory/(str(proof['boot_index'])+'.json')).write_text(json.dumps(proof))
+    monkeypatch.setattr(study_protocol,'verify_draw',lambda path: dict(config=CONFIG,fingerprint='c'*64))
+    monkeypatch.setattr(sys,'argv',['stimulus_evidence','--directory',str(directory),'--config-dir','fixture-only',
+                                  '--output',str(tmp_path/'summary.json')])
+    with pytest.raises(SystemExit) as result:
+        runpy.run_path(str(study_protocol.ROOT/'scripts'/'study_operator'/'stimulus_evidence.py'),run_name='__main__')
+    assert result.value.code == 0
+    assert json.loads(capsys.readouterr().out)['status'] == 'SYNTHETIC_NOT_ACCEPTANCE'

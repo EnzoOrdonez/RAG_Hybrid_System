@@ -27,7 +27,8 @@ def checked_config(value):
             raise OperatorError('Imagen auxiliar sin digest. Usa el recibo de imágenes verificadas.')
     for key in ('asset_root', 'ollama_models', 'host_code'):
         path = PurePosixPath(value[key])
-        if not path.is_absolute() or '..' in path.parts or not str(path).startswith('/srv/cloudrag/'):
+        if (not path.is_absolute() or '..' in path.parts
+                or not re.fullmatch(r'/srv/cloudrag/[A-Za-z0-9_./-]+',str(path))):
             raise OperatorError('Ruta de despliegue no gestionada. Conserva los datos y revisa la instalación.')
     return value
 

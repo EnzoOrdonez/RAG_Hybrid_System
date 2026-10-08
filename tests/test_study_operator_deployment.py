@@ -20,7 +20,8 @@ def config():
 
 @pytest.mark.parametrize('key,value', [('zone','europe-west1-b'), ('project','other'),
     ('hostname','other.sslip.io'), ('ollama_image','ollama:latest'), ('host_code','/etc'),
-    ('period_id','../anything')])
+    ('period_id','../anything'), ('host_code','/srv/cloudrag/code\nExecStart=/bin/sh'),
+    ('asset_root','/srv/cloudrag/path,readonly'), ('ollama_models','/srv/cloudrag/path with space')])
 def test_installation_scope_is_fail_closed(key, value):
     value_config = config()
     value_config[key] = value

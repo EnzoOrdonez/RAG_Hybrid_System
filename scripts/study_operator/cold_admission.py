@@ -2,7 +2,7 @@
 import math
 
 from scripts.study_gate_environment import assess
-from scripts.study_operator.stimulus_collection import cold_state
+from scripts.study_operator.service_transition import cold_state
 
 
 def assess_cold(rows, config, *, preparation_started, admission=False, allowed_pids=()):

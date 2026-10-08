@@ -2,6 +2,7 @@
 import hashlib
 import json
 import math
+from pathlib import Path
 import re
 
 from scripts.study_operator.stimulus_calendar import V2_VERSION, analyze, calendar
@@ -33,7 +34,37 @@ def software_projection(inventory):
     return result
 
 
-def verify_boot(proof, config):
+def analyze_directory(directory, protocol, output):
+    directory,output = Path(directory),Path(output)
+    paths = sorted(directory.glob('*.json'))
+    if len(paths) != 12 or any(path.is_symlink() for path in paths) or output.exists():
+        raise ValueError('Exactly twelve private cold proofs and a new output required')
+    proofs = [json.loads(path.read_bytes()) for path in paths]
+    if any(proof['inventory']['protocol']['fingerprint'] != protocol['fingerprint'] for proof in proofs):
+        raise ValueError('Census protocol differs from sealed review')
+    result = accept(proofs,protocol['config'])
+    result['inputs'] = [dict(name=path.name,sha256=hashlib.sha256(path.read_bytes()).hexdigest()) for path in paths]
+    from scripts.study_operator.service_gateway import save_state
+
+    save_state(output,result)
+    return result
+
+
+def main(argv=None):
+    import argparse
+    from src.ui.components.study_protocol import verify_draw
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--directory',required=True)
+    parser.add_argument('--config-dir',required=True)
+    parser.add_argument('--output',required=True)
+    args = parser.parse_args(argv)
+    result = analyze_directory(args.directory,verify_draw(args.config_dir),args.output)
+    print(json.dumps(result,ensure_ascii=False))  # Counts/hashes only, never query or answer text.
+    return 0
+
+
+def verify_boot(proof, config, *, require_host=True):
     index = proof['boot_index']
     slots = calendar(config).get(index)
     if (type(index) is not int or slots is None or proof.get('status') != 'COMPLETE'
@@ -63,8 +94,12 @@ def verify_boot(proof, config):
                 or state['sequence'] != 1+4*position or not pids or len(set(pids)) != len(pids)
                 or any(type(pid) is not int or pid <= 0 for pid in pids) or previous_pids.intersection(pids)):
             raise ValueError('Runner renewal or exclusive cold history not demonstrated')
-        previous_pids = set(pids)
+        previous_pids.update(pids)
         rows.append(row)
+    if proof['mode'] == 'LIVE' and require_host:
+        from scripts.study_operator.stimulus_host_evidence import verify_host
+
+        verify_host(proof, config)
     return dict(boot_index=index, boot_id=boot, mode=proof['mode'], software_sha256=software, rows=rows)
 
 
@@ -80,3 +115,7 @@ def accept(proofs, config):
     result.update(evidence_bound=True, runner_resets_verified=True, synthetic_cannot_grant_acceptance=True,
         context_identity_not_inferred=True, software_projection_excludes=['physical_gpu_uuid', 'vm_id', 'boot_id', 'location'])
     return result
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

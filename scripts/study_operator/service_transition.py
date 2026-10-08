@@ -3,6 +3,15 @@ import math
 import re
 
 
+def cold_state(state, boot):
+    if (state.get('schema_version') != 1 or state.get('mode') != 'fresh_runner'
+            or state.get('phase') != 'STARTING' or state.get('sequence') != 1
+            or state.get('boot_id') != boot or state.get('request_id') is not None
+            or state.get('deadline_monotonic_s') is not None):
+        raise ValueError('Cold service history was already consumed or changed')
+    return dict(mode='fresh_runner', phase='STARTING', sequence=1, boot_id=boot)
+
+
 def transition(marker, observed, expected_boot, *, admission=False):
     if not isinstance(marker, dict) or marker.get('schema_version') != 1 or marker.get('mode') != 'fresh_runner':
         return False, False

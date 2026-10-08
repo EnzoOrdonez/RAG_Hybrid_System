@@ -10,7 +10,8 @@ RUNBOOK = Path(__file__).resolve().parents[1]/'scripts/study_operator/RUNBOOK_IT
 def test_each_literal_operator_command_is_accepted_by_the_installed_cli_parser():
     substitutions = {'$config.zone':'us-west1-a', '$alternateZone':'us-central1-b',
         '$participantCode':'P999', '$firstSession':'2026-10-20', '$sessionId':'synthetic-session',
-        '$fullGeneration':'123', '$manifestGeneration':'456'}
+        '$fullGeneration':'123', '$manifestGeneration':'456', '$bootIndex':'1'}
+    assert '$bootIndex = 1' in RUNBOOK.read_text(encoding='utf-8')
     operations = set()
     for line in RUNBOOK.read_text(encoding='utf-8').splitlines():
         prefix = '& C:/CloudRAG/operator-iteration5/operator.ps1 '
@@ -23,7 +24,8 @@ def test_each_literal_operator_command_is_accepted_by_the_installed_cli_parser()
         operations.add(result.operation)
     assert {'bootstrap','iap-prepare','iap-release','ip-reserve','tls-prepare','start','preflight','invite',
         'diagnostics','stop','status','revoke','restore','export-anonymized','withdraw','purge-study',
-        'archive-local','failover','failback','ip-release'} <= operations
+        'archive-local','failover','failback','ip-release','stimulus-start','stimulus-status',
+        'stimulus-collect'} <= operations
 
 
 def test_runbook_preserves_ethics_privacy_and_actual_iteration5_paths():

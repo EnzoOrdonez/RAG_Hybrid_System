@@ -11,20 +11,12 @@ from scripts.study_operator.generation_observer import observe as observe_genera
 from scripts.study_operator.rerank_observer import observe as observe_rerank, report
 from scripts.study_operator.stimulus_calendar import V2_VERSION, calendar
 from scripts.study_operator.stimulus_evidence import OPTIONS, digest, software_projection, verify_boot
+from scripts.study_operator.service_transition import cold_state
 from src.evaluation.decline_classifier import classify_response
 from src.ui.components.session_storage import atomic_json
 from src.ui.components.study_service import execute_query
 
 _LIVE_BINDING = object()
-
-
-def cold_state(state, boot):
-    if (state.get('schema_version') != 1 or state.get('mode') != 'fresh_runner'
-            or state.get('phase') != 'STARTING' or state.get('sequence') != 1
-            or state.get('boot_id') != boot or state.get('request_id') is not None
-            or state.get('deadline_monotonic_s') is not None):
-        raise ValueError('Cold service history was already consumed or changed')
-    return dict(mode='fresh_runner', phase='STARTING', sequence=1, boot_id=boot)
 
 
 def prepare_without_generation(factory, read_state, boot):
@@ -50,6 +42,7 @@ class Collector:
 
     def call(self, index):
         if self.terminal or index != len(self.rows)+1 or not 1 <= index <= len(self.slots):
+            self.terminal = True
             raise ValueError('Terminal boot or out-of-order slot cannot resume')
         slot = self.slots[index-1]
         question = (slot['question'] if slot['role'] == 'antecedent'

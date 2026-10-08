@@ -22,6 +22,10 @@ def parser():
     sub = value.add_subparsers(dest='operation',required=True)
     start = sub.add_parser('start')
     start.add_argument('--purpose',required=True,choices=('study','technical','smoke','rehearsal','pilot'))
+    stimulus = sub.add_parser('stimulus-start')
+    stimulus.add_argument('--boot-index',required=True,type=int,choices=range(1,13))
+    for name in ('stimulus-status','stimulus-collect'):
+        sub.add_parser(name)
     for name in ('status','preflight','stop','diagnostics','ip-reserve','ip-release','failback','export-anonymized'):
         sub.add_parser(name)
     for name in ('iap-prepare', 'iap-release'):
@@ -85,6 +89,10 @@ def main(argv=None):
                 dry_run=not args.execute,confirmation=confirmation)
         elif operation == 'start':
             result = operator.start(args.purpose)
+        elif operation in {'stimulus-start','stimulus-status','stimulus-collect'}:
+            from scripts.study_operator.stimulus_owner import run
+
+            result = run(operator,operation,boot_index=getattr(args,'boot_index',None))
         elif operation == 'tls-prepare':
             result = operator.tls_prepare(args.first_session)
         elif operation == 'failover':

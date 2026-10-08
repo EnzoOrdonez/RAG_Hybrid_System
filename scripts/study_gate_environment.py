@@ -11,16 +11,15 @@ import subprocess
 import time
 import urllib.request
 
-from src.ui.components.session_storage import atomic_json, read_json
-from src.ui.components.study_protocol import ROOT, digest, verify_draw
-from src.utils.deployment_artifacts import verify_manifest
-
-
 def command(args):
     return subprocess.check_output(args, text=True, timeout=15).strip()
 
 
 def collect_identity(config):
+    from src.ui.components.session_storage import read_json
+    from src.ui.components.study_protocol import ROOT, digest, verify_draw
+    from src.utils.deployment_artifacts import verify_manifest
+
     protocol = verify_draw(config["config_dir"])
     build = command(["git", "-C", str(ROOT), "rev-parse", "HEAD"])
     if build != config["build_id"] or command(
@@ -176,7 +175,7 @@ class LinuxSampler:
         )
         if self.service_state_path:
             try:
-                result['service_state'] = read_json(self.service_state_path)
+                result['service_state'] = json.loads(Path(self.service_state_path).read_bytes())
             except (OSError, ValueError):
                 result['errors'].append('service_state_unreadable')
         return result
@@ -292,6 +291,8 @@ class Environment:
         self.last = 0
 
     def sample(self):
+        from src.ui.components.session_storage import atomic_json
+
         if time.monotonic() - self.last < 5:
             return
         row = self.sampler()

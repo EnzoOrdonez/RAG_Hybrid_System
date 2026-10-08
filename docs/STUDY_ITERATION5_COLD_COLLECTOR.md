@@ -24,7 +24,23 @@ telemetría continua verificadas; sin ellas rechaza iniciar. Muere el worker si
 muere su padre en Linux. Una llamada fallida, vencida o contaminada deja el
 arranque terminal; solo un arranque completo verificado se puede publicar.
 
-Estado: componentes en implementación y pruebas sintéticas. Falta integrar la
-orquestación de host, la admisión fría y las observaciones GPU fuera del namespace
-del contenedor, incluir el controlador en la imagen final y anclar su identidad.
-No existe todavía aceptación LIVE por este documento o por esos tests.
+El controlador de host usa el sampler Linux fuera del namespace de la app.
+Comprueba identidad de los contenedores, sus PIDs y el acceso bloqueado a metadatos;
+mantiene el calendario privado por stdin/stdout y guarda solo metadatos en el
+progreso técnico. La admisión de 60 s se enlaza por hash, y cada llamada queda
+ligada a sus fronteras y filas de telemetría. El verificador LIVE exige esas
+pruebas además de las observaciones del runner. La cola privada está acotada y
+su cierre no queda bloqueado por una cola llena.
+
+`stimulus-start` valida la sintaxis de la unidad con el systemd instalado, cierra
+admisión y lanza un job independiente con RuntimeMaxSec=7200 y apagado final.
+Rechaza study, datos existentes, historial consumido, margen menor de 125 min y
+la repetición de un intento registrado, aunque su lanzamiento haya fallado.
+`stimulus-collect` descarga en privado, verifica SHA-256 antes y después de guardar
+y confirma el apagado; no muestra ni registra el texto. Un arranque parcial no se
+sustituye. El recibo dice BOOT_COMPLETE_UNANALYZED hasta el análisis del censo.
+
+Estado: flujo de host y controles verificados con fixtures, sin modelo local.
+Falta incluirlos en la imagen final, validar sus binarios en la VM, anclar la
+identidad, ejecutar y descargar los doce arranques reales. No existe todavía
+aceptación LIVE por este documento o por esos tests.

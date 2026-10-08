@@ -189,6 +189,40 @@ alternativa llega a READY, Enzo comunica: «El servidor no tiene capacidad
 disponible. Reprogramaremos la sesión; tus datos y tu participación no se ven
 afectados». El agente no envía ese mensaje a ninguna persona.
 
+## Ensayo técnico de estímulo (solo investigador)
+
+Este ensayo exige la imagen final que contiene el controlador y el preregistro
+anclado. Nunca uses study, participantes o un periodo con sesiones/invitaciones.
+No lo lances sobre la imagen del segundo build, que no tiene estos comandos.
+Cada índice 1 a 12 requiere un arranque frío distinto; no repitas un índice o
+un intento parcial/terminal. No genera respuestas de calentamiento antes del
+primer objetivo. Con READY, ≥125 min restantes y periodo técnico vacío:
+
+```powershell
+& C:/CloudRAG/operator-iteration5/operator.ps1 start --purpose technical
+& C:/CloudRAG/operator-iteration5/operator.ps1 preflight
+$bootIndex = 1
+& C:/CloudRAG/operator-iteration5/operator.ps1 stimulus-start --boot-index $bootIndex
+& C:/CloudRAG/operator-iteration5/operator.ps1 stimulus-status
+```
+
+El job corre desatendido, con límites propios y apagado independiente. La
+admisión pública queda cerrada. Consulta stimulus-status sin abrir un navegador;
+progreso incluye intento/total/ETA y nunca texto. Al observar
+BOOT_COMPLETE_UNANALYZED, descarga en el minuto siguiente:
+
+```powershell
+& C:/CloudRAG/operator-iteration5/operator.ps1 stimulus-collect
+& C:/CloudRAG/operator-iteration5/operator.ps1 status
+```
+
+La descarga guarda solo en private/stimulus/coded-P999, comprueba SHA-256 y
+confirma apagado. Sin confirmación, el minuto de gracia vence y se conserva el
+disco para recuperar la evidencia; no se sustituye el intento. Exige TERMINATED
+antes del índice siguiente. Los datos privados no entran en evidence/. El
+ensayo completo requiere 12 arranques/144 llamadas/120 objetivos; ninguna fila
+o arranque aislado concede aceptación. La ejecución literal real sigue pendiente.
+
 ## Cierre sin sesión agendada
 
 ```powershell

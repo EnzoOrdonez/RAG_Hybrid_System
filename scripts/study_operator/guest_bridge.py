@@ -187,6 +187,11 @@ def dispatch(request):
         return dict(status='MAINTENANCE',admission_closed=True)
     if operation in {'inventory','download-disk','clean-disk','export','restore'}:
         return disk_dispatch(active,request)
+    if operation in {'stimulus-start','stimulus-status','stimulus-evidence','stimulus-ack'}:
+        from scripts.study_operator.stimulus_guest import dispatch_stimulus
+
+        return dispatch_stimulus(active,request,execute=execute,controller=controller,
+                                 maintenance=lambda: dispatch(dict(operation='maintenance')))
     raise ValueError('UNKNOWN_OWNER_OPERATION')
 
 

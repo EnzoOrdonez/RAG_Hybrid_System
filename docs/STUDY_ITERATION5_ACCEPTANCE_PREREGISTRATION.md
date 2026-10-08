@@ -7,8 +7,11 @@ sintético sigue sin conceder aceptación ni GO. No hay participantes.
 
 ## Procedimiento congelado y mecanismo
 
-La imagen final es la del segundo build de esta iteración, identificada por su
-recibo de descarga y restauración CPU. Incluye UEQ-S y respaldo al cerrar sesión.
+La imagen final será la del tercer y último build autorizado de esta iteración,
+identificada por sus recibos de descarga, suites y restauración CPU. El segundo
+build queda conservado como candidato restaurado, sin aceptación GPU; no se
+mezclan sus resultados con los de la imagen final. El último build incorpora el
+controlador privado de historiales fríos, UEQ-S y respaldo al cerrar sesión.
 El único mecanismo de servicio prospectivamente evaluado es `fresh_runner`,
 reinicio del runner de Ollama antes de cada generación, igual para toda consulta
 y ambas condiciones. Las opciones siguen siendo temperatura 0, `num_predict`
@@ -47,6 +50,28 @@ conservan los bytes de texto crudo y mostrado, clase v2 y citas normalizadas, lo
 contextos recuperados, opciones enviadas y observaciones del servicio. Los
 `rerank_score` se registran solo como evidencia. Límite: 600 s por llamada,
 900 s de preparación y 120 min por ensayo de arranque, con STOP nativo independiente.
+
+La admisión fría empieza después de cargar los pipelines y exige 60 s de reposo
+con STARTING/sequence=1 y modelos vacíos. La preparación y esos 60 s están dentro
+del límite de 900 s; el límite de 120 min empieza al lanzar el controlador de host
+e incluye preparación, llamadas y descarga. La frontera de cada respuesta sigue
+siendo `study_service.execute_query`: reinicio, carga y generación de Ollama,
+recuperación y NLI que se ejecuten durante la consulta están dentro del cronómetro.
+La identidad se verifica antes de consultar. No se introduce calentamiento de
+contenido ni se cambia el límite de 60 s de la compuerta caliente posterior.
+
+El host muestrea GPU, CPU y procesos fuera del namespace del contenedor. Solo
+exime PIDs observados en los dos contenedores propios y al controlador. El recibo
+de admisión se enlaza por SHA-256 con el protocolo privado; la verificación LIVE
+rechaza muestras ausentes, alteradas, mezcladas o con huecos mayores de 15 s.
+Las fronteras de cada llamada y el hash de cada fila se comprueban además del
+estado del servicio. Un PID anterior no puede reaparecer en el mismo arranque.
+El proceso systemd tiene límite de 7200 s y apagado independiente al terminar;
+los contenedores se retienen, sin logs ni acceso a metadatos. El dueño dispone de
+un minuto para descargar y confirmar el hash antes del apagado. Los textos
+sintéticos quedan solo en el registro privado coded-P999 y no en evidence/.
+Estos controles no conceden aceptación por sí mismos: exige los doce arranques
+completos del calendario y la verificación de sus inventarios y telemetría.
 
 Aceptación: 12/12 combinaciones con exactamente una variante en cada campo y al
 menos dos arranques. Los textos pueden diferir de exp12. Si alguna combinación

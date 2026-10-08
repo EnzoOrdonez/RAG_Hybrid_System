@@ -156,7 +156,8 @@ def test_elapsed_service_wait_is_included_and_deadline_failure_is_terminal():
     assert collector.terminal
 
 
-def test_unattested_live_collector_and_local_live_measurement_are_rejected():
+def test_unattested_live_collector_and_local_live_measurement_are_rejected(monkeypatch):
+    monkeypatch.setenv('CLOUDRAG_ISOLATED_APP', '0')
     collector, _, _ = setup_collector()
     with pytest.raises(ValueError, match='LIVE'):
         Collector(collector.protocol, collector.inventory, 5, collector.pipelines,

@@ -46,12 +46,13 @@ def run_child(arguments, *, launch=subprocess.Popen):
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument('operation', choices=('freeze', 'verify', 'serve', 'gate', 'backup'))
+    parser.add_argument('operation', choices=('freeze', 'verify', 'serve', 'gate', 'backup', 'stimulus'))
     parser.add_argument('--deployment', required=True)
     parser.add_argument('--ollama-socket', required=True)
     parser.add_argument('--streamlit-socket', required=True)
     parser.add_argument('--request')
     parser.add_argument('--output')
+    parser.add_argument('--boot-index', type=int, choices=range(1, 13))
     args = parser.parse_args(argv)
     from scripts import cloud_entrypoint
 
@@ -60,6 +61,13 @@ def main(argv=None):
 
     signal.signal(signal.SIGTERM, shutdown)
     with relays(args.ollama_socket, args.streamlit_socket):
+        if args.operation == 'stimulus':
+            from scripts.study_operator.stimulus_daemon import serve
+
+            if args.boot_index is None:
+                raise ValueError('Registered cold boot index required')
+            deployment = json.loads(Path(args.deployment).read_text(encoding='utf-8'))
+            return serve(deployment, args.boot_index)
         if args.operation == 'serve':
             from src.ui.components.study_sessions import StudyStore
 
