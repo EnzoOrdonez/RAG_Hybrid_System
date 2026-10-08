@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import uuid
 
@@ -12,6 +13,7 @@ from scripts.study_operator.pricing import quote_archive
 from scripts.study_operator.region_scope import region
 from scripts.study_operator.run_control import require_limited
 from scripts.study_operator.startup_inputs import assemble
+from scripts.study_operator.final_snapshot import inputs as verified_build_inputs, restoration_config
 from src.ui.components.study_protocol import verify_draw
 
 
@@ -30,7 +32,7 @@ def derive(base, *, build, restoration, snapshot, costs, quote, original, subnet
             or original['status'] != 'TERMINATED' or not subnet['privateIpGoogleAccess']
             or subnet.get('enableFlowLogs', False) or subnet['network'].split('/')[-1] != base['network']):
         raise ValueError('Final image, CPU qualification, cost quote or live infrastructure differs')
-    if costs['not_invoice'] is not True or not 0 <= costs['cost']['estimated_spend_usd'] < 90:
+    if costs.get('not_invoice', costs['cost'].get('not_invoice')) is not True or not 0 <= costs['cost']['estimated_spend_usd'] < 90:
         raise ValueError('Conservative cost receipt required')
     result = copy.deepcopy(base)
     for key in ('static_ip', 'hostname', 'prepared_snapshot', 'period_ids', 'period_id',
@@ -56,34 +58,71 @@ def derive(base, *, build, restoration, snapshot, costs, quote, original, subnet
     result['official_rates']['compute_usd_h'] = float(quote['usd_per_hour'])
     result['official_rates']['persistent_disk_gib_usd_h'] = .1/730
     result['official_rates']['snapshot_gib_usd_h'] = .05/730
-    result['official_rates']['snapshot_transfer_na_usd_gib'] = costs['regional_transfer_upper_basis']['rate_usd_gib']
+    if 'regional_transfer_upper_basis' in costs:
+        transfer_rate = costs['regional_transfer_upper_basis']['rate_usd_gib']
+    else:
+        transfer_rate = float(costs['transfer_margin_basis']['quote']['usd_per_usage_unit'])
+    if not 0 <= transfer_rate < float('inf'):
+        raise ValueError('Finite nonnegative official transfer rate required')
+    result['official_rates']['snapshot_transfer_na_usd_gib'] = transfer_rate
     result['configuration_provenance'] = dict(cpu_restoration_verified=True, live_original_terminated=True,
         official_quote=quote, service_not_changed=True, rag_not_changed=True, ethics_record_not_created=True,
         old_operators_not_modified=True, fresh_gpu_identity_pending=True)
     return result
 
 
+def qualified_inputs(package, build_label, restoration_label, cost_receipt):
+    """Select immutable qualification receipts without a stale build2 fallback."""
+    if (not all(re.fullmatch('[a-z][a-z0-9]{0,15}', value)
+                for value in (build_label, restoration_label))
+            or not re.fullmatch(r'cost-reconciliation[0-9]+\.json', cost_receipt)):
+        raise ValueError('Safe qualified build, restoration and cost names required')
+    package = Path(package)
+    names = ('cpu-restoration-'+restoration_label+'-proof.json',
+             'linux-build-'+build_label+'-download-proof.json',
+             'final-snapshot-'+build_label+'-receipt.json', cost_receipt)
+    values, pins = [], {}
+    for name in names:
+        path = package/name
+        if path.is_symlink():
+            raise ValueError('Qualification receipt links forbidden')
+        raw = path.read_bytes()
+        pins[name] = hashlib.sha256(raw).hexdigest()
+        values.append(json.loads(raw))
+    proof, build, creation, costs = values
+    state = json.loads((package/'STATE.json').read_bytes())
+    matches = [row for row in state['resources'] if row['type'] == 'snapshot'
+               and str(row['id']) == str(proof['source_snapshot_id']) and not row.get('disposed')]
+    if (len(matches) != 1 or matches[0]['name'] != creation['snapshot']['name']
+            or str(proof['source_snapshot_id']) != str(creation['snapshot']['id'])
+            or build['image_id'] != creation['image_id'] or build['commit'] != creation['commit']
+            or proof['image_id'] != build['image_id']):
+        raise ValueError('Selected CPU proof, build and retained snapshot differ')
+    return proof, build, creation, costs, pins
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     for key in ('package', 'repo', 'base', 'zone', 'output'):
         parser.add_argument('--'+key, required=True)
+    parser.add_argument('--build-label', default='final02')
+    parser.add_argument('--restoration-label', default='final02r')
+    parser.add_argument('--cost-receipt', default='cost-reconciliation85.json')
     args = parser.parse_args(argv)
     require_limited()
     package, repo = Path(args.package), Path(args.repo)
     base = json.loads(Path(args.base).read_bytes())
-    proof_path = package/'cpu-restoration-final02r-proof.json'
+    proof, build, creation, costs, pins = qualified_inputs(package, args.build_label,
+        args.restoration_label, args.cost_receipt)
+    proof_path = package/('cpu-restoration-'+args.restoration_label+'-proof.json')
     proof_bytes = proof_path.read_bytes()
-    proof = json.loads(proof_bytes)
-    build = json.loads((package/'linux-build-final02-download-proof.json').read_bytes())
-    creation = json.loads((package/'final-snapshot-final02-receipt.json').read_bytes())
     # The immutable creation receipt names the snapshot; current status is read
     # separately. A declaration in STATE cannot substitute for the CPU proof.
-    snapshot_name = next(row['name'] for row in json.loads((package/'STATE.json').read_bytes())['resources']
-                         if row['type'] == 'snapshot' and str(row['id']) == proof['source_snapshot_id'] and not row.get('disposed'))
-    if (proof['source_snapshot_id'] != str(creation['snapshot']['id'])
-            or snapshot_name != creation['snapshot']['name'] or build['image_id'] != creation['image_id']
-            or build['commit'] != creation['commit']):
-        raise ValueError('CPU proof lacks the final snapshot creation receipt')
+    snapshot_name = creation['snapshot']['name']
+    verified_build, _, host = verified_build_inputs(package, args.build_label)
+    if verified_build != build:
+        raise ValueError('Verified build inventory changed')
+    base = restoration_config(base, args.build_label, build, host)
     quote = quote_archive(package/'official-compute-skus', 'g2-standard-4', region(args.zone))
     cloud = Cloud(base['gcloud'], base['project'], package/'installation-config-live')
     original = cloud.command(['compute', 'instances', 'describe', base['primary_vm']['name'],
@@ -105,14 +144,11 @@ def main(argv=None):
     inputs = assemble(reviewed, 'C:/CloudRAG/autonomous-run-20261002T203006Z/deployment-artifacts.json', preregistration)
     commit = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], timeout=30).decode().strip()
     result = derive(base, build=build, restoration=proof, snapshot=snapshot,
-        costs=json.loads((package/'cost-reconciliation85.json').read_bytes()), quote=quote,
+        costs=costs, quote=quote,
         original=original, subnet=subnet, inputs=inputs, fingerprint=protocol['fingerprint'],
         proof_path=proof_path, proof_sha256=hashlib.sha256(proof_bytes).hexdigest(),
         operator_commit=commit, package=package, python=repo/'.venv-app/Scripts/python.exe')
-    result['configuration_provenance']['receipts_sha256'] = {
-        name: hashlib.sha256((package/name).read_bytes()).hexdigest() for name in
-        ('cpu-restoration-final02r-proof.json', 'linux-build-final02-download-proof.json',
-         'final-snapshot-final02-receipt.json', 'cost-reconciliation85.json')}
+    result['configuration_provenance']['receipts_sha256'] = pins
     with Path(args.output).open('x', encoding='utf-8') as stream:
         json.dump(result, stream, indent=2)
     print(json.dumps(dict(status='DERIVED_OPERATOR5_CONFIG_GPU_ACCEPTANCE_PENDING',

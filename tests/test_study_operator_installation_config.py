@@ -1,8 +1,9 @@
 import copy
+import json
 
 import pytest
 
-from scripts.study_operator.installation_config import derive
+from scripts.study_operator.installation_config import derive, qualified_inputs
 
 
 def fixture(tmp_path):
@@ -75,3 +76,76 @@ def test_derive_rejects_incomplete_or_mixed_evidence(tmp_path, tamper):
         inputs['costs']['cost']['estimated_spend_usd'] = 90
     with pytest.raises(ValueError):
         derive(base, **inputs)
+
+
+def test_derive_accepts_reconciled_cost_schema_without_changing_image_identity(tmp_path):
+    base, inputs = fixture(tmp_path)
+    costs = inputs['costs']
+    costs.pop('not_invoice')
+    costs['cost']['not_invoice'] = True
+    costs.pop('regional_transfer_upper_basis')
+    costs['transfer_margin_basis'] = dict(quote=dict(usd_per_usage_unit='0.02'))
+    result = derive(base, **inputs)
+    assert result['official_rates']['snapshot_transfer_na_usd_gib'] == .02
+    assert result['image_id'] == inputs['build']['image_id']
+
+
+@pytest.mark.parametrize('rate', ['NaN', 'Infinity', '-0.01'])
+def test_unquoted_reconciled_transfer_rate_is_rejected(tmp_path, rate):
+    base, inputs = fixture(tmp_path)
+    inputs['costs'].pop('regional_transfer_upper_basis')
+    inputs['costs']['transfer_margin_basis'] = dict(quote=dict(usd_per_usage_unit=rate))
+    with pytest.raises(ValueError):
+        derive(base, **inputs)
+
+
+def qualified_fixture(root):
+    _, values = fixture(root)
+    rows = {
+        'cpu-restoration-final03r-proof.json': values['restoration'],
+        'linux-build-final03-download-proof.json': values['build'],
+        'final-snapshot-final03-receipt.json': dict(snapshot=values['snapshot'],
+            image_id=values['build']['image_id'], commit=values['build']['commit']),
+        'cost-reconciliation249.json': values['costs'],
+        'STATE.json': dict(resources=[dict(type='snapshot', id='900', name='final', disposed=False)])}
+    for name, value in rows.items():
+        (root/name).write_text(json.dumps(value), encoding='utf-8')
+
+
+def test_selected_final3_inputs_are_pinned_without_reading_deleted_final2(tmp_path):
+    qualified_fixture(tmp_path)
+    proof, build, creation, costs, pins = qualified_inputs(tmp_path, 'final03', 'final03r',
+                                                        'cost-reconciliation249.json')
+    assert proof['image_id'] == build['image_id'] == creation['image_id']
+    assert costs['cost']['estimated_spend_usd'] == 13
+    assert len(pins) == 4 and all(len(value) == 64 for value in pins.values())
+    assert all('final02' not in key for key in pins)
+
+
+@pytest.mark.parametrize('defect', ['disposed', 'mixed_image', 'snapshot', 'missing_selected'])
+def test_selected_qualification_never_falls_back_or_adopts_mixed_identity(tmp_path, defect):
+    qualified_fixture(tmp_path)
+    if defect == 'missing_selected':
+        (tmp_path/'cpu-restoration-final03r-proof.json').unlink()
+        with pytest.raises(FileNotFoundError):
+            qualified_inputs(tmp_path, 'final03', 'final03r', 'cost-reconciliation249.json')
+        return
+    name = 'STATE.json' if defect == 'disposed' else 'final-snapshot-final03-receipt.json'
+    value = json.loads((tmp_path/name).read_bytes())
+    if defect == 'disposed':
+        value['resources'][0]['disposed'] = True
+    elif defect == 'mixed_image':
+        value['image_id'] = 'another-image'
+    else:
+        value['snapshot']['id'] = '901'
+    (tmp_path/name).write_text(json.dumps(value), encoding='utf-8')
+    with pytest.raises(ValueError):
+        qualified_inputs(tmp_path, 'final03', 'final03r', 'cost-reconciliation249.json')
+
+
+@pytest.mark.parametrize('build,restore,cost', [('../final03','final03r','cost-reconciliation249.json'),
+    ('final03','../final03r','cost-reconciliation249.json'),
+    ('final03','final03r','../cost-reconciliation249.json')])
+def test_qualification_input_paths_are_confined_to_receipts(tmp_path, build, restore, cost):
+    with pytest.raises(ValueError, match='Safe'):
+        qualified_inputs(tmp_path, build, restore, cost)
