@@ -169,3 +169,90 @@ def test_invalid_synthetic_evidence_does_not_write_receipt_or_update_ledger(tmp_
     with pytest.raises(ValueError):
         reconcile(tmp_path,inputs,output)
     assert not output.exists() and (tmp_path/'STATE.json').read_bytes()==before
+
+
+def replace_input(root, inputs, key, value):
+    inputs[key] = key+'.json'
+    (root/inputs[key]).write_text(json.dumps(value), encoding='utf-8')
+
+
+def transition_fixture(root, inputs):
+    live = json.loads((root/inputs['inventory']).read_bytes())
+    live['resources']['snapshots'][0]['id'] = '6'
+    live['resources']['snapshots'][0]['creationTimestamp'] = '2026-10-07T01:00:00Z'
+    live['listing_sha256'] = digest(live['resources'])
+    replace_input(root, inputs, 'inventory', live)
+    extra = json.loads((root/inputs['extra_inventory']).read_bytes())
+    extra['resources']['snapshots'].append(live['resources']['snapshots'][0])
+    extra['listing_sha256'] = digest(extra['resources'])
+    replace_input(root, inputs, 'extra_inventory', extra)
+    replace_input(root, inputs, 'deleted_3', dict(resource_id='3',
+        status='RESOURCE_ABSENCE_VERIFIED', at='2026-10-07T01:30:00Z'))
+    proof = dict(status='CPU_RESTORATION_VERIFIED', synthetic=False,
+        source_snapshot_id='6', image_id='image-fixture', all_expected_files_verified=True,
+        image_config_verified=True, model_manifest_and_blobs_verified=True,
+        source=dict(files=19), artifacts=dict(files=79),
+        runtime_user_pair=dict(status='PAIRED_RUNTIME_USER_SUPPORTED'))
+    replace_input(root, inputs, 'qualification_proof', proof)
+    replace_input(root, inputs, 'qualified_final', dict(image_id='image-fixture', snapshot=dict(id='6')))
+    replace_input(root, inputs, 'qualification_job', dict(status='PASS', limited_token=True,
+        results=[dict(exit_code=0, command=['python', '-m', 'scripts.study_operator.cpu_restoration'])]))
+
+
+def test_restored_snapshot_transition_charges_both_actual_lifetimes(tmp_path, monkeypatch):
+    inputs, _ = reconciliation_fixture(tmp_path, monkeypatch)
+    transition_fixture(tmp_path, inputs)
+    result = reconcile(tmp_path, inputs, tmp_path/'result.json')
+    assert result['qualified_snapshot_transition']['qualified_id'] == '6'
+    rows = {row['id']: row for row in result['recorded_intervals']['intervals']
+            if row['kind'] == 'snapshots'}
+    assert Decimal(rows['3']['interval_s']) == 5400
+    assert Decimal(rows['6']['interval_s']) == 3600
+    assert result['gpu_runtime_not_inferred']
+
+
+@pytest.mark.parametrize('defect', ['synthetic', 'wrong_image', 'failed_job', 'unproved_old_deletion'])
+def test_snapshot_transition_requires_real_qualification_and_old_absence(tmp_path, monkeypatch, defect):
+    inputs, _ = reconciliation_fixture(tmp_path, monkeypatch)
+    transition_fixture(tmp_path, inputs)
+    key = {'synthetic':'qualification_proof', 'wrong_image':'qualified_final',
+           'failed_job':'qualification_job', 'unproved_old_deletion':'deleted_3'}[defect]
+    value = json.loads((tmp_path/inputs[key]).read_bytes())
+    if defect == 'synthetic':
+        value['synthetic'] = True
+    elif defect == 'wrong_image':
+        value['image_id'] = 'another-image'
+    else:
+        value['status'] = 'FAILED'
+    replace_input(tmp_path, inputs, key, value)
+    before = (tmp_path/'STATE.json').read_bytes()
+    with pytest.raises(ValueError):
+        reconcile(tmp_path, inputs, tmp_path/'result.json')
+    assert (tmp_path/'STATE.json').read_bytes() == before
+    assert not (tmp_path/'result.json').exists()
+
+
+@pytest.mark.parametrize('defect', [None, 'gpu', 'wrong_id', 'missing_absence'])
+def test_cpu_lifetime_upper_is_explicit_and_rejects_unproved_usage(tmp_path, monkeypatch, defect):
+    inputs, _ = reconciliation_fixture(tmp_path, monkeypatch)
+    extra = json.loads((tmp_path/inputs['extra_inventory']).read_bytes())
+    vm = dict(id='7', name='cloudrag-i5-restore-fixture', description='CloudRAG-I5-restore-fixture',
+        status='TERMINATED', machineType='e2-standard-2', zone='us-central1-a',
+        creationTimestamp='2026-10-07T00:30:00Z')
+    if defect == 'gpu':
+        vm['guestAccelerators'] = [dict(acceleratorType='nvidia-l4')]
+    extra['resources']['vms'].append(vm)
+    extra['listing_sha256'] = digest(extra['resources'])
+    replace_input(tmp_path, inputs, 'extra_inventory', extra)
+    replace_input(tmp_path, inputs, 'deleted_7', dict(resource_id='8' if defect == 'wrong_id' else '7',
+        status='FAILED' if defect == 'missing_absence' else 'RESOURCE_ABSENCE_VERIFIED',
+        at='2026-10-07T01:30:00Z'))
+    if defect:
+        with pytest.raises(ValueError):
+            reconcile(tmp_path, inputs, tmp_path/'result.json')
+    else:
+        result = reconcile(tmp_path, inputs, tmp_path/'result.json')
+        row = next(r for r in result['recorded_intervals']['intervals'] if r['kind'] == 'cpu_lifetime_upper')
+        assert Decimal(row['estimated_usd']) == Decimal('.7')
+        assert result['cpu_lifetime_upper_bounds'][0]['method'].endswith('INCLUDES_STOPPED_TIME')
+        assert result['gpu_runtime_not_inferred']

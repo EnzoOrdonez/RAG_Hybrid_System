@@ -11,6 +11,7 @@ from filelock import FileLock
 from scripts.study_operator.evidence import verify
 from scripts.study_operator.pricing import disk_quote_archive, quote_archive, unit_rate
 from scripts.study_operator.retention import digest, projection
+from scripts.study_operator.retention_disposable import controller_job
 from scripts.study_operator.run_control import require_limited, utc
 from src.ui.components.session_storage import atomic_json
 
@@ -110,9 +111,26 @@ def reconcile(root, inputs, output):
             or len(live['resources']['disks']) != 1 or len(live['resources']['snapshots']) != 1
             or live['protected_ids'] != previous['protected_ids']):
         raise ValueError('Fresh stopped original, single final snapshot and no IP required')
-    if (str(live['resources']['snapshots'][0]['id']) != str(previous['resources']['snapshots'][0]['id'])
-            or live['resources']['snapshots'][0]['status'] != 'READY'):
-        raise ValueError('Same qualified final snapshot required')
+    final_snapshot = live['resources']['snapshots'][0]
+    if final_snapshot['status'] != 'READY':
+        raise ValueError('READY qualified final snapshot required')
+    transition = None
+    if str(final_snapshot['id']) != str(previous['resources']['snapshots'][0]['id']):
+        proof, final, job = read('qualification_proof'), read('qualified_final'), read('qualification_job')
+        if (not controller_job(job) or proof.get('status') != 'CPU_RESTORATION_VERIFIED'
+                or proof.get('synthetic') is not False
+                or not all(proof.get(key) for key in ('all_expected_files_verified',
+                    'image_config_verified', 'model_manifest_and_blobs_verified'))
+                or proof.get('source', {}).get('files') != 19
+                or proof.get('artifacts', {}).get('files') != 79
+                or proof.get('runtime_user_pair', {}).get('status') != 'PAIRED_RUNTIME_USER_SUPPORTED'
+                or proof.get('image_id') != final.get('image_id')
+                or str(proof.get('source_snapshot_id')) != str(final_snapshot['id'])
+                or str(final.get('snapshot', {}).get('id')) != str(final_snapshot['id'])):
+            raise ValueError('Actual new final-image restoration and Limited controller required')
+        transition = dict(previous_id=str(previous['resources']['snapshots'][0]['id']),
+            qualified_id=str(final_snapshot['id']), image_id=proof['image_id'],
+            restoration_pinned=True, gpu_acceptance_not_inferred=True)
     begin, end = baseline['cost']['as_of_utc'], live['at']
     prices = catalog_rows(root/'official-compute-skus')
     snapshot = [r for r in prices if r['description'] == 'Storage PD Snapshot'
@@ -166,6 +184,28 @@ def reconcile(root, inputs, output):
                 units, hourly = Decimal(row['storageBytes'])/2**30, snapshot_h
             rows.append(dict(kind=kind,id=identity,created_utc=row['creationTimestamp'],
                 retired_utc=retired,units=str(units),usd_unit_h=str(hourly)))
+    # A terminated CPU clone's creation-to-deletion interval is a conservative
+    # upper bound, including its stopped periods. It never implies GPU usage.
+    cpu_upper = []
+    for vm in extra['resources']['vms']:
+        identity = str(vm['id'])
+        if identity == str(live['protected_ids']['vm']):
+            continue
+        if (vm.get('status') != 'TERMINATED' or vm.get('guestAccelerators')
+                or vm['machineType'].split('/')[-1] != 'e2-standard-2'
+                or not vm['name'].startswith('cloudrag-i5-restore-')
+                or not vm.get('description', '').startswith('CloudRAG-I5-restore-')):
+            raise ValueError('Only recorded stopped owned CPU clones can be estimated')
+        deletion = read('deleted_'+identity)
+        if deletion['resource_id'] != identity or deletion['status'] != 'RESOURCE_ABSENCE_VERIFIED':
+            raise ValueError('CPU API absence receipt required')
+        quote = quote_archive(root/'official-compute-skus', 'e2-standard-2',
+            vm['zone'].split('/')[-1].rsplit('-', 1)[0])
+        row = dict(kind='cpu_lifetime_upper', id=identity, created_utc=vm['creationTimestamp'],
+            retired_utc=deletion['at'], units=1, usd_unit_h=str(quote['usd_per_hour']))
+        rows.append(row)
+        cpu_upper.append(dict(instance_id=identity, method='CREATION_TO_API_ABSENCE_INCLUDES_STOPPED_TIME',
+            official_quote=quote, not_invoice=True))
     ip_start, ip_end = read('ip_start'), read('ip_end')
     if (ip_start['exit_code'] != 0 or ip_end['exit_code'] != 0
             or 'ip-reserve' not in ip_start['command'] or 'ip-release' not in ip_end['command']):
@@ -201,6 +241,7 @@ def reconcile(root, inputs, output):
     result = dict(status='ESTIMATED_RECONCILIATION_NOT_INVOICE',cost=cost,inputs=pins,
         recorded_intervals=charges,bucket_increment_estimated_usd=str(bucket_increment),
         static_ip_quote=ip_rate,snapshot_quote=rate,estimate_month_hours=730,
+        qualified_snapshot_transition=transition,cpu_lifetime_upper_bounds=cpu_upper,
         current_idle_target_met=idle<=Decimal('.45'),forecast_unchanged_assumptions=forecast,
         transfer_margin_basis=dict(added_disk_ids=[str(r['id']) for r in added_cross_region],
             gib_upper=transfer_units,quote=transfer_rate,actual_transferred_bytes_not_measured=True),
