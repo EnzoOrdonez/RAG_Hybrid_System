@@ -37,6 +37,18 @@ def bootstrap(operator, zone):
     config, state, cloud = operator.config, operator.state, operator.cloud
     if zone not in US_L4_ZONES or region(zone) != region(config['zone']):
         raise OperatorError('La zona no coincide con la instalación revisada. Prepara subred, IP, tarifa e identidad propias antes de bootstrap.')
+    pending = state.get('primary_creation_intent')
+    if (not state.get('primary_bootstrap_complete') and pending and pending.get('start_requested_utc')
+            and pending.get('capacity_error_code') != 'ZONE_RESOURCE_POOL_EXHAUSTED'):
+        # An absent resource does not prove that retrying its unknown failure is
+        # eligible. Check before recreating a disk or spending another reserve.
+        observed = cloud.command(['compute', 'instances', 'list'])
+        matches = [row for row in observed if row['name'] == pending['name']]
+        if not matches:
+            raise OperatorError('La creación anterior tiene resultado desconocido y la VM está ausente. Conserva el recibo y diagnostica la causa; bootstrap no repite la creación ni recrea el disco.')
+        if (len(matches) != 1 or matches[0].get('description') != pending['ownership_marker']
+                or zone != pending['zone']):
+            raise OperatorError('La creación desconocida no coincide con una VM propia en esa zona. Concilia identidad y recibos antes de otro efecto.')
     if state.get('primary_bootstrap_complete'):
         if zone != operator.selected()['zone']:
             raise OperatorError('Ya existe un primario final. Usa failover con su instantánea preparada; bootstrap no crea otro.')

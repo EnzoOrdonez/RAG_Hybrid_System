@@ -110,6 +110,22 @@ def test_bootstrap_recovers_lost_reply_without_second_create(tmp_path):
     assert len(creates) == 1
 
 
+def test_unknown_absent_creation_cannot_recreate_disk_or_repeat_paid_insert(tmp_path):
+    operator, cloud, disks, vms, creates, _ = fixture(tmp_path, lost_reply=True)
+    with pytest.raises(OperatorError, match='CREATE_RESPONSE_LOST'):
+        bootstrap(operator, 'us-central1-b')
+    # Simulate the independently verified API absence; keep the actual intent.
+    vms.clear()
+    disks.clear()
+    cloud.calls.clear()
+    before = (operator.root/'active.json').read_bytes()
+    with pytest.raises(OperatorError, match='resultado desconocido'):
+        bootstrap(operator, 'us-central1-b')
+    assert len(creates) == 1 and disks == []
+    assert cloud.calls == [(['compute','instances','list'], {})]
+    assert (operator.root/'active.json').read_bytes() == before
+
+
 def test_bootstrap_next_zone_only_after_stockout_and_actual_vm_absence(tmp_path):
     operator, _, disks, vms, creates, _ = fixture(tmp_path, stockout=True)
     with pytest.raises(OperatorError, match='ZONE_RESOURCE_POOL_EXHAUSTED'):
