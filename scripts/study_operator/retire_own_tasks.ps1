@@ -8,6 +8,9 @@ if($state.status -ne 'CLOSING' -and -not ($DryRun -and $state.status -eq 'ACTIVE
 if(Test-Path -LiteralPath (Join-Path $data.package 'MANIFEST_SHA256.jsonl')){throw 'Sealed package is read-only'}
 $python=[IO.Path]::GetFullPath((Join-Path $data.app '.venv-app/Scripts/python.exe'))
 $sdkPython=[IO.Path]::GetFullPath((Join-Path ([IO.Path]::GetDirectoryName($data.sdk)) '../platform/bundledpython/python.exe'))
+$binding=& $python -B -m scripts.study_operator.writer_quiescence --binding
+if($LASTEXITCODE -ne 0){throw 'Native Python binding unavailable; no retirement'}
+$native=($binding|ConvertFrom-Json).native_executable
 $app=[IO.Path]::GetFullPath($data.app).TrimEnd('\','/')
 $scope=[IO.Path]::GetFullPath($data.package).Replace('\','/').ToLowerInvariant()
 $known=@($state.scheduled_tasks)
@@ -31,15 +34,29 @@ if($DryRun){
 # Validate the complete census before the first stop/unregister effect.
 Add-Content -LiteralPath (Join-Path $data.package 'SYSTEM_CHANGES.md') -Encoding UTF8 -Value ('BEFORE finalization: retire only '+$tasks.Count+' registered I5 Limited tasks, bound to own worktree Python and package; refuse seal if Python writers remain. No I4 tasks or user applications touched.')
 foreach($task in $tasks){
+ if($task.TaskName -in @($data.finalizer_tasks)+@('CloudRAG-I5-safety-reserve','CloudRAG-I5-safety-deadline-backup')){continue}
  if($task.TaskName -ne $data.current_task -and $task.State.ToString() -eq 'Running'){Stop-ScheduledTask -TaskName $task.TaskName}
  Unregister-ScheduledTask -TaskName $task.TaskName -Confirm:$false
 }
 $until=[DateTime]::UtcNow.AddSeconds(30)
 do {
- $processes=@(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -and [IO.Path]::GetFullPath($_.ExecutablePath) -in @($python,$sdkPython) -and $_.ProcessId -ne $data.coordinator_pid})
+ $rows=@(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -and [IO.Path]::GetFullPath($_.ExecutablePath) -in @($python,$native,$sdkPython)} | Select-Object ProcessId,ParentProcessId,ExecutablePath,CommandLine)
+ $json=ConvertTo-Json -InputObject $rows -Depth 4 -Compress
+ $selection=$json | & $python -B -m scripts.study_operator.writer_quiescence --native $native --launcher $python --sdk-python $sdkPython --package $data.package --owner 'C:/CloudRAG/operator-iteration5' --coordinator-pid $data.coordinator_pid --coordinator-plan $data.entry_plan
+ if($LASTEXITCODE -ne 0){throw 'Native writer census failed; no seal'}
+ $processes=@(($selection|ConvertFrom-Json).writer_pids)
  if($processes.Count -eq 0){break}
  Start-Sleep -Milliseconds 500
 } while([DateTime]::UtcNow -lt $until)
 if($processes.Count){throw 'Worktree Python still alive; preserve evidence and do not seal'}
+# Keep backup definitions until writer quiescence is proven. A failed primary
+# therefore leaves another independent opportunity for report/seal and STOP.
+foreach($task in $tasks){
+ if($task.TaskName -in @($data.finalizer_tasks)+@('CloudRAG-I5-safety-reserve','CloudRAG-I5-safety-deadline-backup')){
+  $live=Get-ScheduledTask -TaskName $task.TaskName
+  if($live.State.ToString() -eq 'Running' -and $live.TaskName -ne $data.current_task){throw 'Safety backup still running; preserve independent retries'}
+  Unregister-ScheduledTask -TaskName $live.TaskName -Confirm:$false
+ }
+}
 if(@(Get-ScheduledTask | Where-Object {$_.TaskName -like 'CloudRAG-I5-*'}).Count){throw 'Own task definitions remain; no seal'}
 [pscustomobject]@{status='OWN_TASKS_RETIRED_AND_WRITERS_QUIESCENT';tasks=@($tasks.TaskName);remaining_python=0;at=[DateTimeOffset]::UtcNow.ToString('o');user_applications_untouched=$true} | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $data.retirement_receipt -Encoding UTF8
