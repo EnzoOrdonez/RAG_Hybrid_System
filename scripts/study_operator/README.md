@@ -1,8 +1,8 @@
-# Operador CloudRAG, iteración 4
+# Operador CloudRAG, iteración 5
 
-Instalación exclusiva: `C:/CloudRAG/operator-iteration4`. El operador de la
-iteración 3 y los paquetes anteriores se conservan. El runbook en español
-`C:/CloudRAG/operator-iteration4/RUNBOOK.md`
+Instalación exclusiva: `C:/CloudRAG/operator-iteration5`. Los operadores de las
+iteraciones 3 y 4 y los paquetes anteriores se conservan. El runbook en español
+`scripts/study_operator/RUNBOOK_ITERATION5.md`, dentro del bundle que selecciona `release.json`,
 define la preparación, el día de sesión, la contingencia, la recuperación y el
 borrado. El ensayo completo en vivo y la aceptación de la imagen final siguen
 pendientes; esta documentación no autoriza participantes.
@@ -16,8 +16,8 @@ El operador no la copia, imprime ni crea otra. Si falta el cliente, la clave o
 la autenticación, conserva el recibo y corrige la instalación antes de iniciar.
 
 ```powershell
-& C:/CloudRAG/operator-iteration4/operator.ps1 --help
-& C:/CloudRAG/operator-iteration4/operator.ps1 status
+& C:/CloudRAG/operator-iteration5/operator.ps1 --help
+& C:/CloudRAG/operator-iteration5/operator.ps1 status
 ```
 
 `study` requiere la aprobación ética y el registro creado **a mano por Enzo**,
@@ -38,7 +38,7 @@ antes de borrar, y `study` exige confirmación interactiva. Nunca retires datos
 históricos ni de terceros durante una prueba.
 
 La instalación conserva `installation.json`, estado reanudable `active.json`,
-recibos técnicos en `runs/` y versiones anteriores en `versions/`. No edites los
+recibos técnicos en `runs/` y bundles inmutables en `releases/`. No edites los
 hashes para sortear un rechazo. Ante un error, revisa el mensaje y el recibo,
 ejecuta `status` y resuelve la causa; no repitas una creación a ciegas.
 

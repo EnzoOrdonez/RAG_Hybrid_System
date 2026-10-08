@@ -70,7 +70,8 @@ def worker(connection, config, parent_pid):
 class Supervisor:
     """Parent stays responsive even when inference blocks inside native code."""
 
-    def __init__(self, config, *, call_seconds=600, preparation_seconds=900, poll=None):
+    def __init__(self, config, *, call_seconds=600, preparation_seconds=900, poll=None,
+                 worker_target=worker):
         self.call_seconds = call_seconds
         self.preparation_seconds = preparation_seconds
         self.poll = poll
@@ -78,7 +79,7 @@ class Supervisor:
         self.context = multiprocessing.get_context("spawn")
         self.connection, child = self.context.Pipe()
         self.process = self.context.Process(
-            target=worker, args=(child, config, os.getpid())
+            target=worker_target, args=(child, config, os.getpid())
         )
         self.deadline = None
         self.terminal = False
