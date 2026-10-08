@@ -78,6 +78,18 @@ def test_empty_census_does_not_prove_closure(tmp_path):
     assert not list(tmp_path.glob('safety-close-*.json'))
 
 
+def test_sealed_package_rejects_backup_before_locks_cloud_or_any_write(tmp_path):
+    (tmp_path/'STATE.json').write_text(json.dumps(state()))
+    (tmp_path/'MANIFEST_SHA256.jsonl').write_text('sealed')
+    before = {p.name:p.read_bytes() for p in tmp_path.iterdir()}
+    class Cloud:
+        def command(self, *args, **kwargs):
+            pytest.fail('Sealed backup cannot call cloud or modify evidence')
+    with pytest.raises(ValueError, match='Sealed'):
+        close(tmp_path, Cloud())
+    assert {p.name:p.read_bytes() for p in tmp_path.iterdir()} == before
+
+
 def test_disposed_vm_is_not_expected_alive_but_reappearance_is_rejected(tmp_path):
     value = state()
     value['resources'].append(dict(type='vm', id='456', name='cloudrag-i4-test',

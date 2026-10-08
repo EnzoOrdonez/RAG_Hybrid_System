@@ -149,6 +149,8 @@ def close_network(root, cloud, state, stopped):
 
 def close(root, cloud):
     root = Path(root)
+    if (root/'MANIFEST_SHA256.jsonl').exists():
+        raise ValueError('Sealed package is read-only; use external verification, no closure replay')
     state_path = root/'STATE.json'
     with FileLock(str(root/'state.lock'), timeout=10):
         state = json.loads(state_path.read_bytes())

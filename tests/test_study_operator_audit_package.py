@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from scripts.study_operator.audit_package import census, diagnose_existing, inventory, verify_existing
+from scripts.study_operator.audit_package import census, diagnose_existing, inventory, seal, verify_existing
 from scripts.study_operator.run_control import validate_command
 
 
@@ -110,3 +110,23 @@ def test_existing_inventory_cannot_be_repinned_from_live_content(tmp_path):
     (root/'MANIFEST_SHA256.jsonl').write_text('changed')
     with pytest.raises(ValueError, match='differs'):
         verify_existing(root, tmp_path/'receipt.json', verifier, pin)
+
+
+def test_seal_and_readonly_retry_use_actual_standalone_verifier_cli(tmp_path):
+    from pathlib import Path
+    from scripts.study_operator import package_verify
+    root = tmp_path/'own'
+    root.mkdir()
+    (root/'preserved-failure.txt').write_text('FAIL is evidence', encoding='utf-8')
+    verifier = tmp_path/'external-verifier.py'
+    verifier.write_bytes(Path(package_verify.__file__).read_bytes())
+    receipt = tmp_path/'external-seal.json'
+    result = seal(root, receipt, verifier, seconds=10)
+    assert result['status'] == 'SEALED_AND_EXTERNALLY_VERIFIED'
+    assert json.loads(receipt.with_suffix('.verification.json').read_bytes())['checked_files'] == 1
+    pin = tmp_path/'pin.json'
+    pin.write_text(json.dumps(dict(root=str(root.resolve()),
+        manifest_sha256=result['manifest_sha256'], verifier_source_sha256=result['verifier_source_sha256'])))
+    before = {p.name:p.read_bytes() for p in root.iterdir()}
+    assert verify_existing(root, tmp_path/'retry.json', verifier, pin, seconds=10)['status'] == 'SEALED_AND_EXTERNALLY_VERIFIED'
+    assert {p.name:p.read_bytes() for p in root.iterdir()} == before

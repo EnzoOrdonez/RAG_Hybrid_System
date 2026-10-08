@@ -120,7 +120,7 @@ def seal(root, receipt, verifier, *, seconds=1200):
     os.replace(staging, manifest)
     # This independent verifier never modifies the inventory or audited directory.
     child = subprocess.run([sys.executable, '-B', str(verifier), '--root', str(root),
-                            '--manifest', str(manifest), '--expected-manifest-sha256', result['manifest_sha256'],
+                            '--expected-manifest-sha256', result['manifest_sha256'],
                             '--output', str(verification)], capture_output=True, timeout=1500,
                            env=dict(os.environ, PYTHONDONTWRITEBYTECODE='1', PYTHONUTF8='1'))
     proof = json.loads(verification.read_bytes()) if verification.exists() else {}
@@ -188,7 +188,7 @@ def verify_existing(root, receipt, verifier, pin_receipt, *, seconds=3000):
             or hashlib.sha256(verifier.read_bytes()).hexdigest() != pin['verifier_source_sha256']):
         raise ValueError('Pinned manifest or unchanged external verifier differs')
     start, begin = utc(), time.monotonic()
-    args = [sys.executable, '-B', str(verifier), '--root', str(root), '--manifest', str(manifest),
+    args = [sys.executable, '-B', str(verifier), '--root', str(root),
             '--expected-manifest-sha256', pin['manifest_sha256'], '--output', str(verification)]
     child = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
                              env=dict(os.environ, PYTHONDONTWRITEBYTECODE='1', PYTHONUTF8='1'))
