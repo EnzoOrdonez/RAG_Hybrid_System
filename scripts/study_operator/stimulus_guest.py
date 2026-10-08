@@ -3,13 +3,11 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
-import shlex
-import sys
 
 from scripts.study_operator.managed_stores import recovery_counts
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.service_transition import cold_state
-from scripts.study_operator.stimulus_host import launch_command, owned_names
+from scripts.study_operator.stimulus_host import launch_command, owned_names, unit_text
 from scripts.study_operator.stimulus_host_evidence import sha
 
 
@@ -43,13 +41,7 @@ def dispatch_stimulus(active, request, *, execute, controller, maintenance,
         command = launch_command(active,index)
         job.mkdir(mode=0o700)
         unit_file = job/(unit+'.service')
-        exec_args = command[command.index(sys.executable):]
-        unit_file.write_text('[Unit]\nDescription=Owned cold stimulus\n[Service]\nType=exec\n'
-            +'WorkingDirectory='+active['config']['host_code']+'\n'
-            +'RuntimeMaxSec=7200\nTimeoutStopSec=35\nStandardOutput=null\nStandardError=null\n'
-            +'ExecStart='+shlex.join(exec_args)+'\n'
-            +'ExecStopPost=-/usr/bin/docker stop --time 15 '+name+'\n'
-            +'ExecStopPost=/usr/sbin/shutdown -h now\n',encoding='utf-8')
+        unit_file.write_text(unit_text(active,index),encoding='utf-8')
         execute(['systemd-analyze','verify',str(unit_file)])
         save_state(job/'launch-intent.json',dict(boot_id=boot,boot_index=index,unit=unit,container=name,
                     native_limit_s=7200,replay_allowed=False))

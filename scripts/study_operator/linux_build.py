@@ -66,6 +66,17 @@ def check_commands(image,root,label):
     return commands
 
 
+def host_check_code(host,unit):
+    """No app preparation or generation; validate the exact host stdlib and unit."""
+    return ('import sys,json\nfrom pathlib import Path\n'
+        +'sys.path.insert(0,'+repr(str(host))+')\n'
+        +'from scripts.study_operator import stimulus_host,stimulus_guest,stimulus_host_evidence\n'
+        +'assert not any(k in sys.modules for k in ("torch","filelock","pydantic"))\n'
+        +'active=dict(boot_id="00000000-0000-0000-0000-000000000000",config=dict(host_code='+repr(str(host))+'))\n'
+        +'Path('+repr(str(unit))+').write_text(stimulus_host.unit_text(active,1),encoding="utf-8")\n'
+        +'print(json.dumps(dict(status="HOST_STDLIB_IMPORTS_AND_FIXED_UNIT_READY",model_generation=False)))\n')
+
+
 class Guest:
     def __init__(self,job,*,invoke=subprocess.Popen):
         if (job['purpose'] != 'technical' or job['operation'] != 'I5_CPU_BUILD'
@@ -148,6 +159,10 @@ class Guest:
             files = {p.relative_to(host).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
                      for p in host.rglob('*') if p.is_file()}
             persist(self.logs/'host-code-inventory.json',dict(image_id=image,commit=self.job['commit'],files=files))
+            unit = self.root/'cloudrag-i5-stimulus-native-validation.service'
+            self.step('host-stdlib',['python3','-S','-B','-c',host_check_code(host,unit)],60)
+            self.step('host-systemd-version',['systemctl','--version'],30)
+            self.step('host-unit-validation',['systemd-analyze','verify',str(unit)],30)
             status = 'PASS'
         except BaseException as error:
             persist(self.logs/'failure.json',dict(status='FAILED',error_type=type(error).__name__,

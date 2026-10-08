@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shlex
 import sys
 import time
 
@@ -34,6 +35,17 @@ def launch_command(active, index):
         '--property=ExecStopPost=-/usr/bin/docker stop --time 15 '+name,
         '--property=ExecStopPost=/usr/sbin/shutdown -h now',
         sys.executable,'-B','-m','scripts.study_operator.stimulus_host','--boot-index',str(index)]
+
+
+def unit_text(active, index):
+    command = launch_command(active,index)
+    name,_ = owned_names(active,index)
+    return ('[Unit]\nDescription=Owned cold stimulus\n[Service]\nType=exec\n'
+        +'WorkingDirectory='+active['config']['host_code']+'\n'
+        +'RuntimeMaxSec=7200\nTimeoutStopSec=35\nStandardOutput=null\nStandardError=null\n'
+        +'ExecStart='+shlex.join(command[command.index(sys.executable):])+'\n'
+        +'ExecStopPost=-/usr/bin/docker stop --time 15 '+name+'\n'
+        +'ExecStopPost=/usr/sbin/shutdown -h now\n')
 
 
 class HostCollection:

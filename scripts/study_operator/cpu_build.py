@@ -60,19 +60,32 @@ def stage_payload(job,archive,source):
 
 
 class Build:
-    def __init__(self,root,cloud):
+    def __init__(self,root,cloud,*,cpu_label='bootstrap01'):
+        if not re.fullmatch('[a-z][a-z0-9-]{0,15}',cpu_label):
+            raise ValueError('Safe explicit restored CPU label required')
         self.root,self.cloud = Path(root),cloud
         self.state = Controller(root,cloud)
+        self.cpu_label = cpu_label
 
-    def resource(self):
+    def resource(self,*,cpu_label=None):
+        label = cpu_label or self.cpu_label
+        if not re.fullmatch('[a-z][a-z0-9-]{0,15}',label):
+            raise ValueError('Safe explicit restored CPU label required')
         state = json.loads((self.root/'STATE.json').read_bytes())
         matches = [r for r in state['resources'] if r['type'] == 'vm' and r.get('disposable')
-                   and r['name'] == 'cloudrag-i5-restore-bootstrap01' and not r.get('disposed')]
+                   and r['name'] == 'cloudrag-i5-restore-'+label and not r.get('disposed')]
         if len(matches) != 1:
             raise ValueError('One verified own CPU restoration clone required')
-        proof = json.loads((self.root/'cpu-restoration-bootstrap01-proof.json').read_bytes())
+        proof = json.loads((self.root/('cpu-restoration-'+label+'-proof.json')).read_bytes())
+        disks = [r for r in state['resources'] if r['type'] == 'disk' and r.get('disposable')
+                 and r['name'] == 'cloudrag-i5-restore-'+label+'-boot' and not r.get('disposed')]
         if (proof.get('status') != 'CPU_RESTORATION_VERIFIED' or proof.get('synthetic') is not False
-                or str(proof.get('cpu_vm_id')) != matches[0]['id'] or matches[0]['zone'] != 'us-central1-a'):
+                or str(proof.get('cpu_vm_id')) != matches[0]['id'] or matches[0]['zone'] != 'us-central1-a'
+                or proof.get('zone') != 'us-central1-a' or len(disks) != 1
+                or disks[0]['ownership_marker'] != matches[0]['ownership_marker']
+                or str(proof.get('restored_disk_id')) != disks[0]['id']
+                or not proof.get('source_snapshot_id') or proof.get('all_expected_files_verified') is not True
+                or proof.get('image_config_verified') is not True or proof.get('model_manifest_and_blobs_verified') is not True):
             raise ValueError('Own CPU clone is not the independently verified restoration')
         return matches[0]
 
@@ -89,6 +102,7 @@ class Build:
         if not re.fullmatch('[a-z][a-z0-9]{0,15}',label):
             raise ValueError('Safe unique build label required')
         resource = self.resource()
+        proof_sha = hashlib.sha256((self.root/('cpu-restoration-'+self.cpu_label+'-proof.json')).read_bytes()).hexdigest()
         bundle = Path(inventory['bundle'])
         archive = bundle.read_bytes()
         if (inventory['status'] != 'CLEAN_PUBLISHED_BUILD_CONTEXT_VERIFIED'
@@ -107,7 +121,8 @@ class Build:
             opened['cpu-build-'+label] = dict(maximum_usd=exposure,not_billed_spend=True,
                 at=datetime.now(timezone.utc).isoformat(),catalog_receipt_sha256=quote['catalog_receipt_sha256'])
             state.setdefault('build_jobs',{})[label] = dict(status='INTENT',vm_id=resource['id'],
-                commit=inventory['commit'],context_sha256=inventory['sha256'])
+                commit=inventory['commit'],context_sha256=inventory['sha256'],cpu_label=self.cpu_label,
+                cpu_restoration_proof_sha256=proof_sha)
         self.state.update(reserve)
         with (self.root/'DESTRUCTION_LOG.md').open('a',encoding='utf-8') as stream:
             stream.write('\nBEFORE CPU build '+label+': own Git transfer, Docker intermediate/cache, pip/apt '
@@ -134,6 +149,7 @@ class Build:
         self.cloud.command(['compute','instances','add-metadata',resource['name'],'--zone='+resource['zone'],
                             '--metadata-from-file=startup-script='+str(startup)])
         job = dict(operation='I5_CPU_BUILD',purpose='technical',label=label,instance_id=resource['id'],
+                   cpu_label=self.cpu_label,cpu_restoration_proof_sha256=proof_sha,
                    commit=inventory['commit'],context_sha256=inventory['sha256'],
                    context='/srv/cloudrag/iteration5/builds/'+label+'/context',bucket=TECHNICAL,
                    prefix='iteration4/iteration5/'+self.root.name+'/'+label,
@@ -173,13 +189,19 @@ class Build:
 
     def collection_owner(self,label,job):
         """A delayed collector must never stop the CPU serving a newer build."""
-        resource = self.resource()
+        cpu_label = job.get('cpu_label','bootstrap01')
+        resource = self.resource(cpu_label=cpu_label)
         state = json.loads((self.root/'STATE.json').read_bytes())
         jobs = state.get('build_jobs',{})
         owner = jobs.get(label,{})
         if (owner.get('vm_id') != resource['id'] or job.get('instance_id') != resource['id']
-                or owner.get('commit') != job.get('commit')):
+                or owner.get('commit') != job.get('commit')
+                or owner.get('cpu_label','bootstrap01') != cpu_label):
             raise ValueError('Collector lacks the recorded build and CPU ownership')
+        if 'cpu_restoration_proof_sha256' in job:
+            actual = hashlib.sha256((self.root/('cpu-restoration-'+cpu_label+'-proof.json')).read_bytes()).hexdigest()
+            if actual != job['cpu_restoration_proof_sha256'] or actual != owner.get('cpu_restoration_proof_sha256'):
+                raise ValueError('Collector restoration proof changed')
         active = {'INTENT','LAUNCH_ATTEMPTED','RUNNING'}
         if any(name != label and row.get('vm_id') == resource['id']
                and row.get('status') in active for name,row in jobs.items()):
@@ -222,6 +244,9 @@ class Build:
                 path.write_bytes(data)
             receipts.append(row)
         required = {'pip-check.receipt.json','linux-full.receipt.json','linux-filtered.receipt.json','posix-durability.receipt.json','isolated-runtime-user.receipt.json','persistent-mount.stdout','posix-durability.stdout'}
+        if 'cpu_restoration_proof_sha256' in job:
+            required |= {'host-stdlib.receipt.json','host-unit-validation.receipt.json',
+                         'host-systemd-version.receipt.json','host-systemd-version.stdout'}
         if manifest['status'] == 'PASS' and (not required.issubset({r['object'].split('/')[-1] for r in receipts})
                 or any(json.loads((destination/name).read_bytes())['exit_code'] for name in required if name.endswith('.json'))):
             raise ValueError('PASS lacks complete zero-exit Linux checks')
@@ -261,11 +286,12 @@ def main(argv=None):
     for name in ('package','sdk','label'):
         parser.add_argument('--'+name,required=True)
     parser.add_argument('--inventory')
+    parser.add_argument('--cpu-label',default='bootstrap01')
     args = parser.parse_args(argv)
     require_limited()
     root = Path(args.package)
     with FileLock(str(root/'cpu-build.lock'),timeout=0):
-        build = Build(root,Cloud(args.sdk,'pure-loop-474323-a8',root/'cpu-build-api'))
+        build = Build(root,Cloud(args.sdk,'pure-loop-474323-a8',root/'cpu-build-api'),cpu_label=args.cpu_label)
         if args.operation == 'launch':
             repo = Path(__file__).resolve().parents[2]
             if subprocess.check_output(['git','-C',str(repo),'status','--porcelain'],timeout=60).strip():

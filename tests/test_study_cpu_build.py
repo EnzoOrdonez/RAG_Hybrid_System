@@ -23,11 +23,14 @@ def fixture(tmp_path,monkeypatch):
                             ('roles/storage.objectCreator','roles/storage.objectViewer')])
     technical = dict(bindings=[dict(role='roles/storage.objectCreator',members=[member],condition=dict(
         expression="resource.name.startsWith('projects/_/buckets/"+cpu_build.TECHNICAL+"/objects/iteration4/')"))])
-    state = dict(status='ACTIVE',resources=[resource],cloud_cutoff_usd=90,independent_closure_verified=True,
+    disk = dict(type='disk',name=resource['name']+'-boot',id='10',disposable=True,ownership_marker='own-marker')
+    state = dict(status='ACTIVE',resources=[resource,disk],cloud_cutoff_usd=90,independent_closure_verified=True,
         closure_reserved_utc='2026-10-09T23:01:39Z',cost=dict(estimated_spend_usd=12,reserved_retention_and_closure_usd=4))
     (tmp_path/'STATE.json').write_text(json.dumps(state))
     (tmp_path/'cpu-restoration-bootstrap01-proof.json').write_text(json.dumps(dict(
-        status='CPU_RESTORATION_VERIFIED',synthetic=False,cpu_vm_id='1')))
+        status='CPU_RESTORATION_VERIFIED',synthetic=False,cpu_vm_id='1',zone='us-central1-a',
+        restored_disk_id='10',source_snapshot_id='9',all_expected_files_verified=True,
+        image_config_verified=True,model_manifest_and_blobs_verified=True)))
     monkeypatch.setattr(cpu_build,'quote_archive',lambda *a:dict(usd_per_hour='.067',catalog_receipt_sha256='c'*64))
     class Cloud:
         def __init__(self):
@@ -229,3 +232,67 @@ def test_posix_terminal_summary_supports_actual_quiet_and_normal_pytest(output):
 ])
 def test_posix_terminal_summary_rejects_incomplete_or_excluded_results(output):
     assert not cpu_build.seven_posix_passed(output)
+
+
+def qualified_clone(tmp_path,monkeypatch):
+    build,cloud,old,inventory,*_=fixture(tmp_path,monkeypatch)
+    state = json.loads((tmp_path/'STATE.json').read_bytes())
+    for row in state['resources']:
+        row['disposed'] = True
+    new = dict(old,name='cloudrag-i5-restore-final03c',id='2',ownership_marker='new-marker')
+    state['resources'] += [new,dict(type='disk',name=new['name']+'-boot',id='20',disposable=True,
+                                  ownership_marker='new-marker')]
+    (tmp_path/'STATE.json').write_text(json.dumps(state))
+    proof = json.loads((tmp_path/'cpu-restoration-bootstrap01-proof.json').read_bytes())
+    proof.update(cpu_vm_id='2',restored_disk_id='20',source_snapshot_id='19')
+    (tmp_path/'cpu-restoration-final03c-proof.json').write_text(json.dumps(proof))
+    return cpu_build.Build(tmp_path,cloud,cpu_label='final03c'),cloud,new,inventory
+
+
+def test_build_can_select_a_new_verified_clone_after_old_clone_was_disposed(tmp_path,monkeypatch):
+    build,cloud,new,_ = qualified_clone(tmp_path,monkeypatch)
+    assert build.resource() == new and not cloud.calls
+    with pytest.raises(ValueError,match='One verified'):
+        build.resource(cpu_label='bootstrap01')
+
+
+@pytest.mark.parametrize('defect',['proof_vm','proof_disk','unverified_model','unverified_files','disk_disposed','marker'])
+def test_new_cpu_selection_rejects_unqualified_or_mixed_proof_before_cloud(tmp_path,monkeypatch,defect):
+    build,cloud,new,_ = qualified_clone(tmp_path,monkeypatch)
+    path = tmp_path/'cpu-restoration-final03c-proof.json'
+    proof = json.loads(path.read_bytes())
+    if defect == 'proof_vm':
+        proof['cpu_vm_id'] = '1'
+    elif defect == 'proof_disk':
+        proof['restored_disk_id'] = '10'
+    elif defect == 'unverified_model':
+        proof['model_manifest_and_blobs_verified'] = False
+    elif defect == 'unverified_files':
+        proof['all_expected_files_verified'] = False
+    else:
+        state = json.loads((tmp_path/'STATE.json').read_bytes())
+        disk = next(r for r in state['resources'] if r.get('id')=='20')
+        disk.update(disposed=True) if defect=='disk_disposed' else disk.update(ownership_marker='foreign')
+        (tmp_path/'STATE.json').write_text(json.dumps(state))
+    path.write_text(json.dumps(proof))
+    with pytest.raises(ValueError,match='independently verified'):
+        build.resource()
+    assert not cloud.calls
+
+
+def test_legacy_collector_cannot_adopt_new_clone_or_stop_it(tmp_path,monkeypatch):
+    build,cloud,_,_=qualified_clone(tmp_path,monkeypatch)
+    job = dict(instance_id='1',commit='a'*40)
+    with pytest.raises(ValueError,match='One verified'):
+        build.collection_owner('final01',job)
+    assert not cloud.calls
+
+
+def test_changed_new_restoration_receipt_rejects_collector_before_cloud(tmp_path,monkeypatch):
+    build,cloud,new,_=qualified_clone(tmp_path,monkeypatch)
+    job = dict(instance_id='2',commit='a'*40,cpu_label='final03c',cpu_restoration_proof_sha256='f'*64)
+    build.state.update(lambda state:state.update(build_jobs=dict(final03=dict(vm_id='2',commit='a'*40,
+        cpu_label='final03c',cpu_restoration_proof_sha256='f'*64))))
+    with pytest.raises(ValueError,match='proof changed'):
+        build.collection_owner('final03',job)
+    assert not cloud.calls

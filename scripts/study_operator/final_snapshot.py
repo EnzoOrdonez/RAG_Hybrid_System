@@ -83,7 +83,11 @@ def preserve(root, cloud, label, installation):
     proof, job, host = inputs(root, label)
     config = restoration_config(installation, label, proof, host)
     build = Build(root, cloud)
-    resource = build.collection_owner(label, dict(instance_id=job['vm_id'], commit=job['commit']))
+    owner_input = dict(instance_id=job['vm_id'], commit=job['commit'],
+                       cpu_label=job.get('cpu_label', 'bootstrap01'))
+    if 'cpu_restoration_proof_sha256' in job:
+        owner_input['cpu_restoration_proof_sha256'] = job['cpu_restoration_proof_sha256']
+    resource = build.collection_owner(label, owner_input)
     vm = cloud.command(['compute', 'instances', 'describe', resource['name'], '--zone='+resource['zone']])
     if str(vm['id']) != resource['id'] or vm['status'] != 'TERMINATED' or vm.get('description') != resource['ownership_marker']:
         raise ValueError('Owned build CPU must be observed stopped before snapshot')

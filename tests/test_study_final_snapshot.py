@@ -30,10 +30,14 @@ def fixture(tmp_path):
     state = dict(status='ACTIVE', deadline_utc='2099-01-01T00:00:00Z', closure_reserved_utc='2098-12-31T21:00:00Z',
                  independent_closure_verified=True, cloud_cutoff_usd=90,
                  cost=dict(estimated_spend_usd=12, reserved_retention_and_closure_usd=4),
-                 resources=[resource, dict(type='disk', id='2', name='owned-disk', disposable=True, ownership_marker='owned-disk')],
+                 resources=[resource, dict(type='disk', id='2', name='cloudrag-i5-restore-bootstrap01-boot', disposable=True, ownership_marker='owned-vm')],
                  build_jobs=dict(final02=dict(status=proof['status'], commit=common['commit'], vm_id='1')))
     (tmp_path/'STATE.json').write_text(json.dumps(state))
-    (tmp_path/'cpu-restoration-bootstrap01-proof.json').write_text(json.dumps(dict(status='CPU_RESTORATION_VERIFIED', synthetic=False, cpu_vm_id='1')))
+    (tmp_path/'cpu-restoration-bootstrap01-proof.json').write_text(json.dumps(dict(
+        status='CPU_RESTORATION_VERIFIED', synthetic=False, cpu_vm_id='1', zone='us-central1-a',
+        restored_disk_id='2', source_snapshot_id='retained-source', all_expected_files_verified=True,
+        image_config_verified=True, model_manifest_and_blobs_verified=True)))
+    disk['description'] = 'owned-vm'
     vm = dict(id='1', status='TERMINATED', description='owned-vm', disks=[dict(source=disk['selfLink'], autoDelete=False)])
     return proof, state, vm, disk
 
@@ -46,6 +50,33 @@ def test_complete_inputs_bind_image_source_and_cpu(tmp_path):
     proof, state, *_ = fixture(tmp_path)
     found, job, host = final_snapshot.inputs(tmp_path, 'final02')
     assert found == proof and job['vm_id'] == '1' and host['image_id'] == proof['image_id']
+
+
+def test_snapshot_uses_recorded_qualified_cpu_and_receipt_before_cloud(tmp_path):
+    _, state, vm, _ = fixture(tmp_path)
+    label = 'final03c'
+    for resource in state['resources']:
+        resource['name'] = resource['name'].replace('bootstrap01', label)
+    old = tmp_path/'cpu-restoration-bootstrap01-proof.json'
+    data = old.read_bytes()
+    old.unlink()
+    (tmp_path/('cpu-restoration-'+label+'-proof.json')).write_bytes(data)
+    state['build_jobs']['final02'].update(cpu_label=label,
+        cpu_restoration_proof_sha256=hashlib.sha256(data).hexdigest())
+    save(tmp_path, 'STATE.json', state)
+    calls = []
+    class Cloud:
+        def command(self, args, **kwargs):
+            calls.append(args)
+            return dict(vm, status='RUNNING')
+    config = dict(host_infrastructure_sha256={'scripts/study_operator/deployment.py':'d'*64})
+    with pytest.raises(ValueError, match='observed stopped'):
+        final_snapshot.preserve(tmp_path, Cloud(), 'final02', config)
+    assert calls[0][3] == 'cloudrag-i5-restore-final03c'
+    (tmp_path/('cpu-restoration-'+label+'-proof.json')).write_bytes(data+b' ')
+    with pytest.raises(ValueError, match='proof changed'):
+        final_snapshot.preserve(tmp_path, Cloud(), 'final02', config)
+    assert len(calls) == 1
 
 
 @pytest.mark.parametrize('case', ['failed', 'not-stopped', 'source', 'host-tamper', 'missing'])

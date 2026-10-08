@@ -1,4 +1,4 @@
-from scripts.study_operator.linux_build import check_commands,Guest
+from scripts.study_operator.linux_build import check_commands,Guest,host_check_code
 
 import subprocess
 import time
@@ -56,3 +56,31 @@ def test_command_timeout_kills_owned_group_and_records_exit124(tmp_path,monkeypa
     assert kills and kills[0][0] == 123
     assert receipts[0]['exit_code'] == 124 and receipts[0]['timed_out']
     assert guest.active is None
+
+
+def test_host_validation_uses_the_actual_stdlib_and_unit_without_starting_any_service(tmp_path):
+    import ast
+    code = host_check_code('/srv/cloudrag/iteration5/code-final03',tmp_path/'retained.service')
+    ast.parse(code)
+    assert 'stimulus_host.unit_text(active,1)' in code
+    assert '"torch","filelock","pydantic"' in code
+    assert 'systemd-run' not in code and 'Popen' not in code and 'query(' not in code
+
+
+def test_new_build_collector_requires_native_host_checks_before_false_pass(tmp_path,monkeypatch):
+    from test_study_cpu_build import fixture, objects
+
+    build,_,_,_,_,_=fixture(tmp_path,monkeypatch)
+    objects(tmp_path,monkeypatch,build)
+    import hashlib
+    import json
+    path = tmp_path/'cpu-build-final01-job-input.json'
+    job = json.loads(path.read_bytes())
+    proof_sha = hashlib.sha256((tmp_path/'cpu-restoration-bootstrap01-proof.json').read_bytes()).hexdigest()
+    job.update(cpu_label='bootstrap01',cpu_restoration_proof_sha256=proof_sha)
+    path.write_text(json.dumps(job))
+    build.state.update(lambda state:state['build_jobs']['final01'].update(cpu_label='bootstrap01',
+                       cpu_restoration_proof_sha256=proof_sha))
+    with pytest.raises(ValueError,match='complete zero-exit'):
+        build.collect('final01')
+    assert not (tmp_path/'linux-build-final01-download-proof.json').exists()
