@@ -202,7 +202,10 @@ def should_exclude(relative_path: Path) -> bool:
 
 
 def iter_repository_files(root: Path) -> Iterable[Path]:
-    """Yield inspectable files without following directory symlinks."""
+    """Yield regular files without following symlinks or Windows junctions."""
+
+    def is_link(path: Path) -> bool:
+        return path.is_symlink() or getattr(path, "is_junction", lambda: False)()
 
     for current, directories, filenames in os.walk(root, followlinks=False):
         current_path = Path(current)
@@ -210,11 +213,11 @@ def iter_repository_files(root: Path) -> Iterable[Path]:
         directories[:] = [
             name
             for name in directories
-            if not should_exclude(relative_dir / name)
+            if not should_exclude(relative_dir / name) and not is_link(current_path / name)
         ]
         for filename in filenames:
             path = current_path / filename
-            if not should_exclude(path.relative_to(root)):
+            if not should_exclude(path.relative_to(root)) and not is_link(path):
                 yield path
 
 

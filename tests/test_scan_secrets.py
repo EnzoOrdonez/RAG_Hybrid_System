@@ -1,5 +1,8 @@
 from pathlib import Path
 from io import StringIO
+import os
+import subprocess
+import sys
 
 import pytest
 
@@ -7,6 +10,36 @@ from scripts import scan_secrets
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_repository_scan_does_not_follow_directory_links(tmp_path, synthetic_credentials):
+    root = tmp_path / "scan-root"
+    outside = tmp_path / "outside-root"
+    root.mkdir()
+    outside.mkdir()
+    (outside / "credential.txt").write_text(
+        synthetic_credentials["github_personal_token"], encoding="utf-8"
+    )
+    link = root / "linked-directory"
+    if sys.platform == "win32":
+        result = subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(link), str(outside)],
+            capture_output=True, check=True,
+        )
+        assert result.returncode == 0
+        assert link.is_junction()
+    else:
+        link.symlink_to(outside, target_is_directory=True)
+    try:
+        assert list(scan_secrets.iter_repository_files(root)) == []
+        assert scan_secrets.scan_repository(root) == []
+    finally:
+        # Detach this one fixture link; never recursively remove its target.
+        if sys.platform == "win32":
+            os.rmdir(link)
+        else:
+            link.unlink()
+    assert (outside / "credential.txt").is_file()
 
 
 @pytest.fixture
