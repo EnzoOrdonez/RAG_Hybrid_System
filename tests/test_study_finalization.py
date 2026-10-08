@@ -45,8 +45,16 @@ class Cloud:
 def retired(plan, path):
     root = Path(plan['package'])
     assert json.loads((root/'STATE.json').read_bytes())['status'] == 'CLOSING'
-    (root/'finalization-task-retirement.json').write_text(json.dumps(
-        dict(status='OWN_TASKS_RETIRED_AND_WRITERS_QUIESCENT',remaining_python=0,tasks=['fixture-only'])))
+    receipt = dict(status='OWN_WRITERS_QUIESCENT_BACKUPS_PRESERVED',remaining_python=0,
+                   retired_tasks=['fixture-ordinary'],remaining_safety_tasks=['fixture-backup'])
+    (root/'finalization-task-retirement.json').write_text(json.dumps(receipt))
+    return receipt
+
+
+def cleanup(plan, path):
+    root, external = Path(plan['package']), Path(plan['external'])
+    assert (root/MANIFEST).exists() and (external/'seal.json').exists()
+    return dict(status='OWN_SAFETY_TASKS_RETIRED_AFTER_VERIFIED_SEAL',synthetic=True)
 
 
 def test_reserve_scope_and_actor_are_hard(tmp_path):
@@ -80,14 +88,19 @@ def test_synthetic_full_closure_and_backup_real_verifier_preserve_package(tmp_pa
     root,ext,plan = fixture(tmp_path)
     cloud = Cloud()
     outcome = finalize(plan,ext/'entry.json',cloud,quiesce=retired,
+        cleanup=cleanup,
         now=datetime(2026,10,10,tzinfo=timezone.utc))
     assert outcome['status'] == 'SEALED_AND_EXTERNALLY_VERIFIED'
-    assert json.loads((root/'STATE.json').read_bytes())['status'] == 'CLOSED_AWAITING_EXTERNAL_SEAL'
+    state = json.loads((root/'STATE.json').read_bytes())
+    assert state['status'] == 'CLOSED_AWAITING_EXTERNAL_SEAL'
+    assert state['scheduled_tasks'] == ['fixture-backup']
+    assert state['scheduled_tasks_pending_external_cleanup'] is True
+    assert outcome['external_task_cleanup']['synthetic'] is True
     text = (root/'REPORT_FINAL.md').read_text(encoding='utf-8')
     assert text.count('\n## ') == 22 and 'NO_MEDIDO' in text
     assert 'aptitud reservado' in text and 'GO' not in text
     before = {p.relative_to(root).as_posix():p.read_bytes() for p in root.rglob('*') if p.is_file()}
-    result = finalize(plan,ext/'entry.json',None,quiesce=lambda *a:pytest.fail('No replay'))
+    result = finalize(plan,ext/'entry.json',None,quiesce=lambda *a:pytest.fail('No replay'),cleanup=cleanup)
     assert result['status'] == 'SEALED_AND_EXTERNALLY_VERIFIED'
     assert before == {p.relative_to(root).as_posix():p.read_bytes() for p in root.rglob('*') if p.is_file()}
 
@@ -99,3 +112,56 @@ def test_manifest_without_external_pin_cannot_be_repaired(tmp_path):
     with pytest.raises(ValueError,match='no repin'):
         finalize(plan,ext/'entry.json',None)
     assert before == {p.name:p.read_bytes() for p in root.iterdir()}
+
+
+def test_report_failure_keeps_backup_definitions_and_still_closes_cloud(tmp_path):
+    root,ext,plan = fixture(tmp_path)
+    Path(plan['report_plan']).write_text('{}')
+    cloud = Cloud()
+    with pytest.raises(KeyError):
+        finalize(plan,ext/'entry.json',cloud,quiesce=retired,
+            cleanup=lambda *a:pytest.fail('Never retire backups before verified seal'),
+            now=datetime(2026,10,10,tzinfo=timezone.utc))
+    receipt = json.loads((root/'finalization-task-retirement.json').read_bytes())
+    assert receipt['remaining_safety_tasks'] == ['fixture-backup']
+    assert cloud.calls and not (root/MANIFEST).exists()
+
+
+def test_sealer_failure_keeps_independent_retries(tmp_path):
+    root,ext,plan = fixture(tmp_path)
+
+    def failed(*args):
+        raise OSError('fixture sealer failure')
+
+    with pytest.raises(OSError,match='sealer failure'):
+        finalize(plan,ext/'entry.json',Cloud(),quiesce=retired,sealer=failed,
+            cleanup=lambda *a:pytest.fail('Failed seal cannot retire backup'),
+            now=datetime(2026,10,10,tzinfo=timezone.utc))
+    assert json.loads((root/'STATE.json').read_bytes())['scheduled_tasks'] == ['fixture-backup']
+    assert not (root/MANIFEST).exists()
+
+
+def test_verifier_rejection_cannot_retire_independent_retries(tmp_path):
+    root,ext,plan = fixture(tmp_path)
+    result = finalize(plan,ext/'entry.json',Cloud(),quiesce=retired,
+        sealer=lambda *a:dict(status='EXTERNAL_VERIFICATION_FAILED'),
+        cleanup=lambda *a:pytest.fail('Rejected external verification keeps backups'),
+        now=datetime(2026,10,10,tzinfo=timezone.utc))
+    assert result['status'] == 'EXTERNAL_VERIFICATION_FAILED'
+    assert json.loads((root/'STATE.json').read_bytes())['scheduled_tasks'] == ['fixture-backup']
+
+
+def test_cleanup_failure_is_retried_only_externally_without_cloud_or_package_writes(tmp_path):
+    root,ext,plan = fixture(tmp_path)
+
+    def fail(*args):
+        raise RuntimeError('fixture external cleanup failure')
+
+    with pytest.raises(RuntimeError,match='external cleanup'):
+        finalize(plan,ext/'entry.json',Cloud(),quiesce=retired,cleanup=fail,
+            now=datetime(2026,10,10,tzinfo=timezone.utc))
+    before = {p.relative_to(root).as_posix():p.read_bytes() for p in root.rglob('*') if p.is_file()}
+    result = finalize(plan,ext/'entry.json',None,
+        quiesce=lambda *a:pytest.fail('No cloud or writer replay after seal'),cleanup=cleanup)
+    assert result['external_task_cleanup']['synthetic']
+    assert before == {p.relative_to(root).as_posix():p.read_bytes() for p in root.rglob('*') if p.is_file()}

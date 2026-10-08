@@ -51,12 +51,33 @@ def retire(plan, plan_path, *, invoke=subprocess.run):
     if result.returncode:
         raise RuntimeError('Own writer retirement failed; cloud safety still required')
     receipt = json.loads((root/'finalization-task-retirement.json').read_text(encoding='utf-8-sig'))
-    if receipt['status'] != 'OWN_TASKS_RETIRED_AND_WRITERS_QUIESCENT' or receipt['remaining_python'] != 0:
+    if (receipt['status'] != 'OWN_WRITERS_QUIESCENT_BACKUPS_PRESERVED' or receipt['remaining_python'] != 0
+            or not isinstance(receipt['remaining_safety_tasks'], list)):
         raise ValueError('Quiescence not proven')
     return receipt
 
 
-def finalize(plan, plan_path, cloud, *, quiesce=retire, sealer=seal, now=None):
+def retire_safety(plan, plan_path, *, invoke=subprocess.run):
+    """Only after external verification; retries never modify sealed evidence."""
+    root, external = external_paths(plan)
+    stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+    output = external/('safety-retirement-'+stamp+'.json')
+    runtime = external/('safety-retirement-runtime-'+stamp+'.json')
+    atomic_json(runtime, dict(plan, coordinator_pid=os.getpid(), retirement_receipt=str(output),
+                             entry_plan=str(plan_path)))
+    result = invoke(['powershell', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File',
+        str(Path(plan['app'])/'scripts/study_operator/retire_own_tasks.ps1'), '-Plan', str(runtime),
+        '-SealedCleanup'], capture_output=True, timeout=90)
+    if result.returncode:
+        raise RuntimeError('External safety retirement pending; sealed package stays read-only')
+    receipt = json.loads(output.read_text(encoding='utf-8-sig'))
+    if (receipt['status'] != 'OWN_SAFETY_TASKS_RETIRED_AFTER_VERIFIED_SEAL'
+            or receipt['sealed_package_not_modified'] is not True):
+        raise ValueError('External task cleanup not verified')
+    return dict(status=receipt['status'], receipt=str(output))
+
+
+def finalize(plan, plan_path, cloud, *, quiesce=retire, sealer=seal, cleanup=retire_safety, now=None):
     root, external = external_paths(plan)
     external.mkdir(exist_ok=True)
     seal_receipt = external/'seal.json'
@@ -66,7 +87,10 @@ def finalize(plan, plan_path, cloud, *, quiesce=retire, sealer=seal, now=None):
         if not seal_receipt.exists():
             raise ValueError('Existing manifest lacks external pin; no repin or repair')
         retry = external/('read-only-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'.json')
-        return verify_existing(root, retry, verifier, seal_receipt)
+        result = verify_existing(root, retry, verifier, seal_receipt)
+        if result['status'] == 'SEALED_AND_EXTERNALLY_VERIFIED':
+            result['external_task_cleanup'] = cleanup(plan, plan_path)
+        return result
     state_path = root/'STATE.json'
     state = json.loads(state_path.read_bytes())
     admitted(state, now or datetime.now(timezone.utc))
@@ -75,7 +99,7 @@ def finalize(plan, plan_path, cloud, *, quiesce=retire, sealer=seal, now=None):
     started, begin = utc(), time.monotonic()
     retire_error = None
     try:
-        quiesce(plan, plan_path)
+        retirement = quiesce(plan, plan_path)
     except Exception as exc:
         retire_error = type(exc).__name__
     safety = close(root, cloud)
@@ -90,7 +114,7 @@ def finalize(plan, plan_path, cloud, *, quiesce=retire, sealer=seal, now=None):
         safety_receipt=Path(json.loads(state_path.read_bytes())['safety_receipt']).name)
     atomic_json(root/'finalization-pre-seal-receipt.json', receipt)
     add(root, [dict(key='independent_finalization_safety', certainty='VERIFICADO',
-        statement='El cierre independiente verificó VM propias TERMINATED y retiró tareas propias sin cerrar aplicaciones de Enzo. Esto demuestra cierre seguro, no aceptación del estímulo, smoke, compuerta ni aptitud para participantes.',
+        statement='El cierre independiente verificó VM propias TERMINATED y quiescencia de escritores, y retiró trabajos ordinarios sin cerrar aplicaciones de Enzo. Conservó tareas de respaldo hasta verificar el sello; su retiro final se documenta fuera del paquete. Esto no demuestra aceptación del estímulo, smoke, compuerta ni aptitud para participantes.',
         evidence=['finalization-task-retirement.json', receipt['safety_receipt'], 'finalization-pre-seal-receipt.json'],
         command_receipts=['finalization-pre-seal-receipt.json'])])
     claims = json.loads((root/'claims.json').read_bytes())
@@ -109,16 +133,21 @@ def finalize(plan, plan_path, cloud, *, quiesce=retire, sealer=seal, now=None):
     atomic_json(root/'finalization-time-census.json', census(rows))
     current = json.loads(state_path.read_bytes())
     current.update(status='CLOSED_AWAITING_EXTERNAL_SEAL', phase=6, updated_utc=utc(),
-        scheduled_tasks=[], next_action='Read external seal receipt; independent audit and ethical approval pending',
+        scheduled_tasks=retirement['remaining_safety_tasks'],
+        scheduled_tasks_pending_external_cleanup=True,
+        next_action='Read external seal and task cleanup receipts; independent audit and ethical approval pending',
         finalization=dict(preseal_receipt='finalization-pre-seal-receipt.json', prior_claims=len(before),
             aptitude_not_decided=True, report='REPORT_FINAL.md'))
     atomic_json(state_path, current)
     (root/'HANDOVER.md').write_text('# Cierre\n\n'+json.dumps(current, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     with (root/'RUN_LOG.md').open('a', encoding='utf-8') as stream:
-        stream.write(utc()+' | '+state['agent']+' | '+state['model']+' | Pre-sello: tareas propias retiradas; recursos detenidos. Consultar recibo externo.\n')
+        stream.write(utc()+' | '+state['agent']+' | '+state['model']+' | Pre-sello: trabajos ordinarios retirados; recursos detenidos; respaldos conservados hasta verificar sello. Consultar recibos externos.\n')
     # No package write after this line, including errors or second invocation.
     verifier.write_bytes(Path(package_verify.__file__).read_bytes())
-    return sealer(root, seal_receipt, verifier)
+    result = sealer(root, seal_receipt, verifier)
+    if result['status'] == 'SEALED_AND_EXTERNALLY_VERIFIED':
+        result['external_task_cleanup'] = cleanup(plan, plan_path)
+    return result
 
 
 def main(argv=None):
