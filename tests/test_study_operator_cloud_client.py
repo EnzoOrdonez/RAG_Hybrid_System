@@ -131,3 +131,17 @@ def test_timeout_partial_output_is_preserved_only_for_public_commands(tmp_path, 
     else:
         assert (tmp_path/'0001.stdout').read_bytes() == b'PUBLIC_OR_PRIVATE_SENTINEL'
         assert (tmp_path/'0001.stderr').read_bytes() == b'TRANSPORT_FAILURE_DETAIL'
+
+
+def test_failed_command_keeps_only_allowlisted_error_categories(tmp_path):
+    private = b'ERROR ConnectionError: PRIVATE_SENTINEL@example.org Bearer ya29.PRIVATE_SENTINEL https://private/ 203.0.113.42 HTTPError 503'
+    cloud = Cloud('fixture-sdk', 'pure-loop-474323-a8', tmp_path,
+        invoke=lambda argv, **kwargs: subprocess.CompletedProcess(argv, 1, b'', private))
+    with pytest.raises(OperatorError):
+        cloud.command(['compute', 'instances', 'list'])
+    receipt = json.loads((tmp_path/'0001-receipt.json').read_bytes())
+    assert receipt['error_categories'] == ['ConnectionError']
+    assert receipt['http_error_statuses'] == [503]
+    assert receipt['private_error_message_not_persisted'] is True
+    assert all('PRIVATE_SENTINEL' not in path.read_text() and '203.0.113.42' not in path.read_text()
+               for path in tmp_path.iterdir() if path.is_file())

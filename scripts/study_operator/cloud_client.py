@@ -13,6 +13,20 @@ from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.region_scope import US_L4_ZONES
 
 
+def error_categories(stderr):
+    """Keep allowlisted technical classifications, never private error messages."""
+    names = ('ConnectionError', 'ConnectionResetError', 'RemoteDisconnected', 'SSLError',
+             'ReadTimeout', 'ConnectTimeout', 'ProxyError', 'TimeoutError', 'JSONDecodeError',
+             'INVALID_ARGUMENT', 'PERMISSION_DENIED', 'UNAUTHENTICATED', 'QUOTA_EXCEEDED',
+             'RESOURCE_EXHAUSTED', 'NOT_FOUND', 'UNAVAILABLE', 'INTERNAL')
+    categories = [name for name in names if re.search(rb'\b'+name.encode()+rb'\b', stderr)]
+    if re.search(rb'\b(?:unrecognized arguments|Invalid choice|expected one argument)\b', stderr, re.I):
+        categories.append('SDK_ARGUMENT_ERROR')
+    http_statuses = sorted({int(value) for value in re.findall(rb'\bHTTPError[ :]+([45][0-9]{2})\b', stderr)})
+    return dict(error_categories=categories, http_error_statuses=http_statuses,
+                private_error_message_not_persisted=True)
+
+
 class Cloud:
     def __init__(self, sdk, project, run_root, *, invoke=subprocess.run):
         if project != 'pure-loop-474323-a8':
@@ -119,6 +133,8 @@ class Cloud:
             duration_s=time.monotonic()-began, exit_code=result.returncode,
             stdout_sha256=hashlib.sha256(stdout).hexdigest(), stderr_sha256=hashlib.sha256(stderr).hexdigest(),
             private_output_not_persisted=private_output, transport=transport)
+        if result.returncode:
+            receipt.update(error_categories(stderr))
         if (result.returncode and len(arguments) > 2 and arguments[:2] == ['compute', 'instances']
                 and arguments[2] in {'start', 'create'}):
             match = re.search(rb'\b(ZONE_RESOURCE_POOL_EXHAUSTED(?:_WITH_DETAILS)?)\b', stderr)
