@@ -24,6 +24,7 @@ def failed_disk_plan(inventory, state, intent, proof, job):
             or proof.get('source', {}).get('files') != 19 or proof.get('artifacts', {}).get('files') != 79
             or not all(proof.get(k) for k in ('all_expected_files_verified', 'image_config_verified', 'model_manifest_and_blobs_verified'))
             or proof.get('runtime_user_pair', {}).get('status') != 'PAIRED_RUNTIME_USER_SUPPORTED'
+            or not proof.get('cpu_vm_id') or not proof.get('restored_disk_id')
             or intent['source_snapshot_id'] != snapshot_id):
         raise ValueError('Verified final-image restoration required before disposal')
     snapshots = [r for r in rows['snapshots'] if str(r['id']) == snapshot_id]
@@ -49,6 +50,7 @@ def failed_disk_plan(inventory, state, intent, proof, job):
     if str(disk['id']) in {*protected.values(), snapshot_id}:
         raise ValueError('Protected resource cannot be disposed')
     return dict(status='PLANNED_NOT_DELETED', preserved_ids=protected, qualified_snapshot_id=snapshot_id,
+        cpu_vm_id=proof['cpu_vm_id'], restored_disk_id=proof['restored_disk_id'],
         listing_sha256=inventory['listing_sha256'], restoration_receipt_sha256=digest(proof),
         owned_resource_markers={str(disk['id']): intent['ownership_marker']},
         removals=[dict(disk, resource_kind='disks')], failed_cause_not_reclassified=True,
