@@ -12,13 +12,15 @@ from scripts.study_operator.run_control import require_limited
 ROOT = Path('C:/CloudRAG/operator-iteration5')
 
 
-def install(root, archive_bytes, wrapper, config, *, source_commit):
-    root = Path(root)
+def authorized_root(root):
+    root = Path(root).absolute()
     if (root.name != 'operator-iteration5' or root.resolve() != root.absolute()
             or any(p.is_symlink() or p.is_junction() for p in (root, *root.parents))):
         raise ValueError('Only the new operator5 destination is authorized')
-    if config.get('project') != 'pure-loop-474323-a8' or not Path(config['python']).is_file():
-        raise ValueError('Project and existing project Python required')
+    return root
+
+
+def prepared_archive(archive_bytes):
     prepared = {}
     with tarfile.open(fileobj=io.BytesIO(archive_bytes)) as archive:
         for member in archive.getmembers():
@@ -33,6 +35,14 @@ def install(root, archive_bytes, wrapper, config, *, source_commit):
             prepared[member.name] = archive.extractfile(member).read()
     if 'scripts/study_operator/cli.py' not in prepared or 'src/ui/components/session_storage.py' not in prepared:
         raise ValueError('Owner dependency bundle incomplete')
+    return prepared
+
+
+def install(root, archive_bytes, wrapper, config, *, source_commit):
+    root = authorized_root(root)
+    if config.get('project') != 'pure-loop-474323-a8' or not Path(config['python']).is_file():
+        raise ValueError('Project and existing project Python required')
+    prepared = prepared_archive(archive_bytes)
     files = {name: hashlib.sha256(content).hexdigest() for name, content in prepared.items()}
     marker = dict(schema_version=1, source_commit=source_commit, files=files,
                   wrapper_sha256=hashlib.sha256(wrapper).hexdigest(),
