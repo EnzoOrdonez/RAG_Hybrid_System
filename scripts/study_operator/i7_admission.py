@@ -31,6 +31,30 @@ def compare_contexts(live,reference):
     return sha(live)
 
 
+def validate_gate_receipt(value,identity,software, *, source_sha,pin_sha):
+    try:
+        publication,smoke,stimulus=(value[k] for k in ('publication','smoke','stimulus'))
+        if (value['measurement_identity']!=identity
+                or publication['status']!='PUBLISHED_ANNEX_AND_CONTEXTS_VERIFIED'
+                or publication['software_sha256']!=software or publication['combinations']!=12
+                or smoke['status']!='BROWSER_EXPORT_VERIFIED' or smoke['local_validation'] is not False
+                or smoke['identity']['boot_id']==identity['boot_id']
+                or any(smoke['identity'][k]!=identity[k] for k in ('image_id','source_commit'))
+                or smoke['attempts']!=8 or smoke['instruments']!=2
+                or smoke['automator']['source_sha256']!=source_sha or smoke['automator']['pin_sha256']!=pin_sha
+                or stimulus['status']!='ACCEPTED' or stimulus['synthetic'] is not False
+                or (stimulus['boots'],stimulus['targets'],stimulus['calls'])!=(12,120,144)
+                or stimulus['software_sha256']!=software):
+            raise ValueError('GATE_PREREQUISITE_BINDING_DIFFERS')
+        for digest in (publication['contexts_sha256'],publication['anchor_sha256'],smoke['export_sha256'],
+                       stimulus['proofs_sha256']):
+            if not re.fullmatch('[a-f0-9]{64}',digest):
+                raise ValueError('GATE_PREREQUISITE_HASH_REQUIRED')
+    except (KeyError,TypeError) as error:
+        raise ValueError('ENZO_PUBLISHED_ANNEX_AND_VALIDATED_PREREQUISITES_REQUIRED') from error
+    return sha(value)
+
+
 def validate(anchor, *, software_sha256, live, reference, git=git_read):
     commit=anchor['commit']
     if not re.fullmatch('[a-f0-9]{40}',commit):
@@ -44,13 +68,20 @@ def validate(anchor, *, software_sha256, live, reference, git=git_read):
         raise ValueError('PUBLIC_ANNEX_PATH_REQUIRED')
     if set(anchor['files'])!=set(REQUIRED)|{annex}:
         raise ValueError('ALL_OBSERVER_ANCHORS_REQUIRED')
-    if git('diff','--name-only',anchor['source_commit'],commit,'--','src','scripts','config'):
+    differences=git('diff','--name-only',anchor['source_commit'],commit)
+    differences=differences.decode() if isinstance(differences,bytes) else differences
+    if any(not path.startswith(('docs/','output/audit/')) for path in differences.splitlines()):
         raise ValueError('PUBLISHED_CODE_DIFFERS_FROM_IMAGE')
     for name,expected in anchor['files'].items():
         data=git('show',commit+':'+name)
         data=data.encode() if isinstance(data,str) else data
         if hashlib.sha256(data).hexdigest()!=expected:
             raise ValueError('PUBLISHED_ANNEX_FILE_HASH_DIFFERS')
+        if name in REQUIRED:
+            original=git('show',anchor['source_commit']+':'+name)
+            original=original.encode() if isinstance(original,str) else original
+            if hashlib.sha256(original).hexdigest()!=expected:
+                raise ValueError('IMAGE_OBSERVER_OR_PREREGISTRATION_CHANGED')
     if anchor['software_sha256']!=software_sha256:
         raise ValueError('ANNEX_EFFECTIVE_ENVIRONMENT_DIFFERS')
     context_hash=compare_contexts(live,reference)
@@ -148,7 +179,9 @@ def main(argv=None):
     if args.draft:
         path=Path(__file__).resolve().parents[2]/args.annex
         path.parent.mkdir(parents=True,exist_ok=True)
+        config=json.loads((args.root/'installation.json').read_bytes())
         text=('# Anexo efectivo I7\n\n'
+            +'Zona: '+config['zone']+'. Máquina: '+config['machine_type']+'. Una L4.\n\n'
             +'Imagen: '+proof['inventory']['image']['image_id']+'\n\n'
             +'Commit de fuente: '+proof['inventory']['source']['commit']+'\n\n'
             +'SHA-256 de software: '+software+'\n\n'

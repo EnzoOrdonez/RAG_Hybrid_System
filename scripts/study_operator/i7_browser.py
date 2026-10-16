@@ -57,7 +57,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                     transport['websocket_ip'] |= ip in values.get('user-agent','')
                     transport['websocket_user_agent'] |= values.get('user-agent')==wire_ua
                 cdp.on('Network.webSocketWillSendHandshakeRequest',handshake)
-            page.set_default_timeout(20000)
+            page.set_default_timeout(20000 if local_test else 600000)
             sockets=[]
             page.on('websocket',lambda ws:sockets.append(ws.url))
             def snapshot():
@@ -74,7 +74,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                     raise ValueError('BROWSER_BOOT_IDENTITY_DIFFERS')
                 return result
             def wait(predicate):
-                end=time.monotonic()+25
+                end=time.monotonic()+(25 if local_test else 600)
                 while time.monotonic()<end:
                     result=snapshot()
                     if result.get('data') and predicate(result['data']):
@@ -86,7 +86,8 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                     raise ValueError('APP_VALUE_NOT_REGISTERED')
                 confirmations.append(sha(expected))
             def click(label):
-                page.get_by_role('button',name=label,exact=True).click()
+                timeout=900000 if label=='Probar consulta' and not local_test else None
+                page.get_by_role('button',name=label,exact=True).click(timeout=timeout)
             def text(label,value):
                 control=page.get_by_label(label,exact=True)
                 control.fill(value)
@@ -155,7 +156,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
             final=wait(lambda d:d['stage']=='complete')
             confirm(final['data']['blinding']['choice'],choice)
             confirm(final['data']['blinding']['reason'],reason)
-            deadline=time.monotonic()+25
+            deadline=time.monotonic()+(25 if local_test else 600)
             while 'export_base64' not in final:
                 if time.monotonic()>=deadline:
                     raise ValueError('BROWSER_EXPORT_NOT_BACKED_UP')

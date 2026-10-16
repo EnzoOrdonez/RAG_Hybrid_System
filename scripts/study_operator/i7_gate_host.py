@@ -248,6 +248,7 @@ class GateHost(HostCollection):
             result = collect(channel,self,run)
             self.host.update(status='COMPLETE', ended=self.clock(), calls=run.calls)
             proof = {'inventory': inventory,'software_sha256': software,'tasks': tasks,'rows': run.rows,
+                         'prerequisites_sha256':sha(json.loads((self.root/'prerequisites.json').read_bytes())),
                          'preparation_events':prepared['preparation_events'],
                          'host_evidence': self.host,'host_admission_sha256': admission_sha,'result': result}
             verify(proof)

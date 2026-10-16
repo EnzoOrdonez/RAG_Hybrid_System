@@ -14,20 +14,21 @@ def test_gate_profile_does_not_extend_cold_trials():
 def test_runbook_steps_have_one_executable_entrypoint_and_dependencies():
     result = validate_steps()
     assert result['status'] == 'LOCAL_RUNBOOK_PARTIAL'
-    assert len(result['blockers'])==2
+    assert {row['owner'] for row in result['blockers']}=={'code','Enzo'}
     assert result['steps'] >= 9
 
 
-def test_incomplete_prerequisites_block_gate_before_any_cloud_call():
+def test_incomplete_prerequisites_block_gate_before_any_cloud_call(tmp_path):
     from scripts.study_operator.i7_phase_b import gate
     from scripts.study_operator.i7_gate_guest import dispatch_gate
     class Owner:
+        root=tmp_path
         def __getattr__(self,name):
             pytest.fail('No owner/cloud effect while prerequisites are absent')
-    with pytest.raises(ValueError,match='BROWSER_AUTOMATOR'):
+    with pytest.raises(ValueError,match='ENZO_PUBLISHED'):
         gate(Owner())
     active={'boot_root':'unused','config':{'purpose':'technical'}}
-    with pytest.raises(ValueError,match='PREREQUISITES'):
+    with pytest.raises(ValueError,match='ENZO_PUBLISHED'):
         dispatch_gate(active,{'operation':'gate-start'},execute=Owner(),controller=Owner(),maintenance=Owner())
 
 
@@ -110,3 +111,19 @@ def test_gpu_restore_checks_snapshot_before_allocating_capacity(tmp_path):
             pytest.fail('No reservation before source snapshot readback')
     with pytest.raises(ValueError,match='SNAPSHOT_CHANGED'):
         gpu_restore(Operator())
+
+
+def test_close_before_gpu_allocation_never_targets_placeholder(tmp_path,monkeypatch):
+    from scripts.study_operator.i7_workflows import dispatch
+    from scripts.study_operator import i7_cpu_pipeline
+    class Owner:
+        config={'primary_vm':{'id':'0'}}
+        state={}
+        def stop(self):
+            pytest.fail('Do not stop unallocated GPU identity')
+        def guard(self):
+            pytest.fail('Do not guard nonexistent reservation')
+    monkeypatch.setattr(i7_cpu_pipeline,'cleanup_cpu',lambda owner:{'status':'NO_QUALIFIED_CPU_CLEANUP_PLAN'})
+    assert dispatch(Owner(),'close')['status']=='CLOSED'
+    Owner.state={'creation_intents':[{'status':'UNKNOWN'}]}
+    assert dispatch(Owner(),'close')['status']=='BLOCKED_UNKNOWN_RESOURCE'

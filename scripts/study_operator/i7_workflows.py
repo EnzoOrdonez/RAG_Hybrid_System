@@ -36,7 +36,9 @@ def verify_tool_source(operator):
     source = Path(__file__).resolve().parents[2]
     head = subprocess.check_output(['git','-C',str(source),'rev-parse','HEAD'],text=True).strip()
     if head != operator.config['commit']:
-        raise ValueError('OPERATOR_SOURCE_COMMIT_DIFFERS')
+        changed=subprocess.check_output(['git','-C',str(source),'diff','--name-only',operator.config['commit'],head],text=True)
+        if any(not name.startswith(('docs/','output/audit/')) for name in changed.splitlines()):
+            raise ValueError('OPERATOR_SOURCE_COMMIT_DIFFERS')
     modified = subprocess.run(['git','-C',str(source),'status','--porcelain','--untracked-files=all',
                                '--','scripts','src','config'],
                                check=False,capture_output=True,timeout=60)
@@ -182,10 +184,17 @@ def dispatch(operator, operation):
     if operation == 'privacy':
         return privacy(operator)
     if operation == 'close':
-        stopped = operator.stop()
-        deleted = operator.guard() if not operator.state['reservation'].get('deleted_verified') else {
-            'status':'PRIOR_RESERVATION_CLOSURE_RECORDED'}
+        stopped = operator.stop() if operator.config['primary_vm']['id']!='0' else {'status':'GPU_NOT_ALLOCATED'}
+        reservation=operator.state.get('reservation')
+        deleted = operator.guard() if reservation and not reservation.get('deleted_verified') else {
+            'status':'PRIOR_RESERVATION_CLOSURE_RECORDED' if reservation else 'NO_RECORDED_RESERVATION'}
         from scripts.study_operator.i7_cpu_pipeline import cleanup_cpu
         cleaned = cleanup_cpu(operator)
-        return {'status':'CLOSED','vm':stopped,'reservation':deleted,'cpu_cleanup':cleaned}
+        unresolved=operator.state.get('reservation_intent') or any(
+            row['status']=='UNKNOWN' for row in operator.state.get('creation_intents',[]))
+        cpu_state=Path(operator.root)/'cpu'/'STATE.json' if hasattr(operator,'root') else None
+        partial_cpu=bool(cpu_state and cpu_state.exists() and json.loads(cpu_state.read_bytes()).get('resources')
+                         and cleaned['status']=='NO_QUALIFIED_CPU_CLEANUP_PLAN')
+        status='BLOCKED_UNKNOWN_RESOURCE' if unresolved else 'BLOCKED_CPU_CLOSURE_REVIEW' if partial_cpu else 'CLOSED'
+        return {'status':status,'vm':stopped,'reservation':deleted,'cpu_cleanup':cleaned}
     raise ValueError('UNKNOWN_I7_WORKFLOW')

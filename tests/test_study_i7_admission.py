@@ -31,7 +31,7 @@ def test_admission_checks_publication_hashes_and_twelve_contexts(tmp_path):
     assert result['combinations']==12
 
 
-@pytest.mark.parametrize('fault',['unpublished','hash','context','missing','software','code'])
+@pytest.mark.parametrize('fault',['unpublished','hash','context','missing','software','code','protected_document'])
 def test_admission_rejects_missing_or_changed_evidence(tmp_path,fault):
     from scripts.study_operator.i7_admission import validate
     anchor,contexts,git=fixture(tmp_path)
@@ -50,6 +50,8 @@ def test_admission_rejects_missing_or_changed_evidence(tmp_path,fault):
             return 'd'*40+'\trefs/heads/fix/interview-readiness'
         if fault=='code' and args[0]=='diff':
             return b'scripts/changed.py'
+        if fault=='protected_document' and args[0]=='show' and args[1].startswith('b'*40+':docs/'):
+            return b'changed original protected document'
         return original(*args)
     with pytest.raises(ValueError):
         validate(anchor,software_sha256='c'*64,live=live,reference=contexts,git=altered)

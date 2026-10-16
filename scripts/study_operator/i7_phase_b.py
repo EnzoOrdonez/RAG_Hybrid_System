@@ -1,13 +1,14 @@
 """One owner entrypoint per November step; --check is local and never pays."""
 import argparse
+import hashlib
 import importlib.util
 import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-STEPS = ('cpu-build','gpu-restore','ready','tls-three','smoke','restore','privacy',
-         'withdraw-purge','stimulus','gate','close')
+STEPS = ('cpu-build','gpu-restore','ready','tls-three','contexts','smoke','restore','privacy',
+         'withdraw-purge','stimulus','gate','technical-cycle','reconcile','close')
 
 
 def profile(kind):
@@ -17,14 +18,13 @@ def profile(kind):
             'native_stop_s':10800}
 
 
-def validate_steps():
+def validate_steps(evidence=None, *, root=None,november_authorized=False):
     for module in ('i7','i7_gate_host','i7_restore','i7_privacy','cpu_build','build_context',
-                   'i7_service_disk','i7_cpu_pipeline','i7_smoke'):
+                   'i7_service_disk','i7_cpu_pipeline','i7_smoke','i7_admission','i7_technical','i7_reconcile','i7_costs'):
         if importlib.util.find_spec('scripts.study_operator.'+module) is None:
             raise ValueError('RUNBOOK_MODULE_MISSING')
-    return {'status':'LOCAL_RUNBOOK_PARTIAL','steps':len(STEPS),'cloud_measured':False,
-            'blockers':['VALIDATED_BROWSER_AUTOMATOR_NOT_INTEGRATED',
-                        'PUBLISHED_ENVIRONMENT_ANNEX_ADMISSION_NOT_INTEGRATED']}
+    from scripts.study_operator.i7_readiness import evaluate
+    return dict(evaluate(evidence,root=root,november_authorized=november_authorized),steps=len(STEPS))
 
 
 def switch_profile(operator, kind):
@@ -39,13 +39,17 @@ def switch_profile(operator, kind):
 
 
 def gate(operator):
-    # No validated HTTPS automator is integrated yet. A manual complete export
-    # does not meet the published amendment. Never silently substitute it.
-    raise ValueError('BLOCKED_VALIDATED_BROWSER_AUTOMATOR_NOT_INTEGRATED')
+    from scripts.study_operator.i7_admission import check_files
+    from scripts.study_operator.i7_smoke import validate_receipt
+    try:
+        publication=check_files(operator.root)
+    except (OSError,KeyError,ValueError) as error:
+        raise ValueError('ENZO_PUBLISHED_EFFECTIVE_ANNEX_REQUIRED') from error
+    validate_receipt(operator.root/'browser-validation.json')
+    return _gate_after_prerequisites(operator,publication)
 
 
-def _gate_after_prerequisites(operator):
-    """Not exposed by CLI until the missing published prerequisites are wired."""
+def _gate_after_prerequisites(operator,publication):
     acceptance = json.loads((operator.root/'stimulus-acceptance.json').read_bytes())
     if acceptance['status'] != 'ACCEPTED':
         raise ValueError('I7_STIMULUS_ACCEPTED_REQUIRED')
@@ -53,9 +57,23 @@ def _gate_after_prerequisites(operator):
     from src.ui.components.study_protocol import verify_draw
     proofs=[json.loads(p.read_bytes()) for p in
             (operator.root/'private'/'stimulus'/'coded-P999').glob('*.json')]
+    verified=accept(proofs,verify_draw(operator.config['local_reviewed_config'])['config'])
     if (any(p['inventory']['image']['image_id'] != operator.config['image_id'] for p in proofs)
-            or accept(proofs,verify_draw(operator.config['local_reviewed_config'])['config'])['status'] != 'ACCEPTED'):
+            or verified['status'] != 'ACCEPTED' or verified['software_sha256']!=publication['software_sha256']):
         raise ValueError('CURRENT_IMAGE_STIMULUS_REQUIRED')
+    from scripts.study_operator.i7_admission import compare_contexts
+    from scripts.study_operator.stimulus_host_evidence import sha
+    contexts={}
+    for proof in proofs:
+        for row in proof['rows']:
+            if row['slot']['role']!='target':
+                continue
+            key=row['slot']['query_id']+'|'+row['slot']['condition']
+            if key in contexts and contexts[key]!=row['contexts']:
+                raise ValueError('STIMULUS_CONTEXT_VARIANTS_FORBIDDEN')
+            contexts[key]=row['contexts']
+    reference=json.loads(Path(operator.config['i3_context_reference_path']).read_bytes())['rag']['contexts']
+    compare_contexts(contexts,reference)
     attempt=operator.root/'gate-cohort-intent.json'
     with attempt.open('x',encoding='utf-8') as stream:
         json.dump({'started_utc':operator.now().isoformat(),'replay_allowed':False},stream)
@@ -66,13 +84,26 @@ def _gate_after_prerequisites(operator):
         # The preregistered full smoke follows the twelve complete cold trials.
         from scripts.study_operator.i7_smoke import run
         switch_profile(operator,'smoke')
-        run(operator)
+        smoke=run(operator)
         restore_latest(operator)
         withdraw_purge(operator)
         switch_profile(operator,'gate')
         operator.start()
         wait_ready(operator)
-        result = operator.bridge({'operation':'gate-start'},private=True)
+        identity={'boot_id':operator.state['ready']['boot_id'],'image_id':operator.config['image_id'],
+                  'source_commit':operator.config['commit']}
+        admission={'measurement_identity':identity,'publication':publication,'smoke':smoke,
+            'stimulus':{'status':'ACCEPTED','synthetic':False,'boots':len(proofs),'targets':120,
+                'calls':sum(len(p['rows']) for p in proofs),'software_sha256':verified['software_sha256'],
+                'proofs_sha256':sha(proofs)}}
+        from scripts.study_operator.i7_admission import validate_gate_receipt
+        from scripts.study_operator.i7_browser import PIN
+        digest=validate_gate_receipt(admission,identity,publication['software_sha256'],
+            source_sha=hashlib.sha256(Path(__file__).with_name('i7_browser.py').read_bytes()).hexdigest(),
+            pin_sha=hashlib.sha256(PIN.read_bytes()).hexdigest())
+        operator.state['gate_admission_sha256']=digest
+        operator.persist()
+        result = operator.bridge({'operation':'gate-start','admission':admission},private=True)
         if result.get('status') != 'GATE_STARTED_NOT_GO':
             raise ValueError('GATE_START_UNCONFIRMED')
         deadline = time.monotonic()+9000
@@ -153,6 +184,27 @@ def dispatch(operator, step, spec):
     if step == 'ready':
         from scripts.study_operator.i7_workflows import wait_ready
         return wait_ready(operator)
+    if step=='contexts':
+        from scripts.study_operator.i7_workflows import wait_ready
+        operator.stop()
+        operator.start()
+        try:
+            wait_ready(operator)
+            operator.maintenance()
+            proof=operator.bridge({'operation':'i7-contexts'},private=True,timeout=900)
+            if proof['mode']!='LIVE_NO_GENERATION' or proof['inventory']['image']['image_id']!=operator.config['image_id']:
+                raise ValueError('LIVE_CURRENT_CONTEXT_PROOF_REQUIRED')
+            with (operator.root/'live-contexts.json').open('x',encoding='utf-8') as stream:
+                json.dump(proof,stream,ensure_ascii=False,sort_keys=True)
+            return operator.receipt('contexts',{'status':'TWELVE_CONTEXTS_COLLECTED_NOT_PUBLISHED'})
+        finally:
+            operator.stop()
+    if step=='technical-cycle':
+        from scripts.study_operator.i7_technical import cleanup
+        return cleanup(operator)
+    if step=='reconcile':
+        from scripts.study_operator.i7_reconcile import reconcile
+        return reconcile(operator)
     if step == 'tls-three':
         return tls(operator)
     if step == 'gate':
@@ -185,14 +237,20 @@ def main(argv=None):
     parser.add_argument('--spec',type=Path)
     parser.add_argument('--live',action='store_true')
     parser.add_argument('--check',action='store_true')
+    parser.add_argument('--evidence',type=Path)
     parser.add_argument('step',nargs='?',choices=STEPS)
     args = parser.parse_args(argv)
     if args.check:
-        print(json.dumps(validate_steps()))
+        print(json.dumps(validate_steps(args.evidence,root=args.root,
+            november_authorized=args.live and datetime.now(timezone.utc)>=datetime(2026,11,1,tzinfo=timezone.utc))))
         return 0
     if (not args.live or not args.root or not args.sdk or not args.step
             or datetime.now(timezone.utc) < datetime(2026,11,1,tzinfo=timezone.utc)):
         parser.error('Explicit --live, root, SDK and November authorization required')
+    if args.step not in ('close','reconcile','technical-cycle'):
+        from scripts.study_operator.i7_readiness import evaluate
+        if any(row['owner']=='code' for row in evaluate(args.evidence,november_authorized=True)['blockers']):
+            parser.error('Current source-bound Windows/Linux/I7 verification receipt required')
     from filelock import FileLock
 
     from scripts.study_operator.cloud_client import Cloud

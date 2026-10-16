@@ -306,6 +306,8 @@ class Operator(LegacyOperator):
         else:
             from scripts.study_operator.i7_gate_host import verify
             verified = verify(proof)
+            if not self.state.get('gate_admission_sha256') or proof.get('prerequisites_sha256')!=self.state['gate_admission_sha256']:
+                raise ValueError('MEASURED_GATE_PREREQUISITES_DIFFERS')
         boot = proof['inventory']['observed']['boot_id']
         if not re.fullmatch('[a-f0-9-]{36}',boot):
             raise ValueError('BOOT_ID_REQUIRED')
@@ -387,11 +389,14 @@ def main(argv=None):
             elif args.operation=='technical-cycle':
                 from scripts.study_operator.i7_technical import cleanup
                 result=cleanup(operator)
+            elif args.operation=='gate-start':
+                from scripts.study_operator.i7_phase_b import gate
+                result=gate(operator)
             elif args.operation in {'start','preflight','stop','guard','status','reconcile'}:
                 result = getattr(operator,args.operation)()
             elif args.operation == 'collect':
                 result = operator.collect(args.kind)
-            elif args.operation in {'gate-start','stimulus-start'}:
+            elif args.operation=='stimulus-start':
                 operator.preflight()
                 request = {'operation':args.operation}
                 if args.operation == 'stimulus-start':

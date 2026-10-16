@@ -1,5 +1,6 @@
 """Allowlisted owner RPC for a single terminal I7 gate cohort."""
 import json
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -13,23 +14,32 @@ from scripts.study_operator.stimulus_host_evidence import sha
 
 def dispatch_gate(active, request, *, execute, controller, maintenance,
                   now=lambda: datetime.now(timezone.utc)):
-    root = Path(active['boot_root'])
-    root/'i7-gate'
     op = request['operation']
     if active['config']['purpose'] != 'technical':
         raise ValueError('TECHNICAL_GATE_ONLY')
-    if op == 'gate-start' and set(request) == {'operation'}:
-        raise ValueError('BLOCKED_BROWSER_AUTOMATOR_AND_PUBLISHED_ANNEX_PREREQUISITES')
+    if op=='gate-start':
+        if set(request)!={'operation','admission'}:
+            raise ValueError('ENZO_PUBLISHED_EFFECTIVE_ANNEX_REQUIRED')
+        from scripts.study_operator.i7_admission import validate_gate_receipt
+        from scripts.study_operator.stimulus_evidence import software_projection
+        root=Path(active['boot_root'])
+        inventory=json.loads((root/'meta'/'environment_identity.json').read_bytes())
+        identity={'boot_id':active['boot_id'],'image_id':active['config']['image_id'],
+                  'source_commit':active['config']['commit']}
+        code=Path(active['config']['host_code'])
+        validate_gate_receipt(request['admission'],identity,sha(software_projection(inventory)),
+            source_sha=hashlib.sha256((code/'scripts/study_operator/i7_browser.py').read_bytes()).hexdigest(),
+            pin_sha=hashlib.sha256((code/'config/i7-browser-pin.json').read_bytes()).hexdigest())
     return dispatch_qualified_gate(active,request,execute=execute,controller=controller,
                                    maintenance=maintenance,now=now)
 
 
 def dispatch_qualified_gate(active, request, *, execute, controller, maintenance, now):
-    """Draft launcher; not reachable from the bridge for gate-start in Phase A."""
+    """Qualified launcher; the public dispatcher verifies every prerequisite first."""
     root=Path(active['boot_root'])
     job=root/'i7-gate'
     op=request['operation']
-    if op == 'gate-start' and set(request) == {'operation'}:
+    if op == 'gate-start' and set(request) == {'operation','admission'}:
         if job.exists():
             raise ValueError('GATE_COHORT_ALREADY_REGISTERED')
         backup = controller(active,{'operation':'backup-check'})
@@ -42,6 +52,7 @@ def dispatch_qualified_gate(active, request, *, execute, controller, maintenance
             raise ValueError('GATE_NATIVE_LEASE_INSUFFICIENT')
         job.mkdir(mode=0o700)
         save_state(job/'launch-intent.json',{'boot_id':active['boot_id'],'replay_allowed':False})
+        save_state(job/'prerequisites.json',request['admission'])
         maintenance()
         execute(launch_command(active),timeout=30)
         return {'status':'GATE_STARTED_NOT_GO','boot_id':active['boot_id']}
