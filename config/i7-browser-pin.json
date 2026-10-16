@@ -5,6 +5,10 @@
     "win32": {
       "package_tree_sha256": "192e72ab47a0959936bac301966343e511efa2e2b43d2e2577a28cebcd3c0891",
       "browser_sha256": "ff0c99fc5bb2301cad77930aa76e5354cf2a5fefb7efdcf3b3bc10ba0550c015"
+    },
+    "linux": {
+      "package_tree_sha256": "fd378bfc9ddbbdd216c3c3547ae5a95c9ad82c93bb50afbb9ef0d41ef475559d",
+      "browser_sha256": "481fea1516a1f2b76454664272f12cd9dd1f20117b21e1f1498e08bc7f872c00"
     }
   },
   "wheel_sha256": {
