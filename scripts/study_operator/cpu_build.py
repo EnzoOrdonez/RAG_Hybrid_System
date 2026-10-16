@@ -60,12 +60,13 @@ def stage_payload(job,archive,source):
 
 
 class Build:
-    def __init__(self,root,cloud,*,cpu_label='bootstrap01'):
+    def __init__(self,root,cloud,*,cpu_label='bootstrap01',now=None):
         if not re.fullmatch('[a-z][a-z0-9-]{0,15}',cpu_label):
             raise ValueError('Safe explicit restored CPU label required')
         self.root,self.cloud = Path(root),cloud
         self.state = Controller(root,cloud)
         self.cpu_label = cpu_label
+        self.now = now or (lambda: datetime.now(timezone.utc))
 
     def resource(self,*,cpu_label=None):
         label = cpu_label or self.cpu_label
@@ -117,9 +118,9 @@ class Build:
             if state.get('builds_started',0) >= 3 or label in state.get('build_jobs',{}):
                 raise ValueError('Build allowance consumed or label already attempted; no replay')
             opened = state.setdefault('open_exposures',{})
-            admission(state,sum(r['maximum_usd'] for r in opened.values())+exposure)
+            admission(state,sum(r['maximum_usd'] for r in opened.values())+exposure,now=self.now())
             opened['cpu-build-'+label] = dict(maximum_usd=exposure,not_billed_spend=True,
-                at=datetime.now(timezone.utc).isoformat(),catalog_receipt_sha256=quote['catalog_receipt_sha256'])
+                at=self.now().isoformat(),catalog_receipt_sha256=quote['catalog_receipt_sha256'])
             state.setdefault('build_jobs',{})[label] = dict(status='INTENT',vm_id=resource['id'],
                 commit=inventory['commit'],context_sha256=inventory['sha256'],cpu_label=self.cpu_label,
                 cpu_restoration_proof_sha256=proof_sha)

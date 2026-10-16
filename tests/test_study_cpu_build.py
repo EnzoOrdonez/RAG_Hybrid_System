@@ -3,6 +3,7 @@ import base64
 import copy
 import hashlib
 import json
+from datetime import datetime, timezone
 
 import pytest
 
@@ -65,12 +66,32 @@ def fixture(tmp_path,monkeypatch):
                 return json.dumps(dict(status='CPU_BUILD_LAUNCHED_NOT_ACCEPTED',pid=42,
                                       instance_id='1',context_sha256=job['context_sha256']))
     cloud=Cloud()
-    build=cpu_build.Build(tmp_path,cloud)
+    build=cpu_build.Build(tmp_path,cloud,now=lambda:datetime(2026,10,8,tzinfo=timezone.utc))
     bundle=tmp_path/'source.tar.gz'
     bundle.write_bytes(b'fixture context')
     inventory=dict(bundle=str(bundle),status='CLEAN_PUBLISHED_BUILD_CONTEXT_VERIFIED',
         bytes=bundle.stat().st_size,sha256=hashlib.sha256(bundle.read_bytes()).hexdigest(),commit='a'*40)
     return build,cloud,resource,inventory,sessions,technical
+
+
+@pytest.mark.parametrize('at,accepted',[
+    ('2026-10-09T23:01:38+00:00',True),
+    ('2026-10-09T23:01:39+00:00',False),
+    ('2026-10-09T23:01:40+00:00',False)])
+def test_injected_clock_preserves_actual_paid_deadline(tmp_path,monkeypatch,at,accepted):
+    build,cloud,_,inventory,*_=fixture(tmp_path,monkeypatch)
+    build.now=lambda:datetime.fromisoformat(at)
+    if accepted:
+        assert build.launch('final01',inventory,b'guest')['status']=='CPU_BUILD_LAUNCHED_NOT_ACCEPTED'
+    else:
+        with pytest.raises(ValueError,match='Paid work closed'):
+            build.launch('final01',inventory,b'guest')
+        assert not any(a[:3]==['compute','instances','start'] for a in cloud.calls)
+
+
+def test_default_clock_remains_real_utc(tmp_path):
+    build=cpu_build.Build(tmp_path,None)
+    assert abs((build.now()-datetime.now(timezone.utc)).total_seconds()) < 2
 
 
 @pytest.mark.parametrize('change',[dict(id='replacement'),dict(status='RUNNING'),dict(deletionProtection=False),
