@@ -4,7 +4,9 @@ El criterio previo está en el paquete privado de A2, CRITERIOS_R1.md. Se exige
 recorrido completo de la interfaz real por HTTPS local, sin modificar la app,
 con dobles de modelos y respaldo remoto. Se confirman los valores guardados por
 la app: consulta libre, SUS, ocho ítems UEQ-S, Likert, comparación y cierre.
-Los textarea reciben Ctrl+Enter y luego se coteja el checkpoint. El export debe
+Fuera de formularios, los textarea reciben Ctrl+Enter y se espera el rerun.
+Dentro de formularios se editan y se desenfocan; solo el botón explícito envía
+el formulario. Después se cotejan los valores exactos del checkpoint. El export debe
 tener ocho intentos, dos bloques completos y SHA-256 igual al respaldo.
 Se rechazan entrada no registrada, export incompleto e identidad de boot distinta.
 
@@ -47,7 +49,7 @@ Remove-Item Env:PLAYWRIGHT_BROWSERS_PATH,Env:CLOUDRAG_BROWSER_RECEIPT_DIR,Env:PY
 $env:PYTHONUTF8 = '1'
 $py = (Resolve-Path .venv-app/Scripts/python.exe).Path
 $env:PLAYWRIGHT_BROWSERS_PATH = 'C:/CloudRAG/i7-browser-runtime'
-$env:CLOUDRAG_BROWSER_RECEIPT_DIR = 'C:/CloudRAG/i7-local-verification-followup'
+$env:CLOUDRAG_BROWSER_RECEIPT_DIR = 'C:/CloudRAG/i7-local-verification-stability'
 python -m pip --python $py install --require-hashes -r requirements-i7-browser.txt
 if ($LASTEXITCODE -ne 0) { throw 'Browser dependency installation failed' }
 & $py -m playwright install --no-shell chromium
@@ -94,3 +96,36 @@ La gestión de rutas y la elección del Chromium completo siguen la
 Los hashes de este documento proceden del pin local y los binarios verificados,
 no de una tarifa ni de una medición en nube. Guardar stdout/stderr de la consola
 nueva junto con el recibo local generado en la ruta explícita.
+
+## Sincronización observable y fallos
+
+La visibilidad de un botón y un checkpoint nuevo no prueban que el frontend
+haya terminado el rerun. `StreamlitSync` observa los mensajes protobuf del
+WebSocket de Streamlit 1.54.0: una petición `rerun_script` posterior a la acción
+y su `script_finished = FINISHED_SUCCESSFULLY`. También exige que el DOM de
+`stApp` indique `data-test-script-state=notRunning` y
+`data-test-connection-state=CONNECTED`. Una finalización temprana para otro
+rerun no satisface esa condición. La conexión WebSocket permanece abierta.
+
+Cada botón se acciona una sola vez. El automatizador espera esas condiciones,
+con límite de 25 s en local y 600 s en el recorrido desplegado; la preparación
+conserva su límite existente de 900 s. El sondeo de estado no repite acciones,
+consultas ni envíos. No se aumentaron tiempos para encubrir la carrera.
+Los formularios se editan sin Ctrl+Enter porque ese atajo envía el formulario
+completo; se comprueba el estado seleccionado de cada radio y el valor visible
+del texto. Las comprobaciones exactas de checkpoint, export e identidad siguen
+siendo obligatorias después del único envío explícito.
+
+Las regresiones retrasan la entrega de la finalización al frontend, conservando
+el orden de mensajes, y comprueban que no se edite durante `running`. También
+rechazan petición, finalización o render ausentes sin repetir la acción.
+Las negativas de valor, export e identidad exigen el error correspondiente,
+no cualquier excepción. Ver
+[interacción con formularios de Streamlit](https://docs.streamlit.io/develop/concepts/architecture/forms).
+
+Los registros de reproducción y validación de estabilidad quedan en el paquete
+privado `C:/CloudRAG/iteration7-browser-stability-20261016/`. La admisión requiere
+30 corridas consecutivas de las dos pruebas positivas en Windows y 10 en Linux,
+con los fallos previos conservados. Cada corrida contiene dos recorridos completos;
+no se sustituyen corridas fallidas dentro de una serie. La evidencia local no
+mide la probabilidad de fallos de generación o infraestructura en la Fase B.

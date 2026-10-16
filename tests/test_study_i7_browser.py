@@ -109,6 +109,9 @@ def test_real_https_ui_rejects_backend_fault(tmp_path,fault):
                 raw=json.dumps(data).encode()
                 result.update(export_base64=base64.b64encode(raw).decode(),export_sha256=hashlib.sha256(raw).hexdigest())
             return result
-        with pytest.raises(ValueError):
+        expected={'unregistered':'APP_VALUE_NOT_REGISTERED',
+                  'incomplete':'BROWSER_EXPORT_INCOMPLETE_OR_CHANGED',
+                  'identity':'BROWSER_BOOT_IDENTITY_DIFFERS'}[fault]
+        with pytest.raises(ValueError,match=expected):
             run(url,token,protocol,identity,corrupted,local_test=True)
         assert triggered

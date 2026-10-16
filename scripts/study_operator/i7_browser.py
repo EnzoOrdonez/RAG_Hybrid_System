@@ -30,6 +30,83 @@ def runtime_identity(playwright):
             'browser_sha256':pin['platforms'][platform]['browser_sha256']}
 
 
+class StreamlitSync:
+    """One UI action, one observed rerun; form edits never submit implicitly."""
+    def __init__(self,page,timeout_s):
+        self.page,self.timeout_s=page,timeout_s
+        self.requests=self.completed=self.form_text_entries=0
+        self.error=None
+        page.on('websocket',self.socket)
+
+    def socket(self,socket):
+        if '/_stcore/stream' not in socket.url:
+            return
+        socket.on('framesent',self.sent)
+        socket.on('framereceived',self.received)
+        socket.on('close',lambda:self.failed('STREAMLIT_SOCKET_CLOSED'))
+        socket.on('socketerror',lambda error:self.failed('STREAMLIT_SOCKET_ERROR'))
+
+    def failed(self,reason):
+        self.error=reason
+
+    def sent(self,payload):
+        from streamlit.proto.BackMsg_pb2 import BackMsg
+        if isinstance(payload,bytes) and BackMsg.FromString(payload).WhichOneof('type')=='rerun_script':
+            self.requests+=1
+
+    def received(self,payload):
+        from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
+        if not isinstance(payload,bytes):
+            return
+        message=ForwardMsg.FromString(payload)
+        if message.WhichOneof('type')=='script_finished':
+            if message.script_finished==ForwardMsg.FINISHED_SUCCESSFULLY:
+                self.completed+=1
+            elif message.script_finished==ForwardMsg.FINISHED_WITH_COMPILE_ERROR:
+                self.failed('STREAMLIT_SCRIPT_FAILED')
+
+    def idle(self):
+        return self.page.locator('[data-testid=stApp][data-test-script-state=notRunning][data-test-connection-state=CONNECTED]').count()==1
+
+    def until(self,predicate,timeout_s=None):
+        end=time.monotonic()+(self.timeout_s if timeout_s is None else timeout_s)
+        while time.monotonic()<end:
+            if self.error:
+                raise ValueError(self.error)
+            if predicate():
+                return
+            self.page.wait_for_timeout(20)
+        raise ValueError('STREAMLIT_RERUN_NOT_ACKNOWLEDGED')
+
+    def settled(self):
+        self.until(lambda:self.completed>0 and self.idle())
+
+    def action(self,perform,timeout_s=None):
+        self.settled()
+        sent,completed=self.requests,self.completed
+        perform()
+        self.until(lambda:self.requests>sent and self.completed>completed and self.idle(),timeout_s)
+
+    def option(self,group,value):
+        self.settled()
+        group.get_by_text(str(value),exact=True).click()
+        if not group.get_by_role('radio',name=str(value),exact=True).is_checked():
+            raise ValueError('APP_VALUE_NOT_REGISTERED')
+
+    def text(self,label,value):
+        self.settled()
+        control=self.page.get_by_label(label,exact=True)
+        form=control.evaluate("el => !!el.closest('[data-testid=stForm]')")
+        if form:
+            control.fill(value)
+            control.blur()
+            self.form_text_entries+=1
+        else:
+            self.action(lambda:(control.fill(value),control.press('Control+Enter')))
+        if control.input_value()!=value:
+            raise ValueError('APP_VALUE_NOT_REGISTERED')
+
+
 def run(url, token, protocol, identity, observe, *, local_test=False, user_agent=None, ip=None):
     from playwright.sync_api import sync_playwright
     parsed=urlsplit(url)
@@ -47,6 +124,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
             wire_ua=(user_agent+' CloudRAG-IP/'+ip) if user_agent and ip else user_agent
             context=browser.new_context(ignore_https_errors=local_test,user_agent=wire_ua,extra_http_headers=headers)
             page=context.new_page()
+            sync=StreamlitSync(page,25 if local_test else 600)
             transport={'browser_context':bool(user_agent and ip),'websocket_ip':False,'websocket_user_agent':False}
             if user_agent and ip:
                 cdp=context.new_cdp_session(page)
@@ -87,13 +165,13 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                 confirmations.append(sha(expected))
             def click(label):
                 timeout=900000 if label=='Probar consulta' and not local_test else None
-                page.get_by_role('button',name=label,exact=True).click(timeout=timeout)
+                sync.action(lambda:page.get_by_role('button',name=label,exact=True).click(timeout=timeout),
+                            timeout_s=900 if timeout else None)
             def text(label,value):
-                control=page.get_by_label(label,exact=True)
-                control.fill(value)
-                control.press('Control+Enter')
+                sync.text(label,value)
             snapshot()
             page.goto(url,wait_until='domcontentloaded')
+            sync.settled()
             page.get_by_label('Invitación',exact=True).fill(token)
             click('Entrar')
             first=wait(lambda d:d['stage']=='familiarization')['data']
@@ -131,7 +209,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                 if groups.count()!=len(values):
                     raise ValueError('FULL_INSTRUMENT_UI_REQUIRED')
                 for i,value in enumerate(values):
-                    groups.nth(i).get_by_text(str(value),exact=True).click()
+                    sync.option(groups.nth(i),value)
                 click('Guardar respuestas del bloque')
                 data=wait(lambda d:len(d['instruments'])==block+1)['data']['instruments'][-1]
                 confirm(data['sus'],sus)
@@ -141,7 +219,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
             for i,item in enumerate(config['comparative']):
                 if item['choices']:
                     value=item['choices'][0]
-                    page.get_by_test_id('stRadio').nth(i).get_by_text(value,exact=True).click()
+                    sync.option(page.get_by_test_id('stRadio').nth(i),value)
                 else:
                     value='Synthetic comparison comment.'
                     text(item['text'],value)
@@ -149,7 +227,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
             click('Continuar al cierre')
             confirm(wait(lambda d:d['stage']=='blinding')['data']['comparative'],comparative)
             choice=config['blinding_choices'][0]
-            page.get_by_test_id('stRadio').get_by_text(choice,exact=True).click()
+            sync.option(page.get_by_test_id('stRadio'),choice)
             reason='Synthetic closing reason.'
             text(config['blinding_reason'],reason)
             click('Finalizar')
@@ -173,7 +251,8 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
             return {'status':'BROWSER_EXPORT_VERIFIED','identity':identity,'session_id':session_id,
                 'automator':version,'export_sha256':digest,'attempts':8,'instruments':2,
                 'confirmed_inputs_sha256':confirmations,'websocket_seen':True,'local_validation':local_test,
-                'canary_transport':transport,
+                'canary_transport':transport,'ui_sync':{'requests':sync.requests,'completed':sync.completed,
+                    'form_text_entries':sync.form_text_entries},
                 'objects':final['backup']['objects']}
         finally:
             browser.close()

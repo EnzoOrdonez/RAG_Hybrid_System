@@ -40,7 +40,7 @@ $sdk = (Get-Command gcloud.cmd).Source
 $prep = 'C:/CloudRAG/i7-preparacion-noviembre'
 $run = 'C:/CloudRAG/iteration7-faseB-20261101'
 $spec = "$prep/fase-b-spec.json"
-$evidence = 'C:/CloudRAG/iteration7-faseA2-followup-20261016/local-readiness.json'
+$evidence = 'C:/CloudRAG/iteration7-browser-stability-20261016/local-readiness.json'
 & $py -m scripts.study_operator.i7_phase_b --check --evidence $evidence
 ```
 
@@ -72,7 +72,7 @@ El pin comprueba revisión, ruta, versión, árbol del paquete y ejecutable.
 Un navegador ausente o distinto bloquea el preflight antes de crear el cliente
 de nube de cualquier comando Fase B; el check enumera el bloqueo por nombre.
 Mantener la variable también en el proceso independiente de la serie. Copiar
-el recibo `browser-validation.json` de la consola limpia al nuevo `$run` tras crearlo; el recibo debe
+el recibo `browser-validation.json` de la validación de estabilidad al nuevo `$run` tras crearlo; el recibo debe
 coincidir con fuente y pin. La validación recorrió la app real por HTTPS local,
 con dobles del backend, y tres fallas deliberadas. No es el smoke desplegado.
 
@@ -104,7 +104,7 @@ del lock; no cambiar dependencias para evitar una falla.
 
 ```powershell
 & $py -m scripts.study_operator.i7_config --root $run --spec $spec
-Copy-Item 'C:/CloudRAG/i7-local-verification-followup/browser-validation.json' "$run/browser-validation.json"
+Copy-Item 'C:/CloudRAG/iteration7-browser-stability-20261016/browser-validation.json' "$run/browser-validation.json"
 ```
 
 La raíz es nueva, con períodos técnicos y smoke distintos. No hereda una VM.
