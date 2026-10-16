@@ -79,8 +79,16 @@ def _gate_after_prerequisites(operator):
         while time.monotonic() < deadline:
             value = operator.bridge({'operation':'gate-status'},private=True)
             if value['status'] == 'GATE_COMPLETE_UNANALYZED':
-                return operator.collect('gate')
+                receipt=operator.collect('gate')
+                from scripts.study_operator.i7_technical import cleanup
+                cleanup(operator)
+                operator.bridge({'operation':'gate-finalized','proof_sha256':receipt['proof_sha256']},private=True)
+                return receipt
             if value['status'] == 'INCOMPLETE_TERMINAL':
+                from scripts.study_operator.i7_technical import cleanup,collect_terminal
+                receipt=collect_terminal(operator)
+                cleanup(operator)
+                operator.bridge({'operation':'gate-finalized','proof_sha256':receipt['proof_sha256']},private=True)
                 raise ValueError('GATE_TERMINAL_NO_REPLACEMENT')
             operator.sleep(2)
         raise TimeoutError('GATE_OWNER_DEADLINE')

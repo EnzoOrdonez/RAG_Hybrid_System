@@ -113,6 +113,12 @@ def dispatch(request, deployment, *, maintenance=False):
         # before checking it; freeze() refuses conflicting or populated stores.
         store.freeze()
     store.check()
+    if operation=='i7-technical-close' and deployment['purpose']=='technical' and maintenance:
+        from scripts.cloud_storage import Bucket,backup_session
+        from scripts.study_operator.i7_technical import close_sessions
+        if os.environ.get('CLOUDRAG_ISOLATED_APP')=='1' and not os.environ.get('CLOUDRAG_BACKUP_SOCKET'):
+            raise ValueError('HOST_BACKUP_AGENT_REQUIRED')
+        return close_sessions(store,lambda folder:backup_session(folder,Bucket(deployment['bucket']),deployment['backup_prefix']))
     if operation=='i7-smoke-observe' and deployment['purpose']=='smoke':
         from src.ui.components.study_sessions import StudySession
         checkpoints=list(store.root.glob('*/study_checkpoint.json'))

@@ -347,7 +347,7 @@ def main(argv=None):
     parser.add_argument('--root',required=True,type=Path)
     parser.add_argument('--sdk')
     parser.add_argument('--live',action='store_true')
-    parser.add_argument('operation',choices=('init','status','reserve','reconcile','start','preflight','stop','guard','collect',
+    parser.add_argument('operation',choices=('init','status','reserve','reconcile','reconcile-all','technical-cycle','start','preflight','stop','guard','collect',
         'gate-start','stimulus-start','tls-check','restore-check','privacy','series','schedule','close'))
     parser.add_argument('--config',type=Path)
     parser.add_argument('--request',type=Path)
@@ -381,6 +381,12 @@ def main(argv=None):
             verify_tool_source(operator)
             if args.operation == 'reserve':
                 result = operator.reserve(args.hours)
+            elif args.operation=='reconcile-all':
+                from scripts.study_operator.i7_reconcile import reconcile
+                result=reconcile(operator)
+            elif args.operation=='technical-cycle':
+                from scripts.study_operator.i7_technical import cleanup
+                result=cleanup(operator)
             elif args.operation in {'start','preflight','stop','guard','status','reconcile'}:
                 result = getattr(operator,args.operation)()
             elif args.operation == 'collect':

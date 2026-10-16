@@ -273,10 +273,16 @@ def main():
     if active['boot_id'] != Path('/proc/sys/kernel/random/boot_id').read_text().strip():
         raise ValueError('ACTIVE_BOOT_DIFFERS')
     root = Path(active['boot_root'])/'i7-gate'
+    host=GateHost(active,root)
     try:
-        GateHost(active,root).run()
-        deadline = time.monotonic()+60
-        while time.monotonic() < deadline and not (root/'download-ack.json').is_file():
+        try:
+            host.run()
+        except BaseException:
+            if not (root/'terminal.json').is_file():
+                raise
+        # Finalization fits inside the unchanged independent 9000-second bound.
+        deadline = min(host.deadline,time.monotonic()+600)
+        while time.monotonic() < deadline and not (root/'finalization-ack.json').is_file():
             time.sleep(1)
     finally:
         save_state(Path(active['boot_root'])/'stop-request.json',{'stop': True,'boot_id': active['boot_id']})

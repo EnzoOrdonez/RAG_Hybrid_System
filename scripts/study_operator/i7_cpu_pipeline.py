@@ -108,16 +108,22 @@ def clean_snapshot(operator, cloud, resources, build_proof):
     suffix = operator.config['period_id'][:12]
     stage, target, final = ['cloudrag-i7-'+name+'-'+suffix for name in ('stage','service','clean')]
     zone = 'us-central1-a'
+    from scripts.study_operator.i7_reconcile import observed,record_intent
     for name in (stage,final):
         if cloud.command(['compute','snapshots','list','--filter=name='+name]):
             raise ValueError('I7_SNAPSHOT_INTENT_EXISTS')
     save_state(operator.root/'clean-disk-intent.json',{'cpu_id':str(vm['id']),'cpu_disk_id':str(disk['id']),
                'stage':stage,'target':target,'snapshot':final,'marker':marker})
+    stage_intent=record_intent(operator,'snapshots',stage)
     cloud.command(['compute','snapshots','create',stage,'--source-disk='+disk['name'],
         '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],timeout=600)
+    stage_receipt=cloud.command(['compute','snapshots','describe',stage])
+    observed(operator,stage_intent,stage_receipt)
+    disk_intent=record_intent(operator,'disks',target,zone,source_snapshot_id=str(stage_receipt['id']))
     cloud.command(['compute','disks','create',target,'--source-snapshot='+stage,'--zone='+zone,
         '--type=pd-balanced','--description='+marker],timeout=600)
     target_receipt = cloud.command(['compute','disks','describe',target,'--zone='+zone])
+    observed(operator,disk_intent,target_receipt)
     stage_receipt = cloud.command(['compute','snapshots','describe',stage])
     if (stage_receipt.get('storageLocations')!=['us-central1'] or target_receipt['description'] != marker or
             str(target_receipt['sourceSnapshotId']) != str(stage_receipt['id'])):
@@ -155,9 +161,11 @@ def clean_snapshot(operator, cloud, resources, build_proof):
         stopped = cloud.command(['compute','instances','describe',vm['name'],'--zone='+zone])
         if str(stopped['id']) != str(vm['id']) or stopped['status'] != 'TERMINATED':
             raise ValueError('CPU_CLEANING_STOP_NOT_VERIFIED')
+        final_intent=record_intent(operator,'snapshots',final)
         cloud.command(['compute','snapshots','create',final,'--source-disk='+target,
             '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],timeout=600)
         snapshot = cloud.command(['compute','snapshots','describe',final])
+        observed(operator,final_intent,snapshot)
         if (snapshot['status'] != 'READY' or snapshot['description'] != marker
                 or snapshot.get('storageLocations')!=['us-central1']):
             raise ValueError('CLEAN_SERVICE_SNAPSHOT_NOT_READY')
@@ -175,6 +183,9 @@ def clean_snapshot(operator, cloud, resources, build_proof):
 
 def gpu_restore(operator):
     from scripts.study_operator.startup import write_startup
+    from scripts.study_operator.i7_reconcile import observed,record_intent
+    if any(row['status']=='UNKNOWN' for row in operator.state.get('creation_intents',[])):
+        raise ValueError('UNKNOWN_CREATION_RECONCILE_BEFORE_CAPACITY')
     snapshot = operator.state['qualified_service_snapshot']
     actual = operator.cloud.command(['compute','snapshots','describe',snapshot['name']])
     if (str(actual['id']) != str(snapshot['id']) or actual['status'] != 'READY'
@@ -189,9 +200,11 @@ def gpu_restore(operator):
     zone = operator.config['zone']
     name = 'cloudrag-i7-vm-'+operator.config['period_id'][:12]
     disk = name+'-boot'
+    disk_intent=record_intent(operator,'disks',disk,zone,source_snapshot_id=str(snapshot['id']))
     operator.cloud.command(['compute','disks','create',disk,'--zone='+zone,'--type=pd-balanced',
         '--source-snapshot='+snapshot['name'],'--description='+operator.config['resource_marker']],timeout=600)
     restored_disk = operator.cloud.command(['compute','disks','describe',disk,'--zone='+zone])
+    observed(operator,disk_intent,restored_disk)
     if (str(restored_disk['sourceSnapshotId']) != str(snapshot['id'])
             or restored_disk['description'] != operator.config['resource_marker']):
         raise ValueError('GPU_BOOT_DISK_SOURCE_CHANGED')
@@ -200,6 +213,7 @@ def gpu_restore(operator):
         native_deadline_utc=(operator.now()+timedelta(hours=3)).isoformat())
     startup = operator.root/'first-gpu-startup.sh'
     write_startup(startup,config,discover_instance=True)
+    vm_intent=record_intent(operator,'instances',name,zone,source_snapshot_id=str(snapshot['id']),role='primary_gpu')
     operator.cloud.command(['compute','instances','create',name,'--zone='+zone,'--machine-type=g2-standard-4',
         '--disk=name='+disk+',boot=yes,auto-delete=no','--deletion-protection','--max-run-duration=3h',
         '--instance-termination-action=STOP','--reservation-affinity=specific','--reservation='+reservation['name'],
@@ -210,6 +224,7 @@ def gpu_restore(operator):
         '--description='+config['resource_marker'],'--metadata-from-file=startup-script='+str(startup),
         '--metadata=enable-guest-attributes=TRUE'],timeout=600)
     vm = operator.cloud.command(['compute','instances','describe',name,'--zone='+zone])
+    observed(operator,vm_intent,vm)
     if vm['description'] != config['resource_marker']:
         raise ValueError('NEW_GPU_OWNERSHIP_CHANGED')
     operator.config.update(primary_vm={'name':name,'id':str(vm['id']),'zone':zone},native_stop_s=10800)

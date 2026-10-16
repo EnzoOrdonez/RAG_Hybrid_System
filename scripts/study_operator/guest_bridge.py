@@ -206,6 +206,8 @@ def dispatch(request):
         command=app_command(active['config'],root,active['session_root'],'cloudrag-i7-contexts-'+boot,
                             operation='i7-contexts')
         return execute(command,timeout=900)
+    if operation=='i7-technical-close' and set(request)=={'operation'}:
+        return controller(active,request,maintenance=True)
     if operation == 'maintenance':
         result = subprocess.run(['docker','stop','--time','30',active['app_container']],
                                 stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=45)
@@ -220,7 +222,7 @@ def dispatch(request):
 
         return dispatch_stimulus(active,request,execute=execute,controller=controller,
                                  maintenance=lambda: dispatch(dict(operation='maintenance')))
-    if operation in {'gate-start','gate-status','gate-evidence','gate-ack'}:
+    if operation in {'gate-start','gate-status','gate-evidence','gate-ack','gate-terminal-evidence','gate-finalized'}:
         from scripts.study_operator.i7_gate_guest import dispatch_gate
 
         return dispatch_gate(active,request,execute=execute,controller=controller,

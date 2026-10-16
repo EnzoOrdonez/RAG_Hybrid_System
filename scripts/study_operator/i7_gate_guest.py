@@ -47,6 +47,20 @@ def dispatch_qualified_gate(active, request, *, execute, controller, maintenance
         return {'status':'GATE_STARTED_NOT_GO','boot_id':active['boot_id']}
     if op == 'gate-status' and set(request) == {'operation'}:
         return json.loads((job/'result.json').read_bytes()) if (job/'result.json').exists() else {'status':'RUNNING_OR_UNKNOWN'}
+    if op=='gate-terminal-evidence' and set(request)=={'operation'}:
+        proof=json.loads((job/'terminal.json').read_bytes())
+        if proof['host_evidence']['status']!='INCOMPLETE_TERMINAL':
+            raise ValueError('TERMINAL_EVIDENCE_REQUIRED')
+        return {'proof':proof,'proof_sha256':sha(proof)}
+    if op=='gate-finalized' and set(request)=={'operation','proof_sha256'}:
+        if (job/'terminal.json').exists():
+            expected=sha(json.loads((job/'terminal.json').read_bytes()))
+        else:
+            expected=json.loads((job/'result.json').read_bytes())['proof_sha256']
+        if request['proof_sha256']!=expected:
+            raise ValueError('FINALIZATION_EVIDENCE_HASH_DIFFERS')
+        save_state(job/'finalization-ack.json',{'proof_sha256':expected,'technical_cycle_verified_by_owner':True})
+        return {'status':'GATE_FINALIZATION_ACKNOWLEDGED','proof_sha256':expected}
     if op == 'gate-evidence' and set(request) == {'operation'}:
         result = json.loads((job/'result.json').read_bytes())
         if result['status'] != 'GATE_COMPLETE_UNANALYZED':
