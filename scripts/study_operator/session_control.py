@@ -52,11 +52,11 @@ def restore_closed(store, export_data, manifest_data, objects, *, allow_replay=F
         folder = store.root/sid
         admissions = store._read()
         checkpoint = {key:payload[key] for key in StudySession(store,sid,payload['assignment']).data}
-        if json.loads(folder.joinpath('study_checkpoint.json').read_text()) != checkpoint:
+        if json.loads(folder.joinpath('study_checkpoint.json').read_text(encoding='utf-8')) != checkpoint:
             raise OperatorError('Checkpoint restaurado alterado. Conserva la copia y revisa antes de repetir.')
         if (folder.joinpath('full_session.json').read_bytes() != export_data
                 or folder.joinpath('export_manifest.json').read_bytes() != manifest_data
-                or json.loads(folder.joinpath('backup_state.json').read_text()).get('objects') != objects
+                or json.loads(folder.joinpath('backup_state.json').read_text(encoding='utf-8')).get('objects') != objects
                 or admissions.get('active') is not None
                 or any(not row.get('revoked') for row in admissions['invitations'].values())
                 or len(list(store.root.glob('*/study_checkpoint.json'))) != 1):
@@ -108,6 +108,10 @@ def dispatch(request, deployment, *, maintenance=False):
 
     operation = request['operation']
     store = StudyStore(deployment['session_root'],verify_draw(deployment['config_dir']),deployment['purpose'])
+    if operation == 'restore' and maintenance:
+        # The bridge creates an empty recovery root. Seal verified configuration
+        # before checking it; freeze() refuses conflicting or populated stores.
+        store.freeze()
     store.check()
     if operation == 'revoke':
         store.revoke(participant_code(request['participant_id']))
