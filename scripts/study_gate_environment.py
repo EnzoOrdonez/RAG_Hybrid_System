@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import hashlib
 from importlib.metadata import distributions
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -181,7 +182,12 @@ class LinuxSampler:
         return result
 
 
-def assess(rows, config, *, admission=False, allowed_pids=()):
+def assess(rows, config, *, admission=False, allowed_pids=(), reference_time=None):
+    """Check live freshness by default; archived proofs supply their closing clock."""
+    if reference_time is not None and (
+        type(reference_time) not in (int, float) or not math.isfinite(reference_time)
+    ):
+        raise ValueError("Finite archived observation clock required")
     reasons = set()
     if not rows:
         return ["telemetry_missing"]
@@ -219,7 +225,7 @@ def assess(rows, config, *, admission=False, allowed_pids=()):
                 # make an earlier healthy observation expire retrospectively.
                 reference = observed.timestamp()
                 if row is rows[-1]:
-                    reference = max(reference, time.time())
+                    reference = max(reference, time.time() if reference_time is None else reference_time)
                 if (
                     models[0].get("context_length", 4096) != 4096
                     or expires.timestamp() < reference + 180

@@ -5,20 +5,22 @@ from scripts.study_gate_environment import assess
 from scripts.study_operator.service_transition import cold_state
 
 
-def assess_cold(rows, config, *, preparation_started, admission=False, allowed_pids=()):
+def assess_cold(rows, config, *, preparation_started, admission=False, allowed_pids=(), reference_time=None):
     """Preserve every normal contamination check; allow only genuine initial emptiness."""
     if (type(preparation_started) not in (int, float) or not math.isfinite(preparation_started)
             or config.get('service_mode') != 'fresh_runner'):
         raise ValueError('Bounded cold preparation and fresh service required')
-    reasons = set(assess(rows, config, admission=admission, allowed_pids=allowed_pids))
+    reasons = set(assess(rows, config, admission=admission, allowed_pids=allowed_pids,
+                         reference_time=reference_time))
     normal_reasons = set()
     cold_count = 0
     generated = False
+    normal_rows = []
     for row in rows:
         marker = row.get('service_state', {})
         if marker.get('phase') != 'STARTING':
             generated = True
-            normal_reasons.update(assess([row], config, allowed_pids=allowed_pids))
+            normal_rows.append(row)
             continue
         try:
             cold_state(marker, config['service_boot_id'])
@@ -32,6 +34,9 @@ def assess_cold(rows, config, *, preparation_started, admission=False, allowed_p
             cold_count += 1
         except (ValueError, KeyError, TypeError):
             normal_reasons.add('cold_history_invalid')
+    if normal_rows:
+        normal_reasons.update(assess(normal_rows, config, allowed_pids=allowed_pids,
+                                    reference_time=reference_time))
     if cold_count:
         # These two reasons alone describe the expected cold state. All original
         # rows remain unchanged and all non-cold occurrences must still pass.

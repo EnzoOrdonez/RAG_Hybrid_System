@@ -89,3 +89,29 @@ def test_older_runner_pid_cannot_reappear_after_an_intervening_runner():
     proof['rows'][2]['service_after']['runner_pids'] = proof['rows'][0]['service_after']['runner_pids']
     with pytest.raises(ValueError,match='renewal'):
         verify_boot(proof,CONFIG)
+
+def test_closed_proof_replay_uses_observation_time_and_keeps_live_freshness(monkeypatch):
+    from datetime import datetime, timezone
+    from scripts.study_operator.stimulus_host_evidence import assessment_config, reasons
+    from test_study_stimulus_evidence import CONFIG
+
+    proof = live_proof()
+    host = proof['host_evidence']
+    last = host['samples'][-1]
+    observed = datetime.fromisoformat(last['at']).timestamp()
+    last['ollama_ps_api']['models'][0]['expires_at'] = datetime.fromtimestamp(
+        observed + 300, timezone.utc).isoformat()
+    monkeypatch.setattr('scripts.study_gate_environment.time.time', lambda: observed + 3600)
+    before = copy.deepcopy(proof)
+    assert verify_boot(proof, CONFIG)['mode'] == 'LIVE'
+    assert proof == before
+    assert 'residency_lease' in reasons(host['samples'], assessment_config(proof['inventory']), 100)
+
+@pytest.mark.parametrize('stamp', [None, 'invalid', '2026-10-08T00:00:00'])
+def test_closed_proof_requires_aware_valid_closing_clock(stamp):
+    from test_study_stimulus_evidence import CONFIG
+
+    proof = live_proof()
+    proof['host_evidence']['samples'][-1]['at'] = stamp
+    with pytest.raises((ValueError, TypeError)):
+        verify_boot(proof, CONFIG)

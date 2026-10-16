@@ -68,3 +68,38 @@ def test_initial_state_cannot_reappear_after_a_generation_transition():
     values[5]['service_state'].update(phase='RESETTING', request_id='b'*32,
         deadline_monotonic_s=130, written_monotonic_s=125)
     assert 'cold_history_invalid' in assess_cold(values, CONFIG, preparation_started=100)
+from datetime import datetime, timezone
+
+
+def test_historical_resident_row_keeps_its_observed_lease(monkeypatch):
+    from test_study_gate_residency_history import BASE, history
+
+    values = history(seconds=5)
+    for index, row in enumerate(values):
+        row['service_state'] = dict(schema_version=1, mode='fresh_runner', phase='RESIDENT',
+            sequence=5, boot_id='fixture', request_id='b'*32, runner_pids=[100],
+            deadline_monotonic_s=None, written_monotonic_s=row['monotonic_s'])
+        row['ollama_ps_api']['models'][0]['digest'] = 'a'*64
+        row['ollama_ps_api']['models'][0]['expires_at'] = datetime.fromtimestamp(
+            BASE + (300 if index == 0 else 4000), timezone.utc).isoformat()
+    monkeypatch.setattr('scripts.study_gate_environment.time.time', lambda: BASE + 3600)
+    before = copy.deepcopy(values)
+    assert assess_cold(values, CONFIG, preparation_started=0) == []
+    assert values == before
+
+@pytest.mark.parametrize('remaining', [179, 300])
+def test_cold_verification_rejects_short_historical_lease_and_stale_live_tail(monkeypatch, remaining):
+    from test_study_gate_residency_history import BASE, history
+
+    values = history(seconds=5)
+    for row in values:
+        row['service_state'] = dict(schema_version=1, mode='fresh_runner', phase='RESIDENT',
+            sequence=5, boot_id='fixture', request_id='b'*32, runner_pids=[100],
+            deadline_monotonic_s=None, written_monotonic_s=row['monotonic_s'])
+        row['ollama_ps_api']['models'][0]['digest'] = 'a'*64
+        row['ollama_ps_api']['models'][0]['expires_at'] = datetime.fromtimestamp(
+            datetime.fromisoformat(row['at']).timestamp() + remaining, timezone.utc).isoformat()
+    monkeypatch.setattr('scripts.study_gate_environment.time.time', lambda: BASE + 3600)
+    assert 'residency_lease' in assess_cold(values, CONFIG, preparation_started=0)
+    archived = assess_cold(values, CONFIG, preparation_started=0, reference_time=BASE + 5)
+    assert ('residency_lease' in archived) is (remaining < 180)

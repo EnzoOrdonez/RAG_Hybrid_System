@@ -2,6 +2,7 @@
 import hashlib
 import json
 import math
+from datetime import datetime
 
 from scripts.study_operator.cold_admission import assess_cold
 
@@ -16,11 +17,11 @@ def assessment_config(inventory):
                 service_boot_id=inventory['observed']['boot_id'])
 
 
-def reasons(samples, config, preparation_started, *, admission=False):
+def reasons(samples, config, preparation_started, *, admission=False, reference_time=None):
     # GPU and CPU ownership is taken at each host sample, not a global exemption
     # for processes whose name contains "ollama" or "python".
     result = set(assess_cold(samples, config, preparation_started=preparation_started,
-                            admission=admission,
+                            admission=admission, reference_time=reference_time,
                             allowed_pids={pid for row in samples for pid in row['owned_pids']}))
     previous_busy = set()
     for row in samples:
@@ -68,7 +69,13 @@ def verify_host(proof, protocol_config):
             or any(a['monotonic_s'] >= b['monotonic_s'] for a,b in zip(samples,samples[1:]))):
         raise ValueError('Host telemetry is missing, mixed or unordered')
     config = assessment_config(inventory)
-    if (reasons(admitted,config,times[0],admission=True) or reasons(samples,config,times[0])
+    # COMPLETE proofs are replayed at their closing observation, never at the
+    # auditor's wall clock. Live callers of reasons() retain current freshness.
+    closing = datetime.fromisoformat(samples[-1]['at'])
+    if closing.tzinfo is None:
+        raise ValueError('Archived observation requires an aware clock')
+    if (reasons(admitted,config,times[0],admission=True,reference_time=closing.timestamp())
+            or reasons(samples,config,times[0],reference_time=closing.timestamp())
             or sha(admission_receipt(host)) != proof.get('host_admission_sha256')):
         raise ValueError('Host admission or continuous telemetry rejected')
     calls = host['calls']
