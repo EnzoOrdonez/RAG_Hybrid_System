@@ -59,6 +59,16 @@ def stores(active):
 
 def disk_dispatch(active, request):
     operation = request['operation']
+    if operation == 'i7-preparation-check' and set(request) == {'operation'}:
+        from scripts.study_operator.i7_guest import preparation_check
+
+        return preparation_check(active,execute=execute)
+    if operation == 'i7-privacy' and set(request) == {'operation','ip','user_agent'}:
+        from scripts.study_operator.i7_privacy import host_sources, scan
+
+        if active['config'].get('iteration') != 7 or active['config']['purpose'] != 'technical':
+            raise ValueError('I7_TECHNICAL_PRIVACY_ONLY')
+        return scan(host_sources(active),(request['ip'].encode(),request['user_agent'].encode()))
     roots = stores(active)
     if operation == 'restore':
         folder = Path(active['session_root']).parent/'recoveries'/recovery_key(request)
@@ -142,6 +152,8 @@ def dispatch(request):
     if (active['boot_id'] != boot or root != ROOT/'boots'/boot or not root.is_dir()):
         raise ValueError('NO_ACTIVE_BOOT')
     operation = request['operation']
+    if operation in {'i7-preparation-check','i7-privacy'}:
+        return disk_dispatch(active,request)
     if operation == 'stop':
         backup = controller(active,dict(operation='backup-check'))
         copies = recovery_counts(active['session_root'],active['config']['purpose'])

@@ -171,7 +171,9 @@ class Cloud:
         return token
 
 
-def checked_vm(observed, *, name, instance_id, zone):
+def checked_vm(observed, *, name, instance_id, zone, native_limit_s=10800):
+    if native_limit_s not in (10800,32400):
+        raise ValueError('Reviewed native VM limit required')
     if zone not in US_L4_ZONES:
         raise OperatorError('Zona fuera del ámbito L4 verificado de EE.UU. Revisa el catálogo antes de encender.')
     if (observed.get('name') != name or str(observed.get('id')) != str(instance_id)
@@ -180,7 +182,7 @@ def checked_vm(observed, *, name, instance_id, zone):
             or not observed.get('deletionProtection')
             or not observed.get('disks') or observed['disks'][0].get('autoDelete') is not False
             or observed.get('scheduling', {}).get('instanceTerminationAction') != 'STOP'
-            or observed.get('scheduling', {}).get('maxRunDuration', {}).get('seconds') != '10800'):
+            or observed.get('scheduling', {}).get('maxRunDuration', {}).get('seconds') != str(native_limit_s)):
         raise OperatorError('VM, disco o límite nativo distintos de la instalación. No se enciende; revisa identidad y protecciones.')
     return observed
 
