@@ -1,13 +1,13 @@
+import base64
 import hashlib
 import json
-import base64
 
 import pytest
 
 from scripts.study_operator.policy import OperatorError
 from scripts.study_operator.session_control import read_plan, restore_closed
-from src.ui.components.study_sessions import StudyStore, StudySession
 from src.ui.components.session_storage import SessionStorageError
+from src.ui.components.study_sessions import StudySession, StudyStore
 from tests.study_helpers import configured
 from tests.test_study_sessions import finish
 
@@ -19,15 +19,15 @@ def recovery_request(tmp_path):
     (config/'study.json').write_bytes((tmp_path/'config.json').read_bytes())
     (config/'assignments.csv').write_bytes((tmp_path/'assignments.csv').read_bytes())
     protocol = original.protocol
-    (config/'draw_seal.json').write_text(json.dumps(dict(schema_version=1,
-        seeds=protocol['config']['randomization'], hashes=protocol['hashes'],
-        fingerprint=protocol['fingerprint'])), encoding='utf-8')
+    (config/'draw_seal.json').write_text(json.dumps({'schema_version': 1,
+        'seeds': protocol['config']['randomization'], 'hashes': protocol['hashes'],
+        'fingerprint': protocol['fingerprint']}), encoding='utf-8')
     root = tmp_path/'recoveries'/'new'/'sessions'
     root.mkdir(parents=True)
-    (root/'_i4_root.json').write_text(json.dumps(dict(schema_version=1,purpose='technical')))
-    request = dict(operation='restore', full_session_base64=base64.b64encode(full).decode(),
-        manifest_base64=base64.b64encode(manifest).decode(), objects=objects)
-    deployment = dict(session_root=str(root), config_dir=str(config), purpose='technical')
+    (root/'_i4_root.json').write_text(json.dumps({'schema_version': 1, 'purpose': 'technical'}))
+    request = {'operation': 'restore', 'full_session_base64': base64.b64encode(full).decode(),
+        'manifest_base64': base64.b64encode(manifest).decode(), 'objects': objects}
+    deployment = {'session_root': str(root), 'config_dir': str(config), 'purpose': 'technical'}
     return request, deployment, full
 
 
@@ -48,6 +48,7 @@ def test_dispatch_restores_and_replays_in_new_recovery_store(tmp_path):
 @pytest.mark.parametrize('fault', ['maintenance', 'seal', 'hash', 'generation', 'occupied'])
 def test_dispatch_restore_preserves_guards_and_never_writes_bad_checkpoint(tmp_path, fault):
     from pathlib import Path
+
     from scripts.study_operator.session_control import dispatch
 
     request, deployment, _ = recovery_request(tmp_path)

@@ -1,9 +1,9 @@
 import copy
+from datetime import datetime, timezone
 
 import pytest
 
 from scripts.study_operator.cold_admission import assess_cold
-
 
 CONFIG = dict(service_mode='fresh_runner', service_boot_id='fixture', model_digest='a'*64)
 
@@ -68,7 +68,6 @@ def test_initial_state_cannot_reappear_after_a_generation_transition():
     values[5]['service_state'].update(phase='RESETTING', request_id='b'*32,
         deadline_monotonic_s=130, written_monotonic_s=125)
     assert 'cold_history_invalid' in assess_cold(values, CONFIG, preparation_started=100)
-from datetime import datetime, timezone
 
 
 def test_historical_resident_row_keeps_its_observed_lease(monkeypatch):
@@ -76,9 +75,9 @@ def test_historical_resident_row_keeps_its_observed_lease(monkeypatch):
 
     values = history(seconds=5)
     for index, row in enumerate(values):
-        row['service_state'] = dict(schema_version=1, mode='fresh_runner', phase='RESIDENT',
-            sequence=5, boot_id='fixture', request_id='b'*32, runner_pids=[100],
-            deadline_monotonic_s=None, written_monotonic_s=row['monotonic_s'])
+        row['service_state'] = {'schema_version': 1, 'mode': 'fresh_runner', 'phase': 'RESIDENT',
+            'sequence': 5, 'boot_id': 'fixture', 'request_id': 'b'*32, 'runner_pids': [100],
+            'deadline_monotonic_s': None, 'written_monotonic_s': row['monotonic_s']}
         row['ollama_ps_api']['models'][0]['digest'] = 'a'*64
         row['ollama_ps_api']['models'][0]['expires_at'] = datetime.fromtimestamp(
             BASE + (300 if index == 0 else 4000), timezone.utc).isoformat()
@@ -93,9 +92,9 @@ def test_cold_verification_rejects_short_historical_lease_and_stale_live_tail(mo
 
     values = history(seconds=5)
     for row in values:
-        row['service_state'] = dict(schema_version=1, mode='fresh_runner', phase='RESIDENT',
-            sequence=5, boot_id='fixture', request_id='b'*32, runner_pids=[100],
-            deadline_monotonic_s=None, written_monotonic_s=row['monotonic_s'])
+        row['service_state'] = {'schema_version': 1, 'mode': 'fresh_runner', 'phase': 'RESIDENT',
+            'sequence': 5, 'boot_id': 'fixture', 'request_id': 'b'*32, 'runner_pids': [100],
+            'deadline_monotonic_s': None, 'written_monotonic_s': row['monotonic_s']}
         row['ollama_ps_api']['models'][0]['digest'] = 'a'*64
         row['ollama_ps_api']['models'][0]['expires_at'] = datetime.fromtimestamp(
             datetime.fromisoformat(row['at']).timestamp() + remaining, timezone.utc).isoformat()

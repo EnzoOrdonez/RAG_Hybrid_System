@@ -2,13 +2,17 @@ import copy
 
 import pytest
 
-from scripts.study_operator.stimulus_evidence import digest, software_projection, verify_boot
+from scripts.study_operator.stimulus_evidence import (
+    digest,
+    software_projection,
+    verify_boot,
+)
 from scripts.study_operator.stimulus_host_evidence import admission_receipt, sha
 
 
 def live_proof():
-    from test_study_stimulus_evidence import fixture
     from test_study_cold_admission import rows
+    from test_study_stimulus_evidence import fixture
 
     proof = fixture()[4]
     proof.update(mode='LIVE',identity_verified_live=True)
@@ -92,8 +96,10 @@ def test_older_runner_pid_cannot_reappear_after_an_intervening_runner():
 
 def test_closed_proof_replay_uses_observation_time_and_keeps_live_freshness(monkeypatch):
     from datetime import datetime, timezone
-    from scripts.study_operator.stimulus_host_evidence import assessment_config, reasons
+
     from test_study_stimulus_evidence import CONFIG
+
+    from scripts.study_operator.stimulus_host_evidence import assessment_config, reasons
 
     proof = live_proof()
     host = proof['host_evidence']
