@@ -9,12 +9,15 @@ from tests.test_study_operator_deployment import config as deployment_config
 
 
 def setup(tmp_path):
+    from scripts.study_operator.i7_costs import KEYS
     cfg = dict(deployment_config(),iteration=7,service_account='sa',network='default',subnet='default',
         primary_vm={'name':'cloudrag-i7-vm','id':'10','zone':'us-central1-a'},
         native_stop_s=10800,cuda_cache='/srv/cloudrag/i7/jit',cuda_cache_seed={'k':'a'*64},
         cuda_cache_driver='580.178.04',budget_usd=20,closure_reserve_usd=3,
         rates={'compute_usd_h':.706832255,'price_receipt_sha256':'a'*64,'verified_utc':'2026-11-01T00:00:00+00:00'},
         resource_marker='cloudrag-i7-test')
+    cfg['cost_plan']={'status':'PRICED_LIST','verified_utc':'2026-11-01T00:00:00+00:00',
+        'rates':{key:{'usd':.000001,'sku_id':key} for key in KEYS}}
     (tmp_path/'installation.json').write_text(json.dumps(cfg))
     (tmp_path/'I7.json').write_text(json.dumps({'iteration':7}))
     reservation = {'name': 'cloudrag-i7-res','id': '20','zone': 'zones/us-central1-a','description': 'cloudrag-i7-test',

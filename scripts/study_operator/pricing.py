@@ -106,7 +106,7 @@ def disk_quote_archive(folder, region):
         estimated_month_hours=730,catalog_receipt_sha256=verified['catalog_receipt_sha256'])
 
 
-def download(cloud, destination, *, open_url=urlopen, max_pages=100, seconds=1200):
+def download(cloud, destination, *, open_url=urlopen, max_pages=100, seconds=1200, endpoint=ENDPOINT):
     destination = Path(destination)
     destination.mkdir(exist_ok=False)
     begin, deadline, cursor, rows, pages = time.monotonic(), time.monotonic()+seconds, '', [], []
@@ -114,7 +114,9 @@ def download(cloud, destination, *, open_url=urlopen, max_pages=100, seconds=120
     for page in range(max_pages):
         if time.monotonic() >= deadline:
             raise TimeoutError('Official catalog read limit; preserve partial pages')
-        url = ENDPOINT + '?' + urlencode(dict(currencyCode='USD', pageSize=5000, pageToken=cursor))
+        if endpoint not in (ENDPOINT,'https://cloudbilling.googleapis.com/v1/services/95FF-2EF5-5EA1/skus'):
+            raise ValueError('REVIEWED_LIST_PRICE_SERVICE_REQUIRED')
+        url = endpoint + '?' + urlencode(dict(currencyCode='USD', pageSize=5000, pageToken=cursor))
         request = Request(url, headers={'Authorization': 'Bearer '+token})
         with open_url(request, timeout=min(60, max(1, deadline-time.monotonic()))) as response:
             payload = response.read(16000001)
@@ -130,7 +132,7 @@ def download(cloud, destination, *, open_url=urlopen, max_pages=100, seconds=120
         cursor = value.get('nextPageToken', '')
         if not cursor:
             result = dict(at=datetime.now(timezone.utc).isoformat(), pages=pages, skus=len(rows),
-                          source=ENDPOINT, currency='USD', duration_s=time.monotonic()-begin,
+                          source=endpoint, currency='USD', duration_s=time.monotonic()-begin,
                           candidates=candidates(rows), auth_never_persisted=True)
             with (destination/'receipt.json').open('x', encoding='utf-8') as stream:
                 json.dump(result, stream, indent=2)
@@ -143,10 +145,12 @@ def main(argv=None):
     parser.add_argument('--sdk', required=True)
     parser.add_argument('--package', required=True)
     parser.add_argument('--destination', required=True)
+    parser.add_argument('--storage',action='store_true')
     args = parser.parse_args(argv)
     require_limited()
     cloud = Cloud(args.sdk, 'pure-loop-474323-a8', Path(args.package)/'pricing-catalog-api')
-    result = download(cloud, args.destination)
+    endpoint='https://cloudbilling.googleapis.com/v1/services/95FF-2EF5-5EA1/skus' if args.storage else ENDPOINT
+    result = download(cloud, args.destination,endpoint=endpoint)
     print(json.dumps(dict(skus=result['skus'], pages=len(result['pages']), candidates=result['candidates'])))
 
 

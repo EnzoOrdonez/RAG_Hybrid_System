@@ -33,6 +33,8 @@ def create(root, spec, *, commit):
         rates={'compute_usd_h':float(quote['usd_per_hour']),'verified_utc':receipt['at'],
                'price_receipt_sha256':quote['catalog_receipt_sha256']},
         qualification_status='LOCAL_I7_PLAN_NOT_CLOUD_QUALIFIED')
+    from scripts.study_operator.i7_costs import list_prices
+    source['cost_plan']=list_prices(prices,spec.get('storage_price_archive','MISSING_STORAGE_PRICE_ARCHIVE'))
     for key in ('bootstrap_inputs','bootstrap_inputs_first_boot_only','configuration_provenance',
                 'i6_provenance','primary_disk','secondary_vm','secondary_disk','instance_id',
                 'final_snapshot','host_infrastructure_sha256','host_infrastructure_commit'):

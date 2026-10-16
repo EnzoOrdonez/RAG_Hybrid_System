@@ -59,6 +59,10 @@ def build(operator, spec):
     cloud = Cloud(operator.cloud.sdk,operator.cloud.project,root/'runs')
     controller = Controller(root,cloud,label='i7cpu01')
     inventory = {'resources':{'snapshots':cloud.command(['compute','snapshots','list'])}}
+    source_snapshots=[s for s in inventory['resources']['snapshots']
+                      if s['name']=='cloudrag-i6-cierre-disco-20261016']
+    if len(source_snapshots)!=1 or source_snapshots[0].get('storageLocations')!=['us-central1']:
+        raise ValueError('COST_SCOPE_REQUIRES_CENTRAL1_SOURCE_SNAPSHOT')
     resources = controller.prepare(inventory,source,snapshot_name='cloudrag-i6-cierre-disco-20261016')
     restored = controller.probe_and_stop(resources,source)
     if restored['status'] != 'CPU_RESTORATION_VERIFIED':
@@ -115,7 +119,7 @@ def clean_snapshot(operator, cloud, resources, build_proof):
         '--type=pd-balanced','--description='+marker],timeout=600)
     target_receipt = cloud.command(['compute','disks','describe',target,'--zone='+zone])
     stage_receipt = cloud.command(['compute','snapshots','describe',stage])
-    if (target_receipt['description'] != marker or
+    if (stage_receipt.get('storageLocations')!=['us-central1'] or target_receipt['description'] != marker or
             str(target_receipt['sourceSnapshotId']) != str(stage_receipt['id'])):
         raise ValueError('OWN_SERVICE_CLONE_IDENTITY_CHANGED')
     cloud.command(['compute','instances','attach-disk',vm['name'],'--zone='+zone,
@@ -154,7 +158,8 @@ def clean_snapshot(operator, cloud, resources, build_proof):
         cloud.command(['compute','snapshots','create',final,'--source-disk='+target,
             '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],timeout=600)
         snapshot = cloud.command(['compute','snapshots','describe',final])
-        if snapshot['status'] != 'READY' or snapshot['description'] != marker:
+        if (snapshot['status'] != 'READY' or snapshot['description'] != marker
+                or snapshot.get('storageLocations')!=['us-central1']):
             raise ValueError('CLEAN_SERVICE_SNAPSHOT_NOT_READY')
         operator.config.update(prepared['installation'])
         operator.state['qualified_service_snapshot'] = snapshot
@@ -172,7 +177,8 @@ def gpu_restore(operator):
     from scripts.study_operator.startup import write_startup
     snapshot = operator.state['qualified_service_snapshot']
     actual = operator.cloud.command(['compute','snapshots','describe',snapshot['name']])
-    if str(actual['id']) != str(snapshot['id']) or actual['status'] != 'READY':
+    if (str(actual['id']) != str(snapshot['id']) or actual['status'] != 'READY'
+            or actual.get('storageLocations')!=['us-central1']):
         raise ValueError('QUALIFIED_SERVICE_SNAPSHOT_CHANGED')
     # Capacity is held before restoring the GPU disk, never while another GPU is active.
     instances = operator.cloud.command(['compute','instances','list'])

@@ -75,6 +75,8 @@ class Operator(LegacyOperator):
         now = self.now()
         if now < datetime(2026,11,1,tzinfo=timezone.utc):
             raise ValueError('NO_PAID_EFFECT_BEFORE_NOVEMBER')
+        from scripts.study_operator.i7_costs import admit
+        admit(self)
         rates = self.config['rates']
         money = (exposure,self.state.get('spent_usd',0),self.state.get('open_exposure_usd',0),rates['compute_usd_h'])
         if any(type(v) not in (int,float) or not math.isfinite(v) or v < 0 for v in money) or money[-1] == 0:
@@ -97,6 +99,10 @@ class Operator(LegacyOperator):
         self.admit_paid(hours*self.config['rates']['compute_usd_h']+.25)
         if self.state.get('reservation') and not self.state['reservation'].get('deleted_verified'):
             raise ValueError('PRIOR_RESERVATION_NOT_CLOSED')
+        allocated=self.state.get('reservation_gpu_hours_used',0)+hours
+        if allocated>17:
+            raise ValueError('I7_CUMULATIVE_RESERVATION_HOURS_EXCEED_COST_PLAN')
+        self.state['reservation_gpu_hours_used']=allocated
         name = 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]
         zone = self.selected()['zone']
         until = self.now()+timedelta(hours=hours)
