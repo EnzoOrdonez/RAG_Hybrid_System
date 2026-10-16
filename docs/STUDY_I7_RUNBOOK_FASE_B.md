@@ -25,15 +25,22 @@ Confirmar cuota, instantáneas, IP, firewall, IAM, bucket vacío y política de
 retención por lecturas API. La factura I6 requiere conciliación propia; los
 precios de lista no son factura.
 
-Desde la raíz del worktree publicado, con Python 3.14.3:
+Primero abrir `powershell.exe -NoLogo -NoProfile` y ejecutar el bloque completo
+de instalación y suite I7 de `STUDY_I7_BROWSER_VALIDATION.md`. Ese bloque fija
+la ruta y comprueba Chromium antes del primer paso de Fase B.
+
+Después, desde la raíz del worktree publicado, con Python 3.14.3:
 
 ```powershell
+$env:PLAYWRIGHT_BROWSERS_PATH = 'C:/CloudRAG/i7-browser-runtime'
 $py = (Resolve-Path .venv-app/Scripts/python.exe).Path
+& $py -m scripts.study_operator.i7_browser_preflight
+if ($LASTEXITCODE -ne 0) { throw 'Pinned Chromium preflight failed' }
 $sdk = (Get-Command gcloud.cmd).Source
 $prep = 'C:/CloudRAG/i7-preparacion-noviembre'
 $run = 'C:/CloudRAG/iteration7-faseB-20261101'
 $spec = "$prep/fase-b-spec.json"
-$evidence = 'C:/CloudRAG/iteration7-faseA2-20261016/local-readiness.json'
+$evidence = 'C:/CloudRAG/iteration7-faseA2-followup-20261016/local-readiness.json'
 & $py -m scripts.study_operator.i7_phase_b --check --evidence $evidence
 ```
 
@@ -43,15 +50,29 @@ los bytes de fuente, 19 módulos, 3 documentos y logs de Windows, Linux e I7.
 No editar ese recibo para hacer pasar código diferente. Un cambio de fuente
 exige repetir las comprobaciones afectadas y emitir evidencia nueva.
 
-Instalar el automatizador del dueño, fuera de la imagen de servicio:
+El automatizador del dueño se instala fuera de la imagen de servicio. En cada
+consola que ejecute Fase B se debe definir la misma ruta explícita:
 
 ```powershell
+$env:PLAYWRIGHT_BROWSERS_PATH = 'C:/CloudRAG/i7-browser-runtime'
 python -m pip --python $py install --require-hashes -r requirements-i7-browser.txt
-& $py -m playwright install chromium
+if ($LASTEXITCODE -ne 0) { throw 'Browser dependency installation failed' }
+& $py -m playwright install --no-shell chromium
+if ($LASTEXITCODE -ne 0) { throw 'Chromium installation failed' }
+& $py -m scripts.study_operator.i7_browser_preflight
+if ($LASTEXITCODE -ne 0) { throw 'Pinned Chromium preflight failed' }
 ```
 
-El pin comprueba versión, árbol del paquete y ejecutable. Copiar el recibo
-`browser-validation.json` de A2 al nuevo `$run` tras crearlo; el recibo debe
+Playwright 1.58.0 instala Chromium **1208** por su manifiesto fijado. Ruta
+Windows: `$env:PLAYWRIGHT_BROWSERS_PATH/chromium-1208/chrome-win64/chrome.exe`.
+SHA-256: `ff0c99fc5bb2301cad77930aa76e5354cf2a5fefb7efdcf3b3bc10ba0550c015`.
+En Linux: `chromium-1208/chrome-linux64/chrome`, SHA-256
+`481fea1516a1f2b76454664272f12cd9dd1f20117b21e1f1498e08bc7f872c00`.
+El pin comprueba revisión, ruta, versión, árbol del paquete y ejecutable.
+Un navegador ausente o distinto bloquea el preflight antes de crear el cliente
+de nube de cualquier comando Fase B; el check enumera el bloqueo por nombre.
+Mantener la variable también en el proceso independiente de la serie. Copiar
+el recibo `browser-validation.json` de la consola limpia al nuevo `$run` tras crearlo; el recibo debe
 coincidir con fuente y pin. La validación recorrió la app real por HTTPS local,
 con dobles del backend, y tres fallas deliberadas. No es el smoke desplegado.
 
@@ -83,7 +104,7 @@ del lock; no cambiar dependencias para evitar una falla.
 
 ```powershell
 & $py -m scripts.study_operator.i7_config --root $run --spec $spec
-Copy-Item 'C:/CloudRAG/iteration7-faseA2-20261016/browser-validation.json' "$run/browser-validation.json"
+Copy-Item 'C:/CloudRAG/i7-local-verification-followup/browser-validation.json' "$run/browser-validation.json"
 ```
 
 La raíz es nueva, con períodos técnicos y smoke distintos. No hereda una VM.
@@ -142,8 +163,19 @@ segundo intento terminal ni cambiar el calendario. El colector mantiene pruebas
 privadas de todos los boots completos. Los terminales se conservan en el host;
 los terminales de compuerta se descargan antes del ciclo técnico.
 
-La IP canario viaja en un sufijo de User-Agent también por WebSocket. No cambia
-la IP de origen de TCP. Caddy elimina la cabecera antes de la app. El control
+En la Fase B, el canario IP introducido debe ser la **IP pública de origen real
+de la conexión del navegador al servicio**, la que observa el extremo servidor.
+Comprobarla desde ese mismo equipo y conexión antes del ensayo, considerando
+NAT, VPN o proxy. No escribirla en documentos públicos. Una IP RFC 5737 o una
+cadena inventada no valida ese control desplegado.
+
+En local, la IP documental viajó como sufijo de User-Agent también por
+WebSocket para probar el transporte y el censo con dobles. Ese sufijo no es
+la IP de origen TCP ni acredita su control en la Fase B. El recorrido puede
+transportar también la IP real como marcador en UA; el criterio desplegado
+sigue siendo cero registros nuevos de la IP de origen real y del UA canario.
+No declarar PASS si no se confirmó la IP de origen de la conexión.
+Caddy elimina la cabecera antes de la app. El control
 positivo local provocó una fuga deliberada con dobles; la comprobación del SO,
 Caddy, journald, consola serial y bucket reales se hace en el paso 6. No declarar
 PASS si hay exclusiones sin fecha/motivo o un dominio incompleto.

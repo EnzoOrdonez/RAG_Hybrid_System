@@ -24,7 +24,14 @@ def validate_steps(evidence=None, *, root=None,november_authorized=False):
         if importlib.util.find_spec('scripts.study_operator.'+module) is None:
             raise ValueError('RUNBOOK_MODULE_MISSING')
     from scripts.study_operator.i7_readiness import evaluate
-    return dict(evaluate(evidence,root=root,november_authorized=november_authorized),steps=len(STEPS))
+    result=dict(evaluate(evidence,root=root,november_authorized=november_authorized),steps=len(STEPS))
+    from scripts.study_operator.i7_browser_preflight import verify
+    try:
+        result['browser']=verify()
+    except ValueError:
+        result['status']='LOCAL_RUNBOOK_PARTIAL'
+        result['blockers'].append({'owner':'code','code':'PINNED_BROWSER_RUNTIME_REQUIRED'})
+    return result
 
 
 def switch_profile(operator, kind):
@@ -247,6 +254,11 @@ def main(argv=None):
     if (not args.live or not args.root or not args.sdk or not args.step
             or datetime.now(timezone.utc) < datetime(2026,11,1,tzinfo=timezone.utc)):
         parser.error('Explicit --live, root, SDK and November authorization required')
+    from scripts.study_operator.i7_browser_preflight import verify
+    try:
+        verify()
+    except ValueError as error:
+        parser.error(str(error))
     if args.step not in ('close','reconcile','technical-cycle'):
         from scripts.study_operator.i7_readiness import evaluate
         if any(row['owner']=='code' for row in evaluate(args.evidence,november_authorized=True)['blockers']):

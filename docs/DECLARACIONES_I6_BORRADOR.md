@@ -61,3 +61,25 @@ sobre el artículo y los documentos del estudio. Esta tarea no modifica B.4,
 4.8 ni Declaraciones oficiales. No se ha accedido a personas ni creado ética.
 Los terminales no descargados de la instantánea siguen siendo evidencia pendiente,
 sin afirmar que se haya comprobado su inventario completo en A2.
+
+## Procedencia de los doce contextos: archivo I4 ausente
+
+Comprobación local del 16/10/2026: no existe
+`C:/CloudRAG/autonomous-run-20261004T230147Z/verified-final-context-provenance.json`,
+el archivo de procedencia I4 citado por la enmienda de servicio. Su directorio
+padre sí existe. No se atribuye a ese archivo un hash ni contenido reconstruido.
+
+Se emplea la referencia sellada de la I5:
+`C:/CloudRAG/iteration5-run-20261007T020139Z/rag_freeze_baseline.json`,
+SHA-256 del archivo completo:
+`3616b0cc78b9de4c5fe918c5adc621197c967278872a40e4dcea479ed4ceb8cb`.
+Las doce listas se leen de `rag.contexts`. La admisión liga la ruta y ese hash,
+y compara las listas con los contextos vivos del entorno I7 antes de generar.
+Esto no recupera el archivo original I4 ni acredita por sí mismo procedencia
+viva I7; esa medición queda para B.
+
+Propuesta editorial para Enzo: «El archivo de procedencia I4 citado en la
+enmienda no estuvo disponible en el paquete consultado. La comprobación empleó
+la referencia de los doce contextos conservada en el manifiesto sellado de I5,
+identificado por SHA-256. Se declara esta fuente alternativa, sin presentar
+como recuperado el archivo I4 ausente.»
