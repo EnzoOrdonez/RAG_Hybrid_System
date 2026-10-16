@@ -46,7 +46,7 @@ def run_child(arguments, *, launch=subprocess.Popen):
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument('operation', choices=('freeze', 'verify', 'serve', 'gate', 'backup', 'stimulus'))
+    parser.add_argument('operation', choices=('freeze', 'verify', 'serve', 'gate', 'backup', 'stimulus', 'i7-gate'))
     parser.add_argument('--deployment', required=True)
     parser.add_argument('--ollama-socket', required=True)
     parser.add_argument('--streamlit-socket', required=True)
@@ -61,6 +61,10 @@ def main(argv=None):
 
     signal.signal(signal.SIGTERM, shutdown)
     with relays(args.ollama_socket, args.streamlit_socket):
+        if args.operation == 'i7-gate':
+            from scripts.study_operator.i7_gate_daemon import serve
+            deployment = json.loads(Path(args.deployment).read_text(encoding='utf-8'))
+            return serve(deployment)
         if args.operation == 'stimulus':
             from scripts.study_operator.stimulus_daemon import serve
 

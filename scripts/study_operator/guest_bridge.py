@@ -192,6 +192,11 @@ def dispatch(request):
 
         return dispatch_stimulus(active,request,execute=execute,controller=controller,
                                  maintenance=lambda: dispatch(dict(operation='maintenance')))
+    if operation in {'gate-start','gate-status','gate-evidence','gate-ack'}:
+        from scripts.study_operator.i7_gate_guest import dispatch_gate
+
+        return dispatch_gate(active,request,execute=execute,controller=controller,
+                             maintenance=lambda: dispatch(dict(operation='maintenance')))
     raise ValueError('UNKNOWN_OWNER_OPERATION')
 
 
