@@ -67,7 +67,7 @@ class HostCollection:
         self.process = None
         self.stopped = False
 
-    def command(self, argv, seconds=3):
+    def command(self, argv, seconds=30):
         result = self.invoke(argv,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,timeout=seconds)
         if result.returncode:
             raise ValueError('OWNED_STIMULUS_HOST_COMMAND_FAILED')
