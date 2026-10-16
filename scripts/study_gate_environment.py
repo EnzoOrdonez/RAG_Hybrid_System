@@ -179,6 +179,9 @@ class LinuxSampler:
                 result['service_state'] = json.loads(Path(self.service_state_path).read_bytes())
             except (OSError, ValueError):
                 result['errors'].append('service_state_unreadable')
+        # I6 (Adenda 6): the observation closes after its last read, so a service marker
+        # written during sampling is never later than the sample's own instant.
+        result['monotonic_s'] = time.monotonic()
         return result
 
 

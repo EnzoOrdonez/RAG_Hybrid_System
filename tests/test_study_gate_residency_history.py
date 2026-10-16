@@ -74,3 +74,25 @@ def test_linux_sampler_provides_the_aware_observation_clock(monkeypatch):
     sampled = environment.LinuxSampler()()
     assert datetime.fromisoformat(sampled["at"]).tzinfo is not None
     assert sampled["ollama_ps_api"] == {"models": []}
+
+
+def test_sampler_closes_after_service_marker_without_changing_cpu_interval(monkeypatch):
+    from scripts import study_gate_environment as environment
+    import json
+
+    clock = iter([100.0, 101.0, 105.0, 106.0])
+    monkeypatch.setattr(environment.time, 'monotonic', lambda: next(clock))
+    marker = dict(written_monotonic_s=100.5)
+    fake = SimpleNamespace(read_text=lambda: 'cpu 1 1 1 100 0 0 0 0', iterdir=lambda: [],
+                           read_bytes=lambda: json.dumps(marker).encode())
+    monkeypatch.setattr(environment, 'Path', lambda _: fake)
+    monkeypatch.setattr(environment, 'command', lambda _: '0')
+    monkeypatch.setattr(environment.urllib.request, 'urlopen', lambda *a, **kw:
+                        io.BytesIO(b'{"models": []}'))
+    sampler = environment.LinuxSampler('/synthetic-marker')
+    first = sampler()
+    assert first['monotonic_s'] >= first['service_state']['written_monotonic_s']
+    assert sampler.previous_at == 100.0
+    second = sampler()
+    assert second['monotonic_s'] == 106.0
+    assert sampler.previous_at == 105.0
