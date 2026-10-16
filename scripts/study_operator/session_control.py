@@ -113,6 +113,24 @@ def dispatch(request, deployment, *, maintenance=False):
         # before checking it; freeze() refuses conflicting or populated stores.
         store.freeze()
     store.check()
+    if operation=='i7-smoke-observe' and deployment['purpose']=='smoke':
+        from src.ui.components.study_sessions import StudySession
+        checkpoints=list(store.root.glob('*/study_checkpoint.json'))
+        if not checkpoints:
+            return {'data':None}
+        if len(checkpoints)!=1:
+            raise ValueError('ONE_SYNTHETIC_SMOKE_SESSION_REQUIRED')
+        session=StudySession.load(store,checkpoints[0].parent.name)
+        if session.data['assignment']['participant_id']!='P999':
+            raise ValueError('SYNTHETIC_SMOKE_CODE_REQUIRED')
+        result={'data':session.data}
+        if session.data['stage']=='complete':
+            exported=session.export().read_bytes()
+            store.check_backups()
+            result.update(export_base64=base64.b64encode(exported).decode(),
+                export_sha256=hashlib.sha256(exported).hexdigest(),
+                backup=json.loads((checkpoints[0].parent/'backup_state.json').read_bytes()))
+        return result
     if operation == 'i7-smoke-status' and deployment['purpose'] == 'smoke':
         from src.ui.components.study_sessions import StudySession
 

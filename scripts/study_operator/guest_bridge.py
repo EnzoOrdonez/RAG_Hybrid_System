@@ -192,6 +192,12 @@ def dispatch(request):
         return controller(active,request)
     if operation == 'i7-smoke-status' and set(request) == {'operation'}:
         return controller(active,request)
+    if operation=='i7-smoke-observe' and set(request)=={'operation','identity'}:
+        identity={'boot_id':boot,'image_id':active['config']['image_id'],
+                  'source_commit':active['config']['commit']}
+        if request['identity']!=identity or active['config']['purpose']!='smoke':
+            raise ValueError('BROWSER_BOOT_IDENTITY_DIFFERS')
+        return dict(controller(active,{'operation':operation}),identity=identity)
     if operation == 'maintenance':
         result = subprocess.run(['docker','stop','--time','30',active['app_container']],
                                 stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=45)
