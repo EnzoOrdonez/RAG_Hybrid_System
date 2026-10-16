@@ -223,6 +223,22 @@ antes del índice siguiente. Los datos privados no entran en evidence/. El
 ensayo completo requiere 12 arranques/144 llamadas/120 objetivos; ninguna fila
 o arranque aislado concede aceptación. La ejecución literal real sigue pendiente.
 
+## Preparación obligatoria identificada en I6
+
+La Adenda 8 de I6 mostró una falla de primera carga en una sesión sin la
+preparación de cachés. Antes de cualquier arranque con sesiones, smoke o estímulo,
+seguir la [receta de preparación del host](../../docs/STUDY_I6_HOST_PREPARATION_RECIPE.md).
+Es una propuesta para la siguiente versión, pendiente de implementación y
+validación desplegada. Los comandos anteriores de este runbook no incorporan
+ese paso. Mantener cerrada la admisión mientras falte esa validación.
+
+El cierre local de I6 declara la aceptación del estímulo por separado de la
+compuerta y de la aptitud para participantes. La restauración corregida requiere
+una imagen nueva y una prueba desplegada; final03 conserva el defecto observado.
+No ejecutar automáticamente herramientas Cowork desde este runbook ni tratar
+READY como autorización de admisión. La reserva debe comprobarse ausente tras
+borrarla, incluso con VM detenida.
+
 ## Cierre sin sesión agendada
 
 ```powershell
