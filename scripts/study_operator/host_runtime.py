@@ -125,7 +125,9 @@ class Host:
         for path in (self.root/'config').iterdir():
             os.chmod(path,0o640)
             os.chown(path,0,10001)
-        self.step(['systemd-run','--unit=cloudrag-i4-stop-'+self.boot,'--on-active=165m',
+        from scripts.study_operator.i7_preparation import host_seconds, ollama_command, prepare
+        limit = host_seconds(self.config)
+        self.step(['systemd-run','--unit=cloudrag-i4-stop-'+self.boot,'--on-active='+str(limit)+'s',
                    '/sbin/shutdown','-h','now'], timeout=30)
         # Retained containers from previous iterations are stopped, never removed.
         names = self.step(['docker','ps','--format','{{.Names}}'],capture=True).decode().splitlines()
@@ -133,9 +135,11 @@ class Host:
             if name.startswith(('cloudrag-i3-','cloudrag-i4-')):
                 self.step(['docker','stop','--time','15',name],timeout=30)
         self.ollama = 'cloudrag-i4-ollama-'+self.boot
-        self.container(['docker','run','--rm=false','--name',self.ollama,'--network','host',
+        ollama_argv = ollama_command(self.config,self.ollama) if self.config.get('iteration') == 7 else [
+            'docker','run','--rm=false','--name',self.ollama,'--network','host',
             '--log-driver','none','--gpus','all','-e','OLLAMA_HOST=127.0.0.1:11434',
-            *bind(self.config['ollama_models'],'/root/.ollama/models'), self.config['ollama_image']],self.ollama)
+            *bind(self.config['ollama_models'],'/root/.ollama/models'), self.config['ollama_image']]
+        self.container(ollama_argv,self.ollama)
         for _ in range(60):
             try:
                 with urllib.request.urlopen('http://127.0.0.1:11434/api/version',timeout=2) as response:
@@ -146,6 +150,12 @@ class Host:
                 time.sleep(1)
         else:
             raise ValueError('OLLAMA_START_TIMEOUT')
+        if self.config.get('iteration') == 7:
+            def models():
+                with urllib.request.urlopen('http://127.0.0.1:11434/api/ps',timeout=3) as response:
+                    return json.load(response)['models']
+            receipt = prepare(self.config,self.step,models=models)
+            save_state(self.root/'host-preparation.json',receipt)
         runtime = dict(schema_version=1,boot_id=self.boot,observed_utc=datetime.now(timezone.utc).isoformat(),
             instance={field:metadata(field) for field in ('id','zone','machine-type')})
         if (runtime['instance']['id'] != str(self.config['instance_id'])
@@ -223,7 +233,7 @@ class Host:
         metadata_unreachable(self.app)
         save_state(ROOT/'active.json',dict(schema_version=1,boot_id=self.boot,boot_root=str(self.root),
             session_root=str(self.session_root),app_container=self.app,ollama_container=self.ollama,
-            config=self.config,guest_deadline_utc=(self.started+timedelta(minutes=165)).isoformat(),
+            config=self.config,guest_deadline_utc=(self.started+timedelta(seconds=limit)).isoformat(),
             native_deadline_utc=self.config['native_deadline_utc']))
         (self.root/'caddy-config'/'Caddyfile').write_text(caddyfile(self.config['hostname']),encoding='utf-8')
         tls_root = ROOT/'tls'
@@ -267,7 +277,8 @@ class Host:
     def run(self):
         try:
             self.prepare()
-            while time.monotonic()-self.began < 165*60:
+            from scripts.study_operator.i7_preparation import host_seconds
+            while time.monotonic()-self.began < host_seconds(self.config):
                 if (self.root/'stop-request.json').exists():
                     break
                 if any(child.poll() is not None for child in self.children):
