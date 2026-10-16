@@ -129,3 +129,57 @@ privado `C:/CloudRAG/iteration7-browser-stability-20261016/`. La admisión requi
 con los fallos previos conservados. Cada corrida contiene dos recorridos completos;
 no se sustituyen corridas fallidas dentro de una serie. La evidencia local no
 mide la probabilidad de fallos de generación o infraestructura en la Fase B.
+
+
+## Igualdad de Streamlit en dos puntos
+
+El Python del automatizador debe tener la misma versión exacta de Streamlit
+que `requirements-lock.txt`. El lock vigente fija **1.54.0**. Se lee
+`importlib.metadata.version('streamlit')` en el proceso que ejecuta Fase B.
+
+Antes del primer efecto del build CPU, `verify_before_cpu` exige esa igualdad
+y los hashes exactos de la receta en `config/i7-build-recipe-pin.json`:
+Dockerfile, requirements-lock.txt, traductor del lock para Linux, creador del
+contexto y ejecutor Linux. Son hashes de los bytes LF publicados, según
+`.gitattributes`; no se normalizan ni se ignoran cambios durante el cotejo.
+`STREAMLIT_BUILD_INPUTS_MATCH` confirma estas comprobaciones sin exigir una
+imagen que todavía no existe. Ausencia o discrepancia del pin o de cualquier
+archivo produce `I7_BUILD_RECIPE_HASH_MISMATCH`. La diferencia de versiones
+produce `STREAMLIT_VERSION_MISMATCH`. Ambos errores bloquean antes de crear Cloud.
+
+El pipeline vuelve a comprobar la receta dentro del contexto preparado y que
+el hash del lock del contexto es el admitido antes del pago. El archivo tar
+con ese contexto queda ligado por SHA-256 al trabajo del constructor existente.
+La imagen se construye desde ese lock, sin cambiar las versiones.
+
+Después de construir y descargar los recibos, y otra vez antes de reservar GPU,
+se exigen las tres versiones iguales: automatizador, lock e imagen construida.
+El censo real procede de `packages.stdout` y `packages.receipt.json` de
+`cpu/linux-build-finali7-evidence/`. El recibo debe indicar `docker run` sobre
+el digest de la imagen con `-m pip freeze` y salida cero. Se comprueban bytes
+y SHA-256 contra `cpu/linux-build-finali7-download-proof.json`, así como commit
+y digest contra `installation.json`. No se infiere lo instalado del Dockerfile.
+
+`STREAMLIT_VERSIONS_MATCH` informa las tres versiones y el hash del censo.
+`STREAMLIT_VERSION_MISMATCH` bloquea una diferencia;
+`QUALIFIED_I7_STREAMLIT_EVIDENCE_REQUIRED` bloquea evidencia ausente, alterada
+o de otra imagen. Ante el rechazo se comprueba la identidad del CPU propio,
+se pide STOP si hace falta y se confirma TERMINATED antes de registrar
+`STREAMLIT_BLOCKED_CPU_STOPPED`. No se reserva GPU. Si falla la API o cambia
+la identidad, se registra `STREAMLIT_BLOCKED_CPU_STOP_UNCONFIRMED` y sigue
+bloqueada la reserva. Los comandos de cierre y conciliación siguen disponibles
+sin exigir que las versiones coincidan.
+
+Comprobaciones locales, sin efectos de nube:
+
+```powershell
+& $py -m scripts.study_operator.i7_phase_b --root $run --check --evidence $evidence cpu-build
+& $py -m scripts.study_operator.i7_phase_b --root $run --check --evidence $evidence gpu-restore
+```
+
+El segundo check exige el censo real y bloquea hasta que exista. El check solo
+lee; el STOP ante rechazo corresponde al pipeline vivo. Las pruebas incluyen
+igualdad y primer build sin imagen; rechazo antes de crear Cloud por versión,
+receta o lock cambiado; rechazo posterior con STOP confirmado; errores de API
+y reemplazo de identidad sin reserva; y cierre permitido cuando hay discrepancia.
+Son pruebas con dobles y evidencia sintética, sin validación de una imagen en nube.

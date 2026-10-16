@@ -18,7 +18,7 @@ def profile(kind):
             'native_stop_s':10800}
 
 
-def validate_steps(evidence=None, *, root=None,november_authorized=False):
+def validate_steps(evidence=None, *, root=None,november_authorized=False,step='cpu-build'):
     for module in ('i7','i7_gate_host','i7_restore','i7_privacy','cpu_build','build_context',
                    'i7_service_disk','i7_cpu_pipeline','i7_smoke','i7_admission','i7_technical','i7_reconcile','i7_costs'):
         if importlib.util.find_spec('scripts.study_operator.'+module) is None:
@@ -31,6 +31,12 @@ def validate_steps(evidence=None, *, root=None,november_authorized=False):
     except ValueError:
         result['status']='LOCAL_RUNBOOK_PARTIAL'
         result['blockers'].append({'owner':'code','code':'PINNED_BROWSER_RUNTIME_REQUIRED'})
+    from scripts.study_operator.i7_streamlit_preflight import verify as verify_streamlit, verify_before_cpu
+    try:
+        result['streamlit']=verify_before_cpu() if step=='cpu-build' else verify_streamlit(root)
+    except ValueError as error:
+        result['status']='LOCAL_RUNBOOK_PARTIAL'
+        result['blockers'].append({'owner':'code','code':str(error)})
     return result
 
 
@@ -249,7 +255,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.check:
         print(json.dumps(validate_steps(args.evidence,root=args.root,
-            november_authorized=args.live and datetime.now(timezone.utc)>=datetime(2026,11,1,tzinfo=timezone.utc))))
+            november_authorized=args.live and datetime.now(timezone.utc)>=datetime(2026,11,1,tzinfo=timezone.utc),
+            step=args.step or 'cpu-build')))
         return 0
     if (not args.live or not args.root or not args.sdk or not args.step
             or datetime.now(timezone.utc) < datetime(2026,11,1,tzinfo=timezone.utc)):
@@ -257,9 +264,16 @@ def main(argv=None):
     from scripts.study_operator.i7_browser_preflight import verify
     try:
         verify()
+        from scripts.study_operator.i7_streamlit_preflight import verify as verify_streamlit, verify_before_cpu
+        if args.step=='cpu-build':
+            verify_before_cpu()
+        elif args.step not in ('gpu-restore','close','reconcile','technical-cycle'):
+            verify_streamlit(args.root)
+        # gpu-restore checks the real image inside its admission so a mismatch
+        # can still issue the owned CPU STOP. Cleanup never needs matching versions.
     except ValueError as error:
         parser.error(str(error))
-    if args.step not in ('close','reconcile','technical-cycle'):
+    if args.step not in ('gpu-restore','close','reconcile','technical-cycle'):
         from scripts.study_operator.i7_readiness import evaluate
         if any(row['owner']=='code' for row in evaluate(args.evidence,november_authorized=True)['blockers']):
             parser.error('Current source-bound Windows/Linux/I7 verification receipt required')
@@ -269,6 +283,12 @@ def main(argv=None):
     from scripts.study_operator.i7 import Operator
     with FileLock(str(args.root/'i7.lock'),timeout=1):
         operator = Operator(args.root,Cloud(args.sdk,'pure-loop-474323-a8',args.root/'runs'))
+        if args.step=='gpu-restore':
+            from scripts.study_operator.i7_cpu_pipeline import verify_image_or_stop_cpu
+            verify_image_or_stop_cpu(operator)
+            from scripts.study_operator.i7_readiness import evaluate
+            if any(row['owner']=='code' for row in evaluate(args.evidence,november_authorized=True)['blockers']):
+                parser.error('Current source-bound Windows/Linux/I7 verification receipt required')
         from scripts.study_operator.i7_workflows import verify_tool_source
         verify_tool_source(operator)
         spec = json.loads(args.spec.read_bytes()) if args.spec else {}

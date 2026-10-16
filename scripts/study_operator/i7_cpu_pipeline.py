@@ -15,6 +15,9 @@ from scripts.study_operator.service_gateway import save_state
 
 
 def build(operator, spec):
+    from scripts.study_operator.i7_streamlit_preflight import verify_before_cpu, verify_recipe
+    preflight = verify_before_cpu()
+    operator.receipt('streamlit-prebuild',preflight)
     from scripts.study_operator.build_context import prepare
     from scripts.study_operator.cloud_client import Cloud
     from scripts.study_operator.cpu_build import Build
@@ -79,6 +82,9 @@ def build(operator, spec):
         if result.returncode:
             raise ValueError('CLEAN_BUILD_CONTEXT_COMMAND_FAILED')
     context = prepare(repo,spec['vendor'],root,'finali7',run=run,python=sys.executable)
+    verify_recipe(root/'build-context-finali7/repository')
+    if context['requirements_lock_sha256'] != preflight['files']['requirements-lock.txt']:
+        raise ValueError('I7_BUILD_CONTEXT_LOCK_CHANGED')
     builder = Build(root,cloud,cpu_label='i7cpu01')
     builder.launch('finali7',context,Path(__file__).with_name('linux_build.py').read_bytes())
     deadline = time.monotonic()+7200
@@ -93,6 +99,7 @@ def build(operator, spec):
         raise ValueError('CPU_BUILD_NOT_QUALIFIED')
     operator.config.update(image_id=proof['image_id'],host_code='/srv/cloudrag/iteration5/code-finali7')
     operator.persist()
+    verify_image_or_stop_cpu(operator)
     receipt = clean_snapshot(operator,cloud,resources,proof)
     operator.state['spent_usd'] = operator.state.get('spent_usd',0)+exposure
     operator.state['cpu_cost_basis']='CONSERVATIVE_EXPOSURE_NOT_INVOICE'
@@ -181,7 +188,29 @@ def clean_snapshot(operator, cloud, resources, build_proof):
         cloud.command(['compute','instances','stop',vm['name'],'--zone='+zone],timeout=600)
 
 
+def verify_image_or_stop_cpu(operator):
+    """An image rejection can only perform identity-checked CPU shutdown."""
+    from scripts.study_operator.i7_streamlit_preflight import verify
+    try:
+        result = verify(operator.root)
+    except ValueError as error:
+        from scripts.study_operator.cpu_build import Build
+        builder = Build(operator.root/'cpu',operator.cloud,cpu_label='i7cpu01')
+        try:
+            cpu = builder.stopped(builder.resource())
+        except Exception as stop_error:
+            operator.receipt('streamlit-admission',{'status':'STREAMLIT_BLOCKED_CPU_STOP_UNCONFIRMED',
+                'reason':str(error),'stop_error':type(stop_error).__name__})
+            raise ValueError('STREAMLIT_BLOCKED_CPU_STOP_UNCONFIRMED') from stop_error
+        operator.receipt('streamlit-admission',{'status':'STREAMLIT_BLOCKED_CPU_STOPPED',
+            'reason':str(error),'cpu_id':str(cpu['id']),'cpu_status':cpu['status']})
+        raise
+    operator.receipt('streamlit-admission',result)
+    return result
+
+
 def gpu_restore(operator):
+    verify_image_or_stop_cpu(operator)
     from scripts.study_operator.startup import write_startup
     from scripts.study_operator.i7_reconcile import observed,record_intent
     if any(row['status']=='UNKNOWN' for row in operator.state.get('creation_intents',[])):

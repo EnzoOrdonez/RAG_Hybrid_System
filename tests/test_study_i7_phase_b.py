@@ -98,8 +98,9 @@ def test_cleaner_requires_ack_and_preserves_only_service_payload(tmp_path):
     assert archive.read_bytes()==b'archived original bytes'
 
 
-def test_gpu_restore_checks_snapshot_before_allocating_capacity(tmp_path):
+def test_gpu_restore_checks_snapshot_before_allocating_capacity(tmp_path,monkeypatch):
     from scripts.study_operator.i7_cpu_pipeline import gpu_restore
+    monkeypatch.setattr('scripts.study_operator.i7_cpu_pipeline.verify_image_or_stop_cpu',lambda owner:None)
     class Cloud:
         def command(self,args,**kwargs):
             return {'id':'replacement','status':'READY'}

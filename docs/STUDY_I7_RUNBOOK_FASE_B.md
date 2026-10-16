@@ -40,12 +40,14 @@ $sdk = (Get-Command gcloud.cmd).Source
 $prep = 'C:/CloudRAG/i7-preparacion-noviembre'
 $run = 'C:/CloudRAG/iteration7-faseB-20261101'
 $spec = "$prep/fase-b-spec.json"
-$evidence = 'C:/CloudRAG/iteration7-browser-stability-20261016/local-readiness.json'
+$evidence = 'C:/CloudRAG/iteration7-streamlit-preflight-20261016/option2/local-readiness.json'
 & $py -m scripts.study_operator.i7_phase_b --check --evidence $evidence
 ```
 
-Debe listar solo bloqueos con dueño Enzo: autorización de noviembre y anexo
-efectivo publicado. Un bloqueo con dueño `code` impide empezar. El recibo liga
+En el check de `cpu-build`, debe listar solo bloqueos con dueño Enzo:
+autorización de noviembre y anexo efectivo publicado. No exige todavía el censo
+de una imagen que debe construirse en ese paso. Un bloqueo con dueño `code`
+impide empezar. El recibo liga
 los bytes de fuente, 19 módulos, 3 documentos y logs de Windows, Linux e I7.
 No editar ese recibo para hacer pasar código diferente. Un cambio de fuente
 exige repetir las comprobaciones afectadas y emitir evidencia nueva.
@@ -110,6 +112,52 @@ Copy-Item 'C:/CloudRAG/iteration7-browser-stability-20261016/browser-validation.
 La raíz es nueva, con períodos técnicos y smoke distintos. No hereda una VM.
 Los siguientes comandos están escritos para noviembre y no constituyen permiso.
 
+## Dos guardas de Streamlit
+
+La construcción inicial CPU está autorizada con dos versiones y receta
+verificada. Antes de crear el cliente de nube se compara Streamlit instalado
+en el Python del automatizador con el pin exacto de `requirements-lock.txt`.
+El lock vigente fija **1.54.0**. Se cotejan los SHA-256 de los cinco archivos de
+`config/i7-build-recipe-pin.json`: Dockerfile, lock, traductor del lock,
+creador del contexto y ejecutor Linux. Los bytes deben ser LF como indica
+`.gitattributes`; una diferencia no se corrige automáticamente. El pipeline
+confirma esos mismos archivos en el contexto preparado y el hash del lock del
+contexto antes de lanzarlo. El constructor recibe el tar ligado por SHA-256.
+
+```powershell
+& $py -m scripts.study_operator.i7_phase_b --root $run --check --evidence $evidence cpu-build
+```
+
+Exigir `STREAMLIT_BUILD_INPUTS_MATCH`. `STREAMLIT_VERSION_MISMATCH`,
+`STREAMLIT_OWNER_LOCK_REQUIRED` o `I7_BUILD_RECIPE_HASH_MISMATCH` impiden todo
+efecto del build CPU. No cambiar el pin para evitar el rechazo sin revisar la
+receta y el commit publicado.
+
+Al terminar el build, antes de preparar el disco limpio, se compara también
+la versión instalada dentro de la imagen. Antes de reservar GPU se repite:
+
+```powershell
+& $py -m scripts.study_operator.i7_phase_b --root $run --check --evidence $evidence gpu-restore
+```
+
+Se requieren `installation.json`, `cpu/linux-build-finali7-download-proof.json`
+y `cpu/linux-build-finali7-evidence/packages.stdout` y `packages.receipt.json`.
+Deben corresponder al mismo commit y digest de imagen I7. Se verifican hashes,
+tamaños, comando `docker run <digest> -m pip freeze` y salida cero. El censo se
+lee de la imagen construida, nunca se deduce del lock o del Dockerfile.
+`STREAMLIT_VERSIONS_MATCH` exige que las tres versiones sean iguales.
+
+Una discrepancia, evidencia ausente, alterada o de otra imagen bloquea el
+pipeline vivo. Este pide STOP al CPU propio y confirma TERMINATED por API;
+el recibo queda en `receipts/streamlit-admission/` con
+`STREAMLIT_BLOCKED_CPU_STOPPED`. No reserva GPU. Un error de API o identidad
+reemplazada produce `STREAMLIT_BLOCKED_CPU_STOP_UNCONFIRMED`: no se declara
+cerrado ni se reserva GPU. Resolver el cierre por identidad, conservando los
+intentos y recibos; no repetir el build. Los comandos `close`, `reconcile` y
+`technical-cycle` no exigen coincidencia de Streamlit para permitir el cierre.
+El check local solo lee y reporta; no pide STOP. Ver
+`STUDY_I7_BROWSER_VALIDATION.md` para el censo y las pruebas negativas.
+
 ## Secuencia de ejecución
 
 Cada comando conserva sus recibos privados. No publicar consultas, respuestas,
@@ -117,8 +165,8 @@ tokens, IP, hostname, canarios o inventarios completos.
 
 | Paso | Comando | Criterio de éxito |
 |---|---|---|
-| 1. CPU, imagen y disco limpio | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --spec $spec --evidence $evidence --live cpu-build` | Fuente publicada; restauración CPU; imagen nueva con corrección de restore; nueve registros originales archivados fuera del servicio con hash y ACK; saneamiento offline; snapshot propio READY en us-central1. |
-| 2. Reserva y GPU | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live gpu-restore` | Reserva específica 12 h retenida antes de crear disco; snapshot e identidad exactos; VM propia con STOP 3 h. |
+| 1. CPU, imagen y disco limpio | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --spec $spec --evidence $evidence --live cpu-build` | Fuente publicada; restauración CPU; imagen nueva con corrección de restore; Streamlit leído de la imagen coincide con dueño y lock; nueve registros originales archivados fuera del servicio con hash y ACK; saneamiento offline; snapshot propio READY en us-central1. |
+| 2. Reserva y GPU | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live gpu-restore` | Tres versiones de Streamlit coinciden o CPU cerrado y reserva bloqueada; reserva específica 12 h retenida antes de crear disco; snapshot e identidad exactos; VM propia con STOP 3 h. |
 | 3. READY | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live ready` | <= 900 s; persistencia NVIDIA, driver, blob y mincore completo, JIT persistente, Ollama vacío, aislamiento e identidad. Una falla impide READY y admisión. |
 | 4. TLS | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live tls-three` | Tres boots distintos y consecutivos READY, mismo certificado y fuente, sin fallo intermedio. |
 | 4b. Contextos vivos | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live contexts` | Doce contextos en contenedor aislado, antes de generar y sin consumir historial del servicio. Comparación exacta con la referencia I3 heredada de I5. |
