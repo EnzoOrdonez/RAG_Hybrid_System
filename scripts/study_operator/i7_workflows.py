@@ -123,6 +123,12 @@ def privacy(operator):
     ip = getpass.getpass('IP propia, solo en memoria: ')
     user_agent = 'CloudRAG-I7-'+secrets.token_hex(24)
     inject(operator.config['hostname'],ip,user_agent)
+    from scripts.study_operator.i7_smoke import run as browser_smoke
+    operator.delete_sessions('purge-study',dry_run=True)
+    operator.delete_sessions('purge-study',dry_run=False)
+    journey=browser_smoke(operator,user_agent=user_agent,ip=ip)
+    if not all(journey['canary_transport'].values()):
+        raise ValueError('FULL_BROWSER_WEBSOCKET_CANARY_REQUIRED')
     guest = operator.bridge({'operation':'i7-privacy','ip':ip,'user_agent':user_agent},private=True,timeout=7200)
     storage = Storage(operator.config['sessions_bucket'],operator.cloud.owner_token,
         creation_anchor=operator.config.get('sessions_bucket_creation'))
@@ -134,7 +140,9 @@ def privacy(operator):
                **{k:owner['domains'][k] for k in ('serial','bucket')}}
     total = sum(d['hits'] for d in domains.values())
     status = 'INCOMPLETE' if any(not d['complete'] for d in domains.values()) else 'FAIL' if total else 'PASS'
-    return operator.receipt('privacy',{'status':status,'hits':total,'domains':domains,'exclusions':[]})
+    return operator.receipt('privacy',{'status':status,'hits':total,'domains':domains,'exclusions':[],
+        'journey':{'session_id':journey['session_id'],'identity':journey['identity'],
+                   'export_sha256':journey['export_sha256'],'transport':journey['canary_transport']}})
 
 
 def schedule(operator, *, invoke=subprocess.run):

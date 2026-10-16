@@ -42,8 +42,21 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
         browser=pw.chromium.launch(headless=True,executable_path=pw.chromium.executable_path)
         try:
             headers={'X-Forwarded-For':ip,'X-Real-IP':ip,'Forwarded':'for='+ip} if ip else {}
-            context=browser.new_context(ignore_https_errors=local_test,user_agent=user_agent,extra_http_headers=headers)
+            # Browser WebSocket APIs do not forward arbitrary HTTP headers.
+            # Carry the IP canary in the UA too; Caddy strips this entire header.
+            wire_ua=(user_agent+' CloudRAG-IP/'+ip) if user_agent and ip else user_agent
+            context=browser.new_context(ignore_https_errors=local_test,user_agent=wire_ua,extra_http_headers=headers)
             page=context.new_page()
+            transport={'browser_context':bool(user_agent and ip),'websocket_ip':False,'websocket_user_agent':False}
+            if user_agent and ip:
+                cdp=context.new_cdp_session(page)
+                cdp.send('Network.enable')
+                cdp.send('Network.setExtraHTTPHeaders',{'headers':headers})
+                def handshake(event):
+                    values={k.lower():v for k,v in event['request']['headers'].items()}
+                    transport['websocket_ip'] |= ip in values.get('user-agent','')
+                    transport['websocket_user_agent'] |= values.get('user-agent')==wire_ua
+                cdp.on('Network.webSocketWillSendHandshakeRequest',handshake)
             page.set_default_timeout(20000)
             sockets=[]
             page.on('websocket',lambda ws:sockets.append(ws.url))
@@ -159,6 +172,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
             return {'status':'BROWSER_EXPORT_VERIFIED','identity':identity,'session_id':session_id,
                 'automator':version,'export_sha256':digest,'attempts':8,'instruments':2,
                 'confirmed_inputs_sha256':confirmations,'websocket_seen':True,'local_validation':local_test,
+                'canary_transport':transport,
                 'objects':final['backup']['objects']}
         finally:
             browser.close()

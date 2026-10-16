@@ -17,7 +17,7 @@ from tests.study_helpers import configured
 
 
 @contextmanager
-def local_app(tmp_path):
+def local_app(tmp_path, *, canary_probe=False):
     from cryptography import x509
     from cryptography.hazmat.primitives import hashes, serialization
     from cryptography.hazmat.primitives.asymmetric import rsa
@@ -41,7 +41,8 @@ def local_app(tmp_path):
     with socket.socket() as sock:
         sock.bind(('127.0.0.1',0))
         port=sock.getsockname()[1]
-    env=dict(os.environ,CLOUDRAG_TEST_ROOT=str(tmp_path),PYTHONPATH=str(Path(__file__).resolve().parents[1]))
+    env=dict(os.environ,CLOUDRAG_TEST_ROOT=str(tmp_path),CLOUDRAG_TEST_CANARY_TRACE=str(int(canary_probe)),
+             PYTHONPATH=str(Path(__file__).resolve().parents[1]))
     log=(tmp_path/'server.log').open('wb')
     process=subprocess.Popen([sys.executable,'-m','streamlit','run',str(Path(__file__).with_name('study_browser_fixture.py')),
         '--server.headless=true','--server.address=127.0.0.1','--server.port='+str(port),

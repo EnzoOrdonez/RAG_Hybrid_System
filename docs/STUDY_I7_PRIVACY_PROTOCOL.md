@@ -14,9 +14,20 @@ No aparecen en argv, URL, scripts guardados ni recibos. La IP propia permite
 buscar también la dirección real de la conexión; los encabezados reenviados
 prueban su eliminación en el proxy. La petición recorre raíz, salud y favicon.
 El smoke sintético completo recorre el navegador, la app, el runner y el respaldo.
-El canario UA actual se inyecta solo en las tres peticiones HTTP indicadas.
-Falta enlazarlo al navegador y WebSocket del recorrido completo; por ello el
-código local no acredita todavía toda la cobertura exigida para F04.
+El mismo automatizador completa la sesión con un UA sintético y la IP canario
+en encabezados. Chromium no propaga los encabezados HTTP arbitrarios al
+WebSocket: la IP canario viaja también como sufijo del UA. El recibo CDP
+confirma ambos en el handshake real, sin persistirlos en el informe. Caddy
+suprime ese encabezado completo antes de la app; no se añaden identificadores
+a consultas, prompts ni respuestas.
+
+La prueba local de control positivo deja pasar deliberadamente esos encabezados
+al doble de generación y de respaldo y comprueba detección en app, runner,
+respaldos y bucket. Los dominios proxy, journald y serial son dobles de API
+en esa prueba. Los siete controles positivos deben detectarse y la falta de
+un dominio produce INCOMPLETE. Esto no acredita cobertura del SO del clon.
+En B, el comando privacy ejecuta el navegador, exige ambos canarios en el
+WebSocket y luego recorre los siete dominios reales. Exige cero aciertos.
 
 Fuentes: montajes escribibles efectivos y capas superiores de todos los
 contenedores retenidos del servicio, logs de Docker si existen, árbol del
