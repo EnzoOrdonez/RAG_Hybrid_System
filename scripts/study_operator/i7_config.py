@@ -19,11 +19,15 @@ def create(root, spec, *, commit):
     receipt=json.loads((prices/'receipt.json').read_bytes())
     protocol=verify_draw(spec['reviewed_config'])
     periods={kind:uuid.uuid4().hex for kind in ('technical','smoke')}
+    reference=Path(spec['inherited_package'])/'rag_freeze_baseline.json'
+    import hashlib
     source.update(iteration=7,commit=commit,operator_commit=commit,purpose='technical',
         period_ids=periods,period_id=periods['technical'],zone='us-central1-a',
         native_stop_s=10800,budget_usd=20,closure_reserve_usd=3,
         resource_marker='cloudrag-i7-'+periods['technical'],
         local_reviewed_config=str(Path(spec['reviewed_config']).resolve()),
+        i3_context_reference_path=str(reference.resolve()),
+        i3_context_reference_sha256=hashlib.sha256(reference.read_bytes()).hexdigest(),
         fingerprint=protocol['fingerprint'],cuda_cache_driver='580.178.04',
         cuda_cache='/srv/cloudrag/iteration6-cowork-backups/nv-computecache-580.178.04/ComputeCache',
         rates={'compute_usd_h':float(quote['usd_per_hour']),'verified_utc':receipt['at'],

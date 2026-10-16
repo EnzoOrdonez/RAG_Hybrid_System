@@ -46,7 +46,7 @@ def run_child(arguments, *, launch=subprocess.Popen):
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument('operation', choices=('freeze', 'verify', 'serve', 'gate', 'backup', 'stimulus', 'i7-gate'))
+    parser.add_argument('operation', choices=('freeze', 'verify', 'serve', 'gate', 'backup', 'stimulus', 'i7-gate','i7-contexts'))
     parser.add_argument('--deployment', required=True)
     parser.add_argument('--ollama-socket', required=True)
     parser.add_argument('--streamlit-socket', required=True)
@@ -61,6 +61,15 @@ def main(argv=None):
 
     signal.signal(signal.SIGTERM, shutdown)
     with relays(args.ollama_socket, args.streamlit_socket):
+        if args.operation=='i7-contexts':
+            import io
+            from contextlib import redirect_stderr,redirect_stdout
+            from scripts.study_operator.i7_admission import live_contexts
+            deployment=json.loads(Path(args.deployment).read_bytes())
+            with redirect_stdout(io.StringIO()),redirect_stderr(io.StringIO()):
+                result=live_contexts(deployment)
+            print(json.dumps(result))
+            return 0
         if args.operation == 'i7-gate':
             from scripts.study_operator.i7_gate_daemon import serve
             deployment = json.loads(Path(args.deployment).read_text(encoding='utf-8'))

@@ -49,8 +49,9 @@ def test_local_config_never_targets_inherited_vm(tmp_path,monkeypatch):
     monkeypatch.setattr(i7_config,'checked_config',lambda config:config)
     monkeypatch.setattr('src.ui.components.study_protocol.verify_draw',lambda path:protocol)
     root=tmp_path/'new-i7'
+    (tmp_path/'rag_freeze_baseline.json').write_text('{}')
     assert i7_config.create(root,{'source_installation':str(path),'price_archive':str(prices),
-        'reviewed_config':str(config)},commit='b'*40)['cloud_measured'] is False
+        'reviewed_config':str(config),'inherited_package':str(tmp_path)},commit='b'*40)['cloud_measured'] is False
     saved=json.loads((root/'installation.json').read_bytes())
     assert saved['primary_vm']['name']=='cloudrag-i7-unallocated'
     assert saved['primary_vm']['id']=='0' and 'primary_disk' not in saved and 'instance_id' not in saved

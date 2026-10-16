@@ -198,6 +198,14 @@ def dispatch(request):
         if request['identity']!=identity or active['config']['purpose']!='smoke':
             raise ValueError('BROWSER_BOOT_IDENTITY_DIFFERS')
         return dict(controller(active,{'operation':operation}),identity=identity)
+    if operation=='i7-contexts' and set(request)=={'operation'}:
+        if active['config']['purpose']!='technical' or not (root/'maintenance.json').is_file():
+            raise ValueError('TECHNICAL_MAINTENANCE_REQUIRED')
+        if execute(['docker','inspect',active['app_container']])[0]['State']['Running']:
+            raise ValueError('APP_STOP_REQUIRED')
+        command=app_command(active['config'],root,active['session_root'],'cloudrag-i7-contexts-'+boot,
+                            operation='i7-contexts')
+        return execute(command,timeout=900)
     if operation == 'maintenance':
         result = subprocess.run(['docker','stop','--time','30',active['app_container']],
                                 stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=45)
