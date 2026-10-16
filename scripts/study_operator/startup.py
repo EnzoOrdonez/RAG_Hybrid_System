@@ -43,6 +43,9 @@ def write_startup(path, config, *, discover_instance=False):
         'root=Path("/srv/cloudrag/iteration5");root.mkdir(exist_ok=True)\n'
         'c=json.loads(base64.b64decode('+repr(encoded)+'))\n'+discovery+staging+host_key_publication()+
         'p=root/"launch-config.json"\np.write_text(json.dumps(c))\nos.chmod(p,0o600)\n'
+        'if c.get("iteration")==7 and c.get("image_archive"):\n'
+        ' r=subprocess.run(["docker","image","inspect",c["image_id"]],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n'
+        ' if r.returncode:subprocess.run(["docker","load","--input",c["image_archive"]],check=True,timeout=600,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n'
         'subprocess.Popen(["python3","-B","-m","scripts.study_operator.host_runtime",'
         '"--settings",str(p)],cwd=c["host_code"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,start_new_session=True)\n'
         'PY\n',encoding='utf-8',newline='\n')

@@ -172,7 +172,7 @@ class Cloud:
 
 
 def checked_vm(observed, *, name, instance_id, zone, native_limit_s=10800):
-    if native_limit_s not in (10800,32400):
+    if native_limit_s != 10800:
         raise ValueError('Reviewed native VM limit required')
     if zone not in US_L4_ZONES:
         raise OperatorError('Zona fuera del ámbito L4 verificado de EE.UU. Revisa el catálogo antes de encender.')

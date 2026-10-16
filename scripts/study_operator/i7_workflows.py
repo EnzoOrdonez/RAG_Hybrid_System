@@ -32,6 +32,19 @@ def archive_tools(source, destination, commit):
     return {'commit':commit,'files':len(files),'manifest_sha256':file_sha(destination/'manifest.json')}
 
 
+def verify_tool_source(operator):
+    source = Path(__file__).resolve().parents[2]
+    head = subprocess.check_output(['git','-C',str(source),'rev-parse','HEAD'],text=True).strip()
+    if head != operator.config['commit']:
+        raise ValueError('OPERATOR_SOURCE_COMMIT_DIFFERS')
+    modified = subprocess.run(['git','-C',str(source),'status','--porcelain','--untracked-files=all',
+                               '--','scripts','src','config'],
+                               check=False,capture_output=True,timeout=60)
+    if modified.returncode or modified.stdout.strip():
+        raise ValueError('OPERATOR_SOURCE_BYTES_MODIFIED')
+    return archive_tools(source,operator.root/'tool-versions',head)
+
+
 def check_tls_sequence(attempts):
     rows = sorted(attempts,key=lambda r:r['start_requested_utc'])
     if len(rows) < 3 or any(r.get('status') != 'READY' for r in rows[-3:]):
@@ -101,17 +114,20 @@ def series(operator):
 
 def privacy(operator):
     from scripts.study_operator.gcs import Storage
-    from scripts.study_operator.i7_privacy import bucket_sources, inject, scan
+    from scripts.study_operator.i7_privacy import (
+        bucket_sources,
+        inject,
+        scan,
+        serial_sources,
+    )
     ip = getpass.getpass('IP propia, solo en memoria: ')
     user_agent = 'CloudRAG-I7-'+secrets.token_hex(24)
     inject(operator.config['hostname'],ip,user_agent)
     guest = operator.bridge({'operation':'i7-privacy','ip':ip,'user_agent':user_agent},private=True,timeout=7200)
     storage = Storage(operator.config['sessions_bucket'],operator.cloud.owner_token,
-        creation_anchor=operator.config.get('session_bucket_creation_anchor'))
+        creation_anchor=operator.config.get('sessions_bucket_creation'))
     def serial():
-        data = operator.cloud.command(['compute','instances','get-serial-port-output',operator.selected()['name'],
-            '--zone='+operator.selected()['zone'],'--start=0'],private_output=True,json_output=False)
-        yield 'serial-port-1',[data if isinstance(data,bytes) else data.encode()]
+        yield from serial_sources(operator.cloud,operator.selected())
     owner = scan({'serial':serial,'bucket':lambda:bucket_sources(storage)},
                  (ip.encode(),user_agent.encode()))
     domains = {**{k:v for k,v in guest['domains'].items() if k not in ('serial','bucket')},
@@ -159,6 +175,9 @@ def dispatch(operator, operation):
         return privacy(operator)
     if operation == 'close':
         stopped = operator.stop()
-        deleted = operator.guard()
-        return {'status':'CLOSED','vm':stopped,'reservation':deleted}
+        deleted = operator.guard() if not operator.state['reservation'].get('deleted_verified') else {
+            'status':'PRIOR_RESERVATION_CLOSURE_RECORDED'}
+        from scripts.study_operator.i7_cpu_pipeline import cleanup_cpu
+        cleaned = cleanup_cpu(operator)
+        return {'status':'CLOSED','vm':stopped,'reservation':deleted,'cpu_cleanup':cleaned}
     raise ValueError('UNKNOWN_I7_WORKFLOW')

@@ -4,8 +4,8 @@ import math
 from scripts.study_operator.stimulus_calendar import TASKS
 from scripts.study_operator.stimulus_host_evidence import sha
 
-HOST_LIMIT_S = 30600
-VM_LIMIT_S = 32400
+HOST_LIMIT_S = 9000
+VM_LIMIT_S = 10800
 
 
 def calendar(tasks):
@@ -89,6 +89,8 @@ def collect(channel, host, run):
         for index, slot in enumerate(run.slots, 1):
             if slot['phase'] != phase:
                 phase = slot['phase']
+                if phase!='pilot' and hasattr(host,'revalidate'):
+                    host.revalidate(channel,index)
                 deadline = host.clock()+(12000 if phase == 'pilot' else 7200)
             host.poll(force=True)
             start = host.clock()

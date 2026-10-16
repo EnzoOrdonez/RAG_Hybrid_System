@@ -150,6 +150,28 @@ def bucket_sources(storage):
         raise ValueError('SOFT_DELETED_CONTENT_REQUIRES_REVIEW')
 
 
+def serial_sources(cloud, vm):
+    """All four ports, from byte zero; a truncated ring buffer is incomplete."""
+    def pages(port):
+        offset = 0
+        for _ in range(10000):
+            page = cloud.command(['compute','instances','get-serial-port-output',vm['name'],
+                '--zone='+vm['zone'],'--port='+str(port),'--start='+str(offset)],private_output=True)
+            if int(page['start']) != offset:
+                raise ValueError('SERIAL_PREFIX_LOST')
+            following = int(page['next'])
+            data = page['contents'].encode()
+            if following == offset and not data:
+                return
+            if following <= offset or not data:
+                raise ValueError('SERIAL_CURSOR_INVALID')
+            yield data
+            offset = following
+        raise ValueError('SERIAL_PAGINATION_INCOMPLETE')
+    for port in range(1,5):
+        yield 'serial-port-'+str(port),pages(port)
+
+
 def host_sources(active, *, invoke=None):
     """Discover effective writable mounts and upper layers of all retained containers."""
     import json

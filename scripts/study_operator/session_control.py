@@ -113,6 +113,28 @@ def dispatch(request, deployment, *, maintenance=False):
         # before checking it; freeze() refuses conflicting or populated stores.
         store.freeze()
     store.check()
+    if operation == 'i7-smoke-status' and deployment['purpose'] == 'smoke':
+        from src.ui.components.study_sessions import StudySession
+
+        checkpoints = list(store.root.glob('*/study_checkpoint.json'))
+        if len(checkpoints) != 1:
+            return {'status':'SMOKE_NOT_COMPLETE'}
+        session = StudySession.load(store,checkpoints[0].parent.name)
+        if session.data['stage'] != 'complete':
+            return {'status':'SMOKE_NOT_COMPLETE'}
+        exported = session.export().read_bytes()
+        payload = json.loads(exported)
+        if (payload['assignment']['participant_id'] != 'P999' or len(payload['attempts']) != 8
+                or len(payload['instruments']) != 2
+                or any(len(item.get('ueq_s',[])) != 8 for item in payload['instruments'])):
+            raise ValueError('FULL_UEQ_BROWSER_SMOKE_REQUIRED')
+        store.check_backups()
+        backup = json.loads((checkpoints[0].parent/'backup_state.json').read_bytes())
+        if backup['status'] != 'complete' or backup['sha256'] != hashlib.sha256(exported).hexdigest():
+            raise ValueError('SYNTHETIC_SMOKE_BACKUP_NOT_VERIFIED')
+        return {'status':'SMOKE_COMPLETE_VERIFIED','session_id':session.session_id,
+                'export_sha256':backup['sha256'],'objects':backup['objects'],
+                'attempts':8,'instruments':2,'ueq_s_items_per_system':8}
     if operation == 'revoke':
         store.revoke(participant_code(request['participant_id']))
         return dict(status='REVOKED')

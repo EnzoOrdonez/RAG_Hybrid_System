@@ -14,10 +14,21 @@ from scripts.study_operator.stimulus_host_evidence import sha
 def dispatch_gate(active, request, *, execute, controller, maintenance,
                   now=lambda: datetime.now(timezone.utc)):
     root = Path(active['boot_root'])
-    job = root/'i7-gate'
+    root/'i7-gate'
     op = request['operation']
     if active['config']['purpose'] != 'technical':
         raise ValueError('TECHNICAL_GATE_ONLY')
+    if op == 'gate-start' and set(request) == {'operation'}:
+        raise ValueError('BLOCKED_BROWSER_AUTOMATOR_AND_PUBLISHED_ANNEX_PREREQUISITES')
+    return dispatch_qualified_gate(active,request,execute=execute,controller=controller,
+                                   maintenance=maintenance,now=now)
+
+
+def dispatch_qualified_gate(active, request, *, execute, controller, maintenance, now):
+    """Draft launcher; not reachable from the bridge for gate-start in Phase A."""
+    root=Path(active['boot_root'])
+    job=root/'i7-gate'
+    op=request['operation']
     if op == 'gate-start' and set(request) == {'operation'}:
         if job.exists():
             raise ValueError('GATE_COHORT_ALREADY_REGISTERED')

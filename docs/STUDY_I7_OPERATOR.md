@@ -18,7 +18,8 @@ se fija con la imagen nueva y sus recibos CPU; no se copia la identidad final03.
 verificada, expuesta por `gcloud beta compute reservations`. Si el SDK o la API
 no aceptan ese límite, se bloquea sin alternativa de reserva ilimitada.
 Un resultado desconocido conserva la intención y prohíbe crear otra reserva.
-El techo de 12 horas por reserva no amplía los 120 minutos de cada ensayo.
+El techo de 12 horas por reserva no amplía los límites de cada ensayo:
+7200 s para estímulo y 9000 s para la compuerta, con STOP nativo de 3 h.
 La reserva sigue facturando mientras la VM está detenida.
 
 `start` comprueba VM detenida, identidad y consumo específico de la reserva,
@@ -45,6 +46,11 @@ Cada boot conserva certificado e identidad. La comprobación TLS exige los tres
 I6 ausentes siguen sin verificarse: archivar la versión actual no las recupera.
 
 El cálculo de asignación fusiona intervalos de reserva y ejecución de su VM:
-incluye la espera y no duplica la VM que consume la reserva. El ledger separa
-retención y otros SKU. La conciliación final requiere filas de facturación;
+incluye la espera y no duplica la VM que consume la reserva. El ledger automático
+cubre compute y una cota CPU; falta incorporar retención y los demás SKU antes
+de admitir la Fase B. La conciliación final requiere filas de facturación;
 ninguna estimación local se presenta como factura conciliada.
+
+El runbook está PARCIAL. `gate` y `gate-start` rechazan el inicio por falta de
+automatizador validado y admisión del anexo publicado. Ver
+`STUDY_I7_RUNBOOK_FASE_B.md` antes de cualquier tarea de noviembre.

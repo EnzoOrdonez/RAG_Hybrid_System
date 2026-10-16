@@ -92,7 +92,7 @@ def prepare(config, command, *, models, resident=resident_pages):
 
 def host_seconds(config):
     if config.get('i7_profile') == 'gate':
-        if config.get('iteration') != 7 or config['purpose'] != 'technical' or config.get('native_stop_s') != 32400:
+        if config.get('iteration') != 7 or config['purpose'] != 'technical' or config.get('native_stop_s') != 10800:
             raise ValueError('TECHNICAL_GATE_PROFILE_REQUIRED')
-        return 32100
+        return 165*60
     return 165*60

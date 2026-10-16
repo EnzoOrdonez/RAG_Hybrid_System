@@ -7,6 +7,13 @@ def preparation_check(active, *, execute):
     config = active['config']
     if config.get('iteration') != 7:
         raise ValueError('I7_PREPARATION_REQUIRED')
+    boots = []
+    for path in Path(active['boot_root']).parent.glob('*/boot-start.json'):
+        value = json.loads(path.read_bytes())
+        if value['start_requested_utc'] == config['start_requested_utc']:
+            boots.append(value['boot_id'])
+    if boots != [active['boot_id']]:
+        raise ValueError('UNEXPECTED_BOOT_DURING_START')
     receipt = json.loads((Path(active['boot_root'])/'host-preparation.json').read_bytes())
     if (receipt.get('status') != 'HOST_PREPARED' or receipt.get('blob_resident') is not True
             or receipt.get('models_empty') is not True or receipt.get('persistence_enabled') is not True):

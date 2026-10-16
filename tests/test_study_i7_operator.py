@@ -133,3 +133,25 @@ def test_scheduler_registers_without_administrator_and_pins_version(tmp_path,mon
     assert 'RunLevel Limited' in text and 'Highest' not in text
     assert result['tool_version']['files'] > 0
     assert len(captured)==1
+
+
+def test_unknown_reservation_intent_blocks_another_create(tmp_path):
+    op,cloud,_=setup(tmp_path)
+    op.state.pop('reservation')
+    op.state['reservation_intent']={'status':'UNKNOWN'}
+    with pytest.raises(ValueError,match='UNKNOWN'):
+        op.reserve(1)
+    assert not cloud.calls
+
+
+def test_successful_delete_with_failed_readback_can_be_reconciled_by_read_only(tmp_path):
+    op,cloud,_=setup(tmp_path)
+    cloud.error='list'
+    with pytest.raises(RuntimeError):
+        op.guard()
+    cloud.error=None
+    before=len(cloud.calls)
+    result=op.reconcile()
+    assert result['status']=='RESERVATION_ABSENT_RECONCILED'
+    assert op.state['reservation']['deleted_verified']
+    assert all(c[:3]==['compute','reservations','list'] for c in cloud.calls[before:])

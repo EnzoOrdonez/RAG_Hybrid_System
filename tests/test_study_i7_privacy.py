@@ -54,3 +54,22 @@ def test_clean_import_does_not_copy_runtime_and_archive_keeps_original_bytes(tmp
     import tarfile
     with tarfile.open(private/'legacy.tar') as archive:
         assert [archive.extractfile(m).read() for m in archive.getmembers()] == [p.read_bytes() for p in legacy]
+
+
+def test_serial_census_pages_all_ports_and_rejects_lost_prefix():
+    from scripts.study_operator.i7_privacy import serial_sources
+    class Cloud:
+        def __init__(self):
+            self.lost=False
+        def command(self,args,**kwargs):
+            start=int(next(a.split('=')[1] for a in args if a.startswith('--start=')))
+            assert kwargs['private_output']
+            if start == 0:
+                return {'start':1 if self.lost else 0,'next':4,'contents':'test'}
+            return {'start':4,'next':4,'contents':''}
+    cloud=Cloud()
+    rows=[(name,b''.join(blocks)) for name,blocks in serial_sources(cloud,{'name':'own','zone':'us-central1-a'})]
+    assert len(rows)==4 and all(data==b'test' for _,data in rows)
+    cloud.lost=True
+    with pytest.raises(ValueError,match='LOST'):
+        [(name,b''.join(blocks)) for name,blocks in serial_sources(cloud,{'name':'own','zone':'us-central1-a'})]

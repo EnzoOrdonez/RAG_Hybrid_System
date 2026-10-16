@@ -10,10 +10,14 @@ Dockerfile, pins, modelos, índices, calendario y los 19 módulos congelados.
 El contexto incluye `session_control.py` con sellado de la configuración
 verificada antes de `StudyStore.check()` y lectura UTF-8 de restauraciones.
 
-El disco de servicio será nuevo. Las instantáneas heredadas sirven como fuentes
-de lectura para los artefactos enumerados y comprobados por SHA-256: pesos,
-índices, proveedor de dependencias, TLS y semilla JIT compatible con el driver.
-No se clona su árbol de runtime, sesiones, registros ni respaldos privados.
+El disco de servicio será un clon secundario propio, saneado mientras está
+desmontado del servicio. Conserva el sistema operativo y el driver de la fuente.
+El constructor exporta las tres imágenes por digest, descarga el archivo privado
+con los nueve originales y confirma su SHA-256 antes del saneamiento. Conserva
+solo los artefactos enumerados: pesos, índices, código nuevo, protocolo, TLS y
+semilla JIT compatible con el driver. Reinicia los árboles de Docker, registros,
+temporales y runtime del clon. Las instantáneas y el disco fuente quedan intactos.
+El censo con canarios de noviembre debe comprobar la cobertura residual del SO.
 La configuración I7 exige `iteration=7`, preparación del host y caché JIT
 persistente. Un fallo impide READY. No se declara identidad heredada de I6.
 

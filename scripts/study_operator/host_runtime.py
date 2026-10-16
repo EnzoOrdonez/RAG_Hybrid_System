@@ -74,6 +74,9 @@ class Host:
         self.started = datetime.now(timezone.utc)
         self.start_requested = config['start_requested_utc']
         ready_elapsed(self.start_requested, self.started)
+        if config.get('iteration') == 7:
+            save_state(self.root/'boot-start.json',dict(boot_id=self.boot,
+                       start_requested_utc=self.start_requested))
         self.children, self.containers = [], []
         self.sequence = 0
         self.session_root = ROOT / 'periods' / config['period_id'] / 'sessions'
@@ -260,6 +263,9 @@ class Host:
                     "from src.ui.components.study_sessions import StudyStore; "
                     "d=json.load(open('/deployment/deployment.json')); configure(d); "
                     "StudyStore(d['session_root'],verify(d),d['purpose']).check_backups()"],timeout=120)
+                if self.config.get('iteration') == 7:
+                    # Recheck after app initialization: its reads can evict page-cache pages.
+                    save_state(self.root/'host-preparation.json',prepare(self.config,self.step,models=models))
                 ready_utc = datetime.now(timezone.utc)
                 elapsed = ready_elapsed(self.start_requested, ready_utc)
                 if elapsed > 900:

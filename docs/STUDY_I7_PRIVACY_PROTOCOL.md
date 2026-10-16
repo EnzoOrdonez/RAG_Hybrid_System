@@ -2,8 +2,9 @@
 
 Estado: código probado localmente. El censo desplegado se ejecuta en Fase B.
 
-El disco de servicio nuevo recibe solo archivos enumerados con SHA-256. No se
-copia ningún árbol de runtime, sesiones o respaldos. Antes, los nueve archivos
+El disco de servicio propio conserva SO y driver de un clon secundario,
+con saneamiento offline y selección del contenido de servicio por SHA-256.
+Se vacían los árboles de runtime, sesiones y respaldos. Antes, los nueve archivos
 del inventario I6 se archivan fuera de ese disco mediante `archive_legacy`:
 creación exclusiva, hash de cada original y comparación de los bytes dentro del
 tar. Las instantáneas originales y los archivos fuente se conservan intactos.
@@ -13,6 +14,9 @@ No aparecen en argv, URL, scripts guardados ni recibos. La IP propia permite
 buscar también la dirección real de la conexión; los encabezados reenviados
 prueban su eliminación en el proxy. La petición recorre raíz, salud y favicon.
 El smoke sintético completo recorre el navegador, la app, el runner y el respaldo.
+El canario UA actual se inyecta solo en las tres peticiones HTTP indicadas.
+Falta enlazarlo al navegador y WebSocket del recorrido completo; por ello el
+código local no acredita todavía toda la cobertura exigida para F04.
 
 Fuentes: montajes escribibles efectivos y capas superiores de todos los
 contenedores retenidos del servicio, logs de Docker si existen, árbol del

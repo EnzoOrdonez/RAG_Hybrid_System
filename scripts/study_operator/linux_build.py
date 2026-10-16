@@ -70,7 +70,7 @@ def host_check_code(host,unit):
     """No app preparation or generation; validate the exact host stdlib and unit."""
     return ('import sys,json\nfrom pathlib import Path\n'
         +'sys.path.insert(0,'+repr(str(host))+')\n'
-        +'from scripts.study_operator import stimulus_host,stimulus_guest,stimulus_host_evidence\n'
+        +'from scripts.study_operator import stimulus_host,stimulus_guest,stimulus_host_evidence,i7_gate_host,i7_guest,i7_preparation\n'
         +'assert not any(k in sys.modules for k in ("torch","filelock","pydantic"))\n'
         +'active=dict(boot_id="00000000-0000-0000-0000-000000000000",config=dict(host_code='+repr(str(host))+'))\n'
         +'Path('+repr(str(unit))+').write_text(stimulus_host.unit_text(active,1),encoding="utf-8")\n'

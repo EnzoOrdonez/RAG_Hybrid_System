@@ -190,6 +190,8 @@ def dispatch(request):
             '--deployment','/deployment/deployment.json','--request','-'],request)
     if operation == 'revoke':
         return controller(active,request)
+    if operation == 'i7-smoke-status' and set(request) == {'operation'}:
+        return controller(active,request)
     if operation == 'maintenance':
         result = subprocess.run(['docker','stop','--time','30',active['app_container']],
                                 stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=45)

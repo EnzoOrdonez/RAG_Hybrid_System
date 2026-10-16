@@ -63,6 +63,7 @@ class Operator(LegacyOperator):
         save_state(self.state_path,self.state)
 
     def receipt(self, kind, value):
+        value = dict(value,recorded_utc=self.now().isoformat())
         folder = self.root/'receipts'/kind
         folder.mkdir(parents=True,exist_ok=True)
         path = folder/(self.now().strftime('%Y%m%dT%H%M%S%fZ')+'-'+sha(value)+'.json')
@@ -75,6 +76,9 @@ class Operator(LegacyOperator):
         if now < datetime(2026,11,1,tzinfo=timezone.utc):
             raise ValueError('NO_PAID_EFFECT_BEFORE_NOVEMBER')
         rates = self.config['rates']
+        money = (exposure,self.state.get('spent_usd',0),self.state.get('open_exposure_usd',0),rates['compute_usd_h'])
+        if any(type(v) not in (int,float) or not math.isfinite(v) or v < 0 for v in money) or money[-1] == 0:
+            raise ValueError('FINITE_NONNEGATIVE_LEDGER_REQUIRED')
         verified = datetime.fromisoformat(rates['verified_utc'])
         if (verified.tzinfo is None or not 0 <= (now-verified).total_seconds() <= 7*86400
                 or not re.fullmatch('[a-f0-9]{64}',rates['price_receipt_sha256'])):
@@ -86,6 +90,8 @@ class Operator(LegacyOperator):
             raise ValueError('I7_BUDGET_STOP')
 
     def reserve(self, hours):
+        if self.state.get('reservation_intent'):
+            raise ValueError('UNKNOWN_RESERVATION_RECONCILE_FIRST')
         if not 0 < hours <= 12:
             raise ValueError('RESERVATION_TTL_REQUIRED')
         self.admit_paid(hours*self.config['rates']['compute_usd_h']+.25)
@@ -122,7 +128,7 @@ class Operator(LegacyOperator):
                           native_limit_s=self.config['native_stop_s'])
 
     def start(self, purpose='technical'):
-        if purpose != 'technical':
+        if purpose not in {'technical','smoke'}:
             raise ValueError('I7_PHASE_B_SYNTHETIC_TECHNICAL_ONLY')
         self.admit_paid(0)
         vm = self.observed()
@@ -142,7 +148,12 @@ class Operator(LegacyOperator):
             raise ValueError('SPECIFIC_RESERVATION_NOT_BOUND')
         from scripts.study_operator.startup import write_startup
         now = self.now()
-        config = dict(self.config,instance_id=str(vm['id']),purpose='technical',
+        import uuid
+        periods = self.config.setdefault('period_ids',{})
+        periods.setdefault(self.config['purpose'],self.config['period_id'])
+        periods.setdefault(purpose,uuid.uuid4().hex)
+        self.config.update(purpose=purpose,period_id=periods[purpose])
+        config = dict(self.config,instance_id=str(vm['id']),purpose=purpose,
             start_requested_utc=now.isoformat(),
             native_deadline_utc=(now+timedelta(seconds=self.config['native_stop_s'])).isoformat())
         # Inputs are installed and hashed on the clean disk in the CPU build.
@@ -210,6 +221,8 @@ class Operator(LegacyOperator):
         reservation['delete_intent_sha256'] = sha(reservation_identity(actual))
         self.persist()
         self.cloud.command(['compute','reservations','delete',reservation['name'],'--zone='+zone],timeout=180)
+        reservation['delete_api_success'] = True
+        self.persist()
         listed = self.cloud.command(['compute','reservations','list'])
         if not isinstance(listed,list) or any(str(r['id']) == str(reservation['id']) or
             (r['name'] == reservation['name'] and r['zone'].split('/')[-1] == zone) for r in listed):
@@ -222,6 +235,56 @@ class Operator(LegacyOperator):
         self.persist()
         return self.receipt('reservation',{'status':'RESERVATION_DELETED_VERIFIED',
             'id':reservation['id'],'name':reservation['name'],'zone':zone})
+
+    def reconcile(self):
+        """Readback only. Unknown absence before the native deadline stays unknown."""
+        listed = self.cloud.command(['compute','reservations','list'])
+        if not isinstance(listed,list):
+            raise TypeError('RESERVATION_LIST_NOT_SUCCESSFUL')
+        reservation = self.state.get('reservation')
+        if reservation and not reservation.get('deleted_verified'):
+            present = [r for r in listed if str(r['id']) == str(reservation['id']) or
+                       (r['name'] == reservation['name'] and r['zone'] == reservation['zone'])]
+            if present:
+                if len(present) != 1 or reservation_identity(present[0]) != reservation_identity(reservation):
+                    raise ValueError('RECONCILIATION_IDENTITY_CHANGED')
+                return {'status':'RESERVATION_STILL_PRESENT'}
+            expired = reservation.get('deleteAtTime') and self.now() >= datetime.fromisoformat(
+                reservation['deleteAtTime'].replace('Z','+00:00'))
+            if not reservation.get('delete_api_success') and not expired:
+                raise ValueError('DELETE_OUTCOME_UNKNOWN_UNTIL_NATIVE_DEADLINE')
+            reservation.update(deleted_verified=True,deleted_utc=self.now().isoformat(),
+                               closure_method='SUCCESSFUL_LIST_AFTER_DELETE_OR_NATIVE_TTL')
+            if reservation.get('created_utc'):
+                seconds=max(0,(self.now()-datetime.fromisoformat(reservation['created_utc'])).total_seconds())
+                self.state['spent_usd']=self.state.get('spent_usd',0)+seconds/3600*self.config['rates']['compute_usd_h']
+            self.state['open_exposure_usd']=0
+            self.persist()
+            return self.receipt('reservation',{'status':'RESERVATION_ABSENT_RECONCILED',
+                                              'id':reservation['id']})
+        intent=self.state.get('reservation_intent')
+        if intent:
+            found=[r for r in listed if r['name']==intent['name'] and r['zone'].split('/')[-1]==intent['zone']]
+            if found:
+                if len(found)!=1 or found[0]['description']!=self.config['resource_marker']:
+                    raise ValueError('UNKNOWN_RESERVATION_IDENTITY_CHANGED')
+                resource=found[0]
+                reservation_identity(resource)
+                if datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != datetime.fromisoformat(intent['delete_at_utc']):
+                    raise ValueError('UNKNOWN_RESERVATION_NATIVE_TTL_CHANGED')
+                self.state['reservation']=dict(resource,created_utc=resource['creationTimestamp'])
+                self.state['open_exposure_usd']=12*self.config['rates']['compute_usd_h']+.25
+                self.state.pop('reservation_intent')
+                self.persist()
+                return {'status':'RESERVATION_FOUND_RECONCILED'}
+            if self.now() < datetime.fromisoformat(intent['delete_at_utc']):
+                raise ValueError('UNKNOWN_CREATE_OUTCOME_PRESERVE_INTENT')
+            self.state.pop('reservation_intent')
+            self.state['spent_usd']=self.state.get('spent_usd',0)+12*self.config['rates']['compute_usd_h']+.25
+            self.persist()
+            return self.receipt('reservation',{'status':'UNKNOWN_CREATE_EXPIRED_AND_ABSENT',
+                                              'estimated_at_full_upper_bound':True})
+        return {'status':'NO_OPEN_RESERVATION_RECONCILIATION'}
 
     def collect(self, kind):
         if kind not in {'stimulus','gate'}:
@@ -278,7 +341,7 @@ def main(argv=None):
     parser.add_argument('--root',required=True,type=Path)
     parser.add_argument('--sdk')
     parser.add_argument('--live',action='store_true')
-    parser.add_argument('operation',choices=('init','status','reserve','start','preflight','stop','guard','collect',
+    parser.add_argument('operation',choices=('init','status','reserve','reconcile','start','preflight','stop','guard','collect',
         'gate-start','stimulus-start','tls-check','restore-check','privacy','series','schedule','close'))
     parser.add_argument('--config',type=Path)
     parser.add_argument('--request',type=Path)
@@ -296,7 +359,9 @@ def main(argv=None):
         print(json.dumps({'status':'LOCAL_I7_ROOT_CREATED'}))
         return 0
     if args.operation == 'tls-check':
-        result = tls_three([json.loads(p.read_bytes()) for p in (args.root/'boots').glob('*.json')])
+        from scripts.study_operator.i7_workflows import check_tls_sequence
+        result = check_tls_sequence([json.loads(p.read_bytes()) for p in
+                                     (args.root/'receipts'/'boot-attempt').glob('*.json')])
     else:
         if not args.live or datetime.now(timezone.utc) < datetime(2026,11,1,tzinfo=timezone.utc):
             parser.error('Live I7 operations require --live and November authorization')
@@ -306,9 +371,11 @@ def main(argv=None):
         cloud = Cloud(args.sdk,'pure-loop-474323-a8',args.root/'runs')
         with FileLock(str(args.root/'i7.lock'),timeout=1):
             operator = Operator(args.root,cloud)
+            from scripts.study_operator.i7_workflows import verify_tool_source
+            verify_tool_source(operator)
             if args.operation == 'reserve':
                 result = operator.reserve(args.hours)
-            elif args.operation in {'start','preflight','stop','guard','status'}:
+            elif args.operation in {'start','preflight','stop','guard','status','reconcile'}:
                 result = getattr(operator,args.operation)()
             elif args.operation == 'collect':
                 result = operator.collect(args.kind)
