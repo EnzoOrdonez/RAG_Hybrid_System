@@ -1,6 +1,6 @@
 # Progreso: estado para arranque en frío
 
-**Última actualización:** 2026-10-25 por Claude (Cowork).
+**Última actualización:** 2026-10-25 por Claude (Cowork), segunda sesión.
 Este archivo dice dónde está el trabajo **hoy**. Se reescribe al traspasar, no se acumula: el
 historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 
@@ -15,25 +15,24 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
   - Conserva sin tocar sus cambios sin commitear. Su copia quedó integrada aquí (commit `504b2a3`).
   - También conserva los originales `PROMPT_MAESTRO_*` y `showcase/` sin versionar (F-011).
 
-## Qué se hizo en la última sesión (F-001)
+## Qué se hizo en la última sesión (cierre de F-001)
 
-1. Integración de las dos ramas con los conflictos resueltos sin perder texto (`4f2d637`), y del trabajo sin commitear (`504b2a3`).
-2. Copia inmutable del `CLAUDE.md` anterior (`0c4ad41`).
-3. Documentos de la raíz movidos a `docs/` según Diátaxis, con las referencias vivas actualizadas (`bd84023`).
-4. Arquitectura según ISO 42010, ADRs en formato MADR, log literal y guardrails (`3702683`).
-5. `.harness/`, `init.sh`, `scripts/check_docs.py` con sus tests, paso en CI y `CLAUDE.md` nuevo.
+1. **F-012:** el Chromium 1208 ya estaba instalado en `C:/CloudRAG/i7-browser-runtime` (SHA-256 igual al pin). Faltaba `PLAYWRIGHT_BROWSERS_PATH` al correr `init.sh`; no se descargó nada.
+2. **F-013:** `tests/test_study_task_evidence.py`: marcador `needs_artifacts` y fixture `require_chunk_map` que omite con motivo si falta `data/indices` (3 tests). Sin cambios sin commitear fuera de este archivo y `.harness/`.
+3. `bash init.sh` con la variable definida: capa 1 exit 0, capa 2 exit 0 (1848 pasan, 0 fallan, 6 omitidas), capa 3 exit 0.
+4. F-001, F-012 y F-013 pasan a `passing`.
 
 ## Qué sigue (orden sugerido)
 
-1. **F-012:** la capa 2 sale con exit 1 por 8 tests de navegador de I7, que requieren el Chromium fijado (falla igual en la línea base). Enzo decide si se instala o se excluye. Mientras tanto, **F-001** sigue `active`.
-2. **F-006:** Enzo revisa los commits de `chore/docs-harness` y decide el push y el PR (compuerta ADR-0013).
-3. **F-007:** corregir la contradicción del README sobre el modelo de la UI.
-4. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.
+1. **Commitear** el cambio de esta sesión (test + `.harness/`) en `chore/docs-harness`; hoy está sin commitear.
+2. **F-011:** Enzo decide la limpieza del checkout principal (`PROMPT_MAESTRO_*`, `showcase/`, worktree prunable). No se borra nada sin su OK (ADR-0011).
+3. **F-006:** Enzo revisa los commits de `chore/docs-harness` y decide push y PR (compuerta ADR-0013).
+4. **F-007:** corregir la contradicción del README sobre el modelo de la UI.
+5. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.
 
 ## Riesgos y bloqueos vigentes
 
-- Verificación del 2026-10-25: capa 1 exit 0, capa 3 exit 0, capa 2 exit 1, con el mismo conjunto de fallos
-  que `fix/interview-readiness` (8 de navegador). Hay 3 tests más que necesitan `data/indices` sin marcador (F-013).
+- Verificación del 2026-10-25: las tres capas dan exit 0 con `PLAYWRIGHT_BROWSERS_PATH=C:/CloudRAG/i7-browser-runtime`. Sin esa variable los 8 tests de navegador de I7 fallan con `PINNED_BROWSER_RUNTIME_REQUIRED` (F-012).
 - El worktree tiene uniones (junctions) ignoradas por git: `.venv-app` y `data/indices` apuntan a
   `.worktrees/interview-readiness`. Se crearon para ejecutar la suite y no se versionan.
 - Entrevistas en **NO-GO** hasta validar el despliegue real (`docs/INTERVIEW_READINESS.md`).
@@ -44,5 +43,6 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 ## Cómo verificar en frío
 
 ```bash
+export PLAYWRIGHT_BROWSERS_PATH=C:/CloudRAG/i7-browser-runtime   # obligatorio para los tests de I7
 bash init.sh   # Git Bash en Windows; usa .venv-app si existe; objetivo: exit 0 en las tres capas
 ```

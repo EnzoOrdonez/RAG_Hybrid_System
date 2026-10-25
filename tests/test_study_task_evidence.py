@@ -3,9 +3,19 @@ import pytest
 from scripts.study_task_evidence import literal_search, reseal, validate_evidence
 from src.ui.components.study_protocol import ROOT, digest, draw_study_configuration
 
+CHUNK_MAP = ROOT / "data/indices/chunk_map_bge-large_adaptive_500.json"
 
+
+@pytest.fixture
+def require_chunk_map():
+    """data/indices/ está ignorado por git: sin el artefacto, omitir en vez de fallar."""
+    if not CHUNK_MAP.exists():
+        pytest.skip(f"missing artifact: {CHUNK_MAP.relative_to(ROOT).as_posix()}")
+
+
+@pytest.mark.needs_artifacts
 def test_reviewed_reseal_preserves_assignments_and_binds_evidence(
-    tmp_path, monkeypatch
+    require_chunk_map, tmp_path, monkeypatch
 ):
     import json
     from scripts import study_task_evidence as task
@@ -78,7 +88,8 @@ def test_literal_search_uses_only_text_and_preserves_provider():
         literal_search(chunks, [""])
 
 
-def test_unapproved_tasks_cannot_create_new_seal(tmp_path):
+@pytest.mark.needs_artifacts
+def test_unapproved_tasks_cannot_create_new_seal(require_chunk_map, tmp_path):
     original = tmp_path / "original"
     old = draw_study_configuration(
         ROOT / "config/study.example.json",
@@ -93,7 +104,10 @@ def test_unapproved_tasks_cannot_create_new_seal(tmp_path):
     assert before == {p.name: p.read_bytes() for p in original.iterdir()}
 
 
-def test_unsupported_direct_answer_does_not_pass_on_a_declared_boolean(tmp_path):
+@pytest.mark.needs_artifacts
+def test_unsupported_direct_answer_does_not_pass_on_a_declared_boolean(
+    require_chunk_map, tmp_path
+):
     original = tmp_path / "original"
     protocol = draw_study_configuration(
         ROOT / "config/study.example.json",
