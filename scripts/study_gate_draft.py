@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import numpy as np
 
+from src.utils.checkout_boundary import is_inside_checkout
 from src.ui.components.session_storage import atomic_json, read_json
 from src.ui.components.study_protocol import INVALID_TASKS, ROOT, digest
 
@@ -60,7 +61,7 @@ def run(root, *, resume=False, authorize_new_window=False, contaminated=False, c
     An orderly stop between complete task pairs permits explicit new-window resume.
     """
     root = Path(root).resolve()
-    if root.is_relative_to(ROOT.parent.parent):
+    if is_inside_checkout(root, ROOT):
         raise ValueError('Evidence must be outside checkout')
     if resume:
         if not authorize_new_window:

@@ -8,6 +8,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.evaluation.study_analysis import analyze, read_exports
+from src.utils.checkout_boundary import is_inside_checkout
 from src.ui.components.session_storage import atomic_json
 from src.ui.components.study_protocol import (
     ROOT,
@@ -22,7 +23,7 @@ from src.ui.components.study_sessions import StudySession, StudyStore
 def consolidate(store, output):
     store.check()
     output = Path(output).resolve()
-    if output.is_relative_to(ROOT.parent.parent) or output.exists():
+    if is_inside_checkout(output, ROOT) or output.exists():
         raise ValueError("Use a NEW external export directory")
     paths = []
     for checkpoint in sorted(store.root.glob("*/study_checkpoint.json")):

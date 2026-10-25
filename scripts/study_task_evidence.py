@@ -9,6 +9,7 @@ from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from src.utils.checkout_boundary import is_inside_checkout
 from src.ui.components.study_protocol import ROOT, digest, load_protocol, verify_draw
 
 OFFICIAL = {
@@ -136,7 +137,7 @@ def main():
     path = ROOT / "data/indices/chunk_map_bge-large_adaptive_500.json"
     chunks = json.loads(path.read_text(encoding="utf-8"))
     output = Path(args.output).resolve()
-    if output.is_relative_to(ROOT.parent.parent):
+    if is_inside_checkout(output, ROOT):
         parser.error("Write evidence outside the checkout")
     with output.open("x", encoding="utf-8") as f:
         json.dump(

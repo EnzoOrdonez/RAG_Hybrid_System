@@ -11,6 +11,7 @@ import pytest
 
 from scripts import measure_interview_gate as gate
 from scripts import run_managed_gate as managed
+from src.utils.checkout_boundary import checkout_boundary
 
 
 @pytest.mark.windows_only
@@ -148,7 +149,7 @@ def test_non_admin_manager_refuses_without_files(tmp_path):
 
 @pytest.mark.windows_only
 @pytest.mark.skipif(sys.platform != 'win32', reason='PowerShell Windows guard')
-@pytest.mark.parametrize('root', [gate.PROJECT, gate.PROJECT.parent.parent])
+@pytest.mark.parametrize('root', [gate.PROJECT, checkout_boundary(gate.PROJECT)])
 def test_manager_rejects_checkout_as_evidence_root(root):
     result = subprocess.run(['powershell', '-NoProfile', '-File',
         str(gate.PROJECT / 'scripts/manage_gate_window.ps1'), '-Mode', 'Run', '-Root', str(root)],

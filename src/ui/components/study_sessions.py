@@ -13,6 +13,7 @@ import uuid
 
 from filelock import FileLock
 
+from src.utils.checkout_boundary import is_inside_checkout
 from src.ui.components.study_ueq import score as ueq_score
 
 from src.ui.components.session_storage import (
@@ -48,7 +49,7 @@ STAGES = {
 class StudyStore(InvitationStore):
     def __init__(self, root, protocol, purpose="study"):
         root = Path(root).resolve()
-        if root.is_relative_to(ROOT.parent.parent) or purpose not in (
+        if is_inside_checkout(root, ROOT) or purpose not in (
             "study",
             "pilot",
             "technical",

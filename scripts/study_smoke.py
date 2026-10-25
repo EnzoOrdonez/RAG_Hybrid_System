@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.evaluation.decline_classifier import CLASSIFIER_VERSION, classify_response  # noqa: E402
 from src.evaluation.study_analysis import read_exports  # noqa: E402
+from src.utils.checkout_boundary import is_inside_checkout  # noqa: E402
 from src.ui.components.session_storage import atomic_json, read_json  # noqa: E402
 from src.ui.components.study_backup import backup_export  # noqa: E402
 from src.ui.components.study_protocol import CELLS, LIKERT_IDS, ROOT, digest, sus_score, verify_draw  # noqa: E402
@@ -68,7 +69,7 @@ def same_physical_disk(left, right):
 def plan(config_dir, root, backup):
     protocol = verify_draw(config_dir)
     root, backup = Path(root).resolve(), Path(backup).resolve()
-    if (root.is_relative_to(ROOT.parent.parent) or backup.is_relative_to(ROOT.parent.parent)
+    if (is_inside_checkout(root, ROOT) or is_inside_checkout(backup, ROOT)
             or root.is_relative_to(backup) or backup.is_relative_to(root)):
         raise ValueError('Use separate external session and backup directories')
     return dict(marker=MARKER, mode='HUMAN_UI_REAL_MODELS', root=str(root), backup=str(backup),

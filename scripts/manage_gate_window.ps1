@@ -14,7 +14,8 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $project = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $rootFull = [IO.Path]::GetFullPath($Root)
-$checkout = [IO.Path]::GetFullPath((Join-Path $project '../..'))
+# Igual que src/utils/checkout_boundary.py: solo dentro de <checkout>/.worktrees/<x> el limite sube dos niveles.
+if ((Split-Path (Split-Path $project -Parent) -Leaf) -ieq '.worktrees') { $checkout = [IO.Path]::GetFullPath((Join-Path $project '../..')) } else { $checkout = $project }
 if ($rootFull -eq $checkout -or $rootFull.StartsWith($checkout.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Use external evidence root' }
 $admin = ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $admin) { throw 'Administrator token required; nothing changed' }

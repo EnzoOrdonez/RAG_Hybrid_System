@@ -45,10 +45,20 @@ def test_live_identity_drift_rejects_admission(sealed, field):
         environment.identity(config)
 
 
-def test_inventory_cannot_be_written_inside_checkout(monkeypatch, tmp_path):
-    monkeypatch.setattr(inventory, "ROOT", tmp_path / "project" / "app")
+@pytest.mark.parametrize(
+    "root, target",
+    [
+        # repo dentro de <checkout>/.worktrees/<x>: el checkout padre tambien esta protegido
+        (("project", ".worktrees", "app"), ("project", "environment_identity.json")),
+        (("project", ".worktrees", "app"), ("project", ".worktrees", "app", "out.json")),
+        # checkout principal: el limite es el propio repo
+        (("project", "app"), ("project", "app", "environment_identity.json")),
+    ],
+)
+def test_inventory_cannot_be_written_inside_checkout(monkeypatch, tmp_path, root, target):
+    monkeypatch.setattr(inventory, "ROOT", tmp_path.joinpath(*root))
     with pytest.raises(ValueError, match="outside"):
-        inventory.generate({}, tmp_path / "environment_identity.json")
+        inventory.generate({}, tmp_path.joinpath(*target))
 
 
 def test_execution_environment_records_unset_controls_without_secrets(monkeypatch):

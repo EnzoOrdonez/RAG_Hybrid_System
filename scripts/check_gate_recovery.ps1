@@ -10,7 +10,9 @@ function Write-NewJson([string]$Path, $Value) {
 }
 
 $rootFull = [IO.Path]::GetFullPath($Root)
-$checkout = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
+$recoveryProject = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+# Igual que src/utils/checkout_boundary.py: solo dentro de <checkout>/.worktrees/<x> el limite sube dos niveles.
+if ((Split-Path (Split-Path $recoveryProject -Parent) -Leaf) -ieq '.worktrees') { $checkout = [IO.Path]::GetFullPath((Join-Path $recoveryProject '../..')) } else { $checkout = $recoveryProject }
 if ($rootFull.StartsWith($checkout.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase) -or $rootFull -eq $checkout) {
     throw 'Evidence must be outside checkout'
 }

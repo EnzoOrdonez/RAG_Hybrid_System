@@ -5,7 +5,9 @@ Set-StrictMode -Version Latest
 $gateIdentity=[Security.Principal.WindowsIdentity]::GetCurrent()
 if (-not ([Security.Principal.WindowsPrincipal]::new($gateIdentity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Administrator token required' }
 $gateRoot=[IO.Path]::GetFullPath($Root)
-$gateCheckout=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
+$gateProject=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+# Igual que src/utils/checkout_boundary.py: solo dentro de <checkout>/.worktrees/<x> el limite sube dos niveles.
+if ((Split-Path (Split-Path $gateProject -Parent) -Leaf) -ieq '.worktrees') {$gateCheckout=[IO.Path]::GetFullPath((Join-Path $gateProject '../..'))} else {$gateCheckout=$gateProject}
 if ($gateRoot.StartsWith($gateCheckout.TrimEnd('\')+'\',[StringComparison]::OrdinalIgnoreCase)) {throw 'Evidence must be outside checkout'}
 if (Test-Path -LiteralPath $gateRoot) {throw 'New probe directory required'}
 New-Item -ItemType Directory -Path $gateRoot | Out-Null

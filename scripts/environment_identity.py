@@ -13,12 +13,13 @@ import urllib.request
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.ui.components.session_storage import atomic_json, read_json  # noqa: E402
+from src.utils.checkout_boundary import is_inside_checkout  # noqa: E402
 from src.ui.components.study_protocol import ROOT, digest  # noqa: E402
 
 
 def _external(path):
     path = Path(path).resolve()
-    if path.is_relative_to(ROOT.parent.parent):
+    if is_inside_checkout(path, ROOT):
         raise ValueError("Environment inventory must be outside the checkout")
     return path
 

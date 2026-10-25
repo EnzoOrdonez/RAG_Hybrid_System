@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from src.utils.checkout_boundary import is_inside_checkout
 from scripts import measure_interview_gate as gate
 
 GIB = 1024 ** 3
@@ -147,6 +148,6 @@ if __name__ == '__main__':
     parser.add_argument('--cohort', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    if args.output.resolve().is_relative_to(args.cohort.resolve()) or args.output.resolve().is_relative_to(gate.PROJECT.parent.parent):
+    if args.output.resolve().is_relative_to(args.cohort.resolve()) or is_inside_checkout(args.output, gate.PROJECT):
         parser.error('Use a new output outside cohort and checkout')
     gate.write_new(args.output, analyze(args.cohort))

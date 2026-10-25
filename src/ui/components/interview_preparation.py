@@ -13,6 +13,7 @@ SYSTEMS = ('hybrid', 'lexical', 'semantic')
 MODEL = 'granite4.1:8b'
 KEEP_ALIVE = '30m'
 WARM_QUERY = 'What is the SLA for AWS Lambda?'
+from src.utils.checkout_boundary import is_inside_checkout
 PROJECT = Path(__file__).resolve().parents[3]
 
 
@@ -38,7 +39,7 @@ class Preparation:
         if not self.systems or len(set(self.systems)) != len(self.systems) or not self.nli_systems <= set(self.systems):
             raise ValueError('Invalid preparation systems')
         self.root = Path(root).resolve()
-        if self.root.is_relative_to(PROJECT.parent.parent):
+        if is_inside_checkout(self.root, PROJECT):
             raise ValueError('Preparation evidence must be outside checkout')
         self.factory = factory or load_pipeline
         self.probe = probe or resident_models
