@@ -94,11 +94,11 @@ Variables obligatorias para reproducir: `HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLIN
 
 Las decisiones de arquitectura y proceso están en [../decisions/adr-log.md](../decisions/adr-log.md).
 
-## 8. Inconsistencias conocidas (sin resolver)
+## 8. Inconsistencias conocidas
 
 ISO/IEC/IEEE 42010 pide registrarlas en lugar de ocultarlas.
 
-1. `config/config.yaml` sección `reranking`: dice `ms-marco-mini-6` y no se consume en runtime. El sistema vivo usa `ms-marco-MiniLM-L-12-v2` (aviso dentro del propio YAML y en `docs/KNOB_MAP_summer.md`).
-2. `multidimensional_scoring=True` y `terminology_normalization=True` en `PROPOSED_HYBRID`: las banderas existen, pero el pipeline no las implementa (`docs/CLOUD_DEPLOYMENT.md`).
+1. `config/config.yaml` sección `reranking`: dice `ms-marco-mini-6` y no se consume en runtime. El sistema vivo usa `ms-marco-MiniLM-L-12-v2` (aviso dentro del propio YAML y en `docs/KNOB_MAP_summer.md`). **Documentada como inerte/reservada el 2026-10-25 (F-008):** la sección se conserva sin implementarla ni borrarla, y el comentario del YAML lo declara. Ningún valor de esta sección altera el sistema.
+2. `multidimensional_scoring=True` y `terminology_normalization=True` en `PROPOSED_HYBRID`: las banderas existen (campos de `PipelineConfig` en `src/pipeline/pipeline_config.py`), pero el pipeline no las implementa (`docs/CLOUD_DEPLOYMENT.md`). **Documentadas como inertes/reservadas el 2026-10-25 (F-008):** `PROPOSED_HYBRID` está congelado por ADR-0005 y no se modifica; el registro vive aquí y en el comentario de `config/config.yaml`. Activarlas no cambia el comportamiento.
 3. Modelo de la UI. La tabla de componentes del README dice «Llama 3.1 8B q4 (demo / UI only)», mientras que «Key Features» y «Configuration» dicen que la UI usa Granite 4.1 por defecto. El código (`SURVEY_DEPLOY`) usa Granite. Llama 3.1 sigue en `PROPOSED_HYBRID` como registro del sistema enviado a LACCI. **Resuelto el 2026-10-25 (F-007):** se corrigió la fila de la tabla del README; la UI usa `SURVEY_DEPLOY.llm_model = granite4.1:8b` (comprobado en ejecución), y Llama 3.1 solo queda como registro `PROPOSED_HYBRID` y línea base histórica de exp8.
 4. Corpus. El README da 3 951 documentos y 46 318 fragmentos para el repo completo; la evidencia de Nota 3 usa 2 697 documentos y 24 481 fragmentos. No es un error, pero cualquier cifra citada debe decir a qué corpus se refiere.
