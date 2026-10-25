@@ -6,7 +6,7 @@
 
 <p align="center">
   <!-- Package support, not the experimental environment. Corrected by Claude Code, 2026-08-21
-       07:30 local: the badge read 3.14, which is the REPRODUCIBLE ENVIRONMENT (REPRODUCE.md),
+       07:30 local: the badge read 3.14, which is the REPRODUCIBLE ENVIRONMENT (docs/guides/reproduce.md),
        not what the package supports. setup.py has always said >=3.11. -->
   <img src="https://img.shields.io/badge/Python-3.11+-blue?logo=python" alt="Python">
   <img src="https://img.shields.io/badge/PyTorch-CUDA-red?logo=pytorch" alt="PyTorch">
@@ -43,8 +43,8 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 - **Adaptive chunking**: Preserves code blocks and tables as atomic units
 - **Cross-encoder re-ranking**: ms-marco-MiniLM-L-12-v2 for precision refinement
 - **Hallucination detection**: NLI-based faithfulness scoring with DeBERTa v3
-- **Local LLMs**: Runs entirely on your machine with Ollama (demo: Llama 3.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see MODELS.md)
-- **Streamlit UI**: 5-page web interface with chat, metrics dashboard, and evaluation tools
+- **Local LLMs**: Runs with Ollama (UI default: Granite 4.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see docs/architecture/models.md)
+- **Streamlit UI**: invitation-only participant evaluation; five views in private development mode
 - **Benchmarking suite**: 19 logical experiments (exp3-exp19b + exp8b), stored in 20 result directories because exp15 is split in two, with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
 
 ---
@@ -72,7 +72,7 @@ by construction — reported only as a circularity reference (ledger N2).
 Generation faithfulness (4 LLMs × 4 scenarios × 194, NLI verifier): RAG ≫ no-RAG for
 every testable model — a difference in evidence-supported claims, with no-RAG structurally at zero (not a direct proof of factual accuracy) — but the **retrieval method does not significantly move generation
 faithfulness** (n.s. under 2 NLI verifiers × 4 denominators; ledger N5). Decline-aware
-v2 metric and instrument audit: `output/tables/nota3/` + `RESULTADOS_RESUMEN.md`.
+v2 metric and instrument audit: `output/tables/nota3/` + `docs/reports/results-summary.md`.
 
 ---
 
@@ -95,7 +95,7 @@ Query → Normalization + Expansion
 | Lexical | BM25 (rank_bm25) |
 | Re-ranker | cross-encoder/ms-marco-MiniLM-L-12-v2 |
 | LLMs (evaluated, Nota 3) | Granite 4.1 8B · Gemma 4 E4B · Mistral 7B · Qwen 3.5 9B |
-| LLM (demo / UI only) | Llama 3.1 8B q4 — see [MODELS.md](MODELS.md) |
+| LLM (UI default) | Granite 4.1 8B (`SURVEY_DEPLOY`); Llama 3.1 8B q4 remains only as the `PROPOSED_HYBRID` registry / historical exp8 baseline — see [models.md](docs/architecture/models.md) |
 | NLI | cross-encoder/nli-deberta-v3-small (runtime) + nli-deberta-v3-base (2nd verifier) |
 | UI | Streamlit + Plotly |
 
@@ -132,18 +132,38 @@ Query → Normalization + Expansion
 > specific interpreter, **Python 3.14** at
 > `C:\Users\enziz\AppData\Local\Python\pythoncore-3.14-64\python.exe`, which is the only one on
 > that machine carrying the ML stack. Package support and reproducible environment are separate
-> declarations and are kept separate on purpose — see `REPRODUCE.md §0`.
+> declarations and are kept separate on purpose — see `docs/guides/reproduce.md §0`.
 
 ### Install
+
+For the participant application, use the Python 3.14 environment, hashed dependency
+lock and artifact provisioning steps in [Interview readiness](docs/INTERVIEW_READINESS.md).
+Installing packages alone does not provision the corpus, indices or model snapshots.
+**Study app update (2026-09-27): NO-GO remains.** Participant mode now implements
+two blinded conditions and block-level instruments. Fill the literal SUS placeholders,
+freeze the global mapping/assignment CSV, and follow the
+[study runbook](docs/STUDY_DEPLOYMENT_RUNBOOK.md). Its separate gate is a draft;
+no real study cohort or network exposure has been executed. Approved NLI criteria
+remain intact; the NLI runner uses the isolated `521f525` copy.
+
+Historical interview gate (2026-09-10, Lima): **NO-GO**. That 120-position cohort is complete:
+warm p95 is 51.57 s hybrid, 65.75 s lexical and 45.09 s semantic. Lexical exceeds
+the preregistered 60 s limit. P900 completed 30 technical ratings, synthetic SUS and
+export; its three historical errors have no ratings. Mandatory preparation and
+participant read timeout 180 s with elapsed feedback are implemented and verified.
+Cold latency is reported separately and does not block under the approved protocol.
+See the runbook for hashes, one invalid cold observation, citation-display findings
+and the still-blocked cloud preparation. No public deployment has been prepared.
+The recipe below is the historical CLI environment, not the interview deployment.
 
 ```bash
 git clone https://github.com/EnzoOrdonez/RAG_Hybrid_System.git
 cd RAG_Hybrid_System
 pip install -r requirements.txt
 
-# Download the DEMO model (UI / sustentación).
+# Historical CLI example model.
 # The 4 models EVALUATED in the Nota 3 report (granite4.1:8b, gemma4:e4b,
-# mistral:7b-instruct, qwen3.5:9b) are documented in MODELS.md — pull those
+# mistral:7b-instruct, qwen3.5:9b) are documented in docs/architecture/models.md — pull those
 # to reproduce exp12.
 ollama pull llama3.1:8b-instruct-q4_K_M
 
@@ -157,7 +177,7 @@ The raw-evidence snapshot for the Nota 3 round (exp9-13) is published as the ann
 tag **`nota3-evidencia-2026-06-11`** (v2-era faithfulness metric, ledger N1-N7). The
 citable faithfulness figures were since corrected **offline** — v3 (N8: format-artifact
 exclusion) and **v4 (N9: vacuous-row exclusion; the citable Tabla 6)** — without touching
-the signed raw outputs. See `RESULTADOS_RESUMEN.md` and ledger entries N8/N9; the documentation-ready
+the signed raw outputs. See `docs/reports/results-summary.md` and ledger entries N8/N9; the documentation-ready
 state is frozen on `main` (camera-ready round, 2026-08-30).
 
 **Traceability + minimal repro recipes:** [docs/TRACEABILITY_nota3.md](docs/TRACEABILITY_nota3.md)
@@ -166,7 +186,10 @@ to regenerate only the report's artifacts (without re-running the full experimen
 
 - [Guía de anotación del gold](docs/GUIA_ANOTACION_GOLD_V4.md)
 - [Validación con referencia humana piloto](docs/SECCION_VALIDACION_HUMANA.md)
-- [Reproducción de experimentos](REPRODUCE.md)
+- [Reproducción de experimentos](docs/guides/reproduce.md)
+- [Resumen de resultados de Nota 3](docs/reports/results-summary.md)
+- [Benchmarks de la fase de verano](docs/reports/summer-benchmarks.md)
+- [Índice de toda la documentación](docs/README.md)
 - [Ledger de ablaciones de verano](paper/summer_ablation_log.md)
 
 ### Reproducing the Nota 3 report (evidence -> tables)
@@ -209,7 +232,7 @@ python scripts/run_retrieval_only.py --exp-id exp11_retrieval194_fullrerank
   var is unset, but setting it explicitly is preferred.
 - `seed=42` everywhere; generation uses `temperature=0` (greedy decoding). Determinism is
   model- and runtime-dependent: Granite 4.1 and Qwen 3.5 were deterministic in the
-  measurement environment, Gemma 4 and Mistral 7B were not fully; see [MODELS.md](MODELS.md).
+  measurement environment, Gemma 4 and Mistral 7B were not fully; see [models.md](docs/architecture/models.md).
   
 
 ### Run
@@ -228,32 +251,37 @@ python -m streamlit run src/ui/app.py
 python scripts/run_benchmark.py --experiment exp8 --quick
 ```
 
-### Cómo lanzar la demo (video de sustentación / sesiones B.4)
+### Aplicación para participantes y demo privada
+
+La aplicación abre **Sesión** por defecto y requiere una invitación del
+operador para el protocolo de dos condiciones. Antes de iniciarla, seguir
+[el runbook del estudio](docs/STUDY_DEPLOYMENT_RUNBOOK.md) para completar SUS,
+congelar asignación y fijar almacenamiento, manifiesto, digest y endpoint.
+Las entrevistas permanecen bloqueadas hasta validar el despliegue y su latencia real.
+
+El Chat de desarrollo se habilita explícitamente en un entorno privado:
 
 ```bash
-# 1) Ollama corriendo y modelo de demo descargado
-ollama serve            # si no está ya corriendo
-ollama pull llama3.1:8b-instruct-q4_K_M
-
-# 2) Lanzar la UI (recomendado para el video y las sesiones SUS)
-python -m streamlit run src/ui/app.py
+# Con el entorno y los modelos ya provisionados (Linux/macOS):
+export CLOUDRAG_MODE=development
+.venv-app/bin/python -m streamlit run src/ui/app.py
 # abre http://localhost:8501 → página "Chat"
 ```
 
-Notas operativas (fixes 2026-06-11, ver commits F6):
+En PowerShell: `$env:CLOUDRAG_MODE='development'` y usar `.venv-app/Scripts/python.exe`.
+Configuración actual y diferencias históricas:
 
-- **Modelo de demo:** `llama3.1:8b-instruct-q4_K_M` (default del selector). Es el único
-  que cabe entero en la GPU de 6 GB; gemma4:e4b (9,6 GB) cae a CPU y es más lento aquí.
-- **GPU para Ollama:** la UI fija `CUDA_VISIBLE_DEVICES=""` para sus propios modelos
-  (embedder/reranker/NLI van a CPU) y deja la GPU completa al LLM. Con GPU ≥12 GB:
-  `CLOUDRAG_DEMO_GPU=1` para revertir.
-- **keep_alive:** la UI envía `keep_alive=30m` y precalienta el modelo al primer uso de
-  la sesión → sin carga fría entre consultas ni tras pausas (sesiones de ~30 min).
-- **Streaming:** primeros tokens ~4-5 s tras enviar la consulta; respuesta completa
-  ~40-50 s (512 tokens). La verificación NLI corre DESPUÉS de mostrar la respuesta
-  (toggle en el sidebar).
-- **Primera consulta del proceso:** paga ~25 s extra de cargas perezosas (reranker en
-  CPU). Para el video: hacer una consulta de calentamiento antes de grabar.
+- **Modelo por defecto:** `granite4.1:8b`, seed 42, caché desactivada, salida máxima
+  1024 y contexto 4096. El Chat permite overrides; Evaluation conserva la receta fijada.
+- **GPU para Ollama:** el entorno de entrevistas fija auxiliares en CPU
+  (embedder/reranker/NLI); Ollama administra la GPU disponible. El override
+  `CLOUDRAG_DEMO_GPU=1` corresponde a una demo privada con PyTorch CUDA compatible,
+  no al entorno CPU fijado y medido para entrevistas.
+- **keep_alive y streaming:** corresponden al Chat. Evaluation utiliza `query()` y
+  espera generación y verificación antes de mostrar la respuesta y habilitar ratings.
+- **Latencia:** las cifras de junio (4–5 s a primeros tokens, 40–50 s completos con
+  512 tokens, ~25 s de carga inicial) pertenecen a la demo histórica. No verifican
+  Granite a 1024 tokens ni el p95 ≤60 s exigido para el despliegue de entrevistas.
 - Los benchmarks NO usan este camino (paridad cubierta por
   `tests/test_benchmark_parity.py`).
 
@@ -273,7 +301,7 @@ cloudrag/
 │   ├── generation/         # LLM manager (Ollama) + hallucination detector (NLI)
 │   ├── pipeline/           # End-to-end RAG pipeline (7 stages)
 │   ├── evaluation/         # Metrics, benchmark runner, statistical analysis
-│   └── ui/                 # Streamlit app (5 pages)
+│   └── ui/                 # Participant entry; 5 private development views
 ├── scripts/                # CLI: benchmark, export, analyze
 ├── experiments/results/    # JSON results per experiment
 ├── data/                   # Corpus + chunks + indices (~341 MB)
@@ -313,7 +341,12 @@ corrected per research-question family.
 
 ## Streamlit UI
 
-5 pages: **Chat** (interactive Q&A with system selector), **Metrics Dashboard** (Plotly charts), **Document Explorer** (search corpus), **Evaluation Mode** (controlled user studies), **Experiment Runner** (run benchmarks from UI).
+Participant mode registers only **Sesión**, with invitation login and no
+operator routes. The five views under `src/ui/views/` (**Chat**, **Metrics Dashboard**,
+**Document Explorer**, **Evaluation Mode**, **Experiment Runner**) are available only
+in the separate private `CLOUDRAG_MODE=development` environment. Installation and
+required deployment variables are documented in
+[STUDY_DEPLOYMENT_RUNBOOK.md](docs/STUDY_DEPLOYMENT_RUNBOOK.md).
 
 ```bash
 python -m streamlit run src/ui/app.py
@@ -331,7 +364,7 @@ python -m streamlit run src/ui/app.py
 | Chunk strategy | adaptive | fixed, recursive, semantic, hierarchical, adaptive |
 | Fusion method | RRF (k=60) | RRF, Linear (alpha 0.0-1.0) |
 | Re-ranker | ms-marco-L-12 | ms-marco-L-6, ms-marco-L-12, bge-reranker |
-| LLM (demo/UI) | llama3.1:8b (demo) | evaluated set in MODELS.md: granite4.1, gemma4:e4b, mistral, qwen3.5 |
+| LLM (UI default) | granite4.1:8b | evaluated set in docs/architecture/models.md: granite4.1, gemma4:e4b, mistral, qwen3.5 |
 | Top-K | 5 | 1-20 |
 
 ---

@@ -11,7 +11,6 @@ All tests use alpha=0.05 unless otherwise specified.
 """
 
 import logging
-import math
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -234,6 +233,8 @@ def cohens_d(scores_a: List[float], scores_b: List[float]) -> Tuple[float, str]:
 
     Returns:
         (d_value, label) where label is negligible/small/medium/large
+
+    Raises ValueError for nonzero constant differences: paired d_z is undefined.
     """
     a = np.array(scores_a, dtype=float)
     b = np.array(scores_b, dtype=float)
@@ -249,6 +250,8 @@ def cohens_d(scores_a: List[float], scores_b: List[float]) -> Tuple[float, str]:
     std_diff = np.std(diff, ddof=1)
 
     if std_diff == 0:
+        if mean_diff != 0:
+            raise ValueError("Paired d_z is undefined for constant nonzero differences")
         d = 0.0
     else:
         d = mean_diff / std_diff
@@ -561,5 +564,5 @@ def format_statistical_summary(results: List[StatisticalResult]) -> str:
     sig_count = sum(1 for r in results if r.is_significant)
     lines.append(f"\n{'='*100}")
     lines.append(f"Total comparisons: {len(results)} | Significant (p<0.05): {sig_count}")
-    lines.append(f"* = statistically significant at alpha=0.05")
+    lines.append("* = statistically significant at alpha=0.05")
     return "\n".join(lines)

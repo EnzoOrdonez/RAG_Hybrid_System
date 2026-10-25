@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "purpose": "I7 CPU build recipe, exact LF source bytes",
+  "files": {
+    "Dockerfile": "b248be035f7a15effcb796f8fc5e101d47252697344cbc8cb8287259e5954e02",
+    "requirements-lock.txt": "361c871c18edf2722257a0707251fd86b1c3671613cfef366ae8ab58c592ac31",
+    "scripts/locked_vendor_requirements.py": "de2152e779576ebb500ff81f8e2b7ef450c36101342dd8d118f7ca178781a1b3",
+    "scripts/study_operator/build_context.py": "67407ad1f1b4c11ce30c203ce82773531ed47e1323844a7663822abdd8d0036e",
+    "scripts/study_operator/linux_build.py": "08132cdd6b43c9df839b97ff9b70c91e910be866f961f447ecef63e4551c1b3e"
+  }
+}

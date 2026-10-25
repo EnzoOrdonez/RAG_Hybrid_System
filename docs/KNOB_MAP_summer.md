@@ -67,7 +67,7 @@ archivos de evidencia firmada de los que `verify_v4_offline.py` re-deriva cifras
   es la ruta de **despliegue**. La paridad de prompt debe quedar cubierta por test antes de empaquetar.
   **[TEXTO CANÓNICO — fijado 2026-08-21 07:40 por Claude Code, idéntico en
   `docs/TRACEABILITY_nota3.md`]** Esta entrada y la de `TRACEABILITY_nota3.md` parecían
-  contradecirse; la re-auditoría del 2026-08-04 (entrada [Kimi Code] en `CLAUDE.md`) mostró que
+  contradecirse; la re-auditoría del 2026-08-04 (entrada [Kimi Code] en `docs/decisions/session-log.md`) mostró que
   **ambas son correctas en su contexto y que la contradicción era de redacción, no de código**. La
   **construcción** del prompt es la misma en las dos rutas. Lo que difiere es el **origen del
   `query_type`**: el ruteo es una perilla **opt-in**, `prompt_routing`

@@ -1,0 +1,198 @@
+{
+  "schema_version": 2,
+  "labels": {
+    "A": "",
+    "B": ""
+  },
+  "sus_source_sha256": "15f6ebf953df8adcf2fdfed5bfcb6e9cf65941e719df5ec48f4aeebc955d5fa9",
+  "randomization": {
+    "ab_seed": 20260928,
+    "assignment_seed": 20260929,
+    "algorithm": "independent Python random.Random Fisher-Yates shuffle",
+    "sealed_before_draw": true
+  },
+  "tasks": {
+    "T1": [
+      "q001",
+      "q064",
+      "q171"
+    ],
+    "T2": [
+      "q010",
+      "q070",
+      "q172"
+    ]
+  },
+  "familiarization": "What is cloud computing?",
+  "sus": {
+    "source": "Sevilla-Gonzalez et al. (2020), JMIR Human Factors 7(4), e21161, Multimedia Appendix 2 (CC BY 4.0). Sustitución declarada: «herramienta»/«herramienta electrónica» → «sistema», con concordancia (esta→este, la→el, de la→del). Resto literal, incluida la puntuación original.",
+    "instruction": "Por favor seleccione de cada uno de los enunciados la opción que mejor describa su experiencia con el sistema. Un puntaje de 1 significa que usted se encuentra totalmente en desacuerdo con el enunciado, mientras que un puntaje en 5 significa que está totalmente de acuerdo, un puntaje de 3 significaría que usted se encuentra neutral con el enunciado.",
+    "scale_labels": {
+      "1": "Totalmente en desacuerdo",
+      "5": "Totalmente de acuerdo"
+    },
+    "items": [
+      "Me gustaría usar este sistema frecuentemente.",
+      "Considero que este sistema es innecesariamente complejo",
+      "Considero que el sistema es fácil de usar.",
+      "Considero necesario el apoyo de personal experto para poder utilizar este sistema",
+      "Considero que las funciones del sistema están bien integradas",
+      "Considero que el sistema presenta muchas contradicciones",
+      "Imagino que la mayoría de las personas aprenderían a usar este sistema rápidamente",
+      "Considero que el uso de este sistema es tedioso",
+      "Me sentí muy confiado al usar el sistema",
+      "Necesité saber bastantes cosas antes de poder empezar a usar este sistema"
+    ]
+  },
+  "likert": [
+    {
+      "id": "F1",
+      "text": "Las respuestas me parecieron respaldadas por la documentación.",
+      "inverse": false
+    },
+    {
+      "id": "F2",
+      "text": "Confiaría en estas respuestas para tomar una decisión técnica.",
+      "inverse": false
+    },
+    {
+      "id": "F3",
+      "text": "Detecté afirmaciones que me parecieron inventadas o incorrectas.",
+      "inverse": true
+    },
+    {
+      "id": "F4",
+      "text": "Cuando el sistema no sabía algo, lo admitió en lugar de inventar una respuesta.",
+      "inverse": false
+    },
+    {
+      "id": "U1",
+      "text": "Las respuestas me ahorrarían tiempo frente a buscar en la documentación oficial.",
+      "inverse": false
+    },
+    {
+      "id": "U2",
+      "text": "El nivel de detalle fue adecuado para mi necesidad.",
+      "inverse": false
+    },
+    {
+      "id": "U3",
+      "text": "Las respuestas comparativas entre proveedores me resultaron útiles.",
+      "inverse": false
+    },
+    {
+      "id": "R1",
+      "text": "El tiempo de espera me pareció aceptable.",
+      "inverse": false
+    },
+    {
+      "id": "R2",
+      "text": "La espera me hizo perder el interés en la respuesta.",
+      "inverse": true
+    },
+    {
+      "id": "I1",
+      "text": "Usaría este sistema en mi trabajo o estudio.",
+      "inverse": false
+    }
+  ],
+  "comparative": [
+    {
+      "id": "C1",
+      "text": "¿Qué sistema le dio respuestas más confiables?",
+      "choices": [
+        "A",
+        "B",
+        "iguales"
+      ]
+    },
+    {
+      "id": "C2",
+      "text": "¿Qué sistema le resultó más útil?",
+      "choices": [
+        "A",
+        "B",
+        "iguales"
+      ]
+    },
+    {
+      "id": "C3",
+      "text": "¿Cuál usaría?",
+      "choices": [
+        "A",
+        "B",
+        "ninguno"
+      ]
+    },
+    {
+      "id": "C4",
+      "text": "¿en qué notó la diferencia?",
+      "choices": []
+    }
+  ],
+  "free_instruction": "Ahora escribe tú una consulta sobre algo de AWS, Azure o GCP que te interese o que hayas necesitado buscar alguna vez. Escríbela preferentemente en inglés, el idioma de la documentación. No incluyas datos personales ni información confidencial de tu empleador.",
+  "blinding_question": "De los dos sistemas que usaste, ¿cuál crees que consultaba documentación para responder?",
+  "blinding_choices": [
+    "Sistema A",
+    "Sistema B",
+    "No sabría decir"
+  ],
+  "blinding_reason": "¿En qué lo notaste?",
+  "ueq_s": {
+    "schema_version": 1,
+    "source_url": "https://www.ueq-online.org/Material/UEQS_Items.pdf",
+    "source_sha256": "9f1dcc81ff76235122a2b3f0db38a74f36fe773fa9255693d6504a70cd08be20",
+    "handbook_url": "https://www.ueq-online.org/Material/Handbook.pdf",
+    "handbook_sha256": "dec2f15c16b8501558ba420d6dc32dbe89ec3f670c954b3c014d067a5e8dde87",
+    "source_language": "Spanish",
+    "source_page": 1,
+    "items": [
+      [
+        "obstructivo",
+        "impulsor de apoyo"
+      ],
+      [
+        "complicado",
+        "facil"
+      ],
+      [
+        "ineficiente",
+        "eficiente"
+      ],
+      [
+        "confuso",
+        "claro"
+      ],
+      [
+        "aburrido",
+        "emocionante"
+      ],
+      [
+        "no interesante",
+        "interesante"
+      ],
+      [
+        "convencional",
+        "original"
+      ],
+      [
+        "convencional",
+        "novedoso"
+      ]
+    ],
+    "instruction": "Para cada par de palabras, marca una de las siete posiciones según tu experiencia con este sistema. No hay respuestas correctas o incorrectas. Esta parte toma aproximadamente un minuto.",
+    "instruction_source": "application UX; not a standardized UEQ-S instruction",
+    "positions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "negative_on_left": true,
+    "scoring": "position minus 4; pragmatic items 1..4; hedonic 5..8; overall all 8"
+  },
+  "ueq_s_source_sha256": "d29d1f1938212fa59d2a155673e28bbb22a062bc6a4310b4d16775d88ebcefd4"
+}

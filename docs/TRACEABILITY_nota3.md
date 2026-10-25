@@ -40,7 +40,7 @@ Preámbulo de entorno para TODO comando: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=
 | **Tabla 6b** — tasa de declinación | exp12 | idem | `faithfulness_metrics.json` (v1, vía `--write-v1`) | `output/tables/nota3/tabla6_declinacion__exp12_matrix.{md,csv}` |
 | **Latencias p50/p95** | exp12 | `_latency_p50p95.py` | `exp12_matrix/results.json` | `output/tables/nota3/latency__exp12_matrix.{md,csv}` |
 | **Figuras f1–f4** | exp11/exp12 | `_make_figures_nota3.py` | tablas/jsons anteriores | `output/figures/nota3/f{1,2,3,4}_*.png` |
-| **Expansión cross-cloud OFF≈ON (N4)** | exp13 | `run_exp13_expansion.py` → `compute_retrieval_metrics.py` / `compute_faithfulness_metrics.py` | `exp13_expansion/results.json`, `retrieval_metrics__bge-indep.json`, `faithfulness_metrics_v2.json` | (veredicto en `RESULTADOS_RESUMEN.md` §2/§8) |
+| **Expansión cross-cloud OFF≈ON (N4)** | exp13 | `run_exp13_expansion.py` → `compute_retrieval_metrics.py` / `compute_faithfulness_metrics.py` | `exp13_expansion/results.json`, `retrieval_metrics__bge-indep.json`, `faithfulness_metrics_v2.json` | (veredicto en `docs/reports/results-summary.md` §2/§8) |
 | **Control 0 (LLM sin RAG)** | exp9 | `run_llm_only_benchmark.py` | `exp9_llm_only_no_rag/results.json` | (RESULTADOS §3, "Sin RAG = 0 por construcción", N3) |
 
 ## Verificación vigente y recetas históricas
@@ -104,7 +104,7 @@ Tablas v3: `python scripts/_export_tabla6_v3.py exp12_matrix faithfulness_metric
 **Resultado v3 (small, comparable con la Tabla 6 publicada):** retrieval n.s. en fidelidad (0/12,
 robusto bajo AMBOS verificadores base+small); entre-modelos **2/18 sig bajo small** (6/18 base) —
 corrige el "todo n.s." de N5; gemma/qwen **suben +0,05..0,11** al excluir artefactos. Veredictos y
-deltas: ledger **N8** en `paper/audit_findings_cc_addenda.md`; cifras en `RESULTADOS_RESUMEN.md` §3.
+deltas: ledger **N8** en `paper/audit_findings_cc_addenda.md`; cifras en `docs/reports/results-summary.md` §3.
 
 ### v4 (N9, 2026-07-02): exclusión de filas vacuas — TABLA CITABLE
 
@@ -141,7 +141,7 @@ replica — clasifica todo como default. Reproducir prompts = usar el runner, no
 demo (hallazgo N9 #6);
 **[TEXTO CANÓNICO — fijado 2026-08-21 07:40 por Claude Code, idéntico en
 `docs/KNOB_MAP_summer.md`]** La frase anterior y la de `KNOB_MAP_summer.md` parecían
-contradecirse; la re-auditoría del 2026-08-04 (entrada [Kimi Code] en `CLAUDE.md`) mostró que
+contradecirse; la re-auditoría del 2026-08-04 (entrada [Kimi Code] en `docs/decisions/session-log.md`) mostró que
 **ambas son correctas en su contexto y que la contradicción era de redacción, no de código**. La
 **construcción** del prompt es la misma en las dos rutas: `build_context` → `get_template` → rama
 `cross_cloud` con `context_by_provider` → `SYSTEM_PROMPT`. Lo que difiere es el **origen del

@@ -1,0 +1,295 @@
+# Operador de iteración 4 — borrador sujeto a ensayo literal
+
+Este documento no acredita todavía un despliegue apto. Los comandos requieren
+la instalación nueva sellada en `C:/CloudRAG/operator-iteration4`, con su
+`installation.json`, imagen preparada y recibos. No se usa el operador anterior.
+El ensayo literal, la aceptación del estímulo y la compuerta nueva están pendientes.
+
+Usa PowerShell sin administrador, el SDK de Google Cloud ya autenticado y el
+cliente existente `C:/Windows/System32/OpenSSH/ssh.exe`. Las llamadas privadas
+usan ese cliente con claves públicas verificadas por la API y configuración
+SSH aislada. La clave existente del SDK conserva su ubicación; no la copies
+ni la imprimas. Si falta un requisito, conserva el recibo y corrige la
+instalación antes de `start`. No se crean credenciales ni se aceptan claves
+de host desconocidas para sortear el preflight.
+
+## Preparación de una sesión, al menos tres días antes
+
+Abre PowerShell sin administrador. No uses `Start-Transcript`, redirecciones ni
+capturas al invitar: el token se imprime una vez y no se guarda. La lista que
+vincula nombres y códigos se custodia por separado, fuera de Google Cloud y del
+operador. No ingreses nombres en ningún comando.
+
+Para `study`, Enzo guarda a mano `ethics/ethics_approval.pdf` y
+`ethics/ethics_approval.json` en la instalación. El JSON tiene exactamente
+`committee`, `approval_code`, `date` (AAAA-MM-DD), `pdf_sha256` (64 dígitos
+hexadecimales) y `approved_b4_version`. El operador compara el PDF real con el
+hash, rechaza una fecha futura y no crea ese registro.
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 status
+& C:/CloudRAG/operator-iteration4/operator.ps1 ip-reserve
+$firstSession = Read-Host 'Fecha de la primera sesión (AAAA-MM-DD), al menos 3 días después de hoy'
+& C:/CloudRAG/operator-iteration4/operator.ps1 tls-prepare --first-session $firstSession
+```
+
+`tls-prepare` enciende con propósito técnico, verifica el certificado público y
+detiene la VM y prepara una instantánea global, almacenada en `us-central1`,
+ligada a esa imagen, IP y certificado. No es un disco ni una instantánea
+regional de la API de Compute Engine. Antes de copiar el disco, exige que todos los periodos de iteración
+4 y todas las instancias de recuperación estén vacíos: descarga y purga los
+datos del periodo anterior antes de esta preparación. No crea una instantánea
+con datos de participantes. La IP sigue asociada y el certificado privado queda en el disco
+persistente, fuera del repositorio y del paquete de auditoría. Caddy lo reutiliza
+y renueva. Si se libera la IP, una reserva posterior puede devolver otra: repite
+la preparación con anticipación. No aceptes una excepción de certificado.
+
+## Día de sesión: encender 60 minutos antes
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose study
+& C:/CloudRAG/operator-iteration4/operator.ps1 preflight
+```
+
+Si el primer preflight informa que el invitado aún no está READY, espera y
+repítelo dentro de 15 minutos desde `start`; no repitas `start`. Se exige READY
+en 15 minutos, TLS, identidad, IAM, metadatos inaccesibles y respaldo despejado.
+Cada invitación vuelve a comprobarlo. No se admite una sesión con menos de
+70 minutos hasta el primero de los dos límites independientes de apagado.
+
+Si preflight informa `BOOTSTRAP_FAILED` u otro rechazo definitivo, no sigas
+esperando ni repitas start. Conserva los recibos técnicos de ese arranque:
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 diagnostics
+& C:/CloudRAG/operator-iteration4/operator.ps1 stop
+```
+
+`diagnostics` guarda solo los recibos técnicos permitidos, incluidos los
+comandos de arranque y sus códigos de salida. No copia sesiones, logs de
+acceso, claves de certificado ni el árbol del despliegue. Revisa el primer
+comando fallido en la ruta que devuelve el recibo antes de corregir y reiniciar.
+Si la VM ya está detenida, recupera del bucket técnico el último recibo de
+fallo de esa VM por generación, verifica checksum e identidad de imagen y
+commit, y guarda solo etiquetas de operación, códigos de salida y hashes de
+comandos. No vuelve a encenderla para leerlo. El recibo histórico no acredita
+READY. Si no existe un recibo compatible, conserva el disco y solicita su
+recuperación técnica; no repitas start para adivinar la causa. Un fallo al subir
+el recibo nunca retrasa intencionadamente el apagado del invitado.
+
+```powershell
+$participantCode = Read-Host 'Código congelado de participante, por ejemplo P01'
+& C:/CloudRAG/operator-iteration4/operator.ps1 invite $participantCode
+```
+
+Entrega al participante la URL de preflight y el token al iniciar. La invitación
+caduca a las 24 horas o al completar la sesión. Se puede revocar sin borrar datos:
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 revoke $participantCode
+```
+
+## Falta de capacidad
+
+Al cerrar cada jornada, después de completar y respaldar todas sus sesiones,
+archiva las copias locales del disco. GCS sigue guardando sus respaldos por
+código durante el periodo; también quedan descargas privadas verificadas en
+el equipo del investigador. Una sesión abierta o un respaldo distinto bloquea
+el archivo. En `study`, confirma escribiendo `ARCHIVAR`. El comando cierra la
+app; ejecuta `stop` después, antes de dejar el servidor para el día siguiente.
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 archive-local
+& C:/CloudRAG/operator-iteration4/operator.ps1 archive-local --execute
+& C:/CloudRAG/operator-iteration4/operator.ps1 stop
+```
+
+Así el disco de origen queda vacío y conciliado antes de un posible stockout
+en el próximo arranque. El operador consulta GCS antes de emitir una invitación
+y rechaza un código ya respaldado aunque su copia de disco esté archivada.
+
+Ante `ZONE_RESOURCE_POOL_EXHAUSTED`, conserva el error. Una conmutación exige que
+el operador haya comprobado que no quedan sesiones, invitaciones ni copias
+pendientes en el disco activo. La política conservadora impide conmutar durante
+una sesión o abandonar datos sin recuperarlos. Nunca enciendas dos VM con GPU.
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 failover --zone us-central1-b
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose study
+& C:/CloudRAG/operator-iteration4/operator.ps1 preflight
+```
+
+Si tampoco hay capacidad, prueba `us-central1-c` con el mismo comando de
+`failover`. Si ninguna zona admite la VM, no cambies región ni reintentes a
+ciegas. Texto para Enzo: «El servidor de la sesión no está disponible. Te
+propondré otra fecha; hoy no realizaremos la sesión ni recogeremos respuestas».
+Este aviso lo comunica Enzo; el operador nunca contacta participantes.
+
+Para volver a la zona original, con el mismo requisito de conciliación:
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 failback
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose study
+& C:/CloudRAG/operator-iteration4/operator.ps1 preflight
+```
+
+## Recuperación: información tomada del recibo, no inventada
+
+La restauración crea una instancia nueva de la app, en un almacén separado del
+original y sin admisión pública, con el mismo propósito, periodo, imagen y
+protocolo. No exige vaciar el almacén original. Toma ID y generaciones de los objetos del recibo de
+respaldo. La invitación restaurada queda revocada; se exporta de nuevo y se
+comprueba que el SHA-256 sea idéntico. Repetir el mismo respaldo verifica la
+copia anterior; una copia alterada se rechaza. Retiro y purga inventarían y
+borran también estos almacenes de recuperación. No se sobrescribe una sesión existente.
+
+```powershell
+$installation = Get-Content -LiteralPath C:/CloudRAG/operator-iteration4/installation.json -Raw | ConvertFrom-Json
+$env:CLOUDSDK_CORE_DISABLE_FILE_LOGGING = '1'
+$backupPrefix = 'gs://' + $installation.sessions_bucket + '/periods/' + $installation.period_id + '/' + $participantCode + '/'
+& $installation.gcloud storage ls ($backupPrefix + '**/full_session.json') --long --project=pure-loop-474323-a8 --quiet
+$sessionId = Read-Host 'ID de sesión de 32 caracteres hexadecimales mostrado en la ruta anterior'
+& $installation.gcloud storage objects describe ($backupPrefix + $sessionId + '/full_session.json') --format='json(name,generation,size,md5Hash)' --project=pure-loop-474323-a8 --quiet
+& $installation.gcloud storage objects describe ($backupPrefix + $sessionId + '/export_manifest.json') --format='json(name,generation,size,md5Hash)' --project=pure-loop-474323-a8 --quiet
+$fullGeneration = Read-Host 'generation de full_session.json mostrada arriba'
+$manifestGeneration = Read-Host 'generation de export_manifest.json mostrada arriba'
+& C:/CloudRAG/operator-iteration4/operator.ps1 restore $participantCode --session-id $sessionId --full-generation $fullGeneration --manifest-generation $manifestGeneration
+```
+
+
+Ejecuta esta sección con la VM RUNNING y el mismo propósito y periodo de la
+sesión respaldada, antes de withdraw, purge-study, stop o ip-release. Los
+listados muestran solo metadatos; no descargan ni imprimen consultas. Si no
+hay respaldo o no reconoces el código, conserva el error y no inventes ID ni
+generaciones. restore descarga las generaciones indicadas, valida el
+manifest SHA-256 y exporta la copia aislada para comparar. La app queda cerrada
+para mantenimiento; no emitas otra invitación hasta un nuevo start y preflight.
+
+## Retiro y cierre del periodo
+
+Los comandos de borrado cierran la app primero y dejan la admisión bloqueada.
+Sin `--execute` solo inventarían. La ejecución descarga todas las generaciones
+y las copias de disco al almacenamiento privado local, verifica SHA-256, borra
+el ámbito y verifica listados normales y con versiones vacíos. Si la API de
+soft-deleted devuelve `HTTP400_POLICY_REQUIRED` por retención cero, exige la
+identidad y el historial inicial anclado de retención cero sin modificaciones
+posteriores; el recibo distingue ese método de un listado API vacío exitoso.
+Un error distinto o un historial incompleto bloquea la eliminación. No se
+activa soft delete para obtener un listado. La precisión está documentada en
+`docs/STUDY_ITERATION4_SOFT_DELETE_VERIFICATION_2026-10-05.md`.
+Las descargas privadas siguen bajo custodia del investigador: retirar datos del
+servidor no equivale a autorizar conservarlos para análisis tras un retiro.
+Enzo debe resolver también esas copias privadas y su lista separada conforme a
+la aprobación ética, y registrar esa decisión fuera del servidor.
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 withdraw $participantCode
+& C:/CloudRAG/operator-iteration4/operator.ps1 withdraw $participantCode --execute
+& C:/CloudRAG/operator-iteration4/operator.ps1 export-anonymized
+& C:/CloudRAG/operator-iteration4/operator.ps1 purge-study
+& C:/CloudRAG/operator-iteration4/operator.ps1 purge-study --execute
+```
+
+En `study`, `withdraw --execute` exige escribir el código y `purge-study
+--execute` exige `PURGAR` en consola. En esta iteración solo se prueban datos
+sintéticos propios. La exportación es seudonimizada por código: las consultas
+libres, C4 y razones de cegamiento requieren revisión manual. No la publiques
+automáticamente. El recibo indica el directorio privado de descarga.
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 stop
+& C:/CloudRAG/operator-iteration4/operator.ps1 status
+& C:/CloudRAG/operator-iteration4/operator.ps1 ip-release
+```
+
+Exige `TERMINATED_VERIFIED` y conserva disco, instantánea y buckets. La IP se
+libera al cerrar si no hay sesión agendada. No borres recursos originales.
+Un GO técnico no autoriza reclutar: requiere aprobación ética y B.4 aprobada.
+
+Si el supervisor independiente ya liberó la IP, `ip-release` comprueba su
+ausencia y concilia una sola vez el ID y la reserva anteriores. Conserva el
+recibo `ip-release-settlement.json` dentro del directorio de ejecución que
+devuelve el operador. La estimación usa el extremo superior de la tarifa de
+IP sin asociar hasta la observación de ausencia; no supone asociación continua
+ni una fecha de liberación desconocida y no es factura. Se invalidan READY y
+la referencia de contingencia del certificado anterior, conservando todas las
+instantáneas y sus recibos. La siguiente reserva obtiene su propio ID y exige
+otra preparación TLS. Si falta una fecha válida de creación, conserva el estado
+y concilia los recibos anteriores antes de otra operación pagada; no inventes
+la fecha ni edites los hashes para continuar.
+
+## Ensayo técnico literal, sin participantes ni registro ético real
+
+Esta sección es el recorrido de aceptación del operador. Solo usa datos
+sintéticos propios y propósito `technical`. No crea el archivo de aprobación
+ética y no habilita `study`. Antes de comenzar, verifica que la imagen final,
+el inventario, el certificado y la contingencia estén sellados y que todas las
+VM con GPU estén detenidas. Si un comando falla, conserva su recibo y corrige
+la causa antes de repetirlo; no conviertas el recorrido parcial en aprobado.
+
+Con el directorio `ethics` real aún sin registro, este primer comando debe
+rechazar `study` y no encender la VM:
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose study
+```
+
+Los comandos siguientes sí forman el ensayo técnico. La fecha calculada es
+un fixture de cuatro días de anticipación, no una sesión agendada. `P999` es
+exclusivamente el código de los scripts de aceptación de esta iteración; si
+ya tiene un respaldo en el periodo, conserva ese respaldo y no repitas la
+observación con ese código.
+
+```powershell
+$participantCode = 'P999'
+$firstSession = (Get-Date).ToUniversalTime().Date.AddDays(4).ToString('yyyy-MM-dd')
+& C:/CloudRAG/operator-iteration4/operator.ps1 status
+& C:/CloudRAG/operator-iteration4/operator.ps1 ip-reserve
+& C:/CloudRAG/operator-iteration4/operator.ps1 tls-prepare --first-session $firstSession
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose technical
+& C:/CloudRAG/operator-iteration4/operator.ps1 preflight
+& C:/CloudRAG/operator-iteration4/operator.ps1 invite $participantCode --cell 1 --profile without_experience
+```
+
+Aplica exactamente la espera de READY descrita en «Día de sesión», sin repetir
+`start`. Abre únicamente la URL verificada en preflight y completa la sesión
+sintética con el automatizador funcional previamente aprobado. El token se
+entrega en memoria al campo de contraseña: no lo guardes en la transcripción,
+capturas, argumentos de proceso ni archivos. Verifica las ocho respuestas v2,
+todos los instrumentos, cegamiento, exportación, ausencia de familiarización
+persistida y respaldo por generación y SHA-256. El ensayo no mide rendimiento
+en el equipo local. Cualquier falta conserva el smoke como fallido.
+
+Después del respaldo, ejecuta literalmente la sección «Recuperación» de este
+runbook, usando las generaciones que devuelve GCS, antes de borrar nada.
+Compara la exportación de la instancia nueva con la original mediante SHA-256.
+Luego ejecuta «Retiro y cierre del periodo» con el mismo código sintético: los
+modos de simulación y de ejecución deben dejar recibos separados y verificar
+vacíos GCS, versiones, soft-deleted y todas las copias inventariadas del disco.
+No retires ni purgues datos de iteraciones anteriores ni de otras personas.
+
+El simulacro de capacidad usa la instantánea vacía que preparó `tls-prepare`.
+Debe comprobar la misma URL, certificado, imagen y proyección de identidad en
+la zona alterna y al volver; registrar cada paso no sustituye READY.
+
+```powershell
+& C:/CloudRAG/operator-iteration4/operator.ps1 failover --zone us-central1-b
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose technical
+& C:/CloudRAG/operator-iteration4/operator.ps1 preflight
+& C:/CloudRAG/operator-iteration4/operator.ps1 stop
+& C:/CloudRAG/operator-iteration4/operator.ps1 failback
+& C:/CloudRAG/operator-iteration4/operator.ps1 start --purpose technical
+& C:/CloudRAG/operator-iteration4/operator.ps1 preflight
+& C:/CloudRAG/operator-iteration4/operator.ps1 stop
+& C:/CloudRAG/operator-iteration4/operator.ps1 status
+& C:/CloudRAG/operator-iteration4/operator.ps1 ip-release
+```
+
+Si `us-central1-b` rechaza capacidad, usa la alternativa `us-central1-c` que
+define «Falta de capacidad». Sin READY en la alterna y en la primaria, el
+simulacro sigue incompleto. Al terminar exige `TERMINATED_VERIFIED` e IP
+liberada. El protocolo de reprogramación y la preparación al menos tres días
+antes siguen siendo necesarios para las sesiones reales de Enzo.
+
+Pendiente antes de dar este runbook por probado: instalar la imagen final y
+comprobar todos los comandos, rutas y mensajes con recibos reales.

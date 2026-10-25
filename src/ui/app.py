@@ -23,11 +23,21 @@ if os.environ.get("CLOUDRAG_DEMO_GPU") != "1":
 import streamlit as st
 
 st.set_page_config(
-    page_title="CloudRAG — Hybrid RAG System",
+    page_title="Sesión",
     page_icon="☁️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# Public entry point is Evaluation only. Operator tools require an explicit local mode.
+mode = os.environ.get("CLOUDRAG_MODE", "participant")
+if mode not in {"participant", "development"}:
+    st.error("Invalid application mode")
+    st.stop()
+if mode == "participant":
+    from src.ui.views.study_page import render
+    st.navigation([st.Page(render, title="Sesión", default=True)], position="hidden").run()
+    st.stop()
 
 # Page registry
 PAGES = {
@@ -61,7 +71,7 @@ with st.sidebar:
 
     # Check indices
     import os
-    indices_dir = os.path.join(os.path.dirname(__file__), "..", "..", "data", "indices")
+    indices_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "indices")
     indices_dir = os.path.normpath(indices_dir)
     if os.path.exists(indices_dir) and os.listdir(indices_dir):
         st.success("Indices: Available", icon="✅")
@@ -69,7 +79,7 @@ with st.sidebar:
         st.warning("Indices: Not built", icon="⚠️")
 
     # Corpus stats
-    chunks_dir = os.path.join(os.path.dirname(__file__), "..", "..", "data", "chunks", "adaptive", "size_500")
+    chunks_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "chunks", "adaptive", "size_500")
     chunks_dir = os.path.normpath(chunks_dir)
     if os.path.exists(chunks_dir):
         chunk_count = 0
@@ -86,17 +96,17 @@ with st.sidebar:
 selected_page = PAGES[page]
 
 if selected_page == "chat":
-    from src.ui.pages.chat_page import render
+    from src.ui.views.chat_page import render
     render()
 elif selected_page == "dashboard":
-    from src.ui.pages.dashboard_page import render
+    from src.ui.views.dashboard_page import render
     render()
 elif selected_page == "explorer":
-    from src.ui.pages.explorer_page import render
+    from src.ui.views.explorer_page import render
     render()
 elif selected_page == "evaluation":
-    from src.ui.pages.evaluation_page import render
+    from src.ui.views.evaluation_page import render
     render()
 elif selected_page == "experiments":
-    from src.ui.pages.experiments_page import render
+    from src.ui.views.experiments_page import render
     render()

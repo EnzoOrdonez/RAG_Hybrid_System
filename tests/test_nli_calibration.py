@@ -26,6 +26,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.generation.hallucination_detector import HallucinationDetector  # noqa: E402
+from src.utils.local_models import local_snapshot, resolve  # noqa: E402
 
 # Every test here loads a ~200MB cross-encoder: excluded from the fast suite via
 # `pytest -m "not slow"`.
@@ -51,6 +52,8 @@ def detector():
     # available offline (so this test never produces a misleading red on a
     # machine without the cached weights).
     if det.nli_model is None or not det._use_nli:
+        if local_snapshot(HallucinationDetector.NLI_MODEL) is not None:
+            pytest.fail("Present local NLI snapshot failed to load")
         pytest.skip("NLI model unavailable (offline / not cached)")
     return det
 
@@ -82,8 +85,10 @@ def test_nli_output_is_softmax_probabilities():
     """
     try:
         from sentence_transformers import CrossEncoder
-        model = CrossEncoder(HallucinationDetector.NLI_MODEL, max_length=512)
+        model = CrossEncoder(resolve(HallucinationDetector.NLI_MODEL), max_length=512)
     except Exception as e:  # offline / not cached
+        if local_snapshot(HallucinationDetector.NLI_MODEL) is not None:
+            pytest.fail(f"Present local NLI snapshot failed to load: {e}")
         pytest.skip(f"NLI model unavailable: {e}")
 
     id2label = {i: lbl.lower() for i, lbl in model.config.id2label.items()}

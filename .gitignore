@@ -20,7 +20,7 @@ data/indices/
 data/embeddings/
 data/evaluation/results/
 
-# Downloaded model snapshots (~700 MB, re-obtainable; provenance in MODELS.md.
+# Downloaded model snapshots (~700 MB, re-obtainable; provenance in docs/architecture/models.md.
 # nli-deberta-v3-base was fetched via `curl --ssl-no-revoke` because HF
 # downloads are blocked by TLS interception on this machine.)
 data/models/
@@ -59,3 +59,9 @@ output/tables/*.csv
 # Repos cloned during crawling
 data/raw/*/_repo/
 data/raw/*/_zip/
+# Isolated application installation used by the interview readiness checks.
+.venv-app/
+# Material local de presentacion (F-011): decision de Enzo 2026-10-25, se queda fuera del repo publico.
+showcase/
+# Worktrees de git de esta maquina.
+.worktrees/

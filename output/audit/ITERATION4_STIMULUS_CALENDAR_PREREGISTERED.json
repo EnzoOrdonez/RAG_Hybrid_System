@@ -1,0 +1,1093 @@
+{
+  "schema_version": 1,
+  "status": "PREREGISTERED_NOT_MEASURED",
+  "calendar": {
+    "1": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q001",
+        "condition": "hybrid"
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q001",
+        "condition": "hybrid",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q001",
+        "condition": "no_rag",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q068",
+        "condition": "no_rag",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q068",
+        "condition": "hybrid",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q180",
+        "condition": "hybrid",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q180",
+        "condition": "no_rag",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q016",
+        "condition": "no_rag",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q016",
+        "condition": "hybrid",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q070",
+        "condition": "hybrid",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q070",
+        "condition": "no_rag",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q172",
+        "condition": "no_rag",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q172",
+        "condition": "hybrid",
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q001",
+        "condition": "no_rag",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q001",
+        "condition": "hybrid",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q068",
+        "condition": "hybrid",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q068",
+        "condition": "no_rag",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q180",
+        "condition": "no_rag",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q180",
+        "condition": "hybrid",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q016",
+        "condition": "hybrid",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q016",
+        "condition": "no_rag",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q070",
+        "condition": "no_rag",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q070",
+        "condition": "hybrid",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q172",
+        "condition": "hybrid",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q172",
+        "condition": "no_rag",
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q001",
+        "condition": "hybrid",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q001",
+        "condition": "no_rag",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q068",
+        "condition": "no_rag",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q068",
+        "condition": "hybrid",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q180",
+        "condition": "hybrid",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q180",
+        "condition": "no_rag",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q016",
+        "condition": "no_rag",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q016",
+        "condition": "hybrid",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q070",
+        "condition": "hybrid",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q070",
+        "condition": "no_rag",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q172",
+        "condition": "no_rag",
+        "repetition": 3
+      },
+      {
+        "role": "target",
+        "history": "gate_calendar",
+        "query_id": "q172",
+        "condition": "hybrid",
+        "repetition": 3
+      }
+    ],
+    "2": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q001",
+        "condition": "no_rag"
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q001",
+        "condition": "hybrid",
+        "cell": 1,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q068",
+        "condition": "hybrid",
+        "cell": 1,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q180",
+        "condition": "hybrid",
+        "cell": 1,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q016",
+        "condition": "no_rag",
+        "cell": 1,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q070",
+        "condition": "no_rag",
+        "cell": 1,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q172",
+        "condition": "no_rag",
+        "cell": 1,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q016",
+        "condition": "hybrid",
+        "cell": 2,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q070",
+        "condition": "hybrid",
+        "cell": 2,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q172",
+        "condition": "hybrid",
+        "cell": 2,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q001",
+        "condition": "no_rag",
+        "cell": 2,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q068",
+        "condition": "no_rag",
+        "cell": 2,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q180",
+        "condition": "no_rag",
+        "cell": 2,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q001",
+        "condition": "no_rag",
+        "cell": 3,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q068",
+        "condition": "no_rag",
+        "cell": 3,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q180",
+        "condition": "no_rag",
+        "cell": 3,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q016",
+        "condition": "hybrid",
+        "cell": 3,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q070",
+        "condition": "hybrid",
+        "cell": 3,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q172",
+        "condition": "hybrid",
+        "cell": 3,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q016",
+        "condition": "no_rag",
+        "cell": 4,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q070",
+        "condition": "no_rag",
+        "cell": 4,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q172",
+        "condition": "no_rag",
+        "cell": 4,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q001",
+        "condition": "hybrid",
+        "cell": 4,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q068",
+        "condition": "hybrid",
+        "cell": 4,
+        "repetition": 1
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q180",
+        "condition": "hybrid",
+        "cell": 4,
+        "repetition": 1
+      }
+    ],
+    "3": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q068",
+        "condition": "hybrid"
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q001",
+        "condition": "hybrid",
+        "cell": 1,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q068",
+        "condition": "hybrid",
+        "cell": 1,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q180",
+        "condition": "hybrid",
+        "cell": 1,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q016",
+        "condition": "no_rag",
+        "cell": 1,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q070",
+        "condition": "no_rag",
+        "cell": 1,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q172",
+        "condition": "no_rag",
+        "cell": 1,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q016",
+        "condition": "hybrid",
+        "cell": 2,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q070",
+        "condition": "hybrid",
+        "cell": 2,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q172",
+        "condition": "hybrid",
+        "cell": 2,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q001",
+        "condition": "no_rag",
+        "cell": 2,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q068",
+        "condition": "no_rag",
+        "cell": 2,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q180",
+        "condition": "no_rag",
+        "cell": 2,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q001",
+        "condition": "no_rag",
+        "cell": 3,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q068",
+        "condition": "no_rag",
+        "cell": 3,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q180",
+        "condition": "no_rag",
+        "cell": 3,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q016",
+        "condition": "hybrid",
+        "cell": 3,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q070",
+        "condition": "hybrid",
+        "cell": 3,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q172",
+        "condition": "hybrid",
+        "cell": 3,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q016",
+        "condition": "no_rag",
+        "cell": 4,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q070",
+        "condition": "no_rag",
+        "cell": 4,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q172",
+        "condition": "no_rag",
+        "cell": 4,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q001",
+        "condition": "hybrid",
+        "cell": 4,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q068",
+        "condition": "hybrid",
+        "cell": 4,
+        "repetition": 2
+      },
+      {
+        "role": "target",
+        "history": "latin_cell",
+        "query_id": "q180",
+        "condition": "hybrid",
+        "cell": 4,
+        "repetition": 2
+      }
+    ],
+    "4": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q068",
+        "condition": "no_rag"
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q001",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q001",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q068",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q068",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q180",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q180",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q016",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q016",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q070",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q070",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q172",
+        "condition": "hybrid",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q172",
+        "condition": "no_rag",
+        "history_number": 1
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q001",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q001",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q068",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q068",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q180",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q180",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q016",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q016",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q070",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q070",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q172",
+        "condition": "hybrid",
+        "history_number": 2
+      },
+      {
+        "role": "antecedent",
+        "history": "arbitrary_free",
+        "question": "Which factors should a fictional team consider when choosing a managed database?",
+        "condition": "no_rag",
+        "history_number": 2
+      },
+      {
+        "role": "target",
+        "history": "after_arbitrary_free",
+        "query_id": "q172",
+        "condition": "no_rag",
+        "history_number": 2
+      }
+    ],
+    "5": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q180",
+        "condition": "hybrid"
+      }
+    ],
+    "6": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q180",
+        "condition": "no_rag"
+      }
+    ],
+    "7": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q016",
+        "condition": "hybrid"
+      }
+    ],
+    "8": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q016",
+        "condition": "no_rag"
+      }
+    ],
+    "9": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q070",
+        "condition": "hybrid"
+      }
+    ],
+    "10": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q070",
+        "condition": "no_rag"
+      }
+    ],
+    "11": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q172",
+        "condition": "hybrid"
+      }
+    ],
+    "12": [
+      {
+        "role": "target",
+        "history": "first_after_boot",
+        "query_id": "q172",
+        "condition": "no_rag"
+      }
+    ]
+  },
+  "free_histories": [
+    "Describe a fictional cloud backup plan for a small synthetic research dataset.",
+    "Which factors should a fictional team consider when choosing a managed database?"
+  ],
+  "source_files": {
+    "iteration4_stimulus_acceptance.py": "c28fccf557583d50c24ad2bc2750c28b62840ae0e4e53a8d56dfbc51c06805a6",
+    "iteration4_test_stimulus_acceptance.py": "7abf1d565a38925756eb0d557970a276d74eef093bcece3b9f7c24796dadc819"
+  },
+  "expected_targets": 120,
+  "expected_calls": 144,
+  "required_unique_boots": 12,
+  "classification_version": "faithfulness_v2_28_patterns_300_chars",
+  "call_deadline_s": 600,
+  "boot_deadline_s": 7200,
+  "no_warm_content_before_cold_target": true,
+  "acceptance": "12/12; ten targets each; one raw and rendered text, v2 class and citation set; same frozen RAG",
+  "boot_kind_rule": "Availability uses three actual STOP/START cycles. Any other cold-target OS reboot must be separately recorded before measuring, never counted as availability; same VM/image/weights and unchanged original native deadline.",
+  "final_environment_annex_required": true,
+  "rollback": "Retain failure evidence; no replacement or partial reuse; stimulus branch BLOQUEADO-HUMANO if any target combination varies."
+}

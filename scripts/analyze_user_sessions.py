@@ -16,14 +16,13 @@ Generates:
 import csv
 import json
 import os
-import sys
 from pathlib import Path
 
 import numpy as np
 
 PROJECT_ROOT = Path(__file__).parent.parent
-SESSIONS_DIR = PROJECT_ROOT / "data" / "evaluation" / "user_sessions"
-OUTPUT_DIR = PROJECT_ROOT / "output"
+SESSIONS_DIR = Path(os.environ.get("CLOUDRAG_SESSION_DIR", PROJECT_ROOT / "data" / "evaluation" / "user_sessions"))
+OUTPUT_DIR = Path(os.environ.get("CLOUDRAG_ANALYSIS_DIR", PROJECT_ROOT / "output" / "interviews"))
 FIGURES_DIR = OUTPUT_DIR / "figures"
 TABLES_DIR = OUTPUT_DIR / "tables"
 CSV_DIR = OUTPUT_DIR / "csv"
@@ -52,7 +51,11 @@ def load_all_sessions() -> list:
 
         try:
             data = json.loads(full_path.read_text(encoding="utf-8"))
-            data["participant_id"] = participant_dir.name
+            if data.get("schema_version") == 2:
+                checkpoint = json.loads((participant_dir / "session_checkpoint.json").read_text(encoding="utf-8"))
+                if checkpoint["state"] != "complete" or checkpoint["revision"] != data["config"]["checkpoint_revision"]:
+                    raise ValueError("Export is not committed as complete")
+            data["participant_id"] = data.get("config", {}).get("participant_id", participant_dir.name)
             sessions.append(data)
         except Exception as e:
             print(f"  Error loading {participant_dir.name}: {e}")
@@ -89,9 +92,12 @@ def compute_sus_stats(sessions: list) -> dict:
     """Compute SUS score statistics."""
     scores = []
     for session in sessions:
-        sus_score = session.get("sus_score", 0)
-        if sus_score > 0:
-            scores.append(sus_score)
+        sus_score = session.get("sus_score")
+        if sus_score is None:
+            continue
+        if not isinstance(sus_score, (int, float)) or not np.isfinite(sus_score) or not 0 <= sus_score <= 100:
+            raise ValueError("Invalid SUS score")
+        scores.append(sus_score)
 
     if not scores:
         return {"mean": 0, "std": 0, "min": 0, "max": 0, "n": 0}
@@ -110,18 +116,28 @@ def run_statistical_tests(sessions: list) -> dict:
     from scipy import stats as scipy_stats
 
     # Collect per-participant per-system averages
-    system_avgs = {sys: [] for sys in SYSTEM_NAMES}
+    system_avgs = {sys: {} for sys in SYSTEM_NAMES}
+    seen = set()
 
     for session in sessions:
+        pid = session.get("participant_id") or session.get("config", {}).get("participant_id")
+        if not pid:
+            raise ValueError("Missing participant identity")
+        if pid in seen:
+            raise ValueError(f"Duplicate participant: {pid}")
+        seen.add(pid)
         participant_avgs = {sys: [] for sys in SYSTEM_NAMES}
         for rating in session.get("ratings", []):
             sys_key = rating.get("system", "")
             if sys_key in participant_avgs:
-                participant_avgs[sys_key].append(rating["utility_rating"])
+                score = rating["utility_rating"]
+                if isinstance(score, bool) or not isinstance(score, int) or not 1 <= score <= 5:
+                    raise ValueError("Invalid utility rating")
+                participant_avgs[sys_key].append(score)
 
         for sys_key in SYSTEM_NAMES:
             if participant_avgs[sys_key]:
-                system_avgs[sys_key].append(np.mean(participant_avgs[sys_key]))
+                system_avgs[sys_key][pid] = np.mean(participant_avgs[sys_key])
 
     results = {}
     pairs = [
@@ -134,39 +150,53 @@ def run_statistical_tests(sessions: list) -> dict:
         a_vals = system_avgs[sys_a]
         b_vals = system_avgs[sys_b]
 
-        n = min(len(a_vals), len(b_vals))
+        ids = sorted(a_vals.keys() & b_vals.keys())
+        n = len(ids)
         if n < 3:
-            results[f"{sys_a}_vs_{sys_b}"] = {"error": "Not enough participants (need >= 3)"}
+            results[f"{sys_a}_vs_{sys_b}"] = {"error": "Not enough participants (need >= 3)",
+                "n": n, "participant_ids": ids, "excluded_participants": sorted(seen - set(ids))}
             continue
 
-        a = np.array(a_vals[:n])
-        b = np.array(b_vals[:n])
+        a = np.array([a_vals[pid] for pid in ids])
+        b = np.array([b_vals[pid] for pid in ids])
+        diff = a - b
 
         # Paired t-test
-        t_stat, t_pvalue = scipy_stats.ttest_rel(a, b)
+        t_stat, t_pvalue = (0.0, 1.0) if not np.any(diff) else (
+            scipy_stats.ttest_rel(a, b) if np.std(diff) else (None, None))
 
         # Wilcoxon signed-rank test
-        try:
-            w_stat, w_pvalue = scipy_stats.wilcoxon(a, b)
-        except Exception:
-            w_stat, w_pvalue = 0, 1.0
+        w_stat, w_pvalue = (0.0, 1.0) if not np.any(diff) else scipy_stats.wilcoxon(a, b)
+        if not np.isfinite(w_pvalue):
+            raise ValueError("Wilcoxon returned a non-finite p-value")
 
         # Cohen's d
-        diff = a - b
-        cohens_d = float(np.mean(diff) / np.std(diff)) if np.std(diff) > 0 else 0
+        cohens_d = float(np.mean(diff) / np.std(diff, ddof=1)) if np.std(diff) > 0 else (
+            0.0 if not np.any(diff) else None)
 
         results[f"{sys_a}_vs_{sys_b}"] = {
             "n": n,
+            "participant_ids": ids,
+            "excluded_participants": sorted(seen - set(ids)),
             "mean_a": float(np.mean(a)),
             "mean_b": float(np.mean(b)),
-            "t_statistic": float(t_stat),
-            "t_pvalue": float(t_pvalue),
+            "t_statistic": float(t_stat) if t_stat is not None else None,
+            "t_pvalue": float(t_pvalue) if t_pvalue is not None else None,
             "wilcoxon_statistic": float(w_stat),
             "wilcoxon_pvalue": float(w_pvalue),
             "cohens_d": cohens_d,
-            "significant_005": t_pvalue < 0.05,
+            "effect_status": "defined" if cohens_d is not None else "constant_nonzero_difference",
         }
 
+    from statsmodels.stats.multitest import multipletests
+    # Three prespecified utility contrasts; unavailable tests retain their slot at p=1.
+    raw = [r.get("wilcoxon_pvalue", 1.0) for r in results.values()]
+    adjusted = multipletests(raw, method="fdr_bh")[1]
+    for result, p_bh in zip(results.values(), adjusted):
+        result["bh_family_size"] = 3
+        result["primary_test"] = "wilcoxon"
+        result["wilcoxon_pvalue_bh"] = float(p_bh) if "error" not in result else None
+        result["significant_005"] = bool(p_bh < 0.05 and "error" not in result)
     return results
 
 
@@ -179,11 +209,16 @@ def compute_timing_stats(sessions: list) -> dict:
             sys_key = ts.get("system", "")
             if sys_key in system_times:
                 # N9: claves nuevas (honestas) con fallback a las viejas
-                system_times[sys_key]["system_latency"].append(
-                    ts.get("system_latency_ms", ts.get("reading_time_ms", 0)))
-                system_times[sys_key]["read_and_rate"].append(
-                    ts.get("read_and_rate_ms", ts.get("rating_time_ms", 0)))
-                system_times[sys_key]["total"].append(ts.get("total_time_ms", 0))
+                observed = {
+                    "system_latency": ts.get("system_latency_ms", ts.get("reading_time_ms")),
+                    "read_and_rate": ts.get("read_and_rate_ms", ts.get("rating_time_ms")),
+                    "total": ts.get("total_time_ms"),
+                }
+                for metric, value in observed.items():
+                    if value is not None:
+                        if isinstance(value, bool) or not isinstance(value, (int, float)) or not np.isfinite(value) or value < 0:
+                            raise ValueError("Invalid recorded duration")
+                        system_times[sys_key][metric].append(value)
 
     results = {}
     for sys_key, times in system_times.items():
@@ -192,6 +227,9 @@ def compute_timing_stats(sessions: list) -> dict:
             if values:
                 results[sys_key][f"{metric}_mean_ms"] = float(np.mean(values))
                 results[sys_key][f"{metric}_std_ms"] = float(np.std(values))
+                results[sys_key][f"{metric}_n"] = len(values)
+                results[sys_key][f"{metric}_p50_ms"] = float(np.percentile(values, 50))
+                results[sys_key][f"{metric}_p95_ms"] = float(np.percentile(values, 95))
     return results
 
 
@@ -316,7 +354,7 @@ def export_results(sessions, system_ratings, sus_stats, stat_tests, timing, qual
         print(f"  Exported: {fig_path}")
 
         # Figure 2: SUS scores
-        sus_scores = [s.get("sus_score", 0) for s in sessions if s.get("sus_score", 0) > 0]
+        sus_scores = [s["sus_score"] for s in sessions if s.get("sus_score") is not None]
         if sus_scores:
             fig, ax = plt.subplots(figsize=(8, 5))
             ax.bar(range(len(sus_scores)), sus_scores, color="#1B3A5C")
@@ -367,7 +405,7 @@ def main():
         return
 
     if len(sessions) < 6:
-        print(f"\n  WARNING: Only {len(sessions)} participants. Need >= 6 for statistical significance.")
+        print(f"\n  Small sample: {len(sessions)} participants. Report uncertainty and the planned sample size.")
 
     # Compute metrics
     print("\nComputing per-system ratings...")
@@ -392,9 +430,8 @@ def main():
             else:
                 sig = "***" if result["significant_005"] else "n.s."
                 print(
-                    f"  {comparison}: t={result['t_statistic']:.3f}, "
-                    f"p={result['t_pvalue']:.4f} {sig}, "
-                    f"d={result['cohens_d']:.3f}"
+                    f"  {comparison}: Wilcoxon p_BH={result['wilcoxon_pvalue_bh']:.4f} {sig}, "
+                    f"d_z={result['cohens_d']} (n={result['n']})"
                 )
     except ImportError:
         print("  Warning: scipy not installed, skipping statistical tests")

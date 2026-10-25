@@ -15,6 +15,8 @@ import json
 import os
 from pathlib import Path
 import re
+import subprocess
+import sys
 from typing import Iterable, Sequence
 
 
@@ -93,6 +95,8 @@ _GENERATED_DIRECTORIES = {
     ".ruff_cache",
     ".tox",
     ".venv",
+    ".venv-app",
+    ".worktrees",
     "__pycache__",
     "node_modules",
     "venv",
@@ -200,8 +204,12 @@ def should_exclude(relative_path: Path) -> bool:
     return False
 
 
+def _is_link(path: Path) -> bool:
+    return path.is_symlink() or getattr(path, "is_junction", lambda: False)()
+
+
 def iter_repository_files(root: Path) -> Iterable[Path]:
-    """Yield inspectable files without following directory symlinks."""
+    """Yield regular files without following symlinks or Windows junctions."""
 
     for current, directories, filenames in os.walk(root, followlinks=False):
         current_path = Path(current)
@@ -209,19 +217,69 @@ def iter_repository_files(root: Path) -> Iterable[Path]:
         directories[:] = [
             name
             for name in directories
-            if not should_exclude(relative_dir / name)
+            if not should_exclude(relative_dir / name) and not _is_link(current_path / name)
         ]
         for filename in filenames:
             path = current_path / filename
-            if not should_exclude(path.relative_to(root)):
+            if not should_exclude(path.relative_to(root)) and not _is_link(path):
                 yield path
 
 
-def scan_repository(root: Path) -> list[Finding]:
-    """Scan inspectable repository files and return all redacted findings."""
+def git_file_names(root: Path) -> list[str] | None:
+    """Names git treats as part of the repository: tracked plus untracked-not-ignored.
 
+    Returns None when ``root`` is not the top level of a git repository or git is not
+    available, so the caller falls back to walking the disk (F-015).
+    """
+
+    try:
+        cdup = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--show-cdup"],
+            capture_output=True, text=True, check=False,
+        )
+        if cdup.returncode != 0 or cdup.stdout.strip():
+            return None
+        listing = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+            capture_output=True, check=False,
+        )
+    except OSError:
+        return None
+    if listing.returncode != 0:
+        return None
+    text = listing.stdout.decode("utf-8", errors="replace")
+    return list(dict.fromkeys(name for name in text.split("\0") if name))
+
+
+def iter_git_files(root: Path, names: Iterable[str]) -> Iterable[Path]:
+    """Yield inspectable regular files from a git listing (same exclusions as the walk)."""
+
+    for name in names:
+        relative = Path(name)
+        path = root / relative
+        # A tracked file may be deleted in the working tree; submodules are directories.
+        if should_exclude(relative) or _is_link(path) or not path.is_file():
+            continue
+        yield path
+
+
+# Which enumeration the last scan used: "git" or "disco". Reported by main() for the audit trail.
+LAST_ENUMERATION = "disco"
+
+
+def scan_repository(root: Path, use_git: bool = False) -> list[Finding]:
+    """Scan inspectable repository files and return all redacted findings.
+
+    With ``use_git`` the files come from ``git ls-files --cached --others --exclude-standard``
+    (ignored data never read); otherwise, or if ``root`` is not a git top level, the disk is walked.
+    """
+
+    global LAST_ENUMERATION
+    names = git_file_names(root) if use_git else None
+    LAST_ENUMERATION = "git" if names is not None else "disco"
+    files = iter_git_files(root, names) if names is not None else iter_repository_files(root)
     findings: list[Finding] = []
-    for path in iter_repository_files(root):
+    for path in files:
         try:
             with path.open("rb") as binary_file:
                 if b"\x00" in binary_file.read(8192):
@@ -323,8 +381,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--root",
         type=Path,
-        default=Path(__file__).resolve().parents[1],
-        help="raíz del repositorio (por defecto, el padre de scripts/)",
+        default=None,
+        help=(
+            "raíz del repositorio (por defecto, el padre de scripts/, enumerada con "
+            "git ls-files si es un repo git). Con --root explícito se recorre el disco."
+        ),
     )
     parser.add_argument(
         "--baseline",
@@ -336,8 +397,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    root = args.root.resolve()
-    findings = scan_repository(root)
+    explicit_root = args.root is not None
+    root = (args.root if explicit_root else Path(__file__).resolve().parents[1]).resolve()
+    findings = scan_repository(root) if explicit_root else scan_repository(root, use_git=True)
+    print(f"[scan_secrets] enumeración: {LAST_ENUMERATION}", file=sys.stderr)
     active_findings = findings
     excluded_counts: Counter[str] = Counter()
     baseline_reasons: dict[str, str] = {}

@@ -2380,3 +2380,61 @@ Commits de la ronda: `eaab456`, `1ad167d`, `0062fbf`, `50c8ff3`, `3071c0f` y
 ronda de solo texto; no hubo push ni cambios en código, datos o resultados.
 
 *Fin de la entrada 33 — [Codex] 2026-08-30.*
+
+
+---
+
+## 2026-09-02 (34) — Correo EasyChair «IEEE Proceedings» + eCF: sin correcciones editoriales [Kimi Work]
+
+Correo recibido de EasyChair (2026-09-02) sobre el paper 164. Verificación y
+conclusión:
+
+- **No hay erratas que corregir.** Los editores acusaron recibo de la versión con
+  los comentarios de los revisores en el repositorio «LA-CCI Full Papers»
+  (visible durante la conferencia). El correo no lista errores; la carpeta
+  `LACCI/` que dejó el autor solo contiene la plantilla oficial IEEE
+  (`IEEE-conference-template-062824`, idéntica a la ya versionada en `docs/`).
+- **Nuevo paso administrativo:** EasyChair creó un repositorio nuevo llamado
+  «IEEE Proceedings» donde debe subirse el mismo PDF ya procesado por PDF
+  eXpress e incluir el aviso de copyright IEEE en el pie. Se verificó que
+  `docs/2026305869.pdf` (certificado, PASS) ya contiene en la página 1 la línea
+  `979-8-3195-2812-4/26/$31.00 © 2026 IEEE`, por lo que **no requiere cambios
+  ni re-paso por eXpress**.
+- **eCF:** el correo de copyright IEEE ya llegó. Ruta: EasyChair → «Alerts» →
+  enlace del acuerdo de copyright (o botón «Sign IEEE Copyright Form» en IEEE
+  Proceedings). Elegir «IEEE general terms».
+- **Deadline conjunto (subida a IEEE Proceedings + eCF): 8 de septiembre de 2026.**
+
+Acción en el repo: actualizado únicamente el tracker
+`output/audit/lacci_pendientes.html` (revisión editorial marcada como recibida
+sin correcciones; nuevos pendientes 1 y 2 con deadline 8 set; membresía IEEE
+movida a completados). Sin tocar código, datos, evidencia ni el `.tex`; no se
+creó versión V9 nueva por no existir correcciones que aplicar.
+
+*Fin de la entrada 34 — [Kimi Work] 2026-09-02.*
+
+
+---
+
+## 2026-09-03 (35) — eCF firmado + PDF certificado en «IEEE Proceedings»: deadline 8 set cubierto [Kimi Work]
+
+- **eCF firmado** por Enzo vía EasyChair → Alerts → plataforma IEEE (firma
+  electrónica, «IEEE general terms», situación laboral «ninguna de las
+  anteriores»). Confirmación por correo de ecopyright@ieee.org con copia a ambos
+  autores; **eCF Paper Id 790921**. Recibo archivado en
+  `docs/CopyrightReceipt_eCF_2026-09-03.pdf`.
+- **Subida a «IEEE Proceedings»:** la migración automática de los editores había
+  dejado en el nuevo repositorio una versión antigua del paper (sin aviso de
+  copyright IEEE ni sello «Certified by IEEE PDFExpress»). Se detectó al comparar
+  hashes y contenido; se subió «Upload new version» con `docs/2026305869.pdf` y
+  se verificó que el archivo resultante en EasyChair es **idéntico byte a byte**
+  (SHA-256 `cc9ccc21879999d9…`) al PDF certificado. EasyChair registra la nueva
+  versión con timestamp 2026-09-03 11:05 UTC.
+- Ambos trámites del correo del 2026-09-02 quedaron cerrados **antes del deadline
+  del 8 de septiembre de 2026**. Pendiente solo el «checked by editors», a cargo
+  de los organizadores.
+- Acción en el repo: actualizado `output/audit/lacci_pendientes.html`
+  (eCF y subida a IEEE Proceedings marcados como hechos). Sin tocar código,
+  datos ni evidencia.
+
+*Fin de la entrada 35 — [Kimi Work] 2026-09-03.*

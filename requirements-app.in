@@ -1,0 +1,29 @@
+# Application + offline regression dependencies. Python 3.14, CPU auxiliary models.
+# Ollama runs separately; no Hugging Face or Ollama weights are installed by this file.
+streamlit==1.54.0
+ollama==0.6.1
+sentence-transformers==5.2.3
+transformers==5.2.0
+torch==2.10.0
+faiss-cpu==1.13.2
+rank-bm25==0.2.2
+filelock==3.20.0
+pydantic==2.12.5
+PyYAML==6.0.3
+tiktoken==0.12.0
+rich==14.3.3
+statsmodels==0.14.6
+numpy==2.4.2
+scipy==1.17.1
+pandas==2.3.3
+plotly==6.6.0
+python-dotenv==1.2.1
+beautifulsoup4==4.14.3
+lxml==6.0.2
+markdownify==1.2.2
+datasketch==1.9.0
+GitPython==3.1.46
+matplotlib==3.10.8
+seaborn==0.13.2
+pytest==9.0.2
+ruff==0.15.5

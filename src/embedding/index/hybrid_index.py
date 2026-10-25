@@ -4,7 +4,6 @@ Hybrid Index - Maintains both FAISS and BM25 indices in sync.
 
 import json
 import logging
-import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -229,9 +228,27 @@ class HybridIndex:
             str(self.indices_dir / f"bm25_{chunk_strategy}_{chunk_size}.pkl")
         )
         map_path = self.indices_dir / f"chunk_map_{prefix}.json"
-        if map_path.exists():
-            self.chunk_map = json.loads(map_path.read_text(encoding="utf-8"))
+        if not map_path.exists():
+            raise FileNotFoundError("Required chunk map is missing")
+        self.chunk_map = json.loads(map_path.read_text(encoding="utf-8"))
+        self.validate()
         logger.info("Loaded hybrid index: %s", prefix)
+
+    def validate(self):
+        """Refuse mismatched artifacts before serving a participant query."""
+        dense_ids = self.faiss_index.chunk_ids
+        lexical_ids = self.bm25_index.chunk_ids
+        if (not dense_ids or len(set(dense_ids)) != len(dense_ids)
+                or len(set(lexical_ids)) != len(lexical_ids)
+                or set(dense_ids) != set(lexical_ids) or set(dense_ids) != set(self.chunk_map)):
+            raise ValueError("FAISS, BM25 and chunk map IDs must match and be unique")
+        if self.faiss_index.index.ntotal != len(dense_ids) or self.faiss_index.index.d != self.faiss_index.dimension:
+            raise ValueError("FAISS dimensions or vector count do not match mapping")
+        if len(self.bm25_index.corpus_tokens) != len(lexical_ids):
+            raise ValueError("BM25 corpus and IDs have different lengths")
+        for cid, chunk in self.chunk_map.items():
+            if not isinstance(chunk, dict) or chunk.get("chunk_id") != cid or not chunk.get("text", "").strip():
+                raise ValueError("Chunk map contains missing IDs or empty text")
 
     def get_stats(self) -> Dict:
         return {

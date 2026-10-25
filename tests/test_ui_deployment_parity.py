@@ -104,7 +104,7 @@ def test_chat_defaults_follow_experimental_generation_recipe():
     from pathlib import Path
 
     root = Path(__file__).parents[1]
-    source = (root / "src/ui/pages/chat_page.py").read_text(
+    source = (root / "src/ui/views/chat_page.py").read_text(
         encoding="utf-8"
     )
     loader_source = (root / "src/ui/components/index_loader.py").read_text(

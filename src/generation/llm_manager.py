@@ -103,12 +103,24 @@ class LLMManager:
         max_retries: int = 3,
         timeout: int = 60,
         seed: int = 42,
+        enforce_timeout: bool = False,
+        num_ctx: Optional[int] = None,
+        expected_model_digest: Optional[str] = None,
+        read_timeout: Optional[float] = None,
+        default_keep_alive: Optional[str] = None,
     ):
         self.provider = provider
         self.model = model
         self.cache_enabled = cache_enabled
         self.max_retries = max_retries
         self.timeout = timeout
+        self.read_timeout = read_timeout
+        self.default_keep_alive = default_keep_alive
+        self.enforce_timeout = enforce_timeout
+        self.num_ctx = num_ctx
+        self._ollama_client = None
+        self.expected_model_digest = expected_model_digest
+        self.model_digest = None
         # Audit §20.4 Flag 155: Ollama's `options.seed` makes sampling
         # deterministic for a fixed (prompt, temperature, seed). Without
         # this the LLM was non-deterministic even at temperature=0.1
@@ -130,7 +142,30 @@ class LLMManager:
         self._cache = self._load_cache()
 
         # Load env vars
-        self._load_env()
+        if not enforce_timeout:
+            self._load_env()
+
+    def _ollama_chat(self, ollama, **kwargs):
+        if not self.enforce_timeout:
+            return ollama.chat(**kwargs)
+        if self._ollama_client is None:
+            import httpx
+            self._ollama_client = ollama.Client(
+                host=os.environ.get("OLLAMA_HOST", "http://localhost:11434"),
+                timeout=httpx.Timeout(self.timeout, connect=min(5, self.timeout),
+                                      read=getattr(self, 'read_timeout', None) or self.timeout))
+        if self.num_ctx is not None:
+            kwargs["options"] = {**kwargs["options"], "num_ctx": self.num_ctx}
+        if self.expected_model_digest:
+            # Recheck the tag before every request: replacing a tag must not change the study silently.
+            listing = self._ollama_client.list()
+            models = listing.get("models", [])
+            match = next((m for m in models if m.get("model", m.get("name")) == self.model), None)
+            actual = match.get("digest", "").removeprefix("sha256:") if match else None
+            if actual != self.expected_model_digest.removeprefix("sha256:"):
+                raise LLMError("Configured study model digest does not match Ollama")
+            self.model_digest = actual
+        return self._ollama_client.chat(**kwargs)
 
     def _load_env(self):
         """Load .env file if exists."""
@@ -238,7 +273,7 @@ class LLMManager:
                 if self.provider == "ollama":
                     response = self._generate_ollama(
                         prompt, system_prompt, max_tokens, temperature,
-                        keep_alive=keep_alive,
+                        keep_alive=keep_alive if keep_alive is not None else getattr(self, 'default_keep_alive', None),
                     )
                 elif self.provider == "openai":
                     response = self._generate_openai(
@@ -334,7 +369,7 @@ class LLMManager:
 
         extra = {} if keep_alive is None else {"keep_alive": keep_alive}
         try:
-            response = ollama.chat(
+            response = self._ollama_chat(ollama,
                 model=self.model,
                 messages=messages,
                 options={
@@ -430,7 +465,7 @@ class LLMManager:
         extra = {} if keep_alive is None else {"keep_alive": keep_alive}
         parts = []
         tokens_in = tokens_out = 0
-        stream = ollama.chat(
+        stream = self._ollama_chat(ollama,
             model=self.model,
             messages=messages,
             options={

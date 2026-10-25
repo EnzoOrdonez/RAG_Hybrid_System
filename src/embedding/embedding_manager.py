@@ -5,6 +5,7 @@ batch processing, and disk caching.
 """
 
 import hashlib
+import json
 import logging
 import time
 from pathlib import Path
@@ -254,10 +255,27 @@ class EmbeddingManager:
         force: bool = False,
     ) -> Tuple[np.ndarray, List[str]]:
         """Embed documents, using cache if available."""
+        if len(texts) != len(chunk_ids) or len(set(chunk_ids)) != len(chunk_ids):
+            raise ValueError("Embedding input needs one unique ID per text")
+        fingerprint = hashlib.sha256(json.dumps(
+            {"texts": texts, "ids": chunk_ids, "model": self.config},
+            sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+        metadata_path = self.get_cache_path(chunk_strategy, chunk_size).with_suffix(".manifest.json")
         if not force:
-            cached = self.load_embeddings(chunk_strategy, chunk_size)
-            if cached is not None:
-                return cached
+            if metadata_path.exists():
+                metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+                if metadata.get("input_sha256") == fingerprint:
+                    cached = self.load_embeddings(chunk_strategy, chunk_size)
+                    if cached is not None:
+                        vectors, ids = cached
+                        if ids != chunk_ids or vectors.shape != (len(chunk_ids), self.get_dimension()) or not np.isfinite(vectors).all():
+                            raise ValueError("Invalid embedding cache; rebuild explicitly")
+                        for path in (self.get_cache_path(chunk_strategy, chunk_size), self.get_ids_cache_path(chunk_strategy, chunk_size)):
+                            if hashlib.sha256(path.read_bytes()).hexdigest() != metadata.get(path.name):
+                                raise ValueError("Embedding cache checksum mismatch; rebuild explicitly")
+                        return cached
+            elif self.get_cache_path(chunk_strategy, chunk_size).exists():
+                raise ValueError("Legacy cache has no content manifest; use force to rebuild explicitly")
 
         start = time.time()
         embeddings = self.embed_documents(texts)
@@ -268,6 +286,10 @@ class EmbeddingManager:
         )
 
         self.save_embeddings(embeddings, chunk_ids, chunk_strategy, chunk_size)
+        metadata = {"input_sha256": fingerprint}
+        for path in (self.get_cache_path(chunk_strategy, chunk_size), self.get_ids_cache_path(chunk_strategy, chunk_size)):
+            metadata[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+        metadata_path.write_text(json.dumps(metadata, sort_keys=True), encoding="utf-8")
         return embeddings, chunk_ids
 
     def get_stats(self) -> Dict:

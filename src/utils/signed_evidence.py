@@ -6,7 +6,7 @@ rule, for different reasons:
   SIGNED   `exp3..exp14` (plus `exp8b`) carry the tags `nota3-evidencia-2026-06-11` /
            `nota3-N9-cierre-2026-07-02` and back figures already delivered in the A.3 report
            and the LACCI paper.
-  FROZEN   `exp15..exp19a` are the summer phase. No tag covers them, but the rule is the same:
+  FROZEN   `exp15..exp19b` are the summer phase. The rule is the same:
            committed summer evidence is not regenerated, overwritten or reinterpreted without
            fixing the scope first.
 
@@ -24,9 +24,9 @@ N's arm registry silently scored 1 of exp18's 4 arms (ledger entry 21), and
 protect-list goes stale in the dangerous direction -- a new experiment is unprotected by
 default and nobody finds out until something is clobbered.
 
-So the default is now PROTECTED, and what gets declared is what is still LIVE. A stale LIVE
-entry costs a false refusal: loud, immediate, harmless. A stale protect-list costs overwritten
-evidence: silent and permanent.
+So the default is now PROTECTED, and what gets declared is what is still LIVE. Omitting a
+live experiment costs a false refusal. Leaving a completed experiment in LIVE permits
+overwrites, so remove its entry at closure. The current live registry is empty.
 
 SCOPE OF THE REFUSAL, unchanged: only OVERWRITING a file that already exists. Creating new
 artifacts inside a protected directory stays allowed, because that is how the summer runners
@@ -43,7 +43,7 @@ RESULTS = PROJECT_ROOT / "experiments" / "results"
 
 # Experiments a run is still writing. Everything else under experiments/results is protected.
 # Remove an id from here the moment its evidence is committed and read as final.
-LIVE_EXPERIMENTS = frozenset(["exp19b"])
+LIVE_EXPERIMENTS = frozenset()
 
 # The tagged set, kept separate so the refusal can cite the tag ONLY where it exists.
 # exp1/exp2 never existed; exp8b is signed alongside exp8.

@@ -26,7 +26,7 @@ $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent $PSScriptRoot
 Set-Location $repo
 
-$env:PYTHONUTF8 = 1          # receta determinista en cualquier consola (REPRODUCE.md §0)
+$env:PYTHONUTF8 = 1          # receta determinista en cualquier consola (docs/guides/reproduce.md §0)
 $env:HF_HUB_OFFLINE = 1
 $env:TRANSFORMERS_OFFLINE = 1
 $env:PYTHONHASHSEED = 42

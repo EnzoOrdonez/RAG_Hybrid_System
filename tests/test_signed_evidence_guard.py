@@ -69,10 +69,9 @@ def test_summer_dirs_are_protected_against_overwrite(name):
 
 @pytest.mark.parametrize("name", ["exp19b_anchored_selector",
                                   "exp19b_anchored_selector/_smoke"])
-def test_the_live_experiment_stays_writable(name):
-    """A run in flight rewrites its own results.json and checkpoints; that is not clobbering."""
-    assert "exp19b" in SE.LIVE_EXPERIMENTS
-    assert SE._protected_dir_for(RESULTS / name / "results.json") is None
+def test_closed_exp19b_is_protected(name):
+    assert "exp19b" not in SE.LIVE_EXPERIMENTS
+    assert SE._protected_dir_for(RESULTS / name / "results.json") == "exp19b_anchored_selector"
 
 
 def test_a_future_experiment_is_protected_until_it_is_declared_live():

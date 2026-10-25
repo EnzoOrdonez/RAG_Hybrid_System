@@ -23,7 +23,9 @@ def test_ci_uses_python_314_and_cpu_only_test_expression():
     source = WORKFLOW.read_text(encoding="utf-8")
 
     assert 'python-version: "3.14"' in source
-    assert "python -m pip install -r requirements.txt" in source
+    assert "uv pip sync --system --torch-backend cpu --require-hashes requirements-app.txt" in source
+    assert 'HF_HUB_OFFLINE: "1"' in source
+    assert 'TRANSFORMERS_OFFLINE: "1"' in source
     assert 'python -m pytest tests/ -q -m "not slow and not gpu"' in source
     assert "ollama" not in source.lower()
     assert "cuda" not in source.lower()
