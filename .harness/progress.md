@@ -31,7 +31,7 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 
 ## Riesgos y bloqueos vigentes
 
-- Verificación del 2026-10-25: las tres capas dan exit 0 con `PLAYWRIGHT_BROWSERS_PATH=C:/CloudRAG/i7-browser-runtime`. Sin esa variable los 8 tests de navegador de I7 fallan con `PINNED_BROWSER_RUNTIME_REQUIRED` (F-012).
+- Verificación del 2026-10-25 desde el checkout principal: las tres capas dan exit 0. `init.sh` exporta solo el Chromium fijado de I7 si existe en `C:/CloudRAG/i7-browser-runtime`; en otra máquina sin él, los 8 tests de navegador de I7 fallan con `PINNED_BROWSER_RUNTIME_REQUIRED` (instalación en `docs/STUDY_I7_BROWSER_VALIDATION.md`).
 - Dependencia: la unión `.venv-app` del checkout principal apunta a `.worktrees/interview-readiness/.venv-app`. No quitar ese worktree sin crear antes un entorno propio.
 - `scan_secrets.py` en modo git no lee lo ignorado por `.gitignore`; para auditarlo, `python scripts/scan_secrets.py --root .` (lento con `data/`).
 - Entrevistas en **NO-GO** hasta validar el despliegue real (`docs/INTERVIEW_READINESS.md`).
