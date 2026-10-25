@@ -1,7 +1,16 @@
 # SUMMER_RESULTS — Informe de hallazgos de la fase de verano
 
-**Estado: EN CURSO** (arranque 2026-07-22). Este documento acumula los resultados de la ablación
-(Fase 1), el diagnóstico (Fase 1b) y las mejoras (Fase 2). Ledger de decisiones:
+**Estado: CERRADO (2026-08-30).** Este documento es un **ledger cronológico** de la fase de
+verano (arranque 2026-07-22); las secciones intermedias describen estados ya superados
+("gold pendiente", "exp19b en curso", conteos de tests históricos como 130 o 218).
+**Cierre real:** exp19b completado con veredicto (Δ HHEM +0,0451, IC95 [0,0076; 0,0817],
+TOST dentro de ±0,081); referencia humana piloto v4 completada y adjudicada (κ mejor verificador 0,30;
+jueces LLM κ₂=0,754 entre sí, 0,17–0,20 vs humano; intra-anotador 55 %); taxonomía de 759
+claims calibrada (Kish 27,4); 19 experimentos lógicos versionados en 20 directorios
+(exp15 está partido en dos); paper **aceptado en IEEE LACCI
+2026** y camera-ready certificado (PDF eXpress PASS, PID 2026305869); suite 341/341; CI
+verde. Referencias vigentes: `docs/FICHA_EXPERIMENTAL.md` y
+`docs/SECCION_VALIDACION_HUMANA.md`. Ledger de decisiones:
 `paper/summer_ablation_log.md`. Línea base: tag `summer-baseline` (cifras v4 verificadas,
 `output/audit/phase0_verification_summer_2026-07-22.md`).
 
@@ -25,7 +34,7 @@ Diagnóstico completo de la fase:
   confirman genuino: declina menos, dice más, no copia). Piloto n=25, no sig, direccional-consistente.
 
 Converge: el único eje que mueve la fidelidad es la selección de evidencia (Tier 3 + exp17), no su
-presentación (Tier A) ni la instrucción (exp16). Todo pendiente de gold humano.
+presentación (Tier A) ni la instrucción (exp16). Todo pendiente de la referencia humana piloto.
 
 ## Respuesta Tier 3 (detalle, 2026-07-23 — sujeta a validación con gold)
 **El nulo 0/12 NO es robusto al instrumento: un verificador de grounding limpio (HHEM) revela un efecto
@@ -91,7 +100,7 @@ Viabilidad en esta laptop (RTX 3060 6 GB) antes de las encuestas. Cerrada tras T
 | **1a. Decodificación anclada** (citar/atribuir evidencia, temperatura, prompt) | **Sí** | Bajo (infra lista) | **Nula (probado)** | **IMPLEMENTADA Y PROBADA 2026-07-24 (exp16) — SIN ganancia local.** anchored_cite + strict_abstain: 0/2 bajo NLI-small/base/HHEM; anchored tiende ABAJO (cita≠grounding), ambos suben declinación y recortan contenido. Descarta la línea como victoria local |
 | **1b. Modelo de mayor capacidad** | **No en 6 GB** | — | Alto pero incuantificable local | **DISEÑO/NUBE** — granite@4096 ya no cabe 100% GPU (hallazgo); ≥13B exige otra máquina/nube. Reportar trade-off |
 | **2. Anotación humana (relevancia + gold)** | **Parcial** (diseño sí, ejecución no) | ~4-5 h humano | Alto (rompe circularidad, arbitra instrumento) | **ENTREGADO EL DISEÑO** — `claim_audit_sample_v4` N≈200 listo; ejecuta Enzo/anotadores |
-| **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **HECHO (selección espera gold)** — NLI 22% falso-contradicted; HHEM especificidad buena (falso-grounded 0.033) revela efecto que el NLI enmascara; front-runner ensemble E5_base+hhem (0.003). Selección definitiva = gold humano |
+| **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **HECHO (selección espera referencia piloto)** — NLI 22% falso-contradicted; HHEM especificidad buena (falso-grounded 0.033) revela efecto que el NLI enmascara; front-runner ensemble E5_base+hhem (0.003). Selección definitiva = referencia humana piloto |
 | **4. Ablación de componentes (Tier A/B)** | **Sí** | Medio (GPU, gate determinismo relajado) | Alto (aísla qué mueve la fidelidad) | **Tier A HECHO 2026-07-24** — 0/4 robusto (rerank/top-k/orden/lost-middle no mueven fidelidad en 3 instrumentos); descarta lost-in-the-middle y reranking. Tier 0 hecho; Tier B oráculo listo |
 | **5. Cross-cloud: reescritura/expansión densa** | **Sí** | Bajo (25 q) | **Positivo (piloto)** | **PILOTO CON SEÑAL POSITIVA 2026-07-24 (exp17).** La expansión léxica falló (exp13), pero **rebalancear la cobertura por proveedor** (7/25→25/25) sube la fidelidad comparativa en 3 instrumentos (HHEM +0.081, guardas confirman genuino). No sig a n=25 → confirmatorio con OK. Trabajo Futuro accionable |
 | **6. Memoria semántica (tripletes/KG/versionada)** | **No (verano)** | Alto | Incierto | **SOLO DISEÑO** — excede el verano; entregar veredicto de factibilidad |
@@ -173,7 +182,7 @@ palanca de mejora que dio positivo en toda la fase.
 modelo mayor (no cabe en 6 GB); memoria semántica/KG (fuera de alcance). Todo eso queda como Trabajo
 Futuro en A.3 con veredicto de factibilidad ya escrito.
 
-**Pendientes que NO bloquean las encuestas (pero sí el cierre del paper):** gold humano
+**Pendientes que NO bloquean las encuestas (pero sí el cierre del paper):** referencia humana piloto
 (`claim_audit_sample_v4`, N≈200) para (a) arbitrar el nivel de fidelidad NLI vs HHEM y (b) seleccionar el
 verificador definitivo; confirmatorio pre-registrado de exp17 si se quiere cruzar significancia con n mayor.
 
@@ -181,7 +190,7 @@ verificador definitivo; confirmatorio pre-registrado de exp17 si se quiere cruza
 Diagnóstico + mejoras + matriz: **COMPLETOS**. La fidelidad responde a QUÉ evidencia entra (selección de
 contenido: Tier 3 + exp17), no a su presentación (Tier A) ni a la instrucción (exp16). Config de encuestas
 definida. Ramas `summer/ablacion` (Tier A/3) y `summer/mejoras` (exp16/17) committeadas local, sin push
-(GATE). Falta: gold humano (ejecución de Enzo) y, si se decide, confirmatorio pre-registrado de exp17.
+(GATE). Falta: referencia humana piloto (ejecución de Enzo) y, si se decide, confirmatorio pre-registrado de exp17.
 
 ---
 
@@ -238,7 +247,7 @@ claim genuino (3/60). `hedged_partial` no es abstención.
 > `sens_c` se publica al lado); el gap ahora se **declara** en la salida del script para que no se lea
 > como ruido.
 
-## Gold humano — diseño de dos etapas (decisión de Enzo 2026-07-30)
+## Referencia humana piloto — diseño de dos etapas (decisión de Enzo 2026-07-30)
 
 Los instrumentos no ven lo mismo que el anotador: NLI `vb_agree` lee los 5 chunks y HHEM puntúa
 `max_chunk` sobre los 5 (premisa a 1500 chars), pero el CSV mostraba **uno**. Cerrar el confound para
@@ -253,8 +262,9 @@ agrupar no comprime). Diseño adoptado:
 La etapa B convierte el confound de *caveat* en *corrección*: mide cuántos juicios cambian al ver la
 evidencia completa. `analyze_gold_v4.py` pondera por **Horvitz-Thompson** re-ejecutando el muestreador
 real (los estratos se solapan: 413 de 14 409 claims llevan >1 flag, así que no hay forma cerrada) y
-reporta el **n efectivo de Kish = 42,7** sobre 150 — el gold se diseñó para discriminar verificadores,
-no para estimar una κ poblacional, y el script no lo esconde.
+reportó de forma preliminar un **n efectivo de Kish = 42,7** sobre 150. El análisis final
+persistido en `output/audit/gold_v4_analysis.json` fija el valor autoritativo en **38,5**;
+la referencia se diseñó para discriminar verificadores, no para estimar una κ poblacional.
 
 ## El techo de contexto está a k>5, no a k=5
 
@@ -385,4 +395,4 @@ Latencia re-medida con granite en la ruta de despliegue (n=12 por config):
 No se afirma que k=10 sea más rápido (dispersión enorme, n=12: ruido). Lo que sí sostiene: **la
 latencia local es mala para una encuesta con cualquier modelo y cualquier k** — de ahí el bloque de
 nube como infraestructura.
-- **Gold humano** — etapas A y B listas para anotar (Enzo).
+- **Referencia humana piloto** — etapas A y B listas para anotar (estado histórico).

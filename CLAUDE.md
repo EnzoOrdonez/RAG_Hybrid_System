@@ -27,6 +27,40 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 
 ## Estado histórico (agosto de 2026)
 
+> Nota de integración (2026-10-25, fusión de `summer/taxonomia-759` en `chore/docs-harness`):
+> el primer bloque es el cierre del 2026-08-30 que vivía solo en `summer/taxonomia-759`; el segundo es
+> el estado previo que conservaba `fix/interview-readiness`. Ambos son historia: lo vigente es «Estado
+> actual» (arriba). Dato superado: `LIVE_EXPERIMENTS` ya es `frozenset()` en `src/utils/signed_evidence.py`.
+
+> **Actualizado 2026-08-30 (cierre LACCI, [Kimi Work]):** este bloque es la fuente vigente.
+> Las secciones fechadas de más abajo se conservan como historial; donde contradigan este
+> bloque, manda este bloque.
+
+- **Paper aceptado en IEEE LACCI 2026.** Camera-ready v9 certificado por PDF eXpress
+  (PASS a la primera; Paper ID 2026305869; PDF certificado `docs/2026305869.pdf`).
+  Fuente: `docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex`. Merge final a `main` hecho;
+  CI de GitHub Actions en verde (`.github/workflows/ci.yml` + escáner de secretos con
+  baseline + Ruff informativo + lockfile `requirements-lock.txt`).
+- **19 experimentos lógicos versionados** (`exp3..exp19b` + `exp8b`), almacenados en 20
+  directorios porque exp15 está partido en dos; todos cerrados. Evidencia
+  de Nota 3: `exp9..exp13`; auditoría/validación post-paper: `exp14..exp19b` (piso de
+  ruido del runtime, ablaciones de verificador, techo de evidencia, selector anclado).
+- **exp19b CERRADO**: Δ HHEM +0,0451 (IC95 [0,0076; 0,0817], p=0,018), TOST dentro de la
+  banda preespecificada ±0,081; compuerta `draft_replay_check` (5/5 bit-idénticas).
+  Veredicto: mejora local alineada al verificador, no independiente del verificador.
+- **Referencia humana piloto v4 COMPLETADA y adjudicada**: 150 claims / 200 juicios claim–condición +
+  taxonomía 40 + retest 20. Mejor verificador κ=0,30 ponderada (IC95 cruza 0); jueces LLM
+  ciegos κ₂=0,754 entre sí pero 0,17–0,20 vs humano; intra-anotador 55 %. Las etiquetas
+  son referencia piloto, no ground truth. Docs: `docs/SECCION_VALIDACION_HUMANA.md`,
+  `docs/FICHA_EXPERIMENTAL.md`, `output/audit/triple_judge_agreement.md`.
+- **Suite de tests: 341 pasan, 0 fallan** (`-m "not slow and not gpu"`, intérprete Python
+  3.14, `PYTHONUTF8=1`). La cifra 218 de más abajo es histórica (2026-08-21).
+- La guarda de evidencia (`src/utils/signed_evidence.py`) protege por defecto todo
+  `experiments/results/expN*`; `LIVE_EXPERIMENTS` aún lista `exp19b` por inercia — su
+  evidencia ya está committeada como final, así que procede retirarlo (limpieza menor).
+- Health check local aprobado: 24.481 chunks, FAISS y BM25 cargan 24.481 entradas, Ollama
+  responde con Llama 3.1 disponible y el snapshot NLI local carga correctamente.
+
 - La evidencia de Nota 3 está cerrada en `exp9..exp13`; `exp3..exp8` y `exp8b` son historia.
 - La fase de verano tiene artefactos para `exp15..exp18`. El verificador offline del 2026-08-03
   descubre los cuatro experimentos y reproduce sus cifras desde probabilidades persistidas.
@@ -71,13 +105,10 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 
 ## Registro histórico de problemas (agosto de 2026)
 
-- El gold humano de dos etapas sigue pendiente de anotación real.
-- La decisión sobre experimentos de nube y gasto está bloqueada hasta interpretar `exp18` y recibir
-  aprobación explícita.
-- No hay CI versionada; la protección depende de pruebas y verificadores locales.
-- La instalación declarada no reproduce todos los flujos. `requirements.txt` omite Streamlit, Plotly
-  y pytest; `setup.py` omite buena parte del stack de retrieval y evaluación. No existe lockfile.
-  Propuesta escrita en `docs/MANIFESTS_PROPOSAL_2026-08-21.md`, pendiente de OK de Enzo.
+> Cerrados el 2026-08-30 (ver "Estado actual"): la referencia humana piloto v4 está completada y
+> adjudicada; existe CI versionada (`.github/workflows/ci.yml`) y lockfile
+> (`requirements-lock.txt`, generado el 2026-08-23 junto con la propuesta de manifiestos).
+> Lo que sigue abierto:
 - `test_nli_output_is_softmax_probabilities` **hoy no se omite**: con `HF_HUB_OFFLINE=1` la suite da
   218 pasan y 0 omitidas (verificado el 2026-08-21). Carga porque el tag
   `cross-encoder/nli-deberta-v3-small` **está en el caché de Hugging Face**, no porque el test use el
@@ -106,13 +137,10 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 > - **`PYTHONUTF8=1` ausente de `REPRODUCE.md`** — añadida a la receta con la explicación del
 >   `UnicodeEncodeError` en consola `cp1252`.
 
-- README presenta 12 experimentos de `exp3..exp13` más `exp8b`, pero el repo ya contiene la fase
-  `exp15..exp19b`. Pregunta pendiente: si README debe describir solo Nota 3 o también el estado de
-  verano. **Fuera del alcance de P-DOC**, que no lo autoriza.
-- README indica instalar `requirements.txt` y luego lanzar Streamlit, pero Streamlit y Plotly no están
-  declarados allí. `setup.py` expone otro conjunto más corto. Pregunta pendiente: cuál manifiesto es
-  canónico y si UI, pruebas y ML deben separarse en extras o instalarse juntos. **Propuesta escrita
-  en `docs/MANIFESTS_PROPOSAL_2026-08-21.md`, a la espera de OK; el lockfile no se genera sin él.**
+- ~~README presenta 12 experimentos~~ — **resuelto el 2026-08-30**: README declara los 19
+  experimentos (`exp3..exp19b` + `exp8b`) con tabla completa y sección Publication.
+- ~~Lockfile pendiente de OK~~ — **resuelto el 2026-08-23**: `requirements-lock.txt` generado
+  (134 distribuciones, Python 3.14) y CI creada; la propuesta de manifiestos quedó aplicada.
 - La suite completa se reporta verde con una omisión, pero la prueba omitida es una guarda NLI central y
   el modelo local sí está presente. Pregunta pendiente: si la prueba debe resolverse mediante el mismo
   cargador del detector o mediante una ruta local explícita. **Hilo separado a propósito**: P-DOC lo
@@ -253,7 +281,7 @@ pendiente de OK de Enzo para actualizarlas):
 - La verificación "SUMMER_RESULTS.md:271 describe exp18 como pendiente (sigue así)" de la
   entrada previa también quedó obsoleta.
 
-Cuellos de botella vigentes (detalle en el documento unificado): G1 gold humano v4 A+B
+Cuellos de botella vigentes (detalle en el documento unificado): G1 referencia humana piloto v4 A+B
 (~8 h de anotador, el más antiguo); G2 congelar config de encuestas (vence ~mediados de
 agosto); G3 decisión nube-infraestructura + compuerta exp21 (cero gasto ejecutado); G4
 decisión exp19b; G6 taxonomía de 759 claims; G7 confirmatorio exp17 (opcional).
@@ -267,10 +295,12 @@ Totalmente fusionadas en `summer/mejoras` y sin contenido único: `codex/plan-a-
 `fase-2.5-recompute-retrieval-stats`, `fix/phase-1-no-rerun`, `fix/phase-2-nli-and-seeds`,
 `pre-corpus-rebuild-2026-05-21`, `summer/ablacion`. Con commits NO fusionados: solo dos.
 `fase-3-regenerate-figures` (3 commits, publicados en origin, trae `generate_phase3_artifacts.py`
-y 20 artefactos `_phase3` ausentes de `summer/mejoras`) y
+y 20 artefactos `_phase3` ausentes de `summer/mejoras`; el script existe solo en esa rama
+histórica, no en el árbol actual) y
 `fase-3.5-nli-recompute-saved-answers` (9 commits, de los cuales **6 existen solo en este disco**:
 `origin/…` está en `c119c99`, local en `e8d2e2e`; incluye el commit de anti-circularidad
-Flag 17/142 y los scripts `recompute_nli_over_saved.py` y `build_annotation_pool.py`). Los 5 tags
+Flag 17/142 y los scripts `recompute_nli_over_saved.py` y `build_annotation_pool.py`, que existen
+solo en esa rama histórica y no en el árbol actual). Los 5 tags
 están contenidos en `main`, `summer/ablacion` y `summer/mejoras`: ningún borrado de rama los
 huerfanaría. `main` local va 2 commits por delante de `origin/main`. La eliminación queda a
 decisión de Enzo, rama por rama.

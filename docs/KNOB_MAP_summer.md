@@ -1,38 +1,37 @@
 # KNOB_MAP — Fase de verano (ablación exp15+)
 
-Inventario verificado (2026-07-22; re-verificado 2026-07-30) de cada perilla efectiva del pipeline
+Inventario verificado (2026-07-22; referencias de código refrescadas 2026-08-30) de cada perilla efectiva del pipeline
 y su consumidor real. Los valores vivos están hardcodeados en `src/pipeline/pipeline_config.py`
 y en los runners de `scripts/`.
 
-**Config muerta vs viva (re-verificado 2026-07-30 por grep sobre todo el repo):**
-- `config/evaluation_config.yaml` — **cero consumidores** (Python, yaml, sh, ps1). Es documentación.
+**Config muerta vs viva (re-verificado 2026-08-30 por búsqueda sobre el repo):**
 - `config/config.yaml` — **secciones retrieval/reranking muertas** en runtime de experimentos, pero
   el archivo **SÍ se consume** en el lado corpus: `ingestion_pipeline.py:21`, `deduplicator.py:313`,
   `text_cleaner.py:199`, `build_index.py:39`. **No retirarlo**; retirar solo sus secciones muertas.
 - `config/cloud_services.yaml`, `config/terminology_mappings.yaml` — vivos
-  (`ingestion_pipeline.py:28`, `terminology_normalizer.py:25`, `query_processor.py:83`).
+  (`ingestion_pipeline.py:26`, `terminology_normalizer.py:22`, `query_processor.py:78`).
 
 ## Perillas efectivas (valores vigentes)
 
 | Perilla | Definida en | Consumida en | Valor |
 |---|---|---|---|
-| `fusion_method` | `src/pipeline/pipeline_config.py:73` | `rag_pipeline.py:167` → `hybrid_index.py:128-133` | `rrf` |
-| `rrf_k` | `pipeline_config.py:75` | `hybrid_retriever.py:77` → `hybrid_index.py:171-174` (**solo constructor** de `HybridRetriever`) | 60 |
-| `alpha` (solo linear) | `pipeline_config.py:74` | `hybrid_index.py:154` | 0.5 |
-| `retrieval_top_k` (candidatos) | `pipeline_config.py:28` | `rag_pipeline.py:228-229` | 50 |
-| `final_top_k` (fragmentos al LLM) | `pipeline_config.py:30` | `rag_pipeline.py:248-251` | 5 |
-| `reranker_top_k` | `pipeline_config.py:29` | declarado; la ruta de rerank usa `final_top_k` | 20 |
-| Modelo reranker | `pipeline_config.py:77` | `rag_pipeline.py:182-188` → `src/reranking/cross_encoder_reranker.py` | `cross-encoder/ms-marco-MiniLM-L-12-v2` |
-| Modelo embedding | `embedding_manager.py:29` (mapa `bge-large`) | `load_hybrid_index` (`rag_pipeline.py:499-512`) | `BAAI/bge-large-en-v1.5` (1024d) |
-| Chunking | `pipeline_config.py:34-35` | claves de archivo de índice (`data/indices/`) | adaptive / 500 (overlap 50 al construir) |
-| `query_expansion` (D11) | `pipeline_config.py:26,84` | `rag_pipeline.py:218,231` → `hybrid_retriever.py:57-68` (bajo rrf solo pierna BM25) | **False** (N4/exp13) |
-| `terminology_normalization` | `pipeline_config.py:27,85` | solo lado corpus (`run.py:63-77`); sin efecto query-time | True |
-| Escenarios de generación | `scripts/run_generation_matrix.py:57-62` | mapea a configs de exp11 | sin_rag / lexico / denso / hibrido |
-| Decodificación LLM | `run_generation_matrix.py:211`; `llm_manager.py:337-350` | Ollama | granite4.1:8b, temp 0.0, seed 42, num_predict 1024 |
+| `fusion_method` | `src/pipeline/pipeline_config.py:21,92` | `rag_pipeline.py:180` → `hybrid_index.py:97-131` | `rrf` |
+| `rrf_k` | `pipeline_config.py:23,94` | `rag_pipeline.py:182` → `hybrid_retriever.py:77` → `hybrid_index.py:164-174` | 60 |
+| `alpha` (solo linear) | `pipeline_config.py:22,93` | `rag_pipeline.py:181` → `hybrid_index.py:139-154` | 0.5 |
+| `retrieval_top_k` (candidatos) | `pipeline_config.py:28,105` | `rag_pipeline.py:256-275` | 50 |
+| `final_top_k` (fragmentos al LLM) | `pipeline_config.py:30,107` | `rag_pipeline.py:295,309` | 5 |
+| `reranker_top_k` | `pipeline_config.py:29,106` | declarado; la ruta estándar de rerank usa `final_top_k` (`rag_pipeline.py:295-309`) | 20 |
+| Modelo reranker | `pipeline_config.py:96` | `rag_pipeline.py:187-201` → `src/reranking/cross_encoder_reranker.py` | `cross-encoder/ms-marco-MiniLM-L-12-v2` |
+| Modelo embedding | `src/embedding/embedding_manager.py:29` (mapa `bge-large`) | `load_hybrid_index` (`rag_pipeline.py:568-580`) | `BAAI/bge-large-en-v1.5` (1024d) |
+| Chunking | `pipeline_config.py:53-54` | `load_hybrid_index` (`rag_pipeline.py:568-580`) y claves de `data/indices/` | adaptive / 500 (overlap 50 al construir) |
+| `query_expansion` (D11) | `pipeline_config.py:26,103` | `rag_pipeline.py:246-275` → `hybrid_retriever.py:57-78` (bajo rrf solo pierna BM25) | **False** (N4/exp13) |
+| `terminology_normalization` | `pipeline_config.py:27,104` | solo lado corpus; sin efecto query-time | True |
+| Escenarios de generación | `scripts/run_generation_matrix.py:58-61` | mapea a configs de exp11 | sin_rag / lexico / denso / hibrido |
+| Decodificación LLM | `run_generation_matrix.py:194,223`; `llm_manager.py:341-347` | Ollama | granite4.1:8b, temp 0.0, seed 42, num_predict 1024 |
 | Verificador NLI | `src/generation/hallucination_detector.py:187` | runtime | `cross-encoder/nli-deberta-v3-small` (base vía `scripts/rescore_nli_v3.py --verifier base`) |
 | Umbrales NLI | `hallucination_detector.py:188-189` | `decide_nli_status` (:133-181) | ent 0.7 / contr 0.7 |
 | Variante NLI | `hallucination_detector.py:203` | `decide_nli_status` | `vb_agree` (contradicted exige ≥2 chunks >0.7) |
-| Denominador fidelidad | `scripts/compute_faithfulness_metrics.py:224-229` | familias v2/v3/v4 | `primary_answered` + 3 sensibilidades |
+| Denominador fidelidad | `scripts/compute_faithfulness_metrics.py:263-283` | familias v2/v3/v4 | `primary_answered` + 3 sensibilidades |
 | Umbral oráculo retrieval | `scripts/compute_retrieval_metrics.py:44-59` | métricas binarias | p50 primario (t0 legacy); NDCG graded = headline |
 
 ## Estándar de verificación (formalizado 2026-08-04, ledger entrada 22)
@@ -60,7 +59,7 @@ archivos de evidencia firmada de los que `verify_v4_offline.py` re-deriva cifras
 - **Prompt canónico** = `scripts/run_generation_matrix.py` (`build_prompt`, routing por query_type;
   115/194 no-default) + `src/generation/prompt_templates.py`.
   **Corregido 2026-07-30:** la afirmación previa («`RAGPipeline.query()` **NO** replica esta ruta»)
-  era imprecisa. Verificado en `rag_pipeline.py:270-291`: la construcción del prompt es la MISMA
+  era imprecisa. Verificado en `rag_pipeline.py:328-347`: la construcción del prompt es la MISMA
   (`build_context` → `get_template` → rama `cross_cloud` con `context_by_provider` → `SYSTEM_PROMPT`);
   `rgm.build_prompt` está documentado como réplica de ella. La diferencia real es el **origen del
   contexto**: `rgm` recibe `retrieved_ids` firmados de exp11, `RAGPipeline` recupera en vivo. Sigue
@@ -85,7 +84,7 @@ archivos de evidencia firmada de los que `verify_v4_offline.py` re-deriva cifras
   (convención exp15: `"<arm> | <model>"`). Hits de caché reportan `latency_ms=0` (`from_cache=True`):
   excluir de agregados de latencia.
 - **Checkpoint/resume**: `checkpoint__{label}__{scenario}.json` cada 10 queries, resume por
-  `completed_ids` (`run_generation_matrix.py:199-203,244-248`).
+  `completed_ids` (`run_generation_matrix.py:213,258-260`).
 
 ## Advertencias operativas
 

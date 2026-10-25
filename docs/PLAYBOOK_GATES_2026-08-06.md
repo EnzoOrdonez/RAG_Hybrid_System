@@ -1,5 +1,10 @@
 # Playbook de gates — cómo se cierra cada uno y quién hace qué
 
+> **ARCHIVO HISTÓRICO (cerrado el 2026-08-30).** Conserva el plan operativo del
+> 2026-08-06; no describe pendientes actuales. G1, G4 y G6 se ejecutaron, el repositorio
+> tiene CI y lockfile, y el estado vigente está en `CLAUDE.md` y
+> `docs/ESTADO_PROYECTO_UNIFICADO_2026-08-06.md`.
+
 > **Sección de [Kimi Work] — 2026-08-06 23:55 (hora local)**
 > Documento operativo. Cada gate trae: diagnóstico, solución paso a paso, qué hace Enzo,
 > qué se delega a un agente de código (Claude Code / Kimi Code / Codex) y el prompt listo
@@ -10,7 +15,7 @@
 
 ---
 
-## G1 — Gold humano v4 (Etapa A: 150 · Etapa B: 50)
+## G1 — Referencia humana piloto v4 (Etapa A: 150 · Etapa B: 50)
 
 **Por qué es gate:** es el único árbitro independiente del nivel real de fidelidad
 (¿0,30 NLI o 0,55 HHEM?) y de qué verificador queda como definitivo. Sin esto, ni el paper

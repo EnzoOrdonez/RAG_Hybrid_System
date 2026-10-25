@@ -4,13 +4,14 @@
 runnable on the same consumer hardware (≤6 GB VRAM, RTX 3060 Laptop) at q4
 quantization.
 
-**Status (2026-06-07):** candidate tags **web-verified to exist**; **not yet
-pulled or measured**. Measured VRAM / tokens-per-second and exact digests are
-filled in by the Phase 4 smoke (gate before the matrix). Currently installed
-(old preliminary round): `llama3.1:8b-instruct-q4_K_M`, `mistral:7b-instruct`,
-`qwen2.5:7b-instruct`.
+**Status (2026-06-07, HISTÓRICO — ya superado):** esta sección era el plan de
+selección previo al smoke. El smoke de Phase 4 **ya se ejecutó** ese mismo día
+y los resultados medidos (VRAM, tok/s, determinismo, veredictos) están en la
+sección "Phase 4 smoke results" más abajo. La matriz exp12 ya corrió con los 4
+modelos seleccionados. Modelos instalados en la ronda preliminar antigua:
+`llama3.1:8b-instruct-q4_K_M`, `mistral:7b-instruct`, `qwen2.5:7b-instruct`.
 
-## Candidates (to pull + smoke)
+## Candidates (plan original; selección ya cerrada — ver resultados abajo)
 
 | # | Tag | Lab | Released | Params | Exists | q4 VRAM vs 6 GB | Notes |
 |---|-----|-----|----------|--------|--------|------------------|-------|
@@ -40,10 +41,11 @@ with a measured-latency caveat.
   independent lab family) and are reasoning models whose "thinking" tokens
   distort latency and the claim extraction the NLI verifier depends on.
 
-## To complete in Phase 4 (smoke)
+## To complete in Phase 4 (smoke) — COMPLETADO 2026-06-07
 
-For each pulled model: exact tag + digest + pull date + on-disk size + **measured
-VRAM** + **tokens/s** (smoke) + params (total/effective) + cost-proxy per query.
+Esta checklist quedó resuelta en la sección de resultados siguiente (tag, tamaño
+en disco, VRAM medido, tok/s y determinismo por modelo). Se conserva como
+registro del plan.
 
 **Sources (verified 2026-06-07):**
 Qwen3.5 — ollama.com/library/qwen3.5:9b; Gemma 4 — blog.google / ollama.com/library/gemma4:e4b ;
@@ -74,13 +76,15 @@ this GPU). The LLM cache freezes one sample per query, so a single matrix run is
 reproducible-from-cache, but re-generation of gemma/mistral may differ → documented
 limitation; the deterministic **granite4.1** is the recommended headline model.
 
-**ETA (full matrix 4×4×194 ≈ 3104 generations):** ≈ **50–58 h**, dominated by qwen3.5
-(~26 h alone: 5.2 tok/s + ~900-token answers). Above the 28–52 h estimate. Levers:
-reduce `num_predict` (1024→512) for verbose models, drop qwen3.5, or stage with resume.
+**ETA (matriz completa 4×4×194 ≈ 3104 generaciones) — CONCLUIDO:** la estimación
+fue ≈ **50–58 h**, dominada por qwen3.5 (~26 h sola: 5.2 tok/s + respuestas de
+~900 tokens), por encima del estimado inicial de 28–52 h. La matriz exp12 **ya
+se ejecutó completa**; esta nota queda como registro de la planificación.
 
-**Latency-measurement note:** cached generations report `latency_ms=0` (→ spurious tok/s);
-the Phase 6 latency aggregator must exclude `from_cache=True` rows, or clear the LLM cache
-before the timed matrix run.
+**Latency-measurement note (aplicada):** las generaciones cacheadas reportan
+`latency_ms=0` (→ tok/s espurio); el agregador de latencia de Phase 6 excluye las
+filas `from_cache=True`. Las latencias p50/p95 resultantes están en
+`output/tables/nota3/latency__exp12_matrix.{md,csv}`.
 
 ## NLI verifiers (faithfulness instrument, ledger N5 — added 2026-06-11)
 
@@ -89,7 +93,15 @@ before the timed matrix run.
 | Runtime verifier (exp3-13) | `cross-encoder/nli-deberta-v3-small` | HF cache; softmax + TRUE rule, ENT/CONTR thresholds 0.7, max over 5 chunks |
 | Second verifier (F3b audit) | `cross-encoder/nli-deberta-v3-base` | **fp16** (max prob drift 1.8e-4 vs fp32); local snapshot `data/models/nli-deberta-v3-base/` (gitignored, ~700 MB) because HF downloads are blocked by TLS interception on this machine — re-download with `curl --ssl-no-revoke` |
 
-Agreement (N5): claim-level kappa **0.411** on the 50-claim human sample; config-mean
+Agreement (N5): claim-level kappa **0.411** on the 50-claim audit sample — **ojo:
+esa κ es la concordancia ENTRE los dos verificadores NLI (small vs base), NO contra
+una referencia humana**. En la referencia humana piloto v4 preadjudicación, la etapa A
+contiene 150 claims y la κ ponderada usa 132 juicios binarios (18 `dudoso` excluidos):
+NLI small **0.0860**, NLI base **0.0829** y HHEM **0.3033**. Son concordancias
+verificador–referencia; véanse `output/audit/gold_v4_sensitivity.json`,
+`output/audit/gold_v4_analysis.json` y `docs/SECCION_VALIDACION_HUMANA.md`. El rango
+**0.171–0.204** corresponde, en cambio, a humano–jueces LLM sobre 197 pares válidos de
+claim-condición; no es una κ verificador–humano. Config-mean
 Spearman 0.825 (published metric) / 0.559 n.s. (v2 primary); per-model scenario ordering
 flips in 3/4 models → NLI faithfulness is reported as instrument-relative (contrasts only).
 The claim-format ablation (small verifier, no "Header:" prefix) was cleanly negative

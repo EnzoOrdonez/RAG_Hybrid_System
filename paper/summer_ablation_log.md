@@ -2274,3 +2274,109 @@ humano). También se actualizaron las menciones "exp9..13" → "exp9..19b".
 
 *Fin de la sección de [Kimi Work] 2026-08-30. Cambios solo en README y este
 ledger; sin tocar código, datos ni resultados.*
+
+---
+
+## 2026-08-30 (32) — Auditoría documental exhaustiva (Codex) resuelta [Kimi Work]
+
+Codex auditó 14 documentos del repo (prompt: `output/audit/PROMPT_CODEX_AUDIT_DOCS_2026-08-30.md`).
+Veredicto: 3 OK / 5 DESACTUALIZADO / 6 CONTRADICE. Correcciones aplicadas, **solo
+documentación** (sin tocar código, datos ni resultados):
+
+- **CLAUDE.md** — "Estado actual" reescrito: paper aceptado LACCI 2026, eXpress
+  PASS (PID 2026305869), 19 experimentos, exp19b cerrado (Δ HHEM +0,0451), gold
+  v4 adjudicado, 341 tests, CI + lockfile. "Problemas conocidos abiertos"
+  marcados como cerrados 2026-08-30.
+- **README.md** — tag post-N9 ya fijado en `main`; determinismo declarado por
+  modelo (Granite/Qwen deterministas; Gemma/Mistral no, ver MODELS.md); exp9
+  redactado como "soporte estructuralmente cero" (no "fabrica 195/200"); matiz
+  en la frase "RAG ≫ no-RAG".
+- **REPRODUCE.md** — dos niveles de reproducción declarados: (1) rederivación
+  offline de tablas/figuras desde artefactos versionados; (2) repetición completa
+  (requiere `data/models`, `data/indices`, chunks y corpus, todos gitignored).
+  Intérprete portable (`$PY`); `verify_summer_offline` descrito como
+  descubrimiento por forma; §4 gold marcado COMPLETADO 2026-08-29; inmutables
+  exp3..exp19b+exp8b; ruta `paper/audit_outputs/exp8_stats_corrected.csv`;
+  cobertura condicional histórica (7/25→25/25) vs estricta canónica (2/25→20/25);
+  aviso de NO re-ejecutar el lanzador de exp19b.
+- **docs/SECCION_VALIDACION_HUMANA.md** — triple juez: 89,8 % sobre **197 pares
+  válidos** (3 claves duplicadas fuera del emparejamiento); el contraste
+  49 %→72 % declarado descriptivo por condición con tamaños distintos (no
+  pareado). Trazabilidad ampliada (entradas 28d–28f + `triple_judge_agreement.md`).
+- **docs/LIMITACIONES_Y_TRABAJO_FUTURO.md** — 16/50 = variante **preadjudicación**
+  (principal); 18/50 = reconciliada (sensibilidad); adjudicación 9/9 completada;
+  orden de verificadores estable (Δκ ≤ 0,012).
+- **SUMMER_RESULTS.md / RESULTADOS_RESUMEN.md / NOTA3_NEXT_STEPS.md /
+  docs/ESTADO_PROYECTO_UNIFICADO_2026-08-06.md** — banners de cierre: son
+  instantáneas históricas; los pendientes que listaban ya están resueltos.
+- **MODELS.md** — plan de selección y checklist de Phase 4 marcados como
+  históricos (smoke ya ejecutado, matriz exp12 ya corrida); ETA/latencia como
+  concluidos; **κ=0,411 aclarado**: era concordancia NLI-small vs NLI-base
+  (entre verificadores), NO contra gold humano — la κ real contra el humano es
+  ≈ 0,17–0,30.
+- **docs/TRACEABILITY_nota3.md** — "sin correr las 13 experimentaciones" →
+  "sin reejecutar los experimentos de generación y retrieval de Nota 3
+  (exp9–exp13)".
+
+**Queda menor (código, fuera del alcance de esta ronda):** `LIVE_EXPERIMENTS`
+en `src/utils/signed_evidence.py` aún incluye exp19b; retiro propuesto para la
+ronda de re-revisión de Codex.
+
+*Fin de la sección de [Kimi Work] 2026-08-30. Cambios solo en documentación y
+este ledger; sin tocar código, datos ni resultados.*
+
+---
+
+## 2026-08-30 (33) — Resolución auditoría Codex ronda 2 (P1–P3) [Codex]
+
+Segunda ronda aplicada sobre los hallazgos priorizados de
+`output/audit/docs_audit_codex_2026-08-30.md`, exclusivamente en documentación.
+La comprobación local posterior al `fetch` situó `origin/main` y `main` en
+`670f8e5` (merge PR #3): las afirmaciones del camera-ready ya fusionado eran
+correctas; la discrepancia provenía de una rama `main` local desactualizada y no
+requirió cambios documentales.
+
+### P1 — credibilidad y reproducción
+
+- `REPRODUCE.md` retira `build_gold_v4.py` del flujo normal y lo marca peligroso
+  sobre la referencia adjudicada; cualquier uso excepcional exige backup y un
+  runner modificado con salida temporal/sufijada. La cifra 341/341 quedó fechada
+  como última verificación registrada, no como garantía perpetua.
+- `docs/ESTADO_PROYECTO_UNIFICADO_2026-08-06.md` ya no presenta κ como medida de
+  «fidelidad real», A como cota inferior ni los claims externamente correctos como
+  necesariamente paramétricos.
+- `CITATION.cff` contiene a Enzo Ordoñez Flores y Winston Lewis Fuentes, mantiene
+  `GPL-3.0-only` y añade la cita preferida del paper aceptado en IEEE LACCI 2026.
+
+### P2 — cifras y archivos históricos
+
+- Kish final se unificó en **38,5**, con
+  `output/audit/gold_v4_analysis.json` como autoridad; el 42,7 del ledger de verano
+  quedó rotulado como cálculo preliminar.
+- `MODELS.md` separa los denominadores y conceptos: preadjudicación A (150 claims,
+  132 binarios), κ NLI-small=0,0860, NLI-base=0,0829 y HHEM=0,3033; el rango
+  0,171–0,204 corresponde a humano–jueces LLM sobre 197 pares válidos.
+- Playbook, guía de anotación, propuesta de manifiestos y diseño de nube llevan
+  banners de archivo histórico con su estado final.
+- El inventario de ramas se regeneró desde las refs posteriores al `fetch`, distingue
+  ramas locales, refs de seguimiento y tres refs obsoletas de ramas remotas borradas;
+  no se eliminó ninguna.
+- TRACEABILITY y RESULTADOS usan las rutas exactas `__exp12_matrix`; las recetas
+  históricas in-place quedaron sustituidas por verificadores offline vigentes.
+
+### P3 — nomenclatura y referencias de código
+
+- Se unificó «referencia humana piloto» y se declaró la convención de **19
+  experimentos lógicos / 20 directorios físicos** (exp15 está partido en dos).
+- `docs/KNOB_MAP_summer.md` retiró la referencia inexistente a
+  `config/evaluation_config.yaml` y actualizó líneas/consumidores; la llamada viva
+  `verify_answer` de Streamlit quedó ubicada en `chat_page.py:213`.
+- `CLAUDE.md` aclara que `generate_phase3_artifacts.py`,
+  `recompute_nli_over_saved.py` y `build_annotation_pool.py` solo existen en ramas
+  históricas, no en el árbol actual.
+
+Commits de la ronda: `eaab456`, `1ad167d`, `0062fbf`, `50c8ff3`, `3071c0f` y
+`e13046b`. No se ejecutaron tests, modelos ni verificadores por tratarse de una
+ronda de solo texto; no hubo push ni cambios en código, datos o resultados.
+
+*Fin de la entrada 33 — [Codex] 2026-08-30.*
