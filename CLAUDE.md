@@ -188,6 +188,11 @@ Streamlit y la evidencia experimental de una tesis y un paper.
 - Trazabilidad: `docs/TRACEABILITY_nota3.md`. Resultados de Nota 3: `RESULTADOS_RESUMEN.md`.
 - Fase de verano: `paper/summer_ablation_log.md`, `SUMMER_RESULTS.md` y
   `output/audit/summer_offline_check_2026-08-03.md`.
+- Registros de ejecución (corridas, despliegue GCP, auditorías): **no están en el repo**. Índice en
+  `C:\CloudRAG\LEEME_CLOUDRAG.md`. Por espacio, lo cerrado vive en `D:\CloudRAG_archivo\` y en
+  `C:\CloudRAG\` queda un junction con el mismo nombre (las rutas antiguas siguen funcionando).
+  La iteración 6 del despliegue la ejecuta Claude (Cowork) en `C:\CloudRAG\iteration6-cowork-20261015\`
+  sin tocar la lógica RAG ni el operador de la iteración 5. Presupuesto GCP real: PEN 180 por mes.
 
 ## Log de decisiones y sesiones
 
