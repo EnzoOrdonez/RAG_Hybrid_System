@@ -6,7 +6,7 @@
 
 <p align="center">
   <!-- Package support, not the experimental environment. Corrected by Claude Code, 2026-08-21
-       07:30 local: the badge read 3.14, which is the REPRODUCIBLE ENVIRONMENT (REPRODUCE.md),
+       07:30 local: the badge read 3.14, which is the REPRODUCIBLE ENVIRONMENT (docs/guides/reproduce.md),
        not what the package supports. setup.py has always said >=3.11. -->
   <img src="https://img.shields.io/badge/Python-3.11+-blue?logo=python" alt="Python">
   <img src="https://img.shields.io/badge/PyTorch-CUDA-red?logo=pytorch" alt="PyTorch">
@@ -43,7 +43,7 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 - **Adaptive chunking**: Preserves code blocks and tables as atomic units
 - **Cross-encoder re-ranking**: ms-marco-MiniLM-L-12-v2 for precision refinement
 - **Hallucination detection**: NLI-based faithfulness scoring with DeBERTa v3
-- **Local LLMs**: Runs with Ollama (UI default: Granite 4.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see MODELS.md)
+- **Local LLMs**: Runs with Ollama (UI default: Granite 4.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see docs/architecture/models.md)
 - **Streamlit UI**: invitation-only participant evaluation; five views in private development mode
 - **Benchmarking suite**: 19 logical experiments (exp3-exp19b + exp8b), stored in 20 result directories because exp15 is split in two, with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
 
@@ -72,7 +72,7 @@ by construction — reported only as a circularity reference (ledger N2).
 Generation faithfulness (4 LLMs × 4 scenarios × 194, NLI verifier): RAG ≫ no-RAG for
 every testable model — a difference in evidence-supported claims, with no-RAG structurally at zero (not a direct proof of factual accuracy) — but the **retrieval method does not significantly move generation
 faithfulness** (n.s. under 2 NLI verifiers × 4 denominators; ledger N5). Decline-aware
-v2 metric and instrument audit: `output/tables/nota3/` + `RESULTADOS_RESUMEN.md`.
+v2 metric and instrument audit: `output/tables/nota3/` + `docs/reports/results-summary.md`.
 
 ---
 
@@ -95,7 +95,7 @@ Query → Normalization + Expansion
 | Lexical | BM25 (rank_bm25) |
 | Re-ranker | cross-encoder/ms-marco-MiniLM-L-12-v2 |
 | LLMs (evaluated, Nota 3) | Granite 4.1 8B · Gemma 4 E4B · Mistral 7B · Qwen 3.5 9B |
-| LLM (demo / UI only) | Llama 3.1 8B q4 — see [MODELS.md](MODELS.md) |
+| LLM (demo / UI only) | Llama 3.1 8B q4 — see [models.md](docs/architecture/models.md) |
 | NLI | cross-encoder/nli-deberta-v3-small (runtime) + nli-deberta-v3-base (2nd verifier) |
 | UI | Streamlit + Plotly |
 
@@ -132,7 +132,7 @@ Query → Normalization + Expansion
 > specific interpreter, **Python 3.14** at
 > `C:\Users\enziz\AppData\Local\Python\pythoncore-3.14-64\python.exe`, which is the only one on
 > that machine carrying the ML stack. Package support and reproducible environment are separate
-> declarations and are kept separate on purpose — see `REPRODUCE.md §0`.
+> declarations and are kept separate on purpose — see `docs/guides/reproduce.md §0`.
 
 ### Install
 
@@ -163,7 +163,7 @@ pip install -r requirements.txt
 
 # Historical CLI example model.
 # The 4 models EVALUATED in the Nota 3 report (granite4.1:8b, gemma4:e4b,
-# mistral:7b-instruct, qwen3.5:9b) are documented in MODELS.md — pull those
+# mistral:7b-instruct, qwen3.5:9b) are documented in docs/architecture/models.md — pull those
 # to reproduce exp12.
 ollama pull llama3.1:8b-instruct-q4_K_M
 
@@ -177,7 +177,7 @@ The raw-evidence snapshot for the Nota 3 round (exp9-13) is published as the ann
 tag **`nota3-evidencia-2026-06-11`** (v2-era faithfulness metric, ledger N1-N7). The
 citable faithfulness figures were since corrected **offline** — v3 (N8: format-artifact
 exclusion) and **v4 (N9: vacuous-row exclusion; the citable Tabla 6)** — without touching
-the signed raw outputs. See `RESULTADOS_RESUMEN.md` and ledger entries N8/N9; the documentation-ready
+the signed raw outputs. See `docs/reports/results-summary.md` and ledger entries N8/N9; the documentation-ready
 state is frozen on `main` (camera-ready round, 2026-08-30).
 
 **Traceability + minimal repro recipes:** [docs/TRACEABILITY_nota3.md](docs/TRACEABILITY_nota3.md)
@@ -186,7 +186,10 @@ to regenerate only the report's artifacts (without re-running the full experimen
 
 - [Guía de anotación del gold](docs/GUIA_ANOTACION_GOLD_V4.md)
 - [Validación con referencia humana piloto](docs/SECCION_VALIDACION_HUMANA.md)
-- [Reproducción de experimentos](REPRODUCE.md)
+- [Reproducción de experimentos](docs/guides/reproduce.md)
+- [Resumen de resultados de Nota 3](docs/reports/results-summary.md)
+- [Benchmarks de la fase de verano](docs/reports/summer-benchmarks.md)
+- [Índice de toda la documentación](docs/README.md)
 - [Ledger de ablaciones de verano](paper/summer_ablation_log.md)
 
 ### Reproducing the Nota 3 report (evidence -> tables)
@@ -229,7 +232,7 @@ python scripts/run_retrieval_only.py --exp-id exp11_retrieval194_fullrerank
   var is unset, but setting it explicitly is preferred.
 - `seed=42` everywhere; generation uses `temperature=0` (greedy decoding). Determinism is
   model- and runtime-dependent: Granite 4.1 and Qwen 3.5 were deterministic in the
-  measurement environment, Gemma 4 and Mistral 7B were not fully; see [MODELS.md](MODELS.md).
+  measurement environment, Gemma 4 and Mistral 7B were not fully; see [models.md](docs/architecture/models.md).
   
 
 ### Run
@@ -361,7 +364,7 @@ python -m streamlit run src/ui/app.py
 | Chunk strategy | adaptive | fixed, recursive, semantic, hierarchical, adaptive |
 | Fusion method | RRF (k=60) | RRF, Linear (alpha 0.0-1.0) |
 | Re-ranker | ms-marco-L-12 | ms-marco-L-6, ms-marco-L-12, bge-reranker |
-| LLM (UI default) | granite4.1:8b | evaluated set in MODELS.md: granite4.1, gemma4:e4b, mistral, qwen3.5 |
+| LLM (UI default) | granite4.1:8b | evaluated set in docs/architecture/models.md: granite4.1, gemma4:e4b, mistral, qwen3.5 |
 | Top-K | 5 | 1-20 |
 
 ---

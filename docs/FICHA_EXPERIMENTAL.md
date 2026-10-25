@@ -116,7 +116,7 @@ y configuración del corpus. Los manifiestos citados cubren modelos Transformers
 registran un digest exacto del modelo Granite servido por Ollama. Un tercero necesita el
 artefacto del corpus (o una lista completa con hashes), los índices o su reconstrucción,
 acceso al modelo generativo con su digest Ollama exacto y el hardware/configuración
-descritos en `REPRODUCE.md`.
+descritos en `docs/guides/reproduce.md`.
 
 ## Fuentes de cierre
 
@@ -125,4 +125,4 @@ descritos en `REPRODUCE.md`.
 - `output/audit/claim_audit_sample_v4_meta.json`, `gold_v4_analysis.json`,
   `provider_coverage_probe.json` y `descriptive_cis.json`.
 - `experiments/results/exp19b_anchored_selector/equivalence__{hhem,small,base}.md`.
-- `REPRODUCE.md` y `.github/workflows/ci.yml`.
+- `docs/guides/reproduce.md` y `.github/workflows/ci.yml`.

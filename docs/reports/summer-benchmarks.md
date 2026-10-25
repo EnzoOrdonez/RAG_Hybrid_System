@@ -288,7 +288,7 @@ sobre el pool guardado de exp17 devuelve los `balanced_ids` exactos en **25/25**
 
 ## Reproducibilidad
 
-`REPRODUCE.md` (5 niveles) + `scripts/verify_summer_offline.py`, que re-deriva **cada** celda de Tier A
+`docs/guides/reproduce.md` (5 niveles) + `scripts/verify_summer_offline.py`, que re-deriva **cada** celda de Tier A
 / exp16 / exp17 / **exp18** desde las probs persistidas y recomputa los contrastes pareados: **todo
 cuadra exacto, sin GPU**. Suite **130 tests, 0 fallos, 0 omitidos** (2026-08-04).
 

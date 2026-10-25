@@ -7,7 +7,7 @@ presentación. La segunda no consulta índice ni reordenador. `LLM_ONLY_NO_RAG` 
 las configuraciones experimentales no se modifican. Ver [runbook](STUDY_DEPLOYMENT_RUNBOOK.md).
 La equivalencia de parámetros se prueba con dobles; rendimiento real aún NO verificado.
 
-Auditoría de configuración realizada el 2026-08-23 contra `REPRODUCE.md` y
+Auditoría de configuración realizada el 2026-08-23 contra `docs/guides/reproduce.md` y
 `scripts/run_exp19b_generation.py`. La comparación distingue valores configurables de
 diferencias de mecanismo: igualar un número es seguro; convertir la interfaz en una
 reproducción de exp19b requeriría una ruta explícita y no se hizo aquí.

@@ -20,7 +20,7 @@ data/indices/
 data/embeddings/
 data/evaluation/results/
 
-# Downloaded model snapshots (~700 MB, re-obtainable; provenance in MODELS.md.
+# Downloaded model snapshots (~700 MB, re-obtainable; provenance in docs/architecture/models.md.
 # nli-deberta-v3-base was fetched via `curl --ssl-no-revoke` because HF
 # downloads are blocked by TLS interception on this machine.)
 data/models/

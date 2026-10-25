@@ -2,7 +2,7 @@
 
 **Aplicación del estudio, 2026-09-27:** el modo participante usa el protocolo nuevo
 de dos condiciones, con configuración/asignación selladas e instrumentos por bloque.
-Ver [runbook del estudio](docs/STUDY_DEPLOYMENT_RUNBOOK.md). SUS vacío bloquea sesiones.
+Ver [runbook del estudio](../STUDY_DEPLOYMENT_RUNBOOK.md). SUS vacío bloquea sesiones.
 La compuerta del estudio es BORRADOR y NO-GO sigue vigente. Estas instrucciones
 de reproducción histórica no son autorización para ejecutar cohortes ni publicar la app.
 El pre-registro NLI no cambia: su runner se ejecutará por el humano desde la copia
@@ -28,7 +28,7 @@ una edición posterior haya vuelto a ejecutar la suite.
 ## 0. Entorno (obligatorio)
 
 **Aplicación de entrevistas:** su entorno nuevo se instala desde `requirements-app.txt`
-con hashes y auxiliares CPU. Ver [INTERVIEW_READINESS.md](docs/INTERVIEW_READINESS.md)
+con hashes y auxiliares CPU. Ver [INTERVIEW_READINESS.md](../INTERVIEW_READINESS.md)
 para instalación portable, artefactos, sesiones y validación pendiente. Las rutas y
 mediciones que siguen documentan el entorno experimental histórico; no prueban que
 un despliegue remoto de Evaluation Mode esté listo ni autorizan regenerar evidencia.
@@ -54,7 +54,7 @@ $env:PYTHONUTF8 = 1          # OBLIGATORIA en consola cp1252 (ver nota abajo)
 >
 > **Medido el 2026-08-21 por Claude Code:** en PowerShell **7.6.5** con `chcp 65001` (UTF-8, el
 > defecto de PS7) el verificador da **exit 0 sin** la variable — `sys.stdout.encoding` ya es
-> `utf-8`. O sea que el fallo histórico documentado en `CLAUDE.md` es real pero **condicional a
+> `utf-8`. O sea que el fallo histórico documentado en `docs/decisions/session-log.md` es real pero **condicional a
 > la consola**, no universal. Fijar la variable hace la receta determinista en cualquiera de las
 > dos, que es justo lo que una receta de reproducibilidad tiene que garantizar.
 >
