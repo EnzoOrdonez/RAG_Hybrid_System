@@ -155,6 +155,31 @@
       ],
       "status": "passing",
       "passes": true
+    },
+    {
+      "id": "F-014",
+      "category": "testing",
+      "description": "init.sh capa 2 no puede dar exit 0 desde el checkout principal: 144 tests de I7/estudio fallan porque el codigo asume que el repo vive en <checkout>/.worktrees/<nombre>.",
+      "steps": [
+        "Evidencia 2026-10-25 (checkout principal en chore/docs-harness @ f16f9ce): 1706 pasan, 4 omitidas, 144 fallan/error. Mensajes: 'Use a separate external study directory and explicit purpose' (112), 'Preparation evidence must be outside checkout' (14), 'Environment inventory must be outside the checkout' (9), 'Evidence must be outside checkout' (6).",
+        "Causa: scripts/environment_identity.py:21, scripts/manage_study.py:25 y scripts/study_gate_draft.py:63 usan ROOT.parent.parent como 'el checkout'. En .worktrees/<x> eso es la raiz del repo; en el checkout principal es C:/Users/enziz, de modo que todo AppData/Temp cuenta como interior.",
+        "Hasta resolverlo, init.sh se ejecuta desde .worktrees/docs-harness (HEAD desacoplado, mismo commit): alli las tres capas dan exit 0.",
+        "Opciones (decision de Enzo; toca codigo de I7 y su garantia de evidencia externa): (a) derivar el checkout con git rev-parse --git-common-dir como ya hacen measure_interview_gate.py y contrast_interview_observer.py; (b) aceptarlo y exigir ejecutar la suite desde un worktree."
+      ],
+      "status": "not_started",
+      "passes": false
+    },
+    {
+      "id": "F-015",
+      "category": "quality",
+      "description": "scripts/scan_secrets.py recorre el disco con os.walk en vez de los archivos de git; en un checkout con data/ real (~1 GB sin models) la capa 1 de init.sh no termina en tiempo razonable.",
+      "steps": [
+        "Evidencia 2026-10-25: en el checkout principal la capa 1 llevo mas de 6 minutos sin avanzar y se detuvo a mano; en el worktree (data/indices es una union que no se sigue) tarda segundos.",
+        "Verificacion alternativa usada: python scripts/scan_secrets.py --root <git archive HEAD descomprimido> --baseline secrets_baseline.json => exit 0, sin hallazgos.",
+        "Propuesta (decision de Enzo; es una herramienta de seguridad): enumerar con git ls-files --cached --others --exclude-standard, o excluir data/ ignorado; mantener la baseline."
+      ],
+      "status": "not_started",
+      "passes": false
     }
   ]
 }

@@ -8,7 +8,7 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 
 - **Rama de trabajo:** `chore/docs-harness`, creada desde `fix/interview-readiness` (`3b52c4b`) e integrada con
   `summer/taxonomia-759`. Commits locales, **sin publicar**. Está activa en el **checkout principal**
-  (`C:\Users\enziz\Projects\hybrid-rag-system`); `.worktrees/docs-harness` queda en HEAD desacoplado en el mismo commit y ya no hace falta.
+  (`C:\Users\enziz\Projects\hybrid-rag-system`); `.worktrees/docs-harness` queda en HEAD desacoplado en el mismo commit y **sigue siendo necesario para correr `init.sh`** (F-014, F-015).
 - **Estado de las ramas:**
   - `main` (`670f8e5`) está detrás de `fix/interview-readiness` (214 commits).
   - `summer/taxonomia-759` (9 commits de documentación del 2026-08-30) ya está integrada en `chore/docs-harness`; su punta (`93bd029`) sigue intacta.
@@ -21,13 +21,15 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 
 1. **F-001, F-012, F-013** cerrados en `passing` (commits `c43e61f`, `4569de5`): el Chromium 1208 ya estaba instalado; 3 tests de `task_evidence` omiten con motivo sin `data/indices`.
 2. **`init.sh`** exporta `PLAYWRIGHT_BROWSERS_PATH=C:/CloudRAG/i7-browser-runtime` solo si no está definida y el directorio existe; CI no cambia. Verificado sin exportarla: exit 0 en las tres capas (1848 pasan, 0 fallan, 6 omitidas).
-3. **F-011** resuelto: archivado con SHA-256 (68 archivos de la tanda 2 más los de la tanda 1), `showcase/` y `.worktrees/` en `.gitignore`.
+3. **Checkout principal en `chore/docs-harness`:** capas 1 (sobre `git archive` de HEAD) y 3 con exit 0; la capa 2 da 144 fallos de I7 por una suposición de ruta (F-014) y el escáner de secretos es inviable allí (F-015).
+4. **F-011** resuelto: archivado con SHA-256 (68 archivos de la tanda 2 más los de la tanda 1), `showcase/` y `.worktrees/` en `.gitignore`.
 
 ## Qué sigue (orden sugerido)
 
-1. **F-006:** push y PR de `chore/docs-harness` solo con OK explícito de Enzo (ADR-0013); sigue sin publicar. Un PR a `main` arrastra el historial de `fix/interview-readiness`.
-2. **F-007:** corregir la contradicción del README sobre el modelo de la UI.
-3. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.
+1. **F-014 / F-015:** decidir cómo hacer que `init.sh` sirva desde el checkout principal (cambian código de I7 y el escáner de secretos; no tocados).
+2. **F-006:** push y PR de `chore/docs-harness` solo con OK explícito de Enzo (ADR-0013); sigue sin publicar. Un PR a `main` arrastra el historial de `fix/interview-readiness`.
+3. **F-007:** corregir la contradicción del README sobre el modelo de la UI.
+4. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.
 
 ## Riesgos y bloqueos vigentes
 
@@ -42,5 +44,6 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 ## Cómo verificar en frío
 
 ```bash
+cd .worktrees/docs-harness   # hoy obligatorio: desde el checkout principal fallan F-014 y F-015
 bash init.sh   # Git Bash en Windows; usa .venv-app si existe y exporta solo el Chromium fijado de I7 si existe en C:/CloudRAG; objetivo: exit 0 en las tres capas
 ```
