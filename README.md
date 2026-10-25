@@ -95,7 +95,7 @@ Query → Normalization + Expansion
 | Lexical | BM25 (rank_bm25) |
 | Re-ranker | cross-encoder/ms-marco-MiniLM-L-12-v2 |
 | LLMs (evaluated, Nota 3) | Granite 4.1 8B · Gemma 4 E4B · Mistral 7B · Qwen 3.5 9B |
-| LLM (demo / UI only) | Llama 3.1 8B q4 — see [models.md](docs/architecture/models.md) |
+| LLM (UI default) | Granite 4.1 8B (`SURVEY_DEPLOY`); Llama 3.1 8B q4 remains only as the `PROPOSED_HYBRID` registry / historical exp8 baseline — see [models.md](docs/architecture/models.md) |
 | NLI | cross-encoder/nli-deberta-v3-small (runtime) + nli-deberta-v3-base (2nd verifier) |
 | UI | Streamlit + Plotly |
 

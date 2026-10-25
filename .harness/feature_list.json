@@ -77,13 +77,14 @@
     {
       "id": "F-007",
       "category": "docs",
-      "description": "Resolver la contradicción del README sobre el modelo de la UI (tabla de componentes: Llama 3.1; Key Features y Configuration: Granite 4.1). Ver system-design §8.3.",
+      "description": "Contradiccion del README sobre el modelo de la UI (tabla de componentes: Llama 3.1; Key Features y Configuration: Granite 4.1). Resuelto 2026-10-25: la UI usa SURVEY_DEPLOY.llm_model = granite4.1:8b; se corrigio la fila de la tabla.",
       "steps": [
-        "Confirmar en src/ui qué configuración usa cada vista en modo development.",
-        "Corregir solo la fila contradictoria del README y anotar el cambio en el commit."
+        "Evidencia: chat_page.py, study_pipeline.py e index_loader.py leen SURVEY_DEPLOY.llm_model; en ejecucion vale 'granite4.1:8b'. PROPOSED_HYBRID.llm_model sigue siendo 'llama3.1:8b-instruct-q4_K_M' (registro enviado a LACCI).",
+        "Cambio: solo la fila 98 del README ('LLM (demo / UI only) | Llama 3.1' -> 'LLM (UI default) | Granite 4.1 8B (SURVEY_DEPLOY); Llama 3.1 solo como registro PROPOSED_HYBRID / baseline exp8'). Las lineas 46 y 367 ya eran correctas.",
+        "Nota de resolucion de una linea en docs/architecture/system-design.md (contradiccion 3). Sin cambios de codigo ni de cifras."
       ],
-      "status": "not_started",
-      "passes": false
+      "status": "passing",
+      "passes": true
     },
     {
       "id": "F-008",

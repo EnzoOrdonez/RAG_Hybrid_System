@@ -21,13 +21,13 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 1. **F-014:** el límite del checkout deja de ser `ROOT.parent.parent` (`src/utils/checkout_boundary.py`); la evidencia externa sigue protegida en ambos layouts.
 2. **F-015:** `scan_secrets.py` enumera con `git ls-files` sin `--root` (0,4 s en vez de no terminar); con `--root` recorre el disco.
 3. Verificado con `bash ./init.sh` desde el checkout principal, sin variables exportadas a mano. Commit `640fcab`.
-4. Worktree `docs-harness` retirado: se quitaron sus dos uniones con `rmdir` y se comprobó que `interview-readiness` quedó intacto.
+4. **F-007** resuelto: fila del README corregida (la UI usa Granite 4.1; Llama 3.1 solo en `PROPOSED_HYBRID`).
+5. Worktree `docs-harness` retirado: se quitaron sus dos uniones con `rmdir` y se comprobó que `interview-readiness` quedó intacto.
 
 ## Qué sigue (orden sugerido)
 
 1. **F-006:** push y PR de `chore/docs-harness` solo con OK explícito de Enzo (ADR-0013); sigue sin publicar. Un PR a `main` arrastra el historial de `fix/interview-readiness`.
-2. **F-007:** corregir la contradicción del README sobre el modelo de la UI.
-3. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.
+2. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.
 
 ## Riesgos y bloqueos vigentes
 
