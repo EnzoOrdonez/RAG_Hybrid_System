@@ -13,7 +13,7 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
   - `summer/taxonomia-759` (9 commits de documentación del 2026-08-30) ya está integrada en esta rama.
 - **Checkout principal** (`C:\Users\enziz\Projects\hybrid-rag-system`, en `summer/taxonomia-759`):
   - Conserva sin tocar sus cambios sin commitear. Su copia quedó integrada aquí (commit `504b2a3`).
-  - También conserva los originales `PROMPT_MAESTRO_*` y `showcase/` sin versionar (F-011).
+  - F-011 parcial: `PROMPT_MAESTRO_*` y `Claude outputs/` archivados en `D:/CloudRAG_archivo/hybrid-rag-system-checkout-20261025` (MANIFEST con SHA-256). Siguen sin versionar `showcase/`, 39 archivos de `output/audit/` y otros (ver F-011).
 
 ## Qué se hizo en la última sesión (cierre de F-001)
 
@@ -24,8 +24,8 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 
 ## Qué sigue (orden sugerido)
 
-1. **Commitear** el cambio de esta sesión (test + `.harness/`) en `chore/docs-harness`; hoy está sin commitear.
-2. **F-011:** Enzo decide la limpieza del checkout principal (`PROMPT_MAESTRO_*`, `showcase/`, worktree prunable). No se borra nada sin su OK (ADR-0011).
+1. El cambio de F-012/F-013 está commiteado en local (`c43e61f`), sin publicar.
+2. **F-011 (resto):** Enzo decide `showcase/`, `output/audit/PROMPT_*` y los cambios sin commitear del checkout principal. `.worktrees/interview-readiness` NO se quita: no es prunable y es el destino de las uniones `.venv-app` y `data/indices`.
 3. **F-006:** Enzo revisa los commits de `chore/docs-harness` y decide push y PR (compuerta ADR-0013).
 4. **F-007:** corregir la contradicción del README sobre el modelo de la UI.
 5. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.

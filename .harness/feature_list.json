@@ -121,10 +121,12 @@
     {
       "id": "F-011",
       "category": "hygiene",
-      "description": "Limpiar el checkout principal (summer/taxonomia-759): originales PROMPT_MAESTRO_* sin versionar en la raíz, showcase/ sin versionar (cita MODELS.md), Claude outputs/ y el worktree .worktrees/interview-readiness marcado prunable.",
+      "description": "Limpiar el checkout principal (summer/taxonomia-759). Hecho 2026-10-25: PROMPT_MAESTRO_* y Claude outputs/ movidos a D:/CloudRAG_archivo/hybrid-rag-system-checkout-20261025 (con MANIFEST.txt y SHA-256 verificados). Pendiente: showcase/ sin versionar, 39 archivos sin versionar en output/audit/, docs/CopyrightReceipt_eCF_2026-09-03.pdf, presentacion_lacci*/ y los cambios sin commitear de CLAUDE.md y paper/summer_ablation_log.md.",
       "steps": [
-        "Bloqueo: borrar o versionar es decisión de Enzo; las copias versionadas viven en docs/specs/.",
-        "Si showcase/ se versiona, actualizar su referencia a docs/architecture/models.md."
+        "Hecho: PROMPT_MAESTRO_ANIMACIONES.md (identico a docs/specs/animations-spec.md) y PROMPT_MAESTRO_SHOWCASE.md (version previa a la reescritura de rutas de docs/specs/showcase-spec.md) archivados, no borrados (ADR-0011).",
+        "Hecho: Claude outputs/ (A3 docx + 3 figuras, 7.5 MB) archivado con hashes verificados.",
+        "Correccion: .worktrees/interview-readiness NO esta prunable; existe en disco y es el destino de las uniones .venv-app y data/indices de este worktree. Quitarlo rompe init.sh. git worktree prune --dry-run no encuentra nada.",
+        "Pendiente (decision de Enzo): versionar o archivar showcase/ (si se versiona, actualizar su cita MODELS.md a docs/architecture/models.md); destino de output/audit/PROMPT_* y del PDF CopyrightReceipt; commit o descarte de CLAUDE.md y paper/summer_ablation_log.md modificados."
       ],
       "status": "blocked",
       "passes": false
