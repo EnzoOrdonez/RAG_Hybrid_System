@@ -68,8 +68,12 @@
       "category": "integration",
       "description": "Integrar chore/docs-harness y fix/interview-readiness en main mediante PR.",
       "steps": [
-        "Revisar los commits locales de chore/docs-harness (sin publicar).",
-        "Bloqueo: compuerta de push (ADR-0013); requiere OK explícito de Enzo. Sin push a main ni force push."
+        "Informe de publicacion 2026-10-25 (solo lectura; nada publicado). origin = github.com/EnzoOrdonez/RAG_Hybrid_System (publico). chore/docs-harness NO existe en origin.",
+        "Ya publicados: fix/interview-readiness (3b52c4b) y summer/taxonomia-759 (93bd029). Un push de la rama sube 15 commits nuevos (140 objetos; el mayor, paper/summer_ablation_log.md, 157 KB): el merge de taxonomia-759 y el trabajo del arnes/F-001..F-015.",
+        "Escaneo de los diffs de esos 15 commits: 2836 lineas anadidas, 0 hallazgos de credenciales, 0 IPv4 fuera de loopback/documentacion, 1 correo institucional (ecopyright@ieee.org, de las entradas 34-35 del ledger), sin .env/.pem/.key. Tampoco hay archivos grandes.",
+        "PR a main: origin/main (179acee) tiene 1 commit que la rama no tiene (el merge de la PR #4 de taxonomia-759); merge-tree simulado sin conflictos. El PR mostraria 455 archivos, +56 412/-866, porque main no tiene aun el trabajo de fix/interview-readiness (214 commits, ya publicado en su rama). main local (670f8e5) esta desactualizado respecto de origin/main.",
+        "Riesgo de CI (no verificado): ci.yml solo dispara en push a main y summer/* y en PR a main/summer/*; fix/interview-readiness nunca corrio en CI. El CI instala requirements-app.txt, que no incluye playwright, y los tests de navegador de I7 no tienen skip: un PR a main probablemente falle en 'Run CPU-only test suite'.",
+        "Bloqueo: compuerta de push (ADR-0013); requiere OK explicito de Enzo. Sin push a main ni force push."
       ],
       "status": "blocked",
       "passes": false

@@ -26,7 +26,7 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 
 ## Qué sigue (orden sugerido)
 
-1. **F-006:** push y PR de `chore/docs-harness` solo con OK explícito de Enzo (ADR-0013); sigue sin publicar. Un PR a `main` arrastra el historial de `fix/interview-readiness`.
+1. **F-006:** informe de publicación hecho (ver `feature_list.json`): 15 commits nuevos, 0 hallazgos de secretos, PR a `main` sin conflictos pero con riesgo de CI (playwright no está en `requirements-app.txt`). Push y PR solo con OK explícito de Enzo (ADR-0013); nada publicado.
 2. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.
 
 ## Riesgos y bloqueos vigentes
