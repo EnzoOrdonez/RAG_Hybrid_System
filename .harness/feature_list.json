@@ -159,27 +159,30 @@
     {
       "id": "F-014",
       "category": "testing",
-      "description": "init.sh capa 2 no puede dar exit 0 desde el checkout principal: 144 tests de I7/estudio fallan porque el codigo asume que el repo vive en <checkout>/.worktrees/<nombre>.",
+      "description": "init.sh capa 2 desde el checkout principal: 144 tests de I7/estudio fallaban porque el codigo tomaba ROOT.parent.parent como el checkout. Resuelto con src/utils/checkout_boundary.py: el limite sube dos niveles solo si el repo vive en <checkout>/.worktrees/<x>; si no, es el propio repo.",
       "steps": [
-        "Evidencia 2026-10-25 (checkout principal en chore/docs-harness @ f16f9ce): 1706 pasan, 4 omitidas, 144 fallan/error. Mensajes: 'Use a separate external study directory and explicit purpose' (112), 'Preparation evidence must be outside checkout' (14), 'Environment inventory must be outside the checkout' (9), 'Evidence must be outside checkout' (6).",
-        "Causa: scripts/environment_identity.py:21, scripts/manage_study.py:25 y scripts/study_gate_draft.py:63 usan ROOT.parent.parent como 'el checkout'. En .worktrees/<x> eso es la raiz del repo; en el checkout principal es C:/Users/enziz, de modo que todo AppData/Temp cuenta como interior.",
-        "Hasta resolverlo, init.sh se ejecuta desde .worktrees/docs-harness (HEAD desacoplado, mismo commit): alli las tres capas dan exit 0.",
-        "Opciones (decision de Enzo; toca codigo de I7 y su garantia de evidencia externa): (a) derivar el checkout con git rev-parse --git-common-dir como ya hacen measure_interview_gate.py y contrast_interview_observer.py; (b) aceptarlo y exigir ejecutar la suite desde un worktree."
+        "Causa: ROOT.parent.parent solo es el checkout dentro de .worktrees/<x>; en el principal resolvia a C:/Users/enziz y todo AppData/Temp contaba como interior.",
+        "Cambio (commit 640fcab): helper checkout_boundary()/is_inside_checkout() sin llamar a git; reemplaza 8 usos en Python (environment_identity, manage_study, study_gate_draft, study_smoke, study_task_evidence, analyze_gate_memory, interview_preparation, study_sessions) y aplica la misma regla en check_gate_recovery.ps1, probe_gate_memory.ps1 y manage_gate_window.ps1.",
+        "La garantia de evidencia externa se mantiene: en .worktrees/<x> siguen protegidos el checkout padre y los demas worktrees (test_checkout_boundary.py, test_environment_identity.py parametrizado, test_managed_gate.py).",
+        "Limite conocido: un worktree creado fuera de una carpeta .worktrees solo protege su propia raiz, no el checkout del que cuelga. measure_interview_gate.py y otros ya usan git rev-parse --git-common-dir.",
+        "Evidencia 2026-10-25: bash ./init.sh desde el checkout principal => capa 2 exit 0 (1861 pasan, 0 fallan, 4 omitidas)."
       ],
-      "status": "not_started",
-      "passes": false
+      "status": "passing",
+      "passes": true
     },
     {
       "id": "F-015",
       "category": "quality",
-      "description": "scripts/scan_secrets.py recorre el disco con os.walk en vez de los archivos de git; en un checkout con data/ real (~1 GB sin models) la capa 1 de init.sh no termina en tiempo razonable.",
+      "description": "scan_secrets.py recorria el disco entero; en el checkout principal incluia ~1 GB de data/ ignorado y la capa 1 no terminaba. Resuelto: sin --root enumera con git ls-files --cached --others --exclude-standard; con --root explicito o fuera de un repo git recorre el disco.",
       "steps": [
-        "Evidencia 2026-10-25: en el checkout principal la capa 1 llevo mas de 6 minutos sin avanzar y se detuvo a mano; en el worktree (data/indices es una union que no se sigue) tarda segundos.",
-        "Verificacion alternativa usada: python scripts/scan_secrets.py --root <git archive HEAD descomprimido> --baseline secrets_baseline.json => exit 0, sin hallazgos.",
-        "Propuesta (decision de Enzo; es una herramienta de seguridad): enumerar con git ls-files --cached --others --exclude-standard, o excluir data/ ignorado; mantener la baseline."
+        "Cambio (commit 640fcab): git_file_names()/iter_git_files(); mismas exclusiones que el recorrido (should_exclude); .worktrees se excluye en ambos modos; se omiten archivos trackeados borrados, enlaces y submodulos.",
+        "main() informa 'enumeracion: git|disco' por stderr. Los tests existentes (que pasan --root) siguen recorriendo el disco.",
+        "Tests nuevos en tests/test_scan_secrets.py: trackeado, nuevo sin commit, ignorado, .worktrees, trackeado borrado, subdirectorio y directorio fuera de git, y el CLI con y sin --root.",
+        "Evidencia 2026-10-25: 1061 archivos listados en 0,4 s; una credencial sintetica en un archivo nuevo sin commitear da exit 1 y, retirada, exit 0.",
+        "Riesgo aceptado: en modo git no se lee lo que .gitignore excluye (nada de eso se publica). Para auditar tambien lo ignorado: python scripts/scan_secrets.py --root ."
       ],
-      "status": "not_started",
-      "passes": false
+      "status": "passing",
+      "passes": true
     }
   ]
 }
