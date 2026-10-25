@@ -66,7 +66,7 @@
     {
       "id": "F-006",
       "category": "integration",
-      "description": "Integrar chore/docs-harness y fix/interview-readiness en main mediante PR.",
+      "description": "Integrar chore/docs-harness y fix/interview-readiness en main mediante PR. Cerrado 2026-10-25: PR #5 fusionado con Merge Commit (2f2d6d4), CI real verde.",
       "steps": [
         "Informe de publicacion 2026-10-25 (solo lectura; nada publicado). origin = github.com/EnzoOrdonez/RAG_Hybrid_System (publico). chore/docs-harness NO existe en origin.",
         "Ya publicados: fix/interview-readiness (3b52c4b) y summer/taxonomia-759 (93bd029). Un push de la rama sube 15 commits nuevos (140 objetos; el mayor, paper/summer_ablation_log.md, 157 KB): el merge de taxonomia-759 y el trabajo del arnes/F-001..F-015.",
@@ -75,8 +75,12 @@
         "Riesgo de CI (no verificado): ci.yml solo dispara en push a main y summer/* y en PR a main/summer/*; fix/interview-readiness nunca corrio en CI. El CI instala requirements-app.txt, que no incluye playwright, y los tests de navegador de I7 no tienen skip: un PR a main probablemente falle en 'Run CPU-only test suite'.",
         "Bloqueo: compuerta de push (ADR-0013); requiere OK explicito de Enzo. Sin push a main ni force push.",
         "Ejecutado 2026-10-25 con OK explicito de Enzo (ADR-0013): origin/main (179acee, merge del PR #4) integrada en chore/docs-harness sin conflictos ni cambio de arbol; la rama queda 0 commits detras de origin/main.",
-        "Blindaje de CI previo: los tests de navegador de I7 se omiten con pytest.skip si falta playwright o el Chromium fijado (tests/i7_browser_guard.py); init.sh con el runtime detectado exporta CLOUDRAG_REQUIRE_I7_BROWSER=1 y entonces la ausencia es fallo. Local: 16 de 16 ejecutan y pasan. Emulado sin playwright: 11 omitidos, 0 fallos. Un run real de GitHub Actions NO se ha visto.",
-        "Alcance cumplido: rama publicada y sincronizada. Abrir el PR a main queda pendiente de decision de Enzo (el PR traeria el historial de fix/interview-readiness, 214 commits)."
+        "Blindaje de CI previo: los tests de navegador de I7 se omiten con pytest.skip si falta playwright o el Chromium fijado (tests/i7_browser_guard.py); init.sh con el runtime detectado exporta CLOUDRAG_REQUIRE_I7_BROWSER=1 y entonces la ausencia es fallo. Local: 16 de 16 ejecutan y pasan.",
+        "CI real 2026-10-25: Draft PR #5 (chore/docs-harness @ 5495b6f -> main) dispara el run 40227713051 (GitHub Actions, ubuntu-latest, Python 3.14.8): success en 1 min 3 s. Bloqueantes en verde: install con --require-hashes, secretos (enumeracion: git), check_docs, pytest CPU (1813 pasan, 57 omitidas, 0 fallos en la lectura del log). Ruff informativo: 150 hallazgos, no bloquea (F-009). Primer run de esta rama: no hizo falta ningun commit de correccion.",
+        "Limite del CI: sin playwright ni runtime fijado, los tests de navegador de I7 se omiten (57 omitidas en CI frente a 4 en local); CLOUDRAG_REQUIRE_I7_BROWSER no se exporta en CI. La capa de navegador de I7 solo se ejercita localmente.",
+        "Merge 2026-10-25 con OK explicito de Enzo (AskUserQuestion, ADR-0013): PR #5 pasado de Draft a Ready y fusionado con Merge Commit (sin squash) = 2f2d6d4 en origin/main. Los SHAs citados en ADRs y .harness/ siguen vivos: 5495b6f es el segundo padre; fix/interview-readiness (3b52c4b) y summer/taxonomia-759 (93bd029) son ancestros de main (git merge-base --is-ancestor = 0).",
+        "Checkout principal en main = origin/main (pull --ff-only). Evidencia: bash ./init.sh (Git Bash) en main => capa 1 exit 0, capa 2 exit 0 (1866 pasan, 0 fallan, 4 omitidas), capa 3 exit 0. La union .venv-app sigue apuntando a .worktrees/interview-readiness/.venv-app (verificado, python.exe presente).",
+        "Ramas: por decision de Enzo no se elimino ninguna (chore/docs-harness, summer/taxonomia-759 y fix/interview-readiness siguen locales y en origin; borrarlas despues es seguro por ancestralidad). Sin tags nuevos. fix/interview-readiness sigue en checkout en .worktrees/interview-readiness, que se conserva."
       ],
       "status": "passing",
       "passes": true
