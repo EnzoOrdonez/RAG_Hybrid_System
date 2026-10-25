@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Harness feature list",
+  "description": "Estado verificable de las tareas del repositorio. Lo valida scripts/check_docs.py sin dependencias externas.",
+  "type": "object",
+  "required": ["features"],
+  "properties": {
+    "updated": {"type": "string", "description": "Fecha ISO de la última actualización."},
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "category", "description", "steps", "status", "passes"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^F-[0-9]{3}$"},
+          "category": {"type": "string", "minLength": 1},
+          "description": {"type": "string", "minLength": 1},
+          "steps": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "status": {"enum": ["not_started", "active", "passing", "blocked"]},
+          "passes": {"type": "boolean", "description": "true solo si status es passing y hay evidencia citada en steps."}
+        }
+      }
+    }
+  }
+}

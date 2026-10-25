@@ -148,7 +148,7 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
 ## ADR-0014: Estandarización documental (Diátaxis, `.harness/` y `CLAUDE.md` índice)
 
 - **Estado:** Aceptado. **Fecha:** 2026-10-25 (directiva de Enzo; rama `chore/docs-harness`).
-- **Contexto:** la raíz acumulaba siete documentos y un `CLAUDE.md` de 543 líneas que mezclaba contexto, estado, reglas y un log append-only. Un agente en arranque en frío tenía que leerlo entero para saber qué hacer. La documentación estaba además bifurcada entre `fix/interview-readiness` y `summer/taxonomia-759`.
+- **Contexto:** la raíz acumulaba siete documentos y un `CLAUDE.md` de 543 líneas que mezclaba contexto, estado, reglas y un log append-only. Un agente en arranque en frío tenía que leerlo entero para saber qué hacer. La documentación también estaba bifurcada entre `fix/interview-readiness` y `summer/taxonomia-759`.
 - **Decisión:**
   1. Se integran primero las dos ramas, con conflictos resueltos sin perder texto, más el trabajo sin commitear.
   2. Copia inmutable del `CLAUDE.md` anterior en `docs/archive/`.
