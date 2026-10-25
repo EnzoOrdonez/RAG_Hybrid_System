@@ -13,11 +13,13 @@ from pathlib import Path
 
 import pytest
 
+from tests.i7_browser_guard import require_i7_browser
 from tests.study_helpers import configured
 
 
 @contextmanager
 def local_app(tmp_path, *, canary_probe=False):
+    require_i7_browser()
     from cryptography import x509
     from cryptography.hazmat.primitives import hashes, serialization
     from cryptography.hazmat.primitives.asymmetric import rsa

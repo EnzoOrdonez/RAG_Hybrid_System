@@ -31,6 +31,8 @@ def test_live_step_rejects_missing_browser_before_cloud_client(tmp_path,monkeypa
 def test_pinned_browser_binary_cannot_be_replaced(tmp_path,monkeypatch,fault):
     from contextlib import contextmanager
     from types import SimpleNamespace
+    from tests.i7_browser_guard import require_i7_browser
+    require_i7_browser(need_binary=False)
     import playwright.sync_api
     from scripts.study_operator.i7_browser_preflight import verify
     root=tmp_path/'browsers'
@@ -49,6 +51,8 @@ def test_pinned_browser_binary_cannot_be_replaced(tmp_path,monkeypatch,fault):
 
 
 def test_real_installed_browser_matches_revision_path_and_hash():
+    from tests.i7_browser_guard import require_i7_browser
+    require_i7_browser()
     from scripts.study_operator.i7_browser_preflight import verify
     result=verify()
     assert result['status']=='PINNED_BROWSER_READY' and result['chromium_revision']=='1208'

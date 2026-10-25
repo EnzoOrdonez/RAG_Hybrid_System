@@ -22,6 +22,8 @@ if [ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ]; then
     if [ -d "$d" ]; then export PLAYWRIGHT_BROWSERS_PATH="C:/CloudRAG/i7-browser-runtime"; break; fi
   done
 fi
+# Con el runtime definido, los tests de navegador de I7 son obligatorios: no se omiten en silencio.
+if [ -n "${PLAYWRIGHT_BROWSERS_PATH:-}" ]; then export CLOUDRAG_REQUIRE_I7_BROWSER=1; fi
 
 declare -a NAMES=("1 secretos" "2 tests CPU" "3 docs/harness")
 declare -a CMDS=(

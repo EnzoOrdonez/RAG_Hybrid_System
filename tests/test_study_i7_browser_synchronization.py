@@ -1,10 +1,12 @@
 """User-visible browser actions wait for one acknowledged Streamlit rerun."""
 import pytest
 
+from tests.i7_browser_guard import require_i7_browser
 from tests.test_study_i7_browser import local_app
 
 
 def test_form_text_does_not_submit_before_explicit_button(tmp_path,monkeypatch):
+    require_i7_browser()
     from playwright.sync_api import Locator
     from scripts.study_operator.i7_browser import run
     original=Locator.press
@@ -70,6 +72,7 @@ DELAY_FINISH = r"""
 
 
 def test_edits_wait_for_finished_rerun_and_rendered_app(tmp_path,monkeypatch):
+    require_i7_browser()
     from playwright.sync_api import BrowserContext,Locator
     from scripts.study_operator.i7_browser import run
     original_page,original_fill=BrowserContext.new_page,Locator.fill
