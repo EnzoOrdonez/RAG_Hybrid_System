@@ -73,10 +73,13 @@
         "Escaneo de los diffs de esos 15 commits: 2836 lineas anadidas, 0 hallazgos de credenciales, 0 IPv4 fuera de loopback/documentacion, 1 correo institucional (ecopyright@ieee.org, de las entradas 34-35 del ledger), sin .env/.pem/.key. Tampoco hay archivos grandes.",
         "PR a main: origin/main (179acee) tiene 1 commit que la rama no tiene (el merge de la PR #4 de taxonomia-759); merge-tree simulado sin conflictos. El PR mostraria 455 archivos, +56 412/-866, porque main no tiene aun el trabajo de fix/interview-readiness (214 commits, ya publicado en su rama). main local (670f8e5) esta desactualizado respecto de origin/main.",
         "Riesgo de CI (no verificado): ci.yml solo dispara en push a main y summer/* y en PR a main/summer/*; fix/interview-readiness nunca corrio en CI. El CI instala requirements-app.txt, que no incluye playwright, y los tests de navegador de I7 no tienen skip: un PR a main probablemente falle en 'Run CPU-only test suite'.",
-        "Bloqueo: compuerta de push (ADR-0013); requiere OK explicito de Enzo. Sin push a main ni force push."
+        "Bloqueo: compuerta de push (ADR-0013); requiere OK explicito de Enzo. Sin push a main ni force push.",
+        "Ejecutado 2026-10-25 con OK explicito de Enzo (ADR-0013): origin/main (179acee, merge del PR #4) integrada en chore/docs-harness sin conflictos ni cambio de arbol; la rama queda 0 commits detras de origin/main.",
+        "Blindaje de CI previo: los tests de navegador de I7 se omiten con pytest.skip si falta playwright o el Chromium fijado (tests/i7_browser_guard.py); init.sh con el runtime detectado exporta CLOUDRAG_REQUIRE_I7_BROWSER=1 y entonces la ausencia es fallo. Local: 16 de 16 ejecutan y pasan. Emulado sin playwright: 11 omitidos, 0 fallos. Un run real de GitHub Actions NO se ha visto.",
+        "Alcance cumplido: rama publicada y sincronizada. Abrir el PR a main queda pendiente de decision de Enzo (el PR traeria el historial de fix/interview-readiness, 214 commits)."
       ],
-      "status": "blocked",
-      "passes": false
+      "status": "passing",
+      "passes": true
     },
     {
       "id": "F-007",
@@ -96,10 +99,12 @@
       "description": "Sección reranking de config/config.yaml no consumida y banderas sin implementar (multidimensional_scoring, terminology_normalization). Ver system-design §8.1 y §8.2.",
       "steps": [
         "Decidir con Enzo si se eliminan, se documentan como inertes o se implementan.",
-        "Cualquier cambio en PROPOSED_HYBRID está prohibido (registro de LACCI, ADR-0005)."
+        "Cualquier cambio en PROPOSED_HYBRID está prohibido (registro de LACCI, ADR-0005).",
+        "Resuelto 2026-10-25 (opcion elegida por Enzo: documentar como inertes/reservadas, sin implementar ni borrar).",
+        "Comentario ampliado sobre la seccion reranking en config/config.yaml y registro en docs/architecture/system-design.md seccion 8, puntos 1 y 2. Solo comentarios y prosa: el YAML carga igual y PROPOSED_HYBRID/pipeline_config.py quedan intactos (ADR-0005)."
       ],
-      "status": "not_started",
-      "passes": false
+      "status": "passing",
+      "passes": true
     },
     {
       "id": "F-009",
@@ -188,6 +193,17 @@
       ],
       "status": "passing",
       "passes": true
+    },
+    {
+      "id": "F-016",
+      "category": "tests",
+      "description": "tests/test_study_stimulus_supervisor.py::test_short_calls_always_check_host_telemetry fallo una vez (TimeoutError 'Independent worker deadline reached', scripts/study_gate_supervisor.py:123) dentro de init.sh capa 2 y paso en la repeticion completa y 3 de 3 en aislamiento.",
+      "steps": [
+        "Observado 2026-10-25: 1 fallo en 2 corridas completas; sin cambio de codigo relacionado entre ambas. Hipotesis (no verificada): deadline de un worker en subproceso sensible a la carga de la suite completa.",
+        "Investigar con un deadline medido bajo carga antes de ampliar tiempos; no relajar el test a ciegas."
+      ],
+      "status": "not_started",
+      "passes": false
     }
   ]
 }
