@@ -16,6 +16,13 @@ elif [ -x .venv-app/bin/python ]; then PY=".venv-app/bin/python"
 else PY="python"; fi
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42 PYTHONUTF8=1
 
+# Chromium fijado de I7 (F-012): si no esta definida y existe en esta maquina, se usa; CI y otras maquinas no cambian.
+if [ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ]; then
+  for d in /c/CloudRAG/i7-browser-runtime C:/CloudRAG/i7-browser-runtime; do
+    if [ -d "$d" ]; then export PLAYWRIGHT_BROWSERS_PATH="C:/CloudRAG/i7-browser-runtime"; break; fi
+  done
+fi
+
 declare -a NAMES=("1 secretos" "2 tests CPU" "3 docs/harness")
 declare -a CMDS=(
   "$PY scripts/scan_secrets.py --baseline secrets_baseline.json"

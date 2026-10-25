@@ -6,29 +6,28 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 
 ## Dónde estoy
 
-- **Rama de trabajo:** `chore/docs-harness`, creada desde `fix/interview-readiness` (`3b52c4b`), en el
-  worktree `.worktrees/docs-harness`. Commits locales, **sin publicar**.
+- **Rama de trabajo:** `chore/docs-harness`, creada desde `fix/interview-readiness` (`3b52c4b`) e integrada con
+  `summer/taxonomia-759`. Commits locales, **sin publicar**. Está activa en el **checkout principal**
+  (`C:\Users\enziz\Projects\hybrid-rag-system`); `.worktrees/docs-harness` queda en HEAD desacoplado en el mismo commit y ya no hace falta.
 - **Estado de las ramas:**
   - `main` (`670f8e5`) está detrás de `fix/interview-readiness` (214 commits).
-  - `summer/taxonomia-759` (9 commits de documentación del 2026-08-30) ya está integrada en esta rama.
-- **Checkout principal** (`C:\Users\enziz\Projects\hybrid-rag-system`, en `summer/taxonomia-759`):
-  - Conserva sin tocar sus cambios sin commitear. Su copia quedó integrada aquí (commit `504b2a3`).
-  - F-011 parcial: `PROMPT_MAESTRO_*` y `Claude outputs/` archivados en `D:/CloudRAG_archivo/hybrid-rag-system-checkout-20261025` (MANIFEST con SHA-256). Siguen sin versionar `showcase/`, 39 archivos de `output/audit/` y otros (ver F-011).
+  - `summer/taxonomia-759` (9 commits de documentación del 2026-08-30) ya está integrada en `chore/docs-harness`; su punta (`93bd029`) sigue intacta.
+- **Checkout principal:** limpio. Lo que estaba sin versionar quedó archivado en
+  `D:/CloudRAG_archivo/hybrid-rag-system-checkout-20261025` (MANIFEST con SHA-256), incluidas las copias de los `CLAUDE.md` y
+  `paper/summer_ablation_log.md` modificados (su contenido ya estaba en esta rama). `showcase/` queda ignorada por decisión de Enzo.
+- **`.worktrees/interview-readiness`** se conserva: es el destino de las uniones `.venv-app` y `data/indices`.
 
-## Qué se hizo en la última sesión (cierre de F-001)
+## Qué se hizo en la última sesión
 
-1. **F-012:** el Chromium 1208 ya estaba instalado en `C:/CloudRAG/i7-browser-runtime` (SHA-256 igual al pin). Faltaba `PLAYWRIGHT_BROWSERS_PATH` al correr `init.sh`; no se descargó nada.
-2. **F-013:** `tests/test_study_task_evidence.py`: marcador `needs_artifacts` y fixture `require_chunk_map` que omite con motivo si falta `data/indices` (3 tests). Sin cambios sin commitear fuera de este archivo y `.harness/`.
-3. `bash init.sh` con la variable definida: capa 1 exit 0, capa 2 exit 0 (1848 pasan, 0 fallan, 6 omitidas), capa 3 exit 0.
-4. F-001, F-012 y F-013 pasan a `passing`.
+1. **F-001, F-012, F-013** cerrados en `passing` (commits `c43e61f`, `4569de5`): el Chromium 1208 ya estaba instalado; 3 tests de `task_evidence` omiten con motivo sin `data/indices`.
+2. **`init.sh`** exporta `PLAYWRIGHT_BROWSERS_PATH=C:/CloudRAG/i7-browser-runtime` solo si no está definida y el directorio existe; CI no cambia. Verificado sin exportarla: exit 0 en las tres capas (1848 pasan, 0 fallan, 6 omitidas).
+3. **F-011** resuelto: archivado con SHA-256 (68 archivos de la tanda 2 más los de la tanda 1), `showcase/` y `.worktrees/` en `.gitignore`.
 
 ## Qué sigue (orden sugerido)
 
-1. El cambio de F-012/F-013 está commiteado en local (`c43e61f`), sin publicar.
-2. **F-011 (resto):** Enzo decide `showcase/`, `output/audit/PROMPT_*` y los cambios sin commitear del checkout principal. `.worktrees/interview-readiness` NO se quita: no es prunable y es el destino de las uniones `.venv-app` y `data/indices`.
-3. **F-006:** Enzo revisa los commits de `chore/docs-harness` y decide push y PR (compuerta ADR-0013).
-4. **F-007:** corregir la contradicción del README sobre el modelo de la UI.
-5. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.
+1. **F-006:** push y PR de `chore/docs-harness` solo con OK explícito de Enzo (ADR-0013); sigue sin publicar. Un PR a `main` arrastra el historial de `fix/interview-readiness`.
+2. **F-007:** corregir la contradicción del README sobre el modelo de la UI.
+3. **F-005:** I7 Fase B, no antes del 2026-11-01 y con el gasto aprobado.
 
 ## Riesgos y bloqueos vigentes
 
@@ -43,6 +42,5 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 ## Cómo verificar en frío
 
 ```bash
-export PLAYWRIGHT_BROWSERS_PATH=C:/CloudRAG/i7-browser-runtime   # obligatorio para los tests de I7
-bash init.sh   # Git Bash en Windows; usa .venv-app si existe; objetivo: exit 0 en las tres capas
+bash init.sh   # Git Bash en Windows; usa .venv-app si existe y exporta solo el Chromium fijado de I7 si existe en C:/CloudRAG; objetivo: exit 0 en las tres capas
 ```

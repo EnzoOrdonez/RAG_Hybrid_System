@@ -121,15 +121,16 @@
     {
       "id": "F-011",
       "category": "hygiene",
-      "description": "Limpiar el checkout principal (summer/taxonomia-759). Hecho 2026-10-25: PROMPT_MAESTRO_* y Claude outputs/ movidos a D:/CloudRAG_archivo/hybrid-rag-system-checkout-20261025 (con MANIFEST.txt y SHA-256 verificados). Pendiente: showcase/ sin versionar, 39 archivos sin versionar en output/audit/, docs/CopyrightReceipt_eCF_2026-09-03.pdf, presentacion_lacci*/ y los cambios sin commitear de CLAUDE.md y paper/summer_ablation_log.md.",
+      "description": "Limpiar el checkout principal (summer/taxonomia-759). Hecho 2026-10-25: archivados en D:/CloudRAG_archivo/hybrid-rag-system-checkout-20261025 (MANIFEST.txt con SHA-256 verificados) PROMPT_MAESTRO_*, Claude outputs/, 39 archivos de output/audit, el PDF de copyright y presentacion_lacci*/; showcase/ queda ignorada por decision de Enzo. .worktrees/interview-readiness se conserva (destino de las uniones .venv-app y data/indices).",
       "steps": [
-        "Hecho: PROMPT_MAESTRO_ANIMACIONES.md (identico a docs/specs/animations-spec.md) y PROMPT_MAESTRO_SHOWCASE.md (version previa a la reescritura de rutas de docs/specs/showcase-spec.md) archivados, no borrados (ADR-0011).",
-        "Hecho: Claude outputs/ (A3 docx + 3 figuras, 7.5 MB) archivado con hashes verificados.",
-        "Correccion: .worktrees/interview-readiness NO esta prunable; existe en disco y es el destino de las uniones .venv-app y data/indices de este worktree. Quitarlo rompe init.sh. git worktree prune --dry-run no encuentra nada.",
-        "Pendiente (decision de Enzo): versionar o archivar showcase/ (si se versiona, actualizar su cita MODELS.md a docs/architecture/models.md); destino de output/audit/PROMPT_* y del PDF CopyrightReceipt; commit o descarte de CLAUDE.md y paper/summer_ablation_log.md modificados."
+        "Tanda 1 (68+6 archivos en total con la tanda 2): PROMPT_MAESTRO_ANIMACIONES.md (identico a docs/specs/animations-spec.md), PROMPT_MAESTRO_SHOWCASE.md (version previa a la reescritura de rutas) y Claude outputs/ archivados, no borrados (ADR-0011).",
+        "Tanda 2: 39 archivos sin versionar de output/audit, docs/CopyrightReceipt_eCF_2026-09-03.pdf y presentacion_lacci/ + presentacion_lacci-screenshots/ (28 archivos) archivados con SHA-256 verificado antes y despues.",
+        "CLAUDE.md y paper/summer_ablation_log.md modificados en el checkout principal: comparados con la rama, su contenido ya estaba integrado (log identico; las 5 lineas de CLAUDE.md estan en docs/archive/CLAUDE_legacy_backup.md y docs/decisions/session-log.md). Copia de respaldo en modified-working-copies/ del archivo.",
+        "showcase/ (11 archivos): se deja ignorada via .gitignore; no se versiona ni se mueve.",
+        "El worktree .worktrees/interview-readiness NO es prunable y no se toca: git worktree prune --dry-run no encuentra nada."
       ],
-      "status": "blocked",
-      "passes": false
+      "status": "passing",
+      "passes": true
     },
     {
       "id": "F-012",
@@ -137,7 +138,7 @@
       "description": "Capa 2 en rojo por entorno: los 8 tests de I7 exigian el Chromium fijado (chromium-1208) y fallaban porque init.sh no definia PLAYWRIGHT_BROWSERS_PATH. Resuelto: el runtime ya estaba instalado en C:/CloudRAG/i7-browser-runtime (SHA-256 coincide con el pin).",
       "steps": [
         "Diagnostico 2026-10-25: chrome.exe existe y su SHA-256 coincide con config/i7-browser-pin.json; el preflight da PINNED_BROWSER_READY solo con PLAYWRIGHT_BROWSERS_PATH definida y PINNED_BROWSER_RUNTIME_REQUIRED sin ella. No se descargo nada.",
-        "Regla de uso: exportar PLAYWRIGHT_BROWSERS_PATH=C:/CloudRAG/i7-browser-runtime antes de bash init.sh (docs/STUDY_I7_BROWSER_VALIDATION.md). init.sh no se modifico para no fijar una ruta de maquina en un repo publico.",
+        "init.sh detecta y exporta PLAYWRIGHT_BROWSERS_PATH=C:/CloudRAG/i7-browser-runtime solo si no esta definida y el directorio existe localmente; en CI u otra maquina el comportamiento no cambia. Verificado 2026-10-25 sin exportar la variable: init.sh exit 0 en las tres capas (1848 pasan, 6 omitidas).",
         "Verificacion: 16 tests pasan en test_study_i7_browser*, preflight, synchronization y canary_journey; init.sh capa 2 exit 0."
       ],
       "status": "passing",

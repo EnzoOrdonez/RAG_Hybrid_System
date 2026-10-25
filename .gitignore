@@ -61,3 +61,7 @@ data/raw/*/_repo/
 data/raw/*/_zip/
 # Isolated application installation used by the interview readiness checks.
 .venv-app/
+# Material local de presentacion (F-011): decision de Enzo 2026-10-25, se queda fuera del repo publico.
+showcase/
+# Worktrees de git de esta maquina.
+.worktrees/
