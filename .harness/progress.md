@@ -1,7 +1,7 @@
 # Progreso: estado para arranque en frío
 
-**Última actualización:** 2026-10-27 por Claude (tarea F-020, fase A cerrada).
-**Estado:** F-020 `active`; fase A hecha, fase B (pre-vuelo, USD 0) siguiente. F-017 `passing`.
+**Última actualización:** 2026-10-27 por Claude (tarea F-020, fases A y B cerradas salvo energía).
+**Estado:** F-020 `active`; parada humana del bloque "Fase B" (gasto, push y disponibilidad). F-017 `passing`.
 Este archivo dice dónde está el trabajo **hoy**. Se reescribe al traspasar, no se acumula: el
 historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 
@@ -23,18 +23,18 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
 
 ## Qué sigue (orden)
 
-1. **F-020 fase B** (USD 0), en `fix/interview-readiness`:
-   - adelantar el date guard con TDD (`i7.py`, `i7_phase_b.py`) y pedir OK de push;
-   - regenerar el recibo de preparación: Docker Desktop, suites de Windows, Linux e I7 y `verify_local` (19/19 y 3/3);
-   - preflight de Chromium 1208, catálogos de precios, `i7_phase_b --check`, lecturas GCP y plan de energía;
-   - investigar la ruta humana sobre la imagen I7 (`i7.py:136-138` solo admite propósitos técnicos).
-2. **Parada humana:** el bloque "Fase B" en una pregunta (gasto, región, retención a 24 h y ventana de disponibilidad de Enzo).
+1. **Fase B hecha** en `fix/interview-readiness` (sin push), con `ab267dd` (piso de pago) y `d0ba95a` (fase humana, ADR-0018).
+   - Recibo vigente: `C:\CloudRAG\iteration7-preflight-20261027b\local-readiness.json`.
+   - Spec privado: `C:\CloudRAG\i7-preparacion-20261027\fase-b-spec.json`.
+   - Falta verificar la energía de la laptop (`powercfg` dio acceso denegado).
+2. **Parada humana:** OK de push de `fix/interview-readiness`, bloque de gasto de la Fase B (USD 20 + 3) y ventana de 24 h de Enzo. Después: `i7_config` y el paso 1 del runbook.
 3. **F-020 fases C a E:** el tramo pagado de 24 h como máximo, según `docs/STUDY_I7_RUNBOOK_FASE_B.md`.
 4. Pendientes que no son de F-020: F-009, F-010 y F-016. Las ramas obsoletas siguen sin borrar (decisión de Enzo).
 
 ## Riesgos y bloqueos vigentes
 
-- **Ruta humana sin procedimiento:** el operador I7 rechaza rehearsal, pilot y study. La CLI de I5 los acepta, pero está fijada a otra raíz. Se resuelve en la fase B, antes del GO.
+- **Presupuesto humano:** el ledger de USD 70 (ADR-0018) alcanza para unos 12 días con 2 sesiones por boot [ESTIMADO]. Con 1 sesión por boot no alcanza.
+- **Memoria de la laptop:** el arnés detuvo una regeneración por memoria baja (recuperada con `docker logs`). Cerrar programas antes de las corridas largas.
 - **Respaldo de la fecha:** si las suites regeneradas fallan por una causa distinta de F-016, rige el 2026-11-01T00:00Z (31/10, 19:00 en Lima).
 - **Ventana de 24 h:** cuenta desde el primer efecto pagado (`i7_costs.py:120-130`). Enzo debe poder responder durante ese tramo (OK del push del anexo y retención).
 - **Ausencia de Enzo del 3 al 6/11:** no se hace ningún gasto que exija respuesta inmediata.

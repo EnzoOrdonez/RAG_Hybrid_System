@@ -24,6 +24,7 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
 | [ADR-0015](#adr-0015) | 2026-10-27 | Topes de gasto del estudio: Fase B USD 20 + 3 de cierre, total USD 100 | Aceptado |
 | [ADR-0016](#adr-0016) | 2026-10-27 | Fecha mínima de pago de la Fase B I7 adelantada al 2026-10-28 UTC, con respaldo al 2026-11-01 | Aceptado |
 | [ADR-0017](#adr-0017) | 2026-10-27 | Decisiones de arranque de F-020: ruta humana en nube, cohorte NLI, config sellada vigente | Aceptado |
+| [ADR-0018](#adr-0018) | 2026-10-27 | Fase humana sobre la imagen I7: GO verificado, ledger propio de USD 70 y firewall restringido | Aceptado |
 
 ---
 
@@ -204,3 +205,22 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
   4. Tablero: una entrada F-020 con las fases A a G como pasos (los ids deben cumplir `F-NNN`, `scripts/check_docs.py:114`); F-017 es una entrada propia.
 - **Consecuencias:** los pasos del checklist que dependen de Zoom y de un servidor local quedan superados para el estudio; P998 se ensaya en la nube.
 - **Fuentes:** [STUDY_GATE_PREREGISTRATION_AMENDMENT_2026-10-02.md](../STUDY_GATE_PREREGISTRATION_AMENDMENT_2026-10-02.md); `.harness/feature_list.json` (F-020).
+
+<a id="adr-0018"></a>
+## ADR-0018: Fase humana sobre la imagen I7
+
+- **Estado:** Aceptado. **Fecha:** 2026-10-27 (respuestas de Enzo en la fase B de F-020).
+- **Contexto:** [VERIFICADO por lectura] el operador I7 solo admitía los propósitos `technical` y `smoke` (`scripts/study_operator/i7.py`), y la CLI de la iteración 5 no puede operar la imagen I7 sin varios cambios. Los topes de la Fase B (USD 20, 17 h de reserva y 24 h de retención) hacen fallar por diseño cualquier boot posterior a la compuerta. Como `verify_tool_source` amarra el commit del operador al de la imagen, un cambio de código posterior a `cpu-build` obligaría a repetir la Fase B.
+- **Decisión:**
+  1. El código de la fase humana entra en `fix/interview-readiness` antes de `cpu-build`, de modo que la imagen y la compuerta lo cubran.
+  2. `rehearsal`, `pilot` y `study` solo arrancan con la fase humana abierta. Para abrirla hacen falta recibos de compuerta descargados y verificados, todos con veredicto GO, y la reserva de la Fase B cerrada y verificada.
+  3. El propósito `study` exige además los archivos de aprobación ética (`policy.purpose_allowed`). Los boots humanos usan el perfil `standard`.
+  4. Ledger propio de USD 70 a precio de lista, dentro del total de USD 100 (ADR-0015):
+     - cada boot lleva una reserva de 4 h como máximo;
+     - desde la apertura se cuentan las horas retenidas de disco (540 GiB), snapshots (552 GiB) e IP, con un mínimo de 24 h, más un día proyectado;
+     - se reservan USD 3 de cierre, igual que en la Fase B;
+     - los precios de cómputo y de almacenamiento deben tener 7 días o menos; `refresh-prices` rechaza archivos más antiguos que los vigentes;
+     - el GO debe estar ligado a su prueba privada, a la imagen y al commit, y no puede cambiar después de abrir la fase.
+  5. Las reglas `default-allow-ssh` y `default-allow-rdp` quedan restringidas al rango de IAP; no se borran. [VERIFICADO] con una lectura posterior al cambio.
+- **Consecuencias:** [ESTIMADO, lista del 27/10] la retención cuesta unos USD 2,87 por día y cada boot humano unos USD 3,08. Con 2 sesiones por boot (10 boots), el tope alcanza para unos 12 días de fase humana; con 1 sesión por boot, no alcanza para 20 sesiones. Al llegar al tope solo se bloquean nuevas admisiones: la retención de recursos la decide Enzo. El calendario de sesiones debe ajustarse a esto, o Enzo decide otro tope con un ADR nuevo.
+- **Fuentes:** `tests/test_study_i7_human.py`; [ADR-0015](#adr-0015); `.harness/feature_list.json` (F-020).
