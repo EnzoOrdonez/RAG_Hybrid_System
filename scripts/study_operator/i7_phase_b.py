@@ -253,13 +253,14 @@ def main(argv=None):
     parser.add_argument('--evidence',type=Path)
     parser.add_argument('step',nargs='?',choices=STEPS)
     args = parser.parse_args(argv)
+    from scripts.study_operator.i7 import PAID_NOT_BEFORE_UTC
     if args.check:
         print(json.dumps(validate_steps(args.evidence,root=args.root,
-            november_authorized=args.live and datetime.now(timezone.utc)>=datetime(2026,11,1,tzinfo=timezone.utc),
+            november_authorized=args.live and datetime.now(timezone.utc)>=PAID_NOT_BEFORE_UTC,
             step=args.step or 'cpu-build')))
         return 0
     if (not args.live or not args.root or not args.sdk or not args.step
-            or datetime.now(timezone.utc) < datetime(2026,11,1,tzinfo=timezone.utc)):
+            or datetime.now(timezone.utc) < PAID_NOT_BEFORE_UTC):
         parser.error('Explicit --live, root, SDK and November authorization required')
     from scripts.study_operator.i7_browser_preflight import verify
     try:

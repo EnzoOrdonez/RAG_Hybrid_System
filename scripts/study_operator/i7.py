@@ -16,6 +16,9 @@ from scripts.study_operator.lifecycle import Operator as LegacyOperator
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.stimulus_host_evidence import sha
 
+# Owner date floor for paid effects (ADR-0016); budget authorization stays separate.
+PAID_NOT_BEFORE_UTC = datetime(2026,10,28,tzinfo=timezone.utc)
+
 
 def reservation_charge(reservations, running, rate):
     """Union allocated and running intervals; consumed reservation is not charged twice."""
@@ -73,7 +76,7 @@ class Operator(LegacyOperator):
 
     def admit_paid(self, exposure):
         now = self.now()
-        if now < datetime(2026,11,1,tzinfo=timezone.utc):
+        if now < PAID_NOT_BEFORE_UTC:
             raise ValueError('NO_PAID_EFFECT_BEFORE_NOVEMBER')
         from scripts.study_operator.i7_costs import admit
         admit(self)
@@ -371,7 +374,7 @@ def main(argv=None):
         result = check_tls_sequence([json.loads(p.read_bytes()) for p in
                                      (args.root/'receipts'/'boot-attempt').glob('*.json')])
     else:
-        if not args.live or datetime.now(timezone.utc) < datetime(2026,11,1,tzinfo=timezone.utc):
+        if not args.live or datetime.now(timezone.utc) < PAID_NOT_BEFORE_UTC:
             parser.error('Live I7 operations require --live and November authorization')
         from scripts.study_operator.cloud_client import Cloud
         if not args.sdk:

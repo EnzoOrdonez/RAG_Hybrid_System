@@ -158,3 +158,16 @@ def test_successful_delete_with_failed_readback_can_be_reconciled_by_read_only(t
     assert result['status']=='RESERVATION_ABSENT_RECONCILED'
     assert op.state['reservation']['deleted_verified']
     assert all(c[:3]==['compute','reservations','list'] for c in cloud.calls[before:])
+
+
+def test_paid_floor_is_owner_dated_2026_10_28_adr_0016(tmp_path):
+    from scripts.study_operator.i7 import PAID_NOT_BEFORE_UTC
+    assert PAID_NOT_BEFORE_UTC == datetime(2026,10,28,tzinfo=timezone.utc)
+    op,cloud,_ = setup(tmp_path)
+    op.config['rates']['verified_utc'] = op.config['cost_plan']['verified_utc'] = '2026-10-27T00:00:00+00:00'
+    op.now=lambda:datetime(2026,10,27,23,59,tzinfo=timezone.utc)
+    with pytest.raises(ValueError,match='NOVEMBER'):
+        op.admit_paid(.1)
+    op.now=lambda:PAID_NOT_BEFORE_UTC
+    op.admit_paid(.1)
+    assert not cloud.calls
