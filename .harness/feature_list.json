@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-25",
+  "updated": "2026-10-27",
   "features": [
     {
       "id": "F-001",
@@ -58,9 +58,10 @@
       "steps": [
         "Seguir docs/STUDY_I7_RUNBOOK_FASE_B.md y docs/PROMPT_CODEX_ITERATION7_FASE_B_2026-11-01.md.",
         "Bloqueo: fecha mínima 2026-11-01 y aprobación de gasto de Enzo (USD 20, con USD 3 de cierre).",
-        "No cambiar la lógica RAG ni registrar personas antes de la aprobación ética."
+        "No cambiar la lógica RAG ni registrar personas antes de la aprobación ética.",
+        "2026-10-27: la ejecución pasa a F-020 (fase C a E). La fecha mínima la revisa ADR-0016 y los topes los fija ADR-0015."
       ],
-      "status": "blocked",
+      "status": "active",
       "passes": false
     },
     {
@@ -207,6 +208,35 @@
         "Investigar con un deadline medido bajo carga antes de ampliar tiempos; no relajar el test a ciegas."
       ],
       "status": "not_started",
+      "passes": false
+    },
+    {
+      "id": "F-017",
+      "category": "docs",
+      "description": "Mapa del proyecto para la profesora: docs/guides/project-map.md (árbol anotado, corpus con conteos reales y comando, claves de datos, pipeline etapa -> módulo -> función con archivo:línea, evidencia inmutable y ledgers, 20 preguntas probables) y scripts/check_project_map.py con su prueba. No bloquea F-020.",
+      "steps": [
+        "Contrato en la tarea F-020, paso A5 (2026-10-27). Lo escribe Claude al cerrar la fase A de F-020, en la rama docs/f020-despliegue.",
+        "Aceptación: check_project_map.py da exit 0 y falla (exit 1) si una ruta citada no existe; test en tests/test_check_project_map.py.",
+        "Hecho 2026-10-27: docs/guides/project-map.md, scripts/check_project_map.py y tests/test_check_project_map.py (7/7). check_project_map.py: exit 0 con 81 rutas citadas; exit 1 con una línea inventada (src/retrieval/coverage_balancer.py:9999). Conteos del corpus con los comandos citados en el mapa."
+      ],
+      "status": "passing",
+      "passes": true
+    },
+    {
+      "id": "F-020",
+      "category": "deployment",
+      "description": "Despliegue del estudio con usuarios: de la Fase B de I7 a la primera sesión, sin saltar compuertas preregistradas. Topes: Fase B USD 20 + 3 de cierre (lista); estudio USD 100 (ADR-0015). Plan aprobado 2026-10-27.",
+      "steps": [
+        "A (hoy, USD 0): línea base git e init.sh en main y fix/interview-readiness; origen de la fecha 1/11 (clase b, en código); conciliación checklist local vs runbook I7; verify-draw (config vigente study-config-reviewed-v2, sin nuevo sello); ADR-0015..0017. Salida: informe <= 40 líneas.",
+        "B (pre-vuelo, USD 0): adelantar el date guard con TDD y regenerar el recibo local-readiness (Windows, Linux en Docker, I7, verify_local 19/19 y 3/3); preflight Chromium 1208; catálogos de precios PRICED_LIST y ADMIT; i7_phase_b --check solo con bloqueos de Enzo; lecturas GCP; energía de la laptop; ruta humana sobre la imagen I7. Salida: bloque 'Fase B' en una pregunta.",
+        "C (gasto): runbook pasos 1, 2, 3, 4 y 4b en fix/interview-readiness. Criterios: READY <= 900 s, TLS en 3 boots, 12 contextos, Streamlit 1.54.0 leído de la imagen.",
+        "D (validación): anexo --draft con OK de push, --anchor-published, --check --live hasta LOCAL_RUNBOOK_READY; pasos 5a, 5b, 6, 7 y 8a (serie desatendida 12/12).",
+        "E (compuerta): paso 8b gate y 9 close. GO solo con 120 válidas, 60 por condición, cero fallos e inválidas y p95 lineal <= 60 s por condición. NO-GO se reporta sin variar parámetros.",
+        "F (tras GO): ensayo P998 con Enzo; paquete de operación de sesiones y calendario de 20 sesiones en 2 semanas desde la aprobación ética.",
+        "G (sesiones): ninguna invitación sin aprobación ética confirmada por Enzo por escrito y GO vigente; respaldo verificado por hash antes de la siguiente sesión.",
+        "Evidencia A (2026-10-27): main init.sh exit 0 en las tres capas (1866 pasan, 0 fallan, 4 omitidas); fix/interview-readiness no tiene init.sh (3b52c4b es anterior al harness). verify-draw: study-config del 1/10 falla con el código vigente; study-config-reviewed-v2 OK (schema 2, UEQ-S, misma asignación). Logs y SHA-256 privados en C:/CloudRAG/iteration7-faseB-prep-20261027/."
+      ],
+      "status": "active",
       "passes": false
     }
   ]

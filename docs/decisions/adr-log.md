@@ -21,6 +21,9 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
 | [ADR-0012](#adr-0012) | 2026-08-21 | Regla de veredicto de tres ramas para el suelo de ruido | Aceptado |
 | [ADR-0013](#adr-0013) | sin fecha de origen | Compuerta humana antes de `git push` | Aceptado |
 | [ADR-0014](#adr-0014) | 2026-10-25 | Estandarización documental: Diátaxis, `.harness/` y `CLAUDE.md` índice | Aceptado |
+| [ADR-0015](#adr-0015) | 2026-10-27 | Topes de gasto del estudio: Fase B USD 20 + 3 de cierre, total USD 100 | Aceptado |
+| [ADR-0016](#adr-0016) | 2026-10-27 | Fecha mínima de pago de la Fase B I7 adelantada al 2026-10-28 UTC, con respaldo al 2026-11-01 | Aceptado |
+| [ADR-0017](#adr-0017) | 2026-10-27 | Decisiones de arranque de F-020: ruta humana en nube, cohorte NLI, config sellada vigente | Aceptado |
 
 ---
 
@@ -162,3 +165,42 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
   - Reescribir el log como ADRs: se perderían matices. Se conserva literal y aquí solo se formalizan las decisiones.
 - **Consecuencias:** el arranque en frío lee unas 100 líneas en lugar de 543. `scripts/check_docs.py` verifica que ninguna línea del `CLAUDE.md` anterior se pierda y que los enlaces resuelvan. Los documentos fechados y los ledgers conservan rutas antiguas a propósito.
 - **Fuentes:** `docs/archive/README.md`, commits de `chore/docs-harness`.
+
+<a id="adr-0015"></a>
+## ADR-0015: Topes de gasto del estudio con usuarios
+
+- **Estado:** Aceptado. **Fecha:** 2026-10-27 (directiva de Enzo en la tarea F-020).
+- **Contexto:** el tope de la Fase B I7 existía solo en el código y en el runbook; el tope del estudio completo no estaba escrito. [DECLARADO] `scripts/study_operator/i7_config.py:26` fija `budget_usd=20` y `closure_reserve_usd=3`; `i7.py:57-59` rechaza otra configuración; `i7_costs.py:102-103` devuelve `ADMIT` solo si el total previsto con cierre es de USD 20 o menos; `i7_costs.py:129-130` corta a las 24 h de retención.
+- **Decisión:**
+  1. Fase B I7: USD 20 de exposición prevista a precio de lista, incluidos USD 3 de cierre. Los precios de lista no son factura.
+  2. Estudio completo (Fase B, ensayo, sesiones y retención): USD 100 a precio de lista, Fase B incluida.
+  3. El gasto posterior a la Fase B se pide a Enzo por bloques, cada uno con su costo máximo, dentro del saldo de USD 100.
+  4. No se amplía ningún tope para obtener un resultado.
+- **Consecuencias:** una tarifa nueva o una retención mayor de 24 h pueden bloquear la Fase B aunque la factura real sea menor. Ese bloqueo es aceptado.
+- **Fuentes:** [STUDY_I7_RUNBOOK_FASE_B.md](../STUDY_I7_RUNBOOK_FASE_B.md) (sección «Costos y regla de corte»); `.harness/feature_list.json` (F-020).
+
+<a id="adr-0016"></a>
+## ADR-0016: Fecha mínima de pago de la Fase B I7
+
+- **Estado:** Aceptado. **Fecha:** 2026-10-27. Enzo delegó la decisión en Claude, con preferencia por adelantar.
+- **Contexto:** el código impide todo efecto pagado antes de 2026-11-01T00:00Z: `i7.py:76-77` (`NO_PAID_EFFECT_BEFORE_NOVEMBER`), `i7.py:374-375`, `i7_phase_b.py:258` y `:261-263`, y el bloqueo con dueño Enzo de `i7_readiness.py:41-42`. [VERIFICADO por lectura] La fecha no figura en ningún preregistro ni en `stimulus_calendar.py`; la introdujo el commit `f26395c` (2026-10-15) como guarda de pago, y ningún documento da su motivo. Clase (b): decisión del dueño, no restricción técnica ni calendario preregistrado.
+- **Decisión:**
+  1. El piso pasa a 2026-10-28T00:00Z, en una constante única, con cambio por TDD en `fix/interview-readiness`. Los códigos de error no cambian.
+  2. El cambio exige regenerar el recibo de preparación local: suites de Windows, Linux e I7 y `verify_local` (19 módulos y 3 documentos).
+  3. Respaldo: si una suite falla por una causa distinta de F-016, se revierte con un commit nuevo y rige el 2026-11-01T00:00Z (31/10, 19:00 en Lima).
+  4. La autorización de gasto sigue siendo explícita: el piso de fecha no la reemplaza.
+- **Consecuencias:** la Fase B pagada puede empezar unos tres días antes y terminar antes de la ausencia de Enzo del 3 al 6/11. Cuesta un cambio de fuente y evidencia local nueva antes del build.
+- **Fuentes:** [STUDY_I7_RUNBOOK_FASE_B.md](../STUDY_I7_RUNBOOK_FASE_B.md) (líneas 22-23); `tests/test_study_i7_operator.py:72-78`.
+
+<a id="adr-0017"></a>
+## ADR-0017: Decisiones de arranque de F-020
+
+- **Estado:** Aceptado. **Fecha:** 2026-10-27 (respuestas de Enzo en la sesión de planificación de F-020).
+- **Contexto:** el checklist local del 1/10 ([STUDY_HUMAN_CHECKLIST.md](../STUDY_HUMAN_CHECKLIST.md)) y el runbook I7 describen flujos distintos, y el código no desempata tres puntos.
+- **Decisión:**
+  1. Ruta de las sesiones humanas: nube con el navegador propio del participante por HTTPS (enmienda del 2026-10-02). La forma de operarla sobre la imagen I7 se investiga en la fase B de F-020, porque `i7.py:136-138` solo admite propósitos técnicos.
+  2. La cohorte NLI no es precondición: la enmienda del 2026-10-02 la exige solo para el remedio R2 y la app está congelada en `per_claim` (`scripts/study_operator/rag_freeze.py:71`).
+  3. Config sellada vigente: `study-config-reviewed-v2` (protocolo v2 con UEQ-S, misma asignación). [VERIFICADO] El sello del 1/10 falla con el código vigente; no hace falta un sorteo ni un sello nuevos.
+  4. Tablero: una entrada F-020 con las fases A a G como pasos (los ids deben cumplir `F-NNN`, `scripts/check_docs.py:114`); F-017 es una entrada propia.
+- **Consecuencias:** los pasos del checklist que dependen de Zoom y de un servidor local quedan superados para el estudio; P998 se ensaya en la nube.
+- **Fuentes:** [STUDY_GATE_PREREGISTRATION_AMENDMENT_2026-10-02.md](../STUDY_GATE_PREREGISTRATION_AMENDMENT_2026-10-02.md); `.harness/feature_list.json` (F-020).
