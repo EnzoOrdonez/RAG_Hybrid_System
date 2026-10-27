@@ -128,3 +128,19 @@ def test_close_before_gpu_allocation_never_targets_placeholder(tmp_path,monkeypa
     assert dispatch(Owner(),'close')['status']=='CLOSED'
     Owner.state={'creation_intents':[{'status':'UNKNOWN'}]}
     assert dispatch(Owner(),'close')['status']=='BLOCKED_UNKNOWN_RESOURCE'
+
+
+@pytest.mark.parametrize('day,blocked',[(27,True),(28,False)])
+def test_check_owner_date_blocker_follows_paid_floor(monkeypatch,capsys,day,blocked):
+    import json
+    from datetime import datetime, timezone
+
+    from scripts.study_operator import i7_phase_b
+    class Fixed(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026,10,day,tzinfo=timezone.utc)
+    monkeypatch.setattr(i7_phase_b,'datetime',Fixed)
+    assert i7_phase_b.main(['--check','--live']) == 0
+    codes = {row['code'] for row in json.loads(capsys.readouterr().out)['blockers']}
+    assert ('NOVEMBER_PHASE_B_AUTHORIZATION_REQUIRED' in codes) is blocked
