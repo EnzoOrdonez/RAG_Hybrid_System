@@ -105,7 +105,7 @@ class Operator(LegacyOperator):
     def admit_paid(self, exposure, *, additional_reservations=0):
         now = self.now()
         if now < PAID_NOT_BEFORE_UTC:
-            raise ValueError('NO_PAID_EFFECT_BEFORE_NOVEMBER')
+            raise ValueError('NO_PAID_EFFECT_BEFORE_2026_10_28')
         human = self.state.get('human_phase')
         if human:
             committed = self.human_committed_usd(now, additional_reservations=additional_reservations)
@@ -544,7 +544,7 @@ def main(argv=None):
                                      (args.root/'receipts'/'boot-attempt').glob('*.json')])
     else:
         if not args.live or datetime.now(timezone.utc) < PAID_NOT_BEFORE_UTC:
-            parser.error('Live I7 operations require --live and November authorization')
+            parser.error('Live I7 operations require --live and date >= 2026-10-28 UTC')
         from scripts.study_operator.cloud_client import Cloud
         if not args.sdk:
             parser.error('--sdk required')

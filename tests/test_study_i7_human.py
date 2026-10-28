@@ -141,7 +141,9 @@ def test_cli_exposes_human_operations_behind_live_and_date_guards(tmp_path,capsy
     for operation in ('human-phase-open','refresh-prices','invite','revoke'):
         with pytest.raises(SystemExit):
             i7.main(['--root',str(tmp_path),operation,'--code','P998'])
-        assert 'November authorization' in capsys.readouterr().err
+        error = capsys.readouterr().err
+        assert 'date >= 2026-10-28 UTC' in error
+        assert 'November' not in error
     with pytest.raises(SystemExit):
         i7.main(['--root',str(tmp_path),'start','--purpose','participants'])
 

@@ -72,10 +72,10 @@ def test_guard_never_reports_deleted_on_failed_api_or_replacement(tmp_path,failu
     assert not op.state['reservation'].get('deleted_verified')
 
 
-def test_no_paid_effect_in_october_and_budget_reserves_closure(tmp_path):
+def test_no_paid_effect_before_floor_and_budget_reserves_closure(tmp_path):
     op,cloud,_ = setup(tmp_path)
     op.now=lambda:datetime(2026,10,16,tzinfo=timezone.utc)
-    with pytest.raises(ValueError,match='NOVEMBER'):
+    with pytest.raises(ValueError,match='^NO_PAID_EFFECT_BEFORE_2026_10_28$'):
         op.admit_paid(1)
     assert not cloud.calls
     op.now=lambda:datetime(2026,11,1,tzinfo=timezone.utc)
@@ -169,7 +169,7 @@ def test_paid_floor_is_owner_dated_2026_10_28_adr_0016(tmp_path):
     op,cloud,_ = setup(tmp_path)
     op.config['rates']['verified_utc'] = op.config['cost_plan']['verified_utc'] = '2026-10-27T00:00:00+00:00'
     op.now=lambda:datetime(2026,10,27,23,59,tzinfo=timezone.utc)
-    with pytest.raises(ValueError,match='NOVEMBER'):
+    with pytest.raises(ValueError,match='^NO_PAID_EFFECT_BEFORE_2026_10_28$'):
         op.admit_paid(.1)
     op.now=lambda:PAID_NOT_BEFORE_UTC
     op.admit_paid(.1)

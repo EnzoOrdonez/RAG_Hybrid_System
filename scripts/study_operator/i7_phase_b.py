@@ -261,7 +261,7 @@ def main(argv=None):
         return 0
     if (not args.live or not args.root or not args.sdk or not args.step
             or datetime.now(timezone.utc) < PAID_NOT_BEFORE_UTC):
-        parser.error('Explicit --live, root, SDK and November authorization required')
+        parser.error('Explicit --live, root, SDK and date >= 2026-10-28 UTC required')
     from scripts.study_operator.i7_browser_preflight import verify
     try:
         verify()

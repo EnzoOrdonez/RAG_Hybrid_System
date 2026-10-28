@@ -18,6 +18,16 @@ def test_runbook_steps_have_one_executable_entrypoint_and_dependencies():
     assert result['steps'] >= 9
 
 
+def test_live_cli_reports_current_paid_floor(capsys):
+    from scripts.study_operator import i7_phase_b
+    with pytest.raises(SystemExit) as error:
+        i7_phase_b.main([])
+    assert error.value.code == 2
+    message = capsys.readouterr().err
+    assert 'date >= 2026-10-28 UTC' in message
+    assert 'November' not in message
+
+
 def test_incomplete_prerequisites_block_gate_before_any_cloud_call(tmp_path):
     from scripts.study_operator.i7_phase_b import gate
     from scripts.study_operator.i7_gate_guest import dispatch_gate
