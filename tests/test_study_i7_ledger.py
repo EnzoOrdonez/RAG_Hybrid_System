@@ -1,6 +1,10 @@
 """I7 money boundaries, exercised without a provider or participant data."""
+import copy
+import json
+
 import pytest
 
+from scripts.study_operator.i7 import Operator
 from scripts.study_operator.lifecycle import Operator as LegacyOperator
 from tests.test_study_i7_human import closed_phase_b
 from tests.test_study_i7_operator import setup
@@ -25,3 +29,65 @@ def test_i7_blocks_legacy_spending_before_cloud(tmp_path, human, legacy_instance
         else:
             operator.ip_reserve()
     assert cloud.calls == []
+
+
+class ReservationCloud:
+    """Provider boundary with a durable create observed before its response."""
+    def __init__(self, operator, *, lose_create_response=False):
+        self.operator = operator
+        self.lose_create_response = lose_create_response
+        self.calls = []
+        self.exists = True
+        self.resource = copy.deepcopy(operator.state['reservation'])
+        self.resource.pop('deleted_verified', None)
+        self.at_create = None
+
+    def command(self, arguments, **kwargs):
+        self.calls.append(arguments)
+        if arguments[:4] == ['beta', 'compute', 'reservations', 'create']:
+            self.at_create = json.loads(self.operator.state_path.read_bytes())
+            self.resource.update(name=arguments[4], id='21',
+                creationTimestamp=self.operator.now().isoformat(),
+                deleteAtTime=next(a.split('=', 1)[1] for a in arguments if a.startswith('--delete-at-time=')))
+            if self.lose_create_response:
+                raise TimeoutError('create succeeded; response lost')
+            return None
+        if arguments[:3] == ['compute', 'reservations', 'describe']:
+            return copy.deepcopy(self.resource)
+        if arguments[:3] == ['compute', 'reservations', 'list']:
+            return [copy.deepcopy(self.resource)] if self.exists else []
+        if arguments[:3] == ['compute', 'reservations', 'delete']:
+            self.exists = False
+            return None
+        if arguments[:3] == ['compute', 'instances', 'describe']:
+            return dict(self.operator.selected(), status='TERMINATED')
+        raise AssertionError(arguments)
+
+
+def human_operator(tmp_path, *, lose_create_response=False):
+    operator, _ = closed_phase_b(tmp_path)
+    operator.human_phase_open()
+    cloud = ReservationCloud(operator, lose_create_response=lose_create_response)
+    operator.cloud = cloud
+    return operator, cloud
+
+
+def test_reservation_intent_is_durable_before_create(tmp_path):
+    operator, cloud = human_operator(tmp_path, lose_create_response=True)
+    rate = operator.config['rates']['compute_usd_h']
+    with pytest.raises(TimeoutError):
+        operator.reserve(4)
+    durable = cloud.at_create
+    intent = durable['reservation_intent']
+    assert durable.get('open_exposure_usd') == pytest.approx(4 * rate + .25)
+    assert intent['hours'] == 4
+    assert intent['compute_usd_h'] == rate
+    assert intent['price_receipt_sha256'] == operator.config['rates']['price_receipt_sha256']
+    assert intent['exposure_usd'] == pytest.approx(4 * rate + .25)
+    assert intent['requested_utc'] == operator.now().isoformat()
+    restarted = Operator(tmp_path, cloud, now=operator.now)
+    before = len(cloud.calls)
+    with pytest.raises(ValueError, match='UNKNOWN_RESERVATION_RECONCILE_FIRST'):
+        restarted.reserve(4)
+    assert len(cloud.calls) == before
+    assert restarted.state['reservation_gpu_hours_used'] == 4

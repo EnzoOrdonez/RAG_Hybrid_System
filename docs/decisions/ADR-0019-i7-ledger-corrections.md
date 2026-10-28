@@ -35,3 +35,13 @@ cierre local. El despliegue, GO real y aprobación ética real siguen pendientes
 [VERIFICADO] F1 verde: 37 tests de ledger y ciclo/IP heredados pasan. Al retirar
 por separado la guarda de reserve_cost y la de ip_reserve, fallan cuatro casos
 por mutante; los bytes originales se restauraron en ambos casos.
+
+## F3: exposici?n durable antes de CREATE
+
+[DECLARADO] El intento incluye horas, instante solicitado, tarifa, hash del
+recibo de precios e importe m?ximo. open_exposure_usd se persiste con el intento
+antes de invocar CREATE. Un reinicio conserva esa exposici?n y bloquea otro CREATE.
+
+[VERIFICADO] La regresi?n fall? antes del cambio (importe durable ausente).
+Verde: 49 tests de ledger/humano/operador. Retirar la exposici?n previa o la
+tarifa del intento hizo fallar el test durable; se restauraron ambos mutantes.

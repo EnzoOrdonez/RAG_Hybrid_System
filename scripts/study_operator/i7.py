@@ -207,7 +207,9 @@ class Operator(LegacyOperator):
         human = self.state.get('human_phase')
         if not 0 < hours <= (HUMAN_RESERVATION_MAX_H if human else 12):
             raise ValueError('HUMAN_RESERVATION_TTL_REQUIRED' if human else 'RESERVATION_TTL_REQUIRED')
-        self.admit_paid(hours*self.config['rates']['compute_usd_h']+.25)
+        rate = self.config['rates']['compute_usd_h']
+        exposure = hours*rate+.25
+        self.admit_paid(exposure)
         if self.state.get('reservation') and not self.state['reservation'].get('deleted_verified'):
             raise ValueError('PRIOR_RESERVATION_NOT_CLOSED')
         allocated=self.state.get('reservation_gpu_hours_used',0)+hours
@@ -216,9 +218,14 @@ class Operator(LegacyOperator):
         self.state['reservation_gpu_hours_used']=allocated
         name = 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]
         zone = self.selected()['zone']
-        until = self.now()+timedelta(hours=hours)
-        intent = {'name':name,'zone':zone,'delete_at_utc':until.isoformat(),'status':'UNKNOWN'}
+        requested = self.now()
+        until = requested+timedelta(hours=hours)
+        intent = {'name':name,'zone':zone,'delete_at_utc':until.isoformat(),'status':'UNKNOWN',
+                  'requested_utc':requested.isoformat(),'hours':hours,'compute_usd_h':rate,
+                  'price_receipt_sha256':self.config['rates']['price_receipt_sha256'],
+                  'exposure_usd':exposure}
         self.state['reservation_intent'] = intent
+        self.state['open_exposure_usd'] = exposure
         self.persist()
         # SDK beta exposes native reservation auto-delete. No unbounded fallback.
         self.cloud.command(['beta','compute','reservations','create',name,'--zone='+zone,
@@ -231,7 +238,7 @@ class Operator(LegacyOperator):
                 or datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != until):
             raise ValueError('RESERVATION_NATIVE_DELETION_NOT_VERIFIED')
         self.state['reservation'] = dict(resource,created_utc=self.now().isoformat())
-        self.state['open_exposure_usd'] = hours*self.config['rates']['compute_usd_h']+.25
+        self.state['open_exposure_usd'] = exposure
         self.state.pop('reservation_intent')
         self.persist()
         return self.receipt('reservation',{'status':'SPECIFIC_RESERVATION_HELD',
