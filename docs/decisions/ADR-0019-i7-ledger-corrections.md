@@ -124,5 +124,25 @@ restauraron. La suite del ledger tiene 36 casos aprobados.
 [VERIFICADO] Se reescribió este ADR en UTF-8 para reparar los caracteres de
 interrogación que sustituyeron tildes en el traspaso anterior.
 
-[DECLARADO] F7 y la verificación completa final siguen pendientes en este punto;
-no se ejecuta Fase B ni se autoriza publicar o gastar.
+## F7: aprobación ligada a la configuración sellada ejecutada
+
+[DECLARADO] approved_b4_version debe coincidir exactamente con el identificador
+del directorio de la configuración sellada que se ejecuta (por ejemplo,
+study-config-reviewed-v2). Se obtiene de local_reviewed_config después de
+verificar draw_seal.json y exigir que su fingerprint coincida con el de la
+instalación. No se compara con schema_version ni con un b4_version libre.
+Fuente ausente, sello alterado, fingerprint distinto o etiqueta distinta bloquean
+study antes de consultar nube. La prueba usa fixture-reviewed-config; no se
+crea ni se modifica el expediente ético real. Su etiqueta la aportará Enzo.
+
+[DECLARADO] La autenticidad y autoridad del PDF son un atestado humano de Enzo.
+El código valida campos, fecha, SHA-256 e identidad de la configuración, pero el
+hash no autentica al comité ni sustituye la revisión humana del documento.
+
+[VERIFICADO] Las seis regresiones nuevas fallaron antes del cambio. Se retiraron
+por separado la comparación de etiqueta (3 fallos), fingerprint (1), verificación
+del sello (1), llamada de política desde I7 (1) y hash del PDF (1). Se restauraron
+los bytes originales de cada mutante y las pruebas focalizadas volvieron a pasar.
+
+[DECLARADO] Queda la verificación completa final; no se ejecuta Fase B ni se
+autoriza publicar o gastar.

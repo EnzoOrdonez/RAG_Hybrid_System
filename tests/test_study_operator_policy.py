@@ -7,21 +7,67 @@ import pytest
 from scripts.study_operator.policy import OperatorError, purpose_allowed, session_margin, private_session_bucket, validate_minimal_iam, publication_export, confirm_deletion
 
 
-def test_study_requires_human_record_and_exact_pdf(tmp_path):
-    with pytest.raises(OperatorError, match='Enzo'):
-        purpose_allowed('study', tmp_path)
-    assert purpose_allowed('technical', tmp_path)['ethics_verified'] is False
+def ethics_fixture(tmp_path):
+    from src.ui.components.study_protocol import ROOT, draw_study_configuration
+    reviewed = tmp_path / 'fixture-reviewed-config'
+    protocol = draw_study_configuration(ROOT / 'config/study.example.json',
+                                        tmp_path / 'unused-template.csv', reviewed)
+    installation = {'local_reviewed_config': str(reviewed), 'fingerprint': protocol['fingerprint']}
+    (tmp_path / 'installation.json').write_text(json.dumps(installation))
     root = tmp_path / 'ethics'
     root.mkdir()
     pdf = b'synthetic fixture; not ethical approval'
     (root / 'ethics_approval.pdf').write_bytes(pdf)
     record = dict(committee='synthetic fixture committee', approval_code='FIXTURE', date='2026-01-01',
-                  pdf_sha256=hashlib.sha256(pdf).hexdigest(), approved_b4_version='FIXTURE')
+                  pdf_sha256=hashlib.sha256(pdf).hexdigest(), approved_b4_version=reviewed.name)
     (root / 'ethics_approval.json').write_text(json.dumps(record))
+    return root, reviewed, record, installation
+
+
+def test_study_requires_human_record_and_exact_pdf(tmp_path):
+    with pytest.raises(OperatorError, match='Enzo'):
+        purpose_allowed('study', tmp_path)
+    assert purpose_allowed('technical', tmp_path)['ethics_verified'] is False
+    root, _, _, _ = ethics_fixture(tmp_path)
     assert purpose_allowed('study', tmp_path)['ethics_verified']
     (root / 'ethics_approval.pdf').write_bytes(b'changed fixture')
     with pytest.raises(OperatorError, match='study bloqueado'):
         purpose_allowed('study', tmp_path)
+
+
+@pytest.mark.parametrize('fault', ['different_label', 'schema_number', 'fingerprint', 'seal', 'missing_source'])
+def test_study_approval_is_bound_to_executed_sealed_configuration(tmp_path, fault):
+    root, reviewed, record, installation = ethics_fixture(tmp_path)
+    if fault in {'different_label', 'schema_number'}:
+        record['approved_b4_version'] = 'fixture-other-config' if fault == 'different_label' else '2'
+        # A free installation field must never authorize a different package.
+        installation['b4_version'] = record['approved_b4_version']
+        (root / 'ethics_approval.json').write_text(json.dumps(record))
+    elif fault == 'fingerprint':
+        installation['fingerprint'] = '0' * 64
+    elif fault == 'seal':
+        seal = json.loads((reviewed / 'draw_seal.json').read_bytes())
+        seal['fingerprint'] = '0' * 64
+        (reviewed / 'draw_seal.json').write_text(json.dumps(seal))
+    else:
+        installation.pop('local_reviewed_config')
+    (tmp_path / 'installation.json').write_text(json.dumps(installation))
+    with pytest.raises(OperatorError, match='study bloqueado'):
+        purpose_allowed('study', tmp_path)
+
+
+def test_i7_rejects_mismatched_ethics_before_cloud(tmp_path):
+    from tests.test_study_i7_human import closed_phase_b
+    operator, cloud = closed_phase_b(tmp_path)
+    operator.human_phase_open()
+    root, _, record, installation = ethics_fixture(tmp_path)
+    operator.config.update(installation)
+    operator.persist()
+    record['approved_b4_version'] = 'fixture-other-config'
+    (root / 'ethics_approval.json').write_text(json.dumps(record))
+    with pytest.raises(OperatorError, match='study bloqueado'):
+        operator.start('study')
+    assert cloud.calls == []
 
 
 @pytest.mark.parametrize('minutes,allowed', [(69, False), (70, True), (71, True)])
