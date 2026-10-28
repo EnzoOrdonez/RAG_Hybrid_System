@@ -41,6 +41,8 @@ class ReservationCloud:
         self.exists = True
         self.resource = copy.deepcopy(operator.state['reservation'])
         self.resource.pop('deleted_verified', None)
+        self.resource.pop('cost_basis', None)
+        self.resource.pop('created_utc', None)
         self.at_create = None
 
     def command(self, arguments, **kwargs):
@@ -126,3 +128,40 @@ def test_unknown_reservation_keeps_requested_hours_and_is_idempotent(tmp_path, h
     assert restarted.state['spent_usd'] == durable['spent_usd']
     assert restarted.state['open_exposure_usd'] == durable['open_exposure_usd']
     assert sum(c[:4] == ['beta', 'compute', 'reservations', 'create'] for c in cloud.calls) == 1
+
+
+@pytest.mark.parametrize('closure', ['guard', 'reconcile'])
+def test_open_reservation_keeps_price_after_refresh(tmp_path, monkeypatch, closure):
+    from scripts.study_operator import i7_costs, pricing
+    operator, cloud = human_operator(tmp_path)
+    started = operator.now()
+    old_rate = operator.config['rates']['compute_usd_h']
+    operator.reserve(4)
+    before = copy.deepcopy(operator.state['reservation'])
+    assert before.get('cost_basis', {}).get('compute_usd_h') == old_rate
+    operator.now = lambda: started + timedelta(hours=1)
+    plan = copy.deepcopy(operator.config['cost_plan'])
+    plan['verified_utc'] = operator.now().isoformat()
+    monkeypatch.setattr(i7_costs, 'list_prices', lambda *_: plan)
+    monkeypatch.setattr(pricing, 'quote_archive', lambda *_:
+        {'usd_per_hour': str(old_rate / 2), 'catalog_receipt_sha256': 'b' * 64})
+    compute = tmp_path / 'compute'
+    compute.mkdir()
+    (compute / 'receipt.json').write_text(json.dumps({'at': operator.now().isoformat()}))
+    operator.refresh_prices(compute, tmp_path / 'storage')
+    assert operator.config['rates']['compute_usd_h'] == old_rate / 2
+    assert operator.state['reservation'] == before
+    assert operator.state['open_exposure_usd'] == pytest.approx(4 * old_rate + .25)
+    spent = operator.state['spent_usd']
+    if closure == 'guard':
+        operator.guard()
+        elapsed = 1
+    else:
+        cloud.exists = False
+        operator.now = lambda: started + timedelta(hours=5)
+        operator.reconcile()
+        elapsed = 4
+    assert operator.state['spent_usd'] - spent == pytest.approx(elapsed * old_rate)
+    assert operator.state['open_exposure_usd'] == 0
+    operator.reconcile()
+    assert operator.state['spent_usd'] - spent == pytest.approx(elapsed * old_rate)

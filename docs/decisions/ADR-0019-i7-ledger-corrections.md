@@ -56,3 +56,17 @@ Un intento antiguo sin base de costo queda bloqueado para revisi?n, sin adivinar
 [VERIFICADO] Cuatro regresiones (1/4 h, encontrado/ausente) fallaron antes de
 corregir; despu?s, 53 tests pasan. Los tres mutantes (12 h al encontrar, 12 h
 al vencer y no liberar exposici?n) causaron dos fallos cada uno, y se restauraron.
+
+## F5: tarifa fijada en la reserva
+
+[DECLARADO] La reserva exitosa y la recuperada guardan cost_basis con la tarifa
+admitida. guard y reconcile liquidan con esa tarifa. refresh_prices puede renovar
+el cat?logo para admisiones futuras, pero no modifica la reserva ni su exposici?n.
+Reservas antiguas sin base verificable requieren revisi?n; no se adivina su precio.
+
+[VERIFICADO] Las dos regresiones fallaron sin la base persistida. Los mutantes
+sin base, guard con tarifa actual y reconcile con tarifa actual produjeron
+respectivamente dos, uno y un fallo. Se restauraron los bytes originales.
+La primera mutaci?n encontr? un doble que filtraba cost_basis como si fuese un
+campo del proveedor; se corrigi? el doble antes de repetir las tres mutaciones.
+No se contact? el proveedor ni se alteraron reservas privadas reales.

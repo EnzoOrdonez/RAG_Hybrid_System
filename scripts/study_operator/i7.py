@@ -72,6 +72,12 @@ def reservation_intent_exposure(intent):
     return amount
 
 
+def reservation_rate(reservation):
+    basis = reservation.get('cost_basis',{})
+    reservation_intent_exposure(basis)
+    return basis['compute_usd_h']
+
+
 class Operator(LegacyOperator):
     def __init__(self, root, cloud, *, now=None, sleep=time.sleep):
         super().__init__(root,cloud,now=now,sleep=sleep)
@@ -250,7 +256,8 @@ class Operator(LegacyOperator):
         if (resource['description'] != self.config['resource_marker']
                 or datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != until):
             raise ValueError('RESERVATION_NATIVE_DELETION_NOT_VERIFIED')
-        self.state['reservation'] = dict(resource,created_utc=self.now().isoformat())
+        self.state['reservation'] = dict(resource,created_utc=resource['creationTimestamp'],
+                                        cost_basis=dict(intent))
         self.state['open_exposure_usd'] = exposure
         self.state.pop('reservation_intent')
         self.persist()
@@ -347,6 +354,7 @@ class Operator(LegacyOperator):
         reservation = self.state['reservation']
         if reservation.get('deleted_verified'):
             raise ValueError('RESERVATION_ALREADY_CLOSED')
+        rate = reservation_rate(reservation)
         vm = self.cloud.command(['compute','instances','describe',self.selected()['name'],
                                  '--zone='+self.selected()['zone']])
         if str(vm['id']) != str(self.selected()['id']) or vm['status'] != 'TERMINATED':
@@ -368,7 +376,7 @@ class Operator(LegacyOperator):
         reservation.update(deleted_verified=True,deleted_utc=self.now().isoformat())
         if reservation.get('created_utc'):
             interval = (self.now()-datetime.fromisoformat(reservation['created_utc'])).total_seconds()
-            self.state['spent_usd'] = self.state.get('spent_usd',0)+max(0,interval)/3600*self.config['rates']['compute_usd_h']
+            self.state['spent_usd'] = self.state.get('spent_usd',0)+max(0,interval)/3600*rate
         self.state['open_exposure_usd'] = 0
         self.persist()
         return self.receipt('reservation',{'status':'RESERVATION_DELETED_VERIFIED',
@@ -391,6 +399,7 @@ class Operator(LegacyOperator):
                 reservation['deleteAtTime'].replace('Z','+00:00'))
             if not reservation.get('delete_api_success') and not expired:
                 raise ValueError('DELETE_OUTCOME_UNKNOWN_UNTIL_NATIVE_DEADLINE')
+            rate = reservation_rate(reservation)
             reservation.update(deleted_verified=True,deleted_utc=self.now().isoformat(),
                                closure_method='SUCCESSFUL_LIST_AFTER_DELETE_OR_NATIVE_TTL')
             if reservation.get('created_utc'):
@@ -398,7 +407,7 @@ class Operator(LegacyOperator):
                 if reservation.get('deleteAtTime'):
                     until=min(until,datetime.fromisoformat(reservation['deleteAtTime'].replace('Z','+00:00')))
                 seconds=max(0,(until-datetime.fromisoformat(reservation['created_utc'])).total_seconds())
-                self.state['spent_usd']=self.state.get('spent_usd',0)+seconds/3600*self.config['rates']['compute_usd_h']
+                self.state['spent_usd']=self.state.get('spent_usd',0)+seconds/3600*rate
             self.state['open_exposure_usd']=0
             self.persist()
             return self.receipt('reservation',{'status':'RESERVATION_ABSENT_RECONCILED',

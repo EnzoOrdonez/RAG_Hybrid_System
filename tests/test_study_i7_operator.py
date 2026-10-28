@@ -46,7 +46,10 @@ def setup(tmp_path):
             raise AssertionError(argv)
     cloud = Cloud()
     op = Operator(tmp_path,cloud,now=lambda:datetime(2026,11,1,tzinfo=timezone.utc))
-    op.state['reservation'] = dict(reservation,created_utc='2026-11-01T00:00:00+00:00')
+    op.state['reservation'] = dict(reservation,created_utc='2026-11-01T00:00:00+00:00',
+        cost_basis={'hours':12,'compute_usd_h':cfg['rates']['compute_usd_h'],
+                    'exposure_usd':12*cfg['rates']['compute_usd_h']+.25,
+                    'price_receipt_sha256':cfg['rates']['price_receipt_sha256']})
     return op,cloud,reservation
 
 
