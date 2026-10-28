@@ -182,3 +182,77 @@ def test_expired_no_show_is_charged_only_to_ttl_once(tmp_path, hours):
     restarted.reconcile()
     assert restarted.state['spent_usd'] - spent == pytest.approx(hours * rate)
     assert not any(c[:3] == ['compute', 'instances', 'start'] for c in cloud.calls)
+
+
+def test_human_extra_exposure_blocks_even_without_another_reservation(tmp_path):
+    operator, cloud = human_operator(tmp_path)
+    operator.state['extra_exposure_usd'] = 67
+    with pytest.raises(ValueError, match='I7_HUMAN_BUDGET_STOP'):
+        operator.admit_paid(0)
+    assert cloud.calls == []
+
+
+@pytest.mark.parametrize('extra', [-1, float('nan'), float('inf'), None, True])
+def test_human_extra_exposure_must_be_finite_nonnegative(tmp_path, extra):
+    operator, cloud = human_operator(tmp_path)
+    operator.state['extra_exposure_usd'] = extra
+    with pytest.raises(ValueError, match='FINITE_EXTRA_EXPOSURE_REQUIRED'):
+        operator.admit_paid(0)
+    assert cloud.calls == []
+
+
+def test_noncompute_package_blocks_reservation_before_create(tmp_path):
+    operator, cloud = human_operator(tmp_path)
+    operator.config['cost_plan']['rates']['gcs_a']['usd'] = .0066
+    with pytest.raises(ValueError, match='I7_HUMAN_BUDGET_STOP'):
+        operator.reserve(1)
+    assert cloud.calls == []
+    assert operator.state['human_phase'].get('reservation_blocks', 0) == 0
+    assert 'reservation_intent' not in operator.state
+
+
+def test_noncompute_full_runbook_package_is_retained_per_reservation(tmp_path):
+    from scripts.study_operator.i7_costs import default_quantities
+    operator, cloud = human_operator(tmp_path)
+    operator.state['extra_exposure_usd'] = .4
+    for _ in range(3):
+        operator.reserve(1)
+        # The package count is durable before CREATE, even for a no-show.
+        assert cloud.at_create['human_phase']['reservation_blocks'] == _ + 1
+        current = operator.now()
+        operator.now = lambda current=current: current + timedelta(hours=1)
+        operator.guard()
+    quantities = default_quantities(24)
+    retained = {'pd_gib_h', 'snapshot_gib_h', 'ip_unused_h'}
+    compute = {'g2_vcpu', 'g2_ram', 'l4', 'e2_vcpu', 'e2_ram'}
+    rates = operator.config['cost_plan']['rates']
+    package = 3 * sum(quantities[k] * rates[k]['usd'] for k in quantities if k not in compute)
+    # Three full 24h packages dominate the continuous 48h minimum here.
+    assert sum(quantities[k] * rates[k]['usd'] for k in retained) > 0
+    assert operator.human_committed_usd(operator.now()) == pytest.approx(
+        package + 3 * operator.config['rates']['compute_usd_h'] + .4)
+    assert operator.state['human_phase']['reservation_blocks'] == 3
+
+
+@pytest.mark.parametrize('key,quantity', [
+    ('pd_gib_h', 540 * 48), ('snapshot_gib_h', 552 * 48), ('ip_unused_h', 48),
+    ('egress_gib', 1), ('gcs_gib_h', 24), ('gcs_a', 10000),
+    ('gcs_b', 100000), ('gcs_egress_gib', 1),
+])
+def test_human_each_noncompute_sku_contributes(tmp_path, key, quantity):
+    operator, _ = human_operator(tmp_path)
+    for row in operator.config['cost_plan']['rates'].values():
+        row['usd'] = 0
+    operator.config['cost_plan']['rates'][key]['usd'] = 35 / quantity
+    operator.reserve(1)
+    compute = operator.state['open_exposure_usd']
+    assert operator.human_committed_usd(operator.now()) == pytest.approx(35 + compute)
+
+
+@pytest.mark.parametrize('blocks', [None, -1, True])
+def test_human_reservation_count_requires_nonnegative_integer(tmp_path, blocks):
+    operator, cloud = human_operator(tmp_path)
+    operator.state['human_phase']['reservation_blocks'] = blocks
+    with pytest.raises(ValueError, match='HUMAN_RESERVATION_LEDGER_REQUIRED'):
+        operator.admit_paid(0)
+    assert cloud.calls == []

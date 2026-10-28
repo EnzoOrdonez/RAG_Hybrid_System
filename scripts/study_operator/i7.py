@@ -102,13 +102,13 @@ class Operator(LegacyOperator):
             json.dump(value,stream,ensure_ascii=False,sort_keys=True)
         return value
 
-    def admit_paid(self, exposure):
+    def admit_paid(self, exposure, *, additional_reservations=0):
         now = self.now()
         if now < PAID_NOT_BEFORE_UTC:
             raise ValueError('NO_PAID_EFFECT_BEFORE_NOVEMBER')
         human = self.state.get('human_phase')
         if human:
-            committed = self.human_committed_usd(now)
+            committed = self.human_committed_usd(now, additional_reservations=additional_reservations)
         else:
             from scripts.study_operator.i7_costs import admit
             admit(self)
@@ -130,9 +130,9 @@ class Operator(LegacyOperator):
         if current+exposure+self.config['closure_reserve_usd'] > self.config['budget_usd']+1e-9:
             raise ValueError('I7_BUDGET_STOP')
 
-    def human_committed_usd(self, now):
-        """Retained resources since opening (at least one day) plus human-phase reservations."""
-        from scripts.study_operator.i7_costs import KEYS
+    def human_committed_usd(self, now, *, additional_reservations=0):
+        """Continuous retention plus complete non-compute bounds per reservation."""
+        from scripts.study_operator.i7_costs import KEYS, default_quantities
         human = self.state['human_phase']
         plan = self.config.get('cost_plan',{})
         rates = plan.get('rates',{})
@@ -147,9 +147,24 @@ class Operator(LegacyOperator):
         # plus one projected day, so admission never consumes the cost of closing down.
         elapsed = (now-datetime.fromisoformat(human['opened_utc'])).total_seconds()/3600
         hours = max(24,elapsed)+HUMAN_PROJECTED_RETENTION_H
-        retained = hours*sum(units*rates[key]['usd'] for key,units in HUMAN_RETAINED_UNITS.items())
+        blocks = human.get('reservation_blocks')
+        if (type(blocks) is not int or blocks < 0 or type(additional_reservations) is not int
+                or additional_reservations < 0):
+            raise ValueError('HUMAN_RESERVATION_LEDGER_REQUIRED')
+        blocks += additional_reservations
+        # The runbook bound is for the whole technical run. Human admissions
+        # conservatively retain that complete non-compute bound per reservation.
+        quantities = default_quantities(24)
+        compute = {'g2_vcpu','g2_ram','l4','e2_vcpu','e2_ram'}
+        quantities = {key:0 if key in compute else value*blocks for key,value in quantities.items()}
+        for key, units in HUMAN_RETAINED_UNITS.items():
+            quantities[key] = max(quantities[key], hours*units)
+        noncompute = sum(quantities[key]*rates[key]['usd'] for key in KEYS)
+        extra = self.state.get('extra_exposure_usd',0)
+        if type(extra) not in (int,float) or not math.isfinite(extra) or extra < 0:
+            raise ValueError('FINITE_EXTRA_EXPOSURE_REQUIRED')
         spent = self.state.get('spent_usd',0)-human['phase_b_spent_usd']
-        return retained+spent+self.state.get('open_exposure_usd',0)
+        return noncompute+extra+spent+self.state.get('open_exposure_usd',0)
 
     def verified_gate_go(self):
         """Every gate receipt is a GO whose private proof still matches it and this image/commit."""
@@ -181,7 +196,8 @@ class Operator(LegacyOperator):
         if self.state.get('reservation_intent') or self.state.get('open_exposure_usd',0):
             raise ValueError('PHASE_B_OPEN_EXPOSURE_REQUIRES_RECONCILE')
         self.state['human_phase'] = {'opened_utc':self.now().isoformat(),'gate_receipt_sha256':go,
-                                     'phase_b_spent_usd':self.state.get('spent_usd',0)}
+                                     'phase_b_spent_usd':self.state.get('spent_usd',0),
+                                     'reservation_blocks':0}
         self.persist()
         return self.receipt('human-phase',{'status':'HUMAN_PHASE_OPEN','budget_usd':HUMAN_BUDGET_USD,
                                            'gate_receipt_sha256':go})
@@ -228,7 +244,7 @@ class Operator(LegacyOperator):
             raise ValueError('HUMAN_RESERVATION_TTL_REQUIRED' if human else 'RESERVATION_TTL_REQUIRED')
         rate = self.config['rates']['compute_usd_h']
         exposure = hours*rate+.25
-        self.admit_paid(exposure)
+        self.admit_paid(exposure, additional_reservations=1 if human else 0)
         if self.state.get('reservation') and not self.state['reservation'].get('deleted_verified'):
             raise ValueError('PRIOR_RESERVATION_NOT_CLOSED')
         allocated=self.state.get('reservation_gpu_hours_used',0)+hours
@@ -245,6 +261,8 @@ class Operator(LegacyOperator):
                   'exposure_usd':exposure}
         self.state['reservation_intent'] = intent
         self.state['open_exposure_usd'] = exposure
+        if human:
+            human['reservation_blocks'] += 1
         self.persist()
         # SDK beta exposes native reservation auto-delete. No unbounded fallback.
         self.cloud.command(['beta','compute','reservations','create',name,'--zone='+zone,

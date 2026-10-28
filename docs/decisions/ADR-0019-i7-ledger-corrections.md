@@ -36,66 +36,93 @@ cierre local. El despliegue, GO real y aprobación ética real siguen pendientes
 por separado la guarda de reserve_cost y la de ip_reserve, fallan cuatro casos
 por mutante; los bytes originales se restauraron en ambos casos.
 
-## F3: exposici?n durable antes de CREATE
+## F3: exposición durable antes de CREATE
 
 [DECLARADO] El intento incluye horas, instante solicitado, tarifa, hash del
-recibo de precios e importe m?ximo. open_exposure_usd se persiste con el intento
-antes de invocar CREATE. Un reinicio conserva esa exposici?n y bloquea otro CREATE.
+recibo de precios e importe máximo. open_exposure_usd se persiste con el intento
+antes de invocar CREATE. Un reinicio conserva esa exposición y bloquea otro CREATE.
 
-[VERIFICADO] La regresi?n fall? antes del cambio (importe durable ausente).
-Verde: 49 tests de ledger/humano/operador. Retirar la exposici?n previa o la
+[VERIFICADO] La regresión falló antes del cambio (importe durable ausente).
+Verde: 49 tests de ledger/humano/operador. Retirar la exposición previa o la
 tarifa del intento hizo fallar el test durable; se restauraron ambos mutantes.
 
-## F4: recuperaci?n UNKNOWN con la exposici?n solicitada
+## F4: recuperación UNKNOWN con la exposición solicitada
 
 [DECLARADO] Un intento encontrado recupera su base de costo durable; si vence
-y est? ausente, se liquida una sola vez su m?ximo admitido y se libera la
-exposici?n abierta. No se sustituyen horas por 12 ni precios por la tarifa actual.
-Un intento antiguo sin base de costo queda bloqueado para revisi?n, sin adivinar.
+y está ausente, se liquida una sola vez su máximo admitido y se libera la
+exposición abierta. No se sustituyen horas por 12 ni precios por la tarifa actual.
+Un intento antiguo sin base de costo queda bloqueado para revisión, sin adivinar.
 
 [VERIFICADO] Cuatro regresiones (1/4 h, encontrado/ausente) fallaron antes de
-corregir; despu?s, 53 tests pasan. Los tres mutantes (12 h al encontrar, 12 h
-al vencer y no liberar exposici?n) causaron dos fallos cada uno, y se restauraron.
+corregir; después, 53 tests pasan. Los tres mutantes (12 h al encontrar, 12 h
+al vencer y no liberar exposición) causaron dos fallos cada uno, y se restauraron.
 
 ## F5: tarifa fijada en la reserva
 
 [DECLARADO] La reserva exitosa y la recuperada guardan cost_basis con la tarifa
 admitida. guard y reconcile liquidan con esa tarifa. refresh_prices puede renovar
-el cat?logo para admisiones futuras, pero no modifica la reserva ni su exposici?n.
-Reservas antiguas sin base verificable requieren revisi?n; no se adivina su precio.
+el catálogo para admisiones futuras, pero no modifica la reserva ni su exposición.
+Reservas antiguas sin base verificable requieren revisión; no se adivina su precio.
 
 [VERIFICADO] Las dos regresiones fallaron sin la base persistida. Los mutantes
 sin base, guard con tarifa actual y reconcile con tarifa actual produjeron
 respectivamente dos, uno y un fallo. Se restauraron los bytes originales.
-La primera mutaci?n encontr? un doble que filtraba cost_basis como si fuese un
-campo del proveedor; se corrigi? el doble antes de repetir las tres mutaciones.
-No se contact? el proveedor ni se alteraron reservas privadas reales.
+La primera mutación encontró un doble que filtraba cost_basis como si fuese un
+campo del proveedor; se corrigió el doble antes de repetir las tres mutaciones.
+No se contactó el proveedor ni se alteraron reservas privadas reales.
 
-## F6: c?digos primarios rechazados en rehearsal/pilot
+## F6: códigos primarios rechazados en rehearsal/pilot
 
-[DECLARADO] No se cambia el comportamiento de producci?n: rehearsal admite
-P998 y pilot c?digos sint?ticos P900+, nunca c?digos primarios P01?P20.
+[DECLARADO] No se cambia el comportamiento de producción: rehearsal admite
+P998 y pilot códigos sintéticos P900+, nunca códigos primarios P01-P20.
 
-[VERIFICADO] Las 40 combinaciones de rechazo y dos admisiones sint?ticas pasan.
-Al retirar temporalmente la restricci?n de rehearsal fallaron sus 20 casos;
+[VERIFICADO] Las 40 combinaciones de rechazo y dos admisiones sintéticas pasan.
+Al retirar temporalmente la restricción de rehearsal fallaron sus 20 casos;
 al retirar la de pilot fallaron sus otros 20 casos. study_sessions.py se
-restaur? byte por byte y no forma parte del commit de esta correcci?n.
+restauró byte por byte y no forma parte del commit de esta corrección.
 
 ## F9: TTL nativo y no-shows
 
-[VERIFICADO] El l?mite min(now, deleteAtTime) ya ven?a de d0ba95a y se conserva.
-Las nuevas regresiones de reservas de 1/4 h reconciliadas tres d?as despu?s,
-sin arrancar VM ni sesi?n, cargan solo hasta el TTL y no duplican tras reinicio.
-Retirar el l?mite produjo dos fallos; se restaur? byte por byte. No hubo
-cambio de producci?n en esta correcci?n, solo cobertura y este registro.
+[VERIFICADO] El límite min(now, deleteAtTime) ya venía de d0ba95a y se conserva.
+Las nuevas regresiones de reservas de 1/4 h reconciliadas tres días después,
+sin arrancar VM ni sesión, cargan solo hasta el TTL y no duplican tras reinicio.
+Retirar el límite produjo dos fallos; se restauró byte por byte. No hubo
+cambio de producción en esta corrección, solo cobertura y este registro.
 
-## Estado del traspaso parcial
+## F2: cota no-compute completa por reserva
 
-[VERIFICADO] F1, F3, F4, F5, F6 y F9 est?n en commits separados; 146 tests
-focalizados y los seis checks documentales pasan. Las mutaciones se restauraron.
+[DECLARADO] La cota del runbook es común a la corrida técnica de 24 h, no por
+boot ni por sesión. Por decisión del dueño, se reutiliza completa por cada
+reserva humana, sin descontarla por no-show o cierre anticipado. Un reintento
+UNKNOWN se reconcilia sin incrementar otra vez el contador. Varios boots dentro
+de la misma reserva no añaden un paquete; una reserva nueva sí lo añade.
 
-[DECLARADO] F2 requiere decidir las cantidades de exposici?n humana por SKU;
-F7 requiere definir si approved_b4_version alude a una revisi?n B.4 declarada
-en installation.json o a schema_version=2. No hay revisi?n B.4 en el protocolo
-sellado. Se consult? al due?o antes de introducir cualquiera de esas pol?ticas.
-Falta la verificaci?n completa final tras F2/F7; no se declara listo para Fase B.
+[DECLARADO] Cada paquete usa default_quantities(24): PD 540 GiB, snapshots
+552 GiB e IP sin uso durante 24 h; GCS 1 GiB durante 24 h; 10 000 operaciones A,
+100 000 B; 1 GiB de egreso VM y 1 GiB de egreso GCS. IP en uso y transferencia de
+snapshots conservan cantidad cero bajo el mismo ámbito us-central1 del runbook.
+GPU se cuenta por su reserva de compute; CPU no forma parte del paquete humano.
+
+[DECLARADO] Para PD, snapshots e IP se toma el máximo entre los paquetes
+acumulados y la retención continua desde la apertura (mínimo 24 h más 24 h
+proyectadas), evitando sumar dos veces la misma retención. Los restantes SKU
+no-compute se acumulan por reserva. extra_exposure_usd se valida y suma SIEMPRE,
+incluso al comprobar un arranque sin crear otra reserva. El margen de USD 3 se
+mantiene; los paquetes son exposición conservadora, no cargos de factura.
+
+[DECLARADO] La admisión incluye el paquete futuro antes de CREATE y el contador
+se persiste con el intento, solo después de aprobar el presupuesto. Una petición
+rechazada no incrementa el contador. Una fase antigua sin contador válido se
+bloquea en vez de asumir gasto cero.
+
+[VERIFICADO] Los ocho casos iniciales fallaron antes de la corrección. Se
+verificaron siete mutantes: extra omitido (1 fallo), SKU omitidos (8), paquete
+prospectivo omitido (1), contador durable omitido (1), retención continua omitida
+(1), validación de extra omitida (5) y contador inválido permitido (3). Todos se
+restauraron. La suite del ledger tiene 36 casos aprobados.
+
+[VERIFICADO] Se reescribió este ADR en UTF-8 para reparar los caracteres de
+interrogación que sustituyeron tildes en el traspaso anterior.
+
+[DECLARADO] F7 y la verificación completa final siguen pendientes en este punto;
+no se ejecuta Fase B ni se autoriza publicar o gastar.
