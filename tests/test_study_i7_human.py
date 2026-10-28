@@ -229,3 +229,27 @@ def test_revoke_validates_code_before_any_cloud_call(tmp_path):
     with pytest.raises(Exception,match='digitos|dígitos'):
         op.revoke('Ana')
     assert not cloud.calls
+
+
+@pytest.mark.parametrize('purpose', ['rehearsal', 'pilot'])
+@pytest.mark.parametrize('number', range(1, 21))
+def test_human_rehearsal_and_pilot_reject_primary_codes(tmp_path, purpose, number):
+    from src.ui.components.study_sessions import StudyStore
+    from tests.study_helpers import configured
+    _, _, protocol = configured(tmp_path)
+    store = StudyStore(tmp_path / 'sessions', protocol, purpose=purpose)
+    store.freeze()
+    with pytest.raises(ValueError, match='fictitious P900'):
+        store.issue(f'P{number:02}', cell=1, profile='without_experience')
+
+
+@pytest.mark.parametrize('purpose,code', [('rehearsal', 'P998'), ('pilot', 'P900')])
+def test_human_synthetic_codes_remain_admissible(tmp_path, purpose, code):
+    from src.ui.components.study_sessions import StudyStore
+    from tests.study_helpers import configured
+    _, _, protocol = configured(tmp_path)
+    store = StudyStore(tmp_path / 'sessions', protocol, purpose=purpose)
+    store.freeze()
+    session = store.admit(store.issue(code, cell=1, profile='without_experience'))
+    assert session.data['assignment']['participant_id'] == code
+    assert session.data['purpose'] == purpose

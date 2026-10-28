@@ -70,3 +70,13 @@ respectivamente dos, uno y un fallo. Se restauraron los bytes originales.
 La primera mutaci?n encontr? un doble que filtraba cost_basis como si fuese un
 campo del proveedor; se corrigi? el doble antes de repetir las tres mutaciones.
 No se contact? el proveedor ni se alteraron reservas privadas reales.
+
+## F6: c?digos primarios rechazados en rehearsal/pilot
+
+[DECLARADO] No se cambia el comportamiento de producci?n: rehearsal admite
+P998 y pilot c?digos sint?ticos P900+, nunca c?digos primarios P01?P20.
+
+[VERIFICADO] Las 40 combinaciones de rechazo y dos admisiones sint?ticas pasan.
+Al retirar temporalmente la restricci?n de rehearsal fallaron sus 20 casos;
+al retirar la de pilot fallaron sus otros 20 casos. study_sessions.py se
+restaur? byte por byte y no forma parte del commit de esta correcci?n.
