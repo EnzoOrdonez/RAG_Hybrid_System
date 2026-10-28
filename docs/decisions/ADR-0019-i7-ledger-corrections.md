@@ -45,3 +45,14 @@ antes de invocar CREATE. Un reinicio conserva esa exposici?n y bloquea otro CREA
 [VERIFICADO] La regresi?n fall? antes del cambio (importe durable ausente).
 Verde: 49 tests de ledger/humano/operador. Retirar la exposici?n previa o la
 tarifa del intento hizo fallar el test durable; se restauraron ambos mutantes.
+
+## F4: recuperaci?n UNKNOWN con la exposici?n solicitada
+
+[DECLARADO] Un intento encontrado recupera su base de costo durable; si vence
+y est? ausente, se liquida una sola vez su m?ximo admitido y se libera la
+exposici?n abierta. No se sustituyen horas por 12 ni precios por la tarifa actual.
+Un intento antiguo sin base de costo queda bloqueado para revisi?n, sin adivinar.
+
+[VERIFICADO] Cuatro regresiones (1/4 h, encontrado/ausente) fallaron antes de
+corregir; despu?s, 53 tests pasan. Los tres mutantes (12 h al encontrar, 12 h
+al vencer y no liberar exposici?n) causaron dos fallos cada uno, y se restauraron.

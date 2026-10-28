@@ -1,6 +1,7 @@
 """I7 money boundaries, exercised without a provider or participant data."""
 import copy
 import json
+from datetime import timedelta
 
 import pytest
 
@@ -91,3 +92,37 @@ def test_reservation_intent_is_durable_before_create(tmp_path):
         restarted.reserve(4)
     assert len(cloud.calls) == before
     assert restarted.state['reservation_gpu_hours_used'] == 4
+
+
+@pytest.mark.parametrize('hours', [1, 4])
+@pytest.mark.parametrize('outcome', ['found', 'expired_absent'])
+def test_unknown_reservation_keeps_requested_hours_and_is_idempotent(tmp_path, hours, outcome):
+    operator, cloud = human_operator(tmp_path, lose_create_response=True)
+    original_rate = operator.config['rates']['compute_usd_h']
+    expected = hours * original_rate + .25
+    before = operator.state['spent_usd']
+    started = operator.now()
+    with pytest.raises(TimeoutError):
+        operator.reserve(hours)
+    # Reconciliation uses the admitted intent even if the current quote changes.
+    operator.config['rates']['compute_usd_h'] = original_rate / 2
+    operator.persist()
+    if outcome == 'expired_absent':
+        cloud.exists = False
+        operator.now = lambda: started + timedelta(hours=hours + 1)
+    restarted = Operator(tmp_path, cloud, now=operator.now)
+    restarted.reconcile()
+    if outcome == 'found':
+        assert restarted.state['open_exposure_usd'] == pytest.approx(expected)
+        assert restarted.state['spent_usd'] == before
+        assert restarted.state['reservation']['cost_basis']['hours'] == hours
+    else:
+        assert restarted.state['spent_usd'] - before == pytest.approx(expected)
+        assert restarted.state['open_exposure_usd'] == 0
+    assert 'reservation_intent' not in restarted.state
+    durable = json.loads(restarted.state_path.read_bytes())
+    restarted = Operator(tmp_path, cloud, now=operator.now)
+    restarted.reconcile()
+    assert restarted.state['spent_usd'] == durable['spent_usd']
+    assert restarted.state['open_exposure_usd'] == durable['open_exposure_usd']
+    assert sum(c[:4] == ['beta', 'compute', 'reservations', 'create'] for c in cloud.calls) == 1

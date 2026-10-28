@@ -59,6 +59,19 @@ def reservation_identity(resource):
     return {k:resource[k] for k in ('name','id','zone','description','specificReservation')}
 
 
+def reservation_intent_exposure(intent):
+    """An unknown result retains its admitted hours and quote, never a guessed TTL."""
+    try:
+        hours, rate, amount = (intent[k] for k in ('hours','compute_usd_h','exposure_usd'))
+        if (any(type(v) not in (int,float) or not math.isfinite(v) or v < 0
+                for v in (hours,rate,amount)) or not 0 < hours <= 12 or rate == 0
+                or not math.isclose(amount,hours*rate+.25,rel_tol=1e-12,abs_tol=1e-9)):
+            raise ValueError('basis')
+    except (KeyError,TypeError,ValueError) as error:
+        raise ValueError('RESERVATION_COST_BASIS_REQUIRED') from error
+    return amount
+
+
 class Operator(LegacyOperator):
     def __init__(self, root, cloud, *, now=None, sleep=time.sleep):
         super().__init__(root,cloud,now=now,sleep=sleep)
@@ -392,6 +405,7 @@ class Operator(LegacyOperator):
                                               'id':reservation['id']})
         intent=self.state.get('reservation_intent')
         if intent:
+            exposure = reservation_intent_exposure(intent)
             found=[r for r in listed if r['name']==intent['name'] and r['zone'].split('/')[-1]==intent['zone']]
             if found:
                 if len(found)!=1 or found[0]['description']!=self.config['resource_marker']:
@@ -400,15 +414,17 @@ class Operator(LegacyOperator):
                 reservation_identity(resource)
                 if datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != datetime.fromisoformat(intent['delete_at_utc']):
                     raise ValueError('UNKNOWN_RESERVATION_NATIVE_TTL_CHANGED')
-                self.state['reservation']=dict(resource,created_utc=resource['creationTimestamp'])
-                self.state['open_exposure_usd']=12*self.config['rates']['compute_usd_h']+.25
+                self.state['reservation']=dict(resource,created_utc=resource['creationTimestamp'],
+                                               cost_basis=dict(intent))
+                self.state['open_exposure_usd']=exposure
                 self.state.pop('reservation_intent')
                 self.persist()
                 return {'status':'RESERVATION_FOUND_RECONCILED'}
             if self.now() < datetime.fromisoformat(intent['delete_at_utc']):
                 raise ValueError('UNKNOWN_CREATE_OUTCOME_PRESERVE_INTENT')
             self.state.pop('reservation_intent')
-            self.state['spent_usd']=self.state.get('spent_usd',0)+12*self.config['rates']['compute_usd_h']+.25
+            self.state['spent_usd']=self.state.get('spent_usd',0)+exposure
+            self.state['open_exposure_usd']=0
             self.persist()
             return self.receipt('reservation',{'status':'UNKNOWN_CREATE_EXPIRED_AND_ABSENT',
                                               'estimated_at_full_upper_bound':True})
