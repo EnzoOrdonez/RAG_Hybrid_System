@@ -144,5 +144,33 @@ por separado la comparación de etiqueta (3 fallos), fingerprint (1), verificaci
 del sello (1), llamada de política desde I7 (1) y hash del PDF (1). Se restauraron
 los bytes originales de cada mutante y las pruebas focalizadas volvieron a pasar.
 
-[DECLARADO] Queda la verificación completa final; no se ejecuta Fase B ni se
-autoriza publicar o gastar.
+## Congelación y verificación del cierre
+
+[VERIFICADO] Correcciones en commits separados: F1=77a19aa, F3=3660a10,
+F4=f30f4cf, F5=32622b5, F6=c06a919, F9=cc01ac9, F2=b9a2d2f y F7=1a7c319.
+La integración que resolvió F8 está en los cherry-picks 9dbba79 y 5ae784f sobre
+d8954cb. El conjunto focalizado final tiene 171 pruebas aprobadas y los seis
+checks documentales pasan. No hay cambios netos en src/, config/ ni en el smoke
+congelado; el CLAUDE.md pendiente del worktree original no se ha tocado.
+
+[DECLARADO] El commit documental de cierre se crea antes de ejecutar el comando
+siguiente, para que el hash congelado sea exactamente el árbol verificado. La
+salida de las tres capas y el hash se entregan juntos en el reporte al dueño:
+
+```powershell
+Remove-Item Env:PYTHON -ErrorAction SilentlyContinue
+$env:HF_HUB_OFFLINE='1'
+$env:TRANSFORMERS_OFFLINE='1'
+$env:PYTHONHASHSEED='42'
+$env:PYTHONUTF8='1'
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PLAYWRIGHT_BROWSERS_PATH='C:/CloudRAG/i7-browser-runtime'
+$env:PYTEST_ADDOPTS='-v -ra -p no:cacheprovider'
+git rev-parse HEAD
+& 'C:\Program Files\Git\bin\bash.exe' init.sh
+exit $LASTEXITCODE
+```
+
+[DECLARADO] La aceptación local exige secretos=0, CPU=0 y docs=0; no equivale a
+GO desplegado. La publicación, los recibos ligados a la fuente y el expediente
+ético real corresponden al dueño. No se ejecuta Fase B ni se autoriza gasto.

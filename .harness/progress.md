@@ -1,13 +1,15 @@
-# Revisi?n actual: F-020, preparaci?n offline I7
+# Revisión actual: F-020, preparación offline I7
 
 [VERIFICADO] Rama fix/i7-human-ledger-ready; base d8954cb + cherry-picks 9dbba79 y 5ae784f.
-[VERIFICADO] L?nea base: init.sh secretos=0, CPU=0 (1896 pasan, 11 omitidas, 5 excluidas), docs=0.
+[VERIFICADO] Línea base: init.sh secretos=0, CPU=0 (1896 pasan, 11 omitidas, 5 excluidas), docs=0.
 [VERIFICADO] F1=77a19aa, F3=3660a10, F4=f30f4cf, F5=32622b5, F6=c06a919, F9=cc01ac9.
-[VERIFICADO] 146 tests focalizados pasan; seis checks documentales pasan. Mutantes detectados y restaurados.
-[DECLARADO] F2 y F7 pendientes de aclaraci?n del due?o: cantidades humanas por SKU y referencia de versi?n B.4.
-[DECLARADO] Falta el init.sh final tras esas correcciones; no hay autorizaci?n de push, gasto ni Fase B. Ver ADR-0019.
+[VERIFICADO] F2=b9a2d2f (cota completa por reserva y extra siempre); F7=1a7c319 (identidad sellada ejecutada).
+[VERIFICADO] 171 tests focalizados pasan; seis checks documentales pasan. Mutantes detectados y restaurados.
+[VERIFICADO] ADR-0019 y este traspaso se repararon en UTF-8. El CLAUDE.md local de interview-readiness sigue intacto.
+[DECLARADO] El commit de cierre se verifica después con init.sh completo; el resultado se reporta ligado a su hash exacto.
+[DECLARADO] F-020 sigue active: publicación, recibos vigentes, expediente ético y Fase B real son pasos del dueño. Sin push ni gasto.
 
-## Traspaso heredado de d8954cb (hist?rico; no es estado de esta rama)
+## Traspaso heredado de d8954cb (histórico; no es estado de esta rama)
 
 # Progreso: estado para arranque en frío
 
