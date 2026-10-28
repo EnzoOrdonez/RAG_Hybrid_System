@@ -38,7 +38,7 @@ def purpose_allowed(purpose, operator_root, *, today=None):
         protocol = verify_draw(reviewed)
         if protocol['fingerprint'] != installation['fingerprint']:
             raise ValueError('Executed study configuration changed')
-        if value['approved_b4_version'] != reviewed.name:
+        if value['approved_b4_version'] != f"{reviewed.name}@{protocol['fingerprint']}":
             raise ValueError('Approval does not cover the executed sealed configuration')
     except (OSError, ValueError, TypeError, AttributeError, KeyError):
         raise OperatorError('study bloqueado: Enzo debe guardar la aprobación ética y su PDF en ethics; revisa el runbook.') from None

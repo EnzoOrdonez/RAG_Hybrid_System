@@ -19,7 +19,8 @@ def ethics_fixture(tmp_path):
     pdf = b'synthetic fixture; not ethical approval'
     (root / 'ethics_approval.pdf').write_bytes(pdf)
     record = dict(committee='synthetic fixture committee', approval_code='FIXTURE', date='2026-01-01',
-                  pdf_sha256=hashlib.sha256(pdf).hexdigest(), approved_b4_version=reviewed.name)
+                  pdf_sha256=hashlib.sha256(pdf).hexdigest(),
+                  approved_b4_version=f"{reviewed.name}@{protocol['fingerprint']}")
     (root / 'ethics_approval.json').write_text(json.dumps(record))
     return root, reviewed, record, installation
 
@@ -31,6 +32,41 @@ def test_study_requires_human_record_and_exact_pdf(tmp_path):
     root, _, _, _ = ethics_fixture(tmp_path)
     assert purpose_allowed('study', tmp_path)['ethics_verified']
     (root / 'ethics_approval.pdf').write_bytes(b'changed fixture')
+    with pytest.raises(OperatorError, match='study bloqueado'):
+        purpose_allowed('study', tmp_path)
+
+
+def test_study_approval_matches_sealed_name_and_fingerprint(tmp_path):
+    _, reviewed, record, installation = ethics_fixture(tmp_path)
+    result = purpose_allowed('study', tmp_path)
+    assert result['ethics_verified'] is True
+    assert result['sealed_configuration_id'] == reviewed.name
+    assert result['protocol_fingerprint'] == installation['fingerprint']
+    assert record['approved_b4_version'] == f"{reviewed.name}@{result['protocol_fingerprint']}"
+
+
+def test_study_approval_rejects_same_name_with_other_sealed_fingerprint(tmp_path):
+    from src.ui.components.study_protocol import ROOT, draw_study_configuration, verify_draw
+    _, reviewed, _, installation = ethics_fixture(tmp_path)
+    changed = json.loads((ROOT / 'config/study.example.json').read_text(encoding='utf-8'))
+    changed['randomization']['assignment_seed'] += 1
+    source = tmp_path / 'changed-config.json'
+    source.write_text(json.dumps(changed))
+    other = tmp_path / 'other' / reviewed.name
+    protocol = draw_study_configuration(source, tmp_path / 'unused-other.csv', other)
+    assert other.name == reviewed.name
+    assert verify_draw(other)['fingerprint'] == protocol['fingerprint']
+    assert protocol['fingerprint'] != installation['fingerprint']
+    installation.update(local_reviewed_config=str(other), fingerprint=protocol['fingerprint'])
+    (tmp_path / 'installation.json').write_text(json.dumps(installation))
+    with pytest.raises(OperatorError, match='study bloqueado'):
+        purpose_allowed('study', tmp_path)
+
+
+def test_study_approval_rejects_version_without_fingerprint(tmp_path):
+    root, reviewed, record, _ = ethics_fixture(tmp_path)
+    record['approved_b4_version'] = reviewed.name
+    (root / 'ethics_approval.json').write_text(json.dumps(record))
     with pytest.raises(OperatorError, match='study bloqueado'):
         purpose_allowed('study', tmp_path)
 
