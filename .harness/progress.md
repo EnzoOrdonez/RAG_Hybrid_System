@@ -2,8 +2,10 @@
 
 [VERIFICADO] Rama fix/i7-human-ledger-ready; base d8954cb + cherry-picks 9dbba79 y 5ae784f.
 [VERIFICADO] L?nea base: init.sh secretos=0, CPU=0 (1896 pasan, 11 omitidas, 5 excluidas), docs=0.
-[VERIFICADO] F1: 37 tests pasan; retirar cualquiera de las dos guardas produce cuatro fallos.
-[DECLARADO] F2?F9 pendientes; no hay autorizaci?n de push, gasto ni Fase B. Ver ADR-0019.
+[VERIFICADO] F1=77a19aa, F3=3660a10, F4=f30f4cf, F5=32622b5, F6=c06a919, F9=cc01ac9.
+[VERIFICADO] 146 tests focalizados pasan; seis checks documentales pasan. Mutantes detectados y restaurados.
+[DECLARADO] F2 y F7 pendientes de aclaraci?n del due?o: cantidades humanas por SKU y referencia de versi?n B.4.
+[DECLARADO] Falta el init.sh final tras esas correcciones; no hay autorizaci?n de push, gasto ni Fase B. Ver ADR-0019.
 
 ## Traspaso heredado de d8954cb (hist?rico; no es estado de esta rama)
 

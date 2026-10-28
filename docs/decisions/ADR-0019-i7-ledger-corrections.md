@@ -88,3 +88,14 @@ Las nuevas regresiones de reservas de 1/4 h reconciliadas tres d?as despu?s,
 sin arrancar VM ni sesi?n, cargan solo hasta el TTL y no duplican tras reinicio.
 Retirar el l?mite produjo dos fallos; se restaur? byte por byte. No hubo
 cambio de producci?n en esta correcci?n, solo cobertura y este registro.
+
+## Estado del traspaso parcial
+
+[VERIFICADO] F1, F3, F4, F5, F6 y F9 est?n en commits separados; 146 tests
+focalizados y los seis checks documentales pasan. Las mutaciones se restauraron.
+
+[DECLARADO] F2 requiere decidir las cantidades de exposici?n humana por SKU;
+F7 requiere definir si approved_b4_version alude a una revisi?n B.4 declarada
+en installation.json o a schema_version=2. No hay revisi?n B.4 en el protocolo
+sellado. Se consult? al due?o antes de introducir cualquiera de esas pol?ticas.
+Falta la verificaci?n completa final tras F2/F7; no se declara listo para Fase B.
