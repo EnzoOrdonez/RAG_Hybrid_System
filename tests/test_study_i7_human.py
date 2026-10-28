@@ -80,6 +80,55 @@ def test_human_purpose_uses_standard_profile_and_study_needs_ethics(tmp_path):
         op.human_start_profile('participants')
 
 
+def test_study_start_accepts_ethics_for_executed_sealed_configuration(tmp_path):
+    from tests.test_study_i7_ledger import ReservationCloud
+    from tests.test_study_operator_policy import ethics_fixture
+
+    op, _ = closed_phase_b(tmp_path)
+    op.human_phase_open()
+    _, reviewed, _, installation = ethics_fixture(tmp_path)
+    op.config.update(installation, i7_profile='gate')
+    op.persist()
+
+    class StartCloud(ReservationCloud):
+        def command(self, arguments, **kwargs):
+            operation = arguments[:3]
+            if operation == ['compute', 'instances', 'describe']:
+                self.calls.append(arguments)
+                return dict(op.selected(), status='TERMINATED',
+                    machineType='machineTypes/g2-standard-4', deletionProtection=True,
+                    disks=[{'autoDelete': False}], scheduling={
+                        'instanceTerminationAction': 'STOP', 'maxRunDuration': {'seconds': '10800'}},
+                    reservationAffinity={
+                    'consumeReservationType': 'SPECIFIC_RESERVATION',
+                    'values': [op.state['reservation']['name']]})
+            if operation in (['compute', 'instances', 'add-metadata'],
+                             ['compute', 'instances', 'start']):
+                self.calls.append(arguments)
+                return None
+            return super().command(arguments, **kwargs)
+
+    cloud = StartCloud(op)
+    op.cloud = cloud
+    op.reserve(4)
+    before = len(cloud.calls)
+    assert op.start('study') == {'status': 'STARTED_NOT_READY'}
+    assert [call[:3] for call in cloud.calls[before:]] == [
+        ['compute', 'instances', 'describe'],
+        ['compute', 'reservations', 'describe'],
+        ['compute', 'instances', 'add-metadata'],
+        ['compute', 'instances', 'start']]
+    saved = json.loads((tmp_path / 'installation.json').read_bytes())
+    state = json.loads(op.state_path.read_bytes())
+    assert saved['purpose'] == state['purpose'] == 'study'
+    assert saved['i7_profile'] == 'standard'
+    assert saved['local_reviewed_config'] == str(reviewed)
+    assert saved['fingerprint'] == installation['fingerprint']
+    assert state['ready_verified'] is False
+    assert state['boot_started_utc'] == op.now().isoformat()
+    assert (tmp_path / 'startup-i7.sh').is_file()
+
+
 def test_human_ledger_replaces_phase_b_window_and_cap(tmp_path):
     op,_ = closed_phase_b(tmp_path)
     op.human_phase_open()
