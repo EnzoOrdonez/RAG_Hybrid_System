@@ -165,3 +165,20 @@ def test_open_reservation_keeps_price_after_refresh(tmp_path, monkeypatch, closu
     assert operator.state['open_exposure_usd'] == 0
     operator.reconcile()
     assert operator.state['spent_usd'] - spent == pytest.approx(elapsed * old_rate)
+
+
+@pytest.mark.parametrize('hours', [1, 4])
+def test_expired_no_show_is_charged_only_to_ttl_once(tmp_path, hours):
+    operator, cloud = human_operator(tmp_path)
+    rate = operator.config['rates']['compute_usd_h']
+    started, spent = operator.now(), operator.state['spent_usd']
+    operator.reserve(hours)
+    cloud.exists = False
+    operator.now = lambda: started + timedelta(days=3)
+    operator.reconcile()
+    assert operator.state['spent_usd'] - spent == pytest.approx(hours * rate)
+    assert operator.state['open_exposure_usd'] == 0
+    restarted = Operator(tmp_path, cloud, now=operator.now)
+    restarted.reconcile()
+    assert restarted.state['spent_usd'] - spent == pytest.approx(hours * rate)
+    assert not any(c[:3] == ['compute', 'instances', 'start'] for c in cloud.calls)

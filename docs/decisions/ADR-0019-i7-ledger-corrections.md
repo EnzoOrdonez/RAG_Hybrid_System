@@ -80,3 +80,11 @@ P998 y pilot c?digos sint?ticos P900+, nunca c?digos primarios P01?P20.
 Al retirar temporalmente la restricci?n de rehearsal fallaron sus 20 casos;
 al retirar la de pilot fallaron sus otros 20 casos. study_sessions.py se
 restaur? byte por byte y no forma parte del commit de esta correcci?n.
+
+## F9: TTL nativo y no-shows
+
+[VERIFICADO] El l?mite min(now, deleteAtTime) ya ven?a de d0ba95a y se conserva.
+Las nuevas regresiones de reservas de 1/4 h reconciliadas tres d?as despu?s,
+sin arrancar VM ni sesi?n, cargan solo hasta el TTL y no duplican tras reinicio.
+Retirar el l?mite produjo dos fallos; se restaur? byte por byte. No hubo
+cambio de producci?n en esta correcci?n, solo cobertura y este registro.
