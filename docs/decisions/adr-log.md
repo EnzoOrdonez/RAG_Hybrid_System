@@ -225,3 +225,8 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
   5. Las reglas `default-allow-ssh` y `default-allow-rdp` quedan restringidas al rango de IAP; no se borran. [VERIFICADO] con una lectura posterior al cambio.
 - **Consecuencias:** [ESTIMADO, lista del 27/10] la retención cuesta unos USD 2,87 por día y cada boot humano unos USD 3,08. Con 2 sesiones por boot (10 boots), el tope alcanza para unos 12 días de fase humana; con 1 sesión por boot, no alcanza para 20 sesiones. Al llegar al tope solo se bloquean nuevas admisiones: la retención de recursos la decide Enzo. El calendario de sesiones debe ajustarse a esto, o Enzo decide otro tope con un ADR nuevo.
 - **Fuentes:** `tests/test_study_i7_human.py`; [ADR-0015](#adr-0015); `.harness/feature_list.json` (F-020).
+
+## ADR-0020: Ajustes finales y pendientes de I7
+
+Ver [ADR-0020](ADR-0020-i7-final-freeze.md): H3, H9, positivo integrado de study,
+fe de erratas de los conteos de mutación de ADR-0019 y backlog sin corregir.

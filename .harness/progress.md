@@ -1,13 +1,17 @@
-# Revisión actual: F-020, preparación offline I7
+[Codex] | 2026-10-28 10:13 America/Lima | rama `fix/i7-human-ledger-ready` @ `396b3f2` | tarea F-020 | modo: ejecución
+Capas: 1 secretos=pendiente | 2 tests=pendiente (159 focalizados pasan) | 3 docs=pendiente sobre el cierre documental
+Cambios: H3=2572014, H9=912dd3b, positivo study=396b3f2, ADR-0020 | Sin verificar: init.sh final, nube, GO y ética reales
 
-[VERIFICADO] Rama fix/i7-human-ledger-ready; base d8954cb + cherry-picks 9dbba79 y 5ae784f.
-[VERIFICADO] Línea base: init.sh secretos=0, CPU=0 (1896 pasan, 11 omitidas, 5 excluidas), docs=0.
-[VERIFICADO] F1=77a19aa, F3=3660a10, F4=f30f4cf, F5=32622b5, F6=c06a919, F9=cc01ac9.
-[VERIFICADO] F2=b9a2d2f (cota completa por reserva y extra siempre); F7=1a7c319 (identidad sellada ejecutada).
-[VERIFICADO] 171 tests focalizados pasan; seis checks documentales pasan. Mutantes detectados y restaurados.
-[VERIFICADO] ADR-0019 y este traspaso se repararon en UTF-8. El CLAUDE.md local de interview-readiness sigue intacto.
-[DECLARADO] El commit de cierre se verifica después con init.sh completo; el resultado se reporta ligado a su hash exacto.
-[DECLARADO] F-020 sigue active: publicación, recibos vigentes, expediente ético y Fase B real son pasos del dueño. Sin push ni gasto.
+# Revisión actual: F-020, ajuste final offline sobre e2335ed
+
+[VERIFICADO] H3 liga approved_b4_version a nombre@fingerprint del sello verificado.
+Dos mutantes detectados: solo nombre (2 fallos) y comparación retirada (5); bytes restaurados y 87 tests verdes.
+[VERIFICADO] H9 fecha el código y ambos mensajes CLI del piso como 2026-10-28 UTC; 92 tests pasan.
+[VERIFICADO] Positivo integrado start('study') con aprobación sintética, GO, fase humana y reserva; política y startup reales, nube simulada.
+[VERIFICADO] Suite focalizada final: ledger, human, operator, phase_b, policy y sessions; 159 pasan.
+[DECLARADO] ADR-0020 complementa ADR-0019 con límites inferiores según REPORTE_REVISION2.md y backlog H1, H2, H4–H8 y P7, sin corregirlos.
+[DECLARADO] El cuarto commit contiene el cierre documental; después se ejecuta init.sh sin otras corridas concurrentes y se reportan hash exacto, 0/0/0 y git diff --stat e2335ed HEAD.
+[DECLARADO] F-020 sigue active, passes=false: publicación, recibos vigentes, expediente ético y Fase B real son pasos del dueño. Sin gcloud, push ni gasto.
 
 ## Traspaso heredado de d8954cb (histórico; no es estado de esta rama)
 
