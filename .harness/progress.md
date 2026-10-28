@@ -1,3 +1,12 @@
+# Revisi?n actual: F-020, preparaci?n offline I7
+
+[VERIFICADO] Rama fix/i7-human-ledger-ready; base d8954cb + cherry-picks 9dbba79 y 5ae784f.
+[VERIFICADO] L?nea base: init.sh secretos=0, CPU=0 (1896 pasan, 11 omitidas, 5 excluidas), docs=0.
+[VERIFICADO] F1: 37 tests pasan; retirar cualquiera de las dos guardas produce cuatro fallos.
+[DECLARADO] F2?F9 pendientes; no hay autorizaci?n de push, gasto ni Fase B. Ver ADR-0019.
+
+## Traspaso heredado de d8954cb (hist?rico; no es estado de esta rama)
+
 # Progreso: estado para arranque en frío
 
 **Última actualización:** 2026-10-27 por Claude (tarea F-020, fases A y B cerradas salvo energía).

@@ -108,6 +108,8 @@ class Operator:
                     next_action='Revisa el primer comando con exit_code distinto de cero; corrige su causa y ejecuta stop antes de otro start.')
 
     def reserve_cost(self, operation, amount):
+        if self.config.get('iteration') == 7:
+            raise ValueError('I7_LEGACY_PAID_OPERATION_FORBIDDEN')
         from scripts.study_operator.run_checkpoint import admit
 
         admit(self.config,self.state,amount,now=self.now())
@@ -266,6 +268,8 @@ class Operator:
         return token
 
     def ip_reserve(self):
+        if self.config.get('iteration') == 7:
+            raise ValueError('I7_LEGACY_PAID_OPERATION_FORBIDDEN')
         name = self.config['ip_name']
         ip_region = region(self.config['zone'])
         if self.state.get('reserved_address_region') not in (None, ip_region):

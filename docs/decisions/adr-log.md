@@ -25,6 +25,7 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
 | [ADR-0016](#adr-0016) | 2026-10-27 | Fecha mínima de pago de la Fase B I7 adelantada al 2026-10-28 UTC, con respaldo al 2026-11-01 | Aceptado |
 | [ADR-0017](#adr-0017) | 2026-10-27 | Decisiones de arranque de F-020: ruta humana en nube, cohorte NLI, config sellada vigente | Aceptado |
 | [ADR-0018](#adr-0018) | 2026-10-27 | Fase humana sobre la imagen I7: GO verificado, ledger propio de USD 70 y firewall restringido | Aceptado |
+| [ADR-0019](ADR-0019-i7-ledger-corrections.md) | 2026-10-27 | Correcciones del ledger y la admisión humana I7; preparación offline | Aceptado |
 
 ---
 
