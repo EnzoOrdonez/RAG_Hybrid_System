@@ -173,3 +173,21 @@ Logs: `C:/Users/enziz/AppData/Local/Temp/i7-r4-mutations-3el4oyqb`.
 [DECLARADO] El cierre completo de esta ronda se ejecuta tras sus cuatro commits
 y se entrega con el hash exacto en el reporte externo. Los conteos y la cabecera
 anteriores conservan su alcance histórico; no se confunden con ese cierre nuevo.
+
+## Backlog de REPORTE_REVISION3, sin corregir
+
+| Id | Severidad | Comportamiento pendiente |
+|---|---|---|
+| L-1 | LOW | Una fecha sin zona emite AWARE_RESERVATION_CLOCK_REQUIRED, distinto de los códigos de rechazo de TTL de reserve/reconcile; texto inválido puede emitir el ValueError del parser. Se conserva el fallo cerrado. |
+| L-2 | LOW | Gate persiste gate-cohort-intent.json con apertura x y replay_allowed=false antes de reserve(5). Si beta desaparece después del preflight CLI, puede quedar un intento no repetible. Se conserva la secuencia actual. |
+| L-3 | LOW | verify_beta traduce OSError, ValueError, TypeError y TimeoutExpired; otras excepciones pueden propagarse con otro tipo. Sigue fallando cerrado. No se amplía el catch. |
+
+[REGISTRADO, NO RESUELTO] Tercera aparición de F-016, según REPORTE_REVISION3:
+después de init.sh 0/0/0 en a32c9dc, la repetición con totales mostró
+2047 pasan, 1 falla, 12 omitidos, 5 excluidos y 9 subtests pasan (exit 1, 229 s).
+Falló test_study_stimulus_supervisor.py::test_short_calls_always_check_host_telemetry
+con TimeoutError «Independent worker deadline reached», study_gate_supervisor.py:123.
+Las dos apariciones anteriores estaban registradas el 25/10 y en la corrida
+previa del autor descrita por REPORTE_REVISION2. La revisión 3 indica que la
+prueba sí pasó en su init.sh previo; no demuestra resolución de la intermitencia.
+No se cambian el supervisor, su deadline, el test ni los marcadores de exclusión.
