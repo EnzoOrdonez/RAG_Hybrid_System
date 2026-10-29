@@ -1,8 +1,22 @@
-[Codex] | 2026-10-28 10:13 America/Lima | rama `fix/i7-human-ledger-ready` @ `396b3f2` | tarea F-020 | modo: ejecución
-Capas: 1 secretos=pendiente | 2 tests=pendiente (159 focalizados pasan) | 3 docs=pendiente sobre el cierre documental
-Cambios: H3=2572014, H9=912dd3b, positivo study=396b3f2, ADR-0020 | Sin verificar: init.sh final, nube, GO y ética reales
+[Codex] | 2026-10-29 12:22 America/Lima | rama `fix/interview-readiness` @ `7f309a9` | tarea F-020 | modo: ejecución local
+Capas: 1 secretos=pendiente | 2 tests=pendiente (314 focalizados pasan, 8 omitidos) | 3 docs=0 (seis checks), init.sh final pendiente
+Cambios: incidente gpu-restore-01, seis puntos locales | Sin verificar: init.sh sobre el sexto commit, Linux, nube, GO y ética reales
 
-# Revisión actual: F-020, ajuste final offline sobre e2335ed
+# Revisión actual: gpu-restore-01 sobre 468eb25
+
+[VERIFICADO] 6bfbec9: reserva UTC a segundos y comparación a precisión SDK; UNKNOWN existente se recupera sin otro CREATE. Ocho regresiones rojas antes; 133 tests verdes después.
+[VERIFICADO] 1f3b5ff: beta local requerido antes de reserve/admit_paid y entradas pagadas; consulta components list --only-local-state. Cleanup y parada segura CPU conservados.
+[VERIFICADO] 5763124: 15 familias/95 flags, 94 visibles en --help y listen-on-stdin oculto pero registrado en el parser; sin corrección de flags. e0d8b3e: auditoría de fechas adicionales, sin otros arreglos.
+[VERIFICADO] 7f309a9: ADR-0021, hashes del estado histórico y referencia al force push autorizado previo. Ningún cambio al estado privado.
+[VERIFICADO] Siete tests fijan imagen/commit del GO y admisión de fuente. Las siete mutaciones de tiempo, beta y GO se detectaron y restauraron.
+[VERIFICADO] Todos los test_study_i7*.py más policy: 314 pasan, 8 omitidos. Preflight local real: GCLOUD_BETA_INSTALLED, versión 2026.09.25.
+[DECLARADO] El sexto commit incluye pruebas de identidad, informe y este traspaso. Después se ejecuta init.sh completo con máquina quieta; el cierre se reporta con hash exacto, 0/0/0 y git diff --stat 468eb25 HEAD.
+[DECLARADO] Cambiar HEAD con código nuevo bloquea el operador sobre una instalación antigua; un GO futuro debe corresponder al nuevo build. Sin retag ni migración privada, gcloud con efecto, push o gasto.
+[DECLARADO] F-020 continúa active, passes=false. Informe: [auditoría del incidente](../docs/reports/i7-gpu-restore-01-audit.md).
+
+## Cierre anterior sobre e2335ed (histórico)
+
+# F-020, ajuste final offline sobre e2335ed
 
 [VERIFICADO] H3 liga approved_b4_version a nombre@fingerprint del sello verificado.
 Dos mutantes detectados: solo nombre (2 fallos) y comparación retirada (5); bytes restaurados y 87 tests verdes.

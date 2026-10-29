@@ -88,3 +88,54 @@ UTC y offset -05:00; dos recuperaciones UNKNOWN equivalentes; cuatro rechazos po
 [DECLARADO] Los hashes y timestamps de los archivos privados históricos no se
 normalizan ni se reescriben. Esta revisión no declara compatibilidad con fechas
 arbitrarias sin zona ni acredita tiempos o facturación de GCE en vivo.
+
+## Commit, build y GO de la fase humana
+
+[VERIFICADO por código y siete pruebas sintéticas] verified_gate_go verifica el
+hash del archivo privado, el hash lógico del proof, el veredicto GO y la igualdad
+de proof.inventory.image.image_id y proof.inventory.source.commit con
+installation.json. No lee HEAD ni consulta Git por sí mismo.
+
+| Cambio | Resultado |
+|---|---|
+| Cambiar solo el commit de installation.json, manteniendo el proof anterior | VERIFIED_GATE_GO_REQUIRED, incluso si la imagen no cambió. |
+| Cambiar solo la imagen de installation.json | VERIFIED_GATE_GO_REQUIRED, incluso si el commit no cambió. |
+| Nueva identidad de build y nuevo proof/recibo coherente con esa imagen y commit, antes de abrir la fase | Puede abrir HUMAN_PHASE_OPEN; cambiar el commit antes del build no impide un GO futuro de la nueva identidad. Esto se prueba con fixtures, no con un build real. |
+| Cambiar HEAD manteniendo installation.json y prueba antiguos | verified_gate_go aislado todavía verifica esa pareja antigua; verify_tool_source controla HEAD por separado. Si el diff incluye código o .harness, la CLI rechaza OPERATOR_SOURCE_COMMIT_DIFFERS. |
+| Publicación posterior que cambia únicamente docs/ u output/audit/ | verify_tool_source conserva su excepción documental; no vuelve a etiquetar el commit de la imagen ni el proof. |
+| Sustituir el GO después de abrir la fase humana | human_start_profile rechaza GATE_EVIDENCE_CHANGED_SINCE_OPEN; no se migra silenciosamente la fase abierta. |
+
+[VERIFICADO] Antes de build, i7_cpu_pipeline.build exige HEAD igual al commit
+instalado y al de la rama publicada (PUBLISHED_I7_SOURCE_REQUIRED). La prueba
+descargada de Streamlit también liga imagen y commit. El recibo local de readiness
+se liga a los bytes de fuente, incluidos scripts y tests: cambiar esos bytes
+requiere nueva evidencia de verificación; init.sh local no sustituye sus recibos
+Windows/Linux/I7 ni un GO real.
+
+[DECLARADO] El nuevo código debe pertenecer a la identidad del build futuro y
+de las pruebas y el GO posteriores. La instalación y el build históricos de
+468eb25 no se reetiquetan para saltar las guardas. Aquí no se publica, reconstruye,
+migra estado ni produce GO en GCP.
+
+## Verificación de las correcciones
+
+[VERIFICADO] Antes del arreglo temporal hubo ocho regresiones fallidas: seis
+reservas nuevas y dos recuperaciones equivalentes. Después, 133 tests de tiempo,
+ledger, human y operator pasaron. Retirar la truncación del esperado histórico
+causó dos fallos; aceptar todo TTL causó seis. Los archivos se restauraron byte
+por byte.
+
+[VERIFICADO] El test de beta falló antes del arreglo al alcanzar admit_paid.
+Retirar las guardas de reserve, CLI del dueño y CLI Fase B produjo respectivamente
+1, 9 y 11 fallos. Retirar por separado las guardas de imagen y commit del GO
+produjo un fallo por mutante. Las siete mutaciones se restauraron byte por byte.
+Evidencia local: `C:/Users/enziz/AppData/Local/Temp/i7-incident-mutations-t9iydm64`.
+
+[VERIFICADO] Suite focalizada final: todos los test_study_i7*.py más policy,
+314 pasan y 8 omitidos (sin fijar el runtime Chromium en esa invocación).
+El preflight nuevo, ejecutado contra el SDK local, devuelve GCLOUD_BETA_INSTALLED
+con beta_version=2026.09.25. Los seis checks de documentación pasan.
+
+[DECLARADO] init.sh completo se ejecuta después del sexto commit, con runtime
+Chromium fijado y la máquina quieta; su salida y el hash congelado se entregan
+juntos en el traspaso final. Esta declaración no anticipa un resultado.
