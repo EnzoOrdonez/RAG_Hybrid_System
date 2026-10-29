@@ -86,9 +86,10 @@ def reservation_deadline_matches(expected, observed):
             raise ValueError('AWARE_RESERVATION_CLOCK_REQUIRED')
         return parsed.astimezone(timezone.utc)
     expected = instant(expected)
-    # gcloud FormatDateTime uses %3f: it truncates only the outgoing value.
-    expected = expected.replace(microsecond=expected.microsecond // 1000 * 1000)
-    return instant(observed) == expected
+    # SDK %3f rounds half-up, keeping 999 on overflow; legacy also permits truncation.
+    truncated = expected.replace(microsecond=expected.microsecond // 1000 * 1000)
+    rounded = expected.replace(microsecond=min(999, (expected.microsecond + 500) // 1000) * 1000)
+    return instant(observed) in (truncated, rounded)
 
 
 class Operator(LegacyOperator):

@@ -66,7 +66,8 @@ def test_existing_unknown_uses_sdk_precision_without_recreate(tmp_path, offset, 
         cloud.offset).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
     before = copy.deepcopy(op.state)
     restarted = Operator(tmp_path, cloud, now=op.now)
-    if delta_ms:
+    # .968532 accepts both the legacy truncation .968 and SDK half-up .969.
+    if delta_ms == -1:
         with pytest.raises(ValueError, match='UNKNOWN_RESERVATION_NATIVE_TTL_CHANGED'):
             restarted.reconcile()
         assert restarted.state == before
