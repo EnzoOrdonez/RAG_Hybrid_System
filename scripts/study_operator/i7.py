@@ -78,6 +78,19 @@ def reservation_rate(reservation):
     return basis['compute_usd_h']
 
 
+def reservation_deadline_matches(expected, observed):
+    """Compare instants at the SDK's transmitted precision, including old intents."""
+    def instant(value):
+        parsed = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        if parsed.utcoffset() is None:
+            raise ValueError('AWARE_RESERVATION_CLOCK_REQUIRED')
+        return parsed.astimezone(timezone.utc)
+    expected = instant(expected)
+    # gcloud FormatDateTime uses %3f: it truncates only the outgoing value.
+    expected = expected.replace(microsecond=expected.microsecond // 1000 * 1000)
+    return instant(observed) == expected
+
+
 class Operator(LegacyOperator):
     def __init__(self, root, cloud, *, now=None, sleep=time.sleep):
         super().__init__(root,cloud,now=now,sleep=sleep)
@@ -254,8 +267,9 @@ class Operator(LegacyOperator):
         name = 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]
         zone = self.selected()['zone']
         requested = self.now()
-        until = requested+timedelta(hours=hours)
-        intent = {'name':name,'zone':zone,'delete_at_utc':until.isoformat(),'status':'UNKNOWN',
+        until = (requested+timedelta(hours=hours)).astimezone(timezone.utc).replace(microsecond=0)
+        delete_at = until.isoformat(timespec='seconds')
+        intent = {'name':name,'zone':zone,'delete_at_utc':delete_at,'status':'UNKNOWN',
                   'requested_utc':requested.isoformat(),'hours':hours,'compute_usd_h':rate,
                   'price_receipt_sha256':self.config['rates']['price_receipt_sha256'],
                   'exposure_usd':exposure}
@@ -268,11 +282,11 @@ class Operator(LegacyOperator):
         self.cloud.command(['beta','compute','reservations','create',name,'--zone='+zone,
             '--machine-type=g2-standard-4','--vm-count=1','--accelerator=type=nvidia-l4,count=1',
             '--require-specific-reservation','--description='+self.config['resource_marker'],
-            '--delete-at-time='+until.isoformat()],timeout=300)
+            '--delete-at-time='+delete_at],timeout=300)
         resource = self.cloud.command(['compute','reservations','describe',name,'--zone='+zone])
         reservation_identity(resource)
         if (resource['description'] != self.config['resource_marker']
-                or datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != until):
+                or not reservation_deadline_matches(delete_at, resource['deleteAtTime'])):
             raise ValueError('RESERVATION_NATIVE_DELETION_NOT_VERIFIED')
         self.state['reservation'] = dict(resource,created_utc=resource['creationTimestamp'],
                                         cost_basis=dict(intent))
@@ -280,7 +294,7 @@ class Operator(LegacyOperator):
         self.state.pop('reservation_intent')
         self.persist()
         return self.receipt('reservation',{'status':'SPECIFIC_RESERVATION_HELD',
-            'id':str(resource['id']),'name':name,'delete_at_utc':until.isoformat()})
+            'id':str(resource['id']),'name':name,'delete_at_utc':delete_at})
 
     def observed(self):
         from scripts.study_operator.cloud_client import checked_vm
@@ -439,7 +453,7 @@ class Operator(LegacyOperator):
                     raise ValueError('UNKNOWN_RESERVATION_IDENTITY_CHANGED')
                 resource=found[0]
                 reservation_identity(resource)
-                if datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != datetime.fromisoformat(intent['delete_at_utc']):
+                if not reservation_deadline_matches(intent['delete_at_utc'], resource['deleteAtTime']):
                     raise ValueError('UNKNOWN_RESERVATION_NATIVE_TTL_CHANGED')
                 self.state['reservation']=dict(resource,created_utc=resource['creationTimestamp'],
                                                cost_basis=dict(intent))
