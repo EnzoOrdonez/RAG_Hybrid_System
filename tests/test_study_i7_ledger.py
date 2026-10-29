@@ -44,6 +44,11 @@ class ReservationCloud:
         self.resource.pop('cost_basis', None)
         self.resource.pop('created_utc', None)
         self.at_create = None
+        self.sdk_checks = 0
+
+    def require_beta(self):
+        self.sdk_checks += 1
+        return {'status': 'GCLOUD_BETA_INSTALLED', 'beta_version': 'fixture'}
 
     def command(self, arguments, **kwargs):
         self.calls.append(arguments)

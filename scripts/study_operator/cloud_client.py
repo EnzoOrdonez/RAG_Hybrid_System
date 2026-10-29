@@ -36,6 +36,10 @@ class Cloud:
         self.sequence = max((int(p.name.split('-')[0]) for p in self.root.glob('*-intent.json')
                              if p.name.split('-')[0].isdigit()), default=0)
 
+    def require_beta(self):
+        from scripts.study_operator.i7_sdk_preflight import verify_beta
+        return verify_beta(self.sdk, invoke=self.invoke)
+
     def command(self, arguments, *, private_output=True, input_data=None, timeout=180, json_output=True):
         self.sequence += 1
         stem = self.root / f'{self.sequence:04d}'

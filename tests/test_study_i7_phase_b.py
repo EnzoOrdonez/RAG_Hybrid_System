@@ -1,6 +1,8 @@
 
 import pytest
 
+pytestmark = pytest.mark.usefixtures('installed_beta')
+
 from scripts.study_operator.i7_phase_b import profile, validate_steps
 
 

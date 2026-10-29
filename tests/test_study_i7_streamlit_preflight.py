@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 
 import pytest
 
+pytestmark = pytest.mark.usefixtures('installed_beta')
+
 
 def test_prebuild_matches_owner_lock_and_recipe_without_image():
     from scripts.study_operator.i7_streamlit_preflight import verify_before_cpu

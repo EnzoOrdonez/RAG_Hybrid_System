@@ -7,6 +7,16 @@ exactly the duplication pattern that produced this phase's silent defects.
 import io
 import tokenize
 
+import pytest
+
+
+@pytest.fixture
+def installed_beta(monkeypatch):
+    """CLI tests double the local SDK separately from provider commands."""
+    from scripts.study_operator import i7_sdk_preflight
+    monkeypatch.setattr(i7_sdk_preflight, 'verify_beta', lambda *a, **kw:
+        {'status': 'GCLOUD_BETA_INSTALLED', 'beta_version': 'fixture'})
+
 # Py3.12+ splits f-strings into FSTRING_START/MIDDLE/END, so filtering tokenize.STRING alone
 # leaves the literal text of every f-string behind. Match by NAME to stay version-tolerant.
 _DROP = {"STRING", "COMMENT", "FSTRING_START", "FSTRING_MIDDLE", "FSTRING_END"}

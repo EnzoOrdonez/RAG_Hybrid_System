@@ -255,6 +255,7 @@ class Operator(LegacyOperator):
         human = self.state.get('human_phase')
         if not 0 < hours <= (HUMAN_RESERVATION_MAX_H if human else 12):
             raise ValueError('HUMAN_RESERVATION_TTL_REQUIRED' if human else 'RESERVATION_TTL_REQUIRED')
+        self.cloud.require_beta()
         rate = self.config['rates']['compute_usd_h']
         exposure = hours*rate+.25
         self.admit_paid(exposure, additional_reservations=1 if human else 0)
@@ -562,6 +563,13 @@ def main(argv=None):
         from scripts.study_operator.cloud_client import Cloud
         if not args.sdk:
             parser.error('--sdk required')
+        if args.operation in ('reserve','start','gate-start','stimulus-start','privacy','series',
+                              'schedule','restore-check','invite'):
+            from scripts.study_operator.i7_sdk_preflight import verify_beta
+            try:
+                verify_beta(args.sdk)
+            except ValueError as error:
+                parser.error(str(error))
         cloud = Cloud(args.sdk,'pure-loop-474323-a8',args.root/'runs')
         with FileLock(str(args.root/'i7.lock'),timeout=1):
             operator = Operator(args.root,cloud)

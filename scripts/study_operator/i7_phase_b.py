@@ -18,7 +18,7 @@ def profile(kind):
             'native_stop_s':10800}
 
 
-def validate_steps(evidence=None, *, root=None,november_authorized=False,step='cpu-build'):
+def validate_steps(evidence=None, *, root=None,november_authorized=False,step='cpu-build',sdk=None):
     for module in ('i7','i7_gate_host','i7_restore','i7_privacy','cpu_build','build_context',
                    'i7_service_disk','i7_cpu_pipeline','i7_smoke','i7_admission','i7_technical','i7_reconcile','i7_costs'):
         if importlib.util.find_spec('scripts.study_operator.'+module) is None:
@@ -37,6 +37,13 @@ def validate_steps(evidence=None, *, root=None,november_authorized=False,step='c
     except ValueError as error:
         result['status']='LOCAL_RUNBOOK_PARTIAL'
         result['blockers'].append({'owner':'code','code':str(error)})
+    if step not in ('close','reconcile','technical-cycle'):
+        from scripts.study_operator.i7_sdk_preflight import verify_beta
+        try:
+            result['sdk'] = verify_beta(sdk)
+        except ValueError as error:
+            result['status']='LOCAL_RUNBOOK_PARTIAL'
+            result['blockers'].append({'owner':'code','code':str(error)})
     return result
 
 
@@ -257,7 +264,7 @@ def main(argv=None):
     if args.check:
         print(json.dumps(validate_steps(args.evidence,root=args.root,
             november_authorized=args.live and datetime.now(timezone.utc)>=PAID_NOT_BEFORE_UTC,
-            step=args.step or 'cpu-build')))
+            step=args.step or 'cpu-build',sdk=args.sdk)))
         return 0
     if (not args.live or not args.root or not args.sdk or not args.step
             or datetime.now(timezone.utc) < PAID_NOT_BEFORE_UTC):
@@ -270,6 +277,9 @@ def main(argv=None):
             verify_before_cpu()
         elif args.step not in ('gpu-restore','close','reconcile','technical-cycle'):
             verify_streamlit(args.root)
+        if args.step not in ('gpu-restore','close','reconcile','technical-cycle'):
+            from scripts.study_operator.i7_sdk_preflight import verify_beta
+            verify_beta(args.sdk)
         # gpu-restore checks the real image inside its admission so a mismatch
         # can still issue the owned CPU STOP. Cleanup never needs matching versions.
     except ValueError as error:
@@ -287,6 +297,11 @@ def main(argv=None):
         if args.step=='gpu-restore':
             from scripts.study_operator.i7_cpu_pipeline import verify_image_or_stop_cpu
             verify_image_or_stop_cpu(operator)
+            from scripts.study_operator.i7_sdk_preflight import verify_beta
+            try:
+                verify_beta(args.sdk)
+            except ValueError as error:
+                parser.error(str(error))
             from scripts.study_operator.i7_readiness import evaluate
             if any(row['owner']=='code' for row in evaluate(args.evidence,november_authorized=True)['blockers']):
                 parser.error('Current source-bound Windows/Linux/I7 verification receipt required')

@@ -24,6 +24,9 @@ def setup(tmp_path):
         'specificReservation': {'count': '1','instanceProperties': {'machineType': 'g2-standard-4',
                 'guestAccelerators': [{'acceleratorType': 'nvidia-l4','acceleratorCount': 1}]}}}
     class Cloud:
+        def require_beta(self):
+            return {'status': 'GCLOUD_BETA_INSTALLED', 'beta_version': 'fixture'}
+
         def __init__(self):
             self.calls=[]
             self.error=None
