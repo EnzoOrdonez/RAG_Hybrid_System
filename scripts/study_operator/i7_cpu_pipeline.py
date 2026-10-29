@@ -14,6 +14,16 @@ from scripts.study_operator.i7_preparation import file_sha
 from scripts.study_operator.service_gateway import save_state
 
 
+def cpu_label(config):
+    """CPU VM/disk/firewall names and ownership marker belong to one I7 period (cpu-build-02)."""
+    return 'i7cpu-'+config['period_id'][:8]
+
+
+def build_scope(config):
+    """Technical-object prefix of one period; a remnant of another attempt is never reread."""
+    return 'i7-'+config['period_id'][:12]
+
+
 def build(operator, spec):
     from scripts.study_operator.i7_streamlit_preflight import verify_before_cpu, verify_recipe
     preflight = verify_before_cpu()
@@ -60,7 +70,7 @@ def build(operator, spec):
     # the new host source is extracted and qualified from the newly built image.
     source['host_infrastructure_sha256'] = {}
     cloud = Cloud(operator.cloud.sdk,operator.cloud.project,root/'runs')
-    controller = Controller(root,cloud,label='i7cpu01')
+    controller = Controller(root,cloud,label=cpu_label(operator.config))
     inventory = {'resources':{'snapshots':cloud.command(['compute','snapshots','list'])}}
     source_snapshots=[s for s in inventory['resources']['snapshots']
                       if s['name']=='cloudrag-i6-cierre-disco-20261016']
@@ -85,7 +95,7 @@ def build(operator, spec):
     verify_recipe(root/'build-context-finali7/repository')
     if context['requirements_lock_sha256'] != preflight['files']['requirements-lock.txt']:
         raise ValueError('I7_BUILD_CONTEXT_LOCK_CHANGED')
-    builder = Build(root,cloud,cpu_label='i7cpu01')
+    builder = Build(root,cloud,cpu_label=cpu_label(operator.config),scope=build_scope(operator.config))
     builder.launch('finali7',context,Path(__file__).with_name('linux_build.py').read_bytes())
     deadline = time.monotonic()+7200
     while time.monotonic() < deadline:
@@ -195,7 +205,7 @@ def verify_image_or_stop_cpu(operator):
         result = verify(operator.root)
     except ValueError as error:
         from scripts.study_operator.cpu_build import Build
-        builder = Build(operator.root/'cpu',operator.cloud,cpu_label='i7cpu01')
+        builder = Build(operator.root/'cpu',operator.cloud,cpu_label=cpu_label(operator.config))
         try:
             cpu = builder.stopped(builder.resource())
         except Exception as stop_error:
@@ -277,7 +287,7 @@ def cleanup_cpu(operator):
     zone = 'us-central1-a'
     current = operator.cloud.command(['compute','instances','describe',vm['name'],'--zone='+zone])
     if (str(current['id']) != str(vm['id']) or current['description'] != vm['description']
-            or not vm['name'].startswith('cloudrag-i5-restore-i7cpu')):
+            or vm['name'] != 'cloudrag-i5-restore-'+cpu_label(operator.config)):
         raise ValueError('CPU_CLEANUP_IDENTITY_CHANGED')
     if current['status'] != 'TERMINATED':
         raise ValueError('CPU_CLEANUP_REQUIRES_STOPPED_VM')

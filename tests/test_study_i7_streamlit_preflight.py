@@ -149,13 +149,14 @@ def test_cpu_preflight_allows_first_build_without_image(tmp_path, monkeypatch):
 def cpu_owner(root, *, stop_fails=False, replacement=False):
     """Exercise the real owned-CPU STOP logic with only the API doubled."""
     from types import SimpleNamespace
-    name = 'cloudrag-i5-restore-i7cpu01'
+    period = '09e7ae37e3b440988c4707369ba56d62'
+    name = 'cloudrag-i5-restore-i7cpu-'+period[:8]
     vm = {'type':'vm','disposable':True,'name':name,'id':'11',
           'zone':'us-central1-a','ownership_marker':'synthetic-owner'}
     disk = dict(vm, type='disk', name=name+'-boot', id='22')
     cpu = root/'cpu'
     (cpu/'STATE.json').write_text(json.dumps({'resources':[vm,disk]}))
-    (cpu/'cpu-restoration-i7cpu01-proof.json').write_text(json.dumps({
+    (cpu/('cpu-restoration-i7cpu-'+period[:8]+'-proof.json')).write_text(json.dumps({
         'status':'CPU_RESTORATION_VERIFIED','synthetic':False,'cpu_vm_id':'11',
         'restored_disk_id':'22','source_snapshot_id':'33','zone':'us-central1-a',
         'all_expected_files_verified':True,'image_config_verified':True,
@@ -177,7 +178,7 @@ def cpu_owner(root, *, stop_fails=False, replacement=False):
                 raise RuntimeError('synthetic API failure')
             self.status = 'TERMINATED'
             return {}
-    return SimpleNamespace(root=root, cloud=Cloud(),
+    return SimpleNamespace(root=root, cloud=Cloud(), config={'period_id':period},
         reserve=lambda *a: pytest.fail('No GPU reservation after rejection'),
         receipt=lambda kind,value: receipts.append(value)), events, receipts
 

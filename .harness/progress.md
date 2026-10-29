@@ -1,8 +1,14 @@
-[Codex] | 2026-10-29 12:29 America/Lima | rama `fix/interview-readiness` @ `a32c9dc901c3d6334bec36a11c534ae8748a5c46` | tarea F-020 | modo: cierre verificado de la base de ronda 2
-Capas de a32c9dc: 1 secretos=exit 0 | 2 tests=exit 0 (2056 pasan, 0 fallan, 4 omitidos POSIX, 5 excluidos, 9 subtests) | 3 docs=exit 0 | init.sh=exit 0
-Evidencia: log i7-gpu-restore-01-a32c9dc-init-20261029T122432.log, SHA-256 f33457591e9c8d0bdca60dd4ea44800ee43151d5e8080a476f7acf1ae1c4866a | Sin verificar: Linux, nube, GO y ética reales
+[Claude] | 2026-10-29 America/Lima | rama `fix/interview-readiness` @ base `741f66ec3ac80afb564df5070c6e66ca5dd4ca5c` | tarea F-020 | modo: corrección local tras cpu-build-02
+Capas: init.sh del commit se reporta externamente con su hash (esta cabecera no es autorreferente) | Sin verificar: suites Windows/Linux/I7 del commit nuevo, push, build y nube
 
-# Ronda 2 sobre a32c9dc
+# Incidente cpu-build-02 sobre 741f66e
+
+[VERIFICADO] Intento 2 (período 09e7ae37e3b4): cpu-build exit 1 por prefijo técnico compartido `iteration4/iteration5/cpu/finali7`; leyó el manifest 468eb25 del intento 1. Ningún objeto sobrescrito (67 de 00:42Z). VM CPU autodetenida.
+[VERIFICADO] Con OK de Enzo, VM, disco 180 GB y regla IAP del intento 2 borrados uno a uno tras describe de identidad; queda solo el snapshot `cloudrag-i7-clean-867c595a9e19` del intento 1.
+[VERIFICADO] Prefijo `i7-<p12>` y CPU `i7cpu-<p8>` (nombres y marcador) por período; limpieza por nombre exacto. 7 rojos en 741f66e; 3 mutantes detectados y restaurados en copia. ADR-0022.
+[DECLARADO] Siguiente: diff a Enzo antes del commit; luego suites nuevas, push y cpu-build con OK separados. Regla de calendario: sin arranque después de 16:30, siguiente ventana ~08:30. F-020 active, passes=false.
+
+## Ronda 2 sobre a32c9dc (histórico)
 
 [VERIFICADO] Esta cabecera identifica el árbol base cuyo init.sh ya terminó; no es el hash autorreferente del commit que contiene este archivo. El nuevo cierre se entrega externamente con el hash exacto tras los cuatro commits de ronda 2.
 [VERIFICADO] H-A=547ac1a: aceptar solo truncado o half-up SDK en heredados; conservar .999 al desbordar. Nuevas reservas a segundos: igualdad exacta. Cuatro rojos antes del arreglo.

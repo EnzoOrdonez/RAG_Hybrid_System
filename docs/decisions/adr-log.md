@@ -235,3 +235,8 @@ fe de erratas de los conteos de mutación de ADR-0019 y backlog sin corregir.
 
 Ver [ADR-0021](ADR-0021-i7-gpu-restore-01.md): beta local obligatorio, precisión
 del TTL de reservas, hashes de la corrección de estado y publicación histórica.
+
+## ADR-0022: Incidente cpu-build-02 y nombres por período
+
+Ver [ADR-0022](ADR-0022-i7-cpu-build-02.md): prefijo técnico del build y recursos
+CPU con período, limpieza por nombre exacto y cierre verificado del intento 2.
