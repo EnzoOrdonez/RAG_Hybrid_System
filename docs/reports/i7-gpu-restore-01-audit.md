@@ -71,7 +71,7 @@ Las ubicaciones nombran funciones para mantener la referencia al cambiar líneas
 | Ubicación | Valores y precisión | Comparación / zona | Resultado y alcance |
 |---|---|---|---|
 | i7.Operator.reserve | until local tenía 6 decimales; GCE recibe milisegundos por gcloud FormatDateTime | Igualdad de datetime aware | Defecto reproducido en 468eb25; corregido en 6bfbec9. Nuevas solicitudes emiten UTC con segundos completos. |
-| i7.Operator.reconcile, UNKNOWN encontrado | delete_at_utc histórico con microsegundos frente a deleteAtTime API | Igualdad estricta original | Mismo defecto reproducido; 6bfbec9 trunca solo el esperado a milisegundos y exige igualdad de instantes. Cambiar ±1 ms bloquea; no hay tolerancia de un segundo. |
+| i7.Operator.reconcile, UNKNOWN encontrado | delete_at_utc histórico con microsegundos frente a deleteAtTime API | Candidatos discretos por compatibilidad | REPORTE_REVISION3 corrigió el modelo de 6bfbec9: el SDK redondea half-up, conservando .999 al desbordar. Esta ronda acepta solo el truncado o el redondeado; .968532 admite .968/.969. Fuera del conjunto se rechaza. Las reservas nuevas de segundos enteros conservan igualdad exacta, incluso ante ±1 ms. |
 | i7.Operator.start | deleteAtTime API menos reloj local | Resta de datetime aware y margen mínimo native_stop_s + 60 | Z y offsets equivalentes conservan el instante; no se compara texto ni se pierde precisión en el margen. Sin arreglo adicional. |
 | i7.Operator.reconcile, reserva conocida | now frente a deleteAtTime; min(now, TTL) menos created_utc API | Orden, mínimo y resta de instantes aware | No requiere igualdad de representación. El TTL limita el cargo; permanece la precisión recibida. Sin arreglo adicional. |
 | i7.Operator.guard | now menos created_utc de creationTimestamp | Resta de datetime.fromisoformat | Python 3.14 admite Z y offsets; no hay igualdad exacta con un instante local previo. El método no aplica aquí min(now, TTL): observación de contabilidad fuera del arreglo de precisión; no se modifica. |
@@ -81,9 +81,12 @@ Las ubicaciones nombran funciones para mantener la referencia al cambiar líneas
 | cost_reconciliation.reconcile | creationTimestamp de dos inventarios API para la misma identidad | Comparación textual dentro de metadatos | Puede rechazar representaciones distintas de un mismo instante; es rechazo conservador, no aceptación de otra identidad. No se observó esa variación en GCE real. Se reporta sin corregir. |
 | host_runtime.ready_elapsed y configuración de startup | start_requested_utc y native_deadline_utc locales; maxRunDuration API es una duración | Elapsed aware; checked_vm compara segundos de duración, no una fecha local con una fecha API | No reproduce la igualdad problemática de deleteAtTime. Se conservan las guardas actuales. |
 
-[VERIFICADO] Las regresiones prueban las reservas de 1/4/12 h con reloj no entero,
-UTC y offset -05:00; dos recuperaciones UNKNOWN equivalentes; cuatro rechazos por
-±1 ms; y rechazo de fecha sin zona. Son fixtures sintéticos, sin reservas reales.
+[VERIFICADO] Las regresiones de esta ronda prueban reservas nuevas de 1/4/12 h,
+UTC y offset -05:00; lecturas heredadas .968532 a .969, .968499 a .968 y .9997 a
+.999; y rechazo fuera del conjunto permitido. Las nuevas reservas rechazan ±1 ms
+y cambios submilisegundo. Un heredado .968532 también acepta .968 por la
+compatibilidad acordada, aunque sea -1 ms respecto de .969; no se afirma que ese
+caso deba rechazarse. Son fixtures sintéticos, sin reservas reales.
 
 [DECLARADO] Los hashes y timestamps de los archivos privados históricos no se
 normalizan ni se reescriben. Esta revisión no declara compatibilidad con fechas
@@ -119,11 +122,12 @@ migra estado ni produce GO en GCP.
 
 ## Verificación de las correcciones
 
-[VERIFICADO] Antes del arreglo temporal hubo ocho regresiones fallidas: seis
+[HISTÓRICO, MODELO CORREGIDO] Antes del arreglo temporal hubo ocho regresiones fallidas: seis
 reservas nuevas y dos recuperaciones equivalentes. Después, 133 tests de tiempo,
 ledger, human y operator pasaron. Retirar la truncación del esperado histórico
 causó dos fallos; aceptar todo TTL causó seis. Los archivos se restauraron byte
-por byte.
+por byte. Esos conteos correspondían al fake truncador original y no demostraban
+compatibilidad con el redondeo real del SDK; la validación actual figura abajo.
 
 [VERIFICADO] El test de beta falló antes del arreglo al alcanzar admit_paid.
 Retirar las guardas de reserve, CLI del dueño y CLI Fase B produjo respectivamente
@@ -139,3 +143,33 @@ con beta_version=2026.09.25. Los seis checks de documentación pasan.
 [DECLARADO] init.sh completo se ejecuta después del sexto commit, con runtime
 Chromium fijado y la máquina quieta; su salida y el hash congelado se entregan
 juntos en el traspaso final. Esta declaración no anticipa un resultado.
+
+## Ronda 2 sobre a32c9dc: precisión corregida
+
+Fuente: `C:/CloudRAG/iteration7-revision-cruzada-20261027/REPORTE_REVISION3.md`,
+SHA-256 `5616fa1373a565ffb29cd7573c20315c7e1b73957ba25b39382b462d503f8154`.
+
+[VERIFICADO] Una sonda importó únicamente FormatDateTime del SDK instalado,
+sin ejecutar gcloud: .968532 se convierte en .969, .968499 en .968 y .9997 en
+.999, tanto en Z como en -05:00. Origen: command_lib/compute/reservations/util.py:325,
+core/util/times.py:320 y :350-365. Evidencia local:
+`C:/Users/enziz/AppData/Local/Temp/i7-r4-sdk-rounding-mznw74qu/sdk-rounding.json`.
+
+[VERIFICADO] H-A: cuatro casos rojos sobre a32c9dc antes de corregir el
+comparador. H-B: dos casos rojos antes de sustituir el fake truncador por un
+modelo decimal independiente half-up, con saturación de 999. Tras ambos cambios,
+104 pruebas de tiempo, SDK y GO pasan.
+
+| Mutante | Cambio | Resultado |
+|---|---|---|
+| M1 | Igualdad estricta contra el esperado con microsegundos, sin candidatos | 20 fallos y 34 pasan; restaurado byte por byte. |
+| MX | Solo redondeado SDK, retirando la compatibilidad truncada de H-A | 3 fallos y 51 pasan; restaurado byte por byte. |
+| Control H-B | Volver a truncar la salida de MillisecondCloud | 2 fallos y 4 pasan; restaurado byte por byte. |
+
+MX ya no confunde una lectura SDK correcta con un error del fake: sus tres
+fallos actuales protegen la aceptación truncada que H-A exige para heredados.
+Logs: `C:/Users/enziz/AppData/Local/Temp/i7-r4-mutations-3el4oyqb`.
+
+[DECLARADO] El cierre completo de esta ronda se ejecuta tras sus cuatro commits
+y se entrega con el hash exacto en el reporte externo. Los conteos y la cabecera
+anteriores conservan su alcance histórico; no se confunden con ese cierre nuevo.

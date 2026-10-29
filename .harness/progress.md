@@ -1,8 +1,18 @@
-[Codex] | 2026-10-29 12:22 America/Lima | rama `fix/interview-readiness` @ `7f309a9` | tarea F-020 | modo: ejecución local
-Capas: 1 secretos=pendiente | 2 tests=pendiente (314 focalizados pasan, 8 omitidos) | 3 docs=0 (seis checks), init.sh final pendiente
-Cambios: incidente gpu-restore-01, seis puntos locales | Sin verificar: init.sh sobre el sexto commit, Linux, nube, GO y ética reales
+[Codex] | 2026-10-29 12:29 America/Lima | rama `fix/interview-readiness` @ `a32c9dc901c3d6334bec36a11c534ae8748a5c46` | tarea F-020 | modo: cierre verificado de la base de ronda 2
+Capas de a32c9dc: 1 secretos=exit 0 | 2 tests=exit 0 (2056 pasan, 0 fallan, 4 omitidos POSIX, 5 excluidos, 9 subtests) | 3 docs=exit 0 | init.sh=exit 0
+Evidencia: log i7-gpu-restore-01-a32c9dc-init-20261029T122432.log, SHA-256 f33457591e9c8d0bdca60dd4ea44800ee43151d5e8080a476f7acf1ae1c4866a | Sin verificar: Linux, nube, GO y ética reales
 
-# Revisión actual: gpu-restore-01 sobre 468eb25
+# Ronda 2 sobre a32c9dc
+
+[VERIFICADO] Esta cabecera identifica el árbol base cuyo init.sh ya terminó; no es el hash autorreferente del commit que contiene este archivo. El nuevo cierre se entrega externamente con el hash exacto tras los cuatro commits de ronda 2.
+[VERIFICADO] H-A=547ac1a: aceptar solo truncado o half-up SDK en heredados; conservar .999 al desbordar. Nuevas reservas a segundos: igualdad exacta. Cuatro rojos antes del arreglo.
+[VERIFICADO] H-B=b2f6b36: fake decimal half-up derivado del SDK, con casos .968532/.968499/.9997 y Z/-05:00. Dos rojos antes del arreglo del fake.
+[VERIFICADO] M1=20 fallos; MX=3; control de fake truncador=2. Todos restaurados byte por byte; después pasan 104 pruebas focalizadas.
+[DECLARADO] F-020 sigue active, passes=false. Sin corrección de estado privado, gcloud con efecto, push ni gasto. Informe: [auditoría y ronda 2](../docs/reports/i7-gpu-restore-01-audit.md).
+
+## Preparación del cierre anterior (histórico, completado sobre a32c9dc)
+
+# Incidente gpu-restore-01 sobre 468eb25
 
 [VERIFICADO] 6bfbec9: reserva UTC a segundos y comparación a precisión SDK; UNKNOWN existente se recupera sin otro CREATE. Ocho regresiones rojas antes; 133 tests verdes después.
 [VERIFICADO] 1f3b5ff: beta local requerido antes de reserve/admit_paid y entradas pagadas; consulta components list --only-local-state. Cleanup y parada segura CPU conservados.

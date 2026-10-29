@@ -35,15 +35,19 @@ completos sin cambiar 468eb25. No se ejecutó ese launcher en esta corrección.
 
 ## Decisión
 
-[VERIFICADO] La reproducción de 468eb25 compara .968532 local con .968 de GCE
-y falla tras un CREATE simulado; UNKNOWN existente falla igualmente al conciliar.
-El SDK instalado formatea deleteAtTime con FormatDateTime y %3f.
+[CORREGIDO por REPORTE_REVISION3] La reproducción original comparaba .968532
+local con .968 generado por el fake truncador; no era una lectura real de GCE.
+El SDK 587.0.0 usa FormatDateTime %3f: redondea half-up (.968532 a .969),
+manteniendo .999 si el redondeo desborda. El fake se corrige en esta ronda.
 
 [DECLARADO] Las nuevas reservas usan UTC a segundos completos, preservando la
-precisión de requested_utc. La verificación compartida con reconcile trunca solo
-el esperado histórico a la precisión transmitida por el SDK. Cambiar un
-milisegundo real o quitar la zona horaria sigue bloqueando. Recuperar una reserva
-existente no ejecuta otro CREATE ni duplica la exposición.
+precisión de requested_utc y exigiendo igualdad exacta del vencimiento. Para
+intents heredados, la verificación compartida con reconcile acepta únicamente
+el esperado truncado o el redondeado half-up del SDK, sin acarreo de .999 al
+segundo siguiente. No admite un intervalo de tolerancia. Para .968532 se aceptan
+.968 y .969 por compatibilidad explícita; fuera de esos candidatos se bloquea.
+Un cambio de ±1 ms en reservas nuevas o quitar la zona sigue bloqueando.
+Recuperar una reserva existente no ejecuta otro CREATE ni duplica la exposición.
 
 [DECLARADO] Un preflight de components list --only-local-state exige beta antes
 de reserve/admit_paid y del despacho de entradas pagadas. Falla cerrado con
