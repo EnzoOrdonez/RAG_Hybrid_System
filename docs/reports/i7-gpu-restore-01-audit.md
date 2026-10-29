@@ -61,3 +61,30 @@ Los prefijos abreviados de la cobertura corresponden a las filas compute de la t
 Las ramas se inventarían aunque un estado concreto no las ejecute. Lecturas IAM, describe/list, atributos y serial no crean recursos; no se confunden con los comandos con efecto.
 Backups, restore, privacy y purge también usan Storage mediante HTTP/GCS; el invitado ejecuta código Python/Docker y publica atributos por HTTP de metadatos. Estas operaciones no tienen flags gcloud: no se ejecutaron y no se atribuye una validación --help a ellas.
 CPU-build, technical-cycle y reconcile no forman parte de las once etapas solicitadas; las limpiezas transitivas invocadas por gate y close sí están incluidas.
+
+## Comparaciones temporales local/API
+
+[VERIFICADO por lectura y sondas locales] Se buscaron deleteAtTime, creationTimestamp,
+lastStartTimestamp, lastStopTimestamp y sus consumidores en scripts/study_operator.
+Las ubicaciones nombran funciones para mantener la referencia al cambiar líneas.
+
+| Ubicación | Valores y precisión | Comparación / zona | Resultado y alcance |
+|---|---|---|---|
+| i7.Operator.reserve | until local tenía 6 decimales; GCE recibe milisegundos por gcloud FormatDateTime | Igualdad de datetime aware | Defecto reproducido en 468eb25; corregido en 6bfbec9. Nuevas solicitudes emiten UTC con segundos completos. |
+| i7.Operator.reconcile, UNKNOWN encontrado | delete_at_utc histórico con microsegundos frente a deleteAtTime API | Igualdad estricta original | Mismo defecto reproducido; 6bfbec9 trunca solo el esperado a milisegundos y exige igualdad de instantes. Cambiar ±1 ms bloquea; no hay tolerancia de un segundo. |
+| i7.Operator.start | deleteAtTime API menos reloj local | Resta de datetime aware y margen mínimo native_stop_s + 60 | Z y offsets equivalentes conservan el instante; no se compara texto ni se pierde precisión en el margen. Sin arreglo adicional. |
+| i7.Operator.reconcile, reserva conocida | now frente a deleteAtTime; min(now, TTL) menos created_utc API | Orden, mínimo y resta de instantes aware | No requiere igualdad de representación. El TTL limita el cargo; permanece la precisión recibida. Sin arreglo adicional. |
+| i7.Operator.guard | now menos created_utc de creationTimestamp | Resta de datetime.fromisoformat | Python 3.14 admite Z y offsets; no hay igualdad exacta con un instante local previo. El método no aplica aquí min(now, TTL): observación de contabilidad fuera del arreglo de precisión; no se modifica. |
+| i7_costs.retained_gib_hours y lifecycle.reserve_cost / ip_release | creationTimestamp guardado como created_utc o ip_reserved_utc frente a reloj local | Restas y cotas de retención | Admiten instantes aware con distinta precisión; no necesitan redondeo. Algunos consumidores no codifican explícitamente el error de un timestamp sin zona; no se añade migración ni corrección transversal. |
+| lifecycle.settle_alternate_creation | lastStartTimestamp y lastStopTimestamp, ambos de GCE | Resta y rechazo de duración negativa | Z y offsets equivalentes son comparables; un valor sin zona mezclado con uno aware puede producir TypeError no codificado. Ruta heredada, sin corrección en este cierre. |
+| cost_reconciliation.aware / interval_cost | creationTimestamp API y límites locales de conciliación | Exige zona, normaliza UTC, aplica max/min y resta | Maneja representaciones equivalentes y distintas precisiones. Sin arreglo adicional. |
+| cost_reconciliation.reconcile | creationTimestamp de dos inventarios API para la misma identidad | Comparación textual dentro de metadatos | Puede rechazar representaciones distintas de un mismo instante; es rechazo conservador, no aceptación de otra identidad. No se observó esa variación en GCE real. Se reporta sin corregir. |
+| host_runtime.ready_elapsed y configuración de startup | start_requested_utc y native_deadline_utc locales; maxRunDuration API es una duración | Elapsed aware; checked_vm compara segundos de duración, no una fecha local con una fecha API | No reproduce la igualdad problemática de deleteAtTime. Se conservan las guardas actuales. |
+
+[VERIFICADO] Las regresiones prueban las reservas de 1/4/12 h con reloj no entero,
+UTC y offset -05:00; dos recuperaciones UNKNOWN equivalentes; cuatro rechazos por
+±1 ms; y rechazo de fecha sin zona. Son fixtures sintéticos, sin reservas reales.
+
+[DECLARADO] Los hashes y timestamps de los archivos privados históricos no se
+normalizan ni se reescriben. Esta revisión no declara compatibilidad con fechas
+arbitrarias sin zona ni acredita tiempos o facturación de GCE en vivo.
