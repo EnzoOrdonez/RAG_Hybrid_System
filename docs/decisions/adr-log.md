@@ -230,3 +230,8 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
 
 Ver [ADR-0020](ADR-0020-i7-final-freeze.md): H3, H9, positivo integrado de study,
 fe de erratas de los conteos de mutación de ADR-0019 y backlog sin corregir.
+
+## ADR-0021: Incidente gpu-restore-01
+
+Ver [ADR-0021](ADR-0021-i7-gpu-restore-01.md): beta local obligatorio, precisión
+del TTL de reservas, hashes de la corrección de estado y publicación histórica.
