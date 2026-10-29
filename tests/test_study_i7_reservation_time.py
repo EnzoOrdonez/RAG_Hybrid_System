@@ -2,12 +2,22 @@
 import copy
 import json
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal, ROUND_HALF_UP
 
 import pytest
 
 from scripts.study_operator.i7 import Operator
 from tests.test_study_i7_human import closed_phase_b
 from tests.test_study_i7_ledger import ReservationCloud, human_operator
+
+
+def sdk_delete_at_time(value):
+    """Independent decimal model of the SDK's transmitted RFC3339 value."""
+    # SDK 587.0.0: command_lib/compute/reservations/util.py:325 invokes
+    # core/util/times.py:320 (%3f); :350-365 rounds half-up, keeping 999 on overflow.
+    milliseconds = (Decimal(value.microsecond) / 1000).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+    value = value.replace(microsecond=min(999, int(milliseconds)) * 1000)
+    return value.isoformat(timespec='milliseconds').replace('+00:00', 'Z')
 
 
 class MillisecondCloud(ReservationCloud):
@@ -21,8 +31,7 @@ class MillisecondCloud(ReservationCloud):
         finally:
             if arguments[:4] == ['beta', 'compute', 'reservations', 'create']:
                 until = datetime.fromisoformat(self.resource['deleteAtTime'])
-                self.resource['deleteAtTime'] = until.astimezone(self.offset).isoformat(
-                    timespec='milliseconds').replace('+00:00', 'Z')
+                self.resource['deleteAtTime'] = sdk_delete_at_time(until.astimezone(self.offset))
 
 
 @pytest.mark.parametrize('hours', [1, 4, 12])
@@ -49,9 +58,10 @@ def test_reserve_verifies_sdk_millisecond_readback(tmp_path, hours, offset):
 
 @pytest.mark.parametrize('offset', [0, -5])
 @pytest.mark.parametrize('delta_ms', [0, -1, 1])
-def test_existing_unknown_uses_sdk_precision_without_recreate(tmp_path, offset, delta_ms):
+@pytest.mark.parametrize('microsecond', [968532, 968499, 999700])
+def test_existing_unknown_uses_sdk_precision_without_recreate(tmp_path, offset, delta_ms, microsecond):
     op, _ = human_operator(tmp_path)
-    instant = op.now().replace(microsecond=968532)
+    instant = op.now().replace(microsecond=microsecond)
     op.now = lambda: instant
     cloud = MillisecondCloud(op, offset=offset, lose_create_response=True)
     op.cloud = cloud
@@ -61,13 +71,14 @@ def test_existing_unknown_uses_sdk_precision_without_recreate(tmp_path, offset, 
     legacy_until = instant + timedelta(hours=4)
     op.state['reservation_intent']['delete_at_utc'] = legacy_until.isoformat()
     op.persist()
-    expected = legacy_until.replace(microsecond=968000)
+    expected = datetime.fromisoformat(sdk_delete_at_time(legacy_until))
     cloud.resource['deleteAtTime'] = (expected + timedelta(milliseconds=delta_ms)).astimezone(
         cloud.offset).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
     before = copy.deepcopy(op.state)
     restarted = Operator(tmp_path, cloud, now=op.now)
-    # .968532 accepts both the legacy truncation .968 and SDK half-up .969.
-    if delta_ms == -1:
+    # Legacy .968532 also permits .968 (the explicit truncation compatibility path).
+    accepted = delta_ms == 0 or (microsecond == 968532 and delta_ms == -1)
+    if not accepted:
         with pytest.raises(ValueError, match='UNKNOWN_RESERVATION_NATIVE_TTL_CHANGED'):
             restarted.reconcile()
         assert restarted.state == before
@@ -82,7 +93,8 @@ def test_existing_unknown_uses_sdk_precision_without_recreate(tmp_path, offset, 
     assert sum(c[:4] == ['beta', 'compute', 'reservations', 'create'] for c in cloud.calls) == 1
 
 
-@pytest.mark.parametrize('invalid', ['2026-11-01T04:00:00.000', '2026-11-01T04:00:00.001Z'])
+@pytest.mark.parametrize('invalid', ['2026-11-01T04:00:00.000',
+    '2026-11-01T04:00:00.001Z', '2026-11-01T03:59:59.999Z'])
 def test_reserve_rejects_unzoned_or_changed_native_deadline(tmp_path, invalid):
     op, cloud = human_operator(tmp_path)
     command = cloud.command
