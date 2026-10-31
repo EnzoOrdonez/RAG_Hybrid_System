@@ -1,7 +1,14 @@
-[Claude] | 2026-10-31 America/Lima | rama `fix/interview-readiness` @ base `421695c349c1d9eb3ebe01881885d54ffe115201` | tarea F-020 | modo: corrección local tras cpu-build-04
+[Claude] | 2026-10-31 America/Lima | rama `fix/interview-readiness` @ base `92fadfef1a4bc17eba2a8873e16feb4224086fb6` | tarea F-020 | modo: corrección local tras cpu-build-06
 Capas: init.sh del commit se reporta externamente con su hash (esta cabecera no es autorreferente) | Sin verificar: suites Windows/Linux/I7 del commit nuevo, push, build y nube
 
-# Incidente cpu-build-04 sobre 421695c
+# Incidente cpu-build-06 sobre 92fadfe
+
+[VERIFICADO] Intento 5c (período bfa955e8c72b): el build dio PASS y `clean_snapshot` terminó con exit 1 en `rpc(mount)` a los 4 s. El orden de ADR-0023 se aplicó, pero el attach (22:54:05Z) terminó antes del primer registro del kernel (22:54:10Z), porque `instances start` responde en RUNNING.
+[VERIFICADO] Sonda de solo lectura con OK de Enzo: en el arranque del fallo, `/boot` era `sdb16` (el clon, por `LABEL=BOOT`). Con el arranque terminado, el attach deja `/`, `/boot` y `/boot/efi` en `sda`, la guarda da `GUARD_OK` y el mount ro del clon da exit 0.
+[VERIFICADO] Corrección: después del `start`, `wait_guest_booted` espera (máximo 300 s) a que `systemctl is-system-running` dé running o degraded, y solo entonces viene el `attach-disk`. Usa la operación `boot-status` por el `rpc` fijado. Las claves del guest attribute se rechazan como señal porque sobreviven a stop/start. 4 rojos en 92fadfe y los mutantes M1 (orden) y M2 (sin límite) detectados. ADR-0024.
+[DECLARADO] Siguiente: Enzo revisa el diff y después vienen el commit, las suites, el readiness y el push condicionado (fast-forward desde 92fadfe). Luego la raíz nueva con `--check`, sin cpu-build esta noche; lanzamiento objetivo el 01/11 a las 07:30 Lima. Los recursos del 5c (VM TERMINATED con el clon conectado) no se tocan ni se arrancan. F-020 active, passes=false.
+
+## Incidente cpu-build-04 sobre 421695c (histórico)
 
 [VERIFICADO] Intento 4 (período 5e9d9dac3ca7): el build dentro de la VM dio PASS. `clean_snapshot` terminó con exit 1 en el primer `rpc(mount)`.
 [VERIFICADO] Sonda de solo lectura con OK de Enzo: el clon y el disco de arranque comparten UUID, PARTUUID y LABEL (ext4). `/` arrancó desde el clon (`sdb1`), y en el arranque del fallo `/boot` era `sdb16`.

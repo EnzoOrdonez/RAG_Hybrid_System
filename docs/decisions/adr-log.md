@@ -246,3 +246,10 @@ CPU con período, limpieza por nombre exacto y cierre verificado del intento 2.
 Ver [ADR-0023](ADR-0023-i7-cpu-build-04.md): el clon del disco de arranque ya no
 se conecta antes del arranque. Se agrega una guarda `ROOT_ON_SERVICE_CLONE` antes
 y después del mount, y una espera acotada al `by-id`.
+
+## ADR-0024: Incidente cpu-build-06 y espera del arranque del invitado
+
+Ver [ADR-0024](ADR-0024-i7-cpu-build-06.md): `instances start` responde antes de
+que arranque el invitado, así que el attach debe esperar a `systemctl
+is-system-running` (vía `rpc` fijado, máximo 300 s). Las claves del guest
+attribute se rechazan como señal porque sobreviven a stop/start.

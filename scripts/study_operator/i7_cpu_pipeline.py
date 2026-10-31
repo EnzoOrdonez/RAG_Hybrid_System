@@ -11,7 +11,11 @@ from datetime import timedelta
 from pathlib import Path
 
 from scripts.study_operator.i7_preparation import file_sha
+from scripts.study_operator.policy import ReadyPending
 from scripts.study_operator.service_gateway import save_state
+
+GUEST_BOOT_WAIT_S = 300
+GUEST_BOOTED = ('running','degraded')
 
 
 def cpu_label(config):
@@ -118,6 +122,26 @@ def build(operator, spec):
     return operator.receipt('cpu-build',receipt)
 
 
+def wait_guest_booted(rpc, *, clock=time.monotonic, sleep=time.sleep, timeout=GUEST_BOOT_WAIT_S):
+    """instances start returns at RUNNING, before the guest boots (cpu-build-06, ADR-0024).
+
+    Guest-attribute host keys survive stop/start, so they do not prove a new boot; ask systemd
+    through the same pinned private RPC as the mount (no unpinned SSH)."""
+    deadline = clock()+timeout
+    while True:
+        remaining = int(deadline-clock())
+        if remaining < 1:
+            raise ValueError('GUEST_BOOT_WAIT_TIMEOUT')
+        try:
+            status = rpc({'operation':'boot-status','wait_s':remaining},timeout=remaining+120)
+        except ReadyPending:
+            sleep(15)
+            continue
+        if status.get('state') in GUEST_BOOTED:
+            return
+        raise ValueError('GUEST_BOOT_WAIT_TIMEOUT')
+
+
 def clean_snapshot(operator, cloud, resources, build_proof):
     """An offline secondary clone; originals and the CPU source remain untouched."""
     vm, disk = resources['vm'],resources['disk']
@@ -145,20 +169,22 @@ def clean_snapshot(operator, cloud, resources, build_proof):
     if (stage_receipt.get('storageLocations')!=['us-central1'] or target_receipt['description'] != marker or
             str(target_receipt['sourceSnapshotId']) != str(stage_receipt['id'])):
         raise ValueError('OWN_SERVICE_CLONE_IDENTITY_CHANGED')
-    # Boot only the source disk: a clone attached at boot shares PARTUUID/UUID/LABEL and
-    # may be mounted as / or /boot (cpu-build-04, ADR-0023). Hot-attach it afterwards.
-    cloud.command(['compute','instances','start',vm['name'],'--zone='+zone],timeout=300)
-    cloud.command(['compute','instances','attach-disk',vm['name'],'--zone='+zone,
-                   '--disk='+target,'--device-name='+target,'--mode=rw'])
     script = operator.config['host_code']+'/scripts/study_operator/i7_service_disk.py'
-    def rpc(request):
+    def rpc(request, timeout=1800):
         payload = cloud.command(['compute','ssh',vm['name'],'--zone='+zone,'--tunnel-through-iap',
             '--ssh-key-expire-after=10m','--command=sudo -n python3 -B '+shlex.quote(script)],
-            input_data=json.dumps(request).encode(),json_output=False,private_output=True,timeout=1800)
+            input_data=json.dumps(request).encode(),json_output=False,private_output=True,timeout=timeout)
         return json.loads(payload)
     job = {'cpu_id':str(vm['id']),'disk_name':target,
            'legacy_archive':'/srv/cloudrag/iteration7-legacy-'+suffix+'.tar'}
     try:
+        # Boot only the source disk: a clone present at boot shares PARTUUID/UUID/LABEL and
+        # may be mounted as / or /boot (cpu-build-04, ADR-0023). start returns before the guest
+        # boots, so attach only once systemd reports the boot finished (cpu-build-06, ADR-0024).
+        cloud.command(['compute','instances','start',vm['name'],'--zone='+zone],timeout=300)
+        wait_guest_booted(lambda request,timeout:rpc(dict(job,**request),timeout=timeout))
+        cloud.command(['compute','instances','attach-disk',vm['name'],'--zone='+zone,
+                       '--disk='+target,'--device-name='+target,'--mode=rw'])
         rpc(dict(job,operation='mount'))
         archived = rpc(dict(job,operation='archive'))
         data = base64.b64decode(archived.pop('content_base64'),validate=True)

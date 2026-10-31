@@ -18,6 +18,7 @@ MOUNT = Path('/mnt/cloudrag-i7-service')
 # A boot-disk clone shares PARTUUID/UUID/LABEL; none of these may live on it (ADR-0023).
 SYSTEM_PATHS = ('/','/boot','/boot/efi')
 BY_ID_TIMEOUT_S = 60
+BOOT_WAIT_MAX_S = 300
 BY_ID = Path('/dev/disk/by-id')
 
 
@@ -52,6 +53,18 @@ def wait_target(job, *, run=subprocess.run, exists=Path.exists, sleep=time.sleep
             raise ValueError('SERVICE_DISK_BY_ID_TIMEOUT')
         sleep(1)
     return link
+
+
+def boot_status(job, *, run=subprocess.run):
+    """systemd boot state, bounded; the host attaches the clone only after it (ADR-0024)."""
+    wait = job.get('wait_s')
+    if type(wait) is not int or not 1 <= wait <= BOOT_WAIT_MAX_S:
+        raise ValueError('BOOT_WAIT_BOUND_REQUIRED')
+    try:
+        result = run(['systemctl','is-system-running','--wait'],capture_output=True,timeout=wait)
+    except subprocess.TimeoutExpired:
+        return {'state':'timeout'}
+    return {'state':result.stdout.decode('utf-8','replace').strip()}
 
 
 def safe_path(root, absolute):
@@ -174,6 +187,9 @@ def main():
     with urllib.request.urlopen(request,timeout=5) as response:
         if response.read().decode() != job['cpu_id']:
             raise ValueError('CPU_IDENTITY_CHANGED')
+    if job['operation'] == 'boot-status':
+        print(json.dumps(boot_status(job)))
+        return
     if job['operation'] == 'mount':
         print(json.dumps(mount_service(job)))
         return
