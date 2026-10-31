@@ -240,3 +240,9 @@ del TTL de reservas, hashes de la corrección de estado y publicación históric
 
 Ver [ADR-0022](ADR-0022-i7-cpu-build-02.md): prefijo técnico del build y recursos
 CPU con período, limpieza por nombre exacto y cierre verificado del intento 2.
+
+## ADR-0023: Incidente cpu-build-04 y clon conectado en caliente
+
+Ver [ADR-0023](ADR-0023-i7-cpu-build-04.md): el clon del disco de arranque ya no
+se conecta antes del arranque. Se agrega una guarda `ROOT_ON_SERVICE_CLONE` antes
+y después del mount, y una espera acotada al `by-id`.

@@ -145,9 +145,11 @@ def clean_snapshot(operator, cloud, resources, build_proof):
     if (stage_receipt.get('storageLocations')!=['us-central1'] or target_receipt['description'] != marker or
             str(target_receipt['sourceSnapshotId']) != str(stage_receipt['id'])):
         raise ValueError('OWN_SERVICE_CLONE_IDENTITY_CHANGED')
+    # Boot only the source disk: a clone attached at boot shares PARTUUID/UUID/LABEL and
+    # may be mounted as / or /boot (cpu-build-04, ADR-0023). Hot-attach it afterwards.
+    cloud.command(['compute','instances','start',vm['name'],'--zone='+zone],timeout=300)
     cloud.command(['compute','instances','attach-disk',vm['name'],'--zone='+zone,
                    '--disk='+target,'--device-name='+target,'--mode=rw'])
-    cloud.command(['compute','instances','start',vm['name'],'--zone='+zone],timeout=300)
     script = operator.config['host_code']+'/scripts/study_operator/i7_service_disk.py'
     def rpc(request):
         payload = cloud.command(['compute','ssh',vm['name'],'--zone='+zone,'--tunnel-through-iap',

@@ -1,7 +1,14 @@
-[Claude] | 2026-10-29 America/Lima | rama `fix/interview-readiness` @ base `741f66ec3ac80afb564df5070c6e66ca5dd4ca5c` | tarea F-020 | modo: corrección local tras cpu-build-02
+[Claude] | 2026-10-31 America/Lima | rama `fix/interview-readiness` @ base `421695c349c1d9eb3ebe01881885d54ffe115201` | tarea F-020 | modo: corrección local tras cpu-build-04
 Capas: init.sh del commit se reporta externamente con su hash (esta cabecera no es autorreferente) | Sin verificar: suites Windows/Linux/I7 del commit nuevo, push, build y nube
 
-# Incidente cpu-build-02 sobre 741f66e
+# Incidente cpu-build-04 sobre 421695c
+
+[VERIFICADO] Intento 4 (período 5e9d9dac3ca7): el build dentro de la VM dio PASS. `clean_snapshot` terminó con exit 1 en el primer `rpc(mount)`.
+[VERIFICADO] Sonda de solo lectura con OK de Enzo: el clon y el disco de arranque comparten UUID, PARTUUID y LABEL (ext4). `/` arrancó desde el clon (`sdb1`), y en el arranque del fallo `/boot` era `sdb16`.
+[VERIFICADO] Corrección: el clon se conecta en caliente después de un start solo con el disco de arranque. Se agregan `udevadm settle`, una espera acotada al `by-id` y la guarda `ROOT_ON_SERVICE_CLONE` antes y después del mount. En 421695c hubo 5 rojos y el mutante de orden quedó detectado. ADR-0023.
+[DECLARADO] Siguiente: Enzo revisa el diff y después vienen el commit, las suites nuevas, el readiness y el push condicionado (fast-forward desde 421695c). Luego la raíz nueva con `--check`. El intento 4 conserva sus recursos hasta que arranque el 5, y la raíz `iteration7-faseB-20261031b-421695c` queda obsoleta. F-020 active, passes=false.
+
+## Incidente cpu-build-02 sobre 741f66e (histórico)
 
 [VERIFICADO] Intento 2 (período 09e7ae37e3b4): cpu-build exit 1 por prefijo técnico compartido `iteration4/iteration5/cpu/finali7`; leyó el manifest 468eb25 del intento 1. Ningún objeto sobrescrito (67 de 00:42Z). VM CPU autodetenida.
 [VERIFICADO] Con OK de Enzo, VM, disco 180 GB y regla IAP del intento 2 borrados uno a uno tras describe de identidad; queda solo el snapshot `cloudrag-i7-clean-867c595a9e19` del intento 1.

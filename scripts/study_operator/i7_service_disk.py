@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -14,6 +15,43 @@ from scripts.study_operator.i7_privacy import archive_legacy
 
 TIMES = ('023425','024929','033336','035910','140448','143041','172058','190612','211114')
 MOUNT = Path('/mnt/cloudrag-i7-service')
+# A boot-disk clone shares PARTUUID/UUID/LABEL; none of these may live on it (ADR-0023).
+SYSTEM_PATHS = ('/','/boot','/boot/efi')
+BY_ID_TIMEOUT_S = 60
+BY_ID = Path('/dev/disk/by-id')
+
+
+def clone_devices(job):
+    """Device numbers of the clone's whole disk and partitions, by exact by-id name."""
+    base = 'google-'+job['disk_name']
+    return {os.stat(p).st_rdev for p in BY_ID.glob(base+'*')
+            if p.name == base or p.name.startswith(base+'-part')}
+
+
+def refuse_root_on_clone(job, *, devices=clone_devices, stat=os.stat):
+    clone = devices(job)
+    if not clone:
+        raise ValueError('SERVICE_DISK_BY_ID_MISSING')
+    for path in SYSTEM_PATHS:
+        try:
+            if stat(path).st_dev in clone:
+                raise ValueError('ROOT_ON_SERVICE_CLONE')
+        except FileNotFoundError:
+            continue
+
+
+def wait_target(job, *, run=subprocess.run, exists=Path.exists, sleep=time.sleep,
+                clock=time.monotonic, timeout=BY_ID_TIMEOUT_S):
+    """A hot-attached disk appears asynchronously; wait a bounded time for its by-id link."""
+    run(['udevadm','settle','--timeout=30'],check=True,timeout=40,
+        stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    link = BY_ID/('google-'+job['disk_name']+'-part1')
+    deadline = clock()+timeout
+    while not exists(link):
+        if clock() >= deadline:
+            raise ValueError('SERVICE_DISK_BY_ID_TIMEOUT')
+        sleep(1)
+    return link
 
 
 def safe_path(root, absolute):
@@ -24,6 +62,7 @@ def safe_path(root, absolute):
 
 
 def verify_mount(root, job):
+    refuse_root_on_clone(job)  # First: a clone serving / makes every later check misleading.
     if os.name != 'posix' or root != MOUNT or not root.is_mount():
         raise ValueError('OWN_SECONDARY_SERVICE_MOUNT_REQUIRED')
     request = urllib.request.Request('http://metadata.google.internal/computeMetadata/v1/instance/id',
@@ -111,6 +150,20 @@ def sanitize(root, job, *, verify_target=verify_mount):
             'image_archive_sha256':job['image_archive_sha256']}
 
 
+def mount_service(job, *, wait=wait_target, guard=refuse_root_on_clone, run=subprocess.run,
+                  verify=verify_mount, mount_point=MOUNT):
+    """Root guard before and (inside verify) after mounting the hot-attached clone."""
+    wait(job)
+    guard(job)
+    mount_point.mkdir(mode=0o700,exist_ok=True)
+    if not mount_point.is_mount():
+        device = '/dev/disk/by-id/google-'+job['disk_name']+'-part1'
+        run(['mount',device,str(mount_point)],check=True,timeout=30,
+            stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    verify(mount_point,job)
+    return {'status':'OWN_SERVICE_DISK_MOUNTED'}
+
+
 def main():
     job = json.load(sys.stdin)
     import re
@@ -122,13 +175,7 @@ def main():
         if response.read().decode() != job['cpu_id']:
             raise ValueError('CPU_IDENTITY_CHANGED')
     if job['operation'] == 'mount':
-        MOUNT.mkdir(mode=0o700,exist_ok=True)
-        if not MOUNT.is_mount():
-            device = '/dev/disk/by-id/google-'+job['disk_name']+'-part1'
-            subprocess.run(['mount',device,str(MOUNT)],check=True,timeout=30,
-                           stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-        verify_mount(MOUNT,job)
-        print(json.dumps({'status':'OWN_SERVICE_DISK_MOUNTED'}))
+        print(json.dumps(mount_service(job)))
         return
     verify_mount(MOUNT,job)
     if job['operation'] == 'archive':
