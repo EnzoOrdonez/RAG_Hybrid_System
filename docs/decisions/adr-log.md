@@ -259,3 +259,11 @@ attribute se rechazan como señal porque sobreviven a stop/start.
 Ver [ADR-0025](ADR-0025-i7-reserva-ttl.md): cada arranque exige 3 h 01 min de
 reserva restante, así que la reserva inicial pasa de 12 h a 13,5 h y la del gate
 queda en 5 h. Total 18,5 h, USD 19,75 con cierre, menor que 20.
+
+## ADR-0026: Rechazo de capacidad al crear la reserva de GPU
+
+Ver [ADR-0026](ADR-0026-i7-rechazo-capacidad-reserva.md). Un rechazo de capacidad
+del proveedor libera la admisión de la reserva solo si un listado posterior no
+muestra ninguna reserva propia. Así `gpu-restore` se puede reintentar sin cargar
+horas ni dinero. Cualquier otro error sigue UNKNOWN. El intento único del gate
+se registra después de retener la reserva de 5 h, y nunca se repite.

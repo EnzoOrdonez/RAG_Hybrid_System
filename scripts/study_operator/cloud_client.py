@@ -8,9 +8,24 @@ from pathlib import Path
 import subprocess
 import time
 
-from scripts.study_operator.policy import OperatorError, ReadyPending
+from scripts.study_operator.policy import CapacityRejected, OperatorError, ReadyPending
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.region_scope import US_L4_ZONES
+
+
+def capacity_refusal(stderr):
+    """The provider's capacity code, or None. The message itself stays private."""
+    match = re.search(rb'\b(ZONE_RESOURCE_POOL_EXHAUSTED(?:_WITH_DETAILS)?)\b', stderr)
+    if match:
+        return match[0].decode('ascii')
+    return 'NOT_ENOUGH_RESOURCES' if b'does not have enough resources' in stderr else None
+
+
+def capacity_operation(arguments):
+    """Creates whose capacity refusal is receipted (ADR-0026 adds GPU reservations)."""
+    return ((len(arguments) > 2 and arguments[:2] == ['compute', 'instances']
+             and arguments[2] in {'start', 'create'})
+            or arguments[:4] == ['beta', 'compute', 'reservations', 'create'])
 
 
 def error_categories(stderr):
@@ -139,11 +154,10 @@ class Cloud:
             private_output_not_persisted=private_output, transport=transport)
         if result.returncode:
             receipt.update(error_categories(stderr))
-        if (result.returncode and len(arguments) > 2 and arguments[:2] == ['compute', 'instances']
-                and arguments[2] in {'start', 'create'}):
-            match = re.search(rb'\b(ZONE_RESOURCE_POOL_EXHAUSTED(?:_WITH_DETAILS)?)\b', stderr)
-            if match:
-                receipt['cloud_error_code'] = match[0].decode('ascii')
+        capacity_code = capacity_refusal(stderr) if result.returncode else None
+        if capacity_code and capacity_operation(arguments):
+            receipt['cloud_error_code'] = capacity_code
+            if capacity_code.startswith('ZONE_RESOURCE_POOL_EXHAUSTED'):
                 # Capacity errors are technical evidence, but an SDK footer
                 # containing identity/credentials must still remain in memory.
                 if (re.fullmatch(rb'[\t\r\n\x20-\x7e]*', stderr)
@@ -157,8 +171,8 @@ class Cloud:
                     and b'Guest Attribute' in stderr):
                 raise ReadyPending('Aún faltan claves públicas del invitado. Espera y repite preflight dentro de 15 minutos; no aceptes una clave desconocida.')
             # Capacity is a resource error, not a measured gate failure.
-            if b'ZONE_RESOURCE_POOL_EXHAUSTED' in stderr or b'does not have enough resources' in stderr:
-                raise OperatorError('ZONE_RESOURCE_POOL_EXHAUSTED: respeta las rondas de us-central1 y el orden de regiones medido; usa el runbook de contingencia, identidad y smoke antes de una sesión.')
+            if capacity_code:
+                raise CapacityRejected(code=capacity_code, message='ZONE_RESOURCE_POOL_EXHAUSTED: respeta las rondas de us-central1 y el orden de regiones medido; usa el runbook de contingencia, identidad y smoke antes de una sesión.')
             raise OperatorError('Google Cloud rechazó la operación. Revisa su recibo, verifica status y corrige la causa antes de repetir.')
         if json_output:
             try:

@@ -14,6 +14,13 @@ class ReadyPending(OperatorError):
     """Only the explicit, bounded guest bootstrap state is retryable."""
 
 
+class CapacityRejected(OperatorError):
+    """The provider stated a capacity refusal. Callers still verify absence (ADR-0026)."""
+    def __init__(self, message, *, code):
+        super().__init__(message)
+        self.code = code
+
+
 def purpose_allowed(purpose, operator_root, *, today=None):
     if purpose not in {'study', 'technical', 'smoke', 'rehearsal', 'pilot'}:
         raise OperatorError('Propósito inválido. Usa study, technical, smoke, rehearsal o pilot.')

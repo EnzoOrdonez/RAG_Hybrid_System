@@ -1,7 +1,28 @@
-[Claude] | 2026-10-31 America/Lima | rama `fix/interview-readiness` @ base `4bc1c424947f2d2e0c2eebb9aa81b83cc8fb104c` | tarea F-020 | modo: corrección local antes del cpu-build del intento 6
+[Claude] | 2026-11-01 America/Lima | rama `fix/interview-readiness` @ base `d1b09e3b98dedd87c2572ea4c442230322095f92` | tarea F-020 | modo: corrección local tras el fallo de gpu-restore del intento 6
 Capas: init.sh del commit se reporta externamente con su hash (esta cabecera no es autorreferente) | Sin verificar: suites Windows/Linux/I7 del commit nuevo, push, build y nube
 
-# Reserva frente a la regla de TTL por arranque (intento 6, sobre 4bc1c42)
+# Rechazo de capacidad al crear la reserva (intento 6, sobre d1b09e3)
+
+[VERIFICADO] El cpu-build del intento 6 dio exit 0 (`I7_CPU_IMAGE_AND_CLEAN_DISK_PREPARED`, 0,99 h; el snapshot limpio `cloudrag-i7-clean-3421e7192db2` está READY).
+[VERIFICADO] `gpu-restore` falló a los 27 s: `beta compute reservations create` en `us-central1-a` salió con exit 1 y `ZONE_RESOURCE_POOL_EXHAUSTED`. No hay reserva, ni VM ni disco de GPU.
+[VERIFICADO] Aun así, el intent quedó UNKNOWN con 13,5 h contadas. Eso bloquea `reserve()` y `close` hasta 2026-11-02T06:55Z. El recibo del create no tenía `cloud_error_code`.
+[VERIFICADO] Corrección local:
+- `CapacityRejected` tipado;
+- `cloud_error_code` en el recibo del create de reservas;
+- liberación de la admisión solo si un listado posterior no muestra ninguna reserva con el nombre del intent ni con el marcador.
+
+El resto de los errores sigue UNKNOWN. Test nuevo en rojo antes (ImportError, luego 7 rojos por comportamiento); los 15 pasan después (2 se escribieron después del código, por la revisión independiente: rollback de `persist` y recibo del caso visible) y los 8 mutantes quedan detectados. ADR-0026. Solo zona a, por decisión de Enzo. Gate, por decisión de Enzo: `gate-cohort-intent.json` se crea después de retener `reserve(5)`, y un intento existente se rechaza antes de pagar (`GATE_ATTEMPT_EXISTS_NO_REPLAY`). 5 tests nuevos (4 rojos antes) y los mutantes G1 y G2 detectados (10 de 10 en total). Cierra L-2 de la auditoría i7-gpu-restore-01.
+[VERIFICADO] Cuota SSD: hay 4 × 180 = 720 GB reales y la métrica regional da 620, una diferencia que no se pudo explicar. El intento 7 suma 360 en el cpu-build y 180 en gpu-restore. Hay que liberar al menos 360 GB antes del cpu-build 7.
+[DECLARADO] El cierre del intento 6 necesita un worktree en `d1b09e3` (`verify_tool_source`). La fase A, `close`, limpia la CPU ya. La fase B, `reconcile` y `close`, va después de 2026-11-02T06:55Z.
+[DECLARADO] La raíz del intento 6 no se edita. Después de las 06:55Z del 02/11, `reconcile` carga la cota de USD 9,79 y `close` limpia, con OK.
+[DECLARADO] Siguiente:
+- Enzo revisa el diff;
+- después vienen el commit, las suites Windows/Linux/I7, el readiness nuevo y el push, cada uno con su OK;
+- luego, intento 7: raíz nueva, cpu-build y `launch_tramo1` con carpeta `live-tramo1-rN` por reintento.
+
+F-020 active, passes=false.
+
+## Reserva frente a la regla de TTL por arranque (intento 6, sobre 4bc1c42; histórico)
 
 [VERIFICADO] `start()` exige que a la reserva le queden `native_stop_s` + 60 s (3 h 01 min). Con la reserva inicial de 12 h, el 12.º boot del estímulo no cabe en el peor caso medido (−1,21 h). `reservation_intent_exposure` solo aceptaba `hours <= 12`, así que `guard()` no habría podido cerrar una reserva más larga.
 [VERIFICADO] En la compuerta solo arrancan el smoke y el gate. `restore` y `delete_sessions` no arrancan la VM. El segundo arranque llega a unas 0,94 h + restore y debe llegar antes de 1,98 h.

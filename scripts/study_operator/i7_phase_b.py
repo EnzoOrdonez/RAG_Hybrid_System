@@ -94,12 +94,16 @@ def _gate_after_prerequisites(operator,publication):
             contexts[key]=row['contexts']
     reference=json.loads(Path(operator.config['i3_context_reference_path']).read_bytes())['rag']['contexts']
     compare_contexts(contexts,reference)
+    # ADR-0026: a recorded attempt is never replayed or paid for again; the single attempt is
+    # recorded once reservation 2 is held, so a released capacity refusal does not consume it.
     attempt=operator.root/'gate-cohort-intent.json'
-    with attempt.open('x',encoding='utf-8') as stream:
-        json.dump({'started_utc':operator.now().isoformat(),'replay_allowed':False},stream)
+    if attempt.exists():
+        raise ValueError('GATE_ATTEMPT_EXISTS_NO_REPLAY')
     if not operator.state.get('reservation') or operator.state['reservation'].get('deleted_verified'):
         from scripts.study_operator.i7 import PHASE_B_GATE_RESERVATION_H
         operator.reserve(PHASE_B_GATE_RESERVATION_H)
+    with attempt.open('x',encoding='utf-8') as stream:
+        json.dump({'started_utc':operator.now().isoformat(),'replay_allowed':False},stream)
     from scripts.study_operator.i7_workflows import wait_ready
     try:
         # The preregistered full smoke follows the twelve complete cold trials.

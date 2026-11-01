@@ -301,6 +301,22 @@ purga, sin repetir consultas. Después, `close`.
 Si falta capacidad, detener la pieza. La política de dos rondas y pausa de
 30 minutos requiere un recibo humano: el operador no cambia de zona por sí
 mismo ni consume otra cuota a ciegas. No restaurar GPU sin capacidad retenida.
+
+Si `gpu-restore` falla al crear la reserva por falta de capacidad (ADR-0026),
+buscar el recibo `receipts/reservation/*` con estado
+`RESERVATION_CAPACITY_REJECTED_ABSENT`:
+- **si existe**, la admisión ya se liberó (horas y exposición restauradas) y
+  `gpu-restore` puede volver a lanzarse en la misma raíz con una carpeta de
+  tramo nueva, cuando Enzo lo decida;
+- **si no existe**, o si existe uno con estado
+  `RESERVATION_CAPACITY_REJECTED_PRESENT_KEPT_UNKNOWN`, el intent sigue UNKNOWN:
+  no repetir y ejecutar `reconcile`.
+
+En el gate es igual. `gate-cohort-intent.json` se crea solo después de retener
+la reserva de 5 h, así que un rechazo liberado no consume el intento y
+`launch_gate.ps1` puede volver a lanzarse. Si el archivo ya existe, el gate no
+se repite (`GATE_ATTEMPT_EXISTS_NO_REPLAY`) y no reserva nada.
+
 El ensayo secuencial con cuota de una GPU sigue en `STUDY_I7_CONTINGENCY.md`;
 la solicitud de dos GPU es un borrador que Enzo decide si envía.
 

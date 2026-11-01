@@ -1,5 +1,6 @@
 """I7 owner operator. Paid actions are date/budget guarded; defaults are local."""
 import argparse
+import copy
 import hashlib
 import json
 import math
@@ -13,7 +14,7 @@ from filelock import FileLock
 
 from scripts.study_operator.deployment import checked_config
 from scripts.study_operator.lifecycle import Operator as LegacyOperator
-from scripts.study_operator.policy import participant_code, purpose_allowed
+from scripts.study_operator.policy import CapacityRejected, participant_code, purpose_allowed
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.stimulus_host_evidence import sha
 
@@ -270,6 +271,7 @@ class Operator(LegacyOperator):
         allocated=self.state.get('reservation_gpu_hours_used',0)+hours
         if allocated>PHASE_B_RESERVATION_TOTAL_H and not human:
             raise ValueError('I7_CUMULATIVE_RESERVATION_HOURS_EXCEED_COST_PLAN')
+        admitted = {key:self.state.get(key,0) for key in ('reservation_gpu_hours_used','open_exposure_usd')}
         self.state['reservation_gpu_hours_used']=allocated
         name = 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]
         zone = self.selected()['zone']
@@ -286,10 +288,14 @@ class Operator(LegacyOperator):
             human['reservation_blocks'] += 1
         self.persist()
         # SDK beta exposes native reservation auto-delete. No unbounded fallback.
-        self.cloud.command(['beta','compute','reservations','create',name,'--zone='+zone,
-            '--machine-type=g2-standard-4','--vm-count=1','--accelerator=type=nvidia-l4,count=1',
-            '--require-specific-reservation','--description='+self.config['resource_marker'],
-            '--delete-at-time='+delete_at],timeout=300)
+        try:
+            self.cloud.command(['beta','compute','reservations','create',name,'--zone='+zone,
+                '--machine-type=g2-standard-4','--vm-count=1','--accelerator=type=nvidia-l4,count=1',
+                '--require-specific-reservation','--description='+self.config['resource_marker'],
+                '--delete-at-time='+delete_at],timeout=300)
+        except CapacityRejected as refusal:
+            self._release_refused_reservation(intent, admitted, refusal.code)
+            raise
         resource = self.cloud.command(['compute','reservations','describe',name,'--zone='+zone])
         reservation_identity(resource)
         if (resource['description'] != self.config['resource_marker']
@@ -302,6 +308,32 @@ class Operator(LegacyOperator):
         self.persist()
         return self.receipt('reservation',{'status':'SPECIFIC_RESERVATION_HELD',
             'id':str(resource['id']),'name':name,'delete_at_utc':delete_at})
+
+    def _release_refused_reservation(self, intent, admitted, code):
+        """A stated capacity refusal releases its admission only after a successful list
+        shows neither its name nor any reservation carrying this installation's marker.
+        Otherwise the intent stays UNKNOWN for reconcile() (ADR-0026)."""
+        listed = self.cloud.command(['compute','reservations','list'])
+        if not isinstance(listed,list):
+            raise TypeError('RESERVATION_LIST_NOT_SUCCESSFUL')
+        marker = self.config['resource_marker']
+        evidence = {'name':intent['name'],'zone':intent['zone'],'hours':intent['hours'],
+                    'requested_utc':intent['requested_utc'],'cloud_error_code':code}
+        if any(row.get('name') == intent['name'] or row.get('description') == marker for row in listed):
+            self.receipt('reservation',dict(evidence,status='RESERVATION_CAPACITY_REJECTED_PRESENT_KEPT_UNKNOWN'))
+            return
+        previous = copy.deepcopy(self.state)
+        self.state.pop('reservation_intent')
+        self.state.update(admitted)
+        human = self.state.get('human_phase')
+        if human:
+            human['reservation_blocks'] -= 1
+        try:
+            self.persist()
+        except BaseException:
+            self.state = previous   # Memory never runs ahead of the durable UNKNOWN intent.
+            raise
+        self.receipt('reservation',dict(evidence,status='RESERVATION_CAPACITY_REJECTED_ABSENT'))
 
     def observed(self):
         from scripts.study_operator.cloud_client import checked_vm
