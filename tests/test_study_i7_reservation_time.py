@@ -6,7 +6,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 import pytest
 
-from scripts.study_operator.i7 import Operator
+from scripts.study_operator.i7 import PHASE_B_RESERVATION_1_H, Operator
 from tests.test_study_i7_human import closed_phase_b
 from tests.test_study_i7_ledger import ReservationCloud, human_operator
 
@@ -34,11 +34,11 @@ class MillisecondCloud(ReservationCloud):
                 self.resource['deleteAtTime'] = sdk_delete_at_time(until.astimezone(self.offset))
 
 
-@pytest.mark.parametrize('hours', [1, 4, 12])
+@pytest.mark.parametrize('hours', [1, 4, 12, PHASE_B_RESERVATION_1_H])
 @pytest.mark.parametrize('offset', [0, -5])
 def test_reserve_verifies_sdk_millisecond_readback(tmp_path, hours, offset):
-    op, _ = closed_phase_b(tmp_path) if hours == 12 else human_operator(tmp_path)
-    if hours == 12:
+    op, _ = closed_phase_b(tmp_path) if hours > 4 else human_operator(tmp_path)
+    if hours > 4:
         op.state['spent_usd'] = 0
     instant = op.now().replace(microsecond=968532).astimezone(timezone(timedelta(hours=offset)))
     op.now = lambda: instant

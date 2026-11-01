@@ -253,3 +253,9 @@ Ver [ADR-0024](ADR-0024-i7-cpu-build-06.md): `instances start` responde antes de
 que arranque el invitado, así que el attach debe esperar a `systemctl
 is-system-running` (vía `rpc` fijado, máximo 300 s). Las claves del guest
 attribute se rechazan como señal porque sobreviven a stop/start.
+
+## ADR-0025: Horas de reserva frente a la regla de TTL por arranque
+
+Ver [ADR-0025](ADR-0025-i7-reserva-ttl.md): cada arranque exige 3 h 01 min de
+reserva restante, así que la reserva inicial pasa de 12 h a 13,5 h y la del gate
+queda en 5 h. Total 18,5 h, USD 19,75 con cierre, menor que 20.

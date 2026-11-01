@@ -98,7 +98,8 @@ def _gate_after_prerequisites(operator,publication):
     with attempt.open('x',encoding='utf-8') as stream:
         json.dump({'started_utc':operator.now().isoformat(),'replay_allowed':False},stream)
     if not operator.state.get('reservation') or operator.state['reservation'].get('deleted_verified'):
-        operator.reserve(5)
+        from scripts.study_operator.i7 import PHASE_B_GATE_RESERVATION_H
+        operator.reserve(PHASE_B_GATE_RESERVATION_H)
     from scripts.study_operator.i7_workflows import wait_ready
     try:
         # The preregistered full smoke follows the twelve complete cold trials.

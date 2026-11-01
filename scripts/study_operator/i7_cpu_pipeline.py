@@ -251,6 +251,7 @@ def gpu_restore(operator):
     verify_image_or_stop_cpu(operator)
     from scripts.study_operator.startup import write_startup
     from scripts.study_operator.i7_reconcile import observed,record_intent
+    from scripts.study_operator.i7 import PHASE_B_RESERVATION_1_H
     if any(row['status']=='UNKNOWN' for row in operator.state.get('creation_intents',[])):
         raise ValueError('UNKNOWN_CREATION_RECONCILE_BEFORE_CAPACITY')
     snapshot = operator.state['qualified_service_snapshot']
@@ -262,7 +263,7 @@ def gpu_restore(operator):
     instances = operator.cloud.command(['compute','instances','list'])
     if any(v.get('guestAccelerators') and v['status'] != 'TERMINATED' for v in instances):
         raise ValueError('ANOTHER_GPU_ACTIVE')
-    operator.reserve(12)
+    operator.reserve(PHASE_B_RESERVATION_1_H)
     reservation = operator.state['reservation']
     zone = operator.config['zone']
     name = 'cloudrag-i7-vm-'+operator.config['period_id'][:12]

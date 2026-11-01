@@ -1,7 +1,14 @@
-[Claude] | 2026-10-31 America/Lima | rama `fix/interview-readiness` @ base `92fadfef1a4bc17eba2a8873e16feb4224086fb6` | tarea F-020 | modo: corrección local tras cpu-build-06
+[Claude] | 2026-10-31 America/Lima | rama `fix/interview-readiness` @ base `4bc1c424947f2d2e0c2eebb9aa81b83cc8fb104c` | tarea F-020 | modo: corrección local antes del cpu-build del intento 6
 Capas: init.sh del commit se reporta externamente con su hash (esta cabecera no es autorreferente) | Sin verificar: suites Windows/Linux/I7 del commit nuevo, push, build y nube
 
-# Incidente cpu-build-06 sobre 92fadfe
+# Reserva frente a la regla de TTL por arranque (intento 6, sobre 4bc1c42)
+
+[VERIFICADO] `start()` exige que a la reserva le queden `native_stop_s` + 60 s (3 h 01 min). Con la reserva inicial de 12 h, el 12.º boot del estímulo no cabe en el peor caso medido (−1,21 h). `reservation_intent_exposure` solo aceptaba `hours <= 12`, así que `guard()` no habría podido cerrar una reserva más larga.
+[VERIFICADO] En la compuerta solo arrancan el smoke y el gate. `restore` y `delete_sessions` no arrancan la VM. El segundo arranque llega a unas 0,94 h + restore y debe llegar antes de 1,98 h.
+[VERIFICADO] Corrección: reserva 1 de 13,5 h, gate de 5 h y total de 18,5 h, con las constantes de `i7.py` usadas en los topes, la base de costo, el ledger, `gpu_restore` y el gate. Exposición de 24 h con cierre: USD 19,75136847. 14 + 6,5 h daría USD 21,17 y no cabe. Test nuevo en rojo por ImportError antes; 171 focalizados en verde después; los 8 mutantes detectados y restaurados. ADR-0025.
+[DECLARADO] Siguiente: Enzo revisa el diff y luego vienen el commit, las suites Windows/Linux/I7, el readiness nuevo y el push, cada uno con su OK. Después, la raíz nueva con `i7_config`, los lanzadores copiados con el commit nuevo y el cpu-build. La raíz y los lanzadores de 4bc1c42 se conservan sin usar. F-020 active, passes=false.
+
+## Incidente cpu-build-06 sobre 92fadfe (histórico)
 
 [VERIFICADO] Intento 5c (período bfa955e8c72b): el build dio PASS y `clean_snapshot` terminó con exit 1 en `rpc(mount)` a los 4 s. El orden de ADR-0023 se aplicó, pero el attach (22:54:05Z) terminó antes del primer registro del kernel (22:54:10Z), porque `instances start` responde en RUNNING.
 [VERIFICADO] Sonda de solo lectura con OK de Enzo: en el arranque del fallo, `/boot` era `sdb16` (el clon, por `LABEL=BOOT`). Con el arranque terminado, el attach deja `/`, `/boot` y `/boot/efi` en `sda`, la guarda da `GUARD_OK` y el mount ro del clon da exit 0.

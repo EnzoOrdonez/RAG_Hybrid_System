@@ -166,7 +166,7 @@ tokens, IP, hostname, canarios o inventarios completos.
 | Paso | Comando | Criterio de éxito |
 |---|---|---|
 | 1. CPU, imagen y disco limpio | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --spec $spec --evidence $evidence --live cpu-build` | Fuente publicada; restauración CPU; imagen nueva con corrección de restore; Streamlit leído de la imagen coincide con dueño y lock; nueve registros originales archivados fuera del servicio con hash y ACK; saneamiento offline; snapshot propio READY en us-central1. |
-| 2. Reserva y GPU | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live gpu-restore` | Tres versiones de Streamlit coinciden o CPU cerrado y reserva bloqueada; reserva específica 12 h retenida antes de crear disco; snapshot e identidad exactos; VM propia con STOP 3 h. |
+| 2. Reserva y GPU | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live gpu-restore` | Tres versiones de Streamlit coinciden o CPU cerrado y reserva bloqueada; reserva específica 13,5 h retenida antes de crear disco; snapshot e identidad exactos; VM propia con STOP 3 h. |
 | 3. READY | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live ready` | <= 900 s; persistencia NVIDIA, driver, blob y mincore completo, JIT persistente, Ollama vacío, aislamiento e identidad. Una falla impide READY y admisión. |
 | 4. TLS | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live tls-three` | Tres boots distintos y consecutivos READY, mismo certificado y fuente, sin fallo intermedio. |
 | 4b. Contextos vivos | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live contexts` | Doce contextos en contenedor aislado, antes de generar y sin consumir historial del servicio. Comparación exacta con la referencia I3 heredada de I5. |
@@ -231,17 +231,23 @@ PASS si hay exclusiones sin fecha/motivo o un dominio incompleto.
 ## Costos y regla de corte
 
 Referencia de lista archivada el 16/10, no factura y no tarifa garantizada de
-noviembre: reserva g2+L4 USD 0,706832255/h. Las reservas 12 h + 5 h suman
-USD 12,016148335 de compute; 6 h CPU, 540 GiB de PD, 552 GiB de snapshots,
+noviembre: reserva g2+L4 USD 0,706832255/h. Las reservas 13,5 h + 5 h suman
+USD 13,07639672 de compute; 6 h CPU, 540 GiB de PD, 552 GiB de snapshots,
 IP, GCS, operaciones y egreso se registran por SKU. Exposición de referencia
-completa por 24 h: **USD 18,69112008**, incluidos **USD 3 de cierre**.
+completa por 24 h: **USD 19,75136847**, incluidos **USD 3 de cierre**.
+
+Cada arranque exige que a la reserva le queden `native_stop_s` + 60 s
+(3 h 01 min, `i7.py`, `RESERVATION_TTL_TOO_SHORT_FOR_BOOT`). Por eso el 12.º
+boot del estímulo debe empezar, como tarde, 3 h 01 min antes del vencimiento
+de la reserva inicial. En la compuerta, el boot posterior a smoke, restore y
+purga debe empezar antes de 1 h 59 min desde la reserva de 5 h (ADR-0025).
 Actualizar ambos catálogos antes de noviembre; otro precio puede bloquear.
 
 | Paso o grupo | Cota estimada con lista de octubre, USD |
 |---|---:|
 | 1 CPU, máximo 6 h e2 | 0,4021 de compute; PD y snapshots en la cota común de abajo. |
-| 2 Reserva inicial, máximo 12 h | 8,4820 de g2+L4, incluida toda espera y VM consumidora. |
-| 3 READY; 4 TLS/contextos; 5 smoke/restore; 6 privacidad; 7 retiro; 8a estímulo | Dentro de las mismas 12 h, 0,7068 por hora asignada; no sumar otro cargo GPU por paso. Operaciones/egreso entran en la cota común. |
+| 2 Reserva inicial, máximo 13,5 h | 9,5422 de g2+L4, incluida toda espera y VM consumidora. |
+| 3 READY; 4 TLS/contextos; 5 smoke/restore; 6 privacidad; 7 retiro; 8a estímulo | Dentro de las mismas 13,5 h, 0,7068 por hora asignada; no sumar otro cargo GPU por paso. Operaciones/egreso entran en la cota común. |
 | 8b Reserva compuerta, máximo 5 h | 3,5342 de g2+L4; incluye smoke posterior y cierre técnico. |
 | PD 540 GiB, snapshots 552 GiB e IP sin uso, 24 h | 2,8723 en conjunto, incluidos recursos que quedan después de STOP. |
 | GCS, operaciones y ambos egresos acotados | 0,4007 en conjunto. |
@@ -255,11 +261,11 @@ VM y reserva consumida dos veces. El ledger automático evalúa todos los SKU,
 retención después de STOP y exposición extra, antes de cada efecto pagado.
 Corta si el total previsto con cierre supera USD 20, si falta cualquier SKU,
 si la tarifa vence o si transcurren 24 h. El límite conservador acumulado de
-reservas es 17 h; no se reembolsa automáticamente un TTL cerrado antes. Puede
+reservas es 18,5 h; no se reembolsa automáticamente un TTL cerrado antes. Puede
 bloquear una recuperación aunque la factura real sea menor. No ampliar el tope.
 
 Las cantidades previstas son cotas operativas, no una garantía de factura:
-17 h reservadas, 6 h CPU, máximo 540 GiB de PD y 552 GiB de snapshots durante
+18,5 h reservadas, 6 h CPU, máximo 540 GiB de PD y 552 GiB de snapshots durante
 24 h, 1 GiB de egreso VM y 1 GiB GCS, 10 000 operaciones A y 100 000 B.
 Los snapshots fuente, intermedios y final deben estar en us-central1; moverlos
 fuera del ámbito bloquea la estimación de transferencia cero. Vigilar tamaños,

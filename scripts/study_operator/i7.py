@@ -27,6 +27,11 @@ HUMAN_RESERVATION_MAX_H = 4
 HUMAN_RETAINED_UNITS = {'pd_gib_h':540,'snapshot_gib_h':552,'ip_unused_h':1}
 HUMAN_CLOSURE_RESERVE_USD = 3
 HUMAN_PROJECTED_RETENTION_H = 24
+# Phase B GPU reservations (h). Reservation 1 keeps native_stop_s+60 s for the 12th
+# stimulus boot; both fit the USD 20 list-price cut with closure (ADR-0025).
+PHASE_B_RESERVATION_1_H = 13.5
+PHASE_B_GATE_RESERVATION_H = 5
+PHASE_B_RESERVATION_TOTAL_H = PHASE_B_RESERVATION_1_H + PHASE_B_GATE_RESERVATION_H
 
 
 def reservation_charge(reservations, running, rate):
@@ -64,7 +69,7 @@ def reservation_intent_exposure(intent):
     try:
         hours, rate, amount = (intent[k] for k in ('hours','compute_usd_h','exposure_usd'))
         if (any(type(v) not in (int,float) or not math.isfinite(v) or v < 0
-                for v in (hours,rate,amount)) or not 0 < hours <= 12 or rate == 0
+                for v in (hours,rate,amount)) or not 0 < hours <= PHASE_B_RESERVATION_1_H or rate == 0
                 or not math.isclose(amount,hours*rate+.25,rel_tol=1e-12,abs_tol=1e-9)):
             raise ValueError('basis')
     except (KeyError,TypeError,ValueError) as error:
@@ -254,7 +259,7 @@ class Operator(LegacyOperator):
         if self.state.get('reservation_intent'):
             raise ValueError('UNKNOWN_RESERVATION_RECONCILE_FIRST')
         human = self.state.get('human_phase')
-        if not 0 < hours <= (HUMAN_RESERVATION_MAX_H if human else 12):
+        if not 0 < hours <= (HUMAN_RESERVATION_MAX_H if human else PHASE_B_RESERVATION_1_H):
             raise ValueError('HUMAN_RESERVATION_TTL_REQUIRED' if human else 'RESERVATION_TTL_REQUIRED')
         self.cloud.require_beta()
         rate = self.config['rates']['compute_usd_h']
@@ -263,7 +268,7 @@ class Operator(LegacyOperator):
         if self.state.get('reservation') and not self.state['reservation'].get('deleted_verified'):
             raise ValueError('PRIOR_RESERVATION_NOT_CLOSED')
         allocated=self.state.get('reservation_gpu_hours_used',0)+hours
-        if allocated>17 and not human:
+        if allocated>PHASE_B_RESERVATION_TOTAL_H and not human:
             raise ValueError('I7_CUMULATIVE_RESERVATION_HOURS_EXCEED_COST_PLAN')
         self.state['reservation_gpu_hours_used']=allocated
         name = 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]

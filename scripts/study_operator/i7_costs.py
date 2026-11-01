@@ -77,9 +77,10 @@ def list_prices(compute,storage):
 
 
 def default_quantities(hours=24):
-    # Full phase upper: 12h + 5h GPU reservations, 6h CPU; all retained bytes
+    from scripts.study_operator.i7 import PHASE_B_RESERVATION_TOTAL_H as gpu
+    # Full phase upper: both GPU reservations, 6h CPU; all retained bytes
     # through closure, including inherited snapshots and the existing regional IP.
-    return dict(g2_vcpu=4*17,g2_ram=16*17,l4=17,e2_vcpu=2*6,e2_ram=8*6,
+    return dict(g2_vcpu=4*gpu,g2_ram=16*gpu,l4=gpu,e2_vcpu=2*6,e2_ram=8*6,
         pd_gib_h=(360+180)*hours,snapshot_gib_h=(360+192)*hours,
         ip_used_h=0,ip_unused_h=hours,egress_gib=1,snapshot_transfer_gib=0,
         gcs_gib_h=hours,gcs_a=10000,gcs_b=100000,gcs_egress_gib=1)
