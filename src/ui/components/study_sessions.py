@@ -46,6 +46,14 @@ STAGES = {
 }
 
 
+def smoke_participant():
+    """Synthetic smoke code from the sealed deployment; fails closed, never a real (<P900) code."""
+    code = os.environ.get("CLOUDRAG_SMOKE_PARTICIPANT", "P999")
+    if not re.fullmatch(r"P[0-9]{2,6}", code) or int(code[1:]) < 900:
+        raise ValueError("Smoke sessions require one configured fictitious P900+ code")
+    return code
+
+
 class StudyStore(InvitationStore):
     def __init__(self, root, protocol, purpose="study"):
         root = Path(root).resolve()
@@ -100,7 +108,11 @@ class StudyStore(InvitationStore):
 
     def assignment(self, pid, *, cell=None, profile=None):
         if self.purpose != "study":
-            required = {"smoke": "P999", "rehearsal": "P998"}.get(self.purpose)
+            required = (
+                smoke_participant()
+                if self.purpose == "smoke"
+                else {"rehearsal": "P998"}.get(self.purpose)
+            )
             if (
                 not pid.startswith("P")
                 or not pid[1:].isdigit()

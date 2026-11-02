@@ -156,6 +156,7 @@ def _gate_after_prerequisites(operator,publication):
 def tls(operator):
     from scripts.study_operator.i7_workflows import check_tls_sequence, wait_ready
     attempts = []
+    operator.stop()  # 'ready' leaves the VM RUNNING; start() requires TERMINATED.
     for _ in range(3):
         record = {'start_requested_utc':operator.now().isoformat(),'status':'FAILED'}
         try:
@@ -173,7 +174,8 @@ def withdraw_purge(operator):
     if operator.state.get('purpose') != 'smoke':
         raise ValueError('SYNTHETIC_SMOKE_PERIOD_REQUIRED')
     records = []
-    for operation, code in (('withdraw','P999'),('purge-study',None)):
+    from scripts.study_operator.i7_smoke import smoke_participant
+    for operation, code in (('withdraw',smoke_participant(operator.config)),('purge-study',None)):
         operator.delete_sessions(operation,code=code,dry_run=True)
         result = operator.delete_sessions(operation,code=code,dry_run=False)
         if not all(result[k] for k in ('remote_versions_empty','zero_retention_policy_verified',
@@ -189,7 +191,8 @@ def restore_latest(operator):
         raise ValueError('GENERATION_VERIFIED_SMOKE_BACKUP_REQUIRED')
     smoke=json.loads(rows[-1].read_bytes())
     objects=smoke['objects']
-    result=operator.restore('P999',smoke['session_id'],
+    from scripts.study_operator.i7_smoke import smoke_participant
+    result=operator.restore(smoke_participant(operator.config),smoke['session_id'],
         full_generation=objects['full_session.json']['generation'],
         manifest_generation=objects['export_manifest.json']['generation'])
     if (result.get('status')!='RESTORED_VERIFIED' or result.get('export_sha256')!=smoke['export_sha256']
@@ -242,8 +245,13 @@ def dispatch(operator, step, spec):
         from scripts.study_operator.i7_workflows import wait_ready, privacy
         operator.stop()
         operator.start('smoke')
-        wait_ready(operator)
-        return privacy(operator)
+        try:
+            wait_ready(operator)
+            return privacy(operator)
+        except BaseException:
+            # Success keeps the VM RUNNING for withdraw-purge maintenance.
+            operator.stop()
+            raise
     if step == 'smoke':
         from scripts.study_operator.i7_smoke import run
         return run(operator)

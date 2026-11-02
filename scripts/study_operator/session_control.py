@@ -120,14 +120,14 @@ def dispatch(request, deployment, *, maintenance=False):
             raise ValueError('HOST_BACKUP_AGENT_REQUIRED')
         return close_sessions(store,lambda folder:backup_session(folder,Bucket(deployment['bucket']),deployment['backup_prefix']))
     if operation=='i7-smoke-observe' and deployment['purpose']=='smoke':
-        from src.ui.components.study_sessions import StudySession
+        from src.ui.components.study_sessions import StudySession, smoke_participant
         checkpoints=list(store.root.glob('*/study_checkpoint.json'))
         if not checkpoints:
             return {'data':None}
         if len(checkpoints)!=1:
             raise ValueError('ONE_SYNTHETIC_SMOKE_SESSION_REQUIRED')
         session=StudySession.load(store,checkpoints[0].parent.name)
-        if session.data['assignment']['participant_id']!='P999':
+        if session.data['assignment']['participant_id']!=smoke_participant():
             raise ValueError('SYNTHETIC_SMOKE_CODE_REQUIRED')
         result={'data':session.data}
         if session.data['stage']=='complete':
@@ -138,7 +138,7 @@ def dispatch(request, deployment, *, maintenance=False):
                 backup=json.loads((checkpoints[0].parent/'backup_state.json').read_bytes()))
         return result
     if operation == 'i7-smoke-status' and deployment['purpose'] == 'smoke':
-        from src.ui.components.study_sessions import StudySession
+        from src.ui.components.study_sessions import StudySession, smoke_participant
 
         checkpoints = list(store.root.glob('*/study_checkpoint.json'))
         if len(checkpoints) != 1:
@@ -148,7 +148,7 @@ def dispatch(request, deployment, *, maintenance=False):
             return {'status':'SMOKE_NOT_COMPLETE'}
         exported = session.export().read_bytes()
         payload = json.loads(exported)
-        if (payload['assignment']['participant_id'] != 'P999' or len(payload['attempts']) != 8
+        if (payload['assignment']['participant_id'] != smoke_participant() or len(payload['attempts']) != 8
                 or len(payload['instruments']) != 2
                 or any(len(item.get('ueq_s',[])) != 8 for item in payload['instruments'])):
             raise ValueError('FULL_UEQ_BROWSER_SMOKE_REQUIRED')

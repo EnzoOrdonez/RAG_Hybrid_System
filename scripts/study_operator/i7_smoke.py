@@ -19,20 +19,33 @@ def validate_receipt(path):
     return value
 
 
+def smoke_participant(config):
+    # Same rule the host seals into deployment.json for the app (CLOUDRAG_SMOKE_PARTICIPANT).
+    from scripts.study_operator.deployment import smoke_participant as checked
+    return checked(config)
+
+
 def run(operator, *, user_agent=None, ip=None):
     from scripts.study_operator.i7_browser import run as browse
     from scripts.study_operator.i7_workflows import wait_ready
     from src.ui.components.study_protocol import verify_draw
     validate_receipt(operator.root/'browser-validation.json')
+    code=smoke_participant(operator.config)
     operator.stop()
     operator.start('smoke')
-    wait_ready(operator)
-    identity={'boot_id':operator.state['ready']['boot_id'],'image_id':operator.config['image_id'],
-              'source_commit':operator.config['commit']}
-    token=operator.invite('P999',cell=1,profile='without_experience')
-    def observe():
-        return operator.bridge({'operation':'i7-smoke-observe','identity':identity},private=True)
-    result=browse('https://'+operator.config['hostname'],token,
-                  verify_draw(operator.config['local_reviewed_config']),identity,observe,
-                  user_agent=user_agent,ip=ip)
-    return operator.receipt('smoke',dict(result,boot_id=identity['boot_id']))
+    try:
+        wait_ready(operator)
+        identity={'boot_id':operator.state['ready']['boot_id'],'image_id':operator.config['image_id'],
+                  'source_commit':operator.config['commit']}
+        token=operator.invite(code,cell=1,profile='without_experience')
+        def observe():
+            return operator.bridge({'operation':'i7-smoke-observe','identity':identity},private=True)
+        result=browse('https://'+operator.config['hostname'],token,
+                      verify_draw(operator.config['local_reviewed_config']),identity,observe,
+                      user_agent=user_agent,ip=ip,participant=code,
+                      failure_dir=operator.root/'private'/'browser-failures')
+        return operator.receipt('smoke',dict(result,boot_id=identity['boot_id']))
+    except BaseException:
+        # Success keeps the VM RUNNING: restore and withdraw-purge need maintenance on it.
+        operator.stop()
+        raise
