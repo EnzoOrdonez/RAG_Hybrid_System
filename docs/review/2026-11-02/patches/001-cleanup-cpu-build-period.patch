@@ -1,0 +1,34 @@
+diff --git a/scripts/study_operator/i7_cpu_pipeline.py b/scripts/study_operator/i7_cpu_pipeline.py
+index 4a62c26..3eb39f1 100644
+--- a/scripts/study_operator/i7_cpu_pipeline.py
++++ b/scripts/study_operator/i7_cpu_pipeline.py
+@@ -23,6 +23,11 @@ def cpu_label(config):
+     return 'i7cpu-'+config['period_id'][:8]
+ 
+ 
++def build_period(config):
++    """CPU-build period of the root: start('smoke') switches period_id, never this one."""
++    return config.get('period_ids',{}).get('technical',config['period_id'])
++
++
+ def build_scope(config):
+     """Technical-object prefix of one period; a remnant of another attempt is never reread."""
+     return 'i7-'+config['period_id'][:12]
+@@ -233,7 +238,7 @@ def verify_image_or_stop_cpu(operator):
+         result = verify(operator.root)
+     except ValueError as error:
+         from scripts.study_operator.cpu_build import Build
+-        builder = Build(operator.root/'cpu',operator.cloud,cpu_label=cpu_label(operator.config))
++        builder = Build(operator.root/'cpu',operator.cloud,cpu_label=cpu_label({'period_id':build_period(operator.config)}))
+         try:
+             cpu = builder.stopped(builder.resource())
+         except Exception as stop_error:
+@@ -316,7 +321,7 @@ def cleanup_cpu(operator):
+     zone = 'us-central1-a'
+     current = operator.cloud.command(['compute','instances','describe',vm['name'],'--zone='+zone])
+     if (str(current['id']) != str(vm['id']) or current['description'] != vm['description']
+-            or vm['name'] != 'cloudrag-i5-restore-'+cpu_label(operator.config)):
++            or vm['name'] != 'cloudrag-i5-restore-'+cpu_label({'period_id':build_period(operator.config)})):
+         raise ValueError('CPU_CLEANUP_IDENTITY_CHANGED')
+     if current['status'] != 'TERMINATED':
+         raise ValueError('CPU_CLEANUP_REQUIRES_STOPPED_VM')
