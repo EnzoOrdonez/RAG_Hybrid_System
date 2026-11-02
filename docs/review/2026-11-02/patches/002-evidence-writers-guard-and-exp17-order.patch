@@ -1,0 +1,78 @@
+diff --git a/scripts/audit/smoke_recompute_retrieval_stats.py b/scripts/audit/smoke_recompute_retrieval_stats.py
+index 4f93892..629ac0f 100644
+--- a/scripts/audit/smoke_recompute_retrieval_stats.py
++++ b/scripts/audit/smoke_recompute_retrieval_stats.py
+@@ -64,7 +64,8 @@ REQUIRED_LEAF_KEYS = {
+ 
+ 
+ def _run_or_read(exp_id: str) -> dict:
+-    if os.environ.get("SMOKE_SKIP_RECOMPUTE") == "1":
++    # Solo lectura por defecto; regenerar exige SMOKE_RECOMPUTE=1 explícito (R-04).
++    if os.environ.get("SMOKE_RECOMPUTE") != "1":
+         path = REPO_ROOT / "experiments" / "results" / exp_id / "retrieval_metrics.json"
+         return json.loads(path.read_text(encoding="utf-8"))
+     return recompute_experiment(exp_id)
+diff --git a/scripts/compute_exp17_powered.py b/scripts/compute_exp17_powered.py
+index 3801f0b..81aedb9 100644
+--- a/scripts/compute_exp17_powered.py
++++ b/scripts/compute_exp17_powered.py
+@@ -31,6 +31,8 @@ import pandas as pd
+ 
+ PROJECT_ROOT = Path(__file__).resolve().parents[1]
+ EXP_DIR = PROJECT_ROOT / "experiments/results/exp17_crosscloud_balanced"
++sys.path.insert(0, str(PROJECT_ROOT))
++from src.utils.signed_evidence import guard_write  # noqa: E402
+ BASE, BAL = "baseline | granite4.1-8b", "balanced | granite4.1-8b"
+ VERIFIERS = [("small", "faithfulness_rows__small__vb_agree.json"),
+              ("base", "faithfulness_rows__base__vb_agree.json"),
+@@ -43,7 +45,7 @@ def load_counts(fname):
+     cfg = json.loads((EXP_DIR / fname).read_text(encoding="utf-8"))["configs"]
+     base, bal = cfg[BASE], cfg[BAL]
+     out = {}
+-    for q in set(base) | set(bal):
++    for q in sorted(set(base) | set(bal)):  # orden fijo: independiente de PYTHONHASHSEED (R-05)
+         bg = base.get(q, {}); lg = bal.get(q, {})
+         out[q] = {"baseline": (int(bg.get("supported") or 0), int(bg.get("genuine") or 0)),
+                   "balanced": (int(lg.get("supported") or 0), int(lg.get("genuine") or 0))}
+@@ -81,7 +83,7 @@ def glmm(df):
+ 
+ def cluster_bootstrap(counts, n_boot=N_BOOT, seed=SEED):
+     """Query-level cluster bootstrap of the paired micro-averaged faithfulness diff."""
+-    qids = list(counts)
++    qids = sorted(counts)
+     def micro(qsel):
+         bs = bg = ls = lg = 0
+         for q in qsel:
+@@ -121,7 +123,7 @@ def main():
+                       "cluster_bootstrap": "resample 25 queries; paired micro-faithfulness diff; seed 42"},
+            "note": "claim-level is conditional on a genuine claim (declines/vacuous drop out).",
+            "verifiers": results, "generated_by": "scripts/compute_exp17_powered.py"}
+-    (EXP_DIR / "powered_reanalysis.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
++    (guard_write(EXP_DIR / "powered_reanalysis_v2.json")).write_text(json.dumps(out, indent=1), encoding="utf-8")
+ 
+     L = ["# exp17 — higher-power reanalysis (same 25 queries, claim resolution)", "",
+          "GLMM = supported ~ arm + (1|query) (binomial VB, keeps pairing). Bootstrap = query-level "
+@@ -137,7 +139,7 @@ def main():
+           "read with the per-query decline-aware arm_stats (declines drop here).",
+           "balanced also has MORE genuine claims than baseline (less decline) — a separate gain the "
+           "conditional analysis does not capture."]
+-    (EXP_DIR / "powered_reanalysis.md").write_text("\n".join(L), encoding="utf-8")
++    (guard_write(EXP_DIR / "powered_reanalysis_v2.md")).write_text("\n".join(L), encoding="utf-8")
+     print("\n".join(L))
+ 
+ 
+diff --git a/scripts/recompute_retrieval_stats.py b/scripts/recompute_retrieval_stats.py
+index ec30d24..ff69dab 100644
+--- a/scripts/recompute_retrieval_stats.py
++++ b/scripts/recompute_retrieval_stats.py
+@@ -201,6 +201,10 @@ def recompute_experiment(exp_id: str) -> Dict:
+     results_path = exp_dir / "results.json"
+     metrics_path = exp_dir / "retrieval_metrics.json"
+     backup_path = exp_dir / "retrieval_metrics_pre_fix.json"
++    # Falla ANTES de cargar el oráculo: exp8/exp8b son evidencia firmada (R-04).
++    from src.utils.signed_evidence import guard_write
++    guard_write(metrics_path)
++    guard_write(backup_path)
+ 
+     if not results_path.exists():
+         raise FileNotFoundError(f"Missing {results_path}")
