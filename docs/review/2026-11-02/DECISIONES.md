@@ -14,3 +14,5 @@
   al aplicar el parche, pasan a XPASS y obligan a retirar la marca.
 - **D-05** Subagentes de pasada: solo lectura sobre el repo; escriben en el scratchpad. La integración en
   `docs/review/` la hace el agente principal.
+- **D-06** Compuerta de push (ADR-0013): el usuario eligió "esperar al cierre" (AskUserQuestion, 2026-11-02).
+  No se publica nada hasta un único OK final. El hook que avisa de commits sin publicar se atiende con esa decisión.
