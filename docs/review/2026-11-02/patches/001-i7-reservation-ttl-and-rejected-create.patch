@@ -1,0 +1,73 @@
+--- a/scripts/study_operator/i7.py	2026-11-02 03:44:08.697751793 +0000
++++ b/scripts/study_operator/i7.py	2026-11-02 03:44:08.722674533 +0000
+@@ -13,6 +13,7 @@
+ 
+ from scripts.study_operator.deployment import checked_config
+ from scripts.study_operator.lifecycle import Operator as LegacyOperator
++from scripts.study_operator.policy import OperatorError
+ from scripts.study_operator.service_gateway import save_state
+ from scripts.study_operator.stimulus_host_evidence import sha
+ 
+@@ -105,19 +106,28 @@
+         self.state['reservation_gpu_hours_used']=allocated
+         name = 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]
+         zone = self.selected()['zone']
+-        until = self.now()+timedelta(hours=hours)
+-        intent = {'name':name,'zone':zone,'delete_at_utc':until.isoformat(),'status':'UNKNOWN'}
++        # gcloud trunca --delete-at-time a milisegundos: se fija a segundos enteros (R-01).
++        until = self.now().replace(microsecond=0)+timedelta(hours=hours)
++        intent = {'name':name,'zone':zone,'delete_at_utc':until.isoformat(),'status':'UNKNOWN',
++                  'hours':hours}
+         self.state['reservation_intent'] = intent
+         self.persist()
+         # SDK beta exposes native reservation auto-delete. No unbounded fallback.
+-        self.cloud.command(['beta','compute','reservations','create',name,'--zone='+zone,
+-            '--machine-type=g2-standard-4','--vm-count=1','--accelerator=type=nvidia-l4,count=1',
+-            '--require-specific-reservation','--description='+self.config['resource_marker'],
+-            '--delete-at-time='+until.isoformat()],timeout=300)
++        try:
++            self.cloud.command(['beta','compute','reservations','create',name,'--zone='+zone,
++                '--machine-type=g2-standard-4','--vm-count=1','--accelerator=type=nvidia-l4,count=1',
++                '--require-specific-reservation','--description='+self.config['resource_marker'],
++                '--delete-at-time='+until.isoformat()],timeout=300)
++        except OperatorError as exc:
++            # Rechazo definitivo de capacidad (R-02): se marca; reconcile lo cierra solo tras un list vacío.
++            if 'ZONE_RESOURCE_POOL_EXHAUSTED' in str(exc):
++                intent['create_rejected_capacity'] = True
++                self.persist()
++            raise
+         resource = self.cloud.command(['compute','reservations','describe',name,'--zone='+zone])
+         reservation_identity(resource)
+         if (resource['description'] != self.config['resource_marker']
+-                or datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != until):
++                or abs((datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00'))-until).total_seconds()) >= 1):
+             raise ValueError('RESERVATION_NATIVE_DELETION_NOT_VERIFIED')
+         self.state['reservation'] = dict(resource,created_utc=self.now().isoformat())
+         self.state['open_exposure_usd'] = hours*self.config['rates']['compute_usd_h']+.25
+@@ -276,17 +286,23 @@
+                     raise ValueError('UNKNOWN_RESERVATION_IDENTITY_CHANGED')
+                 resource=found[0]
+                 reservation_identity(resource)
+-                if datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != datetime.fromisoformat(intent['delete_at_utc']):
++                if abs((datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00'))-datetime.fromisoformat(intent['delete_at_utc'])).total_seconds()) >= 1:
+                     raise ValueError('UNKNOWN_RESERVATION_NATIVE_TTL_CHANGED')
+                 self.state['reservation']=dict(resource,created_utc=resource['creationTimestamp'])
+-                self.state['open_exposure_usd']=12*self.config['rates']['compute_usd_h']+.25
++                self.state['open_exposure_usd']=intent.get('hours',12)*self.config['rates']['compute_usd_h']+.25
+                 self.state.pop('reservation_intent')
+                 self.persist()
+                 return {'status':'RESERVATION_FOUND_RECONCILED'}
++            if intent.get('create_rejected_capacity'):
++                # Rechazo explícito + list vacío: nunca existió; se devuelven las horas y no se cobra.
++                self.state.pop('reservation_intent')
++                self.state['reservation_gpu_hours_used']=max(0,self.state.get('reservation_gpu_hours_used',0)-intent.get('hours',12))
++                self.persist()
++                return self.receipt('reservation',{'status':'CREATE_REJECTED_CAPACITY_ABSENT'})
+             if self.now() < datetime.fromisoformat(intent['delete_at_utc']):
+                 raise ValueError('UNKNOWN_CREATE_OUTCOME_PRESERVE_INTENT')
+             self.state.pop('reservation_intent')
+-            self.state['spent_usd']=self.state.get('spent_usd',0)+12*self.config['rates']['compute_usd_h']+.25
++            self.state['spent_usd']=self.state.get('spent_usd',0)+intent.get('hours',12)*self.config['rates']['compute_usd_h']+.25
+             self.persist()
+             return self.receipt('reservation',{'status':'UNKNOWN_CREATE_EXPIRED_AND_ABSENT',
+                                               'estimated_at_full_upper_bound':True})
