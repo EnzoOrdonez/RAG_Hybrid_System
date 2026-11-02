@@ -9,7 +9,12 @@
    "severity": "S1",
    "new_in_3bb9ca8": false,
    "activated_by": "trabajar en la rama fix/i7-attempt8",
-   "location": ["scripts/study_operator/i7_cpu_pipeline.py:42-46", "scripts/study_operator/i7_cpu_pipeline.py:60", "scripts/study_operator/i7_cpu_pipeline.py:90-91", "scripts/study_operator/i7_streamlit_preflight.py:55-58"],
+   "location": [
+    "scripts/study_operator/i7_cpu_pipeline.py:42-46",
+    "scripts/study_operator/i7_cpu_pipeline.py:60",
+    "scripts/study_operator/i7_cpu_pipeline.py:90-91",
+    "scripts/study_operator/i7_streamlit_preflight.py:55-58"
+   ],
    "summary": "La guarda previa al pago compara HEAD y la rama REMOTA fix/interview-readiness, pero el clon de :90 usa la rama LOCAL con ese nombre, y lo hace después de admit_paid (:60) y de la restauración pagada de la CPU.",
    "scenario": "El operador está en fix/i7-attempt8 en 3bb9ca8 y origin ya avanzó por fast-forward. (a) Si la rama local fix/interview-readiness sigue en b470d3e, se construye b470d3e sin aviso y el desajuste solo aparece en verify_image_or_stop_cpu, después del build. (b) Si no hay rama local, git clone sale con rc 128; cpu/ queda creado y el reintento da CPU_ATTEMPT_EXISTS_RECONCILE_WITHOUT_REPLAY.",
    "evidence": "pytest --runxfail tests/test_review_i8_findings.py -k i8_01 -> Paid: admit_paid alcanzado (stale y missing); experimento git: HEAD=91345ae, remoto=91345ae, clon L90=7e2c8a4 (el viejo); sin rama local: rc=128",
@@ -22,7 +27,11 @@
    "id": "I8-02",
    "severity": "S2",
    "new_in_3bb9ca8": false,
-   "location": ["scripts/study_operator/i7_smoke.py:35", "scripts/study_operator/i7_phase_b.py:247", "scripts/study_operator/i7.py:383"],
+   "location": [
+    "scripts/study_operator/i7_smoke.py:35",
+    "scripts/study_operator/i7_phase_b.py:247",
+    "scripts/study_operator/i7.py:383"
+   ],
    "summary": "La parada ante fallo de 3bb9ca8 deja start('smoke') fuera del try. Si `instances start` (timeout=300) expira o se interrumpe, la operación de GCE sigue y nada para la VM.",
    "scenario": "subprocess.TimeoutExpired o KeyboardInterrupt durante `instances start`. Con smoke o privacy como pasos sueltos no hay ningún finally externo. Coste acotado por el STOP nativo de 10800 s (unas 3 h de g2-standard-4).",
    "evidence": "pytest --runxfail -k i8_02 -> calls == ['stop','start:smoke'], sin stop final",
@@ -35,7 +44,12 @@
    "id": "I8-03",
    "severity": "S2",
    "new_in_3bb9ca8": true,
-   "location": ["scripts/study_operator/i7_browser.py:213-214", "scripts/study_operator/i7_browser.py:178-180", "scripts/study_operator/i7_browser.py:348", "scripts/study_operator/deployment.py:34"],
+   "location": [
+    "scripts/study_operator/i7_browser.py:213-214",
+    "scripts/study_operator/i7_browser.py:178-180",
+    "scripts/study_operator/i7_browser.py:348",
+    "scripts/study_operator/deployment.py:34"
+   ],
    "summary": "El volcado escribe la IP pública real: el hostname es <IP>.sslip.io y console.json guarda ws.url y los mensajes de consola, y aria.yaml guarda /url. scrub() no conoce el host.",
    "scenario": "Cualquier fallo del smoke en producción. La carpeta es privada y local, así que el impacto actual es bajo; incumple el requisito explícito y pasaría a S1 si root/private entrara en un paquete publicado.",
    "evidence": "Chromium real (1243): token y contraseña ausentes en los 4 archivos; IP presente en aria.yaml y console.json. pytest --runxfail -k i8_03 -> ['aria.yaml','console.json']",
@@ -47,7 +61,10 @@
    "id": "I8-04",
    "severity": "S3",
    "new_in_3bb9ca8": true,
-   "location": ["scripts/study_operator/i7_smoke.py:48-51", "scripts/study_operator/i7_phase_b.py:251-254"],
+   "location": [
+    "scripts/study_operator/i7_smoke.py:48-51",
+    "scripts/study_operator/i7_phase_b.py:251-254"
+   ],
    "summary": "Mismo patrón que B-2: si falla el stop() del except BaseException, la excepción que se propaga es la del stop y la causa del smoke solo queda en __context__ (sí se imprime en el traceback encadenado).",
    "reproducer": "tests/test_review_i8_findings.py::test_i8_04_*",
    "label": "VERIFICADO"
@@ -56,7 +73,10 @@
    "id": "I8-05",
    "severity": "S3",
    "new_in_3bb9ca8": true,
-   "location": ["scripts/study_operator/deployment.py:17-18", "scripts/study_operator/i7_config.py:24-35"],
+   "location": [
+    "scripts/study_operator/deployment.py:17-18",
+    "scripts/study_operator/i7_config.py:24-35"
+   ],
    "summary": "smoke_participant no tiene ninguna vía soportada para fijarse: ni i7_config ni la CLI lo escriben y ningún documento lo menciona. Usarlo exige editar installation.json a mano (ADR-0026). restore y withdraw leen el valor vigente, no el del recibo del smoke.",
    "label": "VERIFICADO (lectura y git grep)"
   },
@@ -64,15 +84,24 @@
    "id": "I8-06",
    "severity": "S3",
    "new_in_3bb9ca8": true,
-   "location": ["scripts/study_operator/i7_browser.py:180", "scripts/study_operator/i7_browser.py:346-348"],
+   "location": [
+    "scripts/study_operator/i7_browser.py:180",
+    "scripts/study_operator/i7_browser.py:346-348"
+   ],
    "summary": "Para F-020 el volcado no guarda sync.requests ni sync.completed, ni un snapshot de observe(). Sin ellos no se distingue «el clic no envió rerun_script» de «el rerun no terminó» o de «admit() falló en el servidor».",
-   "label": "VERIFICADO (lectura)"
+   "label": "VERIFICADO (xfail estricto; con el parche: XPASS y requests=2/completed=2/observe.data=null contra la app real con invitación caducada)",
+   "patch": "patches/004-i8-06-dump-sync-and-observe.patch",
+   "reproducer": "tests/test_review_i8_f020.py::test_i8_06_failure_dump_records_sync_counters_and_app_state"
   },
   {
    "id": "I8-07",
    "severity": "S3",
    "new_in_3bb9ca8": "parcial",
-   "location": ["scripts/study_operator/i7_browser.py:256-258", "scripts/study_operator/i7_browser.py:121", "scripts/study_operator/i7_browser.py:91-95"],
+   "location": [
+    "scripts/study_operator/i7_browser.py:256-258",
+    "scripts/study_operator/i7_browser.py:121",
+    "scripts/study_operator/i7_browser.py:91-95"
+   ],
    "summary": "Ninguna operación de Playwright queda en 600000 ms. Los presupuestos se suman: un clic en 'Probar consulta' puede durar 600+900+900+900 = 3300 s. is_visible, count, all_inner_texts y browser.close no tienen tope.",
    "label": "VERIFICADO (fuente de Playwright 1.58.0; no ejecutado contra la app)"
   },
@@ -80,7 +109,11 @@
    "id": "I8-08",
    "severity": "S3",
    "new_in_3bb9ca8": false,
-   "location": ["docs/STUDY_I7_RUNBOOK_FASE_B.md:9", "docs/STUDY_I7_RUNBOOK_FASE_B.md:41-43", "docs/STUDY_I7_IMAGE_RECIPE.md:6"],
+   "location": [
+    "docs/STUDY_I7_RUNBOOK_FASE_B.md:9",
+    "docs/STUDY_I7_RUNBOOK_FASE_B.md:41-43",
+    "docs/STUDY_I7_IMAGE_RECIPE.md:6"
+   ],
    "summary": "Los runbooks dicen «solo fix/interview-readiness» y fijan $run y $evidence (recibo del 16/10) en valores que no sirven para 3bb9ca8. Ningún documento menciona el intento 8 ni fix/i7-attempt8.",
    "label": "VERIFICADO (lectura)"
   }
@@ -88,5 +121,7 @@
  "no_findings": [
   "§2.1: control de acceso sin debilitar. Los códigos reales son P01-P24 (study_protocol.py:132); smoke_participant() solo se consulta con purpose=='smoke'; rehearsal sigue en P998; register_invitation_hash no cambia. Mutantes M01-M08 muertos.",
   "§2.7: sin regresiones frente a b470d3e en smoke -> restore -> privacy -> withdraw-purge (suite completa en exit 0; tests de la auditoría anterior idénticos)."
- ]
+ ],
+ "patches_decision": "001-004 no se aplican (decisión del dueño, 2026-11-02)",
+ "f020": "No reproducido en 22 recorridos locales (docs/review/2026-11-02-i8/F020.md). El rechazo de admit() en el servidor reproduce el síntoma."
 }

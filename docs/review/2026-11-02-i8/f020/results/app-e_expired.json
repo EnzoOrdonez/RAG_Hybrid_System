@@ -1,0 +1,98 @@
+{
+ "variant": "e_expired",
+ "server": "app",
+ "frames": [
+  {
+   "t": 1.274,
+   "dir": "ws",
+   "type": "open"
+  },
+  {
+   "t": 1.296,
+   "dir": "sent",
+   "type": "rerun_script",
+   "widgets": []
+  },
+  {
+   "t": 1.305,
+   "dir": "recv",
+   "type": "new_session"
+  },
+  {
+   "t": 1.336,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 1.571,
+   "dir": "recv",
+   "type": "script_finished",
+   "status": 0
+  },
+  {
+   "t": 1.571,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 1.816,
+   "dir": "sent",
+   "type": "rerun_script",
+   "widgets": [
+    {
+     "id_suffix": "6ff10b19275cd7df317-None",
+     "kind": "string_value",
+     "value_is_token": true,
+     "trigger": null
+    },
+    {
+     "id_suffix": "rmSubmitter:login-Entrar",
+     "kind": "trigger_value",
+     "value_is_token": null,
+     "trigger": true
+    }
+   ]
+  },
+  {
+   "t": 1.824,
+   "dir": "recv",
+   "type": "new_session"
+  },
+  {
+   "t": 1.833,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 1.94,
+   "dir": "recv",
+   "type": "script_finished",
+   "status": 0
+  },
+  {
+   "t": 1.94,
+   "dir": "recv",
+   "type": "session_status_changed"
+  }
+ ],
+ "error": null,
+ "requests": 2,
+ "completed": 2,
+ "buttons_after": [
+  "Deploy",
+  "",
+  "",
+  "Entrar"
+ ],
+ "error_text": [
+  "No se pudo abrir la sesión. Contacta al coordinador."
+ ],
+ "sessions_created": 0,
+ "stage": null,
+ "login": false,
+ "server_log_tail": [
+  "  You can now view your Streamlit app in your browser.",
+  "  URL: http://localhost:56749",
+  "  Stopping..."
+ ]
+}

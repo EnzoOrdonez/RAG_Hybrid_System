@@ -75,3 +75,6 @@ Se probaron en un worktree desechable: solo cambian los xfail estrictos de I8-01
 - **001:** comprueba que `refs/heads/fix/interview-readiness` local == HEAD junto a `:46`, antes de pagar. Ningún archivo del pin de receta cambia.
 - **002:** mueve `start('smoke')` dentro del try en el smoke y en privacy.
 - **003:** añade el host `.sslip.io` y su IP a los secretos de `run()`.
+- **004 (I8-06, añadido en el seguimiento de F-020):** guarda `sync` y `observe()` en el volcado. Ver [F020.md](F020.md).
+
+**Decisión del dueño (2026-11-02):** los parches 001-004 no se aplican; quedan documentados.

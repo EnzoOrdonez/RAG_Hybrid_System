@@ -1,0 +1,41 @@
+diff --git a/scripts/study_operator/i7_browser.py b/scripts/study_operator/i7_browser.py
+index 10c6dd1..a0426c9 100644
+--- a/scripts/study_operator/i7_browser.py
++++ b/scripts/study_operator/i7_browser.py
+@@ -147,7 +147,7 @@ def scrub(value,secrets):
+     return value
+ 
+ 
+-def dump_failure(page,root,private,events,error):
++def dump_failure(page,root,private,events,error,diagnostics=None):
+     """Owner-only diagnostics. Token, canary IP/UA and field values are redacted; dump errors never escape."""
+     try:
+         folder=Path(root)/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+@@ -177,7 +177,8 @@ def dump_failure(page,root,private,events,error):
+     for name,produce in (('screenshot.png',lambda:page.screenshot(path=str(folder/'screenshot.png'),full_page=True)),
+             ('aria.yaml',lambda:save('aria.yaml',scrub(redact_aria(page.locator('body').aria_snapshot()),secrets))),
+             ('controls.json',lambda:save('controls.json',controls())),
+-            ('console.json',lambda:save('console.json',dict(events,sync_error=error)))):
++            ('console.json',lambda:save('console.json',dict(events,sync_error=error))),
++            *((('diagnostics.json',lambda:save('diagnostics.json',diagnostics)),) if diagnostics else ())):
+         try:
+             produce()
+         except Exception:
+@@ -345,7 +346,16 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
+                 'objects':final['backup']['objects']}
+         except Exception:
+             if failure_dir and page is not None:
+-                dump_failure(page,failure_dir,(token,ip,user_agent,wire_ua),events,getattr(sync,'error',None))
++                # F-020: requests vs completed separates 'click not sent', 'rerun not finished' and
++                # 'admit() refused server-side' (rerun completed, no checkpoint in observe()).
++                try:
++                    state=observe()
++                    state={'identity_matches':state.get('identity')==identity,'data':state.get('data')}
++                except Exception as observe_error:
++                    state={'observe_error':type(observe_error).__name__}
++                diagnostics={'sync':{name:getattr(sync,name,None) for name in
++                                     ('requests','completed','form_text_entries','error')},'observe':state}
++                dump_failure(page,failure_dir,(token,ip,user_agent,wire_ua),events,getattr(sync,'error',None),diagnostics)
+             raise
+         finally:
+             browser.close()

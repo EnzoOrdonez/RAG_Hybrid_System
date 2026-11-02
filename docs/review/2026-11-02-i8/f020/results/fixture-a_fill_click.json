@@ -1,0 +1,118 @@
+{
+ "variant": "a_fill_click",
+ "server": "fixture",
+ "frames": [
+  {
+   "t": 1.179,
+   "dir": "ws",
+   "type": "open"
+  },
+  {
+   "t": 1.198,
+   "dir": "sent",
+   "type": "rerun_script",
+   "widgets": []
+  },
+  {
+   "t": 1.21,
+   "dir": "recv",
+   "type": "new_session"
+  },
+  {
+   "t": 1.243,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 1.44,
+   "dir": "recv",
+   "type": "script_finished",
+   "status": 0
+  },
+  {
+   "t": 1.441,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 1.637,
+   "dir": "sent",
+   "type": "rerun_script",
+   "widgets": [
+    {
+     "id_suffix": "ab8a0c9d59f28a3dddc-None",
+     "kind": "string_value",
+     "value_is_token": true,
+     "trigger": null
+    },
+    {
+     "id_suffix": "rmSubmitter:login-Entrar",
+     "kind": "trigger_value",
+     "value_is_token": null,
+     "trigger": true
+    }
+   ]
+  },
+  {
+   "t": 1.64,
+   "dir": "recv",
+   "type": "new_session"
+  },
+  {
+   "t": 1.642,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 1.716,
+   "dir": "recv",
+   "type": "script_finished",
+   "status": 2
+  },
+  {
+   "t": 1.716,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 1.778,
+   "dir": "recv",
+   "type": "new_session"
+  },
+  {
+   "t": 1.78,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 1.782,
+   "dir": "recv",
+   "type": "script_finished",
+   "status": 0
+  },
+  {
+   "t": 1.782,
+   "dir": "recv",
+   "type": "session_status_changed"
+  }
+ ],
+ "error": null,
+ "requests": 2,
+ "completed": 2,
+ "buttons_after": [
+  "Deploy",
+  "",
+  "Preparar sesión"
+ ],
+ "error_text": [
+  "El coordinador debe preparar la sesión antes de continuar."
+ ],
+ "sessions_created": 1,
+ "stage": "familiarization",
+ "login": true,
+ "server_log_tail": [
+  "  You can now view your Streamlit app in your browser.",
+  "  URL: http://localhost:34807",
+  "  Stopping..."
+ ]
+}

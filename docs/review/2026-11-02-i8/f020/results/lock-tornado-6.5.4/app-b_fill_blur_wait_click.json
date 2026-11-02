@@ -1,0 +1,118 @@
+{
+ "variant": "b_fill_blur_wait_click",
+ "server": "app",
+ "frames": [
+  {
+   "t": 1.379,
+   "dir": "ws",
+   "type": "open"
+  },
+  {
+   "t": 1.397,
+   "dir": "sent",
+   "type": "rerun_script",
+   "widgets": []
+  },
+  {
+   "t": 1.412,
+   "dir": "recv",
+   "type": "new_session"
+  },
+  {
+   "t": 1.443,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 1.644,
+   "dir": "recv",
+   "type": "script_finished",
+   "status": 0
+  },
+  {
+   "t": 1.645,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 3.339,
+   "dir": "sent",
+   "type": "rerun_script",
+   "widgets": [
+    {
+     "id_suffix": "6ff10b19275cd7df317-None",
+     "kind": "string_value",
+     "value_is_token": true,
+     "trigger": null
+    },
+    {
+     "id_suffix": "rmSubmitter:login-Entrar",
+     "kind": "trigger_value",
+     "value_is_token": null,
+     "trigger": true
+    }
+   ]
+  },
+  {
+   "t": 3.348,
+   "dir": "recv",
+   "type": "new_session"
+  },
+  {
+   "t": 3.354,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 3.447,
+   "dir": "recv",
+   "type": "script_finished",
+   "status": 2
+  },
+  {
+   "t": 3.453,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 3.546,
+   "dir": "recv",
+   "type": "new_session"
+  },
+  {
+   "t": 3.55,
+   "dir": "recv",
+   "type": "session_status_changed"
+  },
+  {
+   "t": 3.552,
+   "dir": "recv",
+   "type": "script_finished",
+   "status": 0
+  },
+  {
+   "t": 3.553,
+   "dir": "recv",
+   "type": "session_status_changed"
+  }
+ ],
+ "error": null,
+ "requests": 2,
+ "completed": 2,
+ "buttons_after": [
+  "Deploy",
+  "",
+  "Preparar sesión"
+ ],
+ "error_text": [
+  "El coordinador debe preparar la sesión antes de continuar."
+ ],
+ "sessions_created": 1,
+ "stage": "familiarization",
+ "login": true,
+ "server_log_tail": [
+  "  You can now view your Streamlit app in your browser.",
+  "  URL: http://localhost:49703",
+  "  Stopping..."
+ ]
+}
