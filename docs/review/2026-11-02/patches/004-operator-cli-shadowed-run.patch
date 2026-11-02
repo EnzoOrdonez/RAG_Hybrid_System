@@ -1,0 +1,16 @@
+diff --git a/scripts/study_operator/cli.py b/scripts/study_operator/cli.py
+index 6c86436..bd3b2d0 100644
+--- a/scripts/study_operator/cli.py
++++ b/scripts/study_operator/cli.py
+@@ -90,9 +90,9 @@ def main(argv=None):
+         elif operation == 'start':
+             result = operator.start(args.purpose)
+         elif operation in {'stimulus-start','stimulus-status','stimulus-collect'}:
+-            from scripts.study_operator.stimulus_owner import run
++            from scripts.study_operator.stimulus_owner import run as stimulus_run  # no sombrear `run` (R-07)
+ 
+-            result = run(operator,operation,boot_index=getattr(args,'boot_index',None))
++            result = stimulus_run(operator,operation,boot_index=getattr(args,'boot_index',None))
+         elif operation == 'tls-prepare':
+             result = operator.tls_prepare(args.first_session)
+         elif operation == 'failover':

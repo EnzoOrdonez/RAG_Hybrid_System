@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-25",
+  "updated": "2026-11-02",
   "features": [
     {
       "id": "F-001",
@@ -204,10 +204,23 @@
       "description": "tests/test_study_stimulus_supervisor.py::test_short_calls_always_check_host_telemetry fallo una vez (TimeoutError 'Independent worker deadline reached', scripts/study_gate_supervisor.py:123) dentro de init.sh capa 2 y paso en la repeticion completa y 3 de 3 en aislamiento.",
       "steps": [
         "Observado 2026-10-25: 1 fallo en 2 corridas completas; sin cambio de codigo relacionado entre ambas. Hipotesis (no verificada): deadline de un worker en subproceso sensible a la carga de la suite completa.",
-        "Investigar con un deadline medido bajo carga antes de ampliar tiempos; no relajar el test a ciegas."
+        "Investigar con un deadline medido bajo carga antes de ampliar tiempos; no relajar el test a ciegas.",
+        "Auditoría 2026-11-02 (R-20): causa localizada. preparation_seconds=3 no alcanza para el arranque spawn del hijo bajo carga: 14/64 fallos (22 %) con 16 procesos concurrentes + 16 de carga, 0/30 en aislamiento, 0/8 en la suite. Arreglo propuesto solo en el test (preparation_seconds=60, call_seconds=10, aserción no exacta); pendiente de aplicar."
       ],
       "status": "not_started",
       "passes": false
+    },
+    {
+      "id": "F-017",
+      "category": "auditoría",
+      "description": "Auditoría autónoma 2026-11-02 de todo el repo: 40 hallazgos (S0=1, S1=5, S2=21, S3=13) en docs/review/2026-11-02/ con reproductores xfail estrictos en tests/review_2026_11_02/ y 4 parches propuestos sin aplicar.",
+      "steps": [
+        "Pasadas A-E en paralelo y verificación adversarial de los 11 S0/S1 propuestos (6 cambiaron de severidad).",
+        "Entregados findings.json, REPORT.md, 26 xfail estrictos + 2 controles, y los parches 001-004 verificados en worktrees temporales.",
+        "Pendiente del dueño: aplicar el parche 001 antes de F-005 (NO-GO por R-01/R-02); decidir la cifra de exp17 del ledger (R-05); OK para el push."
+      ],
+      "status": "passing",
+      "passes": true
     }
   ]
 }

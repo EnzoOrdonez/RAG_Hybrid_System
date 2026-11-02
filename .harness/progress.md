@@ -1,9 +1,19 @@
 # Progreso: estado para arranque en frío
 
-**Última actualización:** 2026-10-25 por Claude, Turno 6.
+**Última actualización:** 2026-11-02 por Claude (auditoría autónoma, F-017). Lo anterior a «Auditoría 2026-11-02» sigue vigente desde el Turno 6 (2026-10-25).
 **Estado: Clean State** (F-006 cerrada: PR #5 fusionado en `main`, CI real verde, tres capas en exit 0 sobre `main`).
 Este archivo dice dónde está el trabajo **hoy**. Se reescribe al traspasar, no se acumula: el
 historial va en los commits y, si hubo una decisión, en un ADR nuevo.
+
+## Auditoría 2026-11-02 (F-017), rama `claude/blissful-euler-0a3xkp`, sin publicar
+
+- Informe: [docs/review/2026-11-02/REPORT.md](../docs/review/2026-11-02/REPORT.md). 40 hallazgos: S0=1, S1=5, S2=21, S3=13.
+  Reproductores `xfail(strict=True)` en `tests/review_2026_11_02/`. Parches 001-004 propuestos, sin aplicar (zona congelada).
+- **F-005 en NO-GO** hasta aplicar el parche 001 y ensayarlo. R-01 (S0): la reserva L4 se crea pero `reserve()` no la registra
+  porque gcloud trunca `--delete-at-time` a ms. R-02 (S1): un stockout consume el plan y bloquea gpu-restore 12 h.
+- **No volver a ejecutar scripts de cifras** antes de cerrar R-04 y R-06: sobrescriben evidencia firmada o congelada sin `guard_write`.
+- **R-05:** «HHEM 0,23» de `paper/summer_ablation_log.md:497` no se reproduce (0,24 con la semilla 42). El veredicto no cambia. Decide Enzo.
+- **R-09:** el operador I7 exige la rama `fix/interview-readiness` **por nombre**. No borrarla antes de F-005 (corrige la nota de abajo).
 
 ## Dónde estoy
 
@@ -13,7 +23,7 @@ historial va en los commits y, si hubo una decisión, en un ADR nuevo.
   Bloqueantes en verde: instalación con `--require-hashes`, secretos, `check_docs`, pytest CPU (1813 pasan, 57 omitidas, 0 fallos). Ruff sigue informativo (150 hallazgos, F-009).
 - **Verificación local en `main`:** `bash ./init.sh` (Git Bash) exit 0 en las tres capas (1866 pasan, 0 fallan, 4 omitidas).
 - **Ramas (ninguna eliminada, decisión de Enzo):** `chore/docs-harness`, `summer/taxonomia-759` y `fix/interview-readiness` siguen locales y en `origin`.
-  `fix/interview-readiness` (`3b52c4b`) y `summer/taxonomia-759` (`93bd029`) son ancestros de `main`, y `chore/docs-harness` (`5495b6f`) es su segundo padre: borrarlas después es seguro.
+  `fix/interview-readiness` (`3b52c4b`) y `summer/taxonomia-759` (`93bd029`) son ancestros de `main`, y `chore/docs-harness` (`5495b6f`) es su segundo padre. Borrar `fix/interview-readiness` **no** es seguro mientras el operador I7 la exija por nombre (R-09, auditoría 2026-11-02).
 - **`.worktrees/interview-readiness`** se conserva: su `.venv-app` es el único entorno (36 571 archivos) y el checkout principal lo usa por una unión (`.venv-app`).
 
 ## Qué se hizo en la última sesión
