@@ -1,0 +1,65 @@
+--- a/scripts/study_operator/i7_cpu_pipeline.py	2026-11-02 04:29:52.272506901 +0000
++++ b/scripts/study_operator/i7_cpu_pipeline.py	2026-11-02 04:29:52.275501031 +0000
+@@ -319,30 +319,49 @@
+         raise ValueError('PRIVATE_LEGACY_ARCHIVE_REQUIRED_BEFORE_CPU_CLEANUP')
+     vm = resources['vm']
+     zone = 'us-central1-a'
+-    current = operator.cloud.command(['compute','instances','describe',vm['name'],'--zone='+zone])
+-    if (str(current['id']) != str(vm['id']) or current['description'] != vm['description']
+-            or vm['name'] != 'cloudrag-i5-restore-'+cpu_label({'period_id':build_period(operator.config)})):
+-        raise ValueError('CPU_CLEANUP_IDENTITY_CHANGED')
+-    if current['status'] != 'TERMINATED':
+-        raise ValueError('CPU_CLEANUP_REQUIRES_STOPPED_VM')
+-    operator.cloud.command(['compute','instances','update',vm['name'],'--zone='+zone,'--no-deletion-protection'])
+-    operator.cloud.command(['compute','instances','delete',vm['name'],'--zone='+zone,'--keep-disks=all'],timeout=300)
++    # Resumable (B-3): each delete is recorded before it is sent; on retry, a recorded delete
++    # counts as done only when a successful list no longer shows that id.
++    deleting = operator.state.setdefault('cpu_cleanup_deleting',[])
++    def done(kind, resource_id):
++        if str(resource_id) not in deleting:
++            return False
++        rows = operator.cloud.command(['compute',kind,'list'])
++        return isinstance(rows,list) and all(str(r['id']) != str(resource_id) for r in rows)
++    def record(resource_id):
++        deleting.append(str(resource_id))
++        operator.persist()
++    if not done('instances',vm['id']):
++        current = operator.cloud.command(['compute','instances','describe',vm['name'],'--zone='+zone])
++        if (str(current['id']) != str(vm['id']) or current['description'] != vm['description']
++                or vm['name'] != 'cloudrag-i5-restore-'+cpu_label({'period_id':build_period(operator.config)})):
++            raise ValueError('CPU_CLEANUP_IDENTITY_CHANGED')
++        if current['status'] != 'TERMINATED':
++            raise ValueError('CPU_CLEANUP_REQUIRES_STOPPED_VM')
++        operator.cloud.command(['compute','instances','update',vm['name'],'--zone='+zone,'--no-deletion-protection'])
++        record(vm['id'])
++        operator.cloud.command(['compute','instances','delete',vm['name'],'--zone='+zone,'--keep-disks=all'],timeout=300)
+     for resource in (resources['source_disk'],resources['service_disk']):
++        if done('disks',resource['id']):
++            continue
+         actual = operator.cloud.command(['compute','disks','describe',resource['name'],'--zone='+zone])
+         if str(actual['id']) != str(resource['id']) or actual['description'] != resource['description']:
+             raise ValueError('CPU_DISK_CLEANUP_IDENTITY_CHANGED')
++        record(resource['id'])
+         operator.cloud.command(['compute','disks','delete',resource['name'],'--zone='+zone],timeout=300)
+     stage = resources['stage_snapshot']
+-    actual = operator.cloud.command(['compute','snapshots','describe',stage['name']])
+-    if str(actual['id']) != str(stage['id']) or actual['description'] != operator.config['resource_marker']:
+-        raise ValueError('STAGING_SNAPSHOT_CLEANUP_IDENTITY_CHANGED')
+-    operator.cloud.command(['compute','snapshots','delete',stage['name']],timeout=300)
++    if not done('snapshots',stage['id']):
++        actual = operator.cloud.command(['compute','snapshots','describe',stage['name']])
++        if str(actual['id']) != str(stage['id']) or actual['description'] != operator.config['resource_marker']:
++            raise ValueError('STAGING_SNAPSHOT_CLEANUP_IDENTITY_CHANGED')
++        record(stage['id'])
++        operator.cloud.command(['compute','snapshots','delete',stage['name']],timeout=300)
+     cpu_state = json.loads((operator.root/'cpu'/'STATE.json').read_bytes())
+     for resource in cpu_state['resources']:
+-        if resource['type'] == 'firewall':
++        if resource['type'] == 'firewall' and not done('firewall-rules',resource['id']):
+             actual = operator.cloud.command(['compute','firewall-rules','describe',resource['name']])
+             if str(actual['id']) != str(resource['id']) or actual['description'] != resource['ownership_marker']:
+                 raise ValueError('TEMPORARY_IAP_RULE_IDENTITY_CHANGED')
++            record(resource['id'])
+             operator.cloud.command(['compute','firewall-rules','delete',resource['name']])
+     lists = {kind:operator.cloud.command(['compute',kind,'list']) for kind in
+              ('instances','disks','snapshots','firewall-rules')}

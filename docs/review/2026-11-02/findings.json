@@ -1,0 +1,365 @@
+{
+ "base": "b470d3e76fe569fd63ee98b1000c6d75817cc964",
+ "branch": "claude/review-2026-11-02",
+ "date": "2026-11-02",
+ "findings": [
+  {
+   "id": "F-01",
+   "severity": "S1",
+   "severity_disputed": "refutador independiente propone S2",
+   "category": "recovery/invariant",
+   "location": [
+    "scripts/study_operator/i7.py:368-371",
+    "scripts/study_operator/i7_cpu_pipeline.py:319"
+   ],
+   "summary": "start('smoke') persiste period_id del smoke y cleanup_cpu deriva de él el nombre esperado de la VM de CPU: close falla con CPU_CLEANUP_IDENTITY_CHANGED.",
+   "scenario": "Abortar tras los pasos 5a smoke, 6 privacy o 7 withdraw-purge, o un gate que falle dentro de run(smoke)/restore_latest/withdraw_purge: close detiene la GPU y borra la reserva, y luego no borra la VM e2, los dos discos de 180 GB, el snapshot de staging ni la regla IAP (~1-1,5 USD/día, [ESTIMADO] por el refutador). Solo un start() técnico (reserva viva y <24 h) restaura el periodo; la otra salida es editar installation.json, que ADR-0026 prohíbe.",
+   "evidence": "pytest --runxfail tests/test_review_2026_11_02_period_id.py -> ValueError: CPU_CLEANUP_IDENTITY_CHANGED (i7_cpu_pipeline.py:320)",
+   "reproducer": "tests/test_review_2026_11_02_period_id.py",
+   "patch": "patches/001-cleanup-cpu-build-period.patch",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true,
+   "effort": "S"
+  },
+  {
+   "id": "B-4",
+   "severity": "S1",
+   "category": "money/recovery",
+   "location": [
+    "scripts/study_operator/i7_cpu_pipeline.py:266-295",
+    "scripts/study_operator/i7.py:429-432",
+    "scripts/study_operator/i7_workflows.py:186-189"
+   ],
+   "summary": "Si gpu_restore falla tras reserve(13.5) (crear disco o VM), close no puede borrar la reserva: guard() describe la VM placeholder id 0 y lanza NOT_FOUND.",
+   "scenario": "La reserva factura hasta su TTL nativo (13,5 h, ~9,5 USD, ya dentro de la exposición admitida) y consume 13,5 de 18,5 h: gpu-restore no se puede repetir en la raíz. El intent UNKNOWN del disco además deja close en BLOCKED.",
+   "evidence": "close raised: NOT_FOUND instances/cloudrag-i7-unallocated; ninguna llamada reservations delete; con el parche 002: RESERVATION_DELETED_VERIFIED",
+   "reproducer": "tests/test_review_2026_11_02_recovery.py::test_b4_*",
+   "patch": "patches/002-guard-unallocated-gpu-reservation.patch",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true,
+   "effort": "S"
+  },
+  {
+   "id": "B-3",
+   "severity": "S1",
+   "category": "recovery/idempotency",
+   "location": [
+    "scripts/study_operator/i7_cpu_pipeline.py:317-348"
+   ],
+   "summary": "cleanup_cpu no es reanudable: tras un fallo a mitad, el reintento falla en el primer describe de la VM ya borrada.",
+   "scenario": "Timeout o error transitorio al borrar el segundo disco: el disco, el snapshot de staging y la regla IAP quedan, y close no termina nunca sin gcloud manual. Coste acotado (PD/snapshot, cota 24 h ~2,87 USD).",
+   "evidence": "retry raised: NOT_FOUND instances/cloudrag-i5-restore-i7cpu-aaaaaaaa; service disk y stage snapshot siguen",
+   "reproducer": "tests/test_review_2026_11_02_recovery.py::test_b3_*",
+   "patch": "patches/003-cleanup-cpu-resumable.patch (encima de 001)",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true,
+   "effort": "M"
+  },
+  {
+   "id": "A-1",
+   "severity": "S2",
+   "category": "money",
+   "location": [
+    "i7.py:149-151; i7_cpu_pipeline.py:59,118"
+   ],
+   "summary": "La cota de CPU (3,95 USD) queda en spent_usd: el gate reserve(5) da I7_BUDGET_STOP si la reserva 1 se cobra >13,105 h (guard tardío o reconcile al TTL).",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "A-2",
+   "severity": "S2",
+   "category": "money/docs",
+   "location": [
+    "i7_costs.py:119-131; i7_phase_b.py:99-116; i7_workflows.py:79-84"
+   ],
+   "summary": "Sin comprobación anticipada del corte de 24 h: reserve() se admite a T0+23h50 y el gate se quema en switch_profile. Refutador: el corte es el tope diseñado (S3); queda S2 porque ADR-0026/runbook dicen \"reintentar en la misma raíz\" sin el límite de 24 h.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "A-3",
+   "severity": "S2",
+   "category": "money",
+   "location": [
+    "i7.py:286,306,451; i7_cpu_pipeline.py:70,117-120"
+   ],
+   "summary": "open_exposure_usd escalar: si el STOP del finally de clean_snapshot falla, la exposición de CPU se pierde; el gate se admite con ledger correcto de 20,28 USD. Lo acota el plan de i7_costs (19,75).",
+   "label": "VERIFICADO",
+   "confidence": "media",
+   "reproduced": true
+  },
+  {
+   "id": "B-1",
+   "severity": "S2",
+   "category": "recovery",
+   "location": [
+    "i7_workflows.py:82-84"
+   ],
+   "summary": "series escribe INTENT antes de start(); un rechazo sin coste deja TERMINAL_STIMULUS_REQUIRES_HUMAN_REVIEW. Refutado como S1: el finally borra la reserva y el tope acumulado ya impide reanudar.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "B-2",
+   "severity": "S2",
+   "category": "recovery",
+   "location": [
+    "i7_workflows.py:112-114; i7_phase_b.py:151-153"
+   ],
+   "summary": "finally stop(); guard(): KeyError/RESERVATION_ALREADY_CLOSED ocultan la causa real; si stop() falla por API con la VM parada, guard no corre (recuperable con close/guard).",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "B-5",
+   "severity": "S2",
+   "category": "recovery",
+   "location": [
+    "i7.py:112-114"
+   ],
+   "summary": "persist() escribe installation.json y active.json sin atomicidad conjunta.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "B-6",
+   "severity": "S2",
+   "category": "recovery",
+   "location": [
+    "i7_phase_b.py:102-106"
+   ],
+   "summary": "El gate reutiliza una reserva abierta sin comprobar TTL y escribe el intento único antes del chequeo de TTL de start(). Requiere un fallo previo (B-2c); el runbook (reconcile) lo neutraliza.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "C-1",
+   "severity": "S2",
+   "category": "security",
+   "location": [
+    "backup_agent.py:55-61; service_gateway.py:18-25"
+   ],
+   "summary": "Agentes root siguen symlinks plantados por el contenedor uid 10001 (= R-10).",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "C-2",
+   "severity": "S2",
+   "category": "security",
+   "location": [
+    "service_gateway.py:82-91,195"
+   ],
+   "summary": "Diferencial JSON Python/Go permite saltar las opciones congeladas de Ollama (= R-14).",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "R-03",
+   "severity": "S2",
+   "category": "secrets",
+   "location": [
+    "scripts/scan_secrets.py:48-66,183-203"
+   ],
+   "summary": "Capa 1 no detecta ya29./AIza/hf_/github_pat_ y omite .pem/.key/.env.*.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "R-04",
+   "severity": "S2",
+   "category": "evidence",
+   "location": [
+    "scripts/recompute_retrieval_stats.py:200-217,311"
+   ],
+   "summary": "Sobrescribe retrieval_metrics.json firmado sin guard_write.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "R-05",
+   "severity": "S2",
+   "category": "reproducibility",
+   "location": [
+    "scripts/compute_exp17_powered.py:46,82"
+   ],
+   "summary": "Bootstrap dependiente de PYTHONHASHSEED (p=0,236 con 42 vs 0,2555 con 7, n_boot=2000; guardado 0,2329).",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "R-06",
+   "severity": "S2",
+   "category": "evidence",
+   "location": [
+    "11 escritores compute_exp15..19b, rescore_nli_v3"
+   ],
+   "summary": "guard_write opt-in: 11/11 sin guarda.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "R-08",
+   "severity": "S2",
+   "category": "tests",
+   "location": [
+    "init.sh:19-26"
+   ],
+   "summary": "PLAYWRIGHT_BROWSERS_PATH cualquiera activa CLOUDRAG_REQUIRE_I7_BROWSER: 11 rojos falsos en este contenedor.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "R-09",
+   "severity": "S2",
+   "category": "invariants",
+   "location": [
+    "12 literales en 8 módulos"
+   ],
+   "summary": "Rama fix/interview-readiness sin origen único; hoy todas coinciden.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "R-15",
+   "severity": "S2",
+   "category": "supply-chain",
+   "location": [
+    "Dockerfile:8-17; requirements-lock.txt"
+   ],
+   "summary": "La imagen instala un lock de Windows sin hashes; CI usa requirements-app.txt con --require-hashes.",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "R-16",
+   "severity": "S2",
+   "category": "privacy",
+   "location": [
+    "43 archivos (ID de proyecto, 75 veces); 24 con el usuario de Windows; 12 con correo de cuenta de servicio"
+   ],
+   "summary": "Identificadores en el repo público; decide el dueño (ADR-0011).",
+   "label": "VERIFICADO",
+   "confidence": "alta",
+   "reproduced": true
+  },
+  {
+   "id": "A-4",
+   "severity": "S3",
+   "location": [
+    "i7.py:577; docs/STUDY_I7_OPERATOR.md:17-20"
+   ],
+   "summary": "--hours por defecto 12 (plan 13,5): un reserve manual agota la Fase B.",
+   "label": "VERIFICADO",
+   "reproduced": true
+  },
+  {
+   "id": "A-5",
+   "severity": "S3",
+   "location": [
+    "i7.py:503"
+   ],
+   "summary": "fromisoformat sin chequeo de zona (inalcanzable hoy).",
+   "label": "SUPUESTO",
+   "reproduced": false
+  },
+  {
+   "id": "B-7",
+   "severity": "S3",
+   "location": [
+    "i7_phase_b.py:222"
+   ],
+   "summary": "live-contexts.json open('x') tras el boot pagado; reintento paga y falla.",
+   "label": "SUPUESTO",
+   "reproduced": false
+  },
+  {
+   "id": "C-3",
+   "severity": "S3",
+   "location": [
+    "i7_workflows.py:155-156"
+   ],
+   "summary": "quote() de PowerShell ignora comillas Unicode.",
+   "label": "SUPUESTO",
+   "reproduced": true
+  },
+  {
+   "id": "C-4",
+   "severity": "S3",
+   "location": [
+    "deployment.py:112"
+   ],
+   "summary": "Correo ACME en el repo público.",
+   "label": "VERIFICADO",
+   "reproduced": true
+  },
+  {
+   "id": "M-1",
+   "severity": "S3",
+   "location": [
+    "ruff F/E9/B"
+   ],
+   "summary": "15 avisos en el alcance; los B023 son falsos positivos (cierres invocados en la misma iteración).",
+   "label": "VERIFICADO",
+   "reproduced": true
+  }
+ ],
+ "prior_report_revalidation": {
+  "R-01": "REFUTADO",
+  "R-02": "OBSOLETO (ADR-0026); residual documentado: listado fallido deja UNKNOWN",
+  "R-03": "CONFIRMADO",
+  "R-04": "CONFIRMADO",
+  "R-05": "CONFIRMADO",
+  "R-06": "CONFIRMADO",
+  "R-09": "CONFIRMADO (S2; hoy coinciden)",
+  "R-15": "CONFIRMADO",
+  "R-16": "CONFIRMADO",
+  "R-08": "CONFIRMADO (observado en la línea base)",
+  "R-10": "CONFIRMADO como C-1",
+  "R-14": "CONFIRMADO como C-2",
+  "R-11": "CONFIRMADO como A-3",
+  "R-39": "CONFIRMADO (falla en worktree fuera de .worktrees)"
+ },
+ "refuted_or_downgraded": [
+  {
+   "id": "R-01",
+   "reason": "reserve() envía la hora sin fracción (replace(microsecond=0), timespec='seconds'); 21 combinaciones de microsegundos y desfases pasan; el mutante sin redondeo falla en 3 casos.",
+   "test": "tests/test_review_2026_11_02_prior_findings.py"
+  },
+  {
+   "id": "A-2 como S1",
+   "reason": "El corte de 24 h es el tope documentado (runbook :261-263, STUDY_I7_COST_LEDGER.md:26-27); el coste perdido son minutos de reserva. Rebajado a S2."
+  },
+  {
+   "id": "B-1/B-2/B-6 como S1",
+   "reason": "Refutador: la reserva se borra en el finally y el tope acumulado ya impide reanudar (B-1); close/guard recuperan B-2c; B-6 requiere un fallo previo y reconcile lo neutraliza. Rebajados a S2."
+  },
+  {
+   "id": "period_id en reserve()/schedule/host_runtime",
+   "reason": "Leen period_id tras el smoke pero solo para nombres o rutas por periodo, que es lo intencionado; el marcador de propiedad sigue fijado al periodo técnico."
+  },
+  {
+   "id": "tls() sin stop()",
+   "reason": "En esta base tls() (i7_phase_b.py:156-169) llama a stop() en su finally en cada iteración; el arreglo local del que habla el encargo no está aquí y no se audita."
+  }
+ ]
+}
