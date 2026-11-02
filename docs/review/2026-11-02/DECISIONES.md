@@ -16,3 +16,5 @@
   `docs/review/` la hace el agente principal.
 - **D-06** Compuerta de push (ADR-0013): el usuario eligió "esperar al cierre" (AskUserQuestion, 2026-11-02).
   No se publica nada hasta un único OK final. El hook que avisa de commits sin publicar se atiende con esa decisión.
+- **D-07** Cierre (AskUserQuestion, 2026-11-02): el usuario autorizó publicar la rama (sin PR ni push a `main`) y, para R-05,
+  solo reportar. El ledger no se toca; la cifra nueva irá a `powered_reanalysis_v2` cuando se aplique el parche 002, con OK frase por frase.
