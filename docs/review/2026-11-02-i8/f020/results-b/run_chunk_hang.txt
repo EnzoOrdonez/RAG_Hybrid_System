@@ -1,0 +1,5 @@
+RUN_RAISED ValueError BUTTON_NOT_VISIBLE
+dump ['aria.yaml', 'console.json', 'controls.json', 'screenshot.png'] token_in_dump False
+ARIA_SIGNATURE ['- textbox "Invitación": <redacted>', '- alert:', '- strong: Missing Submit Button']
+CONSOLE_ERRORS [] sync_error None
+BUTTONS [{'text': 'Deploy', 'disabled': False}, {'text': '', 'disabled': False}, {'text': '', 'disabled': False}]

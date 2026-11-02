@@ -1,0 +1,5 @@
+RUN_RAISED ValueError BUTTON_NOT_VISIBLE
+dump ['aria.yaml', 'console.json', 'controls.json', 'screenshot.png'] token_in_dump False
+ARIA_SIGNATURE ['- textbox "Invitación": <redacted>', '- alert:', '- text: "Failed to fetch dynamically imported module: https://localhost:55045/static/js/index.BQcmlvas.js"', '- alert:', '- strong: Missing Submit Button']
+CONSOLE_ERRORS ['Failed to load resource: net::ERR_FAILED', 'TypeError: Failed to fetch dynamically imported module: https://localhost:55045/static/js/index.BQcmlvas.js', 'TypeError: Failed to fetch dynamically imported module: https://localhost:55045/static/js/index.BQcmlvas.js\nTy'] sync_error None
+BUTTONS [{'text': 'Deploy', 'disabled': False}, {'text': '', 'disabled': False}, {'text': '', 'disabled': False}]

@@ -1,0 +1,172 @@
+[
+ {
+  "condition": "baseline",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "ok",
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- button \"Entrar\":\n  - paragraph: Entrar",
+  "exact_match_attempt7": false
+ },
+ {
+  "condition": "aria_hidden_form",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)"
+  ],
+  "locator_resolved": false,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"",
+  "exact_match_attempt7": true
+ },
+ {
+  "condition": "aria_hidden_button",
+  "error": "Error: Page.evaluate: TypeError: Cannot read properties of undefined (reading 'closest')\n    at eval (eval at evaluate (:290:30), <anonymous>:1:80)\n    at eval (<anonymous>)\n    at UtilityScript.evaluate (<a",
+  "exact_match_attempt7": false
+ },
+ {
+  "condition": "aria_hidden_app_root",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)"
+  ],
+  "locator_resolved": false,
+  "aria": "",
+  "exact_match_attempt7": true
+ },
+ {
+  "condition": "inert_form",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)",
+   "- locator resolved to <button aria-label=\"\" kind=\"secondaryFormSubmit\" class=\"st-emotion-cache-1t4wwsl e1mwqyj97\" data-testid=\"stBaseButton-secondaryFormSubmit\">…</button>",
+   "- attempting click action",
+   "2 × waiting for element to be visible, enabled and stable",
+   "- element is visible, enabled and stable",
+   "- scrolling into view if needed"
+  ],
+  "locator_resolved": true,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n- button \"Show password text\":\n  - img \"Show password text\"\n- button \"Entrar\":\n  - paragraph: Entrar",
+  "exact_match_attempt7": false
+ },
+ {
+  "condition": "button_display_none",
+  "error": "Error: Page.evaluate: TypeError: Cannot read properties of undefined (reading 'style')\n    at eval (eval at evaluate (:290:30), <anonymous>:1:80)\n    at eval (<anonymous>)\n    at UtilityScript.evaluate (<ano",
+  "exact_match_attempt7": false
+ },
+ {
+  "condition": "button_visibility_hidden",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)"
+  ],
+  "locator_resolved": false,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- text: Press Enter to submit form",
+  "exact_match_attempt7": true
+ },
+ {
+  "condition": "button_removed",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)"
+  ],
+  "locator_resolved": false,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- text: Press Enter to submit form",
+  "exact_match_attempt7": true
+ },
+ {
+  "condition": "name_lowercase",
+  "error": "Error: Page.evaluate: TypeError: Cannot read properties of undefined (reading 'querySelector')\n    at eval (eval at evaluate (:290:30), <anonymous>:1:80)\n    at eval (<anonymous>)\n    at UtilityScript.evalua",
+  "exact_match_attempt7": false
+ },
+ {
+  "condition": "name_extra_text",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)"
+  ],
+  "locator_resolved": false,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- text: Press Enter to submit form\n- button \"Entrar →\":\n  - paragraph: Entrar →",
+  "exact_match_attempt7": true
+ },
+ {
+  "condition": "name_aria_label",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)"
+  ],
+  "locator_resolved": false,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- text: Press Enter to submit form\n- button \"Ingresar\":\n  - paragraph: Entrar",
+  "exact_match_attempt7": true
+ },
+ {
+  "condition": "name_translated",
+  "error": "Error: Page.evaluate: TypeError: Cannot read properties of undefined (reading 'querySelector')\n    at eval (eval at evaluate (:290:30), <anonymous>:1:115)\n    at eval (<anonymous>)\n    at UtilityScript.evalu",
+  "exact_match_attempt7": false
+ },
+ {
+  "condition": "button_disabled",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)",
+   "- locator resolved to <button disabled aria-label=\"\" kind=\"secondaryFormSubmit\" class=\"st-emotion-cache-1t4wwsl e1mwqyj97\" data-testid=\"stBaseButton-secondaryFormSubmit\">…</button>",
+   "- attempting click action",
+   "2 × waiting for element to be visible, enabled and stable",
+   "- element is not enabled",
+   "- retrying click action"
+  ],
+  "locator_resolved": true,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- text: Press Enter to submit form\n- button \"Entrar\" [disabled]:\n  - paragraph: Entrar",
+  "exact_match_attempt7": false
+ },
+ {
+  "condition": "role_presentation",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "ok",
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- button \"Entrar\":\n  - paragraph: Entrar",
+  "exact_match_attempt7": false
+ },
+ {
+  "condition": "settings_dialog",
+  "fill": "ok",
+  "idle_before_click": true,
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)",
+   "- locator resolved to <button aria-label=\"\" kind=\"secondaryFormSubmit\" class=\"st-emotion-cache-1t4wwsl e1mwqyj97\" data-testid=\"stBaseButton-secondaryFormSubmit\">…</button>",
+   "- attempting click action",
+   "2 × waiting for element to be visible, enabled and stable",
+   "- element is visible, enabled and stable",
+   "- scrolling into view if needed"
+  ],
+  "locator_resolved": true,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- button \"Entrar\":\n  - paragraph: Entrar\n- dialog \"dialog\":\n  - text: Settings\n  - heading \"Development\" [level=2]\n  - checkbox \"Run on save\"\n  - text: Run on save\n  - paragraph: Automatically updates the app when the underlying code is updated.\n  - heading \"Appearance\" [level=2]\n  - checkbox \"Wide mode\" [checked]: ✓\n  - text: Wide mode\n  - paragraph: Turn on to make this app occupy the entire width of the screen.\n  - text: Choose app theme Custom Theme\n  - combobox \"Selected Custom Theme.\" [disabled]\n  - img \"open\"\n  - paragraph: Made with Streamlit 1.54.0\n  - button \"Close\":\n    - img",
+  "exact_match_attempt7": false
+ }
+]

@@ -1,0 +1,20 @@
+[
+ {
+  "condition": "connection_error_dialog",
+  "fill": "TimeoutError: Locator.fill: Timeout 4000ms exceeded.",
+  "idle_before_click": false,
+  "settled_before_click": "STREAMLIT_SOCKET_CLOSED",
+  "click": "Locator.click: Timeout 4000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)",
+   "- locator resolved to <button disabled aria-label=\"\" kind=\"secondaryFormSubmit\" class=\"st-emotion-cache-1t4wwsl e1mwqyj97\" data-testid=\"stBaseButton-secondaryFormSubmit\">…</button>",
+   "- attempting click action",
+   "2 × waiting for element to be visible, enabled and stable",
+   "- element is not enabled",
+   "- retrying click action"
+  ],
+  "locator_resolved": true,
+  "aria": "- banner:\n  - text: Connecting\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\" [disabled]:\n  - /placeholder: \"\"\n- button \"Show password text\":\n  - img \"Show password text\"\n- button \"Entrar\" [disabled]:\n  - paragraph: Entrar\n- dialog \"dialog\":\n  - text: \"Connection error Is Streamlit still running? If you accidentally stopped Streamlit, just restart it in your terminal:\"\n  - code: streamlit run yourscript.py\n  - button \"Copy to clipboard\":\n    - img\n  - button \"Close\":\n    - img",
+  "exact_match_attempt7": false
+ }
+]

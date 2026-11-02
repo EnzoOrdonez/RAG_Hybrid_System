@@ -1,0 +1,60 @@
+[
+ {
+  "mode": "none",
+  "chunk": "index.BQcmlvas.js",
+  "settled": true,
+  "fill": "ok",
+  "settled_before_click": true,
+  "click": "ok",
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- button \"Entrar\":\n  - paragraph: Entrar",
+  "console": [
+   "verbose: [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o"
+  ],
+  "requestfailed": [],
+  "exact_match_attempt7": false
+ },
+ {
+  "mode": "abort",
+  "chunk": "index.BQcmlvas.js",
+  "settled": true,
+  "fill": "ok",
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 8000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)"
+  ],
+  "locator_resolved": false,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- alert:\n  - strong: \"TypeError:\"\n  - text: \"Failed to fetch dynamically imported module: http://localhost:45813/static/js/index.BQcmlvas.js\"\n  - code\n- alert:\n  - paragraph:\n    - strong: Missing Submit Button\n  - paragraph: This form has no submit button, which means that user interactions will never be sent to your Streamlit app.\n  - paragraph:\n    - text: To create a submit button, use the\n    - code: st.form_submit_button()\n    - text: function.\n  - paragraph:\n    - text: For more information, refer to the\n    - link \"documentation for forms\":\n      - /url: https://docs.streamlit.io/develop/api-reference/execution-flow/st.form\n    - text: .",
+  "console": [
+   "error: Failed to load resource: net::ERR_FAILED",
+   "error: TypeError: Failed to fetch dynamically imported module: http://localhost:45813/static/js/index.BQcmlvas.js",
+   "error: TypeError: Failed to fetch dynamically imported module: http://localhost:45813/static/js/index.BQcmlvas.js\nTypeError: Failed to fetch dynamically imported modul",
+   "verbose: [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o"
+  ],
+  "requestfailed": [
+   {
+    "failed": "index.BQcmlvas.js",
+    "why": "net::ERR_FAILED"
+   }
+  ],
+  "exact_match_attempt7": true
+ },
+ {
+  "mode": "hang",
+  "chunk": "index.BQcmlvas.js",
+  "settled": true,
+  "fill": "ok",
+  "settled_before_click": true,
+  "click": "Locator.click: Timeout 8000ms exceeded.",
+  "call_log": [
+   "- waiting for get_by_role(\"button\", name=\"Entrar\", exact=True)"
+  ],
+  "locator_resolved": false,
+  "aria": "- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Sesión\" [level=1]:\n  - text: Sesión\n  - link \"Link to heading\":\n    - /url: \"#sesion\"\n- textbox \"Invitación\":\n  - /placeholder: \"\"\n  - text: <dummy>\n- button \"Show password text\":\n  - img \"Show password text\"\n- alert:\n  - paragraph:\n    - strong: Missing Submit Button\n  - paragraph: This form has no submit button, which means that user interactions will never be sent to your Streamlit app.\n  - paragraph:\n    - text: To create a submit button, use the\n    - code: st.form_submit_button()\n    - text: function.\n  - paragraph:\n    - text: For more information, refer to the\n    - link \"documentation for forms\":\n      - /url: https://docs.streamlit.io/develop/api-reference/execution-flow/st.form\n    - text: .",
+  "console": [
+   "verbose: [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o"
+  ],
+  "requestfailed": [],
+  "exact_match_attempt7": true
+ }
+]

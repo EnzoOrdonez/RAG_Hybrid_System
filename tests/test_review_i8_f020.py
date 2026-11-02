@@ -84,3 +84,21 @@ def test_f020_harness_never_writes_the_token():
         record = json.loads(path.read_bytes())
         assert set(record) >= {'variant', 'server', 'login', 'frames'}
         assert os.path.basename(path) == record['server']+'-'+record['variant']+'.json'
+
+
+def test_f020b_button_chunk_failure_reproduces_attempt7_call_log(tmp_path):
+    """Intento 7: fill('Invitación') funciona y click('Entrar') agota el tiempo sin 'locator resolved'.
+    Mecanismo reproducido: el chunk JS de stFormSubmitButton falla (abort) o queda pendiente (hang)."""
+    module = harness()
+    spec = importlib.util.spec_from_file_location('f020_chunk', HARNESS.with_name('chunk.py'))
+    chunk = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(chunk)
+    chunk.main(tmp_path/'chunk.json')
+    rows = {r['mode']: r for r in json.loads((tmp_path/'chunk.json').read_bytes())}
+    assert rows['none']['click'] == 'ok' and not rows['none']['exact_match_attempt7']
+    for mode, signature in (('abort', 'Failed to fetch dynamically imported module'), ('hang', 'Missing Submit Button')):
+        row = rows[mode]
+        assert row['exact_match_attempt7'], row
+        assert row['call_log'] == ['- waiting for get_by_role("button", name="Entrar", exact=True)']
+        assert signature in row['aria'] and 'textbox "Invitación"' in row['aria']
+    assert module.CHROME

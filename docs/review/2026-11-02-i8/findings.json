@@ -116,6 +116,17 @@
    ],
    "summary": "Los runbooks dicen «solo fix/interview-readiness» y fijan $run y $evidence (recibo del 16/10) en valores que no sirven para 3bb9ca8. Ningún documento menciona el intento 8 ni fix/i7-attempt8.",
    "label": "VERIFICADO (lectura)"
+  },
+  {
+   "id": "I8-09",
+   "severity": "S3",
+   "new_in_3bb9ca8": true,
+   "location": [
+    "scripts/study_operator/i7_browser.py:210-215"
+   ],
+   "summary": "El volcado no registra requestfailed ni las peticiones pendientes. Si el chunk del botón queda pendiente, solo lo delata la alerta «Missing Submit Button» de aria.yaml y la consola queda vacía.",
+   "evidence": "docs/review/2026-11-02-i8/f020/results-b/run_chunk_hang.txt (CONSOLE_ERRORS [])",
+   "label": "VERIFICADO (local, Chromium 1243)"
   }
  ],
  "no_findings": [
@@ -123,5 +134,5 @@
   "§2.7: sin regresiones frente a b470d3e en smoke -> restore -> privacy -> withdraw-purge (suite completa en exit 0; tests de la auditoría anterior idénticos)."
  ],
  "patches_decision": "001-004 no se aplican (decisión del dueño, 2026-11-02)",
- "f020": "No reproducido en 22 recorridos locales (docs/review/2026-11-02-i8/F020.md). El rechazo de admit() en el servidor reproduce el síntoma."
+ "f020": "F020.md (rechazo de admit()) descartado por el call log real. F020b.md: el chunk JS de stFormSubmitButton abortado o pendiente reproduce exactamente el call log del intento 7 (fill ok, settled ok, click Timeout sin locator resolved). Causa en la VM no verificada."
 }

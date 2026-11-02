@@ -1,0 +1,282 @@
+[
+ {
+  "load": 0,
+  "at_settled": {
+   "field": 1,
+   "button": 1
+  },
+  "first_seen_s": {
+   "field": 0.018,
+   "button": 0.018
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 1,
+  "at_settled": {
+   "field": 1,
+   "button": 1
+  },
+  "first_seen_s": {
+   "field": 0.024,
+   "button": 0.024
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 2,
+  "at_settled": {
+   "field": 1,
+   "button": 1
+  },
+  "first_seen_s": {
+   "field": 0.043,
+   "button": 0.043
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 3,
+  "at_settled": {
+   "field": 0,
+   "button": 1
+  },
+  "first_seen_s": {
+   "button": 0.028,
+   "field": 0.044
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": -0.015999999999999997
+ },
+ {
+  "load": 4,
+  "at_settled": {
+   "field": 1,
+   "button": 1
+  },
+  "first_seen_s": {
+   "field": 0.019,
+   "button": 0.019
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 5,
+  "at_settled": {
+   "field": 0,
+   "button": 1
+  },
+  "first_seen_s": {
+   "button": 0.02,
+   "field": 0.034
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": -0.014000000000000002
+ },
+ {
+  "load": 6,
+  "at_settled": {
+   "field": 0,
+   "button": 1
+  },
+  "first_seen_s": {
+   "button": 0.021,
+   "field": 0.035
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": -0.014000000000000002
+ },
+ {
+  "load": 7,
+  "at_settled": {
+   "field": 0,
+   "button": 0
+  },
+  "first_seen_s": {
+   "field": 0.056,
+   "button": 0.056
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 8,
+  "at_settled": {
+   "field": 1,
+   "button": 1
+  },
+  "first_seen_s": {
+   "field": 0.032,
+   "button": 0.032
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 9,
+  "at_settled": {
+   "field": 0,
+   "button": 0
+  },
+  "first_seen_s": {
+   "field": 0.043,
+   "button": 0.043
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 10,
+  "at_settled": {
+   "field": 0,
+   "button": 1
+  },
+  "first_seen_s": {
+   "button": 0.02,
+   "field": 0.037
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": -0.016999999999999998
+ },
+ {
+  "load": 11,
+  "at_settled": {
+   "field": 0,
+   "button": 0
+  },
+  "first_seen_s": {
+   "field": 0.041,
+   "button": 0.041
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 12,
+  "at_settled": {
+   "field": 0,
+   "button": 0
+  },
+  "first_seen_s": {
+   "field": 0.052,
+   "button": 0.052
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 13,
+  "at_settled": {
+   "field": 0,
+   "button": 0
+  },
+  "first_seen_s": {
+   "field": 0.031,
+   "button": 0.031
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 14,
+  "at_settled": {
+   "field": 0,
+   "button": 1
+  },
+  "first_seen_s": {
+   "button": 0.019,
+   "field": 0.035
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": -0.016000000000000004
+ },
+ {
+  "load": 15,
+  "at_settled": {
+   "field": 1,
+   "button": 1
+  },
+  "first_seen_s": {
+   "field": 0.027,
+   "button": 0.027
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 16,
+  "at_settled": {
+   "field": 0,
+   "button": 0
+  },
+  "first_seen_s": {
+   "field": 0.036,
+   "button": 0.036
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 17,
+  "at_settled": {
+   "field": 0,
+   "button": 0
+  },
+  "first_seen_s": {
+   "field": 0.044,
+   "button": 0.044
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 18,
+  "at_settled": {
+   "field": 0,
+   "button": 0
+  },
+  "first_seen_s": {
+   "field": 0.046,
+   "button": 0.046
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ },
+ {
+  "load": 19,
+  "at_settled": {
+   "field": 0,
+   "button": 0
+  },
+  "first_seen_s": {
+   "field": 0.048,
+   "button": 0.048
+  },
+  "completed": 1,
+  "requests": 1,
+  "field_without_button_window_s": 0.0
+ }
+]
