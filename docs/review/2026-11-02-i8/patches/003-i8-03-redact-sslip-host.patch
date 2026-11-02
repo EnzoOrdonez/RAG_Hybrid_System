@@ -1,0 +1,16 @@
+diff --git a/scripts/study_operator/i7_browser.py b/scripts/study_operator/i7_browser.py
+index 10c6dd1..4e54b1c 100644
+--- a/scripts/study_operator/i7_browser.py
++++ b/scripts/study_operator/i7_browser.py
+@@ -345,7 +345,10 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
+                 'objects':final['backup']['objects']}
+         except Exception:
+             if failure_dir and page is not None:
+-                dump_failure(page,failure_dir,(token,ip,user_agent,wire_ua),events,getattr(sync,'error',None))
++                # The VM hostname is <public IP>.sslip.io (deployment.py:34): never write that IP.
++                host=parsed.hostname or ''
++                dump_failure(page,failure_dir,(token,ip,user_agent,wire_ua,host,host.removesuffix('.sslip.io')),
++                             events,getattr(sync,'error',None))
+             raise
+         finally:
+             browser.close()
