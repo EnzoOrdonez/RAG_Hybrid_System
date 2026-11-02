@@ -1,0 +1,26 @@
+diff --git a/config/i7-build-recipe-pin.json b/config/i7-build-recipe-pin.json
+index ff7468b..99634c9 100644
+--- a/config/i7-build-recipe-pin.json
++++ b/config/i7-build-recipe-pin.json
+@@ -3,7 +3,7 @@
+   "purpose": "I7 CPU build recipe, exact LF source bytes",
+   "files": {
+     "Dockerfile": "b248be035f7a15effcb796f8fc5e101d47252697344cbc8cb8287259e5954e02",
+-    "requirements-lock.txt": "361c871c18edf2722257a0707251fd86b1c3671613cfef366ae8ab58c592ac31",
++    "requirements-lock.txt": "9da98c6246ac4e8756998ec93fe2e27fae155dc98bd99bd20e260f925114f006",
+     "scripts/locked_vendor_requirements.py": "de2152e779576ebb500ff81f8e2b7ef450c36101342dd8d118f7ca178781a1b3",
+     "scripts/study_operator/build_context.py": "67407ad1f1b4c11ce30c203ce82773531ed47e1323844a7663822abdd8d0036e",
+     "scripts/study_operator/linux_build.py": "08132cdd6b43c9df839b97ff9b70c91e910be866f961f447ecef63e4551c1b3e"
+diff --git a/requirements-lock.txt b/requirements-lock.txt
+index 7629c2a..86092d5 100644
+--- a/requirements-lock.txt
++++ b/requirements-lock.txt
+@@ -121,7 +121,7 @@ tiktoken==0.12.0
+ tokenizers==0.22.2
+ toml==0.10.2
+ torch==2.10.0+cu126
+-tornado==6.5.4
++tornado==6.6
+ tqdm==4.67.3
+ transformers==5.2.0
+ typer-slim==0.24.0

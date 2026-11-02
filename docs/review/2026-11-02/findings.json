@@ -20,16 +20,20 @@
    "label": "VERIFICADO",
    "confidence": "alta",
    "reproduced": true,
-   "effort": "S"
+   "effort": "S",
+   "severity_decision": "S1, decisión del dueño (2026-11-02)",
+   "patch_status": "no aplicado, decisión del dueño: se evita un commit nuevo en scripts/ antes del intento 8"
   },
   {
    "id": "B-4",
    "severity": "S1",
    "category": "money/recovery",
    "location": [
-    "scripts/study_operator/i7_cpu_pipeline.py:266-295",
-    "scripts/study_operator/i7.py:429-432",
-    "scripts/study_operator/i7_workflows.py:186-189"
+    "scripts/study_operator/i7_config.py:43",
+    "scripts/study_operator/i7_cpu_pipeline.py:266-298",
+    "scripts/study_operator/i7_workflows.py:187-189",
+    "scripts/study_operator/i7.py:429",
+    "scripts/study_operator/lifecycle.py:41"
    ],
    "summary": "Si gpu_restore falla tras reserve(13.5) (crear disco o VM), close no puede borrar la reserva: guard() describe la VM placeholder id 0 y lanza NOT_FOUND.",
    "scenario": "La reserva factura hasta su TTL nativo (13,5 h, ~9,5 USD, ya dentro de la exposición admitida) y consume 13,5 de 18,5 h: gpu-restore no se puede repetir en la raíz. El intent UNKNOWN del disco además deja close en BLOCKED.",
@@ -39,7 +43,9 @@
    "label": "VERIFICADO",
    "confidence": "alta",
    "reproduced": true,
-   "effort": "S"
+   "effort": "S",
+   "exception": "Si la VM se creó y se perdió la respuesta, reconcile-all la adopta (i7_reconcile.py:88-91).",
+   "patch_status": "no aplicado, decisión del dueño: se evita un commit nuevo en scripts/ antes del intento 8"
   },
   {
    "id": "B-3",
@@ -56,7 +62,8 @@
    "label": "VERIFICADO",
    "confidence": "alta",
    "reproduced": true,
-   "effort": "M"
+   "effort": "M",
+   "patch_status": "no aplicado, decisión del dueño: se evita un commit nuevo en scripts/ antes del intento 8"
   },
   {
    "id": "A-1",
@@ -104,7 +111,8 @@
    "summary": "series escribe INTENT antes de start(); un rechazo sin coste deja TERMINAL_STIMULUS_REQUIRES_HUMAN_REVIEW. Refutado como S1: el finally borra la reserva y el tope acumulado ya impide reanudar.",
    "label": "VERIFICADO",
    "confidence": "alta",
-   "reproduced": true
+   "reproduced": true,
+   "capacity_variant": "Un CapacityRejected en instances start también consume el registro: tests/test_review_2026_11_02_single_use.py"
   },
   {
    "id": "B-2",
@@ -140,7 +148,8 @@
    "summary": "El gate reutiliza una reserva abierta sin comprobar TTL y escribe el intento único antes del chequeo de TTL de start(). Requiere un fallo previo (B-2c); el runbook (reconcile) lo neutraliza.",
    "label": "VERIFICADO",
    "confidence": "alta",
-   "reproduced": true
+   "reproduced": true,
+   "capacity_variant": "Un CapacityRejected en instances start también consume el registro: tests/test_review_2026_11_02_single_use.py"
   },
   {
    "id": "C-1",
@@ -200,7 +209,8 @@
    "summary": "Bootstrap dependiente de PYTHONHASHSEED (p=0,236 con 42 vs 0,2555 con 7, n_boot=2000; guardado 0,2329).",
    "label": "VERIFICADO",
    "confidence": "alta",
-   "reproduced": true
+   "reproduced": true,
+   "patch_status": "no aplicado, decisión del dueño: se evita un commit nuevo en scripts/ antes del intento 8"
   },
   {
    "id": "R-06",
@@ -248,7 +258,8 @@
    "summary": "La imagen instala un lock de Windows sin hashes; CI usa requirements-app.txt con --require-hashes.",
    "label": "VERIFICADO",
    "confidence": "alta",
-   "reproduced": true
+   "reproduced": true,
+   "patch_status": "no aplicado, decisión del dueño: se evita un commit nuevo en scripts/ antes del intento 8"
   },
   {
    "id": "R-16",
@@ -361,5 +372,15 @@
    "id": "tls() sin stop()",
    "reason": "En esta base tls() (i7_phase_b.py:156-169) llama a stop() en su finally en cada iteración; el arreglo local del que habla el encargo no está aquí y no se audita."
   }
- ]
+ ],
+ "followup_2026_11_02": {
+  "answers": "SEGUIMIENTO.md",
+  "closeout": "closeout/ + RUNBOOK_CLOSE_MANUAL.md",
+  "backlog": "BACKLOG.md",
+  "r15_pip_audit_tornado": {
+   "6.5.4": 8,
+   "6.5.8": 6,
+   "fix_all": "6.6"
+  }
+ }
 }
