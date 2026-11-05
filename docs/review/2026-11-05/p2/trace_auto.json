@@ -1,0 +1,5114 @@
+[
+ {
+  "doc": "README.md",
+  "line": 9,
+  "figure": "3.14",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__lexico.json"
+  ],
+  "n_sources": 4,
+  "context": "07:30 local: the badge read 3.14, which is the REPRODUCIBLE ENVIRONMENT (docs/guides/reproduce.md),"
+ },
+ {
+  "doc": "README.md",
+  "line": 10,
+  "figure": "3.11",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json"
+  ],
+  "n_sources": 5,
+  "context": "not what the package supports. setup.py has always said >=3.11. -->"
+ },
+ {
+  "doc": "README.md",
+  "line": 11,
+  "figure": "3.11",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json"
+  ],
+  "n_sources": 5,
+  "context": "<img src=\"https://img.shields.io/badge/Python-3.11+-blue?logo=python\" alt=\"Python\">"
+ },
+ {
+  "doc": "README.md",
+  "line": 62,
+  "figure": "0.531",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json"
+  ],
+  "n_sources": 15,
+  "context": "| BM25 (lexical) | 0.531 | 0.443 | 0.299 | 0.603 | 0.442 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 62,
+  "figure": "0.443",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 16,
+  "context": "| BM25 (lexical) | 0.531 | 0.443 | 0.299 | 0.603 | 0.442 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 62,
+  "figure": "0.299",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 14,
+  "context": "| BM25 (lexical) | 0.531 | 0.443 | 0.299 | 0.603 | 0.442 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 62,
+  "figure": "0.603",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 7,
+  "context": "| BM25 (lexical) | 0.531 | 0.443 | 0.299 | 0.603 | 0.442 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 62,
+  "figure": "0.442",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 12,
+  "context": "| BM25 (lexical) | 0.531 | 0.443 | 0.299 | 0.603 | 0.442 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 63,
+  "figure": "0.686",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp19b_anchored_selector/faithfulness_rows__small__vb_agree.json"
+  ],
+  "n_sources": 11,
+  "context": "| Dense (BGE) | 0.686 | 0.546 | 0.390 | 0.742 | 0.624 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 63,
+  "figure": "0.546",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json"
+  ],
+  "n_sources": 42,
+  "context": "| Dense (BGE) | 0.686 | 0.546 | 0.390 | 0.742 | 0.624 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 63,
+  "figure": "0.390",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 16,
+  "context": "| Dense (BGE) | 0.686 | 0.546 | 0.390 | 0.742 | 0.624 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 63,
+  "figure": "0.742",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json"
+  ],
+  "n_sources": 20,
+  "context": "| Dense (BGE) | 0.686 | 0.546 | 0.390 | 0.742 | 0.624 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 63,
+  "figure": "0.624",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "| Dense (BGE) | 0.686 | 0.546 | 0.390 | 0.742 | 0.624 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 64,
+  "figure": "0.613",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 15,
+  "context": "| Hybrid pre-rerank (RRF) | 0.613 | 0.543 | 0.377 | 0.699 | 0.603 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 64,
+  "figure": "0.543",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "| Hybrid pre-rerank (RRF) | 0.613 | 0.543 | 0.377 | 0.699 | 0.603 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 64,
+  "figure": "0.377",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 15,
+  "context": "| Hybrid pre-rerank (RRF) | 0.613 | 0.543 | 0.377 | 0.699 | 0.603 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 64,
+  "figure": "0.699",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 5,
+  "context": "| Hybrid pre-rerank (RRF) | 0.613 | 0.543 | 0.377 | 0.699 | 0.603 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 64,
+  "figure": "0.603",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 7,
+  "context": "| Hybrid pre-rerank (RRF) | 0.613 | 0.543 | 0.377 | 0.699 | 0.603 |"
+ },
+ {
+  "doc": "README.md",
+  "line": 65,
+  "figure": "0.716",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/aggregated_metrics.json"
+  ],
+  "n_sources": 9,
+  "context": "| **Hybrid post-rerank (ours)** | **0.716** | **0.637** | **0.468** | **0.770** | **0.740** |"
+ },
+ {
+  "doc": "README.md",
+  "line": 65,
+  "figure": "0.637",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/hhem_vs_nli.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "| **Hybrid post-rerank (ours)** | **0.716** | **0.637** | **0.468** | **0.770** | **0.740** |"
+ },
+ {
+  "doc": "README.md",
+  "line": 65,
+  "figure": "0.468",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 12,
+  "context": "| **Hybrid post-rerank (ours)** | **0.716** | **0.637** | **0.468** | **0.770** | **0.740** |"
+ },
+ {
+  "doc": "README.md",
+  "line": 65,
+  "figure": "0.770",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_qwen2.5.json"
+  ],
+  "n_sources": 11,
+  "context": "| **Hybrid post-rerank (ours)** | **0.716** | **0.637** | **0.468** | **0.770** | **0.740** |"
+ },
+ {
+  "doc": "README.md",
+  "line": 65,
+  "figure": "0.740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "| **Hybrid post-rerank (ours)** | **0.716** | **0.637** | **0.468** | **0.770** | **0.740** |"
+ },
+ {
+  "doc": "README.md",
+  "line": 67,
+  "figure": "+0.45",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json"
+  ],
+  "n_sources": 67,
+  "context": "Hybrid(post) > Dense is significant under the independent oracle (d_z = +0.45,"
+ },
+ {
+  "doc": "README.md",
+  "line": 68,
+  "figure": "0.001",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 57,
+  "context": "p_BH < 0.001); the advantage comes from the **reranking stage**, not the RRF fusion"
+ },
+ {
+  "doc": "README.md",
+  "line": 69,
+  "figure": "0.995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "(pre-rerank ≈ Dense, n.s.). Under the circular oracle the hybrid scores NDCG@5 = 0.995"
+ },
+ {
+  "doc": "README.md",
+  "line": 106,
+  "figure": "3,951",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "3,951 documents, 46,318 indexed chunks (adaptive chunking, 500 tokens):"
+ },
+ {
+  "doc": "README.md",
+  "line": 106,
+  "figure": "46,318",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "3,951 documents, 46,318 indexed chunks (adaptive chunking, 500 tokens):"
+ },
+ {
+  "doc": "README.md",
+  "line": 109,
+  "figure": "2,697",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "> **2,697 processed documents (2,644 represented in the index after the stratified"
+ },
+ {
+  "doc": "README.md",
+  "line": 109,
+  "figure": "2,644",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "> **2,697 processed documents (2,644 represented in the index after the stratified"
+ },
+ {
+  "doc": "README.md",
+  "line": 110,
+  "figure": "24,481",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "> subsampling; the delta is 53 Azure docs whose chunks were all removed) / 24,481"
+ },
+ {
+  "doc": "README.md",
+  "line": 117,
+  "figure": "1,461",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "| Azure | 1,461 | Functions, Blob Storage, Virtual Network, AKS, Cosmos DB |"
+ },
+ {
+  "doc": "README.md",
+  "line": 119,
+  "figure": "1,162",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "| Kubernetes | 1,162 | Pods, Deployments, Services, Networking, Storage |"
+ },
+ {
+  "doc": "README.md",
+  "line": 127,
+  "figure": "3.11",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json"
+  ],
+  "n_sources": 5,
+  "context": "- Python 3.11+ — what the **package** supports (`setup.py: python_requires=\">=3.11\"`)"
+ },
+ {
+  "doc": "README.md",
+  "line": 127,
+  "figure": "3.11",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json"
+  ],
+  "n_sources": 5,
+  "context": "- Python 3.11+ — what the **package** supports (`setup.py: python_requires=\">=3.11\"`)"
+ },
+ {
+  "doc": "README.md",
+  "line": 132,
+  "figure": "3.14",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__lexico.json"
+  ],
+  "n_sources": 4,
+  "context": "> specific interpreter, **Python 3.14** at"
+ },
+ {
+  "doc": "README.md",
+  "line": 133,
+  "figure": "3.14",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__lexico.json"
+  ],
+  "n_sources": 4,
+  "context": "> `C:\\Users\\enziz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe`, which is the only one on"
+ },
+ {
+  "doc": "README.md",
+  "line": 139,
+  "figure": "3.14",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__lexico.json"
+  ],
+  "n_sources": 4,
+  "context": "For the participant application, use the Python 3.14 environment, hashed dependency"
+ },
+ {
+  "doc": "README.md",
+  "line": 150,
+  "figure": "51.57",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp6/checkpoint_ablation_+normalization.json",
+   "experiments/results/exp6/results.json"
+  ],
+  "n_sources": 2,
+  "context": "warm p95 is 51.57 s hybrid, 65.75 s lexical and 45.09 s semantic. Lexical exceeds"
+ },
+ {
+  "doc": "README.md",
+  "line": 150,
+  "figure": "65.75",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "warm p95 is 51.57 s hybrid, 65.75 s lexical and 45.09 s semantic. Lexical exceeds"
+ },
+ {
+  "doc": "README.md",
+  "line": 150,
+  "figure": "45.09",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "warm p95 is 51.57 s hybrid, 65.75 s lexical and 45.09 s semantic. Lexical exceeds"
+ },
+ {
+  "doc": "README.md",
+  "line": 326,
+  "figure": "+0.45",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json"
+  ],
+  "n_sources": 67,
+  "context": "| exp10-11 | Retrieval, multi-oracle (D12 fix) | Hybrid>Dense real (d_z +0.45) but inflated under circular oracle (0.995 vs 0.740); edge lives in the rerank sta"
+ },
+ {
+  "doc": "README.md",
+  "line": 326,
+  "figure": "0.995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "| exp10-11 | Retrieval, multi-oracle (D12 fix) | Hybrid>Dense real (d_z +0.45) but inflated under circular oracle (0.995 vs 0.740); edge lives in the rerank sta"
+ },
+ {
+  "doc": "README.md",
+  "line": 326,
+  "figure": "0.740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "| exp10-11 | Retrieval, multi-oracle (D12 fix) | Hybrid>Dense real (d_z +0.45) but inflated under circular oracle (0.995 vs 0.740); edge lives in the rerank sta"
+ },
+ {
+  "doc": "README.md",
+  "line": 329,
+  "figure": "0.0616",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_mistral.json"
+  ],
+  "n_sources": 6,
+  "context": "| exp14 | H5 replicas, runtime-noise floor | Re-scoring 140 replicas under the same runtime: \\|Δ\\| mean 0.0616, p90 0.2005, 23.3% beyond the ±0.081 band — noise"
+ },
+ {
+  "doc": "README.md",
+  "line": 329,
+  "figure": "0.2005",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp6/checkpoint_ablation_+reranker.json",
+   "experiments/results/exp6/results.json"
+  ],
+  "n_sources": 2,
+  "context": "| exp14 | H5 replicas, runtime-noise floor | Re-scoring 140 replicas under the same runtime: \\|Δ\\| mean 0.0616, p90 0.2005, 23.3% beyond the ±0.081 band — noise"
+ },
+ {
+  "doc": "README.md",
+  "line": 329,
+  "figure": "0.081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "| exp14 | H5 replicas, runtime-noise floor | Re-scoring 140 replicas under the same runtime: \\|Δ\\| mean 0.0616, p90 0.2005, 23.3% beyond the ±0.081 band — noise"
+ },
+ {
+  "doc": "README.md",
+  "line": 334,
+  "figure": "+0.0451",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp19b_anchored_selector/arm_stats__hhem.json",
+   "experiments/results/exp19b_anchored_selector/equivalence__hhem.json"
+  ],
+  "n_sources": 5,
+  "context": "| exp19b | Anchored evidence selector, paired + replay-gated | HHEM Δ=+0.0451 (CI95 [0.0076; 0.0817], p=0.018), TOST within ±0.081; verdict: verifier-aligned lo"
+ },
+ {
+  "doc": "README.md",
+  "line": 334,
+  "figure": "0.0076",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 6,
+  "context": "| exp19b | Anchored evidence selector, paired + replay-gated | HHEM Δ=+0.0451 (CI95 [0.0076; 0.0817], p=0.018), TOST within ±0.081; verdict: verifier-aligned lo"
+ },
+ {
+  "doc": "README.md",
+  "line": 334,
+  "figure": "0.0817",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp19b_anchored_selector/equivalence__hhem.json"
+  ],
+  "n_sources": 7,
+  "context": "| exp19b | Anchored evidence selector, paired + replay-gated | HHEM Δ=+0.0451 (CI95 [0.0076; 0.0817], p=0.018), TOST within ±0.081; verdict: verifier-aligned lo"
+ },
+ {
+  "doc": "README.md",
+  "line": 334,
+  "figure": "0.018",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json",
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json"
+  ],
+  "n_sources": 28,
+  "context": "| exp19b | Anchored evidence selector, paired + replay-gated | HHEM Δ=+0.0451 (CI95 [0.0076; 0.0817], p=0.018), TOST within ±0.081; verdict: verifier-aligned lo"
+ },
+ {
+  "doc": "README.md",
+  "line": 334,
+  "figure": "0.081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "| exp19b | Anchored evidence selector, paired + replay-gated | HHEM Δ=+0.0451 (CI95 [0.0076; 0.0817], p=0.018), TOST within ±0.081; verdict: verifier-aligned lo"
+ },
+ {
+  "doc": "README.md",
+  "line": 335,
+  "figure": "0.30",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 91,
+  "context": "| pilot reference v4 | Claim-level human validation (150 claims, 200 claim-condition judgments, blinded LLM judges) | Best verifier κ=0.30 (weighted, CI crosses"
+ },
+ {
+  "doc": "README.md",
+  "line": 335,
+  "figure": "0.754",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_qwen2.5.json"
+  ],
+  "n_sources": 4,
+  "context": "| pilot reference v4 | Claim-level human validation (150 claims, 200 claim-condition judgments, blinded LLM judges) | Best verifier κ=0.30 (weighted, CI crosses"
+ },
+ {
+  "doc": "README.md",
+  "line": 335,
+  "figure": "0.17",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 102,
+  "context": "| pilot reference v4 | Claim-level human validation (150 claims, 200 claim-condition judgments, blinded LLM judges) | Best verifier κ=0.30 (weighted, CI crosses"
+ },
+ {
+  "doc": "README.md",
+  "line": 335,
+  "figure": "0.20",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 100,
+  "context": "| pilot reference v4 | Claim-level human validation (150 claims, 200 claim-condition judgments, blinded LLM judges) | Best verifier κ=0.30 (weighted, CI crosses"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 25,
+  "figure": "0,552",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 16,
+  "context": "| Léxico (BM25) | 0,552 | 0,442 |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 25,
+  "figure": "0,442",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 12,
+  "context": "| Léxico (BM25) | 0,552 | 0,442 |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 26,
+  "figure": "0,649",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp6/checkpoint_ablation_+normalization.json",
+   "experiments/results/exp6/results.json"
+  ],
+  "n_sources": 6,
+  "context": "| Denso (BGE) | 0,649 | 0,624 |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 26,
+  "figure": "0,624",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "| Denso (BGE) | 0,649 | 0,624 |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 27,
+  "figure": "0,668",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp5/checkpoint_llm_qwen2.5.json",
+   "experiments/results/exp5/results.json"
+  ],
+  "n_sources": 6,
+  "context": "| Híbrido pre-rerank (RRF) | 0,668 | 0,603 |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 27,
+  "figure": "0,603",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 7,
+  "context": "| Híbrido pre-rerank (RRF) | 0,668 | 0,603 |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 28,
+  "figure": "0,995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "| Híbrido post-rerank | **0,995** | **0,740** |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 28,
+  "figure": "0,740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "| Híbrido post-rerank | **0,995** | **0,740** |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 31,
+  "figure": "+0,45",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json"
+  ],
+  "n_sources": 67,
+  "context": "(d_z=+0,45, p_BH<0,001), pero la magnitud estaba **inflada por circularidad**"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 31,
+  "figure": "0,001",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 57,
+  "context": "(d_z=+0,45, p_BH<0,001), pero la magnitud estaba **inflada por circularidad**"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 32,
+  "figure": "+1,38",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp5/checkpoint_llm_mistral.json",
+   "experiments/results/exp5/results.json"
+  ],
+  "n_sources": 3,
+  "context": "(d_z=+1,38 con ms-marco; NDCG 0,995 ≈ techo por construcción)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 32,
+  "figure": "0,995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "(d_z=+1,38 con ms-marco; NDCG 0,995 ≈ techo por construcción)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 39,
+  "figure": "0,995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "NDCG@5≈0,995 **bajo el oráculo compartido** — es decir, el fix hace que reranker y oráculo"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 41,
+  "figure": "0,740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "honesto es 0,740 (oráculo independiente). Esto era invisible en exp10 (oráculo único = el"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 48,
+  "figure": "+16,75",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "no se lee en retrieval. **Ambos brazos recuperaron lo mismo** → el +16,75 % (0,2916 vs 0,2498)"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 48,
+  "figure": "0,2916",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json"
+  ],
+  "n_sources": 5,
+  "context": "no se lee en retrieval. **Ambos brazos recuperaron lo mismo** → el +16,75 % (0,2916 vs 0,2498)"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 48,
+  "figure": "0,2498",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp18_evidence_ceiling/selection_bound.json",
+   "experiments/results/exp18_evidence_ceiling/selection_bound_v2.json"
+  ],
+  "n_sources": 7,
+  "context": "no se lee en retrieval. **Ambos brazos recuperaron lo mismo** → el +16,75 % (0,2916 vs 0,2498)"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 56,
+  "figure": "0,852",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_rescore__small-noheader.json"
+  ],
+  "n_sources": 11,
+  "context": "- Bajo oráculo independiente (bge), ON es **direccionalmente PEOR**: NDCG@5 0,852→0,820,"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 56,
+  "figure": "0,820",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json"
+  ],
+  "n_sources": 10,
+  "context": "- Bajo oráculo independiente (bge), ON es **direccionalmente PEOR**: NDCG@5 0,852→0,820,"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 57,
+  "figure": "0,863",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 10,
+  "context": "recall@5 0,863→0,789, avg_score 0,287→0,269 — **no significativo tras BH** (d_z≈−0,4,"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 57,
+  "figure": "0,789",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "output/audit/claim_audit_sample_v4_meta.json"
+  ],
+  "n_sources": 4,
+  "context": "recall@5 0,863→0,789, avg_score 0,287→0,269 — **no significativo tras BH** (d_z≈−0,4,"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 57,
+  "figure": "0,287",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 17,
+  "context": "recall@5 0,863→0,789, avg_score 0,287→0,269 — **no significativo tras BH** (d_z≈−0,4,"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 57,
+  "figure": "0,269",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 30,
+  "context": "recall@5 0,863→0,789, avg_score 0,287→0,269 — **no significativo tras BH** (d_z≈−0,4,"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 58,
+  "figure": "0,13",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 98,
+  "context": "p_BH=0,13). La expansión añade términos a BM25 que perturban sin mejorar."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 59,
+  "figure": "0,175",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp13_expansion/faithfulness_metrics.json"
+  ],
+  "n_sources": 19,
+  "context": "- Fidelidad: OFF 0,175 ≈ ON 0,174 (d_z≈0, n.s.)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 59,
+  "figure": "0,174",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json"
+  ],
+  "n_sources": 37,
+  "context": "- Fidelidad: OFF 0,175 ≈ ON 0,174 (d_z≈0, n.s.)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 78,
+  "figure": "0,000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "| Sin RAG | 0,000* (189) | 0,000* (191) | 0,000* (193) | 0,000* (17†) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 78,
+  "figure": "0,000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "| Sin RAG | 0,000* (189) | 0,000* (191) | 0,000* (193) | 0,000* (17†) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 78,
+  "figure": "0,000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "| Sin RAG | 0,000* (189) | 0,000* (191) | 0,000* (193) | 0,000* (17†) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 78,
+  "figure": "0,000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "| Sin RAG | 0,000* (189) | 0,000* (191) | 0,000* (193) | 0,000* (17†) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 79,
+  "figure": "0,234",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 16,
+  "context": "| RAG léxico | 0,234 (75) | 0,381 (60) | 0,245 (114) | 0,246 (42) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 79,
+  "figure": "0,381",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json"
+  ],
+  "n_sources": 32,
+  "context": "| RAG léxico | 0,234 (75) | 0,381 (60) | 0,245 (114) | 0,246 (42) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 79,
+  "figure": "0,245",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 25,
+  "context": "| RAG léxico | 0,234 (75) | 0,381 (60) | 0,245 (114) | 0,246 (42) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 79,
+  "figure": "0,246",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "| RAG léxico | 0,234 (75) | 0,381 (60) | 0,245 (114) | 0,246 (42) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 80,
+  "figure": "0,255",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 33,
+  "context": "| RAG denso | 0,255 (85) | 0,356 (65) | 0,275 (132) | 0,246 (51) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 80,
+  "figure": "0,356",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 18,
+  "context": "| RAG denso | 0,255 (85) | 0,356 (65) | 0,275 (132) | 0,246 (51) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 80,
+  "figure": "0,275",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 22,
+  "context": "| RAG denso | 0,255 (85) | 0,356 (65) | 0,275 (132) | 0,246 (51) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 80,
+  "figure": "0,246",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "| RAG denso | 0,255 (85) | 0,356 (65) | 0,275 (132) | 0,246 (51) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 81,
+  "figure": "0,293",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json"
+  ],
+  "n_sources": 17,
+  "context": "| RAG híbrido | 0,293 (87) | 0,312 (60) | 0,282 (122) | 0,293 (47) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 81,
+  "figure": "0,312",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 21,
+  "context": "| RAG híbrido | 0,293 (87) | 0,312 (60) | 0,282 (122) | 0,293 (47) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 81,
+  "figure": "0,282",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 26,
+  "context": "| RAG híbrido | 0,293 (87) | 0,312 (60) | 0,282 (122) | 0,293 (47) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 81,
+  "figure": "0,293",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json"
+  ],
+  "n_sources": 17,
+  "context": "| RAG híbrido | 0,293 (87) | 0,312 (60) | 0,282 (122) | 0,293 (47) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 93,
+  "figure": "0,235",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json"
+  ],
+  "n_sources": 42,
+  "context": "| RAG léxico | 0,235 (75) | **0,443** (60) | 0,246 (114) | **0,361** (42) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 93,
+  "figure": "0,443",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 16,
+  "context": "| RAG léxico | 0,235 (75) | **0,443** (60) | 0,246 (114) | **0,361** (42) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 93,
+  "figure": "0,246",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "| RAG léxico | 0,235 (75) | **0,443** (60) | 0,246 (114) | **0,361** (42) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 93,
+  "figure": "0,361",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 24,
+  "context": "| RAG léxico | 0,235 (75) | **0,443** (60) | 0,246 (114) | **0,361** (42) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 94,
+  "figure": "0,247",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 24,
+  "context": "| RAG denso | 0,247 (85) | **0,425** (65) | 0,281 (132) | **0,351** (51) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 94,
+  "figure": "0,425",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 16,
+  "context": "| RAG denso | 0,247 (85) | **0,425** (65) | 0,281 (132) | **0,351** (51) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 94,
+  "figure": "0,281",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 27,
+  "context": "| RAG denso | 0,247 (85) | **0,425** (65) | 0,281 (132) | **0,351** (51) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 94,
+  "figure": "0,351",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 14,
+  "context": "| RAG denso | 0,247 (85) | **0,425** (65) | 0,281 (132) | **0,351** (51) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 95,
+  "figure": "0,299",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 14,
+  "context": "| RAG híbrido | 0,299 (87) | **0,363** (60) | 0,288 (122) | **0,354** (47) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 95,
+  "figure": "0,363",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 20,
+  "context": "| RAG híbrido | 0,299 (87) | **0,363** (60) | 0,288 (122) | **0,354** (47) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 95,
+  "figure": "0,288",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "| RAG híbrido | 0,299 (87) | **0,363** (60) | 0,288 (122) | **0,354** (47) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 95,
+  "figure": "0,354",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp13_expansion/faithfulness_metrics_v2.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 18,
+  "context": "| RAG híbrido | 0,299 (87) | **0,363** (60) | 0,288 (122) | **0,354** (47) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 98,
+  "figure": "0,01",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 77,
+  "context": "(H1): granite/mistral ~igual (±0,01); **gemma/qwen suben +0,05..0,11** (tenían 20-23 % de artefactos"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 98,
+  "figure": "+0,05",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 97,
+  "context": "(H1): granite/mistral ~igual (±0,01); **gemma/qwen suben +0,05..0,11** (tenían 20-23 % de artefactos"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 108,
+  "figure": "0,235",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json"
+  ],
+  "n_sources": 42,
+  "context": "| RAG léxico | 0,235 (75) | 0,413 (57) | 0,246 (114) | 0,255 (36) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 108,
+  "figure": "0,413",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json",
+   "experiments/results/exp15_ablation_nli/ensemble_sweep_results.json",
+   "experiments/results/exp15_ablation_nli/hhem_vs_nli.json"
+  ],
+  "n_sources": 9,
+  "context": "| RAG léxico | 0,235 (75) | 0,413 (57) | 0,246 (114) | 0,255 (36) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 108,
+  "figure": "0,246",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "| RAG léxico | 0,235 (75) | 0,413 (57) | 0,246 (114) | 0,255 (36) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 108,
+  "figure": "0,255",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 33,
+  "context": "| RAG léxico | 0,235 (75) | 0,413 (57) | 0,246 (114) | 0,255 (36) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 109,
+  "figure": "0,247",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 24,
+  "context": "| RAG denso | 0,247 (85) | 0,377 (60) | 0,281 (132) | 0,265 (45) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 109,
+  "figure": "0,377",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 15,
+  "context": "| RAG denso | 0,247 (85) | 0,377 (60) | 0,281 (132) | 0,265 (45) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 109,
+  "figure": "0,281",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 27,
+  "context": "| RAG denso | 0,247 (85) | 0,377 (60) | 0,281 (132) | 0,265 (45) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 109,
+  "figure": "0,265",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 26,
+  "context": "| RAG denso | 0,247 (85) | 0,377 (60) | 0,281 (132) | 0,265 (45) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 110,
+  "figure": "0,299",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 14,
+  "context": "| RAG híbrido | 0,299 (87) | 0,317 (56) | 0,288 (122) | 0,294 (43) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 110,
+  "figure": "0,317",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 17,
+  "context": "| RAG híbrido | 0,299 (87) | 0,317 (56) | 0,288 (122) | 0,294 (43) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 110,
+  "figure": "0,288",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "| RAG híbrido | 0,299 (87) | 0,317 (56) | 0,288 (122) | 0,294 (43) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 110,
+  "figure": "0,294",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json"
+  ],
+  "n_sources": 30,
+  "context": "| RAG híbrido | 0,299 (87) | 0,317 (56) | 0,288 (122) | 0,294 (43) |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 112,
+  "figure": "−0,03",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 88,
+  "context": "Granite/mistral idénticos a v3 (sus vacuas eran declinaciones ya excluidas); gemma baja −0,03..−0,05"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 112,
+  "figure": "0,05",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 97,
+  "context": "Granite/mistral idénticos a v3 (sus vacuas eran declinaciones ya excluidas); gemma baja −0,03..−0,05"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 113,
+  "figure": "−0,06",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 102,
+  "context": "y qwen −0,06..−0,11 respecto de v3 — parte del alza v2→v3 de gemma/qwen venía de los flips 0→1,0"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 113,
+  "figure": "0,11",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 94,
+  "context": "y qwen −0,06..−0,11 respecto de v3 — parte del alza v2→v3 de gemma/qwen venía de los flips 0→1,0"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 120,
+  "figure": "0,234",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 16,
+  "context": "granite es monótono léxico→denso→híbrido (0,234→0,255→0,293; mejor par híbrido-vs-léxico"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 120,
+  "figure": "0,255",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 33,
+  "context": "granite es monótono léxico→denso→híbrido (0,234→0,255→0,293; mejor par híbrido-vs-léxico"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 120,
+  "figure": "0,293",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json"
+  ],
+  "n_sources": 17,
+  "context": "granite es monótono léxico→denso→híbrido (0,234→0,255→0,293; mejor par híbrido-vs-léxico"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 121,
+  "figure": "+0,29",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 88,
+  "context": "d_z=+0,29, p_BH=0,11, n=53) y mistral también (0,245→0,275→0,282, n.s.); gemma tiende al"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 121,
+  "figure": "0,11",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 94,
+  "context": "d_z=+0,29, p_BH=0,11, n=53) y mistral también (0,245→0,275→0,282, n.s.); gemma tiende al"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 121,
+  "figure": "0,245",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 25,
+  "context": "d_z=+0,29, p_BH=0,11, n=53) y mistral también (0,245→0,275→0,282, n.s.); gemma tiende al"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 121,
+  "figure": "0,275",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 22,
+  "context": "d_z=+0,29, p_BH=0,11, n=53) y mistral también (0,245→0,275→0,282, n.s.); gemma tiende al"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 121,
+  "figure": "0,282",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 26,
+  "context": "d_z=+0,29, p_BH=0,11, n=53) y mistral también (0,245→0,275→0,282, n.s.); gemma tiende al"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 122,
+  "figure": "0,381",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json"
+  ],
+  "n_sources": 32,
+  "context": "REVÉS (0,381→0,312). Potencia limitada: n pareado 20–63 en granite/gemma/qwen ([n<60] en"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 122,
+  "figure": "0,312",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 21,
+  "context": "REVÉS (0,381→0,312). Potencia limitada: n pareado 20–63 en granite/gemma/qwen ([n<60] en"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 124,
+  "figure": "0,86",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 66,
+  "context": "- **RAG ≫ Sin RAG se sostiene** para granite/gemma/mistral (d_z 0,86–1,09, p_BH<0,001)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 124,
+  "figure": "1,09",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 17,
+  "context": "- **RAG ≫ Sin RAG se sostiene** para granite/gemma/mistral (d_z 0,86–1,09, p_BH<0,001)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 124,
+  "figure": "0,001",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 57,
+  "context": "- **RAG ≫ Sin RAG se sostiene** para granite/gemma/mistral (d_z 0,86–1,09, p_BH<0,001)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 128,
+  "figure": "+0,42",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json"
+  ],
+  "n_sources": 77,
+  "context": "**mismo verificador small hay 2/18 pares significativos** (denso granite-vs-mistral d_z=+0,42"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 129,
+  "figure": "0,014",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 20,
+  "context": "p_BH=0,014 n=75; léxico gemma-vs-mistral d_z=−0,45 p_BH=0,044 n=49); bajo base, 6/18. Las diferencias"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 129,
+  "figure": "−0,45",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json"
+  ],
+  "n_sources": 67,
+  "context": "p_BH=0,014 n=75; léxico gemma-vs-mistral d_z=−0,45 p_BH=0,044 n=49); bajo base, 6/18. Las diferencias"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 129,
+  "figure": "0,044",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json"
+  ],
+  "n_sources": 47,
+  "context": "p_BH=0,014 n=75; léxico gemma-vs-mistral d_z=−0,45 p_BH=0,044 n=49); bajo base, 6/18. Las diferencias"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 132,
+  "figure": "0,000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "**comportamiento de declinación** (McNemar v2: mistral declina mucho menos que el resto, p≈0,000). El"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 137,
+  "figure": "+0,42",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json"
+  ],
+  "n_sources": 77,
+  "context": "1/18 par —distinto— (small: denso granite-vs-mistral d_z=+0,42 p_BH=0,014 n=75; base: léxico"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 137,
+  "figure": "0,014",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 20,
+  "context": "1/18 par —distinto— (small: denso granite-vs-mistral d_z=+0,42 p_BH=0,014 n=75; base: léxico"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 138,
+  "figure": "−0,53",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json"
+  ],
+  "n_sources": 70,
+  "context": "gemma-vs-granite d_z=−0,53 p_BH=0,038 n=42) que NO se sostiene al cruzar verificadores —"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 138,
+  "figure": "0,038",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json"
+  ],
+  "n_sources": 29,
+  "context": "gemma-vs-granite d_z=−0,53 p_BH=0,038 n=42) que NO se sostiene al cruzar verificadores —"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 139,
+  "figure": "2204.04991",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "resultado frágil atribuible al instrumento (cf. TRUE, arXiv:2204.04991; Verifying the"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 140,
+  "figure": "2506.13342",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "Verifiers, arXiv:2506.13342), no hallazgo. El 0/12 RAG-vs-RAG se mantiene bajo v3 y v4;"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 143,
+  "figure": "0,017",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json"
+  ],
+  "n_sources": 18,
+  "context": "estables entre réplicas, Δ≤0,017: ruido por-generación, no por-agregado; este framing no"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 154,
+  "figure": "0,99",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 16,
+  "context": "- q085 (granite-híbrido): 28/28 claims \"contradicted\" a prob ~0,99 en una respuesta procedural"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 156,
+  "figure": "0,986",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp8/checkpoint_RAG_Hibrido_Propuesto.json",
+   "experiments/results/exp8/results.json"
+  ],
+  "n_sources": 5,
+  "context": "0,986). Reproducido bit-exacto. El lado contradicted usa max sobre 5 chunks con umbral 0,7"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 162,
+  "figure": "0,87",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 34,
+  "context": "- Ablación de formato (small sin prefijo \"Header:\"): **negativa limpia** — kappa 0,87,"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 163,
+  "figure": "0,944",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json"
+  ],
+  "n_sources": 17,
+  "context": "Spearman 0,944, mismos órdenes por modelo, q085 idéntico. El formato sintetizado de claims"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 165,
+  "figure": "0,411",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 12,
+  "context": "- Verificador base vs small: kappa claim-level **0,411** (las contradicciones de small migran"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 166,
+  "figure": "0,825",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_qwen2.5.json",
+   "experiments/results/exp5/results.json"
+  ],
+  "n_sources": 7,
+  "context": "a unsupported bajo base); Spearman de medias por config 0,825 (publicada) pero **0,559"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 166,
+  "figure": "0,559",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp18_evidence_ceiling/faithfulness_rows__hhem.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 4,
+  "context": "a unsupported bajo base); Spearman de medias por config 0,825 (publicada) pero **0,559"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 168,
+  "figure": "0,29",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 88,
+  "context": "Niveles absolutos más bajos bajo base (granite primaria 0,29→0,21)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 168,
+  "figure": "0,21",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 82,
+  "context": "Niveles absolutos más bajos bajo base (granite primaria 0,29→0,21)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 173,
+  "figure": "0,38",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 94,
+  "context": "(mejor |d_z|=0,38). El veredicto \"método de retrieval n.s.\" queda apoyado bajo"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 185,
+  "figure": "0,995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "2. **Circularidad del oráculo infla masivamente** el retrieval del híbrido (0,995 → 0,740)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 185,
+  "figure": "0,740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "2. **Circularidad del oráculo infla masivamente** el retrieval del híbrido (0,995 → 0,740)."
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 206,
+  "figure": "0,740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "| Circularidad del oráculo (reranker = juez) | Oráculo independiente (bge) + ranking pre-rerank; orden estable; número honesto 0,740 reportado |"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 219,
+  "figure": "0,285",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 20,
+  "context": "- exp13 re-medido bajo métrica v2: **\"expansión OFF≈ON\" SE SOSTIENE** (0,285 vs 0,324,"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 219,
+  "figure": "0,324",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "- exp13 re-medido bajo métrica v2: **\"expansión OFF≈ON\" SE SOSTIENE** (0,285 vs 0,324,"
+ },
+ {
+  "doc": "docs/reports/results-summary.md",
+  "line": 227,
+  "figure": "11,12",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__hibrido.json",
+   "experiments/results/exp12_matrix/results.json"
+  ],
+  "n_sources": 2,
+  "context": "clasificación v2 + claims_desglose, tabla5 v2, latency); `experiments/results/exp{11,12,13}_*`"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 6,
+  "figure": "+0,0451",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp19b_anchored_selector/arm_stats__hhem.json",
+   "experiments/results/exp19b_anchored_selector/equivalence__hhem.json"
+  ],
+  "n_sources": 5,
+  "context": "**Cierre real:** exp19b completado con veredicto (Δ HHEM +0,0451, IC95 [0,0076; 0,0817],"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 6,
+  "figure": "0,0076",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 6,
+  "context": "**Cierre real:** exp19b completado con veredicto (Δ HHEM +0,0451, IC95 [0,0076; 0,0817],"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 6,
+  "figure": "0,0817",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp19b_anchored_selector/equivalence__hhem.json"
+  ],
+  "n_sources": 7,
+  "context": "**Cierre real:** exp19b completado con veredicto (Δ HHEM +0,0451, IC95 [0,0076; 0,0817],"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 7,
+  "figure": "0,081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "TOST dentro de ±0,081); referencia humana piloto v4 completada y adjudicada (κ mejor verificador 0,30;"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 7,
+  "figure": "0,30",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 91,
+  "context": "TOST dentro de ±0,081); referencia humana piloto v4 completada y adjudicada (κ mejor verificador 0,30;"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 8,
+  "figure": "0,754",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_qwen2.5.json"
+  ],
+  "n_sources": 4,
+  "context": "jueces LLM κ₂=0,754 entre sí, 0,17–0,20 vs humano; intra-anotador 55 %); taxonomía de 759"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 8,
+  "figure": "0,17",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 102,
+  "context": "jueces LLM κ₂=0,754 entre sí, 0,17–0,20 vs humano; intra-anotador 55 %); taxonomía de 759"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 8,
+  "figure": "0,20",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 100,
+  "context": "jueces LLM κ₂=0,754 entre sí, 0,17–0,20 vs humano; intra-anotador 55 %); taxonomía de 759"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 18,
+  "figure": "0.740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "¿Por qué una mejor recuperación (NDCG@5 0.740 híbrido vs 0.442 léxico, oráculo independiente)"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 18,
+  "figure": "0.442",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 12,
+  "context": "¿Por qué una mejor recuperación (NDCG@5 0.740 híbrido vs 0.442 léxico, oráculo independiente)"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 20,
+  "figure": "0.235",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json"
+  ],
+  "n_sources": 42,
+  "context": "0.235/0.247/0.299)? ¿Instrumento, generación, contexto, o techo real?"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 20,
+  "figure": "0.247",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 24,
+  "context": "0.235/0.247/0.299)? ¿Instrumento, generación, contexto, o techo real?"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 20,
+  "figure": "0.299",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 14,
+  "context": "0.235/0.247/0.299)? ¿Instrumento, generación, contexto, o techo real?"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 33,
+  "figure": "+0.081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "cross-cloud (7/25→25/25) sube la fidelidad comparativa en los 3 instrumentos (HHEM +0.081; guardas"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 43,
+  "figure": "0.085",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 27,
+  "context": "- NLI small: **0/12** (granite hib-vs-lex p_bh 0.085). NLI base: **0/12**."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 44,
+  "figure": "0.020",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 27,
+  "context": "- **HHEM: 1/12** — **granite hibrido-vs-lexico p_bh 0.020, d_z −0.35, SIGNIFICATIVO** (mistral 0.067,"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 44,
+  "figure": "−0.35",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json"
+  ],
+  "n_sources": 90,
+  "context": "- **HHEM: 1/12** — **granite hibrido-vs-lexico p_bh 0.020, d_z −0.35, SIGNIFICATIVO** (mistral 0.067,"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 44,
+  "figure": "0.067",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json"
+  ],
+  "n_sources": 41,
+  "context": "- **HHEM: 1/12** — **granite hibrido-vs-lexico p_bh 0.020, d_z −0.35, SIGNIFICATIVO** (mistral 0.067,"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 47,
+  "figure": "0.033",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 36,
+  "context": "- **Nivel instrument-relative:** HHEM (especificidad buena: falso-grounded 0.033) da +0.307 sobre NLI"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 47,
+  "figure": "+0.307",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 24,
+  "context": "- **Nivel instrument-relative:** HHEM (especificidad buena: falso-grounded 0.033) da +0.307 sobre NLI"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 48,
+  "figure": "0.40",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 98,
+  "context": "(granite 0.40-0.44 vs 0.23-0.30). El NLI marca **22% de texto ALEATORIO** como contradicted → baja el"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 48,
+  "figure": "0.44",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 84,
+  "context": "(granite 0.40-0.44 vs 0.23-0.30). El NLI marca **22% de texto ALEATORIO** como contradicted → baja el"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 48,
+  "figure": "0.23",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 89,
+  "context": "(granite 0.40-0.44 vs 0.23-0.30). El NLI marca **22% de texto ALEATORIO** como contradicted → baja el"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 48,
+  "figure": "0.30",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 91,
+  "context": "(granite 0.40-0.44 vs 0.23-0.30). El NLI marca **22% de texto ALEATORIO** como contradicted → baja el"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 49,
+  "figure": "0.30",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 91,
+  "context": "nivel Y enmascara el contraste. El \"0.30\" publicado es relativo al instrumento NLI."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 50,
+  "figure": "0.99",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 16,
+  "context": "**Correcciones de rigor (3 iteraciones):** entrada 6 (\"todo artefacto NLI, HHEM 0.99\") sobre-vendió"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 59,
+  "figure": "0.7405",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "output/csv/exp11_retrieval194_fullrerank__bge-reranker-indep_retrieval_metrics.csv"
+  ],
+  "n_sources": 2,
+  "context": "| NDCG@5 híbrido (oráculo indep.) | 0.7405 | exp11 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 60,
+  "figure": "0.9948",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "output/csv/exp11_retrieval194_fullrerank__ms-marco-circular_retrieval_metrics.csv"
+  ],
+  "n_sources": 2,
+  "context": "| NDCG@5 híbrido (circular, no citar como real) | 0.9948 | exp11 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 61,
+  "figure": "0.235",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json"
+  ],
+  "n_sources": 42,
+  "context": "| Fidelidad Granite lexico/denso/hibrido | 0.235(75)/0.247(85)/0.299(87) | exp12 v4_small |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 61,
+  "figure": "0.247",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 24,
+  "context": "| Fidelidad Granite lexico/denso/hibrido | 0.235(75)/0.247(85)/0.299(87) | exp12 v4_small |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 61,
+  "figure": "0.299",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 14,
+  "context": "| Fidelidad Granite lexico/denso/hibrido | 0.235(75)/0.247(85)/0.299(87) | exp12 v4_small |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 73,
+  "figure": "0.308",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__denso.json"
+  ],
+  "n_sources": 55,
+  "context": "| baseline_repro | identidad | 0.308 | 0.204 | 0.450 | ancla | reproduce exp12 (drift +0.03 n.s.) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 73,
+  "figure": "0.204",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json"
+  ],
+  "n_sources": 16,
+  "context": "| baseline_repro | identidad | 0.308 | 0.204 | 0.450 | ancla | reproduce exp12 (drift +0.03 n.s.) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 73,
+  "figure": "0.450",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json"
+  ],
+  "n_sources": 18,
+  "context": "| baseline_repro | identidad | 0.308 | 0.204 | 0.450 | ancla | reproduce exp12 (drift +0.03 n.s.) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 73,
+  "figure": "+0.03",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 88,
+  "context": "| baseline_repro | identidad | 0.308 | 0.204 | 0.450 | ancla | reproduce exp12 (drift +0.03 n.s.) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 74,
+  "figure": "0.243",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 17,
+  "context": "| reranker_off | RRF pre-rerank | 0.243 | 0.144 | 0.438 | 0/3 | reranking NO sube fidelidad |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 74,
+  "figure": "0.144",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 18,
+  "context": "| reranker_off | RRF pre-rerank | 0.243 | 0.144 | 0.438 | 0/3 | reranking NO sube fidelidad |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 74,
+  "figure": "0.438",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 35,
+  "context": "| reranker_off | RRF pre-rerank | 0.243 | 0.144 | 0.438 | 0/3 | reranking NO sube fidelidad |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 75,
+  "figure": "0.282",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 26,
+  "context": "| final_top_k_3 | top-3 | 0.282 | 0.222 | 0.438 | 0/3 | recorte de contexto NO mueve |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 75,
+  "figure": "0.222",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json"
+  ],
+  "n_sources": 68,
+  "context": "| final_top_k_3 | top-3 | 0.282 | 0.222 | 0.438 | 0/3 | recorte de contexto NO mueve |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 75,
+  "figure": "0.438",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 35,
+  "context": "| final_top_k_3 | top-3 | 0.282 | 0.222 | 0.438 | 0/3 | recorte de contexto NO mueve |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 76,
+  "figure": "0.315",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json"
+  ],
+  "n_sources": 21,
+  "context": "| context_reversed | orden invertido | 0.315 | 0.214 | 0.469 | 0/3 | orden NO importa |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 76,
+  "figure": "0.214",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json"
+  ],
+  "n_sources": 47,
+  "context": "| context_reversed | orden invertido | 0.315 | 0.214 | 0.469 | 0/3 | orden NO importa |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 76,
+  "figure": "0.469",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 12,
+  "context": "| context_reversed | orden invertido | 0.315 | 0.214 | 0.469 | 0/3 | orden NO importa |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 77,
+  "figure": "0.332",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 27,
+  "context": "| context_lost_middle | relevante al centro | 0.332 | 0.202 | 0.424 | 0/3 | **lost-in-the-middle NO** |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 77,
+  "figure": "0.202",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 24,
+  "context": "| context_lost_middle | relevante al centro | 0.332 | 0.202 | 0.424 | 0/3 | **lost-in-the-middle NO** |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 77,
+  "figure": "0.424",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/faithfulness_rows__hhem.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 12,
+  "context": "| context_lost_middle | relevante al centro | 0.332 | 0.202 | 0.424 | 0/3 | **lost-in-the-middle NO** |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 82,
+  "figure": "+0.033",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 36,
+  "context": "un pool ya recuperado (rerank/top-k/orden/posición). Deriva H5 baseline_repro vs junio: +0.033 (n.s."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 83,
+  "figure": "0.083",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json"
+  ],
+  "n_sources": 51,
+  "context": "p=0.083), r=0.86, 39% queries idénticas → valida gate relajado y diseño pareado within-session."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 83,
+  "figure": "0.86",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 66,
+  "context": "p=0.083), r=0.86, 39% queries idénticas → valida gate relajado y diseño pareado within-session."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 88,
+  "figure": "0.30",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 91,
+  "context": "| Instrumento NLI ruidoso/descalibrado (¿0/12 artefacto del punto de operación?) | **Tier 0 + Tier 3-A COMPLETOS**: (Tier 0) κ 0.30–0.36; nulo robusto bajo base"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 88,
+  "figure": "0.36",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 83,
+  "context": "| Instrumento NLI ruidoso/descalibrado (¿0/12 artefacto del punto de operación?) | **Tier 0 + Tier 3-A COMPLETOS**: (Tier 0) κ 0.30–0.36; nulo robusto bajo base"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 88,
+  "figure": "0.009",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json"
+  ],
+  "n_sources": 19,
+  "context": "| Instrumento NLI ruidoso/descalibrado (¿0/12 artefacto del punto de operación?) | **Tier 0 + Tier 3-A COMPLETOS**: (Tier 0) κ 0.30–0.36; nulo robusto bajo base"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 88,
+  "figure": "0.30",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 91,
+  "context": "| Instrumento NLI ruidoso/descalibrado (¿0/12 artefacto del punto de operación?) | **Tier 0 + Tier 3-A COMPLETOS**: (Tier 0) κ 0.30–0.36; nulo robusto bajo base"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 90,
+  "figure": "+0.027",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 27,
+  "context": "| Lost in the middle | **DESCARTADO (Tier A)**: context_lost_middle vs baseline 0/3 instrumentos (small +0.027, base −0.005, HHEM −0.025, todos n.s.) | `arm_sta"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 90,
+  "figure": "−0.005",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 42,
+  "context": "| Lost in the middle | **DESCARTADO (Tier A)**: context_lost_middle vs baseline 0/3 instrumentos (small +0.027, base −0.005, HHEM −0.025, todos n.s.) | `arm_sta"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 90,
+  "figure": "−0.025",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 23,
+  "context": "| Lost in the middle | **DESCARTADO (Tier A)**: context_lost_middle vs baseline 0/3 instrumentos (small +0.027, base −0.005, HHEM −0.025, todos n.s.) | `arm_sta"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 92,
+  "figure": "−0.05",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 97,
+  "context": "| Reranking sube fidelidad | **DESCARTADO (Tier A)**: reranker_off 0/3, incluso tiende abajo (−0.05..−0.06 NLI, n.s.) | `arm_stats__*` |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 92,
+  "figure": "0.06",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 102,
+  "context": "| Reranking sube fidelidad | **DESCARTADO (Tier A)**: reranker_off 0/3, incluso tiende abajo (−0.05..−0.06 NLI, n.s.) | `arm_stats__*` |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 103,
+  "figure": "0.32",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 68,
+  "context": "| **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **HECHO (sel"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 103,
+  "figure": "0.033",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 36,
+  "context": "| **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **HECHO (sel"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 103,
+  "figure": "0.003",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 47,
+  "context": "| **3. Verificador de fidelidad estable (Tier 3)** | **Sí** | Bajo-medio (CPU + descargas hechas) | **Alto** (κ 0.32; NLI 22% falso-contradicted) | **HECHO (sel"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 105,
+  "figure": "+0.081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "| **5. Cross-cloud: reescritura/expansión densa** | **Sí** | Bajo (25 q) | **Positivo (piloto)** | **PILOTO CON SEÑAL POSITIVA 2026-07-24 (exp17).** La expansió"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 119,
+  "figure": "−0.034",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 15,
+  "context": "| anchored_cite (cita [N] por claim) | −0.034 | −0.040 | −0.056 | 0/3 — tiende ABAJO |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 119,
+  "figure": "−0.040",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json"
+  ],
+  "n_sources": 38,
+  "context": "| anchored_cite (cita [N] por claim) | −0.034 | −0.040 | −0.056 | 0/3 — tiende ABAJO |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 119,
+  "figure": "−0.056",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 55,
+  "context": "| anchored_cite (cita [N] por claim) | −0.034 | −0.040 | −0.056 | 0/3 — tiende ABAJO |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 120,
+  "figure": "−0.002",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 50,
+  "context": "| strict_abstain (omitir lo no explícito) | −0.002 | +0.031 | +0.038 | 0/3 — plano |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 120,
+  "figure": "+0.031",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__lexico.json"
+  ],
+  "n_sources": 24,
+  "context": "| strict_abstain (omitir lo no explícito) | −0.002 | +0.031 | +0.038 | 0/3 — plano |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 120,
+  "figure": "+0.038",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json"
+  ],
+  "n_sources": 29,
+  "context": "| strict_abstain (omitir lo no explícito) | −0.002 | +0.031 | +0.038 | 0/3 — plano |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 124,
+  "figure": "11.95",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__hibrido.json",
+   "experiments/results/exp12_matrix/results.json",
+   "experiments/results/exp16_anchored_decoding/guards.json"
+  ],
+  "n_sources": 3,
+  "context": "11.95→7.55/5.27); anchored_cite baja el solape (0.061, no copia) pero igual baja la fidelidad → **cita ≠"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 124,
+  "figure": "7.55",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/results.json",
+   "experiments/results/exp16_anchored_decoding/guards.json"
+  ],
+  "n_sources": 3,
+  "context": "11.95→7.55/5.27); anchored_cite baja el solape (0.061, no copia) pero igual baja la fidelidad → **cita ≠"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 124,
+  "figure": "5.27",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp16_anchored_decoding/guards.json"
+  ],
+  "n_sources": 1,
+  "context": "11.95→7.55/5.27); anchored_cite baja el solape (0.061, no copia) pero igual baja la fidelidad → **cita ≠"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 124,
+  "figure": "0.061",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 28,
+  "context": "11.95→7.55/5.27); anchored_cite baja el solape (0.061, no copia) pero igual baja la fidelidad → **cita ≠"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 131,
+  "figure": "0.85",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json"
+  ],
+  "n_sources": 53,
+  "context": "un proveedor pese a NDCG 0.85) → comparación imposible de anclar. 2 brazos del MISMO pool híbrido (baseline"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 137,
+  "figure": "0.199",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json"
+  ],
+  "n_sources": 11,
+  "context": "| NLI small | 0.199 | 0.236 | +0.037 | 0.13 | 0.40 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 137,
+  "figure": "0.236",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 21,
+  "context": "| NLI small | 0.199 | 0.236 | +0.037 | 0.13 | 0.40 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 137,
+  "figure": "+0.037",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json"
+  ],
+  "n_sources": 31,
+  "context": "| NLI small | 0.199 | 0.236 | +0.037 | 0.13 | 0.40 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 137,
+  "figure": "0.13",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 98,
+  "context": "| NLI small | 0.199 | 0.236 | +0.037 | 0.13 | 0.40 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 137,
+  "figure": "0.40",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 98,
+  "context": "| NLI small | 0.199 | 0.236 | +0.037 | 0.13 | 0.40 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 138,
+  "figure": "0.151",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 17,
+  "context": "| NLI base | 0.151 | 0.196 | +0.045 | 0.21 | 0.14 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 138,
+  "figure": "0.196",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 20,
+  "context": "| NLI base | 0.151 | 0.196 | +0.045 | 0.21 | 0.14 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 138,
+  "figure": "+0.045",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json"
+  ],
+  "n_sources": 29,
+  "context": "| NLI base | 0.151 | 0.196 | +0.045 | 0.21 | 0.14 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 138,
+  "figure": "0.21",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 82,
+  "context": "| NLI base | 0.151 | 0.196 | +0.045 | 0.21 | 0.14 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 138,
+  "figure": "0.14",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 90,
+  "context": "| NLI base | 0.151 | 0.196 | +0.045 | 0.21 | 0.14 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 139,
+  "figure": "0.477",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp17_crosscloud_balanced/arm_stats__hhem.json",
+   "experiments/results/exp18_evidence_ceiling/arm_stats__hhem.json"
+  ],
+  "n_sources": 9,
+  "context": "| HHEM | 0.477 | 0.558 | **+0.081** | 0.26 | 0.24 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 139,
+  "figure": "0.558",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 5,
+  "context": "| HHEM | 0.477 | 0.558 | **+0.081** | 0.26 | 0.24 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 139,
+  "figure": "+0.081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "| HHEM | 0.477 | 0.558 | **+0.081** | 0.26 | 0.24 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 139,
+  "figure": "0.26",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 73,
+  "context": "| HHEM | 0.477 | 0.558 | **+0.081** | 0.26 | 0.24 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 139,
+  "figure": "0.24",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 81,
+  "context": "| HHEM | 0.477 | 0.558 | **+0.081** | 0.26 | 0.24 |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 143,
+  "figure": "0.11",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 94,
+  "context": "a exp16): declinación 56%→32% (BAJA), palabras 349→427 (SUBE), claims 11.5→14.9 (SUBE), solape 0.11→0.13"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 143,
+  "figure": "0.13",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 98,
+  "context": "a exp16): declinación 56%→32% (BAJA), palabras 349→427 (SUBE), claims 11.5→14.9 (SUBE), solape 0.11→0.13"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 148,
+  "figure": "1.25",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp17_crosscloud_balanced/powered_reanalysis.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json",
+   "experiments/results/exp5/checkpoint_llm_mistral.json"
+  ],
+  "n_sources": 7,
+  "context": "GLMM `supported ~ arm + (1|query)` una-cola: HHEM OR 1.25 **p=0.021**, base 0.056 (marginal), small 0.152;"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 148,
+  "figure": "0.021",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json"
+  ],
+  "n_sources": 15,
+  "context": "GLMM `supported ~ arm + (1|query)` una-cola: HHEM OR 1.25 **p=0.021**, base 0.056 (marginal), small 0.152;"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 148,
+  "figure": "0.056",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 55,
+  "context": "GLMM `supported ~ arm + (1|query)` una-cola: HHEM OR 1.25 **p=0.021**, base 0.056 (marginal), small 0.152;"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 148,
+  "figure": "0.152",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__hibrido.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 18,
+  "context": "GLMM `supported ~ arm + (1|query)` una-cola: HHEM OR 1.25 **p=0.021**, base 0.056 (marginal), small 0.152;"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 149,
+  "figure": "0.23",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 89,
+  "context": "bootstrap conservador por query NO cruza (HHEM 0.23). Sugestivo, no concluyente: real en dirección, al"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 165,
+  "figure": "0.74",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json"
+  ],
+  "n_sources": 46,
+  "context": "final top-5. NDCG@5 indep 0.74 (vs léxico 0.44). Es el mejor retrieval medido; Tier A confirmó que su"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 165,
+  "figure": "0.44",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 84,
+  "context": "final top-5. NDCG@5 indep 0.74 (vs léxico 0.44). Es el mejor retrieval medido; Tier A confirmó que su"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 169,
+  "figure": "0.30",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 91,
+  "context": "- Métrica de fidelidad mostrada/registrada: reportar relativa al instrumento (el \"0.30\" es NLI-relativo;"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 170,
+  "figure": "+0.31",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 81,
+  "context": "HHEM da ~+0.31 de nivel). Para la encuesta, la fidelidad es contexto interno, no se le pide juzgarla al"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 237,
+  "figure": "0,471",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__denso.json"
+  ],
+  "n_sources": 31,
+  "context": "> claims no soportables (0,471 vs 0,330 en `answered`). La forma dominante es *\"I cannot find"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 237,
+  "figure": "0,330",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 17,
+  "context": "> claims no soportables (0,471 vs 0,330 en `answered`). La forma dominante es *\"I cannot find"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 245,
+  "figure": "+0,0914",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 1,
+  "context": "> sube el nivel reportado **+0,0914 (HHEM)** y **+0,0983 (small)** frente a `sens_c` — casi la banda"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 245,
+  "figure": "+0,0983",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp8b/checkpoint_RAG_Lexico_(BM25).json",
+   "experiments/results/exp8b/results.json"
+  ],
+  "n_sources": 2,
+  "context": "> sube el nivel reportado **+0,0914 (HHEM)** y **+0,0983 (small)** frente a `sens_c` — casi la banda"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 298,
+  "figure": "0,081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "por verificador; TOST bilateral contra ±0,081; los 3 verificadores. Ancla HHEM 0,4638, dentro de la"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 298,
+  "figure": "0,4638",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp18_evidence_ceiling/arm_stats__hhem.json"
+  ],
+  "n_sources": 1,
+  "context": "por verificador; TOST bilateral contra ±0,081; los 3 verificadores. Ancla HHEM 0,4638, dentro de la"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 299,
+  "figure": "0,40",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 98,
+  "context": "guarda de carga 0,40-0,55. Determinismo del re-puntuado: **bit-idéntico**."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 299,
+  "figure": "0,55",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json"
+  ],
+  "n_sources": 65,
+  "context": "guarda de carga 0,40-0,55. Determinismo del re-puntuado: **bit-idéntico**."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 303,
+  "figure": "−0,3185",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json",
+   "experiments/results/exp18_evidence_ceiling/arm_stats__hhem.json"
+  ],
+  "n_sources": 2,
+  "context": "| `evidence_swapped` | **−0,3185** | −0,857 (grande) | **0,000** | **sig. en los 3 verificadores** |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 303,
+  "figure": "−0,857",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json"
+  ],
+  "n_sources": 51,
+  "context": "| `evidence_swapped` | **−0,3185** | −0,857 (grande) | **0,000** | **sig. en los 3 verificadores** |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 303,
+  "figure": "0,000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "| `evidence_swapped` | **−0,3185** | −0,857 (grande) | **0,000** | **sig. en los 3 verificadores** |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 304,
+  "figure": "+0,0217",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 9,
+  "context": "| `oracle_evidence` | +0,0217 | 0,060 | 0,288 | **TOST EQUIVALENTE** (HHEM p=0,012 · small 0,0009 · base 0,023) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 304,
+  "figure": "0,060",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 27,
+  "context": "| `oracle_evidence` | +0,0217 | 0,060 | 0,288 | **TOST EQUIVALENTE** (HHEM p=0,012 · small 0,0009 · base 0,023) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 304,
+  "figure": "0,288",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "| `oracle_evidence` | +0,0217 | 0,060 | 0,288 | **TOST EQUIVALENTE** (HHEM p=0,012 · small 0,0009 · base 0,023) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 304,
+  "figure": "0,012",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 14,
+  "context": "| `oracle_evidence` | +0,0217 | 0,060 | 0,288 | **TOST EQUIVALENTE** (HHEM p=0,012 · small 0,0009 · base 0,023) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 304,
+  "figure": "0,0009",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 45,
+  "context": "| `oracle_evidence` | +0,0217 | 0,060 | 0,288 | **TOST EQUIVALENTE** (HHEM p=0,012 · small 0,0009 · base 0,023) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 304,
+  "figure": "0,023",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 23,
+  "context": "| `oracle_evidence` | +0,0217 | 0,060 | 0,288 | **TOST EQUIVALENTE** (HHEM p=0,012 · small 0,0009 · base 0,023) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 305,
+  "figure": "+0,0161",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp18_evidence_ceiling/arm_stats__hhem.json"
+  ],
+  "n_sources": 2,
+  "context": "| `final_top_k_10` | +0,0161 | 0,050 | 0,477 | n.s. (no truncadas +0,0259; truncadas +0,0005) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 305,
+  "figure": "0,050",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json"
+  ],
+  "n_sources": 49,
+  "context": "| `final_top_k_10` | +0,0161 | 0,050 | 0,477 | n.s. (no truncadas +0,0259; truncadas +0,0005) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 305,
+  "figure": "0,477",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp17_crosscloud_balanced/arm_stats__hhem.json",
+   "experiments/results/exp18_evidence_ceiling/arm_stats__hhem.json"
+  ],
+  "n_sources": 9,
+  "context": "| `final_top_k_10` | +0,0161 | 0,050 | 0,477 | n.s. (no truncadas +0,0259; truncadas +0,0005) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 305,
+  "figure": "+0,0259",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 4,
+  "context": "| `final_top_k_10` | +0,0161 | 0,050 | 0,477 | n.s. (no truncadas +0,0259; truncadas +0,0005) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 305,
+  "figure": "+0,0005",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 26,
+  "context": "| `final_top_k_10` | +0,0161 | 0,050 | 0,477 | n.s. (no truncadas +0,0259; truncadas +0,0005) |"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 308,
+  "figure": "0,036",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json"
+  ],
+  "n_sources": 26,
+  "context": "**1,7 % (1 de 60)**, claims 10,6 → 4,8, jaccard-5grama 0,036, **reaparición de claims del baseline"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 309,
+  "figure": "0,0009",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 45,
+  "context": "0,0009**. Diverge casi por completo y **se calla en vez de fabricar**. Descarta la fila 4 de la matriz."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 312,
+  "figure": "0,081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "±0,081 con oráculo independiente (`bge-reranker-large`). El claim-level da un positivo pequeño bajo"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 313,
+  "figure": "0,114",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4.json"
+  ],
+  "n_sources": 18,
+  "context": "GLMM que el bootstrap de cluster no confirma (HHEM p=0,114) — mismo patrón que exp17."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 319,
+  "figure": "0,4552",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp18_evidence_ceiling/selection_bound.json",
+   "experiments/results/exp18_evidence_ceiling/selection_bound_v2.json",
+   "experiments/results/exp19a_selector_probe/probe.json"
+  ],
+  "n_sources": 3,
+  "context": "**Cota de selección** (n=188): baseline 0,4552 · alcanzable k=5 **0,5834** · superior 0,5879. Validada"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 319,
+  "figure": "0,5834",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp18_evidence_ceiling/selection_bound.json",
+   "experiments/results/exp18_evidence_ceiling/selection_bound_v2.json",
+   "experiments/results/exp19a_selector_probe/probe.json"
+  ],
+  "n_sources": 3,
+  "context": "**Cota de selección** (n=188): baseline 0,4552 · alcanzable k=5 **0,5834** · superior 0,5879. Validada"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 319,
+  "figure": "0,5879",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp18_evidence_ceiling/selection_bound.json",
+   "experiments/results/exp18_evidence_ceiling/selection_bound_v2.json"
+  ],
+  "n_sources": 2,
+  "context": "**Cota de selección** (n=188): baseline 0,4552 · alcanzable k=5 **0,5834** · superior 0,5879. Validada"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 320,
+  "figure": "0,0000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 152,
+  "context": "contra el scorer canónico con **0,0000 de discrepancia en 188 queries**, bracket sin violaciones."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 323,
+  "figure": "0,0132",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp18_evidence_ceiling/diagnosis__base.json"
+  ],
+  "n_sources": 7,
+  "context": "> cambia la respuesta —el propio brazo de oráculo da reaparición de claims 0,0132, ~99 % de lo afirmado"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 324,
+  "figure": "+0,128",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "> cambia— así que **no acota a un selector real** y \"% de los +0,128 recuperado\" sería una cifra"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 340,
+  "figure": "0,4552",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp18_evidence_ceiling/selection_bound.json",
+   "experiments/results/exp18_evidence_ceiling/selection_bound_v2.json",
+   "experiments/results/exp19a_selector_probe/probe.json"
+  ],
+  "n_sources": 3,
+  "context": "`(claim, chunk)` con ms-marco-L12 sube la cobertura de claims de **0,4552 a 0,4853** (diferencia"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 340,
+  "figure": "0,4853",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp19a_selector_probe/probe.json",
+   "experiments/results/exp6/checkpoint_ablation_bm25_only.json"
+  ],
+  "n_sources": 4,
+  "context": "`(claim, chunk)` con ms-marco-L12 sube la cobertura de claims de **0,4552 a 0,4853** (diferencia"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 341,
+  "figure": "+0,0300",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "pareada +0,0300, IC95 [0,0156, 0,0448], **excluye 0**), o sea el **23,4 %** del margen hasta la"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 341,
+  "figure": "0,0156",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "pareada +0,0300, IC95 [0,0156, 0,0448], **excluye 0**), o sea el **23,4 %** del margen hasta la"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 341,
+  "figure": "0,0448",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/results.json"
+  ],
+  "n_sources": 7,
+  "context": "pareada +0,0300, IC95 [0,0156, 0,0448], **excluye 0**), o sea el **23,4 %** del margen hasta la"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 342,
+  "figure": "0,5834",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp18_evidence_ceiling/selection_bound.json",
+   "experiments/results/exp18_evidence_ceiling/selection_bound_v2.json",
+   "experiments/results/exp19a_selector_probe/probe.json"
+  ],
+  "n_sources": 3,
+  "context": "cota (0,5834). 59 queries mejoran, 22 empeoran, 107 igual. Sanity check perfecto: el rerank por"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 349,
+  "figure": "0,081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "→ regenerar). Primaria = Δ fidelidad + TOST ±0,081 en los 3 verificadores, familia BH declarada;"
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 360,
+  "figure": "0,226",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 28,
+  "context": "- **759 claims sin respaldo** — mejor score p50 0,226 (τ=0,5); 123 (16 %) a menos de 0,1 del umbral."
+ },
+ {
+  "doc": "docs/reports/summer-benchmarks.md",
+  "line": 378,
+  "figure": "0,081",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 29,
+  "context": "Compuerta obligatoria `exp21_hosted_equivalence`: TOST ±0,081 en los 3 verificadores contra el"
+ },
+ {
+  "doc": "paper/overleaf_ready/main.tex",
+  "line": 65,
+  "figure": "0.930",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp8/checkpoint_RAG_Hibrido_Propuesto.json",
+   "experiments/results/exp8/results.json"
+  ],
+  "n_sources": 10,
+  "context": "set, the hybrid pipeline achieves P@1 = 0.930, MRR = 0.942, and"
+ },
+ {
+  "doc": "paper/overleaf_ready/main.tex",
+  "line": 65,
+  "figure": "0.942",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp19b_anchored_selector/arm_stats__small.json"
+  ],
+  "n_sources": 12,
+  "context": "set, the hybrid pipeline achieves P@1 = 0.930, MRR = 0.942, and"
+ },
+ {
+  "doc": "paper/overleaf_ready/main.tex",
+  "line": 66,
+  "figure": "0.736",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/hhem_vs_nli.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp8/retrieval_metrics.json"
+  ],
+  "n_sources": 8,
+  "context": "NDCG@5 = 0.736, outperforming BM25 (P@1 = 0.785) and dense retrieval alone"
+ },
+ {
+  "doc": "paper/overleaf_ready/main.tex",
+  "line": 66,
+  "figure": "0.785",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp8/retrieval_metrics.json",
+   "experiments/results/exp8/retrieval_metrics_pre_fix.json"
+  ],
+  "n_sources": 7,
+  "context": "NDCG@5 = 0.736, outperforming BM25 (P@1 = 0.785) and dense retrieval alone"
+ },
+ {
+  "doc": "paper/overleaf_ready/main.tex",
+  "line": 67,
+  "figure": "0.860",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp8/retrieval_metrics.json",
+   "experiments/results/exp8/retrieval_metrics_pre_fix.json"
+  ],
+  "n_sources": 7,
+  "context": "(P@1 = 0.860) with statistical significance (Wilcoxon signed-rank test,"
+ },
+ {
+  "doc": "paper/overleaf_ready/main.tex",
+  "line": 68,
+  "figure": "0.0001",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 10,
+  "context": "p < 0.0001; Cohen's d = 0.626). Dictionary-based cross-provider query"
+ },
+ {
+  "doc": "paper/overleaf_ready/main.tex",
+  "line": 68,
+  "figure": "0.626",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp15_ablation_nli/hhem_vs_nli.json",
+   "experiments/results/exp8/aggregated_metrics.json"
+  ],
+  "n_sources": 6,
+  "context": "p < 0.0001; Cohen's d = 0.626). Dictionary-based cross-provider query"
+ },
+ {
+  "doc": "paper/overleaf_ready/main.tex",
+  "line": 173,
+  "figure": "3.11",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json"
+  ],
+  "n_sources": 5,
+  "context": "\\textcolor{blue}{[PLACEHOLDER: Hardware (CPU/GPU/RAM). Software: Python 3.11, sentence-transformers, faiss-cpu, Ollama. Docker image + Zenodo DOI + GitHub URL. "
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 28,
+  "figure": "0.740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "oracle: the reranked hybrid reaches NDCG@5 0.740 (versus               with the pipeline’s own reranker? This paper contributes: (i) a"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 29,
+  "figure": "0.995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "0.995 under the circular judge), and its advantage over the"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 31,
+  "figure": "24,481",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "rather than in RRF fusion. The central finding is that better          tation, with 24,481 chunks indexed by BGE-large and BM25,"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 55,
+  "figure": "31.00",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json"
+  ],
+  "n_sources": 45,
+  "context": "979-8-3195-2812-4/26/$31.00 © 2026 IEEE                                Hybrid methods combine them through tunable linear fu-"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 81,
+  "figure": "10,681",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "erarchy (Azure Functions 10,681→2,500 chunks; Azure Blob            (> 0.7), or UNSUPPORTED. We report the primary metric"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 81,
+  "figure": "2,500",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "erarchy (Azure Functions 10,681→2,500 chunks; Azure Blob            (> 0.7), or UNSUPPORTED. We report the primary metric"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 82,
+  "figure": "3,841",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "Storage 3,841→1,500), preserving 100% of unique top-level           over answered responses (faithfulness answered): the mean"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 82,
+  "figure": "1,500",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "Storage 3,841→1,500), preserving 100% of unique top-level           over answered responses (faithfulness answered): the mean"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 83,
+  "figure": "24,481",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "headings. The final corpus has 24,481 chunks (Table I); the         per-claim faithfulness restricted to responses that are not pure"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 92,
+  "figure": "6,366",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "AWS          6,366          26.0                   no genuine factual content, are treated as non-answers and"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 93,
+  "figure": "9,606",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "Azure        9,606          39.2                   excluded from the denominator. Because NLI verifiers differ"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 94,
+  "figure": "8,509",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "GCP          8,509          34.8"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 96,
+  "figure": "24,481",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "Total       24,481         100.0                   small and -base) and treat the absolute values as instrument-"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 103,
+  "figure": "0.75",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 80,
+  "context": "search). BM25 [4] uses k1 = 1.5, b = 0.75 (average document         response may contribute factual claims and also match a"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 121,
+  "figure": "0.000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "original 200 referenced Kubernetes/CNCF concepts and were              No-RAG 0.000 (189) 0.000 (191) 0.000 (193)    0.000 (17)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 121,
+  "figure": "0.000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "original 200 referenced Kubernetes/CNCF concepts and were              No-RAG 0.000 (189) 0.000 (191) 0.000 (193)    0.000 (17)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 121,
+  "figure": "0.000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "original 200 referenced Kubernetes/CNCF concepts and were              No-RAG 0.000 (189) 0.000 (191) 0.000 (193)    0.000 (17)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 121,
+  "figure": "0.000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "original 200 referenced Kubernetes/CNCF concepts and were              No-RAG 0.000 (189) 0.000 (191) 0.000 (193)    0.000 (17)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 122,
+  "figure": "0.235",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json"
+  ],
+  "n_sources": 42,
+  "context": "Lexical 0.235 (75) 0.413 (57) 0.246 (114)     0.255 (36)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 122,
+  "figure": "0.413",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json",
+   "experiments/results/exp15_ablation_nli/ensemble_sweep_results.json",
+   "experiments/results/exp15_ablation_nli/hhem_vs_nli.json"
+  ],
+  "n_sources": 9,
+  "context": "Lexical 0.235 (75) 0.413 (57) 0.246 (114)     0.255 (36)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 122,
+  "figure": "0.246",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "Lexical 0.235 (75) 0.413 (57) 0.246 (114)     0.255 (36)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 122,
+  "figure": "0.255",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 33,
+  "context": "Lexical 0.235 (75) 0.413 (57) 0.246 (114)     0.255 (36)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 123,
+  "figure": "0.247",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 24,
+  "context": "removed to match the corpus scope. We report Precision@5,              Dense   0.247 (85) 0.377 (60) 0.281 (132)     0.265 (45)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 123,
+  "figure": "0.377",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 15,
+  "context": "removed to match the corpus scope. We report Precision@5,              Dense   0.247 (85) 0.377 (60) 0.281 (132)     0.265 (45)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 123,
+  "figure": "0.281",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 27,
+  "context": "removed to match the corpus scope. We report Precision@5,              Dense   0.247 (85) 0.377 (60) 0.281 (132)     0.265 (45)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 123,
+  "figure": "0.265",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 26,
+  "context": "removed to match the corpus scope. We report Precision@5,              Dense   0.247 (85) 0.377 (60) 0.281 (132)     0.265 (45)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 124,
+  "figure": "0.299",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 14,
+  "context": "Recall@5, MRR, and NDCG@5. Lacking human relevance                     Hybrid  0.299 (87) 0.317 (56) 0.288 (122)     0.294 (43)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 124,
+  "figure": "0.317",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 17,
+  "context": "Recall@5, MRR, and NDCG@5. Lacking human relevance                     Hybrid  0.299 (87) 0.317 (56) 0.288 (122)     0.294 (43)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 124,
+  "figure": "0.288",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 24,
+  "context": "Recall@5, MRR, and NDCG@5. Lacking human relevance                     Hybrid  0.299 (87) 0.317 (56) 0.288 (122)     0.294 (43)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 124,
+  "figure": "0.294",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json"
+  ],
+  "n_sources": 30,
+  "context": "Recall@5, MRR, and NDCG@5. Lacking human relevance                     Hybrid  0.299 (87) 0.317 (56) 0.288 (122)     0.294 (43)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 132,
+  "figure": "0.05",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 97,
+  "context": "correction (FDR = 0.05), effect sizes as Cohen’s dz , and"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 134,
+  "figure": "10,000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__sin_rag.json"
+  ],
+  "n_sources": 89,
+  "context": "10,000-resample bootstrap intervals.                                          Lexical   65.5     55.2    25.3      43.8"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 140,
+  "figure": "0.442",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 12,
+  "context": "0.442→0.740; P@5 0.443→0.637). Crucially, the hybrid be-          in the hybrid scenario ranged from 36 s (Gemma, 25.8 tok/s)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 140,
+  "figure": "0.740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "0.442→0.740; P@5 0.443→0.637). Crucially, the hybrid be-          in the hybrid scenario ranged from 36 s (Gemma, 25.8 tok/s)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 140,
+  "figure": "0.443",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 16,
+  "context": "0.442→0.740; P@5 0.443→0.637). Crucially, the hybrid be-          in the hybrid scenario ranged from 36 s (Gemma, 25.8 tok/s)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 140,
+  "figure": "0.637",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/hhem_vs_nli.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "0.442→0.740; P@5 0.443→0.637). Crucially, the hybrid be-          in the hybrid scenario ranged from 36 s (Gemma, 25.8 tok/s)"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 142,
+  "figure": "0.603",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 7,
+  "context": "0.603 vs. 0.624), so the gain is attributable to the cross-       Granite at 66 s and Mistral at 42 s. Representative no-RAG"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 142,
+  "figure": "0.624",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "0.603 vs. 0.624), so the gain is attributable to the cross-       Granite at 66 s and Mistral at 42 s. Representative no-RAG"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 144,
+  "figure": "0.552",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 16,
+  "context": "systems score 0.552, 0.649, 0.668, and 0.995 (BM25, dense,        “Lightly Used” AWS Reserved Instance tier (removed in"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 144,
+  "figure": "0.649",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp6/checkpoint_ablation_+normalization.json",
+   "experiments/results/exp6/results.json"
+  ],
+  "n_sources": 6,
+  "context": "systems score 0.552, 0.649, 0.668, and 0.995 (BM25, dense,        “Lightly Used” AWS Reserved Instance tier (removed in"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 144,
+  "figure": "0.668",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp5/checkpoint_llm_qwen2.5.json",
+   "experiments/results/exp5/results.json"
+  ],
+  "n_sources": 6,
+  "context": "systems score 0.552, 0.649, 0.668, and 0.995 (BM25, dense,        “Lightly Used” AWS Reserved Instance tier (removed in"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 144,
+  "figure": "0.995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "systems score 0.552, 0.649, 0.668, and 0.995 (BM25, dense,        “Lightly Used” AWS Reserved Instance tier (removed in"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 145,
+  "figure": "0.995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "RRF-only, reranked): the reranked hybrid inflates to 0.995        2014), a 99.99% AWS Lambda SLA (the official figure is"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 145,
+  "figure": "99.99",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "RRF-only, reranked): the reranked hybrid inflates to 0.995        2014), a 99.99% AWS Lambda SLA (the official figure is"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 146,
+  "figure": "99.95",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "because the reranker agrees with itself. The system ordering      99.95%), and a non-existent Microsoft Entra ID “P3” tier"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 148,
+  "figure": "+1.38",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp5/checkpoint_llm_mistral.json",
+   "experiments/results/exp5/results.json"
+  ],
+  "n_sources": 3,
+  "context": "dense shrinks from dz = +1.38 (circular) to dz = +0.45"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 148,
+  "figure": "+0.45",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json"
+  ],
+  "n_sources": 67,
+  "context": "dense shrinks from dz = +1.38 (circular) to dz = +0.45"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 149,
+  "figure": "0.001",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 57,
+  "context": "(independent, p < 0.001); the RRF-only hybrid does not differ                           VI. D ISCUSSION"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 150,
+  "figure": "−0.08",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 112,
+  "context": "from dense (dz = −0.08, p = 0.240), and reranking alone           A. Retrieval Gains Do Not Transfer, and the Gain Is from"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 150,
+  "figure": "0.240",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 32,
+  "context": "from dense (dz = −0.08, p = 0.240), and reranking alone           A. Retrieval Gains Do Not Transfer, and the Gain Is from"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 151,
+  "figure": "+0.52",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json"
+  ],
+  "n_sources": 46,
+  "context": "accounts for the gain (dz = +0.52, p < 0.001).                    Reranking"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 151,
+  "figure": "0.001",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 57,
+  "context": "accounts for the gain (dz = +0.52, p < 0.001).                    Reranking"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 157,
+  "figure": "0.443",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3_small.json"
+  ],
+  "n_sources": 16,
+  "context": "BM25 (lexical)      0.443   0.299   0.603     0.442          weakest scenario returns a relevant chunk on most queries and"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 157,
+  "figure": "0.299",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 14,
+  "context": "BM25 (lexical)      0.443   0.299   0.603     0.442          weakest scenario returns a relevant chunk on most queries and"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 157,
+  "figure": "0.603",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 7,
+  "context": "BM25 (lexical)      0.443   0.299   0.603     0.442          weakest scenario returns a relevant chunk on most queries and"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 157,
+  "figure": "0.442",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 12,
+  "context": "BM25 (lexical)      0.443   0.299   0.603     0.442          weakest scenario returns a relevant chunk on most queries and"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 158,
+  "figure": "0.546",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json"
+  ],
+  "n_sources": 42,
+  "context": "Dense (BGE)         0.546   0.390   0.742     0.624          one may suffice; the entailment model’s coverage may be the"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 158,
+  "figure": "0.390",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 16,
+  "context": "Dense (BGE)         0.546   0.390   0.742     0.624          one may suffice; the entailment model’s coverage may be the"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 158,
+  "figure": "0.742",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json"
+  ],
+  "n_sources": 20,
+  "context": "Dense (BGE)         0.546   0.390   0.742     0.624          one may suffice; the entailment model’s coverage may be the"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 158,
+  "figure": "0.624",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp13_expansion/retrieval_metrics__bge-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "Dense (BGE)         0.546   0.390   0.742     0.624          one may suffice; the entailment model’s coverage may be the"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 159,
+  "figure": "0.543",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "Hybrid (RRF only)   0.543   0.377   0.699     0.603          binding constraint, suppressing the benefit of better retrieval;"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 159,
+  "figure": "0.377",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 15,
+  "context": "Hybrid (RRF only)   0.543   0.377   0.699     0.603          binding constraint, suppressing the benefit of better retrieval;"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 159,
+  "figure": "0.699",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 5,
+  "context": "Hybrid (RRF only)   0.543   0.377   0.699     0.603          binding constraint, suppressing the benefit of better retrieval;"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 159,
+  "figure": "0.603",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v3.json"
+  ],
+  "n_sources": 7,
+  "context": "Hybrid (RRF only)   0.543   0.377   0.699     0.603          binding constraint, suppressing the benefit of better retrieval;"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 160,
+  "figure": "0.637",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/hhem_vs_nli.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json"
+  ],
+  "n_sources": 8,
+  "context": "Hybrid (reranked)   0.637   0.468   0.770     0.740"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 160,
+  "figure": "0.468",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 12,
+  "context": "Hybrid (reranked)   0.637   0.468   0.770     0.740"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 160,
+  "figure": "0.770",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_qwen2.5.json"
+  ],
+  "n_sources": 11,
+  "context": "Hybrid (reranked)   0.637   0.468   0.770     0.740"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 160,
+  "figure": "0.740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "Hybrid (reranked)   0.637   0.468   0.770     0.740"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 167,
+  "figure": "0.235",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json",
+   "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json"
+  ],
+  "n_sources": 42,
+  "context": "changes faithfulness (e.g., Granite 0.235→0.299) and is non-      inflates NDCG@5 to 0.995 by construction, we recommend"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 167,
+  "figure": "0.299",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json"
+  ],
+  "n_sources": 14,
+  "context": "changes faithfulness (e.g., Granite 0.235→0.299) and is non-      inflates NDCG@5 to 0.995 by construction, we recommend"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 167,
+  "figure": "0.995",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 9,
+  "context": "changes faithfulness (e.g., Granite 0.235→0.299) and is non-      inflates NDCG@5 to 0.995 by construction, we recommend"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 169,
+  "figure": "0.000",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/results.json",
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/results.json"
+  ],
+  "n_sources": 163,
+  "context": "no-RAG control collapses to 0.000 for every model. Absolute       dent of the reranker; doing so reduces the hybrid’s score to a"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 170,
+  "figure": "0.740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "values are low and instrument-relative; they are meaningful       still-leading 0.740."
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 180,
+  "figure": "0.740",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_llama3.1.json"
+  ],
+  "n_sources": 7,
+  "context": "The largest difference between models is not faithfulness but        reaches NDCG@5 0.740 under an independent oracle; the"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 192,
+  "figure": "0.30",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 91,
+  "context": "ence, the best-aligned automatic verifier reached κ = 0.30           the corpus to reduce per-service variance."
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 193,
+  "figure": "−0.02",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 78,
+  "context": "(weighted; 95% CI [−0.02, 0.56]), and no verifier’s κ differed"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 193,
+  "figure": "0.56",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json",
+   "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__denso.json"
+  ],
+  "n_sources": 67,
+  "context": "(weighted; 95% CI [−0.02, 0.56]), and no verifier’s κ differed"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 197,
+  "figure": "0.754",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp12_matrix/faithfulness_metrics_v4_small.json",
+   "experiments/results/exp15_ablation_nli/negative_control_scores.json",
+   "experiments/results/exp5/checkpoint_llm_qwen2.5.json"
+  ],
+  "n_sources": 4,
+  "context": "(binary κ = 0.754, 89.8% agreement) yet were systematically          work."
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 198,
+  "figure": "0.17",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 102,
+  "context": "stricter than the human (κ = 0.17–0.20, ≈55% agreement);                Disclosure of AI-generated content. In accordance with"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 198,
+  "figure": "0.20",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__bge-reranker-indep.json",
+   "experiments/results/exp11_retrieval194_fullrerank/retrieval_metrics__ms-marco-circular.json"
+  ],
+  "n_sources": 100,
+  "context": "stricter than the human (κ = 0.17–0.20, ≈55% agreement);                Disclosure of AI-generated content. In accordance with"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 203,
+  "figure": "0.268",
+  "status": "verificada",
+  "sources": [
+   "experiments/results/exp10_retrieval194/retrieval_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics.json",
+   "experiments/results/exp12_matrix/faithfulness_metrics_v2.json"
+  ],
+  "n_sources": 28,
+  "context": "blind 20-item re-annotation was 55% (κ = 0.268), below               of Claude (Anthropic). The experimental code was developed"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 220,
+  "figure": "2311.05232",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "dependent and that verifier–human agreement is limited. The               arXiv:2311.05232, 2023."
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 222,
+  "figure": "4,215",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "coverage (e.g., AWS EC2 contributes 4,215 chunks while                    Kuttler, M. Lewis, W. Yih, T. Rocktaschel, S. Riedel, and D. Kiela,"
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 244,
+  "figure": "1901.04085",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "arXiv:1901.04085, 2019."
+ },
+ {
+  "doc": "docs/2026305869.pdf (pdftotext -layout)",
+  "line": 263,
+  "figure": "2312.10997",
+  "status": "sin fuente",
+  "sources": [],
+  "n_sources": 0,
+  "context": "A survey,” arXiv:2312.10997, 2023."
+ }
+]
