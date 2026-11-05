@@ -35,3 +35,28 @@ Cada fase vive en su rama, creada desde `3bb9ca8`, y cada entrada se escribe des
   - **S2 fuera del corpus:** correspondencia en `titulacion/` con correos de terceros, el correo ACME en `deployment.py:125` (zona congelada), la cuenta de servicio y el ID de proyecto en 43 archivos.
   - **Plan:** sin reescribir historia.
 - **No verificado:** la historia de git anterior, los binarios `.docx`/`.pdf` y el consentimiento del correo personal en los `.tex`.
+
+## P4 salud de tests: `claude/p4-tests` @ `23bd15b` (06:09-06:47 UTC)
+- **Capas:** 1=0, 2=0, 3=0.
+- **F-016:** la causa son los plazos del fixture `supervisor()`: preparación de 3 s y llamada de 0,1 s. Bajo carga, el arranque del worker sube a unos 10 s y el viaje de una llamada llega a 112 ms.
+  - **Antes:** 30 de 30 fallan con 128 procesos de carga.
+  - **Después:** 0 de 10 fallan con la misma carga (archivo completo).
+  - El arreglo está solo en el test; `scripts/` no se toca.
+- **Mutación, antes → después:**
+  - `retrieval_metrics`: 46/63 → 57/63.
+  - `hybrid_index` (RRF): 0/66 → 32/66 (fusión 32/36).
+  - `hybrid_retriever`: 0/22 → 18/22.
+  - `hallucination_metrics`: 0/12 → 12/12.
+  - `statistical_analysis` (60 sitios): 8/60 → 37/60.
+  - Los 42 tests nuevos están en `tests/test_p4_mutation_killers.py`.
+- **Hallazgos:**
+  - **P4-H1 (S2):** `_linear_fusion` (`hybrid_index.py:149`) desempata según PYTHONHASHSEED; 4 órdenes con 4 semillas. Afecta a exp3.
+  - **P4-H2 (S3):** `paired_comparison` con diferencias nulas devuelve p = NaN.
+- **No verificado:** la carga real de la suite, Windows y `hallucination_detector` (necesita modelos).
+
+## P5 docs: `claude/p5-docs` @ `82fd492` (06:36-06:43 UTC)
+- **Capas:** 1=0, 2=0, 3=0, ejecutadas en el checkout principal. En un worktree, `test_fresh_refuses_legacy_output_and_checkout` falla por entorno (R-39).
+- **`CLAUDE.md:37`:** CI no llama a `init.sh`; corre las tres capas por separado y solo en `main`/`summer/*`.
+- **Runbook de Fase B y receta de imagen (I8-08):** nota sobre la rama `fix/interview-readiness`, remota y local en HEAD, y `$run`/`$evidence` como marcadores de una raíz y un recibo nuevos.
+- **`adr-log.md`:** filas 0020-0026 en el índice (fecha de alta en git; estado no declarado en el archivo) y sección para ADR-0019.
+- **No verificado:** el resto de runbooks no se ha revisado.
