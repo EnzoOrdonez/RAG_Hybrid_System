@@ -26,6 +26,13 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
 | [ADR-0017](#adr-0017) | 2026-10-27 | Decisiones de arranque de F-020: ruta humana en nube, cohorte NLI, config sellada vigente | Aceptado |
 | [ADR-0018](#adr-0018) | 2026-10-27 | Fase humana sobre la imagen I7: GO verificado, ledger propio de USD 70 y firewall restringido | Aceptado |
 | [ADR-0019](ADR-0019-i7-ledger-corrections.md) | 2026-10-27 | Correcciones del ledger y la admisión humana I7; preparación offline | Aceptado |
+| [ADR-0020](ADR-0020-i7-final-freeze.md) | 2026-10-28 (alta en git) | Ajustes finales y pendientes de I7 | No declarado en el archivo |
+| [ADR-0021](ADR-0021-i7-gpu-restore-01.md) | 2026-10-29 (alta en git) | Incidente gpu-restore-01 | No declarado en el archivo |
+| [ADR-0022](ADR-0022-i7-cpu-build-02.md) | 2026-10-29 (alta en git) | Incidente cpu-build-02 y nombres por período | No declarado en el archivo |
+| [ADR-0023](ADR-0023-i7-cpu-build-04.md) | 2026-10-31 (alta en git) | Incidente cpu-build-04 y clon de servicio conectado en caliente | No declarado en el archivo |
+| [ADR-0024](ADR-0024-i7-cpu-build-06.md) | 2026-10-31 (alta en git) | Incidente cpu-build-06 y espera del arranque del invitado antes del attach | No declarado en el archivo |
+| [ADR-0025](ADR-0025-i7-reserva-ttl.md) | 2026-10-31 (alta en git) | Horas de reserva de la Fase B frente a la regla de TTL por arranque | No declarado en el archivo |
+| [ADR-0026](ADR-0026-i7-rechazo-capacidad-reserva.md) | 2026-11-01 (alta en git) | Rechazo de capacidad al crear la reserva de GPU | No declarado en el archivo |
 
 ---
 
@@ -225,6 +232,10 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
   5. Las reglas `default-allow-ssh` y `default-allow-rdp` quedan restringidas al rango de IAP; no se borran. [VERIFICADO] con una lectura posterior al cambio.
 - **Consecuencias:** [ESTIMADO, lista del 27/10] la retención cuesta unos USD 2,87 por día y cada boot humano unos USD 3,08. Con 2 sesiones por boot (10 boots), el tope alcanza para unos 12 días de fase humana; con 1 sesión por boot, no alcanza para 20 sesiones. Al llegar al tope solo se bloquean nuevas admisiones: la retención de recursos la decide Enzo. El calendario de sesiones debe ajustarse a esto, o Enzo decide otro tope con un ADR nuevo.
 - **Fuentes:** `tests/test_study_i7_human.py`; [ADR-0015](#adr-0015); `.harness/feature_list.json` (F-020).
+
+## ADR-0019: Correcciones del ledger y la admisión humana I7
+
+Ver [ADR-0019](ADR-0019-i7-ledger-corrections.md): correcciones del ledger, admisión humana I7 y preparación offline.
 
 ## ADR-0020: Ajustes finales y pendientes de I7
 

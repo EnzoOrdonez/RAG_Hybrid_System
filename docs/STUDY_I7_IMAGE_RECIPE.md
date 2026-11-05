@@ -3,6 +3,9 @@
 Estado: receta local, pendiente de construcción y validación en noviembre.
 Final03 y las tres instantáneas heredadas se conservan sin cambios.
 
+> **Nota (I8-08, 2026-11-05):** «limpio de `fix/interview-readiness`» significa que esa rama local y su
+> remota apuntan al HEAD que se construye (`i7_cpu_pipeline.py:42-46,90`); ver el runbook de Fase B.
+
 La fuente de la imagen será un checkout limpio de `fix/interview-readiness`,
 con HEAD publicado tras permiso de Enzo. No se descarta el cambio local de
 `CLAUDE.md`: se prepara otro checkout limpio para construir. Se mantienen

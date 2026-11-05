@@ -11,6 +11,13 @@ Solo `fix/interview-readiness`, us-central1 y una L4. Sin personas ni registro
 Construir una imagen I7 nueva. Leer completos los dos preregistros y la enmienda
 I4 antes de cualquier pago. No extender límites para obtener un resultado.
 
+> **Rama (I8-08, 2026-11-05).** El código sigue exigiendo la rama `fix/interview-readiness`
+> (`i7_cpu_pipeline.py:42-46` compara la punta remota con HEAD y `:90` clona la rama **local** por nombre
+> después de pagar). Una rama de trabajo como `fix/i7-attempt8` solo sirve si, antes del `cpu-build`,
+> `origin/fix/interview-readiness` avanzó por fast-forward a ese HEAD **y** la rama local
+> `fix/interview-readiness` apunta al mismo commit (lo recomendado es hacer checkout de ella).
+> Detalle: `docs/review/2026-11-02-i8/REPORT.md` §1 en la rama `claude/review-i8`.
+
 Piloto caliente de 20 y dos ventanas de 60 en el mismo boot. El piloto no
 concede GO. Solo el agregado de 120, 60 por condición, cero fallos e inválidos y
 p95 lineal <= 60 s por condición decide. Llamada 600 s, preparación 900 s,
@@ -38,9 +45,9 @@ $py = (Resolve-Path .venv-app/Scripts/python.exe).Path
 if ($LASTEXITCODE -ne 0) { throw 'Pinned Chromium preflight failed' }
 $sdk = (Get-Command gcloud.cmd).Source
 $prep = 'C:/CloudRAG/i7-preparacion-noviembre'
-$run = 'C:/CloudRAG/iteration7-faseB-20261101'
+$run = 'C:/CloudRAG/<raiz-nueva-del-intento>'   # raíz nueva creada con i7_config en el HEAD del build; la del 01/11 no sirve para otro commit
 $spec = "$prep/fase-b-spec.json"
-$evidence = 'C:/CloudRAG/iteration7-streamlit-preflight-20261016/option2/local-readiness.json'
+$evidence = 'C:/CloudRAG/<recibo-readiness-del-commit>/local-readiness.json'   # recibo nuevo cuyo source_sha256 corresponde a los bytes del HEAD; el del 16/10 es de otro commit
 & $py -m scripts.study_operator.i7_phase_b --check --evidence $evidence
 ```
 

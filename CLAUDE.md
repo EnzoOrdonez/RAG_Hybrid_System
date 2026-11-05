@@ -34,8 +34,9 @@ Este archivo es un **índice**. El detalle vive en los archivos enlazados y se l
 | 2 Tests CPU | `python -m pytest tests/ -q -m "not slow and not gpu"` | Código y guardas de evidencia intactos |
 | 3 Docs/harness | `python scripts/check_docs.py` | Enlaces, esquema de tareas, `CLAUDE.md` < 100 líneas, ninguna línea del CLAUDE.md anterior perdida |
 
-Ejecutar `bash init.sh` desde Git Bash en Windows (no WSL), o en Linux o CI. Usa `.venv-app` si
-existe (lo exigen los tests de I7); `PYTHON=<ruta>` lo cambia. Si una capa sale distinta de 0,
+Ejecutar `bash init.sh` desde Git Bash en Windows (no WSL) o en Linux. CI no llama a `init.sh`: corre las
+tres capas por separado con `python` del sistema y solo en `main`/`summer/*` (`.github/workflows/ci.yml`).
+Usa `.venv-app` si existe (lo exigen los tests de I7); `PYTHON=<ruta>` lo cambia. Si una capa sale distinta de 0,
 la tarea no está terminada.
 
 ## Cabecera de telemetría (obligatoria al inicio de cada reporte o traspaso)
