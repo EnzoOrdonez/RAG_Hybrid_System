@@ -111,6 +111,9 @@ def caddyfile(hostname):
     admin off
     persist_config off
     auto_https disable_redirects
+    servers {
+        protocols h1 h2
+    }
     log default {
         output discard
     }

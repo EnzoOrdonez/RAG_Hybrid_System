@@ -14,6 +14,8 @@ from scripts.study_operator.stimulus_host_evidence import sha
 
 PIN=Path(__file__).resolve().parents[2]/'config/i7-browser-pin.json'
 DUMP_TIMEOUT_MS=5000
+# Transport mitigation NOT backed by evidence (F-020 HTTP/3 hypothesis did not reproduce locally).
+CHROMIUM_ARGS=('--disable-quic',)
 BUTTON_WAIT_S=90   # A normal button appears within one rerun; 'Probar consulta' passes 900 s explicitly.
 TEXT_FIELDS='input:not([type=radio]):not([type=checkbox]):not([type=button]):not([type=submit]), textarea'
 # ARIA snapshots print field values, password included: redact the value and any child lines.
@@ -211,7 +213,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
     confirmations=[]
     with sync_playwright() as pw:
         version=runtime_identity(pw)
-        browser=pw.chromium.launch(headless=True,executable_path=pw.chromium.executable_path)
+        browser=pw.chromium.launch(headless=True,executable_path=pw.chromium.executable_path,args=CHROMIUM_ARGS)
         page=sync=None
         events={'console':[],'pageerror':[],'websockets':[],'websocket_closed':[]}
         network={'pending':{},'failed':[]}

@@ -148,3 +148,16 @@ def test_network_log_is_bounded_and_never_waits():
     assert len(log['pending']) == NETWORK_LOG_LIMIT and log['pending'][0] == {'method': 'GET', 'path': '/p0', 'age_s': 100.0}
     assert len(log['failed']) == NETWORK_LOG_LIMIT and log['failed'][-1] == {'path': '/f%d' % (NETWORK_LOG_LIMIT+4)}
     assert log['pending_total'] == NETWORK_LOG_LIMIT+10 and log['failed_total'] == NETWORK_LOG_LIMIT+5
+
+
+# Transport (commit 2, not backed by evidence): Caddy serves only h1/h2 and Chromium never tries QUIC.
+def test_caddy_disables_http3():
+    from scripts.study_operator.deployment import caddyfile
+    text = caddyfile(HOST)
+    assert 'servers {\n        protocols h1 h2\n    }' in text and 'h3' not in text
+
+
+def test_browser_launches_with_quic_disabled(tmp_path, monkeypatch):
+    observe = lambda: {'identity': {'boot_id': 'boot'}}
+    _, launches = run_failing(tmp_path, monkeypatch, Page(), observe)
+    assert launches and '--disable-quic' in launches[0]['args']
