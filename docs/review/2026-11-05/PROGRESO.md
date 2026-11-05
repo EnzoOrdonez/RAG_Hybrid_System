@@ -23,3 +23,15 @@ Cada fase vive en su rama, creada desde `3bb9ca8`, y cada entrada se escribe des
   - **D3 (S3):** las latencias del README no tienen fuente en el repo.
   - **D4 (S3):** «HHEM 0.23» pasaría a 0,24 con P1.
 - **No verificado:** la prosa de A.3 y de la ficha (no están en el repo), 76 `docs/*.md` no barridos y los registros fuera del repo.
+
+## P3 higiene: `claude/p3-higiene` @ `0545339` (06:04-06:08 UTC)
+- **Capas:** 1=0, 2=0, 3=0.
+- **R-03:**
+  - 7 patrones nuevos: Google OAuth y API, Hugging Face, GitHub fine-grained y app/OAuth, Slack y `private_key_id`.
+  - Los archivos de clave se informan por presencia, sin abrirse.
+  - `tests/test_p3_scan_secrets.py`: 19 tests; con el escáner de 3bb9ca8 fallan 10.
+  - El repo queda en 0 hallazgos sin ampliar el baseline.
+- **R-16:** 488 apariciones en 3bb9ca8 (correo 137, IPv4 pública 123, ID de proyecto 75, ruta de Windows 68, `/home` 57, cuenta de servicio 23, sslip 5), con 0 tokens. La mayoría está en datos de corpus o salidas de LLM; `docs/review/**` tiene 0.
+  - **S2 fuera del corpus:** correspondencia en `titulacion/` con correos de terceros, el correo ACME en `deployment.py:125` (zona congelada), la cuenta de servicio y el ID de proyecto en 43 archivos.
+  - **Plan:** sin reescribir historia.
+- **No verificado:** la historia de git anterior, los binarios `.docx`/`.pdf` y el consentimiento del correo personal en los `.tex`.
