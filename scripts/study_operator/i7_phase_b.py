@@ -244,8 +244,8 @@ def dispatch(operator, step, spec):
     if step == 'privacy':
         from scripts.study_operator.i7_workflows import wait_ready, privacy
         operator.stop()
-        operator.start('smoke')
         try:
+            operator.start('smoke')
             wait_ready(operator)
             return privacy(operator)
         except BaseException:

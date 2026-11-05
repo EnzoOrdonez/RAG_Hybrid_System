@@ -42,7 +42,10 @@ def build(operator, spec):
     head = subprocess.check_output(['git','-C',str(original),'rev-parse','HEAD'],text=True).strip()
     remote = subprocess.check_output(['git','-C',str(original),'ls-remote','origin',
                                       'refs/heads/fix/interview-readiness'],text=True).split()[0]
-    if head != operator.config['commit'] or remote != head:
+    local = subprocess.run(['git','-C',str(original),'rev-parse','--verify','--quiet',
+                            'refs/heads/fix/interview-readiness'],capture_output=True,text=True).stdout.strip()
+    # Line 90 clones the LOCAL branch by name after admit_paid: a missing or stale branch fails late.
+    if head != operator.config['commit'] or remote != head or local != head:
         raise ValueError('PUBLISHED_I7_SOURCE_REQUIRED')
     if root.exists():
         raise ValueError('CPU_ATTEMPT_EXISTS_RECONCILE_WITHOUT_REPLAY')

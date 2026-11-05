@@ -32,8 +32,8 @@ def run(operator, *, user_agent=None, ip=None):
     validate_receipt(operator.root/'browser-validation.json')
     code=smoke_participant(operator.config)
     operator.stop()
-    operator.start('smoke')
     try:
+        operator.start('smoke')  # a timed-out 'instances start' may still boot the VM
         wait_ready(operator)
         identity={'boot_id':operator.state['ready']['boot_id'],'image_id':operator.config['image_id'],
                   'source_commit':operator.config['commit']}

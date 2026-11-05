@@ -147,7 +147,20 @@ def scrub(value,secrets):
     return value
 
 
-def dump_failure(page,root,private,events,error):
+NETWORK_LOG_LIMIT=50
+
+
+def network_log(network,now=None):
+    """Bounded snapshot of failed and pending requests; never blocks on the page."""
+    now=time.monotonic() if now is None else now
+    pending=sorted(network['pending'].values(),key=lambda entry:entry[2])
+    return {'failed':network['failed'][-NETWORK_LOG_LIMIT:],
+            'pending':[{'method':method,'path':path,'age_s':round(now-started,3)}
+                       for method,path,started in pending[:NETWORK_LOG_LIMIT]],
+            'pending_total':len(pending),'failed_total':len(network['failed'])}
+
+
+def dump_failure(page,root,private,events,error,diagnostics=None):
     """Owner-only diagnostics. Token, canary IP/UA and field values are redacted; dump errors never escape."""
     try:
         folder=Path(root)/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
@@ -177,7 +190,8 @@ def dump_failure(page,root,private,events,error):
     for name,produce in (('screenshot.png',lambda:page.screenshot(path=str(folder/'screenshot.png'),full_page=True)),
             ('aria.yaml',lambda:save('aria.yaml',scrub(redact_aria(page.locator('body').aria_snapshot()),secrets))),
             ('controls.json',lambda:save('controls.json',controls())),
-            ('console.json',lambda:save('console.json',dict(events,sync_error=error)))):
+            ('console.json',lambda:save('console.json',dict(events,sync_error=error))),
+            *((('diagnostics.json',lambda:save('diagnostics.json',diagnostics)),) if diagnostics else ())):
         try:
             produce()
         except Exception:
@@ -200,6 +214,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
         browser=pw.chromium.launch(headless=True,executable_path=pw.chromium.executable_path)
         page=sync=None
         events={'console':[],'pageerror':[],'websockets':[],'websocket_closed':[]}
+        network={'pending':{},'failed':[]}
         try:
             headers={'X-Forwarded-For':ip,'X-Real-IP':ip,'Forwarded':'for='+ip} if ip else {}
             # Browser WebSocket APIs do not forward arbitrary HTTP headers.
@@ -213,6 +228,16 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                 events['websockets'].append(ws.url)
                 ws.on('close',lambda *_:events['websocket_closed'].append(ws.url))
             page.on('websocket',watch)
+            # I8-09: failed and still-pending requests (path only), read at dump time without waiting.
+            page.on('request',lambda request:network['pending'].__setitem__(id(request),
+                    (request.method,urlsplit(request.url).path,time.monotonic())))
+            page.on('requestfinished',lambda request:network['pending'].pop(id(request),None))
+            def failed_request(request):
+                entry=network['pending'].pop(id(request),None)
+                network['failed'].append({'method':request.method,'path':urlsplit(request.url).path,
+                                          'failure':request.failure,'pending_s':None if entry is None
+                                          else round(time.monotonic()-entry[2],3)})
+            page.on('requestfailed',failed_request)
             sync=StreamlitSync(page,25 if local_test else 600)
             transport={'browser_context':bool(user_agent and ip),'websocket_ip':False,'websocket_user_agent':False}
             if user_agent and ip:
@@ -345,7 +370,20 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                 'objects':final['backup']['objects']}
         except Exception:
             if failure_dir and page is not None:
-                dump_failure(page,failure_dir,(token,ip,user_agent,wire_ua),events,getattr(sync,'error',None))
+                # F-020: requests vs completed separates 'click not sent', 'rerun not finished' and
+                # 'admit() refused server-side' (rerun completed, no checkpoint in observe()).
+                try:
+                    state=observe()
+                    state={'identity_matches':state.get('identity')==identity,'data':state.get('data')}
+                except Exception as observe_error:
+                    state={'observe_error':type(observe_error).__name__}
+                diagnostics={'sync':{name:getattr(sync,name,None) for name in
+                                     ('requests','completed','form_text_entries','error')},'observe':state}
+                diagnostics['network']=network_log(network)
+                # The VM hostname is <public IP>.sslip.io (deployment.py:34): never write that IP.
+                host=parsed.hostname or ''
+                dump_failure(page,failure_dir,(token,ip,user_agent,wire_ua,host,host.removesuffix('.sslip.io')),
+                             events,getattr(sync,'error',None),diagnostics)
             raise
         finally:
             browser.close()
