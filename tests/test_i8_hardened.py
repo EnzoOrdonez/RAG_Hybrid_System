@@ -161,3 +161,29 @@ def test_browser_launches_with_quic_disabled(tmp_path, monkeypatch):
     observe = lambda: {'identity': {'boot_id': 'boot'}}
     _, launches = run_failing(tmp_path, monkeypatch, Page(), observe)
     assert launches and '--disable-quic' in launches[0]['args']
+
+
+# observe() is a gcloud ssh over IAP (~180 s budget, lifecycle.py:48): the dump waits at most 5 s.
+def test_dump_observe_is_bounded_to_5_s(tmp_path, monkeypatch):
+    import threading
+    import time
+    release, calls = threading.Event(), []
+    def observe():
+        calls.append(1)
+        if len(calls) > 1:  # the dump-time call hangs
+            release.wait(30)
+        return {'identity': {'boot_id': 'boot'}}
+    began = time.monotonic()
+    try:
+        files, _ = run_failing(tmp_path, monkeypatch, Page(), observe)
+    finally:
+        release.set()
+    assert time.monotonic() - began < 10
+    assert json.loads(files['diagnostics.json'])['observe'] == {'observe_error': 'TimeoutError'}
+
+
+def test_bounded_returns_value_and_reraises_errors():
+    from scripts.study_operator.i7_browser import bounded
+    assert bounded(lambda: 7, 1) == 7
+    with pytest.raises(PermissionError):
+        bounded(lambda: (_ for _ in ()).throw(PermissionError('x')), 1)

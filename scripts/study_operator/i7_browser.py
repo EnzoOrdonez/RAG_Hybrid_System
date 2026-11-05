@@ -150,6 +150,26 @@ def scrub(value,secrets):
 
 
 NETWORK_LOG_LIMIT=50
+OBSERVE_DUMP_TIMEOUT_S=5
+
+
+def bounded(function,seconds):
+    """Run function in a daemon thread; TimeoutError after seconds (the call itself is abandoned)."""
+    import threading
+    box={}
+    def target():
+        try:
+            box['value']=function()
+        except BaseException as error:
+            box['error']=error
+    worker=threading.Thread(target=target,daemon=True)
+    worker.start()
+    worker.join(seconds)
+    if worker.is_alive():
+        raise TimeoutError('OBSERVE_DUMP_TIMEOUT')
+    if 'error' in box:
+        raise box['error']
+    return box['value']
 
 
 def network_log(network,now=None):
@@ -375,7 +395,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                 # F-020: requests vs completed separates 'click not sent', 'rerun not finished' and
                 # 'admit() refused server-side' (rerun completed, no checkpoint in observe()).
                 try:
-                    state=observe()
+                    state=bounded(observe,OBSERVE_DUMP_TIMEOUT_S)
                     state={'identity_matches':state.get('identity')==identity,'data':state.get('data')}
                 except Exception as observe_error:
                     state={'observe_error':type(observe_error).__name__}
