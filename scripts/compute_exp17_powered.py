@@ -19,7 +19,7 @@ balanced's more likely to be grounded?", complementing the per-query decline-awa
 
 Usage: python scripts/compute_exp17_powered.py
 Reads faithfulness_rows__{small,base}__vb_agree.json + faithfulness_rows__hhem.json.
-Writes experiments/results/exp17_crosscloud_balanced/powered_reanalysis.{json,md}
+Writes experiments/results/exp17_crosscloud_balanced/powered_reanalysis_v2.{json,md} (R-05: qids sorted)
 """
 import json
 import math
@@ -30,6 +30,8 @@ import numpy as np
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
+from src.utils.signed_evidence import guard_write  # noqa: E402
 EXP_DIR = PROJECT_ROOT / "experiments/results/exp17_crosscloud_balanced"
 BASE, BAL = "baseline | granite4.1-8b", "balanced | granite4.1-8b"
 VERIFIERS = [("small", "faithfulness_rows__small__vb_agree.json"),
@@ -43,7 +45,7 @@ def load_counts(fname):
     cfg = json.loads((EXP_DIR / fname).read_text(encoding="utf-8"))["configs"]
     base, bal = cfg[BASE], cfg[BAL]
     out = {}
-    for q in set(base) | set(bal):
+    for q in sorted(set(base) | set(bal)):   # R-05: orden independiente de PYTHONHASHSEED
         bg = base.get(q, {}); lg = bal.get(q, {})
         out[q] = {"baseline": (int(bg.get("supported") or 0), int(bg.get("genuine") or 0)),
                   "balanced": (int(lg.get("supported") or 0), int(lg.get("genuine") or 0))}
@@ -81,7 +83,7 @@ def glmm(df):
 
 def cluster_bootstrap(counts, n_boot=N_BOOT, seed=SEED):
     """Query-level cluster bootstrap of the paired micro-averaged faithfulness diff."""
-    qids = list(counts)
+    qids = sorted(counts)   # R-05: el remuestreo indexa por posición; el orden debe ser fijo
     def micro(qsel):
         bs = bg = ls = lg = 0
         for q in qsel:
@@ -121,7 +123,8 @@ def main():
                       "cluster_bootstrap": "resample 25 queries; paired micro-faithfulness diff; seed 42"},
            "note": "claim-level is conditional on a genuine claim (declines/vacuous drop out).",
            "verifiers": results, "generated_by": "scripts/compute_exp17_powered.py"}
-    (EXP_DIR / "powered_reanalysis.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
+    # R-05: el artefacto firmado no se sobrescribe; el recálculo determinista va a _v2 (ADR-0001/0009).
+    guard_write(EXP_DIR / "powered_reanalysis_v2.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
 
     L = ["# exp17 — higher-power reanalysis (same 25 queries, claim resolution)", "",
          "GLMM = supported ~ arm + (1|query) (binomial VB, keeps pairing). Bootstrap = query-level "
@@ -137,7 +140,7 @@ def main():
           "read with the per-query decline-aware arm_stats (declines drop here).",
           "balanced also has MORE genuine claims than baseline (less decline) — a separate gain the "
           "conditional analysis does not capture."]
-    (EXP_DIR / "powered_reanalysis.md").write_text("\n".join(L), encoding="utf-8")
+    guard_write(EXP_DIR / "powered_reanalysis_v2.md").write_text("\n".join(L), encoding="utf-8")
     print("\n".join(L))
 
 
