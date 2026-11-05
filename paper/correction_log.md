@@ -459,3 +459,14 @@ v3 definitivo. **GATE de push:** pendiente de confirmación explícita (nada pus
 - **compute_faithfulness_metrics.py**: metadata generated hardcodeada (2026-06-11) y etiqueta
   de ledger errónea en v3_small (decía N5); corregido junto con el flag --exclude-vacuous (N9).
 - Detalle completo de la ronda: paper/audit_findings_cc_addenda.md entrada N9.
+
+---
+
+## N10 (2026-11-05): discrepancias entre el camera-ready LACCI y la evidencia, detectadas al preparar la defensa
+
+Entrada append-only. **No toca** la prosa del paper (requiere OK frase por frase), ni `audit_findings.md`, ni la evidencia firmada. Detalle y fuentes: `docs/review/2026-11-05/defensa/LEDGER_DEFENSA.md`.
+
+- **N10-1 (errata de parámetro).** `docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex:67` dice `k_1=1.5`. El índice de todos los experimentos usa `k1=1.2`, `b=0.75` (`config/config.yaml:100-101`, `src/embedding/index/bm25_index.py:50`), igual que Flag 49 de `audit_findings.md`. Ninguna cifra cambia: es un error de reporte del parámetro. **Corrige** la afirmación «No hay erratas que corregir» de `summer_ablation_log.md:2392`, que solo valía para el correo de EasyChair. Pendiente de decisión del autor: pedir una errata a IEEE o declararla en la defensa.
+- **N10-2 (alcance del abstract).** `...v9.tex:33` dice «better retrieval does not translate into higher answer faithfulness». Con κ 0,30 en un piloto de un solo anotador, la evidencia solo sostiene «con este verificador, la fidelidad no acompaña la mejora de recuperación». Se registra como formulación más fuerte que la evidencia.
+- **N10-3 (procedencia de los ejemplos).** `...v9.tex:141` presenta tres invenciones «common across models». [VERIFICADO 2026-11-05] Vienen de `experiments/results/exp9_llm_only_no_rag/` (Llama 3.1 8B Q4; `_handoff/qualitative_examples.md`). En `exp12_matrix/checkpoint__*__sin_rag.json` ninguna aparece en las respuestas de los cuatro modelos (Gemma, Granite y Mistral 194 no vacías cada uno; Qwen 17), buscando «lightly used», Lambda junto a 99,99 % y Entra/Azure AD junto a P3. «Common across models» no está respaldado por los modelos del paper.
+- **N10-4 (familia del oráculo).** `audit_findings.md:99` propone `BAAI/bge-reranker-large` como «otra familia». Es de BAAI, la misma organización que el buscador denso `BAAI/bge-large-en-v1.5` (`...v9.tex:67`). Es independiente del reordenador del pipeline (MS MARCO), pero no del denso, así que no se descarta un sesgo a favor del denso. Tampoco se ejecutó denso + reordenador: «la fusión no aporta en el pipeline completo» no está probado.
