@@ -153,7 +153,9 @@ class HybridIndex:
             score = alpha * bm25_dict.get(cid, 0.0) + (1 - alpha) * dense_dict.get(cid, 0.0)
             combined.append((cid, score))
 
-        combined.sort(key=lambda x: x[1], reverse=True)
+        # Deterministic tie-break by chunk id: all_ids is a set, so equal scores otherwise
+        # came out in PYTHONHASHSEED-dependent order (P4-H1/P6, 2026-11-05).
+        combined.sort(key=lambda x: (-x[1], x[0]))
         return combined[:top_k]
 
     def _rrf_fusion(
