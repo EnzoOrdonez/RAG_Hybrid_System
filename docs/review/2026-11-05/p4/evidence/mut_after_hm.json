@@ -1,0 +1,100 @@
+{
+ "module": "src/evaluation/hallucination_metrics.py",
+ "tests": [
+  "tests/test_decline_rule.py",
+  "tests/test_signed_evidence_guard.py",
+  "tests/test_study_declination.py",
+  "tests/test_retrieval_contracts.py",
+  "tests/test_p4_mutation_killers.py"
+ ],
+ "sites_total": 12,
+ "mutants": 12,
+ "killed": 12,
+ "score": 1.0,
+ "rows": [
+  {
+   "line": 32,
+   "col": 7,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 34,
+   "col": 28,
+   "kind": "const",
+   "from": "0.0",
+   "status": "killed"
+  },
+  {
+   "line": 35,
+   "col": 34,
+   "kind": "const",
+   "from": "1.0",
+   "status": "killed"
+  },
+  {
+   "line": 36,
+   "col": 32,
+   "kind": "const",
+   "from": "1",
+   "status": "killed"
+  },
+  {
+   "line": 37,
+   "col": 28,
+   "kind": "const",
+   "from": "0",
+   "status": "killed"
+  },
+  {
+   "line": 38,
+   "col": 32,
+   "kind": "const",
+   "from": "0",
+   "status": "killed"
+  },
+  {
+   "line": 43,
+   "col": 23,
+   "kind": "op",
+   "from": "Or",
+   "status": "killed"
+  },
+  {
+   "line": 66,
+   "col": 28,
+   "kind": "const",
+   "from": "0.0",
+   "status": "killed"
+  },
+  {
+   "line": 67,
+   "col": 34,
+   "kind": "const",
+   "from": "1.0",
+   "status": "killed"
+  },
+  {
+   "line": 68,
+   "col": 32,
+   "kind": "const",
+   "from": "1",
+   "status": "killed"
+  },
+  {
+   "line": 69,
+   "col": 28,
+   "kind": "const",
+   "from": "0",
+   "status": "killed"
+  },
+  {
+   "line": 70,
+   "col": 32,
+   "kind": "const",
+   "from": "0",
+   "status": "killed"
+  }
+ ]
+}

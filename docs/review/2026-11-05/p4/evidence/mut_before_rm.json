@@ -1,0 +1,454 @@
+{
+ "module": "src/evaluation/retrieval_metrics.py",
+ "tests": [
+  "tests/test_retrieval_contracts.py",
+  "tests/test_signed_evidence_guard.py"
+ ],
+ "sites_total": 63,
+ "mutants": 63,
+ "killed": 46,
+ "score": 0.73,
+ "rows": [
+  {
+   "line": 24,
+   "col": 7,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "killed"
+  },
+  {
+   "line": 24,
+   "col": 7,
+   "kind": "op",
+   "from": "Or",
+   "status": "killed"
+  },
+  {
+   "line": 24,
+   "col": 56,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "killed"
+  },
+  {
+   "line": 26,
+   "col": 7,
+   "kind": "op",
+   "from": "And",
+   "status": "killed"
+  },
+  {
+   "line": 26,
+   "col": 26,
+   "kind": "op",
+   "from": "Or",
+   "status": "killed"
+  },
+  {
+   "line": 26,
+   "col": 48,
+   "kind": "cmp0",
+   "from": "LtE",
+   "status": "killed"
+  },
+  {
+   "line": 26,
+   "col": 53,
+   "kind": "const",
+   "from": "0",
+   "status": "survived"
+  },
+  {
+   "line": 33,
+   "col": 7,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 35,
+   "col": 15,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 36,
+   "col": 7,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 37,
+   "col": 15,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 40,
+   "col": 11,
+   "kind": "op",
+   "from": "Div",
+   "status": "killed"
+  },
+  {
+   "line": 46,
+   "col": 7,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 48,
+   "col": 15,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 49,
+   "col": 7,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 50,
+   "col": 15,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 53,
+   "col": 11,
+   "kind": "op",
+   "from": "Div",
+   "status": "killed"
+  },
+  {
+   "line": 53,
+   "col": 44,
+   "kind": "const",
+   "from": "0.0",
+   "status": "killed"
+  },
+  {
+   "line": 59,
+   "col": 7,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 59,
+   "col": 7,
+   "kind": "op",
+   "from": "Or",
+   "status": "survived"
+  },
+  {
+   "line": 59,
+   "col": 27,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 60,
+   "col": 15,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 63,
+   "col": 11,
+   "kind": "cmp0",
+   "from": "In",
+   "status": "killed"
+  },
+  {
+   "line": 64,
+   "col": 19,
+   "kind": "const",
+   "from": "1.0",
+   "status": "killed"
+  },
+  {
+   "line": 64,
+   "col": 19,
+   "kind": "op",
+   "from": "Div",
+   "status": "killed"
+  },
+  {
+   "line": 64,
+   "col": 26,
+   "kind": "op",
+   "from": "Add",
+   "status": "killed"
+  },
+  {
+   "line": 64,
+   "col": 30,
+   "kind": "const",
+   "from": "1",
+   "status": "killed"
+  },
+  {
+   "line": 65,
+   "col": 11,
+   "kind": "const",
+   "from": "0.0",
+   "status": "killed"
+  },
+  {
+   "line": 71,
+   "col": 7,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 71,
+   "col": 7,
+   "kind": "op",
+   "from": "Or",
+   "status": "survived"
+  },
+  {
+   "line": 71,
+   "col": 27,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 72,
+   "col": 15,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 77,
+   "col": 10,
+   "kind": "const",
+   "from": "0.0",
+   "status": "killed"
+  },
+  {
+   "line": 79,
+   "col": 14,
+   "kind": "const",
+   "from": "1.0",
+   "status": "killed"
+  },
+  {
+   "line": 79,
+   "col": 21,
+   "kind": "cmp0",
+   "from": "In",
+   "status": "killed"
+  },
+  {
+   "line": 79,
+   "col": 46,
+   "kind": "const",
+   "from": "0.0",
+   "status": "killed"
+  },
+  {
+   "line": 80,
+   "col": 15,
+   "kind": "op",
+   "from": "Div",
+   "status": "killed"
+  },
+  {
+   "line": 80,
+   "col": 31,
+   "kind": "op",
+   "from": "Add",
+   "status": "killed"
+  },
+  {
+   "line": 80,
+   "col": 35,
+   "kind": "const",
+   "from": "2",
+   "status": "killed"
+  },
+  {
+   "line": 84,
+   "col": 15,
+   "kind": "const",
+   "from": "1.0",
+   "status": "killed"
+  },
+  {
+   "line": 84,
+   "col": 15,
+   "kind": "op",
+   "from": "Div",
+   "status": "killed"
+  },
+  {
+   "line": 84,
+   "col": 31,
+   "kind": "op",
+   "from": "Add",
+   "status": "killed"
+  },
+  {
+   "line": 84,
+   "col": 35,
+   "kind": "const",
+   "from": "2",
+   "status": "killed"
+  },
+  {
+   "line": 86,
+   "col": 11,
+   "kind": "op",
+   "from": "Div",
+   "status": "killed"
+  },
+  {
+   "line": 86,
+   "col": 25,
+   "kind": "cmp0",
+   "from": "Gt",
+   "status": "survived"
+  },
+  {
+   "line": 86,
+   "col": 32,
+   "kind": "const",
+   "from": "0",
+   "status": "survived"
+  },
+  {
+   "line": 86,
+   "col": 39,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 92,
+   "col": 7,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 92,
+   "col": 7,
+   "kind": "op",
+   "from": "Or",
+   "status": "survived"
+  },
+  {
+   "line": 92,
+   "col": 27,
+   "kind": "not",
+   "from": "Not",
+   "status": "killed"
+  },
+  {
+   "line": 93,
+   "col": 15,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 95,
+   "col": 11,
+   "kind": "const",
+   "from": "0",
+   "status": "killed"
+  },
+  {
+   "line": 96,
+   "col": 20,
+   "kind": "const",
+   "from": "0.0",
+   "status": "killed"
+  },
+  {
+   "line": 98,
+   "col": 11,
+   "kind": "cmp0",
+   "from": "In",
+   "status": "killed"
+  },
+  {
+   "line": 99,
+   "col": 20,
+   "kind": "const",
+   "from": "1",
+   "status": "killed"
+  },
+  {
+   "line": 100,
+   "col": 29,
+   "kind": "op",
+   "from": "Div",
+   "status": "killed"
+  },
+  {
+   "line": 100,
+   "col": 37,
+   "kind": "op",
+   "from": "Add",
+   "status": "killed"
+  },
+  {
+   "line": 100,
+   "col": 41,
+   "kind": "const",
+   "from": "1",
+   "status": "killed"
+  },
+  {
+   "line": 101,
+   "col": 11,
+   "kind": "op",
+   "from": "Div",
+   "status": "killed"
+  },
+  {
+   "line": 101,
+   "col": 66,
+   "kind": "const",
+   "from": "0.0",
+   "status": "killed"
+  },
+  {
+   "line": 111,
+   "col": 20,
+   "kind": "const",
+   "from": "5",
+   "status": "survived"
+  },
+  {
+   "line": 111,
+   "col": 23,
+   "kind": "const",
+   "from": "10",
+   "status": "survived"
+  },
+  {
+   "line": 111,
+   "col": 27,
+   "kind": "const",
+   "from": "20",
+   "status": "survived"
+  }
+ ]
+}

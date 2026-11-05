@@ -1,0 +1,474 @@
+{
+ "module": "src/embedding/index/hybrid_index.py",
+ "tests": [
+  "tests/test_retrieval_contracts.py"
+ ],
+ "sites_total": 66,
+ "mutants": 66,
+ "killed": 0,
+ "score": 0.0,
+ "rows": [
+  {
+   "line": 25,
+   "col": 25,
+   "kind": "const",
+   "from": "1.2",
+   "status": "survived"
+  },
+  {
+   "line": 26,
+   "col": 24,
+   "kind": "const",
+   "from": "0.75",
+   "status": "survived"
+  },
+  {
+   "line": 40,
+   "col": 26,
+   "kind": "const",
+   "from": "500",
+   "status": "survived"
+  },
+  {
+   "line": 71,
+   "col": 15,
+   "kind": "cmp0",
+   "from": "Eq",
+   "status": "survived"
+  },
+  {
+   "line": 80,
+   "col": 39,
+   "kind": "const",
+   "from": "50",
+   "status": "survived"
+  },
+  {
+   "line": 90,
+   "col": 39,
+   "kind": "const",
+   "from": "50",
+   "status": "survived"
+  },
+  {
+   "line": 99,
+   "col": 21,
+   "kind": "const",
+   "from": "20",
+   "status": "survived"
+  },
+  {
+   "line": 101,
+   "col": 23,
+   "kind": "const",
+   "from": "0.5",
+   "status": "survived"
+  },
+  {
+   "line": 102,
+   "col": 32,
+   "kind": "const",
+   "from": "50",
+   "status": "survived"
+  },
+  {
+   "line": 103,
+   "col": 21,
+   "kind": "const",
+   "from": "60",
+   "status": "survived"
+  },
+  {
+   "line": 127,
+   "col": 11,
+   "kind": "cmp0",
+   "from": "Eq",
+   "status": "survived"
+  },
+  {
+   "line": 129,
+   "col": 13,
+   "kind": "cmp0",
+   "from": "Eq",
+   "status": "survived"
+  },
+  {
+   "line": 147,
+   "col": 24,
+   "kind": "const",
+   "from": "0",
+   "status": "survived"
+  },
+  {
+   "line": 147,
+   "col": 57,
+   "kind": "const",
+   "from": "0",
+   "status": "survived"
+  },
+  {
+   "line": 153,
+   "col": 20,
+   "kind": "op",
+   "from": "Add",
+   "status": "survived"
+  },
+  {
+   "line": 153,
+   "col": 20,
+   "kind": "op",
+   "from": "Mult",
+   "status": "survived"
+  },
+  {
+   "line": 153,
+   "col": 47,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 153,
+   "col": 54,
+   "kind": "op",
+   "from": "Mult",
+   "status": "survived"
+  },
+  {
+   "line": 153,
+   "col": 55,
+   "kind": "const",
+   "from": "1",
+   "status": "survived"
+  },
+  {
+   "line": 153,
+   "col": 55,
+   "kind": "op",
+   "from": "Sub",
+   "status": "survived"
+  },
+  {
+   "line": 153,
+   "col": 88,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 156,
+   "col": 38,
+   "kind": "const",
+   "from": "1",
+   "status": "survived"
+  },
+  {
+   "line": 170,
+   "col": 30,
+   "kind": "op",
+   "from": "Add",
+   "status": "survived"
+  },
+  {
+   "line": 170,
+   "col": 50,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 170,
+   "col": 57,
+   "kind": "const",
+   "from": "1.0",
+   "status": "survived"
+  },
+  {
+   "line": 170,
+   "col": 57,
+   "kind": "op",
+   "from": "Div",
+   "status": "survived"
+  },
+  {
+   "line": 170,
+   "col": 64,
+   "kind": "op",
+   "from": "Add",
+   "status": "survived"
+  },
+  {
+   "line": 170,
+   "col": 79,
+   "kind": "const",
+   "from": "1",
+   "status": "survived"
+  },
+  {
+   "line": 173,
+   "col": 30,
+   "kind": "op",
+   "from": "Add",
+   "status": "survived"
+  },
+  {
+   "line": 173,
+   "col": 50,
+   "kind": "const",
+   "from": "0.0",
+   "status": "survived"
+  },
+  {
+   "line": 173,
+   "col": 57,
+   "kind": "const",
+   "from": "1.0",
+   "status": "survived"
+  },
+  {
+   "line": 173,
+   "col": 57,
+   "kind": "op",
+   "from": "Div",
+   "status": "survived"
+  },
+  {
+   "line": 173,
+   "col": 64,
+   "kind": "op",
+   "from": "Add",
+   "status": "survived"
+  },
+  {
+   "line": 173,
+   "col": 79,
+   "kind": "const",
+   "from": "1",
+   "status": "survived"
+  },
+  {
+   "line": 175,
+   "col": 62,
+   "kind": "const",
+   "from": "1",
+   "status": "survived"
+  },
+  {
+   "line": 183,
+   "col": 11,
+   "kind": "not",
+   "from": "Not",
+   "status": "survived"
+  },
+  {
+   "line": 188,
+   "col": 14,
+   "kind": "op",
+   "from": "Sub",
+   "status": "survived"
+  },
+  {
+   "line": 189,
+   "col": 11,
+   "kind": "cmp0",
+   "from": "Eq",
+   "status": "survived"
+  },
+  {
+   "line": 189,
+   "col": 18,
+   "kind": "const",
+   "from": "0",
+   "status": "survived"
+  },
+  {
+   "line": 190,
+   "col": 26,
+   "kind": "const",
+   "from": "1.0",
+   "status": "survived"
+  },
+  {
+   "line": 191,
+   "col": 22,
+   "kind": "op",
+   "from": "Div",
+   "status": "survived"
+  },
+  {
+   "line": 191,
+   "col": 23,
+   "kind": "op",
+   "from": "Sub",
+   "status": "survived"
+  },
+  {
+   "line": 205,
+   "col": 71,
+   "kind": "const",
+   "from": "500",
+   "status": "survived"
+  },
+  {
+   "line": 209,
+   "col": 16,
+   "kind": "op",
+   "from": "Div",
+   "status": "survived"
+  },
+  {
+   "line": 212,
+   "col": 16,
+   "kind": "op",
+   "from": "Div",
+   "status": "survived"
+  },
+  {
+   "line": 215,
+   "col": 19,
+   "kind": "op",
+   "from": "Div",
+   "status": "survived"
+  },
+  {
+   "line": 217,
+   "col": 46,
+   "kind": "const",
+   "from": "2",
+   "status": "survived"
+  },
+  {
+   "line": 221,
+   "col": 71,
+   "kind": "const",
+   "from": "500",
+   "status": "survived"
+  },
+  {
+   "line": 225,
+   "col": 16,
+   "kind": "op",
+   "from": "Div",
+   "status": "survived"
+  },
+  {
+   "line": 228,
+   "col": 16,
+   "kind": "op",
+   "from": "Div",
+   "status": "survived"
+  },
+  {
+   "line": 230,
+   "col": 19,
+   "kind": "op",
+   "from": "Div",
+   "status": "survived"
+  },
+  {
+   "line": 231,
+   "col": 11,
+   "kind": "not",
+   "from": "Not",
+   "status": "survived"
+  },
+  {
+   "line": 241,
+   "col": 12,
+   "kind": "not",
+   "from": "Not",
+   "status": "survived"
+  },
+  {
+   "line": 241,
+   "col": 12,
+   "kind": "op",
+   "from": "Or",
+   "status": "survived"
+  },
+  {
+   "line": 241,
+   "col": 29,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "survived"
+  },
+  {
+   "line": 242,
+   "col": 19,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "survived"
+  },
+  {
+   "line": 243,
+   "col": 19,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "survived"
+  },
+  {
+   "line": 243,
+   "col": 57,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "survived"
+  },
+  {
+   "line": 245,
+   "col": 11,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "survived"
+  },
+  {
+   "line": 245,
+   "col": 11,
+   "kind": "op",
+   "from": "Or",
+   "status": "survived"
+  },
+  {
+   "line": 245,
+   "col": 62,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "survived"
+  },
+  {
+   "line": 247,
+   "col": 11,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "survived"
+  },
+  {
+   "line": 250,
+   "col": 15,
+   "kind": "not",
+   "from": "Not",
+   "status": "survived"
+  },
+  {
+   "line": 250,
+   "col": 15,
+   "kind": "op",
+   "from": "Or",
+   "status": "survived"
+  },
+  {
+   "line": 250,
+   "col": 46,
+   "kind": "cmp0",
+   "from": "NotEq",
+   "status": "survived"
+  },
+  {
+   "line": 250,
+   "col": 78,
+   "kind": "not",
+   "from": "Not",
+   "status": "survived"
+  }
+ ]
+}

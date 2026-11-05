@@ -19,10 +19,20 @@ def fixture_worker(connection, config, parent_pid):
         connection.close()
 
 
-def supervisor(tmp_path, **settings):
+# F-016: both fixture deadlines were wall-clock budgets shorter than scheduling latency under load.
+# Measured on 4 CPUs (docs/review/2026-11-05/p4/SALUD_TESTS.md): spawn-worker start 0.17 s idle but
+# ~10 s with 128 busy processes (budget was 3 s); one call round trip p99 96 ms / max 112 ms (budget
+# was 0.1 s). Success paths get generous budgets; only the hang test keeps a short call budget.
+PREPARATION_SECONDS = 60
+SUCCESS_CALL_SECONDS = 10
+HANG_CALL_SECONDS = .5
+
+
+def supervisor(tmp_path, call_seconds=SUCCESS_CALL_SECONDS, **settings):
     config = dict(root=str(tmp_path), **settings)
     return ColdSupervisor(config, admission=lambda receipt: None, poll=lambda: None,
-                          worker_target=fixture_worker, preparation_seconds=3, call_seconds=.1)
+                          worker_target=fixture_worker, preparation_seconds=PREPARATION_SECONDS,
+                          call_seconds=call_seconds)
 
 
 def test_short_calls_always_check_host_telemetry(tmp_path):
@@ -37,7 +47,7 @@ def test_short_calls_always_check_host_telemetry(tmp_path):
 
 
 def test_blocked_native_call_is_killed_and_cannot_resume(tmp_path):
-    with supervisor(tmp_path, hang=True) as runner:
+    with supervisor(tmp_path, call_seconds=HANG_CALL_SECONDS, hang=True) as runner:
         with pytest.raises(TimeoutError):
             runner(1)
         assert runner.terminal and not runner.process.is_alive()

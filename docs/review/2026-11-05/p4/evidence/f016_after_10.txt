@@ -1,0 +1,10 @@
+after 1 5 passed in 29.19s
+after 2 5 passed in 28.81s
+after 3 5 passed in 30.80s
+after 4 5 passed in 30.61s
+after 5 5 passed in 29.83s
+after 6 5 passed in 28.86s
+after 7 5 passed in 28.33s
+after 8 5 passed in 29.01s
+after 9 5 passed in 29.61s
+after 10 5 passed in 29.85s
