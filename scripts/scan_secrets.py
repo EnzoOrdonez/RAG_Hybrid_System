@@ -53,6 +53,18 @@ PATTERNS = (
         "private_key",
         re.compile(r"-----BEGIN (?:[A-Z0-9]+ )?PRIVATE KEY-----"),
     ),
+    # R-03 (2026-11-05): cloud tokens the scanner did not recognise.
+    SecretPattern("google_oauth_token", re.compile(r"\bya29\.[0-9A-Za-z_-]{20,}")),
+    SecretPattern("google_api_key", re.compile(r"\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])")),
+    SecretPattern("huggingface_token", re.compile(r"\bhf_[A-Za-z0-9]{34,}\b")),
+    SecretPattern("github_fine_grained_token", re.compile(r"\bgithub_pat_[A-Za-z0-9]{22}_[A-Za-z0-9]{59}\b")),
+    SecretPattern("github_app_or_oauth_token", re.compile(r"\bgh[ousr]_[A-Za-z0-9]{36}\b")),
+    SecretPattern("slack_token", re.compile(r"\bxox[abprs]-[A-Za-z0-9-]{10,}")),
+    SecretPattern(
+        "gcp_service_account_key_id",
+        re.compile(r"\"private_key_id\"\s*:\s*\"(?P<kid>[0-9a-f]{40})\""),
+        "kid",
+    ),
     SecretPattern(
         "password_assignment",
         re.compile(
@@ -181,6 +193,21 @@ def scan_stream(
     return findings
 
 
+KEY_MATERIAL_PATTERN = "key_material_file"
+
+
+def is_key_material(relative_path: Path) -> bool:
+    """Files that are never opened (.env rule) but whose presence in the repo is itself a finding."""
+
+    name = relative_path.name.lower()
+    return (
+        name == ".env"
+        or name.startswith(".env.")
+        or relative_path.suffix.lower() in {".key", ".pem"}
+        or name in _PROTECTED_FILENAMES
+    )
+
+
 def should_exclude(relative_path: Path) -> bool:
     """Return whether a repository-relative path must not be inspected."""
 
@@ -279,6 +306,20 @@ def scan_repository(root: Path, use_git: bool = False) -> list[Finding]:
     LAST_ENUMERATION = "git" if names is not None else "disco"
     files = iter_git_files(root, names) if names is not None else iter_repository_files(root)
     findings: list[Finding] = []
+    # R-03: key material is reported by name only; its content is never read.
+    if names is not None:
+        present = (Path(name) for name in names if (root / name).is_file() and not _is_link(root / name))
+    else:
+        present = (
+            Path(current).relative_to(root) / filename
+            for current, _dirs, filenames in os.walk(root, followlinks=False)
+            if ".git" not in Path(current).relative_to(root).parts
+            and not any(part in _GENERATED_DIRECTORIES for part in Path(current).relative_to(root).parts)
+            for filename in filenames
+        )
+    for relative in present:
+        if is_key_material(relative) and not _is_link(root / relative):
+            findings.append(Finding(pattern=KEY_MATERIAL_PATTERN, path=relative, line=0, preview=""))
     for path in files:
         try:
             with path.open("rb") as binary_file:
@@ -356,6 +397,7 @@ def format_report(
     lines = ["Conteo por patrón:"]
     for pattern in PATTERNS:
         lines.append(f"  {pattern.name}: {counts.get(pattern.name, 0)}")
+    lines.append(f"  {KEY_MATERIAL_PATTERN}: {counts.get(KEY_MATERIAL_PATTERN, 0)}")
     if excluded_counts:
         lines.append("Excluidos por baseline:")
         for category in sorted(excluded_counts):

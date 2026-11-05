@@ -1,0 +1,572 @@
+{
+ "rev": "3bb9ca8",
+ "files_scanned": 1322,
+ "by_category": {
+  "email": {
+   "occurrences": 137,
+   "files": 47,
+   "distinct_values": 26,
+   "severity": "S2"
+  },
+  "ipv4_public": {
+   "occurrences": 123,
+   "files": 31,
+   "distinct_values": 23,
+   "severity": "S2"
+  },
+  "gcp_project_id": {
+   "occurrences": 75,
+   "files": 43,
+   "distinct_values": 1,
+   "severity": "S2"
+  },
+  "windows_user_path": {
+   "occurrences": 68,
+   "files": 46,
+   "distinct_values": 3,
+   "severity": "S3"
+  },
+  "posix_home_path": {
+   "occurrences": 57,
+   "files": 26,
+   "distinct_values": 2,
+   "severity": "S3"
+  },
+  "service_account": {
+   "occurrences": 23,
+   "files": 12,
+   "distinct_values": 5,
+   "severity": "S1"
+  },
+  "sslip_host": {
+   "occurrences": 5,
+   "files": 4,
+   "distinct_values": 1,
+   "severity": "S2"
+  }
+ },
+ "by_file": {
+  "experiments/results/exp15_ablation_nli/negative_control_pairs.json": {
+   "email": 35,
+   "ipv4_public": 29,
+   "service_account": 1,
+   "posix_home_path": 5
+  },
+  "experiments/results/exp12_matrix/results.json": {
+   "email": 13,
+   "ipv4_public": 1,
+   "service_account": 2,
+   "windows_user_path": 1,
+   "posix_home_path": 5
+  },
+  "experiments/results/exp5/results.json": {
+   "email": 6,
+   "ipv4_public": 14,
+   "service_account": 2
+  },
+  "tests/test_study_operator_cloud_client.py": {
+   "email": 2,
+   "gcp_project_id": 12
+  },
+  "experiments/results/exp18_evidence_ceiling/results.json": {
+   "email": 3,
+   "service_account": 5,
+   "posix_home_path": 3
+  },
+  "experiments/results/exp5/checkpoint_llm_mistral.json": {
+   "email": 2,
+   "ipv4_public": 6,
+   "service_account": 2
+  },
+  "experiments/results/exp6/results.json": {
+   "ipv4_public": 10
+  },
+  "data/llm_cache/qwen3.5_9b_cache.json": {
+   "email": 5,
+   "ipv4_public": 1,
+   "windows_user_path": 1,
+   "posix_home_path": 2
+  },
+  "data/llm_cache/granite4.1_8b_cache.json": {
+   "email": 3,
+   "ipv4_public": 2,
+   "posix_home_path": 3
+  },
+  "tests/test_study_operator_windows_ssh.py": {
+   "gcp_project_id": 8
+  },
+  "data/llm_cache/mistral_7b-instruct_cache.json": {
+   "email": 6,
+   "service_account": 1
+  },
+  "docs/reports/i7-gpu-restore-01-audit.md": {
+   "windows_user_path": 4,
+   "posix_home_path": 3
+  },
+  "experiments/results/exp5/checkpoint_llm_qwen2.5.json": {
+   "email": 4,
+   "ipv4_public": 3
+  },
+  "experiments/results/exp18_evidence_ceiling/checkpoint__granite4.1-8b__oracle_evidence.json": {
+   "email": 1,
+   "service_account": 5
+  },
+  "experiments/results/exp19b_anchored_selector/results.json": {
+   "email": 5,
+   "ipv4_public": 1
+  },
+  "experiments/results/exp8b/results.json": {
+   "email": 2,
+   "ipv4_public": 2,
+   "posix_home_path": 2
+  },
+  "experiments/results/exp9_llm_only_no_rag/run.log": {
+   "windows_user_path": 6
+  },
+  "output/audit/descriptive_cis.json": {
+   "windows_user_path": 6
+  },
+  "experiments/results/exp5/checkpoint_llm_llama3.1.json": {
+   "ipv4_public": 5
+  },
+  "experiments/results/exp6/checkpoint_ablation_+expansion.json": {
+   "ipv4_public": 5
+  },
+  "experiments/results/exp6/checkpoint_ablation_+normalization.json": {
+   "ipv4_public": 5
+  },
+  "experiments/results/exp7/checkpoint_cross_cloud_with_norm.json": {
+   "ipv4_public": 5
+  },
+  "experiments/results/exp7/results.json": {
+   "ipv4_public": 5
+  },
+  "experiments/results/exp8/checkpoint_RAG_Hibrido_Propuesto.json": {
+   "email": 1,
+   "ipv4_public": 4
+  },
+  "experiments/results/exp8/results.json": {
+   "email": 1,
+   "ipv4_public": 4
+  },
+  "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__hibrido.json": {
+   "email": 3,
+   "windows_user_path": 1
+  },
+  "experiments/results/exp15_ablation_nli/claims_extraction.json": {
+   "email": 2,
+   "posix_home_path": 2
+  },
+  "experiments/results/exp18_evidence_ceiling/checkpoint__granite4.1-8b__baseline_repro.json": {
+   "email": 2,
+   "posix_home_path": 2
+  },
+  "experiments/results/exp19b_anchored_selector/checkpoint__granite4.1-8b__claim_selected.json": {
+   "email": 3,
+   "ipv4_public": 1
+  },
+  "scripts/study_operator/cpu_build.py": {
+   "gcp_project_id": 3,
+   "service_account": 1
+  },
+  "tests/test_study_i7_reservation_capacity.py": {
+   "email": 1,
+   "gcp_project_id": 3
+  },
+  "tests/test_study_operator_lifecycle.py": {
+   "gcp_project_id": 2,
+   "sslip_host": 2
+  },
+  ".harness/feature_list.json": {
+   "email": 1,
+   "windows_user_path": 1,
+   "posix_home_path": 1
+  },
+  "docs/STUDY_OPERATOR_ITERATION4_RUNBOOK.md": {
+   "gcp_project_id": 3
+  },
+  "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__lexico.json": {
+   "email": 2,
+   "service_account": 1
+  },
+  "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__denso.json": {
+   "email": 2,
+   "ipv4_public": 1
+  },
+  "experiments/results/exp15_ablation_tierA/results.json": {
+   "email": 1,
+   "ipv4_public": 2
+  },
+  "experiments/results/exp18_evidence_ceiling/claims_extraction.json": {
+   "posix_home_path": 3
+  },
+  "experiments/results/exp8b/checkpoint_RAG_Hibrido_Propuesto.json": {
+   "email": 1,
+   "ipv4_public": 2
+  },
+  "experiments/results/exp8b/checkpoint_RAG_Lexico_(BM25).json": {
+   "email": 1,
+   "posix_home_path": 2
+  },
+  "output/audit/ITERATION4_MASTER_PROMPT_2026-10-04.md": {
+   "email": 2,
+   "gcp_project_id": 1
+  },
+  "output/audit/anotador_gold.html": {
+   "email": 1,
+   "posix_home_path": 2
+  },
+  "output/audit/backups_pre_merge_2026-08-29/claim_audit_sample_v4_stageB.csv": {
+   "email": 1,
+   "posix_home_path": 2
+  },
+  "output/audit/claim_audit_sample_v4_stageB.csv": {
+   "email": 1,
+   "posix_home_path": 2
+  },
+  "output/audit/claim_audit_sample_v4_stageB.md": {
+   "email": 1,
+   "posix_home_path": 2
+  },
+  "output/audit/gold_v4_blind_items.json": {
+   "email": 1,
+   "posix_home_path": 2
+  },
+  "scripts/launch_tierA_clean.ps1": {
+   "windows_user_path": 3
+  },
+  "scripts/study_operator/cpu_restoration.py": {
+   "ipv4_public": 2,
+   "gcp_project_id": 1
+  },
+  "tests/test_study_bucket_history.py": {
+   "gcp_project_id": 3
+  },
+  "titulacion/emails_lewis_y_gyt.md": {
+   "email": 3
+  },
+  "docs/OPERATIONAL_GATE_2026-09-05.md": {
+   "windows_user_path": 1,
+   "posix_home_path": 1
+  },
+  "docs/PLAYBOOK_GATES_2026-08-06.md": {
+   "windows_user_path": 2
+  },
+  "docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex": {
+   "email": 2
+  },
+  "docs/STUDY_ITERATION5_FINAL_IMAGE_RECOVERY.md": {
+   "windows_user_path": 1,
+   "posix_home_path": 1
+  },
+  "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__hibrido.json": {
+   "email": 1,
+   "posix_home_path": 1
+  },
+  "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__lexico.json": {
+   "posix_home_path": 2
+  },
+  "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__denso.json": {
+   "email": 2
+  },
+  "experiments/results/exp12_matrix/checkpoint__mistral-7b-instruct__hibrido.json": {
+   "email": 2
+  },
+  "experiments/results/exp12_matrix/checkpoint__qwen3.5-9b__lexico.json": {
+   "posix_home_path": 2
+  },
+  "experiments/results/exp14_h5_replicas/replicas_checkpoint.json": {
+   "ipv4_public": 2
+  },
+  "experiments/results/exp15_ablation_tierA/checkpoint__granite4.1-8b__baseline_repro.json": {
+   "ipv4_public": 2
+  },
+  "experiments/results/exp18_evidence_ceiling/_determinism_snapshot/base/claims_extraction.json": {
+   "posix_home_path": 2
+  },
+  "experiments/results/exp18_evidence_ceiling/_determinism_snapshot/small/claims_extraction.json": {
+   "posix_home_path": 2
+  },
+  "experiments/results/exp18_evidence_ceiling/selection_scores_v2_index.json": {
+   "posix_home_path": 2
+  },
+  "experiments/results/exp19b_anchored_selector/checkpoint__granite4.1-8b__baseline_repro.json": {
+   "email": 2
+  },
+  "experiments/results/exp4/checkpoint_rerank_bge_large.json": {
+   "ipv4_public": 2
+  },
+  "experiments/results/exp4/results.json": {
+   "ipv4_public": 2
+  },
+  "experiments/results/exp9_llm_only_no_rag/_handoff/run_log_tail.txt": {
+   "windows_user_path": 2
+  },
+  "output/audit/PROMPT_CODEX_ADJUDICACION_2026-08-29.md": {
+   "windows_user_path": 2
+  },
+  "output/audit/PROMPT_CODEX_AUDIT_DOCS_2026-08-30.md": {
+   "windows_user_path": 2
+  },
+  "output/audit/PROMPT_CODEX_CIERRE_DOC_2026-08-29.md": {
+   "windows_user_path": 2
+  },
+  "output/audit/PROMPT_CODEX_PULIDO_FINAL_2026-08-29.md": {
+   "windows_user_path": 2
+  },
+  "output/audit/PROMPT_MASTER_ITERATION5_20261006.md": {
+   "email": 1,
+   "gcp_project_id": 1
+  },
+  "output/audit/provider_coverage_probe.json": {
+   "windows_user_path": 2
+  },
+  "paper/overleaf_ready/main.tex": {
+   "email": 2
+  },
+  "scripts/study_operator/cloud_client.py": {
+   "gcp_project_id": 2
+  },
+  "scripts/study_operator/deployment.py": {
+   "email": 1,
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/read_only_http_probe.py": {
+   "gcp_project_id": 2
+  },
+  "scripts/study_operator/windows_ssh.py": {
+   "gcp_project_id": 2
+  },
+  "tests/test_study_i7_restore.py": {
+   "gcp_project_id": 1,
+   "sslip_host": 1
+  },
+  "tests/test_study_operator_deployment.py": {
+   "gcp_project_id": 1,
+   "sslip_host": 1
+  },
+  "tests/test_study_operator_failover_owned.py": {
+   "gcp_project_id": 1,
+   "service_account": 1
+  },
+  "tests/test_study_operator_installation.py": {
+   "gcp_project_id": 2
+  },
+  "tests/test_study_writer_quiescence.py": {
+   "gcp_project_id": 2
+  },
+  "README.md": {
+   "windows_user_path": 1
+  },
+  "data/llm_cache/gemma4_e4b_cache.json": {
+   "service_account": 1
+  },
+  "docs/CLOUD_DEPLOYMENT.md": {
+   "ipv4_public": 1
+  },
+  "docs/ESTADO_PROYECTO_UNIFICADO_2026-08-06.md": {
+   "windows_user_path": 1
+  },
+  "docs/NLI_BATCH_RUNNER_2026-09-21.md": {
+   "windows_user_path": 1
+  },
+  "docs/STUDY_GATE_ENVIRONMENT_ANNEX_2026-10-04.md": {
+   "gcp_project_id": 1
+  },
+  "docs/STUDY_GATE_ENVIRONMENT_ANNEX_2026-10-06_ITERATION4_B4_DIAGNOSTIC.md": {
+   "gcp_project_id": 1
+  },
+  "docs/STUDY_GATE_PREREGISTRATION_AMENDMENT_2026-10-02.md": {
+   "gcp_project_id": 1
+  },
+  "docs/STUDY_GATE_R1_ENVIRONMENT_ANNEX_2026-10-04.md": {
+   "gcp_project_id": 1
+  },
+  "docs/STUDY_I7_CONTINGENCY.md": {
+   "gcp_project_id": 1
+  },
+  "docs/UNATTENDED_DIAGNOSTIC.md": {
+   "windows_user_path": 1
+  },
+  "docs/archive/CLAUDE_legacy_backup.md": {
+   "windows_user_path": 1
+  },
+  "docs/guides/guardrails.md": {
+   "windows_user_path": 1
+  },
+  "docs/guides/reproduce.md": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp12_matrix/checkpoint__gemma4-e4b__sin_rag.json": {
+   "service_account": 1
+  },
+  "experiments/results/exp12_matrix/checkpoint__granite4.1-8b__denso.json": {
+   "email": 1
+  },
+  "experiments/results/exp12_matrix/faithfulness_rescore__nli-base.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp12_matrix/faithfulness_rescore_v3__base__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp12_matrix/faithfulness_rescore_v3__small__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp15_ablation_nli/rescore_check__base__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp15_ablation_nli/rescore_check__small__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp15_ablation_tierA/checkpoint__granite4.1-8b__context_lost_middle.json": {
+   "email": 1
+  },
+  "experiments/results/exp15_ablation_tierA/faithfulness_rows__base__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp15_ablation_tierA/faithfulness_rows__small__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp16_anchored_decoding/faithfulness_rows__base__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp16_anchored_decoding/faithfulness_rows__small__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp17_crosscloud_balanced/faithfulness_rows__base__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp17_crosscloud_balanced/faithfulness_rows__small__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp18_evidence_ceiling/_determinism_snapshot/base/faithfulness_rows__base__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp18_evidence_ceiling/_determinism_snapshot/small/faithfulness_rows__small__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp18_evidence_ceiling/checkpoint__granite4.1-8b__final_top_k_10.json": {
+   "posix_home_path": 1
+  },
+  "experiments/results/exp18_evidence_ceiling/faithfulness_rows__base__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp18_evidence_ceiling/faithfulness_rows__small__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp19b_anchored_selector/claims_extraction.json": {
+   "ipv4_public": 1
+  },
+  "experiments/results/exp19b_anchored_selector/faithfulness_rows__base__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "experiments/results/exp19b_anchored_selector/faithfulness_rows__small__vb_agree.json": {
+   "windows_user_path": 1
+  },
+  "output/audit/REPORTE_VERIFICACION_H1H2_Fase3.md": {
+   "windows_user_path": 1
+  },
+  "output/audit/h2_variant_eval.json": {
+   "windows_user_path": 1
+  },
+  "output/audit/rescore_v2_summary.md": {
+   "windows_user_path": 1
+  },
+  "paper/overleaf_ready/README_OVERLEAF.md": {
+   "email": 1
+  },
+  "paper/summer_ablation_log.md": {
+   "email": 1
+  },
+  "requirements-lock.txt": {
+   "windows_user_path": 1
+  },
+  "scripts/launch_exp19b_full.ps1": {
+   "windows_user_path": 1
+  },
+  "scripts/study_operator/bucket_history.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/capacity_probe.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/cloud_safety.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/failed_bootstrap_retention.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/final_snapshot.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/finalization.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/i7.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/i7_phase_b.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/i7_reconcile.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/iap_access.py": {
+   "ipv4_public": 1
+  },
+  "scripts/study_operator/installation.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/legacy_closure.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/pricing.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/regional_capacity.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/retention.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/retention_cleanup.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/retention_disposable.py": {
+   "gcp_project_id": 1
+  },
+  "scripts/study_operator/writer_quiescence.py": {
+   "gcp_project_id": 1
+  },
+  "tests/test_scan_secrets.py": {
+   "email": 1
+  },
+  "tests/test_study_cpu_restoration.py": {
+   "ipv4_public": 1
+  },
+  "tests/test_study_i7_sdk_preflight.py": {
+   "gcp_project_id": 1
+  },
+  "tests/test_study_operator_iap_access.py": {
+   "ipv4_public": 1
+  },
+  "tests/test_study_operator_policy.py": {
+   "email": 1
+  },
+  "tests/test_study_operator_upgrade.py": {
+   "gcp_project_id": 1
+  },
+  "tests/test_study_prepared_snapshot.py": {
+   "sslip_host": 1
+  }
+ },
+ "review_folders": {
+  "email": 0,
+  "windows_user_path": 0,
+  "posix_home_path": 0,
+  "service_account": 0,
+  "ipv4_public": 0,
+  "gcp_project_id": 0,
+  "sslip_host": 0
+ }
+}
