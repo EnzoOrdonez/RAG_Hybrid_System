@@ -78,6 +78,9 @@ def server(listen, target):
     class Relay(socketserver.ThreadingMixIn, base):
         daemon_threads = True
         allow_reuse_address = True
+        # F-020: Caddy dials one Unix connection per in-flight request. With the socketserver default (5) the
+        # kernel answers EAGAIN to the extra connects of a cold HTTP/2 burst and Caddy replies 502 to lazy chunks.
+        request_queue_size = 128
 
         def handle_error(self, request, client_address):
             # Never log client addresses, bytes or exception payloads.
