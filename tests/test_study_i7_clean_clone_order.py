@@ -200,3 +200,22 @@ def test_by_id_wait_is_bounded():
     found = wait_target({'disk_name':TARGET},run=lambda argv,**kw:None,exists=lambda path:True,
                         sleep=lambda s:None,clock=lambda:0,timeout=3)
     assert found.name == 'google-'+TARGET+'-part1'
+
+
+def test_snapshot_and_disk_creates_wait_for_slow_gcp_uploads():
+    """cpu-build 2026-11-10: 180 GiB snapshots took 646-773 s and the 600 s tool limit left UNKNOWN intents (no replay)."""
+    import ast
+    from pathlib import Path
+    import scripts.study_operator.i7_cpu_pipeline as pipeline
+    assert pipeline.CLOUD_CREATE_TIMEOUT_S >= 1800
+    tree = ast.parse(Path(pipeline.__file__).read_text(encoding='utf-8'))
+    creates = []
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == 'command'
+                and node.args and isinstance(node.args[0], ast.List)):
+            head = [e.value for e in node.args[0].elts[:3] if isinstance(e, ast.Constant)]
+            if head in (['compute', 'snapshots', 'create'], ['compute', 'disks', 'create']):
+                timeout = next((k.value for k in node.keywords if k.arg == 'timeout'), None)
+                creates.append(isinstance(timeout, ast.Name) and timeout.id == 'CLOUD_CREATE_TIMEOUT_S')
+    # stage snapshot, service disk, clean snapshot (clean_snapshot) and the GPU boot disk (gpu_restore)
+    assert len(creates) == 4 and all(creates)

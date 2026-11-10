@@ -15,6 +15,9 @@ from scripts.study_operator.policy import ReadyPending
 from scripts.study_operator.service_gateway import save_state
 
 GUEST_BOOT_WAIT_S = 300
+# A 180 GiB snapshot upload took 646-773 s (cpu-build, 2026-11-10); a tool call cut off at 600 s leaves the
+# creation intent UNKNOWN and the root unusable (no replay), so snapshot/disk creation waits up to 30 min.
+CLOUD_CREATE_TIMEOUT_S = 1800
 GUEST_BOOTED = ('running','degraded')
 
 
@@ -160,12 +163,13 @@ def clean_snapshot(operator, cloud, resources, build_proof):
                'stage':stage,'target':target,'snapshot':final,'marker':marker})
     stage_intent=record_intent(operator,'snapshots',stage)
     cloud.command(['compute','snapshots','create',stage,'--source-disk='+disk['name'],
-        '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],timeout=600)
+        '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],
+        timeout=CLOUD_CREATE_TIMEOUT_S)
     stage_receipt=cloud.command(['compute','snapshots','describe',stage])
     observed(operator,stage_intent,stage_receipt)
     disk_intent=record_intent(operator,'disks',target,zone,source_snapshot_id=str(stage_receipt['id']))
     cloud.command(['compute','disks','create',target,'--source-snapshot='+stage,'--zone='+zone,
-        '--type=pd-balanced','--description='+marker],timeout=600)
+        '--type=pd-balanced','--description='+marker],timeout=CLOUD_CREATE_TIMEOUT_S)
     target_receipt = cloud.command(['compute','disks','describe',target,'--zone='+zone])
     observed(operator,disk_intent,target_receipt)
     stage_receipt = cloud.command(['compute','snapshots','describe',stage])
@@ -211,7 +215,8 @@ def clean_snapshot(operator, cloud, resources, build_proof):
             raise ValueError('CPU_CLEANING_STOP_NOT_VERIFIED')
         final_intent=record_intent(operator,'snapshots',final)
         cloud.command(['compute','snapshots','create',final,'--source-disk='+target,
-            '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],timeout=600)
+            '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],
+            timeout=CLOUD_CREATE_TIMEOUT_S)
         snapshot = cloud.command(['compute','snapshots','describe',final])
         observed(operator,final_intent,snapshot)
         if (snapshot['status'] != 'READY' or snapshot['description'] != marker
@@ -273,7 +278,8 @@ def gpu_restore(operator):
     disk = name+'-boot'
     disk_intent=record_intent(operator,'disks',disk,zone,source_snapshot_id=str(snapshot['id']))
     operator.cloud.command(['compute','disks','create',disk,'--zone='+zone,'--type=pd-balanced',
-        '--source-snapshot='+snapshot['name'],'--description='+operator.config['resource_marker']],timeout=600)
+        '--source-snapshot='+snapshot['name'],'--description='+operator.config['resource_marker']],
+        timeout=CLOUD_CREATE_TIMEOUT_S)
     restored_disk = operator.cloud.command(['compute','disks','describe',disk,'--zone='+zone])
     observed(operator,disk_intent,restored_disk)
     if (str(restored_disk['sourceSnapshotId']) != str(snapshot['id'])
