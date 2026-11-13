@@ -207,11 +207,11 @@ Un cambio del tip remoto exige revisar y anclar de nuevo de manera explícita.
 | 8b. Compuerta | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live gate` | Revalida publicación y doce pruebas/contextos actuales; reserva 5 h; repite el mismo smoke después del estímulo, restaura y purga; nuevo boot, piloto y dos ventanas; hash por fila, telemetría y descarga verificada. Restaura un respaldo técnico y purga antes del ACK final. |
 | 9. Cierre | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --live close` | STOP verificado, DELETE y LIST de reserva exitosos, temporales CPU propios ausentes. Un UNKNOWN o cierre CPU parcial no devuelve CLOSED. |
 
-**Aviso (ADR-0028, stimulus-09):** el paso 8a programado no detiene la VM antes del
-primer boot, y después de withdraw-purge la VM queda RUNNING. En el intento 9,
-`series` falló en el boot 1 y guard borró la reserva. Hasta que se corrija, usar el
-paso `stimulus` de `i7_phase_b` en primer plano y desacoplado: `switch_profile` detiene la
-VM antes de la serie.
+**Aviso (ADR-0028, stimulus-09):** en el intento 9 el paso 8a programado no detenía la
+VM antes del primer boot, y después de withdraw-purge la VM queda RUNNING. `series` falló
+en el boot 1 y guard borró la reserva. Desde ADR-0029, `dispatch('series')` aplica
+`switch_profile` antes de la serie. El paso `stimulus` de `i7_phase_b` en primer plano y
+desacoplado sigue siendo equivalente, y es el que usa el intento 10.
 
 No correr también `stimulus` si ya está programada la serie. La alternativa en
 primer plano es el paso `stimulus` de `i7_phase_b`; no resiste el cierre del

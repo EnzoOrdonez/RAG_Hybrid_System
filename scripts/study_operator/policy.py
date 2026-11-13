@@ -21,6 +21,12 @@ class CapacityRejected(OperatorError):
         self.code = code
 
 
+class TransportUnavailable(OperatorError):
+    """The SSH/IAP transport failed before a verified answer (timeout, rejected channel, ssh exit 255).
+
+    Only read-only polls may retry it, a bounded number of times (ADR-0029)."""
+
+
 def purpose_allowed(purpose, operator_root, *, today=None):
     if purpose not in {'study', 'technical', 'smoke', 'rehearsal', 'pilot'}:
         raise OperatorError('Propósito inválido. Usa study, technical, smoke, rehearsal o pilot.')

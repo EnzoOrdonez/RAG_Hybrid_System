@@ -283,3 +283,10 @@ Ver [ADR-0028](ADR-0028-i7-intento-9-resultado.md).
 - **El estímulo programado (8a) falló en el boot 1:** `series` arranca sin detener la VM que deja withdraw-purge, y guard borró la reserva (stimulus-09).
 - **Cierre:** el gate no corrió y `close` dio CLOSED. Gasto ≤ USD 10.
 - **Pendiente:** las correcciones esperan el OK de Enzo y un intento 10.
+
+## ADR-0029: Correcciones tras el intento 9
+
+Ver [ADR-0029](ADR-0029-i7-correcciones-tras-intento-9.md).
+- **privacy-09:** el escáner resuelve la capa escribible de los contenedores con containerd (Docker 29 no da `UpperDir`). Escanea el texto de los enlaces sin seguirlos y cuenta vacíos los sockets, FIFOs y whiteouts. Quedó validado sobre un clon del disco real.
+- **stimulus-09:** la serie programada detiene la VM y aplica el perfil antes del primer boot, y rechaza antes un boot a medias.
+- **Transporte:** `bridge` reintenta dos veces solo los sondeos de lectura.

@@ -256,7 +256,8 @@ def dispatch(operator, step, spec):
         from scripts.study_operator.i7_smoke import run
         return run(operator)
     if step == 'stimulus':
-        from scripts.study_operator.i7_workflows import series
+        from scripts.study_operator.i7_workflows import require_no_unfinished_stimulus, series
+        require_no_unfinished_stimulus(operator)  # before any STOP (ADR-0029)
         switch_profile(operator,'stimulus')
         return series(operator)
     from scripts.study_operator.i7_workflows import dispatch as workflow

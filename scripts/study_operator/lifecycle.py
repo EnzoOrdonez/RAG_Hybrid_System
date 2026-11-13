@@ -14,7 +14,13 @@ import uuid
 
 from scripts.study_operator.cloud_client import checked_vm, no_other_gpu, readiness
 from scripts.study_operator.deployment import checked_config
-from scripts.study_operator.policy import OperatorError, ReadyPending, participant_code, purpose_allowed, session_margin
+from scripts.study_operator.policy import (OperatorError, ReadyPending, TransportUnavailable, participant_code,
+                                           purpose_allowed, session_margin)
+
+# Read-only guest polls: a transport failure is retried twice, after 15 s and 45 s (ADR-0029).
+RETRYABLE_BRIDGE_OPERATIONS = frozenset(
+    {'stimulus-status', 'gate-status', 'i7-smoke-observe', 'preflight', 'i7-preparation-check'})
+TRANSPORT_RETRY_DELAYS_S = (15, 45)
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.region_scope import region
 
@@ -48,9 +54,19 @@ class Operator:
     def bridge(self, request, *, private=False, timeout=180):
         selected = self.selected()
         fixed = self.config['host_code']+'/scripts/study_operator/guest_bridge.py'
-        content = self.cloud.command(['compute','ssh',selected['name'],'--zone='+selected['zone'],
-            '--tunnel-through-iap','--ssh-key-expire-after=10m','--command=sudo -n python3 -B '+shlex.quote(fixed)],
-            input_data=json.dumps(request).encode(),json_output=False,private_output=private,timeout=timeout)
+        # Only read-only polls retry a transport failure, a bounded number of times (ADR-0029);
+        # operations with effects keep the single attempt and its UNKNOWN handling.
+        delays = TRANSPORT_RETRY_DELAYS_S if request.get('operation') in RETRYABLE_BRIDGE_OPERATIONS else ()
+        for delay in (*delays, None):
+            try:
+                content = self.cloud.command(['compute','ssh',selected['name'],'--zone='+selected['zone'],
+                    '--tunnel-through-iap','--ssh-key-expire-after=10m','--command=sudo -n python3 -B '+shlex.quote(fixed)],
+                    input_data=json.dumps(request).encode(),json_output=False,private_output=private,timeout=timeout)
+                break
+            except TransportUnavailable:
+                if delay is None:
+                    raise
+                self.sleep(delay)
         try:
             result = json.loads(content)
             if result.get('status') == 'WAITING' and request.get('operation') == 'preflight':
