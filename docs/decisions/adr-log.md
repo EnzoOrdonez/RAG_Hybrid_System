@@ -290,3 +290,10 @@ Ver [ADR-0029](ADR-0029-i7-correcciones-tras-intento-9.md).
 - **privacy-09:** el escáner resuelve la capa escribible de los contenedores con containerd (Docker 29 no da `UpperDir`). Escanea el texto de los enlaces sin seguirlos y cuenta vacíos los sockets, FIFOs y whiteouts. Quedó validado sobre un clon del disco real.
 - **stimulus-09:** la serie programada detiene la VM y aplica el perfil antes del primer boot, y rechaza antes un boot a medias.
 - **Transporte:** `bridge` reintenta dos veces solo los sondeos de lectura.
+
+## ADR-0030: Resultado del intento 10 y reintento de la recolección idempotente
+
+Ver [ADR-0030](ADR-0030-i7-intento-10-y-recoleccion-idempotente.md).
+- **Llegó al paso 8a:** pasos 1 a 7 en exit 0, con privacy **PASS** (0 aciertos, todos los dominios completos).
+- **El estímulo falló en el boot 2 (stimulus-10):** un solo corte del túnel IAP (OpenSSH 255) en `stimulus-ack`, después de descargar y verificar la prueba. Guard borró la reserva; sin gate; close CLOSED. Gasto USD 6,17.
+- **Corrección:** `bridge` también reintenta la recolección idempotente (`*-evidence`, `*-ack`, `gate-terminal-evidence` y `gate-finalized`). Los arranques siguen con un único intento. Sigue el intento 11.

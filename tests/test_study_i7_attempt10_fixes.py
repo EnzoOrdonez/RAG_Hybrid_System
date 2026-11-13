@@ -108,8 +108,9 @@ def test_read_only_poll_gives_up_after_bounded_attempts(tmp_path):
     assert len(op.cloud.calls) == 3 and sleeps == [15, 45]
 
 
+# stimulus-ack y gate-finalized pasaron a reintentarse en ADR-0030 (idempotentes en el invitado).
 @pytest.mark.parametrize('operation', ['stimulus-start', 'gate-start', 'i7-privacy', 'stop', 'restore',
-                                       'stimulus-ack', 'gate-finalized', 'i7-contexts', 'export'])
+                                       'i7-contexts', 'export'])
 def test_operations_with_effects_never_retry(tmp_path, operation):
     op, sleeps = _operator(tmp_path, [_transport(), OK])
     with pytest.raises(TransportUnavailable):
@@ -124,9 +125,10 @@ def test_non_transport_errors_never_retry(tmp_path):
     assert len(op.cloud.calls) == 1 and sleeps == []
 
 
-def test_retryable_operations_are_exactly_the_read_only_polls():
+def test_read_only_polls_remain_retryable():
+    # El conjunto exacto (polls + recolección idempotente) lo fija test_study_i7_attempt11_fixes.py.
     from scripts.study_operator.lifecycle import RETRYABLE_BRIDGE_OPERATIONS, TRANSPORT_RETRY_DELAYS_S
-    assert RETRYABLE_BRIDGE_OPERATIONS == frozenset(
+    assert RETRYABLE_BRIDGE_OPERATIONS >= frozenset(
         {'stimulus-status', 'gate-status', 'i7-smoke-observe', 'preflight', 'i7-preparation-check'})
     assert TRANSPORT_RETRY_DELAYS_S == (15, 45)
 

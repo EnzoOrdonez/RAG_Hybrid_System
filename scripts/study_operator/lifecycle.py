@@ -17,9 +17,13 @@ from scripts.study_operator.deployment import checked_config
 from scripts.study_operator.policy import (OperatorError, ReadyPending, TransportUnavailable, participant_code,
                                            purpose_allowed, session_margin)
 
-# Read-only guest polls: a transport failure is retried twice, after 15 s and 45 s (ADR-0029).
+# A transport failure is retried twice, after 15 s and 45 s, only for read-only guest polls
+# (ADR-0029) and for the idempotent collection steps: the guest re-reads the same proof or
+# rewrites the same acknowledgement after checking its hash (ADR-0030).
 RETRYABLE_BRIDGE_OPERATIONS = frozenset(
-    {'stimulus-status', 'gate-status', 'i7-smoke-observe', 'preflight', 'i7-preparation-check'})
+    {'stimulus-status', 'gate-status', 'i7-smoke-observe', 'preflight', 'i7-preparation-check',
+     'stimulus-evidence', 'stimulus-ack', 'gate-evidence', 'gate-ack', 'gate-terminal-evidence',
+     'gate-finalized'})
 TRANSPORT_RETRY_DELAYS_S = (15, 45)
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.region_scope import region
