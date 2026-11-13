@@ -74,8 +74,10 @@ El pin comprueba revisión, ruta, versión, árbol del paquete y ejecutable.
 Un navegador ausente o distinto bloquea el preflight antes de crear el cliente
 de nube de cualquier comando Fase B; el check enumera el bloqueo por nombre.
 Mantener la variable también en el proceso independiente de la serie. Copiar
-el recibo `browser-validation.json` de la validación de estabilidad al nuevo `$run` tras crearlo; el recibo debe
-coincidir con fuente y pin. La validación recorrió la app real por HTTPS local,
+al nuevo `$run`, tras crearlo, el recibo `browser-validation.json` de la verificación local Windows del commit
+de la imagen. Se escribe en `CLOUDRAG_BROWSER_RECEIPT_DIR` y su origen está en `STUDY_I7_BROWSER_VALIDATION.md`.
+El recibo debe coincidir con fuente y pin. El de la validación de estabilidad del 16/10 ya no coincide
+desde 3f12fd9 (ADR-0028). La validación recorrió la app real por HTTPS local,
 con dobles del backend, y tres fallas deliberadas. No es el smoke desplegado.
 
 Descargar ambos catálogos en directorios nuevos, como máximo siete días antes
@@ -106,7 +108,8 @@ del lock; no cambiar dependencias para evitar una falla.
 
 ```powershell
 & $py -m scripts.study_operator.i7_config --root $run --spec $spec
-Copy-Item 'C:/CloudRAG/iteration7-browser-stability-20261016/browser-validation.json' "$run/browser-validation.json"
+Copy-Item "$prep/local-verification-<commit>/windows-browser-<intento>/browser-validation.json" "$run/browser-validation.json"
+& $py -c "from scripts.study_operator.i7_smoke import validate_receipt as v; v(r'$run/browser-validation.json')"
 ```
 
 La raíz es nueva, con períodos técnicos y smoke distintos. No hereda una VM.
@@ -203,6 +206,12 @@ Un cambio del tip remoto exige revisar y anclar de nuevo de manera explícita.
 | 8a. Estímulo | `& $py -m scripts.study_operator.i7 --root $run --sdk $sdk --live schedule` | Proceso del Programador de tareas independiente de la sesión del agente; doce boots, calendario intacto, hash y verificación antes de ACK, ACCEPTED 12/12 actual. Cierra reserva. |
 | 8b. Compuerta | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --evidence $evidence --live gate` | Revalida publicación y doce pruebas/contextos actuales; reserva 5 h; repite el mismo smoke después del estímulo, restaura y purga; nuevo boot, piloto y dos ventanas; hash por fila, telemetría y descarga verificada. Restaura un respaldo técnico y purga antes del ACK final. |
 | 9. Cierre | `& $py -m scripts.study_operator.i7_phase_b --root $run --sdk $sdk --live close` | STOP verificado, DELETE y LIST de reserva exitosos, temporales CPU propios ausentes. Un UNKNOWN o cierre CPU parcial no devuelve CLOSED. |
+
+**Aviso (ADR-0028, stimulus-09):** el paso 8a programado no detiene la VM antes del
+primer boot, y después de withdraw-purge la VM queda RUNNING. En el intento 9,
+`series` falló en el boot 1 y guard borró la reserva. Hasta que se corrija, usar el
+paso `stimulus` de `i7_phase_b` en primer plano y desacoplado: `switch_profile` detiene la
+VM antes de la serie.
 
 No correr también `stimulus` si ya está programada la serie. La alternativa en
 primer plano es el paso `stimulus` de `i7_phase_b`; no resiste el cierre del

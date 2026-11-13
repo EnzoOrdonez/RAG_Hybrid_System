@@ -274,3 +274,12 @@ Ver [ADR-0027](ADR-0027-i7-privacy-y-cierre-tras-smoke.md). El paso privacy
 arranca en el período smoke, así que el invitado acepta `i7-privacy` en los
 períodos sintéticos technical y smoke, nunca en los humanos. El cierre reconoce
 la VM CPU por el período technical del build, no por el período actual.
+
+## ADR-0028: Resultado del intento 9 de la Fase B y defectos nuevos
+
+Ver [ADR-0028](ADR-0028-i7-intento-9-resultado.md).
+- **Llegó al paso 7:** el intento 9 completó del paso 1 al 7, con smoke y restore en exit 0.
+- **Privacy quedó INCOMPLETE:** el escáner del invitado no completó 4 de 7 dominios (privacy-09).
+- **El estímulo programado (8a) falló en el boot 1:** `series` arranca sin detener la VM que deja withdraw-purge, y guard borró la reserva (stimulus-09).
+- **Cierre:** el gate no corrió y `close` dio CLOSED. Gasto ≤ USD 10.
+- **Pendiente:** las correcciones esperan el OK de Enzo y un intento 10.
