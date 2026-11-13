@@ -207,9 +207,11 @@
       "steps": [
         "Observado 2026-10-25: 1 fallo en 2 corridas completas; sin cambio de codigo relacionado entre ambas. Hipotesis (no verificada): deadline de un worker en subproceso sensible a la carga de la suite completa.",
         "Investigar con un deadline medido bajo carga antes de ampliar tiempos; no relajar el test a ciegas.",
-        "Tercera aparición, REPORTE_REVISION3.md sobre a32c9dc (2026-10-29): init.sh 0/0/0; una repetición posterior para obtener totales dio 2047 pasan, 1 falla F-016, 12 omitidos, 5 excluidos y 9 subtests pasan, exit 1 (229 s). Las anteriores son la del 25/10 y la corrida previa del autor registrada por REPORTE_REVISION2. Se registra la recurrencia sin corregirla."
+        "Tercera aparición, REPORTE_REVISION3.md sobre a32c9dc (2026-10-29): init.sh 0/0/0; una repetición posterior para obtener totales dio 2047 pasan, 1 falla F-016, 12 omitidos, 5 excluidos y 9 subtests pasan, exit 1 (229 s). Las anteriores son la del 25/10 y la corrida previa del autor registrada por REPORTE_REVISION2. Se registra la recurrencia sin corregirla.",
+        "2026-11-10, f7309a0 (solo test): presupuesto de preparación del worker de 3 a 30 s. Sin recurrencia observada desde entonces: init.sh completo en verde el 13/11 sobre 83382fb (tres veces: rama fix, evidencia local Windows 2196 pasan y rama chore/f009-ruff-scanner).",
+        "2026-11-13: el test aislado pasó 25 de 25 veces (1,2 a 8,2 s; las primeras más lentas por caché fría). La falla solo apareció bajo la suite completa; falta medir bajo carga con el presupuesto nuevo antes de cerrarla."
       ],
-      "status": "not_started",
+      "status": "active",
       "passes": false
     },
     {
