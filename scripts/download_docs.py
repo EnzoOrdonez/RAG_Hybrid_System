@@ -130,7 +130,7 @@ def download(providers, max_services):
 
     stats = pipeline.run(providers=providers, max_services=max_services)
 
-    console.print(f"\n[bold green]Download Complete![/bold green]")
+    console.print("\n[bold green]Download Complete![/bold green]")
     console.print(f"Total documents: {stats['total_documents']}")
     for prov, info in stats["providers"].items():
         console.print(

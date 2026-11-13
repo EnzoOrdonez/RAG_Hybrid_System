@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-27",
+  "updated": "2026-11-13",
   "features": [
     {
       "id": "F-001",
@@ -117,9 +117,10 @@
       "description": "Hallazgos de Ruff: hoy informativos en CI (continue-on-error).",
       "steps": [
         "Medir con ruff check . y clasificar por regla.",
-        "Corregir solo fuera de src/ con lógica RAG; volverlo bloqueante cuando llegue a 0."
+        "Corregir solo fuera de src/ con lógica RAG; volverlo bloqueante cuando llegue a 0.",
+        "2026-11-13 (rama chore/f009-ruff-scanner, sobre 83382fb): 155 hallazgos con reglas por defecto (F401 52, E402 38, F541 31, E702 18, F841 6, E731 5, E741 4, E722 1). F401/F541 en scripts/, tests/ y run.py: 46. Se corrigen solo 9 archivos sin referencias en experiments/results, paper, output ni docs/reports; los 16 que produjeron o citan evidencia firmada (run.py, compute_exp15/17/18, rescore_grounding_exp15, verify_summer/v4_offline, build_index, smoke_* de audit, entre otros) quedan sin tocar hasta que Enzo decida. Ningún archivo tocado tiene su hash fijado en el repo."
       ],
-      "status": "not_started",
+      "status": "active",
       "passes": false
     },
     {

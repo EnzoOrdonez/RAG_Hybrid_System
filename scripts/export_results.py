@@ -66,7 +66,7 @@ def main():
 
     exporter.export_all(experiment_ids=experiment_ids)
 
-    print(f"\nExport complete!")
+    print("\nExport complete!")
     print(f"  Figures: {exporter.figures_dir}")
     print(f"  Tables:  {exporter.tables_dir}")
     print(f"  CSV:     {exporter.csv_dir}")

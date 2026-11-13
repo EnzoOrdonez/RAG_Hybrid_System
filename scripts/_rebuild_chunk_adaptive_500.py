@@ -7,7 +7,6 @@ config used by exp3, exp5, exp6, exp8, exp8b, exp9). The 14 other
 (strategy, size) combinations are deferred.
 """
 
-import json
 import logging
 import sys
 import time

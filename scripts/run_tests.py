@@ -9,7 +9,6 @@ Tests:
 5. Latency benchmarks
 """
 
-import json
 import logging
 import sys
 import time

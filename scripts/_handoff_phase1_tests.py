@@ -66,7 +66,7 @@ def main() -> int:
     print("=" * 60)
     print("TEST 2: _extract_claims over q196 saved answer")
     print(f"  Answer length: {len(answer)} chars")
-    print(f"  Answer first 200 chars:")
+    print("  Answer first 200 chars:")
     print("    " + repr(answer[:200]))
     claims = detector._extract_claims(answer)
     print(f"  Claims extracted: {len(claims)}")

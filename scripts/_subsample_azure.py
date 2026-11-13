@@ -108,7 +108,7 @@ def main() -> int:
             shutil.copy2(f, BACKUP_INDICES / f.name)
     for f in (ROOT / "data" / "embeddings").glob("*.npy"):
         shutil.copy2(f, BACKUP_EMB / f.name)
-    log(f"  indices + embeddings backed up")
+    log("  indices + embeddings backed up")
 
     drop_ids: set = set()
     diversity_stats = {}

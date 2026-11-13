@@ -154,7 +154,7 @@ def test_1_health_check():
         console.print(f"  LLM: {provider}/{model} - available")
     else:
         checks["llm_available"] = False
-        console.print(f"  LLM: No provider available (Ollama not running, no API keys)")
+        console.print("  LLM: No provider available (Ollama not running, no API keys)")
 
     # 1f. NLI model
     try:
@@ -201,7 +201,7 @@ def test_2_compare_systems(hybrid_index, llm_available=False):
 
     query = "How do I deploy a containerized application on Kubernetes?"
 
-    from src.pipeline.pipeline_config import PIPELINE_CONFIGS, get_config
+    from src.pipeline.pipeline_config import get_config
     from src.retrieval.bm25_retriever import BM25Retriever
     from src.retrieval.dense_retriever import DenseRetriever
     from src.retrieval.hybrid_retriever import HybridRetriever
@@ -379,7 +379,7 @@ def test_4_hallucination_detection(hybrid_index):
     sample_text = chunk_dicts[0].get("text", "")[:200]
     faithful_response = f"According to the documentation, {sample_text}"
     report_a = detector.check(faithful_response, chunk_dicts)
-    console.print(f"\n  A) Faithful response:")
+    console.print("\n  A) Faithful response:")
     console.print(f"     Faithfulness: {report_a.faithfulness_score:.2f}")
     console.print(f"     Rubric: {report_a.suggested_rubric}/5")
     console.print(f"     Claims: {report_a.total_claims} total, {report_a.supported_claims} supported")
@@ -392,7 +392,7 @@ def test_4_hallucination_detection(hybrid_index):
         "Pods can only contain a single container."
     )
     report_b = detector.check(hallucinated_response, chunk_dicts)
-    console.print(f"\n  B) Hallucinated response:")
+    console.print("\n  B) Hallucinated response:")
     console.print(f"     Faithfulness: {report_b.faithfulness_score:.2f}")
     console.print(f"     Rubric: {report_b.suggested_rubric}/5")
     console.print(f"     Hallucination rate: {report_b.hallucination_rate:.2f}")
