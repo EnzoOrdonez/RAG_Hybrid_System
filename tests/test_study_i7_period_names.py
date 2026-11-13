@@ -51,7 +51,7 @@ def test_cpu_label_names_and_marker_carry_the_period(tmp_path):
     assert ('CloudRAG-I5-restore-cpu-'+second).endswith(A[:8])
 
 
-def cleanup_owner(root, name, status):
+def cleanup_owner(root, name, status, config=None):
     from types import SimpleNamespace
     archive = root/'private'/'legacy'/'i3-nine-originals.tar'
     archive.parent.mkdir(parents=True)
@@ -64,7 +64,7 @@ def cleanup_owner(root, name, status):
             calls.append(args)
             assert args[:3] == ['compute', 'instances', 'describe'], 'No destructive call in this fixture'
             return dict(vm, status=status)
-    return SimpleNamespace(root=root, cloud=Cloud(), state=state, config={'period_id': A}), calls
+    return SimpleNamespace(root=root, cloud=Cloud(), state=state, config=config or {'period_id': A}), calls
 
 
 def test_cleanup_refuses_cpu_named_for_another_attempt(tmp_path):
@@ -80,4 +80,23 @@ def test_cleanup_accepts_the_cpu_of_its_own_period(tmp_path):
     owner, _ = cleanup_owner(tmp_path, 'cloudrag-i5-restore-i7cpu-'+A[:8], 'RUNNING')
     # Identity passes; the next guard (stopped VM) is what blocks this synthetic RUNNING CPU.
     with pytest.raises(ValueError, match='^CPU_CLEANUP_REQUIRES_STOPPED_VM$'):
+        cleanup_cpu(owner)
+
+
+# close-08: start('smoke') switches config['period_id'] to the smoke period (lifecycle.start);
+# the CPU was built and named in the technical period, so close must keep recognising it.
+AFTER_SMOKE = {'period_id': B, 'purpose': 'smoke', 'period_ids': {'technical': A, 'smoke': B}}
+
+
+def test_cleanup_after_a_smoke_boot_accepts_the_cpu_of_the_build_period(tmp_path):
+    from scripts.study_operator.i7_cpu_pipeline import cleanup_cpu
+    owner, _ = cleanup_owner(tmp_path, 'cloudrag-i5-restore-i7cpu-'+A[:8], 'RUNNING', dict(AFTER_SMOKE))
+    with pytest.raises(ValueError, match='^CPU_CLEANUP_REQUIRES_STOPPED_VM$'):
+        cleanup_cpu(owner)
+
+
+def test_cleanup_after_a_smoke_boot_refuses_a_cpu_named_for_the_smoke_period(tmp_path):
+    from scripts.study_operator.i7_cpu_pipeline import cleanup_cpu
+    owner, _ = cleanup_owner(tmp_path, 'cloudrag-i5-restore-i7cpu-'+B[:8], 'TERMINATED', dict(AFTER_SMOKE))
+    with pytest.raises(ValueError, match='^CPU_CLEANUP_IDENTITY_CHANGED$'):
         cleanup_cpu(owner)

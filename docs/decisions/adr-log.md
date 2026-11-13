@@ -267,3 +267,10 @@ del proveedor libera la admisión de la reserva solo si un listado posterior no
 muestra ninguna reserva propia. Así `gpu-restore` se puede reintentar sin cargar
 horas ni dinero. Cualquier otro error sigue UNKNOWN. El intento único del gate
 se registra después de retener la reserva de 5 h, y nunca se repite.
+
+## ADR-0027: Privacy y cierre después de un arranque smoke
+
+Ver [ADR-0027](ADR-0027-i7-privacy-y-cierre-tras-smoke.md). El paso privacy
+arranca en el período smoke, así que el invitado acepta `i7-privacy` en los
+períodos sintéticos technical y smoke, nunca en los humanos. El cierre reconoce
+la VM CPU por el período technical del build, no por el período actual.

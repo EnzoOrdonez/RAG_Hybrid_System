@@ -26,6 +26,11 @@ def cpu_label(config):
     return 'i7cpu-'+config['period_id'][:8]
 
 
+def build_period(config):
+    """Period in which the CPU was built and named. start(purpose) later switches period_id (close-08)."""
+    return {'period_id':config.get('period_ids',{}).get('technical',config['period_id'])}
+
+
 def build_scope(config):
     """Technical-object prefix of one period; a remnant of another attempt is never reread."""
     return 'i7-'+config['period_id'][:12]
@@ -325,7 +330,7 @@ def cleanup_cpu(operator):
     zone = 'us-central1-a'
     current = operator.cloud.command(['compute','instances','describe',vm['name'],'--zone='+zone])
     if (str(current['id']) != str(vm['id']) or current['description'] != vm['description']
-            or vm['name'] != 'cloudrag-i5-restore-'+cpu_label(operator.config)):
+            or vm['name'] != 'cloudrag-i5-restore-'+cpu_label(build_period(operator.config))):
         raise ValueError('CPU_CLEANUP_IDENTITY_CHANGED')
     if current['status'] != 'TERMINATED':
         raise ValueError('CPU_CLEANUP_REQUIRES_STOPPED_VM')
