@@ -258,6 +258,19 @@
       ],
       "status": "active",
       "passes": false
+    },
+    {
+      "id": "F-021",
+      "category": "deployment",
+      "description": "cloud_client: un error de transporte del SDK (ConnectionError o RemoteDisconnected) durante un create se registra como fallo aunque GCP complete la creación; el operador no adopta el recurso y clean_snapshot no puede reanudar. En el intento 9 (13/11) costó la raíz 1 y unos 34 min de CPU.",
+      "steps": [
+        "Evidencia en la bitácora privada del intento 9 (fila 07:37Z): el disco de servicio quedó READY tras un create con exit 1; reconcile lo resolvió por identidad con 0 mutaciones.",
+        "Propuesta (sin implementar): tras un error de transporte en un create, describir el recurso y adoptar su identidad solo si coinciden el intent y el marcador de la instalación, igual que reconcile; en cualquier otro caso, UNKNOWN como hoy.",
+        "Antes de tocar código: decisión de Enzo, ADR propio, tests RED de los casos (adoptado, ausente, ajeno) y mutantes, como en ADR-0026.",
+        "No se cambia el operador durante un intento en curso: el cambio exige commit nuevo, suites y cpu-build nuevos."
+      ],
+      "status": "not_started",
+      "passes": false
     }
   ]
 }
