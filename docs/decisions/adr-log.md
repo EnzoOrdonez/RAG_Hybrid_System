@@ -297,3 +297,11 @@ Ver [ADR-0030](ADR-0030-i7-intento-10-y-recoleccion-idempotente.md).
 - **Llegó al paso 8a:** pasos 1 a 7 en exit 0, con privacy **PASS** (0 aciertos, todos los dominios completos).
 - **El estímulo falló en el boot 2 (stimulus-10):** un solo corte del túnel IAP (OpenSSH 255) en `stimulus-ack`, después de descargar y verificar la prueba. Guard borró la reserva; sin gate; close CLOSED. Gasto USD 6,17.
 - **Corrección:** `bridge` también reintenta la recolección idempotente (`*-evidence`, `*-ack`, `gate-terminal-evidence` y `gate-finalized`). Los arranques siguen con un único intento. Sigue el intento 11.
+
+## ADR-0031: Resultado del intento 11 y ventana de acuse del host
+
+Ver [ADR-0031](ADR-0031-i7-intento-11-y-ventana-de-acuse-del-host.md).
+- **Llegó al paso 8a:** pasos 1 a 7 en exit 0, con privacy **PASS** (0 aciertos, los siete dominios completos).
+- **El estímulo falló en el boot 5:** boots 1 a 4 COMPLETE. En el boot 5 se perdió el acuse aun con los reintentos de ADR-0030. Guard borró la reserva; sin gate; close CLOSED. Gasto USD 6,91.
+- **Causa en código:** el host de estímulo daba al dueño 60 s antes de `shutdown -h now`, y la recolección del dueño ronda los 60-75 s. Corrige el diagnóstico de ADR-0030.
+- **Corrección:** `host_runtime.await_owner_ack`, con una ventana de 600 s compartida por el estímulo y el gate, y 30 s de gracia tras el acuse. Sigue el intento 12.

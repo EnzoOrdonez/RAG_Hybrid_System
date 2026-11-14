@@ -18,6 +18,26 @@ from scripts.study_operator.service_gateway import save_state
 
 
 ROOT = Path('/srv/cloudrag/iteration5')
+# After a cold-boot job, the owner downloads, verifies and acknowledges the private proof
+# through several gcloud calls before the native unit's ExecStopPost shuts the VM down.
+# One minute was too short for the stimulus (ADR-0031); stimulus and gate share ten minutes,
+# and the host lingers briefly after the acknowledgement so the bridge reply leaves first.
+OWNER_ACK_WINDOW_S = 600
+POST_ACK_GRACE_S = 30
+
+
+def await_owner_ack(ack_path, *, bound, clock=time.monotonic, sleep=time.sleep):
+    """Wait for the owner's acknowledgement, never past the job's independent bound."""
+    ack = Path(ack_path)
+    deadline = min(bound, clock()+OWNER_ACK_WINDOW_S)
+    while clock() < deadline and not ack.is_file():
+        sleep(1)
+    if not ack.is_file():
+        return False
+    grace = min(POST_ACK_GRACE_S, bound-clock())
+    if grace > 0:
+        sleep(grace)
+    return True
 
 
 def ready_elapsed(requested, now=None):

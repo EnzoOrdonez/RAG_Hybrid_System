@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 from scripts.study_operator.deployment import app_command, assert_isolation
-from scripts.study_operator.host_runtime import ROOT, metadata_unreachable
+from scripts.study_operator.host_runtime import ROOT, await_owner_ack, metadata_unreachable
 from scripts.study_operator.i7_gate import HOST_LIMIT_S, GateRun, collect
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.stimulus_host import HostCollection
@@ -267,6 +267,11 @@ class GateHost(HostCollection):
             channel.close() if channel else self.stop()
 
 
+def await_finalization_ack(root, *, bound, clock=time.monotonic, sleep=time.sleep):
+    """The owner's bounded window to collect and finalize the gate proof (ADR-0031)."""
+    return await_owner_ack(Path(root)/'finalization-ack.json',bound=bound,clock=clock,sleep=sleep)
+
+
 def main():
     if os.name != 'posix':
         raise ValueError('LINUX_GATE_HOST_REQUIRED')
@@ -282,9 +287,7 @@ def main():
             if not (root/'terminal.json').is_file():
                 raise
         # Finalization fits inside the unchanged independent 9000-second bound.
-        deadline = min(host.deadline,time.monotonic()+600)
-        while time.monotonic() < deadline and not (root/'finalization-ack.json').is_file():
-            time.sleep(1)
+        await_finalization_ack(root,bound=host.deadline)
     finally:
         save_state(Path(active['boot_root'])/'stop-request.json',{'stop': True,'boot_id': active['boot_id']})
 
