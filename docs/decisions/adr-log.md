@@ -305,3 +305,11 @@ Ver [ADR-0031](ADR-0031-i7-intento-11-y-ventana-de-acuse-del-host.md).
 - **El estímulo falló en el boot 5:** boots 1 a 4 COMPLETE. En el boot 5 se perdió el acuse aun con los reintentos de ADR-0030. Guard borró la reserva; sin gate; close CLOSED. Gasto USD 6,91.
 - **Causa en código:** el host de estímulo daba al dueño 60 s antes de `shutdown -h now`, y la recolección del dueño ronda los 60-75 s. Corrige el diagnóstico de ADR-0030.
 - **Corrección:** `host_runtime.await_owner_ack`, con una ventana de 600 s compartida por el estímulo y el gate, y 30 s de gracia tras el acuse. Sigue el intento 12.
+
+## ADR-0032: Resultado del intento 12 y nombre de reserva ligado a la VM
+
+Ver [ADR-0032](ADR-0032-i7-intento-12-y-nombre-de-reserva-ligado-a-la-vm.md).
+- **Llegó al gate:** pasos 1 a 7 en exit 0, privacy **PASS** y estímulo **ACCEPTED 12/12**, el primero de la Fase B.
+- **El gate falló sin medir:** cinco rechazos de capacidad liberados y reserva 2 a las 14:37Z. `start('smoke')` lanzó `SPECIFIC_RESERVATION_NOT_BOUND` con el intento ya escrito. Guard borró la reserva; close CLOSED. Gasto USD 7,95.
+- **Causa en código:** la VM queda ligada por nombre a la reserva 1 y `reserve()` daba otro nombre a la reserva 2. Google Cloud no re-liga una VM a otra reserva específica.
+- **Corrección:** con la VM ya creada, `reserve()` reutiliza el nombre que la VM consume y lo verifica antes de cualquier efecto pagado o intento del gate. Sigue el intento 13.

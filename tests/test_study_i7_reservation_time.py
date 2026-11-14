@@ -47,7 +47,8 @@ def test_reserve_verifies_sdk_millisecond_readback(tmp_path, hours, offset):
     result = op.reserve(hours)
     assert result['status'] == 'SPECIFIC_RESERVATION_HELD'
     expected = (instant + timedelta(hours=hours)).astimezone(timezone.utc).replace(microsecond=0)
-    sent = next(a.split('=', 1)[1] for a in cloud.calls[0] if a.startswith('--delete-at-time='))
+    create = next(c for c in cloud.calls if c[:4] == ['beta', 'compute', 'reservations', 'create'])
+    sent = next(a.split('=', 1)[1] for a in create if a.startswith('--delete-at-time='))
     assert sent == expected.isoformat(timespec='seconds')
     assert result['delete_at_utc'] == sent
     assert op.state['reservation']['cost_basis']['delete_at_utc'] == sent

@@ -14,6 +14,7 @@ from tests.test_study_i7_ledger import ReservationCloud
 
 CREATE = ['beta', 'compute', 'reservations', 'create']
 LIST = ['compute', 'reservations', 'list']
+DESCRIBE = ['compute', 'instances', 'describe']
 CAPACITY = b'ZONE_RESOURCE_POOL_EXHAUSTED: zone us-central1-a lacks available resources'
 
 
@@ -75,8 +76,9 @@ def test_capacity_refusal_with_absent_readback_releases_admission(tmp_path, purp
     with pytest.raises(CapacityRejected):
         op.reserve(hours)
     # The intent was durable before the provider call, and the listing came after it.
+    # ADR-0032: the VM's reservation binding is read back before any paid effect.
     assert cloud.at_create['reservation_intent']['status'] == 'UNKNOWN'
-    assert [c[:4] if c[:4] == CREATE else c[:3] for c in cloud.calls] == [CREATE, LIST]
+    assert [c[:4] if c[:4] == CREATE else c[:3] for c in cloud.calls] == [DESCRIBE, CREATE, LIST]
     assert ledger(op) == before
     [receipt] = released(op)
     assert receipt['cloud_error_code'] == 'ZONE_RESOURCE_POOL_EXHAUSTED'
@@ -165,7 +167,7 @@ def test_other_create_failures_never_read_back_or_release(tmp_path, error):
     op.cloud = cloud
     with pytest.raises(type(error)):
         op.reserve(hours)
-    assert [c[:4] for c in cloud.calls] == [CREATE]
+    assert [c[:4] if c[:4] == CREATE else c[:3] for c in cloud.calls] == [DESCRIBE, CREATE]
     assert_still_unknown(op, hours)
 
 

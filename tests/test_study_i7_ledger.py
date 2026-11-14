@@ -45,6 +45,8 @@ class ReservationCloud:
         self.resource.pop('created_utc', None)
         self.at_create = None
         self.sdk_checks = 0
+        # ADR-0032: the VM keeps the specific reservation name it was created with.
+        self.bound = (operator.state.get('reservation') or {}).get('name')
 
     def require_beta(self):
         self.sdk_checks += 1
@@ -68,7 +70,9 @@ class ReservationCloud:
             self.exists = False
             return None
         if arguments[:3] == ['compute', 'instances', 'describe']:
-            return dict(self.operator.selected(), status='TERMINATED')
+            return dict(self.operator.selected(), status='TERMINATED', reservationAffinity={
+                'consumeReservationType': 'SPECIFIC_RESERVATION',
+                'key': 'compute.googleapis.com/reservation-name', 'values': [self.bound]})
         raise AssertionError(arguments)
 
 

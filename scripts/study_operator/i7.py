@@ -271,9 +271,9 @@ class Operator(LegacyOperator):
         allocated=self.state.get('reservation_gpu_hours_used',0)+hours
         if allocated>PHASE_B_RESERVATION_TOTAL_H and not human:
             raise ValueError('I7_CUMULATIVE_RESERVATION_HOURS_EXCEED_COST_PLAN')
+        name = self._consumable_reservation_name()
         admitted = {key:self.state.get(key,0) for key in ('reservation_gpu_hours_used','open_exposure_usd')}
         self.state['reservation_gpu_hours_used']=allocated
-        name = 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]
         zone = self.selected()['zone']
         requested = self.now()
         until = (requested+timedelta(hours=hours)).astimezone(timezone.utc).replace(microsecond=0)
@@ -308,6 +308,23 @@ class Operator(LegacyOperator):
         self.persist()
         return self.receipt('reservation',{'status':'SPECIFIC_RESERVATION_HELD',
             'id':str(resource['id']),'name':name,'delete_at_utc':delete_at})
+
+    def _consumable_reservation_name(self):
+        """ADR-0032: Compute Engine binds a VM to one SPECIFIC reservation by name when the VM is
+        created and cannot rebind it to another specific reservation (only ANY or NONE). Once the
+        GPU VM exists, every new reservation reuses the name the VM consumes, and that binding is
+        read back before any paid effect or recorded gate attempt."""
+        selected = self.selected()
+        if str(selected['id']) == '0':
+            return 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]
+        bound = (self.state.get('reservation') or {}).get('name')
+        vm = self.cloud.command(['compute','instances','describe',selected['name'],'--zone='+selected['zone']])
+        affinity = vm.get('reservationAffinity') or {}
+        if (not bound or str(vm.get('id')) != str(selected['id'])
+                or affinity.get('consumeReservationType') != 'SPECIFIC_RESERVATION'
+                or affinity.get('values') != [bound]):
+            raise ValueError('SPECIFIC_RESERVATION_NOT_BOUND')
+        return bound
 
     def _release_refused_reservation(self, intent, admitted, code):
         """A stated capacity refusal releases its admission only after a successful list
