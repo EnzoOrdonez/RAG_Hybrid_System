@@ -25,6 +25,13 @@ RETRYABLE_BRIDGE_OPERATIONS = frozenset(
      'stimulus-evidence', 'stimulus-ack', 'gate-evidence', 'gate-ack', 'gate-terminal-evidence',
      'gate-finalized'})
 TRANSPORT_RETRY_DELAYS_S = (15, 45)
+# The long status polls of the stimulus and the gate only read while the guest job keeps running
+# (ADR-0033). Their schedule starts with the short one, so every outage the short schedule survived
+# behaves the same; it then keeps trying every 60 s, so the owner sees the end of an outage quickly
+# and can still collect inside the 600 s acknowledgement window that starts when the job completes
+# (ADR-0031). preflight keeps the short schedule so READY stays within 900 s.
+LONG_POLL_OPERATIONS = frozenset({'stimulus-status', 'gate-status'})
+LONG_POLL_TRANSPORT_RETRY_DELAYS_S = (15, 45, 60, 60, 60, 60, 60)
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.region_scope import region
 
@@ -60,7 +67,9 @@ class Operator:
         fixed = self.config['host_code']+'/scripts/study_operator/guest_bridge.py'
         # Only read-only polls retry a transport failure, a bounded number of times (ADR-0029);
         # operations with effects keep the single attempt and its UNKNOWN handling.
-        delays = TRANSPORT_RETRY_DELAYS_S if request.get('operation') in RETRYABLE_BRIDGE_OPERATIONS else ()
+        operation = request.get('operation')
+        delays = (LONG_POLL_TRANSPORT_RETRY_DELAYS_S if operation in LONG_POLL_OPERATIONS
+                  else TRANSPORT_RETRY_DELAYS_S if operation in RETRYABLE_BRIDGE_OPERATIONS else ())
         for delay in (*delays, None):
             try:
                 content = self.cloud.command(['compute','ssh',selected['name'],'--zone='+selected['zone'],

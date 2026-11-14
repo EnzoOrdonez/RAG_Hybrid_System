@@ -313,3 +313,10 @@ Ver [ADR-0032](ADR-0032-i7-intento-12-y-nombre-de-reserva-ligado-a-la-vm.md).
 - **El gate falló sin medir:** cinco rechazos de capacidad liberados y reserva 2 a las 14:37Z. `start('smoke')` lanzó `SPECIFIC_RESERVATION_NOT_BOUND` con el intento ya escrito. Guard borró la reserva; close CLOSED. Gasto USD 7,95.
 - **Causa en código:** la VM queda ligada por nombre a la reserva 1 y `reserve()` daba otro nombre a la reserva 2. Google Cloud no re-liga una VM a otra reserva específica.
 - **Corrección:** con la VM ya creada, `reserve()` reutiliza el nombre que la VM consume y lo verifica antes de cualquier efecto pagado o intento del gate. Sigue el intento 13.
+
+## ADR-0033: Resultado del intento 13 y sondeos largos tolerantes a cortes de transporte
+
+Ver [ADR-0033](ADR-0033-i7-intento-13-y-sondeos-largos-tolerantes.md).
+- **Hasta el estímulo:** pasos 1 a 7 en exit 0, L4 en la 1.ª ronda y privacy **PASS** con siete dominios completos y 0 aciertos.
+- **El estímulo falló en el boot 3:** el SSH por IAP a la VM se cortó unos 5,5 min mientras la API respondía. `stimulus-status` se rindió tras 15 s y 45 s, y el boot quedó INTENT sin COMPLETE. Sin gate; close CLOSED; gasto USD 6,31.
+- **Corrección:** solo `stimulus-status` y `gate-status` reintentan con (15, 45, 60, 60, 60, 60, 60) s. Siguen acotados por el límite del trabajo del invitado y por la ventana de acuse de 600 s. `preflight` y la recolección conservan (15, 45). Sigue el intento 14.

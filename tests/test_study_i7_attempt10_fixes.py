@@ -101,10 +101,11 @@ def test_read_only_poll_retries_transport_and_then_succeeds(tmp_path):
     assert len(op.cloud.calls) == 3 and sleeps == [15, 45]
 
 
-def test_read_only_poll_gives_up_after_bounded_attempts(tmp_path):
+def test_short_schedule_op_gives_up_after_bounded_attempts(tmp_path):
+    # gate-status y stimulus-status siguen el calendario largo de ADR-0033 (test_study_i7_long_poll_retry.py).
     op, sleeps = _operator(tmp_path, [_transport(), _transport(), _transport()])
     with pytest.raises(TransportUnavailable):
-        op.bridge({'operation': 'gate-status'}, private=True)
+        op.bridge({'operation': 'i7-smoke-observe'}, private=True)
     assert len(op.cloud.calls) == 3 and sleeps == [15, 45]
 
 
