@@ -320,3 +320,10 @@ Ver [ADR-0033](ADR-0033-i7-intento-13-y-sondeos-largos-tolerantes.md).
 - **Hasta el estímulo:** pasos 1 a 7 en exit 0, L4 en la 1.ª ronda y privacy **PASS** con siete dominios completos y 0 aciertos.
 - **El estímulo falló en el boot 3:** el SSH por IAP a la VM se cortó unos 5,5 min mientras la API respondía. `stimulus-status` se rindió tras 15 s y 45 s, y el boot quedó INTENT sin COMPLETE. Sin gate; close CLOSED; gasto USD 6,31.
 - **Corrección:** solo `stimulus-status` y `gate-status` reintentan con (15, 45, 60, 60, 60, 60, 60) s. Siguen acotados por el límite del trabajo del invitado y por la ventana de acuse de 600 s. `preflight` y la recolección conservan (15, 45). Sigue el intento 14.
+
+## ADR-0034: Resultado del intento 14, reloj de los tramos archivados del gate y lecturas de mantenimiento
+
+Ver [ADR-0034](ADR-0034-i7-intento-14-reloj-de-tramos-archivados.md).
+- **Hasta el estímulo:** pasos 1 a 7 en exit 0, L4 en la 1.ª ronda, privacy **PASS** y estímulo **ACCEPTED** 12/12.
+- **El gate corrió por primera vez:** tras 5 rechazos de capacidad liberados, 140/140 llamadas. Después `verify` lo dejó terminal: juzgaba los tramos de admisión y de ventanas con el reloj de cierre y el lease de Ollama (~30 min) parecía vencido. Sin GO ni NO-GO; close CLOSED; gasto USD 9,39.
+- **Corrección:** cada tramo archivado se evalúa con el reloj de su propia última muestra; `inventory` y `download-disk` reintentan (15, 45) s. Sigue el intento 15.

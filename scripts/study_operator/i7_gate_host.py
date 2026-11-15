@@ -63,8 +63,21 @@ def verify_preparation(events, inventory):
             raise ValueError('HOT_PREPARATION_SYSTEMS_DIFFERS')
 
 
+def observed_at(rows):
+    """Wall clock of the last row of an archived slice; the slice is replayed at that instant."""
+    observed = datetime.fromisoformat(rows[-1]['at'])
+    if observed.tzinfo is None:
+        raise ValueError('GATE_CLOCK_UNAWARE')
+    return observed.timestamp()
+
+
 def verify(proof):
-    """Recompute accounting and host evidence at its actual closing observation."""
+    """Recompute accounting and host evidence at its actual closing observation.
+
+    The continuous telemetry closes at the last sample. The admission and window slices were
+    assessed live right after their own last sample, so they are replayed at that instant
+    (ADR-0034): the gate's closing clock would make a lease that was healthy then look expired.
+    """
     host, inventory = proof['host_evidence'], proof['inventory']
     identity = {'boot_id': inventory['observed']['boot_id'], 'image_id': inventory['image']['image_id'],
                     'software_sha256': proof['software_sha256']}
@@ -90,12 +103,10 @@ def verify(proof):
             or sha(proof['preparation_events'])!=host['preparation_sha256']):
         raise ValueError('GATE_ADMISSION_DIFFERS')
     verify_preparation(proof['preparation_events'],inventory)
-    closing = datetime.fromisoformat(samples[-1]['at'])
-    if closing.tzinfo is None:
-        raise ValueError('GATE_CLOCK_UNAWARE')
+    closing = observed_at(samples)
     config = assessment_config(inventory)
-    if (reasons(samples, config, began, reference_time=closing.timestamp()) or
-            hot_reasons(admitted, config, began, reference_time=closing.timestamp())
+    if (reasons(samples, config, began, reference_time=closing) or
+            hot_reasons(admitted, config, began, reference_time=observed_at(admitted))
             or any(s['service_state']['sequence']!=9 for s in admitted)):
         raise ValueError('GATE_TELEMETRY_REJECTED')
     windows=host.get('window_admissions',[])
@@ -104,7 +115,7 @@ def verify(proof):
     for window in windows:
         rows=window['samples']
         if (not rows or rows!=[s for s in samples if rows[0]['monotonic_s']<=s['monotonic_s']<=rows[-1]['monotonic_s']]
-                or hot_reasons(rows,config,began,reference_time=closing.timestamp())
+                or hot_reasons(rows,config,began,reference_time=observed_at(rows))
                 or any(s['service_state']['sequence']!=9+4*(window['index']-1) for s in rows)
                 or rows[0]['monotonic_s']<host['calls'][window['index']-2]['ended']
                 or rows[-1]['monotonic_s']>host['calls'][window['index']-1]['started']

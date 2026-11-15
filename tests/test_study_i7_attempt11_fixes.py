@@ -46,7 +46,8 @@ def test_registering_starts_keep_a_single_attempt(tmp_path, operation):
 def test_retryable_operations_are_read_only_polls_and_idempotent_collection():
     from scripts.study_operator.lifecycle import RETRYABLE_BRIDGE_OPERATIONS, TRANSPORT_RETRY_DELAYS_S
     polls = {'stimulus-status', 'gate-status', 'i7-smoke-observe', 'preflight', 'i7-preparation-check'}
-    assert RETRYABLE_BRIDGE_OPERATIONS == frozenset(polls | set(IDEMPOTENT_COLLECTION))
+    maintenance_reads = {'inventory', 'download-disk'}  # ADR-0034
+    assert RETRYABLE_BRIDGE_OPERATIONS == frozenset(polls | set(IDEMPOTENT_COLLECTION) | maintenance_reads)
     assert TRANSPORT_RETRY_DELAYS_S == (15, 45)
 
 

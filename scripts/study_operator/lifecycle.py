@@ -17,13 +17,18 @@ from scripts.study_operator.deployment import checked_config
 from scripts.study_operator.policy import (OperatorError, ReadyPending, TransportUnavailable, participant_code,
                                            purpose_allowed, session_margin)
 
+# The technical cleanup reads the session stores under maintenance before it deletes anything;
+# the guest re-checks that the inventory still equals the plan, so a repeated read changes nothing
+# (ADR-0034). The calls with effects (maintenance, close, restore, clean-disk) keep one try.
+MAINTENANCE_READ_OPERATIONS = frozenset({'inventory', 'download-disk'})
 # A transport failure is retried twice, after 15 s and 45 s, only for read-only guest polls
-# (ADR-0029) and for the idempotent collection steps: the guest re-reads the same proof or
-# rewrites the same acknowledgement after checking its hash (ADR-0030).
+# (ADR-0029), for the idempotent collection steps: the guest re-reads the same proof or
+# rewrites the same acknowledgement after checking its hash (ADR-0030), and for the maintenance
+# reads above.
 RETRYABLE_BRIDGE_OPERATIONS = frozenset(
     {'stimulus-status', 'gate-status', 'i7-smoke-observe', 'preflight', 'i7-preparation-check',
      'stimulus-evidence', 'stimulus-ack', 'gate-evidence', 'gate-ack', 'gate-terminal-evidence',
-     'gate-finalized'})
+     'gate-finalized'} | MAINTENANCE_READ_OPERATIONS)
 TRANSPORT_RETRY_DELAYS_S = (15, 45)
 # The long status polls of the stimulus and the gate only read while the guest job keeps running
 # (ADR-0033). Their schedule starts with the short one, so every outage the short schedule survived
