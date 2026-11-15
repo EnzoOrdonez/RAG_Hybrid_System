@@ -117,7 +117,10 @@ controlada: cambian el hardware y el arnés.
 [VERIFICADO en el ledger del operador; no es la factura]
 - El intento 15 completo, del cpu-build al close, registra USD 9,46 de exposición conservadora,
   dentro del tope de USD 20 + 3.
-- Los intentos 11 a 15 suman USD 40,02 según sus ADR (6,91 + 7,95 + 6,31 + 9,39 + 9,46).
+- La primera raíz del intento 15, abandonada al fallar cpu-build por cuota SSD llena, conserva
+  USD 3,95 de exposición abierta conservadora. No entra en los USD 9,46.
+- Los intentos 11 a 15 suman USD 40,02 según sus ADR (6,91 + 7,95 + 6,31 + 9,39 + 9,46), más
+  esos USD 3,95 abiertos.
 - La factura real se contrasta en la consola de facturación de Google Cloud.
 - Fuera de estas cifras siguen cobrando los recursos retenidos (discos, snapshots e IP reservada).
 

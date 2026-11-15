@@ -25,7 +25,9 @@ intento. Este ADR no cambia código.
 | 9 close | `CLOSED`: VM detenida y verificada, cierre de reserva registrado, temporales CPU ausentes. |
 
 Tras el close, la IP estática se desligó de la VM y quedó RESERVED sin usuarios.
-Gasto: USD 9,46 según el ledger del operador (exposición conservadora, no factura).
+Gasto: USD 9,46 según el ledger del operador (exposición conservadora, no factura). No incluye la
+primera raíz del intento 15: se abandonó al fallar cpu-build por cuota SSD llena y conserva
+USD 3,95 de exposición abierta conservadora, en revisión de cierre CPU.
 
 ### Medición del gate
 
