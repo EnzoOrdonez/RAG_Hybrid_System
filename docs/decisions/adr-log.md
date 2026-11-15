@@ -327,3 +327,11 @@ Ver [ADR-0034](ADR-0034-i7-intento-14-reloj-de-tramos-archivados.md).
 - **Hasta el estímulo:** pasos 1 a 7 en exit 0, L4 en la 1.ª ronda, privacy **PASS** y estímulo **ACCEPTED** 12/12.
 - **El gate corrió por primera vez:** tras 5 rechazos de capacidad liberados, 140/140 llamadas. Después `verify` lo dejó terminal: juzgaba los tramos de admisión y de ventanas con el reloj de cierre y el lease de Ollama (~30 min) parecía vencido. Sin GO ni NO-GO; close CLOSED; gasto USD 9,39.
 - **Corrección:** cada tramo archivado se evalúa con el reloj de su propia última muestra; `inventory` y `download-disk` reintentan (15, 45) s. Sigue el intento 15.
+
+## ADR-0035: Resultado del intento 15: gate GO y limpieza técnica incompleta
+
+Ver [ADR-0035](ADR-0035-i7-intento-15-gate-go.md).
+- **Fase B completa:** pasos 1 a 7 en exit 0 tras 5 rechazos de capacidad liberados, privacy **PASS**, estímulo **ACCEPTED** 12/12 y reserva 2 al primer intento.
+- **Gate GO:** 120 válidas, 0 fallos e inválidas. p95 hybrid 34,88 s y no_rag 27,64 s, frente al límite de 60 s. Close CLOSED; gasto USD 9,46.
+- **Pendiente:** `purge-study` falló en `maintenance` por transporte IAP; las sesiones sintéticas de los intentos 14 y 15 siguen sin purgar (decide Enzo).
+- **Regla:** sin cambios de código. Los comandos `i7` de la fase humana corren desde un checkout cuyo diff contra b5e54f1 solo toque `docs/` y `output/audit/`. Informe descriptivo en [i7-gate-sesiones-sinteticas-i15.md](../reports/i7-gate-sesiones-sinteticas-i15.md).
