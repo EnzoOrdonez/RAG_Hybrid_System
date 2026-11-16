@@ -111,17 +111,15 @@ def test_family_correction_covers_every_comparison_against_the_baseline():
 
 
 # ------------------------------------------------------- propuestas de clase B
-@pytest.mark.xfail(strict=True, reason="FABLE-B2: pendiente de decisión de Enzo")
 def test_identical_scores_give_p_one_not_nan():
-    """H-02: dos sistemas con los mismos puntajes dan hoy p = NaN."""
+    """H-02 (B2 aplicada el 2026-11-15): puntajes idénticos dan p = 1, no NaN."""
     out = paired_comparison(TIED, TIED)
     assert out["p_value"] == 1.0
     assert not out["is_significant"]
 
 
-@pytest.mark.xfail(strict=True, reason="FABLE-B2: pendiente de decisión de Enzo")
 def test_one_tied_comparison_does_not_turn_the_whole_family_into_nan():
-    """H-02: un solo p = NaN vuelve NaN todos los p_bh y p_holm de la familia."""
+    """H-02 (B2 aplicada el 2026-11-15): un par empatado no vuelve NaN la familia BH/Holm."""
     results = run_all_comparisons(
         {"base": {"ndcg": BASE, "recall": TIED}, "hybrid": {"ndcg": BETTER, "recall": TIED}},
         baseline_name="base")
