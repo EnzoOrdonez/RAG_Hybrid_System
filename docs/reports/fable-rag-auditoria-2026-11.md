@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-15 22:18 | rama `fable/rag-auditoria` @ `65f32e5` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
-Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2389 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
-Cambios: 23 commits sobre `1574d22` más el de documentación de esta ronda; B1, B2 y B6 aplicadas (§12); análisis del porqué (§13) | Sin verificar: ningún modelo se ejecutó (D1); `init.sh` completo corrió sobre `65f32e5`, antes del commit que solo añade documentación (capas 1 y 3 repetidas después); ver §10 y §13
+[Fable 5.2] | 2026-11-16 01:12 | rama `fable/rag-auditoria` @ `0e21e32` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
+Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2403 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
+Cambios: 28 commits sobre `1574d22` más el de documentación de esta ronda; B1, B2 y B6 aplicadas (§12); análisis del porqué (§13); exp20 y auditoría de concepto (§14) | Sin verificar: no se ejecutó ningún LLM, NLI ni HHEM (exp20 sí corrió el encoder denso, el reranker y el oráculo, con autorización; ver §14); `init.sh` completo corrió sobre `0e21e32`, antes del commit que solo añade documentación (capas 1 y 3 repetidas después); ver §10 y §13
 
 # Auditoría y endurecimiento del código RAG (noviembre de 2026)
 
@@ -682,3 +682,31 @@ exit 1 si alguna deja de cumplirse.
 **Lo que sigue sin verificar.** La búsqueda densa, el reranker, la generación y los verificadores
 NLI y HHEM no se ejecutaron. No hay prueba de extremo a extremo con modelos reales. Las seis
 preguntas que eso deja abiertas, con la corrida mínima de cada una, están en §5 del informe enlazado.
+
+## 14. exp20 y auditoría de concepto (2026-11-15 y 16)
+
+Enzo autorizó la corrida exp20 («si lanza el exp20») y pidió buscar lagunas y errores de concepto
+en todo el código y los planteamientos, del tipo de la circularidad del oráculo. El detalle está en
+[`fable-rag-conceptos-2026-11.md`](fable-rag-conceptos-2026-11.md). Resumen:
+
+- **Con esto, el párrafo anterior queda superado en parte:** la búsqueda densa y el reranker sí se
+  ejecutaron, con los modelos reales, sobre las 194 consultas, y reproducen el top-5 firmado de
+  exp11 (194 de 194 en tres brazos) y el NDCG@5 firmado con los dos jueces (desviación menor de
+  10⁻⁶). La generación, NLI y HHEM siguen sin ejecutarse.
+- **Hallazgo principal:** con el mismo reranker, el híbrido supera al denso en +0,016 de NDCG@5
+  (IC 95 %: −0,004 a +0,035; p = 0,075; no significativo). La ventaja firmada del híbrido sobre el
+  denso la pone el reranker (entre +0,095 y +0,133 según el orden de la descomposición). La fusión
+  sola no mejora al denso.
+- **Once hallazgos de concepto** (C1 a C11), entre ellos: el juez «independiente» es de la misma
+  familia que el recuperador denso (si eso sesga las cifras queda sin resolver); el NDCG es
+  relativo al pool; el truncado a 512 tokens de los Flags 33, 130 y 144 queda medido; las 194
+  consultas equivalen a unas 69 independientes.
+- **Tres correcciones propias:** el contraste «Gemma supera a Granite» del informe del porqué no es
+  robusto y se retira; el oráculo independiente sí estaba en disco; y una regresión que parecía
+  mostrar que el juez favorece a la pierna densa era un artefacto de selección, detectado por una
+  revisión independiente de los scripts.
+- exp20 **no es evidencia firmada**: vive en `output/audit/` y firmarla es decisión de Enzo.
+
+Código nuevo: `scripts/audit/exp20_rerank_arms.py`, `scripts/audit/fable_concept_probes.py` y
+`tests/test_fable_concept_probes.py` (14 tests rápidos y 1 `slow`). Ningún archivo de `src/`
+cambió en esta ronda.

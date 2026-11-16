@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-15 22:18 | rama `fable/rag-auditoria` @ `65f32e5` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
-Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2389 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
-Cambios: `scripts/audit/fable_why_analysis.py`, sus tests, el reporte generado en `output/audit/` y este informe | Sin verificar: ningún modelo se ejecutó (D1); `init.sh` completo corrió sobre `65f32e5`, antes del commit que solo añade documentación (capas 1 y 3 repetidas después); ver §5
+[Fable 5.2] | 2026-11-16 01:12 | rama `fable/rag-auditoria` @ `0e21e32` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
+Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2403 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
+Cambios: `scripts/audit/fable_why_analysis.py`, sus tests, el reporte generado en `output/audit/` y este informe | Sin verificar: este análisis no ejecuta modelos; exp20 está en el informe de conceptos; `init.sh` completo corrió sobre `0e21e32`, antes del commit que solo añade documentación (capas 1 y 3 repetidas después); ver §5
 
 # Por qué el híbrido no siempre gana y por qué unos modelos puntúan más
 
@@ -158,16 +158,23 @@ casi una constante de cada modelo (Gemma unas 4, Mistral y Qwen de 9 a 12, Grani
 longitud y modelo no se pueden separar con estos datos. La descomposición de arriba es contabilidad
 exacta; no prueba que alargar la respuesta cause la caída.
 
-**Hallazgo exploratorio (medido, no altera cifras firmadas).** Juntando los tres escenarios, con la
-pregunta y el contexto fijos, Gemma supera a Granite en 0,08 con los dos verificadores (Holm sobre
-6 pares: p = 0,016 con small y p = 0,022 con base). Es el único par coherente entre verificadores.
-El ledger N9 concluye «0 de 18 pares robustos» con una familia por escenario; este contraste usa el
-triple de datos y otra familia, y se definió después de ver los primeros resultados. No lo
-sustituye. Queda como pregunta para Enzo (§6).
+**Hallazgo exploratorio retirado (corrección del 2026-11-15).** La primera versión de este informe
+decía que, juntando los tres escenarios, Gemma supera a Granite en 0,08 con los dos verificadores
+(Holm sobre 6 pares: p = 0,016 con small y p = 0,022 con base). Ese resultado sale de una regresión
+conjunta de los cuatro modelos. Con diferencias pareadas solo en las celdas donde ambos modelos
+contestaron, la brecha es +0,057 (Holm 0,30) con small y +0,078 (Holm 0,066) con base; agrupando
+por plantilla de consulta, 0,36 y 0,14. Ningún par de modelos es significativo con los dos
+verificadores. El hallazgo no resiste el cambio de estimador y se retira: el «0 de 18 pares
+robustos» del ledger N9 se mantiene sin matices. Detalle en
+[el informe de conceptos](fable-rag-conceptos-2026-11.md), C11.
 
 ## 5. Lo que el código no puede responder sin ejecutar modelos
 
 Cada punto necesita una corrida nueva con ID `exp20+` y tu autorización (D1, ADR-0004).
+
+**Actualización del 2026-11-15:** autorizaste exp20 y las dos primeras filas ya tienen respuesta
+en [el informe de conceptos](fable-rag-conceptos-2026-11.md), §2. Las cuatro restantes siguen
+abiertas.
 
 | Pregunta | Por qué no se puede hoy | Corrida mínima |
 |---|---|---|
@@ -182,8 +189,8 @@ Cada punto necesita una corrida nueva con ID `exp20+` y tu autorización (D1, AD
 
 1. **¿Autorizas alguna corrida de §5?** La más barata y de más valor es la segunda: sin ella, la
    frase «el híbrido supera al denso» mezcla dos componentes.
-2. **¿Se anota en el ledger el contraste exploratorio Gemma frente a Granite?** No cambia ninguna
-   cifra citable, pero matiza el «0 de 18» de N9.
+2. ~~¿Se anota en el ledger el contraste exploratorio Gemma frente a Granite?~~ Retirada: el
+   contraste no es robusto (§4). No hay nada que anotar.
 3. **¿Quieres un parche de clase B que suba los candidatos por pierna o pondere la pierna densa?**
    Cambiaría rankings y el camino desplegado; solo lo propongo si lo pides.
 
