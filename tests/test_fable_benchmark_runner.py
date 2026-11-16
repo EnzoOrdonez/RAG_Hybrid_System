@@ -138,9 +138,8 @@ def test_the_module_does_not_advertise_a_timeout_it_does_not_apply():
 
 
 # ------------------------------------------------------- propuestas de clase B
-@pytest.mark.xfail(strict=True, reason="FABLE-B1: pendiente de decisión de Enzo")
 def test_rerunning_a_completed_protected_experiment_does_not_rewrite_its_artifacts(tmp_path, monkeypatch):
-    """H-01: relanzar un experimento protegido y ya completo reescribe hoy sus artefactos."""
+    """H-01 (B1 aplicada el 2026-11-15): relanzar un experimento protegido no toca sus artefactos."""
     from src.utils import signed_evidence
 
     monkeypatch.setattr("src.utils.reproducibility.set_all_seeds", lambda seed=42: None)
