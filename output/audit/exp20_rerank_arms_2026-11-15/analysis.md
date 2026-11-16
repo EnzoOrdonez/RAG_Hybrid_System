@@ -88,16 +88,32 @@ Modelos cargados: BAAI/bge-large-en-v1.5 (encoder denso); cross-encoder/ms-marco
 | con filtro de proveedor | 79 | +0.0002 | 0.66 | 23/24/32 |
 | sin filtro | 115 | +0.0264 | 0.007 | 56/29/30 |
 
-- La fusión deja fuera de su top-5 el primer resultado denso en 82/194 consultas. Según el oráculo independiente, ese fragmento tiene una probabilidad media de relevancia de 0.434; el primero de la lista fusionada, 0.413 (diferencia +0.021, p = 0.71); la media del top-5 fusionado, 0.356 (diferencia +0.078, p = 0.046). De esos 82, 82 seguían en el pool de 50 y el reranker devolvió 29 al top-5 final.
+- La fusión deja fuera de su top-5 el primer resultado denso en 82/194 consultas. Según el oráculo independiente, ese fragmento tiene una probabilidad media de relevancia de 0.434 y el primero de la lista fusionada, 0.413 (diferencia +0.021, p = 0.71). De esos 82, 82 seguían en el pool de 50 y el reranker devolvió 29 al top-5 final.
 
-- Acuerdo entre oráculos (Spearman dentro de cada consulta, ms-marco frente a bge-reranker, sobre el top-5 de los siete brazos): media +0.472, mediana +0.538, por debajo de 0,5 en 86/194 consultas.
+**Brazo `hibrido_justo_rerank`** (derivado sin modelos: fusiona los pools ya filtrados por proveedor, 50 + 50, y reordena con los puntajes guardados del reranker). Coincide con `hibrido_rerank` en 115/115 consultas sin filtro y cambia el top-5 en 6/79 consultas con filtro.
 
-Afinidad de cada oráculo con cada pierna. Variable explicada: puesto percentil del fragmento según ese oráculo dentro de su consulta. Controles: el puesto según el otro oráculo y efectos fijos de consulta.
+| A − B (NDCG@5, pool de 8) | Consultas | n | Diferencia media | d_z | p (Wilcoxon) | p agrupando por plantilla | gana / empate / pierde |
+|---|---|---|---|---|---|---|---|
+| hibrido_justo_rerank − denso_rerank | todas | 194 | +0.0147 | +0.10 | 0.13 | 0.21 | 77/54/63 |
+| hibrido_justo_rerank − denso_rerank | con filtro de proveedor | 79 | -0.0023 | -0.01 | 0.41 | 0.89 | 21/25/33 |
+| hibrido_justo_rerank − denso_rerank | sin filtro | 115 | +0.0264 | +0.21 | 0.007 | 0.08 | 56/29/30 |
+| hibrido_rerank − denso_rerank | todas | 194 | +0.0157 | +0.11 | 0.075 | 0.16 | 79/53/62 |
+| hibrido_rerank − denso_rerank | con filtro de proveedor | 79 | +0.0002 | +0.00 | 0.66 | 0.99 | 23/24/32 |
+| hibrido_rerank − denso_rerank | sin filtro | 115 | +0.0264 | +0.21 | 0.007 | 0.08 | 56/29/30 |
+| hibrido_justo_rerank − hibrido_rerank | todas | 194 | -0.0010 | -0.04 | 0.46 | 0.57 | 2/188/4 |
+| hibrido_justo_rerank − hibrido_rerank | con filtro de proveedor | 79 | -0.0025 | -0.06 | 0.46 | 0.57 | 2/73/4 |
+| hibrido_justo_rerank − hibrido_rerank | sin filtro | 115 | +0.0000 | +0.00 | 1 | nan | 0/115/0 |
 
-| Oráculo | β puesto según el otro oráculo | β «estaba en el top-50 denso» | β «estaba en el top-50 léxico» |
-|---|---|---|---|
-| bge-reranker (el «independiente») | +0.452 | +0.134 (p = 4.3e-22) | +0.060 (p = 4.5e-05) |
-| ms-marco (el del pipeline) | +0.469 | +0.007 (p = 0.69) | -0.023 (p = 0.14) |
+- Acuerdo entre jueces (Spearman dentro de cada consulta, ms-marco frente a bge-reranker): todos los brazos: media +0.472, mediana +0.538, por debajo de 0,5 en 86/194 consultas; solo brazos sin reranker: media +0.547, mediana +0.625, por debajo de 0,5 en 64/194 consultas. Es una cota inferior: solo se puntuaron fragmentos que algún brazo puso en su top-5 (rango restringido).
+
+Afinidad de cada juez con cada pierna (puesto percentil según ese juez, explicado por el puesto según el otro juez, efectos fijos de consulta y dos indicadores de pertenencia). **No identifica un sesgo:** cuatro de los siete brazos eligen su top-5 con ms-marco y ninguno con bge-reranker, así que la muestra completa anula por construcción los coeficientes de ms-marco. En la muestra sin esa selección la asimetría desaparece.
+
+| Muestra | Pares | Juez | β «estaba en el top-50 denso» | β «estaba en el top-50 léxico» |
+|---|---|---|---|---|
+| todos los brazos | 2957 | bge-reranker | +0.134 (p = 4.3e-22) | +0.060 (p = 4.5e-05) |
+| todos los brazos | 2957 | ms-marco | +0.007 (p = 0.69) | -0.023 (p = 0.14) |
+| solo brazos sin reranker | 2140 | bge-reranker | +0.096 (p = 2.7e-07) | +0.019 (p = 0.22) |
+| solo brazos sin reranker | 2140 | ms-marco | +0.121 (p = 8.6e-12) | +0.093 (p = 1.6e-07) |
 
 ## Comprobaciones
 

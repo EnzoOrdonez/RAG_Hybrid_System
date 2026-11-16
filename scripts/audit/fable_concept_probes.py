@@ -506,8 +506,10 @@ def probe_absolute_meaning(rep: Report) -> None:
     rep.log()
     rep.table(["Sistema", "NDCG@5 (relativo al pool)", "Probabilidad media de relevancia del top-5 según el oráculo",
                "P@5 con umbral 0"], body)
-    rep.log("- Un NDCG@5 de 0,74 no significa que el 74 % del top-5 sea relevante: el propio oráculo asigna al "
-            "top-5 del mejor sistema una probabilidad media de relevancia de 0,42. La columna de umbral 0 vale 1,00 "
+    best = max(indep["systems"].values(), key=lambda s: s["ndcg@5_mean"])
+    rep.log(f"- Un NDCG@5 de {best['ndcg@5_mean']:.2f} no significa que esa fracción del top-5 sea relevante: el propio "
+            f"oráculo asigna al top-5 del mejor sistema una probabilidad media de relevancia de "
+            f"{best['avg_score@5_mean']:.2f}. La columna de umbral 0 vale 1,00 "
             "para todos con este oráculo (una probabilidad nunca es negativa): esa variante no discrimina.")
     rep.log()
     rep.data["absolute"] = {"p50_indep": p50, "avg_score": {n: s["avg_score@5_mean"] for n, s in indep["systems"].items()}}

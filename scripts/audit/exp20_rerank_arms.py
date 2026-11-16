@@ -42,6 +42,7 @@ OUT_DIR = ROOT / "output" / "audit" / "exp20_rerank_arms_2026-11-15"
 SEED = 42
 ORACLE_MODEL = "BAAI/bge-reranker-large"
 ORACLE_FILE = "oracle_scores__bge-reranker-indep.json"
+FAIR_ARM = "hibrido_justo_rerank"
 GRADE_BLOCK = 64
 
 
@@ -89,9 +90,10 @@ def grade(oracle_path: Path) -> int:
                            .read_text(encoding="utf-8"))
     out_path = OUT_DIR / ORACLE_FILE
     scores = json.loads(out_path.read_text(encoding="utf-8"))["scores"] if out_path.exists() else {}
+    rrf_fuse = _load_audit_module("fable_why_analysis").rrf_fuse
     pending = [(r["query_id"], r["question"], cid)
                for r in payload["results"]
-               for cid in sorted({c for ids in r["arms"].values() for c in ids})
+               for cid in sorted({c for ids in r["arms"].values() for c in ids} | set(fair_hybrid_top5(r, rrf_fuse)))
                if cid not in scores.get(r["query_id"], {})]
     pending.sort(key=lambda item: len(chunk_map[item[2]]["text"]))
     digest = hashlib.sha256()
@@ -119,6 +121,124 @@ def grade(oracle_path: Path) -> int:
     save(done=True)
     print(f"[exp20] puntajes guardados en {out_path}")
     return 0
+
+
+def fair_hybrid_top5(row, rrf_fuse, depth: int = 50, k: int = 5):
+    """Top-5 de un híbrido con la misma sobre-recuperación que los brazos base (derivado, sin modelos).
+
+    El híbrido de producción fusiona 50 + 50 candidatos y filtra por proveedor después, sin reponer. Los brazos
+    base piden 100, filtran y cortan a 50. Los pools `lexico` y `denso` de exp20 ya son esos pools filtrados, así
+    que aquí se fusionan con el mismo RRF y se reordenan con los puntajes del reranker ya guardados. En las
+    consultas sin filtro el resultado coincide con `hibrido_rerank`.
+    """
+    fused = [cid for cid, _ in rrf_fuse(row["pools"]["lexico"], row["pools"]["denso"])[:depth]]
+    scores = row["reranker_scores"]
+    return sorted(fused, key=lambda cid: scores[cid], reverse=True)[:k]
+
+
+def _load_audit_module(name: str):
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / "audit" / f"{name}.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _fair_arm_section(rows, oracle, arms, probes, log, table, data) -> None:
+    """¿Cambia el contraste de la fusión si el híbrido recibe la misma sobre-recuperación que los brazos base?"""
+    import numpy as np
+
+    rrf_fuse = _load_audit_module("fable_why_analysis").rrf_fuse
+    fair = [fair_hybrid_top5(r, rrf_fuse) for r in rows]
+    missing = sum(1 for r, ids in zip(rows, fair) for cid in ids if cid not in oracle["scores"][r["query_id"]])
+    unfiltered = [i for i, r in enumerate(rows) if not r["provider_filter"]]
+    same = sum(1 for i in unfiltered if set(fair[i]) == set(rows[i]["arms"]["hibrido_rerank"]))
+    changed = sum(1 for i, r in enumerate(rows) if r["provider_filter"] and set(fair[i]) != set(r["arms"]["hibrido_rerank"]))
+    log(f"**Brazo `{FAIR_ARM}`** (derivado sin modelos: fusiona los pools ya filtrados por proveedor, 50 + 50, y "
+        f"reordena con los puntajes guardados del reranker). Coincide con `hibrido_rerank` en {same}/{len(unfiltered)} "
+        f"consultas sin filtro y cambia el top-5 en {changed}/{len(rows) - len(unfiltered)} consultas con filtro.")
+    log()
+    data["fair_arm"] = {"same_unfiltered": same, "unfiltered": len(unfiltered), "changed_filtered": changed,
+                        "pairs_without_oracle_score": missing}
+    if missing:
+        log(f"- Faltan {missing} pares por calificar con el oráculo independiente (`--grade`). Sin NDCG para este brazo.")
+        log()
+        return
+    ndcg = {name: [] for name in ("hibrido_rerank", "denso_rerank", FAIR_ARM)}
+    for r, ids in zip(rows, fair):
+        scores = oracle["scores"][r["query_id"]]
+        pool = {cid: scores[cid] for arm in arms for cid in r["arms"][arm]}
+        pool.update({cid: scores[cid] for cid in ids})
+        ndcg[FAIR_ARM].append(probes.ndcg_graded(ids, pool))
+        for arm in ("hibrido_rerank", "denso_rerank"):
+            ndcg[arm].append(probes.ndcg_graded(r["arms"][arm], pool))
+    templates = [probes.template_of(r["question"]) for r in rows]
+    body = []
+    subsets = (("todas", list(range(len(rows)))),
+               ("con filtro de proveedor", [i for i, r in enumerate(rows) if r["provider_filter"]]),
+               ("sin filtro", unfiltered))
+    for a, b in ((FAIR_ARM, "denso_rerank"), ("hibrido_rerank", "denso_rerank"), (FAIR_ARM, "hibrido_rerank")):
+        for label, index in subsets:
+            res = _paired([ndcg[a][i] for i in index], [ndcg[b][i] for i in index])
+            res["p_template"] = probes.cluster_mean_test([ndcg[a][i] - ndcg[b][i] for i in index],
+                                                         [templates[i] for i in index])["p_cluster"]
+            data["fair_arm"][f"{a}_minus_{b}__{label}"] = res
+            body.append([f"{a} − {b}", label, len(index), f"{res['mean']:+.4f}", f"{res['dz']:+.2f}", f"{res['p']:.2g}",
+                         f"{res['p_template']:.2g}", f"{res['wins']}/{res['ties']}/{res['losses']}"])
+    table(["A − B (NDCG@5, pool de 8)", "Consultas", "n", "Diferencia media", "d_z", "p (Wilcoxon)",
+           "p agrupando por plantilla", "gana / empate / pierde"], body)
+    data["fair_arm"]["ndcg_pool8"] = {name: float(np.mean(values)) for name, values in ndcg.items()}
+
+
+def _oracle_comparison(rows, oracle, probes, log, table, data) -> None:
+    """Acuerdo entre los dos jueces y regresión de afinidad, con el aviso de que la muestra está seleccionada."""
+    import numpy as np
+    from scipy import stats
+
+    first_stage = ("lexico", "denso", "hibrido_pre")       # brazos que no eligen con ningún juez
+    agreement = {"todos los brazos": [], "solo brazos sin reranker": []}
+    samples = {"todos los brazos": [], "solo brazos sin reranker": []}
+    for r in rows:
+        scores = oracle["scores"][r["query_id"]]
+        arm_ids = sorted({c for ids in r["arms"].values() for c in ids})
+        unselected = sorted({c for arm in first_stage for c in r["arms"][arm]})
+        dense_pool, lexical_pool = set(r["pools"]["denso"]), set(r["pools"]["lexico"])
+        for label, ids in (("todos los brazos", arm_ids), ("solo brazos sin reranker", unselected)):
+            bge = [scores[c] for c in ids]
+            ms = [r["reranker_scores"][c] for c in ids]
+            rho = stats.spearmanr(bge, ms).statistic
+            if rho == rho:
+                agreement[label].append(float(rho))
+            rank_bge, rank_ms = stats.rankdata(bge) / len(ids), stats.rankdata(ms) / len(ids)
+            for i, cid in enumerate(ids):
+                samples[label].append((r["query_id"], rank_bge[i], rank_ms[i],
+                                       float(cid in dense_pool), float(cid in lexical_pool)))
+    log("- Acuerdo entre jueces (Spearman dentro de cada consulta, ms-marco frente a bge-reranker): "
+        + "; ".join(f"{label}: media {np.mean(v):+.3f}, mediana {np.median(v):+.3f}, por debajo de 0,5 en "
+                    f"{sum(1 for x in v if x < 0.5)}/{len(v)} consultas" for label, v in agreement.items())
+        + ". Es una cota inferior: solo se puntuaron fragmentos que algún brazo puso en su top-5 (rango restringido).")
+    log()
+    data["oracle_agreement"] = {label: {"mean": float(np.mean(v)), "median": float(np.median(v)),
+                                        "below_half": sum(1 for x in v if x < 0.5), "n": len(v)}
+                                for label, v in agreement.items()}
+    fixed_effects = probes._load_why().fixed_effects_ols
+    body = []
+    for label, sample in samples.items():
+        groups = [item[0] for item in sample]
+        for judge, y_col, other_col in (("bge-reranker", 1, 2), ("ms-marco", 2, 1)):
+            y = [item[y_col] for item in sample]
+            x = np.array([[item[other_col], item[3], item[4]] for item in sample])
+            fit = fixed_effects(y, x, groups, groups)
+            body.append([label, len(sample), judge, f"{fit['beta'][1]:+.3f} (p = {fit['p'][1]:.2g})",
+                         f"{fit['beta'][2]:+.3f} (p = {fit['p'][2]:.2g})"])
+            data.setdefault("oracle_affinity", {}).setdefault(label, {})[judge] = {
+                "n": len(sample), "in_dense_pool": float(fit["beta"][1]), "p_dense": float(fit["p"][1]),
+                "in_lexical_pool": float(fit["beta"][2]), "p_lexical": float(fit["p"][2])}
+    log("Afinidad de cada juez con cada pierna (puesto percentil según ese juez, explicado por el puesto según el "
+        "otro juez, efectos fijos de consulta y dos indicadores de pertenencia). **No identifica un sesgo:** cuatro "
+        "de los siete brazos eligen su top-5 con ms-marco y ninguno con bge-reranker, así que la muestra completa "
+        "anula por construcción los coeficientes de ms-marco. En la muestra sin esa selección la asimetría desaparece.")
+    log()
+    table(["Muestra", "Pares", "Juez", "β «estaba en el top-50 denso»", "β «estaba en el top-50 léxico»"], body)
 
 
 def _independent_section(rows, oracle, arms, mapping, log, table, data, failures) -> None:
@@ -177,64 +297,21 @@ def _independent_section(rows, oracle, arms, mapping, log, table, data, failures
     if dropped:
         top1 = [oracle["scores"][r["query_id"]][r["arms"]["denso"][0]] for r in dropped]
         fused_top1 = [oracle["scores"][r["query_id"]][r["arms"]["hibrido_pre"][0]] for r in dropped]
-        fused_mean = [float(np.mean([oracle["scores"][r["query_id"]][c] for c in r["arms"]["hibrido_pre"]])) for r in dropped]
-        versus_top1, versus_mean = _paired(top1, fused_top1), _paired(top1, fused_mean)
+        versus_top1 = _paired(top1, fused_top1)
         in_pool = sum(1 for r in dropped if r["arms"]["denso"][0] in set(r["pools"]["hibrido"]))
         rescued = sum(1 for r in dropped if r["arms"]["denso"][0] in r["arms"]["hibrido_rerank"])
         log(f"- La fusión deja fuera de su top-5 el primer resultado denso en {len(dropped)}/{n} consultas. Según el "
-            f"oráculo independiente, ese fragmento tiene una probabilidad media de relevancia de {np.mean(top1):.3f}; "
-            f"el primero de la lista fusionada, {np.mean(fused_top1):.3f} (diferencia {versus_top1['mean']:+.3f}, "
-            f"p = {versus_top1['p']:.2g}); la media del top-5 fusionado, {np.mean(fused_mean):.3f} "
-            f"(diferencia {versus_mean['mean']:+.3f}, p = {versus_mean['p']:.2g}). "
-            f"De esos {len(dropped)}, {in_pool} seguían en el pool de 50 y el reranker devolvió {rescued} al top-5 final.")
+            f"oráculo independiente, ese fragmento tiene una probabilidad media de relevancia de {np.mean(top1):.3f} "
+            f"y el primero de la lista fusionada, {np.mean(fused_top1):.3f} (diferencia {versus_top1['mean']:+.3f}, "
+            f"p = {versus_top1['p']:.2g}). De esos {len(dropped)}, {in_pool} seguían en el pool de 50 y el reranker "
+            f"devolvió {rescued} al top-5 final.")
         log()
         data["dropped_dense_top1"] = {"queries": len(dropped), "mean_prob_dropped": float(np.mean(top1)),
                                       "mean_prob_fused_top1": float(np.mean(fused_top1)),
-                                      "mean_prob_fused_top5": float(np.mean(fused_mean)),
-                                      "vs_fused_top1": versus_top1, "vs_fused_top5": versus_mean,
+                                      "vs_fused_top1": versus_top1,
                                       "still_in_pool": in_pool, "rescued_by_reranker": rescued}
-    # Acuerdo entre los dos oráculos sobre los mismos pares: si es bajo, «relevante» depende del juez.
-    from scipy import stats
-    agreement = []
-    for r in rows:
-        scores = oracle["scores"][r["query_id"]]
-        ids = sorted(scores)
-        rho = stats.spearmanr([scores[c] for c in ids], [r["reranker_scores"][c] for c in ids]).statistic
-        if rho == rho:
-            agreement.append(float(rho))
-    log(f"- Acuerdo entre oráculos (Spearman dentro de cada consulta, ms-marco frente a bge-reranker, sobre el top-5 "
-        f"de los siete brazos): media {np.mean(agreement):+.3f}, mediana {np.median(agreement):+.3f}, "
-        f"por debajo de 0,5 en {sum(1 for x in agreement if x < 0.5)}/{len(agreement)} consultas.")
-    log()
-    data["oracle_agreement"] = {"mean": float(np.mean(agreement)), "median": float(np.median(agreement)),
-                                "below_half": sum(1 for x in agreement if x < 0.5), "n": len(agreement)}
-    # Afinidad de cada oráculo con cada pierna: con el juicio del otro oráculo fijo, ¿puntúa más alto lo que
-    # trajo la pierna densa (misma familia BGE que el oráculo «independiente») o lo que trajo BM25?
-    fixed_effects = probes._load_why().fixed_effects_ols
-    y_bge, y_ms, x_bge, x_ms, groups = [], [], [], [], []
-    for r in rows:
-        scores = oracle["scores"][r["query_id"]]
-        ids = sorted(scores)
-        rank_bge = stats.rankdata([scores[c] for c in ids]) / len(ids)
-        rank_ms = stats.rankdata([r["reranker_scores"][c] for c in ids]) / len(ids)
-        dense_pool, lexical_pool = set(r["pools"]["denso"]), set(r["pools"]["lexico"])
-        for i, cid in enumerate(ids):
-            membership = [float(cid in dense_pool), float(cid in lexical_pool)]
-            y_bge.append(rank_bge[i]); x_bge.append([rank_ms[i]] + membership)
-            y_ms.append(rank_ms[i]); x_ms.append([rank_bge[i]] + membership)
-            groups.append(r["query_id"])
-    body = []
-    for label, y, x in (("bge-reranker (el «independiente»)", y_bge, x_bge), ("ms-marco (el del pipeline)", y_ms, x_ms)):
-        fit = fixed_effects(y, np.array(x), groups, groups)
-        body.append([label, f"{fit['beta'][0]:+.3f}", f"{fit['beta'][1]:+.3f} (p = {fit['p'][1]:.2g})",
-                     f"{fit['beta'][2]:+.3f} (p = {fit['p'][2]:.2g})"])
-        data.setdefault("oracle_affinity", {})[label] = {"other_oracle": float(fit["beta"][0]),
-                                                         "in_dense_pool": float(fit["beta"][1]), "p_dense": float(fit["p"][1]),
-                                                         "in_lexical_pool": float(fit["beta"][2]), "p_lexical": float(fit["p"][2])}
-    log("Afinidad de cada oráculo con cada pierna. Variable explicada: puesto percentil del fragmento según ese "
-        "oráculo dentro de su consulta. Controles: el puesto según el otro oráculo y efectos fijos de consulta.")
-    log()
-    table(["Oráculo", "β puesto según el otro oráculo", "β «estaba en el top-50 denso»", "β «estaba en el top-50 léxico»"], body)
+    _fair_arm_section(rows, oracle, arms, probes, log, table, data)
+    _oracle_comparison(rows, oracle, probes, log, table, data)
     data["indep_ndcg"] = {"pool4": {a: float(np.mean(v)) for a, v in four.items()},
                           "pool7": {a: float(np.mean(v)) for a, v in seven.items()},
                           "probability": {a: float(np.mean(v)) for a, v in probability.items()},

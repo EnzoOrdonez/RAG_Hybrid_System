@@ -45,6 +45,19 @@ def test_ndcg_matches_the_signed_definition_by_hand():
     assert probes.ndcg_graded(["a", "b"], pool, k=2) == pytest.approx(expected)
 
 
+def test_ndcg_is_identical_to_the_signed_metric_script_on_random_pools():
+    spec = importlib.util.spec_from_file_location(
+        "compute_retrieval_metrics", PROJECT_ROOT / "scripts" / "compute_retrieval_metrics.py")
+    signed = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(signed)
+    rng = np.random.default_rng(11)
+    for _ in range(300):
+        size = int(rng.integers(1, 15))
+        pool = {f"c{i}": float(rng.normal(scale=3.0)) for i in range(size)}     # logits: hay negativos
+        ranking = [f"c{i}" for i in rng.permutation(size)[:5]] + (["fuera"] if rng.random() < 0.3 else [])
+        assert probes.ndcg_graded(ranking, pool, k=5) == pytest.approx(signed.ndcg_at_k_graded(ranking, pool, 5), abs=1e-12)
+
+
 def test_the_same_ranking_scores_lower_when_another_system_adds_a_better_chunk():
     ranking = ["a", "b"]
     alone = probes.ndcg_graded(ranking, {"a": 2.0, "b": 1.0}, k=2)
@@ -66,6 +79,20 @@ def test_icc_is_one_for_pure_group_effects_and_near_zero_for_noise():
     rng = np.random.default_rng(42)
     assert abs(probes.icc_oneway(list(rng.normal(size=100)), groups)) < 0.15
     assert math.isnan(probes.icc_oneway([1.0, 2.0, 3.0], ["g", "g", "g"]))
+
+
+def test_icc_recovers_a_known_value_with_unbalanced_groups():
+    rng = np.random.default_rng(5)
+    estimates = []
+    for _ in range(40):
+        values, groups = [], []
+        for group in range(74):
+            level = rng.normal(scale=math.sqrt(0.4))                    # ICC real = 0,4
+            for _ in range(int(rng.integers(1, 9))):
+                values.append(level + rng.normal(scale=math.sqrt(0.6)))
+                groups.append(group)
+        estimates.append(probes.icc_oneway(values, groups))
+    assert np.mean(estimates) == pytest.approx(0.4, abs=0.05)
 
 
 def test_design_effect_follows_kish_for_equal_and_unequal_groups():
@@ -112,6 +139,16 @@ def test_exp20_paired_contrast_counts_wins_ties_and_losses():
 def test_exp20_paired_contrast_of_identical_arms_is_not_significant():
     out = exp20._paired([0.5, 0.7, 0.9], [0.5, 0.7, 0.9])
     assert out["p"] == 1.0 and out["dz"] == 0.0 and out["ties"] == 3
+
+
+def test_fair_hybrid_arm_fuses_the_filtered_pools_and_reorders_by_reranker_score():
+    why = _load("fable_why_analysis")
+    row = {"pools": {"lexico": ["a", "b", "c"], "denso": ["c", "d", "a"]},
+           "reranker_scores": {"a": 0.1, "b": 5.0, "c": 2.0, "d": 9.0}}
+    # depth=2: RRF deja solo el consenso (a y c); el reranker pone c delante.
+    assert exp20.fair_hybrid_top5(row, why.rrf_fuse, depth=2, k=5) == ["c", "a"]
+    # depth amplio: entran los cuatro y manda el puntaje del reranker.
+    assert exp20.fair_hybrid_top5(row, why.rrf_fuse, depth=50, k=3) == ["d", "b", "c"]
 
 
 # --------------------------------------------------------------- recorrido real

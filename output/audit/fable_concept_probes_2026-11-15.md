@@ -123,7 +123,7 @@ Verificador `base`:
 | RAG Hibrido Propuesto | 0.7405 | 0.4232 | 1.00 |
 | RAG Hibrido (pre-rerank RRF) | 0.6026 | 0.3482 | 1.00 |
 
-- Un NDCG@5 de 0,74 no significa que el 74 % del top-5 sea relevante: el propio oráculo asigna al top-5 del mejor sistema una probabilidad media de relevancia de 0,42. La columna de umbral 0 vale 1,00 para todos con este oráculo (una probabilidad nunca es negativa): esa variante no discrimina.
+- Un NDCG@5 de 0.74 no significa que esa fracción del top-5 sea relevante: el propio oráculo asigna al top-5 del mejor sistema una probabilidad media de relevancia de 0.42. La columna de umbral 0 vale 1,00 para todos con este oráculo (una probabilidad nunca es negativa): esa variante no discrimina.
 
 ## 8. Tipado de consultas: «cross_cloud» no significa «varios proveedores»
 
