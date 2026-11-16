@@ -68,7 +68,7 @@ comportamiento incorrecto en el camino desplegado; MEDIO y BAJO = el resto.
 | H-02 | MEDIO (latente) | B2 | `src/evaluation/statistical_analysis.py:197-217`, `:297-307` | Dos sistemas con puntajes idénticos dan `p=NaN`; un solo NaN vuelve NaN todos los `p_bh` y `p_holm` de la familia | Reproducido con scipy 1.17.1. La evidencia firmada no contiene ningún `p` NaN | Propuesto (B2); decide Enzo |
 | H-03 | MEDIO | B3 | `src/evaluation/benchmark_runner.py:258-324` | `_run_single_query` ignora `response.error`: una falla del pipeline queda como fila válida y su texto de error se puntúa como si fuera la respuesta | exp3, brazos lineales: q042 y q049 sin fragmentos recuperados en los 3 brazos, con `errors: 0` | Propuesto (B3); decide Enzo |
 | H-04 | ALTO | B4 | `src/retrieval/coverage_balancer.py:86-88` | Los nombres de servicio genéricos del índice (`virtual machines`, `virtual network`, `vpc`, `iam`) añaden un proveedor que la pregunta no compara y le asignan cuota en `SURVEY_DEPLOY` | «Compare virtual machines on AWS and GCP» resuelve `aws, azure, gcp` con el índice real | Propuesto (B4); decide Enzo |
-| H-05 | ALTO | B5 | `src/retrieval/query_processor.py:140-148` | La detección de proveedor es por subcadena: `laws` y `flaws` contienen `aws` y activan el filtro `single_provider` | «What data residency laws apply to object storage?» queda filtrada a AWS | Abierto |
+| H-05 | ALTO | B5 | `src/retrieval/query_processor.py:140-148` | La detección de proveedor es por subcadena: `laws` y `flaws` contienen `aws` y activan el filtro `single_provider` | «What data residency laws apply to object storage?» queda filtrada a AWS | Propuesto (B5); decide Enzo |
 | H-06 | MEDIO | B6 | `src/evaluation/latency_metrics.py:46-51` | Se descartan los valores a más de 3 desviaciones antes de calcular p95, p99 y máximo: se recorta justo la cola que esas cifras deben describir | exp8b denso: p95 41 541 ms recortado frente a 45 630 ms sin recortar | Abierto |
 | H-07 | MEDIO (latente) | B7 | `src/evaluation/benchmark_runner.py:140` | La caché de índices usa `estrategia_tamaño` e ignora el modelo de embeddings: dos configuraciones con modelos distintos comparten el primer índice cargado | Traza de código; afecta a `exp2`, que no es evidencia firmada | Abierto |
 | H-08 | MEDIO | B8 | `src/generation/llm_manager.py:304-311` | `generate()` guarda en caché una respuesta vacía y la sirve para siempre; `generate_stream()` sí la descarta | exp12 tiene 399 respuestas vacías de 3104 (N6.4 documenta 177 de qwen sin RAG) | Abierto |
@@ -237,3 +237,24 @@ hasta 2 de los 5 fragmentos que ve el modelo. Solo ocurre en `SURVEY_DEPLOY`
 Alternativa al parche: derivar la ambigüedad del propio corpus (un nombre es ambiguo si aparece con
 frecuencia en el texto de fragmentos de otros proveedores). Evita la lista escrita a mano, que es la
 clase de lista que el módulo quería evitar, pero cuesta un pase sobre los 24 481 fragmentos al arrancar.
+
+### B5 (H-05, ALTO): la detección de proveedor es por subcadena
+
+**Defecto.** `_detect_providers` usa `if kw in q`. La palabra clave `aws` está dentro de `laws`, `flaws`,
+`draws` o `bylaws`. Una pregunta sin proveedor queda detectada como `aws`, se tipa `single_provider` y
+los tres recuperadores descartan todo fragmento que no sea de AWS:
+
+- «What data residency laws apply to object storage?» resuelve `['aws']`, filtro `['aws']`.
+- «What are common flaws in serverless function design?» resuelve `['aws']`, filtro `['aws']`.
+
+Es distinto de F2 del ledger de verano, que registra que falta `google` a secas y que `k8s`/`cncf`
+apuntan a un corpus borrado. F2 sigue pendiente de tu decisión y este parche no lo toca.
+
+1. **Test:** `tests/test_fable_providers.py::test_provider_detection_does_not_match_inside_other_words` (2 casos).
+2. **Parche:** [B5.diff](fable-rag-2026-11/patches/B5.diff). Coincidencia por palabra completa.
+3. **Impacto:** ninguno sobre la evidencia. En las 194 consultas del conjunto y en las 200 del respaldo
+   previo, el detector por subcadena y el de palabra completa devuelven exactamente lo mismo (0
+   diferencias), así que `query_type`, filtro y plantilla de prompt no cambian en ninguna. Afecta al
+   camino desplegado y a cualquier consulta libre.
+4. **Corrida nueva:** ninguna. `QueryProcessor` alimenta el `query_type` de `run_generation_matrix.py`;
+   como no cambia en ninguna de las 194, una re-corrida de exp11 o exp12 no se vería alterada.

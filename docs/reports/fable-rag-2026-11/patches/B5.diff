@@ -1,0 +1,15 @@
+diff --git a/src/retrieval/query_processor.py b/src/retrieval/query_processor.py
+index 8b9d474..f973600 100644
+--- a/src/retrieval/query_processor.py
++++ b/src/retrieval/query_processor.py
+@@ -142,7 +142,9 @@ class QueryProcessor:
+         found = []
+         for provider, keywords in self.PROVIDER_KEYWORDS.items():
+             for kw in keywords:
+-                if kw in q:
++                # Whole-word match: a plain substring test finds "aws" inside "laws" and
++                # "flaws" and switches on the single_provider filter for that provider.
++                if re.search(r"(?<![a-z0-9])" + re.escape(kw) + r"(?![a-z0-9])", q):
+                     found.append(provider)
+                     break
+         return found
