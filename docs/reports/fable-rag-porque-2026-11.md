@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-16 01:12 | rama `fable/rag-auditoria` @ `0e21e32` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
-Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2403 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
-Cambios: `scripts/audit/fable_why_analysis.py`, sus tests, el reporte generado en `output/audit/` y este informe | Sin verificar: este análisis no ejecuta modelos; exp20 está en el informe de conceptos; `init.sh` completo corrió sobre `0e21e32`, antes del commit que solo añade documentación (capas 1 y 3 repetidas después); ver §5
+[Fable 5.2] | 2026-11-16 04:40 | rama `fable/rag-auditoria` @ `bf8a18d` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
+Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2406 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
+Cambios: `scripts/audit/fable_why_analysis.py`, sus tests, el reporte generado en `output/audit/` y este informe | Sin verificar: este análisis no ejecuta modelos; exp20 (firmada el 2026-11-16) está en el informe de conceptos; `init.sh` completo corrió con la evidencia firmada presente y antes del commit que solo añade documentación (capas 1 y 3 repetidas después); ver §5
 
 # Por qué el híbrido no siempre gana y por qué unos modelos puntúan más
 
@@ -175,6 +175,9 @@ Cada punto necesita una corrida nueva con ID `exp20+` y tu autorización (D1, AD
 **Actualización del 2026-11-15:** autorizaste exp20 y las dos primeras filas ya tienen respuesta
 en [el informe de conceptos](fable-rag-conceptos-2026-11.md), §2. Las cuatro restantes siguen
 abiertas.
+
+**Actualización del 2026-11-16:** exp20 quedó firmada en `experiments/results/exp20_rerank_arms/`
+y replica bit a bit la corrida de auditoría (informe de conceptos, §2.5).
 
 | Pregunta | Por qué no se puede hoy | Corrida mínima |
 |---|---|---|

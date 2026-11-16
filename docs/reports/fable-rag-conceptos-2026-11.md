@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-16 01:12 | rama `fable/rag-auditoria` @ `0e21e32` | tarea F-propuesta (sin número, ver §9 del informe de auditoría) | modo: ejecución
-Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2403 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
-Cambios: `scripts/audit/exp20_rerank_arms.py`, `scripts/audit/fable_concept_probes.py`, sus tests, las salidas en `output/audit/` y este informe | Sin verificar: no se ejecutó ningún LLM, NLI ni HHEM; exp20 no está firmada; `init.sh` completo corrió sobre `0e21e32`, antes del commit que solo añade documentación (capas 1 y 3 repetidas después)
+[Fable 5.2] | 2026-11-16 04:40 | rama `fable/rag-auditoria` @ `bf8a18d` | tarea F-propuesta (sin número, ver §9 del informe de auditoría) | modo: ejecución
+Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2406 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
+Cambios: `scripts/audit/exp20_rerank_arms.py`, `scripts/audit/fable_concept_probes.py`, sus tests, las salidas en `output/audit/`, la evidencia firmada `experiments/results/exp20_rerank_arms/` (commit `bf8a18d`) y este informe | Sin verificar: no se ejecutó ningún LLM, NLI ni HHEM; la entrada de ledger de exp20 es texto propuesto (§10) y no está en `paper/`; `init.sh` completo corrió con la evidencia firmada presente y antes del commit que solo añade documentación (capas 1 y 3 repetidas después)
 
 # Lagunas y errores de concepto en la evaluación de CloudRAG
 
@@ -16,12 +16,15 @@ afirma por opinión. Cada resultado lleva una etiqueta:
 - **No resuelto**: la sonda no puede decidirlo; se dice qué haría falta.
 - **Refutado**: la sospecha se contrastó y los datos no la sostienen.
 
-Ninguna cifra firmada cambió. La corrida exp20 **no es evidencia firmada**: vive en
-`output/audit/exp20_rerank_arms_2026-11-15/` y nunca se escribió en `experiments/results/`.
+Ninguna cifra firmada previa cambió. exp20 se corrió dos veces: primero como corrida de auditoría
+(`output/audit/exp20_rerank_arms_2026-11-15/`) y, con tu OK del 2026-11-16, como **evidencia
+firmada** en `experiments/results/exp20_rerank_arms/` (§2.5). Las dos corridas coinciden bit a bit,
+así que las cifras de exp20 de este informe son las firmadas.
 
 Código: [`scripts/audit/exp20_rerank_arms.py`](../../scripts/audit/exp20_rerank_arms.py) y
 [`scripts/audit/fable_concept_probes.py`](../../scripts/audit/fable_concept_probes.py). Salidas:
-[`analysis.md` de exp20](../../output/audit/exp20_rerank_arms_2026-11-15/analysis.md) y
+[`analysis.md` de exp20 firmado](../../experiments/results/exp20_rerank_arms/analysis.md),
+[`analysis.md` de la corrida de auditoría](../../output/audit/exp20_rerank_arms_2026-11-15/analysis.md) y
 [`fable_concept_probes_2026-11-15.md`](../../output/audit/fable_concept_probes_2026-11-15.md).
 Este informe continúa [el del porqué](fable-rag-porque-2026-11.md) y
 [el de auditoría](fable-rag-auditoria-2026-11.md).
@@ -168,6 +171,59 @@ El coste de los primeros resultados densos que la fusión expulsa también queda
 fusión pone primero en su lugar, 0,413 (diferencia +0,021; p = 0,71). No hay pérdida demostrable.
 Los 82 siguen en el pool de 50 y el reranker devuelve 29 al top-5 final.
 
+### 2.5 Firma de exp20 (2026-11-16)
+
+El 2026-11-16 respondiste «Sí, firma exp20». La corrida se repitió completa, desde cero, con el
+mismo script en modo `--signed`, y quedó en
+[`experiments/results/exp20_rerank_arms/`](../../experiments/results/exp20_rerank_arms/analysis.md).
+
+| Aspecto | Valor |
+|---|---|
+| Archivos | `results.json`, `oracle_scores__bge-reranker-indep.json`, `analysis.md`, `analysis.json` |
+| Escritura | una sola vez por archivo, a través de `guard_write`; un segundo intento aborta |
+| Código | commit `0b37c7c`, árbol sin cambios; SHA-256 del script `275b62fa…120dd2609` |
+| Pesos (SHA-256 de `model.safetensors`) | encoder denso `45e19549…`, reranker `1ed84b90…`, oráculo `c5ae4e26…` (coincide con el manifiesto de julio) |
+| Entorno | Python 3.14.3, torch 2.10.0+cpu, sentence-transformers 5.2.3, CPU, seed 42, modo offline |
+| Duración | recuperación 89,0 min; calificación de 2 957 pares 89,7 min |
+| Modelos no cargados | Ollama, NLI, HHEM |
+
+**Réplica frente a la corrida de auditoría.** La corrida firmada no reutiliza nada de la de
+auditoría: otro proceso, modelos cargados de nuevo y todos los puntajes recalculados. Lo único
+común son las entradas de solo lectura (índices, embeddings del corpus y pesos). Coinciden por
+completo:
+
+| Comparación | Resultado |
+|---|---|
+| Top-5 (identificadores y orden), 194 consultas × 7 brazos | 1 358 de 1 358 listas idénticas |
+| Pools de candidatos (léxico, denso, híbrido) | 582 de 582 idénticos |
+| Puntaje del reranker sobre el mismo par | diferencia máxima 0 |
+| Puntaje del oráculo independiente, 2 957 pares | diferencia máxima 0 |
+
+Por eso todas las cifras de §2.2 a §2.4 valen sin cambios para la corrida firmada. La recuperación
+y la calificación son deterministas en esta máquina bajo el régimen de entorno del proyecto.
+
+**Corrección de un error mío.** Dije que firmar exigía declarar exp20 como experimento vivo en
+`src/utils/signed_evidence.py`. Era falso. La guarda solo rechaza **sobrescribir** un archivo que
+ya existe bajo `experiments/results/exp*`; crear un directorio nuevo está permitido. Ese archivo no
+se tocó y el registro de experimentos vivos sigue vacío. Desde ahora, la guarda protege exp20 igual
+que al resto: cualquier recálculo va a archivos `_vN` nuevos (`--analysis-suffix _v2`).
+
+**Formato.** `results.json` lleva el bloque `configs` con el esquema de exp11 (los cuatro nombres
+de sistema firmados más tres nuevos), de modo que `scripts/compute_retrieval_metrics.py` lo puede
+leer, y un manifiesto de procedencia sin rutas ni nombres de máquina. Los verificadores offline y
+`tests/test_scored_arms_complete.py` descubren los experimentos por su forma; exp20 no tiene
+brazos de generación y no entra en su recorrido (§7).
+
+**Sobre el identificador.** «exp20» aparecía como nombre tentativo de otra idea, un selector de
+diversidad tipo MMR, en un comentario de `src/retrieval/coverage_balancer.py:23` y en
+`docs/CLOUD_EXPERIMENT_DESIGN.md` (líneas 130 y 145). Esa idea nunca se corrió. Si se retoma,
+necesita otro identificador (`exp21` o posterior). No toqué esos dos archivos: el primero es parte
+del camino desplegado y el segundo no es de esta tarea. Por lo mismo, las corridas pendientes que
+los informes de auditoría y del porqué llaman `exp20+` pasan a ser `exp21+`.
+
+**Lo que falta para cerrar la firma.** La entrada de ledger. Elegiste dejarla como texto propuesto;
+está completa en §10 y se pega en `paper/summer_ablation_log.md` al integrar la rama.
+
 ## 3. Hallazgos de concepto
 
 | # | Hallazgo | Etiqueta | ¿Estaba en el ledger? |
@@ -307,7 +363,7 @@ Tres consecuencias de concepto:
 agrupados por consulta: el coeficiente de la fracción no leída es +0,52 (p = 0,17) con el
 verificador small y +0,02 (p = 0,96) con base. **No se detecta efecto.** El diseño es
 observacional y de poca potencia: no demuestra que el efecto sea nulo. La prueba limpia sería
-volver a verificar con el fragmento partido en ventanas (corrida `exp20+`, solo NLI, sin Ollama).
+volver a verificar con el fragmento partido en ventanas (corrida `exp21+`, solo NLI, sin Ollama).
 
 ### C6. `adaptive_500` no acota el tamaño (medido)
 
@@ -413,8 +469,8 @@ Se anotan porque una auditoría que solo reporta lo que confirma no es una audit
 
 ## 5. Qué se puede afirmar y qué no
 
-Textos propuestos. La prosa del paper y del A.3 solo cambia con tu OK frase por frase. exp20 no
-está firmada: para citar sus cifras hay que repetirla bajo un ID propio (§6, decisión 1).
+Textos propuestos. La prosa del paper y del A.3 solo cambia con tu OK frase por frase. exp20 está
+firmada desde el 2026-11-16 (§2.5): sus cifras se citan como `exp20_rerank_arms`.
 
 | Tema | Lo que los datos sostienen |
 |---|---|
@@ -430,16 +486,15 @@ está firmada: para citar sus cifras hay que repetirla bajo un ID propio (§6, d
 
 ## 6. Decisiones que te tocan
 
-1. **¿Se firma exp20?** Recomiendo que sí: cambia la redacción de la afirmación principal y hoy
-   solo existe como corrida de auditoría. Exige repetirla bajo `experiments/results/exp20_…`
-   (unas 2 horas de CPU, sin Ollama), declararla viva en `src/utils/signed_evidence.py` (la guarda
-   B1 lo pide) y anotarla en el ledger.
+1. **¿Se firma exp20?** Resuelto: la firmaste el 2026-11-16 (§2.5). Queda una acción tuya o de
+   quien integre la rama: pegar la entrada de §10 en `paper/summer_ablation_log.md`. No hizo falta
+   tocar `src/utils/signed_evidence.py`.
 2. **¿Se cambia la afirmación principal del paper y del A.3?** Texto propuesto en §5. Es la
    consecuencia más seria de esta ronda.
 3. **¿Se valida el juez?** Una muestra de juicios humanos de relevancia (por ejemplo, 200 pares
    estratificados por acuerdo entre los dos jueces) resuelve C2 y da por primera vez una medida
    absoluta. Encaja con la fase humana ya prevista.
-4. **¿Se vuelve a verificar la fidelidad con ventanas en lugar de truncar?** Corrida `exp20+`, solo
+4. **¿Se vuelve a verificar la fidelidad con ventanas en lugar de truncar?** Corrida `exp21+`, solo
    NLI. Resuelve C5.
 5. **¿Se aplica el aviso del Flag 33?** Su propio umbral (10 %) está superado.
 6. Siguen abiertas B3, B4, B5, B7 y B8 (informe de auditoría, §5 y §8). No recomiendo un parche de
@@ -453,15 +508,21 @@ está firmada: para citar sus cifras hay que repetirla bajo un ID propio (§6, d
 | NDCG@5 circular firmado recalculado desde exp20 | desviación máxima 8 × 10⁻⁸ |
 | NDCG@5 independiente firmado recalculado desde exp20 | desviación máxima 2 × 10⁻⁷ |
 | SHA-256 del oráculo frente al manifiesto de julio | coincide |
-| Tests nuevos (`tests/test_fable_concept_probes.py`) | 14 rápidos y 1 `slow` que recorre todas las sondas; pasan. Incluyen la paridad de `ndcg_graded` con la función firmada sobre 300 pools aleatorios |
+| Réplica de la corrida firmada frente a la de auditoría (§2.5) | 1 358 de 1 358 listas, 582 de 582 pools, diferencia máxima de puntajes 0 |
+| Procedencia de la corrida firmada | `manifest.git_commit` = `0b37c7c`, `git_tracked_changes` = falso; sin rutas ni nombres de máquina en los cuatro archivos |
+| Tests nuevos (`tests/test_fable_concept_probes.py`) | 17 rápidos y 1 `slow` que recorre todas las sondas; pasan. Tres fijan el modo firmado: esquema de exp11, escritura única y reescritura permitida solo en modo auditoría. Incluyen la paridad de `ndcg_graded` con la función firmada sobre 300 pools aleatorios |
 | Revisión independiente de los dos scripts (agente revisor, solo lectura) | 1 hallazgo alto (la regresión de afinidad, retirada), 4 medios (descomposición dependiente del orden, subgrupos, comparación top-1 frente a media, acuerdo atenuado) y 2 bajos (tests). Todos corregidos. Recalculó por su cuenta +0,0157 y p = 0,0745 |
-| `bash init.sh`, tres capas | exit 0 (2403 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) |
-| Verificadores offline frente a la línea base | SHA-256 normalizado igual en los dos |
-| `git diff --stat 1574d22..HEAD -- experiments paper config src/ui scripts/study_operator .harness` | vacío |
+| `bash init.sh`, tres capas, con la evidencia firmada de exp20 presente | exit 0 (2406 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) |
+| Verificadores offline frente a la línea base, con exp20 presente | SHA-256 normalizado igual en los dos: su descubrimiento por forma no recoge exp20, que no tiene brazos de generación |
+| `scan_secrets` con los cuatro archivos firmados ya en el índice de git | exit 0, ningún hallazgo |
+| `git diff --stat 1574d22..HEAD -- experiments paper config src/ui scripts/study_operator .harness docs/decisions CLAUDE.md src/utils/signed_evidence.py` | solo los cuatro archivos nuevos de `experiments/results/exp20_rerank_arms/`; nada más |
 
 ## 8. Límites
 
-- exp20 no es evidencia firmada.
+- exp20 está firmada, pero su entrada de ledger todavía es texto propuesto (§10) y no está en
+  `paper/summer_ablation_log.md`.
+- La réplica exacta de §2.5 prueba que la corrida es determinista en esta máquina y en CPU. No
+  prueba que otra máquina u otra versión de las bibliotecas den los mismos bits.
 - No hay juicios humanos de relevancia. Todo NDCG de este proyecto es el acuerdo con un modelo.
 - El contraste de la fusión no tiene potencia para efectos pequeños (d_z < 0,20).
 - La longitud de las afirmaciones no está guardada: el truncado del NLI se da para 20, 40 y 60
@@ -488,3 +549,67 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42 PYTHONUTF8=1 .venv-app
 Ninguno de los dos carga pesos de modelos. Repetir la corrida de recuperación (unos 67 minutos de
 CPU) o la calificación con el oráculo (`--grade --oracle-path <carpeta local del modelo>`, unos 60
 minutos) sí los carga y requiere tu autorización.
+
+Para recalcular el análisis de la corrida firmada sin sobrescribirla (escribe `analysis_v2.md` y
+`analysis_v2.json`; sin el sufijo, la guarda aborta porque los archivos ya existen):
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONHASHSEED=42 PYTHONUTF8=1 .venv-app/Scripts/python.exe scripts/audit/exp20_rerank_arms.py --signed --analyze --analysis-suffix _v2
+```
+
+## 10. Texto propuesto para el ledger
+
+Entrada lista para pegar al final de `paper/summer_ablation_log.md` cuando se integre la rama. El
+número `N` es el siguiente libre en ese momento (en esta rama el último es 35; la sesión de
+despliegue puede haber añadido más).
+
+```markdown
+---
+
+## 2026-11-16 (N) — exp20_rerank_arms firmado: control con el mismo reranker y oráculo independiente [Fable 5.2]
+
+- **Autorización:** Enzo, el 2026-11-15 («si lanza el exp20», encoders locales, sin Ollama) y el
+  2026-11-16 («Sí, firma exp20»). Solo recuperación y reranking. No se cargó Ollama, NLI ni HHEM y
+  no se descargó nada.
+- **Qué responde:** exp11 compara «híbrido + reranker» con «denso sin reranker» y «léxico sin
+  reranker», así que no separa el aporte de la fusión del aporte del reranker. exp20 añade los
+  brazos `denso_rerank`, `lexico_rerank` y `union_rerank` sobre las mismas 194 consultas, con los
+  mismos objetos que `scripts/run_retrieval_only.py`, y califica el top-5 de los siete brazos con
+  el oráculo independiente `BAAI/bge-reranker-large`.
+- **Dónde:** `experiments/results/exp20_rerank_arms/` (`results.json`,
+  `oracle_scores__bge-reranker-indep.json`, `analysis.md`, `analysis.json`). Escritura única a
+  través de `guard_write`; el registro de experimentos vivos de `src/utils/signed_evidence.py`
+  sigue vacío. Script: `scripts/audit/exp20_rerank_arms.py --signed`.
+- **Procedencia:** commit `0b37c7c`, árbol sin cambios; SHA-256 del script `275b62fa…120dd2609`;
+  pesos `bge-large-en-v1.5` `45e19549…`, `ms-marco-MiniLM-L-12-v2` `1ed84b90…`,
+  `bge-reranker-large` `c5ae4e26…` (igual al manifiesto de julio); Python 3.14.3, torch 2.10.0+cpu,
+  sentence-transformers 5.2.3; CPU; seed 42; modo offline.
+- **Instrumento:** reproduce el top-5 firmado de exp11 en 194 de 194 consultas para `lexico`,
+  `denso` e `hibrido_rerank` (193 de 194 en orden y 194 en conjunto para `hibrido_pre`) y el
+  NDCG@5 independiente firmado con el pool de cuatro sistemas (desviación máxima 1,9 × 10⁻⁷).
+- **Réplica:** coincide bit a bit con la corrida de auditoría previa
+  (`output/audit/exp20_rerank_arms_2026-11-15/`): 1 358 de 1 358 listas top-5, 582 de 582 pools,
+  diferencia máxima 0 en los puntajes del reranker y en los 2 957 puntajes del oráculo.
+- **Resultado (NDCG@5, oráculo independiente, pool común de siete brazos):** `lexico` 0,4276;
+  `hibrido_pre` 0,5817; `denso` 0,6035; `lexico_rerank` 0,6461; `denso_rerank` 0,6985;
+  `union_rerank` 0,7062; `hibrido_rerank` 0,7142.
+- **Contrastes pareados (n = 194; p de Wilcoxon y p agrupando por plantilla):**
+  `hibrido_rerank − denso_rerank` +0,0157 (d_z 0,11; p 0,075; 0,16; IC 95 % −0,004 a +0,035);
+  `denso_rerank − denso` +0,0951 (p 2 × 10⁻⁶); `hibrido_rerank − hibrido_pre` +0,1325
+  (p 9 × 10⁻¹¹); `hibrido_pre − denso` −0,0217 (p 0,19); `union_rerank − hibrido_rerank` −0,0080
+  (p 0,25).
+- **Lectura:** con el mismo reranker, la ventaja del híbrido sobre el denso no es significativa. La
+  mejora firmada del pipeline completo sobre el denso procede sobre todo del reranker. La fusión
+  RRF sola no mejora al denso. Darle al reranker la unión de los pools no mejora el resultado.
+- **Límites:** el NDCG es relativo al pool y el juez es un modelo de la misma familia que el
+  recuperador denso; no hay juicios humanos. El contraste de la fusión no tiene potencia para
+  efectos con d_z < 0,20. El análisis por subgrupo (con y sin filtro de proveedor) es exploratorio.
+- **No cambia:** ninguna cifra firmada de exp3 a exp19b. No se tocó el paper, el A.3, `src/` ni la
+  configuración. La redacción de la afirmación principal queda como decisión de Enzo, frase por
+  frase (propuesta en `docs/reports/fable-rag-conceptos-2026-11.md`, §5).
+- **Nota de identificador:** «exp20» figuraba como nombre tentativo de un selector de diversidad
+  (comentario en `src/retrieval/coverage_balancer.py` y `docs/CLOUD_EXPERIMENT_DESIGN.md`). Esa
+  idea no se corrió; si se retoma, usa `exp21` o posterior.
+
+*Fin de la entrada N — [Fable 5.2] 2026-11-16.*
+```

@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-16 01:12 | rama `fable/rag-auditoria` @ `0e21e32` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
-Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2403 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
-Cambios: 28 commits sobre `1574d22` más el de documentación de esta ronda; B1, B2 y B6 aplicadas (§12); análisis del porqué (§13); exp20 y auditoría de concepto (§14) | Sin verificar: no se ejecutó ningún LLM, NLI ni HHEM (exp20 sí corrió el encoder denso, el reranker y el oráculo, con autorización; ver §14); `init.sh` completo corrió sobre `0e21e32`, antes del commit que solo añade documentación (capas 1 y 3 repetidas después); ver §10 y §13
+[Fable 5.2] | 2026-11-16 04:40 | rama `fable/rag-auditoria` @ `bf8a18d` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
+Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2406 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
+Cambios: 31 commits sobre `1574d22` más el de documentación de esta ronda; B1, B2 y B6 aplicadas (§12); análisis del porqué (§13); exp20, su firma y la auditoría de concepto (§14) | Sin verificar: no se ejecutó ningún LLM, NLI ni HHEM (exp20 sí corrió el encoder denso, el reranker y el oráculo, con autorización; ver §14); `init.sh` completo corrió con la evidencia firmada presente y antes del commit que solo añade documentación (capas 1 y 3 repetidas después); ver §10 y §13
 
 # Auditoría y endurecimiento del código RAG (noviembre de 2026)
 
@@ -705,8 +705,18 @@ en todo el código y los planteamientos, del tipo de la circularidad del orácul
   robusto y se retira; el oráculo independiente sí estaba en disco; y una regresión que parecía
   mostrar que el juez favorece a la pierna densa era un artefacto de selección, detectado por una
   revisión independiente de los scripts.
-- exp20 **no es evidencia firmada**: vive en `output/audit/` y firmarla es decisión de Enzo.
+- **exp20 está firmada desde el 2026-11-16.** Enzo respondió «Sí, firma exp20». La corrida se
+  repitió completa en modo firmado y quedó en `experiments/results/exp20_rerank_arms/`, con
+  escritura única a través de `guard_write` y manifiesto de procedencia (commit `0b37c7c`, árbol
+  sin cambios). Coincide bit a bit con la corrida de auditoría: 1 358 de 1 358 listas top-5, 582 de
+  582 pools y diferencia máxima 0 en los puntajes del reranker y del oráculo. Es la única
+  excepción a la regla de no escribir en `experiments/results/**`, y solo crea un directorio nuevo.
+  `src/utils/signed_evidence.py` no se tocó y el registro de experimentos vivos sigue vacío: la
+  exigencia de declarar vivo un experimento (§12) aplica al `BenchmarkRunner`, que reescribe sus
+  archivos al reanudar, y exp20 escribe cada archivo una sola vez. La entrada de ledger queda como
+  texto propuesto (informe de conceptos, §10); `paper/**` no se tocó. Las corridas pendientes que
+  este informe llama `exp20+` pasan a ser `exp21+`.
 
 Código nuevo: `scripts/audit/exp20_rerank_arms.py`, `scripts/audit/fable_concept_probes.py` y
-`tests/test_fable_concept_probes.py` (14 tests rápidos y 1 `slow`). Ningún archivo de `src/`
+`tests/test_fable_concept_probes.py` (17 tests rápidos y 1 `slow`). Ningún archivo de `src/`
 cambió en esta ronda.
