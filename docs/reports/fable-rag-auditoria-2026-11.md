@@ -66,7 +66,7 @@ comportamiento incorrecto en el camino desplegado; MEDIO y BAJO = el resto.
 |---|---|---|---|---|---|---|
 | H-01 | CRÍTICO (riesgo) | B1 | `src/evaluation/benchmark_runner.py:199-215`, `:533-568`, `:703-707` | `BenchmarkRunner` escribe `results.json`, `aggregated_metrics.json` y los checkpoints sin pasar por `guard_write`. Relanzar un experimento firmado con todo ya completado reescribe sus artefactos sin cargar ningún modelo | Traza: `run_experiment` siempre termina en `_save_experiment_results`; `scripts/run_benchmark.py:164` y `scripts/run_llm_only_benchmark.py:138` usan el directorio de evidencia por defecto | Propuesto (B1); decide Enzo |
 | H-02 | MEDIO (latente) | B2 | `src/evaluation/statistical_analysis.py:197-217`, `:297-307` | Dos sistemas con puntajes idénticos dan `p=NaN`; un solo NaN vuelve NaN todos los `p_bh` y `p_holm` de la familia | Reproducido con scipy 1.17.1. La evidencia firmada no contiene ningún `p` NaN | Propuesto (B2); decide Enzo |
-| H-03 | MEDIO | B3 | `src/evaluation/benchmark_runner.py:258-324` | `_run_single_query` ignora `response.error`: una falla del pipeline queda como fila válida y su texto de error se puntúa como si fuera la respuesta | exp3, brazos lineales: q042 y q049 sin fragmentos recuperados en los 3 brazos, con `errors: 0` | Abierto |
+| H-03 | MEDIO | B3 | `src/evaluation/benchmark_runner.py:258-324` | `_run_single_query` ignora `response.error`: una falla del pipeline queda como fila válida y su texto de error se puntúa como si fuera la respuesta | exp3, brazos lineales: q042 y q049 sin fragmentos recuperados en los 3 brazos, con `errors: 0` | Propuesto (B3); decide Enzo |
 | H-04 | ALTO | B4 | `src/retrieval/coverage_balancer.py:86-88` | Los nombres de servicio genéricos del índice (`virtual machines`, `virtual network`, `vpc`, `iam`) añaden un proveedor que la pregunta no compara y le asignan cuota en `SURVEY_DEPLOY` | «Compare virtual machines on AWS and GCP» resuelve `aws, azure, gcp` con el índice real | Abierto |
 | H-05 | ALTO | B5 | `src/retrieval/query_processor.py:140-148` | La detección de proveedor es por subcadena: `laws` y `flaws` contienen `aws` y activan el filtro `single_provider` | «What data residency laws apply to object storage?» queda filtrada a AWS | Abierto |
 | H-06 | MEDIO | B6 | `src/evaluation/latency_metrics.py:46-51` | Se descartan los valores a más de 3 desviaciones antes de calcular p95, p99 y máximo: se recorta justo la cola que esas cifras deben describir | exp8b denso: p95 41 541 ms recortado frente a 45 630 ms sin recortar | Abierto |
@@ -175,3 +175,32 @@ debía cubrir «todas las diferencias son cero» ya no se alcanza con esta versi
    etiqueta `test_name` en un par totalmente empatado.
 4. **Corrida nueva:** ninguna. Protege cualquier análisis futuro (`exp20+`) en el que dos brazos
    coincidan en una métrica, cosa probable en métricas binarias con pocos casos.
+
+### B3 (H-03, MEDIO): los errores del pipeline se registran como respuestas válidas
+
+**Defecto.** `RAGPipeline.query` no lanza excepción cuando falla: devuelve un `RAGResponse` con
+`error` y un texto fijo en `answer` («Error generating response: …», «Pipeline error: …» o «No relevant
+documentation found for this query.»). `_run_single_query` no mira `response.error`, así que la fila
+queda con `error=None`, cuenta como válida y, si hay métricas de generación o de fidelidad, el texto
+fijo se puntúa como si fuera la respuesta del modelo. Un fallo de Ollama a mitad de una corrida
+entraría al promedio de fidelidad como un 0 con `method="nli"`.
+
+**Rastro en la evidencia.** exp3, brazos `retrieval_hybrid_linear_03/05/07`: q042 y q049 (ambas sobre
+Azure Container Instances) no recuperaron ningún fragmento y su `answer` es el texto fijo, con
+`errors: 0` en los tres brazos. Son 6 filas. En esas filas `retrieval_metrics` está vacío, así que no
+movieron ninguna media. En el resto de `experiments/results/**/*.json` no hay ninguna `answer` que
+empiece por uno de los tres textos fijos.
+
+1. **Test:** `tests/test_fable_benchmark_runner.py::test_a_pipeline_error_is_recorded_as_an_error_not_scored_as_an_answer`.
+2. **Parche:** [B3.diff](fable-rag-2026-11/patches/B3.diff). La fila conserva `retrieved_ids` y sus
+   métricas de recuperación, lleva `error=response.error` y no calcula métricas de generación ni de
+   fidelidad sobre el texto fijo.
+3. **Impacto:** ninguna cifra firmada cambia. Si exp3 se re-agregara, sus tres brazos lineales pasarían
+   de `errors: 0` a `errors: 2`.
+4. **Corrida nueva:** ninguna para la evidencia actual. Cualquier corrida `exp20+` con este runner
+   reportaría sus fallos como fallos.
+
+Punto que debes decidir: una consulta sin fragmentos recuperados, ¿es un error o un cero de
+recuperación? El parche la trata como error, igual que hoy se tratan las excepciones, y por tanto queda
+fuera de las medias de recuperación. Si prefieres contarla como cero, hace falta además separar en
+`_save_aggregated_metrics` las filas válidas para recuperación de las válidas para generación.
