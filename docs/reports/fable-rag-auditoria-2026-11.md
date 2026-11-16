@@ -92,6 +92,11 @@ Notas de A1:
 - La escritura usa un archivo temporal hermano y `os.replace`. Si el archivo de caché fuera un enlace
   simbólico de archivo, `os.replace` sustituiría el enlace por un archivo normal. En este repositorio
   `data/llm_cache/` contiene archivos normales, así que el caso no se da.
+- `os.replace` añade dos modos de fallo que la escritura directa no tenía: en Windows falla si otro
+  proceso tiene abierto el archivo de caché en ese instante, y necesita permiso de escritura en el
+  directorio, no solo en el archivo. En ambos casos se registra el aviso de siempre y esa entrada no se
+  persiste; el texto generado no cambia. No hay un segundo escritor en `src` y el despliegue corre con la
+  caché desactivada.
 - El docstring del módulo ahora dice la verdad sobre el timeout: 60 s para OpenAI, y para Ollama solo con
   `enforce_timeout=True`. El camino por defecto de los benchmarks llama a `ollama.chat` sin timeout de
   cliente. El comportamiento no se tocó.
@@ -379,7 +384,8 @@ comprobar que se excluyan igual. La causa de que el modelo devuelva vacío no la
 
 ### 6.3 Cadena de construcción del índice (P3): observaciones sin parche
 
-Lectura parcial: `adaptive_chunker.py`, `text_cleaner.py` y `embedding_manager.py` completos. Todo cambio
+Lectura parcial: `adaptive_chunker.py`, `text_cleaner.py`, `deduplicator.py` y `embedding_manager.py`
+completos. Todo cambio
 aquí es de clase B, obliga a reconstruir el índice e invalida la comparabilidad con exp10 a exp19b, así
 que no preparé parches ni tests. Quedan como observaciones con su traza:
 
@@ -395,7 +401,16 @@ que no preparé parches ni tests. Quedan como observaciones con su traza:
 - `text_cleaner.py:115-131` colapsa los espacios repetidos fuera de bloques cercados, incluida la
   indentación; `:139-156` elimina párrafos repetidos de 20 caracteres o más aunque estén dentro de código.
 
-No leídos: `deduplicator.py`, `terminology_normalizer.py`, `metadata_extractor.py`, `doc_parser.py`, los
+- `deduplicator.py:153-172`: cada grupo de casi-duplicados conserva el documento más largo, pero el grupo
+  se arma con todo lo que devuelve la consulta LSH, incluidos documentos que ya se marcaron para borrar.
+  Si B ya cayó frente a A y luego C se agrupa con B, y B es más largo que C, C también se borra aunque
+  no se parezca a A. Un documento puede eliminarse en favor de otro que tampoco sobrevive.
+- `src/ingestion/doc_parser.py:46,74`: `doc_id` y `chunk_id` son `uuid4()` aleatorios. Reconstruir el
+  corpus genera identificadores nuevos, así que los `retrieved_ids` de la evidencia solo se pueden
+  resolver contra el índice ya construido. La reproducibilidad de la recuperación depende de conservar
+  `data/indices`, no de poder regenerarlo.
+
+No leídos: `terminology_normalizer.py`, `metadata_extractor.py`, el resto de `doc_parser.py`, los
 crawlers, `ingestion_pipeline.py`, los otros cuatro chunkers y `test_queries.py`. De `results_exporter.py`
 solo revisé dónde calcula estadísticos.
 
@@ -502,3 +517,25 @@ Ninguno de los dos archivos de destino se editó (límite 5).
   "passes": false
 }
 ```
+
+## 10. Lo que no se verificó y por qué
+
+- **Ningún modelo se ejecutó** (D1): ni Ollama, ni BGE, ni el cross-encoder, ni NLI, ni HHEM. La
+  equivalencia de los arreglos de clase A descansa en tests con dobles y en que los dos verificadores
+  offline dan el mismo SHA-256. No hay una comparación de recuperación real antes y después. Para los tres
+  arreglos aplicados el riesgo es bajo: no tocan recuperación, prompt ni métricas.
+- **El efecto real de B4 y B5 sobre lo recuperado** no está medido. Sé qué proveedores se resuelven y qué
+  filtro se activa; no sé cuánto cambia la respuesta final, porque eso exige el índice y el generador.
+- **Cobertura de tests:** no medida (`pytest-cov` ausente).
+- **Cadena de construcción del índice (P3):** lectura parcial, detallada en §6.3. No ejecuté ningún
+  chunker ni limpiador: el tokenizador y el modelo de embeddings del chunker no se cargaron.
+- **`results_exporter.py`:** solo revisé dónde calcula estadísticos. Las figuras no se regeneraron.
+- **Prosa del paper y del A.3:** no la leí. La afirmación de que ninguna latencia de exp8 se cita se limita
+  a `docs/reports/results-summary.md` y `docs/TRACEABILITY_nota3.md`.
+- **Causa de las 399 respuestas vacías de exp12:** no investigada; haría falta generar.
+- **Otros sistemas operativos:** todo corrió en Windows con `.venv-app` (Python 3.14.3). No corrí la suite
+  en Linux ni en CI.
+- **Combinación de parches B:** los ocho aplican juntos sobre el HEAD de esta rama y la suite `fable` pasa
+  con todos puestos. No corrí `init.sh` completo con los parches aplicados.
+- **Simulación de B1:** la tabla de campos que cambiarían sale de re-agregar en memoria las filas de cada
+  `results.json` firmado. No ejecuté `scripts/run_benchmark.py` sobre la evidencia.

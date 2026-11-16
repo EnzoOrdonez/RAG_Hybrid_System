@@ -126,7 +126,7 @@ def test_query_timeout_is_accepted_but_never_enforced(tmp_path, monkeypatch):
     result = r._run_single_query(_query(), FakePipeline(response, delay_s=0.05), "cfg")
 
     assert r.query_timeout == 0 and result.error is None
-    assert result.latency["benchmark_total_ms"] >= 50
+    assert result.latency["benchmark_total_ms"] >= 40      # margen: sleep(0.05) puede volver antes
 
 
 def test_the_module_does_not_advertise_a_timeout_it_does_not_apply():

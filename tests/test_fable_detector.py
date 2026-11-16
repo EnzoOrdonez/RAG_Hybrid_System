@@ -218,7 +218,10 @@ def test_set_all_seeds_makes_random_and_numpy_repeatable():
 def test_hashseed_guard_only_re_executes_when_the_variable_is_missing(monkeypatch):
     execs = []
     monkeypatch.setattr(reproducibility.os, "execv", lambda exe, argv: execs.append((exe, argv)))
-    monkeypatch.delenv("_CLOUDRAG_HASHSEED_REEXEC", raising=False)
+    # setenv antes de delenv: delenv sobre una variable ausente no registra nada que deshacer, y
+    # la función bajo prueba escribe el centinela directamente en os.environ.
+    monkeypatch.setenv("_CLOUDRAG_HASHSEED_REEXEC", "0")
+    monkeypatch.delenv("_CLOUDRAG_HASHSEED_REEXEC")
 
     monkeypatch.setenv("PYTHONHASHSEED", "42")
     reproducibility.ensure_hashseed_at_startup(42)
