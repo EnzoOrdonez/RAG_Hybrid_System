@@ -43,6 +43,79 @@ SEED = 42
 ORACLE_MODEL = "BAAI/bge-reranker-large"
 ORACLE_FILE = "oracle_scores__bge-reranker-indep.json"
 FAIR_ARM = "hibrido_justo_rerank"
+
+# Modo firmado (--signed): la corrida se escribe UNA vez bajo experiments/results. La guarda de evidencia
+# protege por defecto todo directorio exp*, así que cada archivo se crea y no se vuelve a tocar.
+AUDIT_DIR = OUT_DIR
+SIGNED_DIR = ROOT / "experiments" / "results" / "exp20_rerank_arms"
+SIGNED = False
+ANALYSIS_SUFFIX = ""
+# Nombres de sistema con el esquema de exp11, para que `scripts/compute_retrieval_metrics.py` pueda leer la corrida.
+ARM_CONFIG_NAMES = {
+    "lexico": "RAG Lexico (BM25)",
+    "denso": "RAG Semantico (Dense)",
+    "hibrido_rerank": "RAG Hibrido Propuesto",
+    "hibrido_pre": "RAG Hibrido (pre-rerank RRF)",
+    "denso_rerank": "RAG Semantico (Dense) + reranker",
+    "lexico_rerank": "RAG Lexico (BM25) + reranker",
+    "union_rerank": "Reranker sobre la union de pools",
+}
+
+
+def exp11_style_configs(rows) -> dict:
+    """Bloque `configs` con el mismo esquema que exp11: un sistema por brazo y una fila por consulta."""
+    return {name: {"total_queries": len(rows), "errors": 0,
+                   "results": [{"query_id": r["query_id"], "config_name": name, "question": r["question"],
+                                "answer": "", "retrieved_ids": list(r["arms"][arm]), "relevant_ids": [], "error": None}
+                               for r in rows]}
+            for arm, name in ARM_CONFIG_NAMES.items()}
+
+
+def _write_once(path: Path, text: str) -> None:
+    """Escribe el archivo. En modo firmado pasa por la guarda de evidencia, que se niega a sobrescribir."""
+    if SIGNED:
+        from src.utils.signed_evidence import guard_write
+        guard_write(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8", newline="\n")
+
+
+def _sha256(path: Path) -> str:
+    import hashlib
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for block in iter(lambda: handle.read(1 << 24), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _manifest() -> dict:
+    """Procedencia de la corrida: commit, script, pesos y versiones. Sin rutas, hosts ni usuarios."""
+    import os
+    import platform
+    import subprocess
+
+    import sentence_transformers
+    import torch
+
+    from src.utils.local_models import local_snapshot
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=False).stdout.strip()
+
+    weights = {}
+    for model_id in ("BAAI/bge-large-en-v1.5", "cross-encoder/ms-marco-MiniLM-L-12-v2"):
+        snapshot = local_snapshot(model_id)
+        weights[model_id] = _sha256(Path(snapshot) / "model.safetensors") if snapshot else None
+    return {"git_commit": git("rev-parse", "HEAD"),
+            "git_tracked_changes": bool(git("status", "--porcelain", "--untracked-files=no")),
+            "script_sha256": _sha256(Path(__file__)),
+            "model_sha256": weights,
+            "python": platform.python_version(), "system": platform.system(),
+            "torch": torch.__version__, "sentence_transformers": sentence_transformers.__version__,
+            "device": "cpu",
+            "env": {key: os.environ.get(key) for key in
+                    ("HF_HUB_OFFLINE", "TRANSFORMERS_OFFLINE", "PYTHONHASHSEED", "PYTHONUTF8")}}
 GRADE_BLOCK = 64
 
 
@@ -88,25 +161,35 @@ def grade(oracle_path: Path) -> int:
     payload = json.loads((OUT_DIR / "results.json").read_text(encoding="utf-8"))
     chunk_map = json.loads((ROOT / "data" / "indices" / "chunk_map_bge-large_adaptive_500.json")
                            .read_text(encoding="utf-8"))
+    import tempfile
+
     out_path = OUT_DIR / ORACLE_FILE
-    scores = json.loads(out_path.read_text(encoding="utf-8"))["scores"] if out_path.exists() else {}
+    # En modo firmado los avances parciales van a un temporal: el archivo de evidencia se escribe una vez.
+    partial_path = Path(tempfile.gettempdir()) / "exp20_signed_oracle_partial.json" if SIGNED else out_path
+    source = out_path if out_path.exists() else partial_path
+    scores = json.loads(source.read_text(encoding="utf-8"))["scores"] if source.exists() else {}
     rrf_fuse = _load_audit_module("fable_why_analysis").rrf_fuse
     pending = [(r["query_id"], r["question"], cid)
                for r in payload["results"]
                for cid in sorted({c for ids in r["arms"].values() for c in ids} | set(fair_hybrid_top5(r, rrf_fuse)))
                if cid not in scores.get(r["query_id"], {})]
     pending.sort(key=lambda item: len(chunk_map[item[2]]["text"]))
-    digest = hashlib.sha256()
-    with open(oracle_path / "model.safetensors", "rb") as handle:
-        for block in iter(lambda: handle.read(1 << 24), b""):
-            digest.update(block)
+    model_sha = _sha256(oracle_path / "model.safetensors")
 
     def save(done: bool) -> None:
-        body = {"oracle_model": ORACLE_MODEL, "model_sha256": digest.hexdigest(), "complete": done,
-                "status": "NO FIRMADO. Corrida de auditoría.", "scores": scores}
-        out_path.write_text(json.dumps(body, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+        body = {"oracle_model": ORACLE_MODEL, "model_sha256": model_sha, "complete": done,
+                "status": ("Corrida firmada exp20_rerank_arms." if SIGNED else "NO FIRMADO. Corrida de auditoría."),
+                "scores": scores}
+        text = json.dumps(body, ensure_ascii=False, indent=1) + "\n"
+        if done:
+            _write_once(out_path, text)
+        else:
+            partial_path.write_text(text, encoding="utf-8", newline="\n")
 
     print(f"[exp20] oráculo {ORACLE_MODEL}: {len(pending)} pares pendientes", flush=True)
+    if not pending and out_path.exists():
+        print(f"[exp20] nada que calificar: {out_path} ya está completo")
+        return 0
     if pending:
         model = CrossEncoder(str(oracle_path), device="cpu")
         started = time.perf_counter()
@@ -239,6 +322,34 @@ def _oracle_comparison(rows, oracle, probes, log, table, data) -> None:
         "anula por construcción los coeficientes de ms-marco. En la muestra sin esa selección la asimetría desaparece.")
     log()
     table(["Muestra", "Pares", "Juez", "β «estaba en el top-50 denso»", "β «estaba en el top-50 léxico»"], body)
+
+
+def _replication_section(rows, oracle, arms, log, data, failures) -> None:
+    """Compara la corrida firmada con la corrida de auditoría previa: mismas listas y mismos puntajes."""
+    audit_rows = {r["query_id"]: r for r in json.loads((AUDIT_DIR / "results.json").read_text(encoding="utf-8"))["results"]}
+    same_lists = sum(1 for r in rows for arm in arms if r["arms"][arm] == audit_rows[r["query_id"]]["arms"][arm])
+    same_pools = sum(1 for r in rows for pool in ("lexico", "denso", "hibrido")
+                     if r["pools"][pool] == audit_rows[r["query_id"]]["pools"][pool])
+    reranker_gap = max(abs(score - audit_rows[r["query_id"]]["reranker_scores"].get(cid, float("inf")))
+                       for r in rows for cid, score in r["reranker_scores"].items())
+    log("## Réplica frente a la corrida de auditoría del 2026-11-15")
+    log()
+    total_lists, total_pools = len(rows) * len(arms), len(rows) * 3
+    log(f"- Top-5 idéntico (identificadores y orden): {same_lists}/{total_lists} listas (consulta, brazo).")
+    log(f"- Pools de candidatos idénticos: {same_pools}/{total_pools}.")
+    log(f"- Diferencia máxima de puntaje del reranker sobre el mismo par: {reranker_gap:.2e}.")
+    data["replication"] = {"same_top5": same_lists, "lists": total_lists, "same_pools": same_pools,
+                           "pools": total_pools, "max_reranker_gap": reranker_gap}
+    audit_oracle_path = AUDIT_DIR / ORACLE_FILE
+    if oracle and oracle["complete"] and audit_oracle_path.exists():
+        audit_scores = json.loads(audit_oracle_path.read_text(encoding="utf-8"))["scores"]
+        gaps = [abs(score - audit_scores[qid][cid]) for qid, by_chunk in oracle["scores"].items()
+                for cid, score in by_chunk.items() if cid in audit_scores.get(qid, {})]
+        log(f"- Diferencia máxima de puntaje del oráculo independiente sobre {len(gaps)} pares comunes: {max(gaps):.2e}.")
+        data["replication"].update({"oracle_pairs": len(gaps), "max_oracle_gap": max(gaps)})
+    log()
+    if same_lists != total_lists or same_pools != total_pools:
+        failures.append("la corrida firmada no reproduce las listas de la corrida de auditoría")
 
 
 def _independent_section(rows, oracle, arms, mapping, log, table, data, failures) -> None:
@@ -464,14 +575,15 @@ def analyze() -> int:
     oracle = json.loads(oracle_path.read_text(encoding="utf-8")) if oracle_path.exists() else None
     if oracle and oracle["complete"]:
         _independent_section(rows, oracle, arms, mapping, log, table, data, failures)
+    if SIGNED and (AUDIT_DIR / "results.json").exists():
+        _replication_section(rows, oracle, arms, log, data, failures)
 
     log("## Comprobaciones")
     log()
     log(f"- Fallos: {len(failures)}" + (f" ({'; '.join(failures)})" if failures else ""))
     text = "\n".join(out) + "\n"
-    (OUT_DIR / "analysis.md").write_text(text, encoding="utf-8", newline="\n")
-    (OUT_DIR / "analysis.json").write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n",
-                                           encoding="utf-8", newline="\n")
+    _write_once(OUT_DIR / f"analysis{ANALYSIS_SUFFIX}.md", text)
+    _write_once(OUT_DIR / f"analysis{ANALYSIS_SUFFIX}.json", json.dumps(data, indent=1, ensure_ascii=False) + "\n")
     sys.stdout.write(text)
     return 1 if failures else 0
 
@@ -487,7 +599,15 @@ def main() -> int:
                         help="puntúa el top-5 de los brazos con el oráculo independiente (requiere --oracle-path)")
     parser.add_argument("--oracle-path", type=Path, default=None,
                         help="carpeta local de BAAI/bge-reranker-large (no se descarga nada)")
+    parser.add_argument("--signed", action="store_true",
+                        help="corrida firmada: escribe una sola vez en experiments/results/exp20_rerank_arms")
+    parser.add_argument("--analysis-suffix", default="",
+                        help="sufijo del análisis (p. ej. _v2) si ya existe uno en la corrida firmada")
     args = parser.parse_args()
+    global OUT_DIR, SIGNED, ANALYSIS_SUFFIX
+    SIGNED, ANALYSIS_SUFFIX = args.signed, args.analysis_suffix
+    if SIGNED:
+        OUT_DIR = SIGNED_DIR
     if args.analyze:
         return analyze()
     if args.grade:
@@ -551,21 +671,26 @@ def main() -> int:
 
     payload = {
         "experiment_id": "exp20_rerank_arms",
-        "status": "NO FIRMADO. Corrida de auditoría en output/audit; no es evidencia de experiments/results.",
+        "name": "Retrieval-only: brazos de control con el mismo reranker",
+        "status": ("Corrida firmada exp20_rerank_arms. Autorizada por Enzo el 2026-11-16. Solo recuperación y reranking."
+                   if SIGNED else
+                   "NO FIRMADO. Corrida de auditoría en output/audit; no es evidencia de experiments/results."),
         "timestamp": datetime.now().isoformat(timespec="seconds"),
         "seed": SEED,
         "models_loaded": ["BAAI/bge-large-en-v1.5 (encoder denso)",
                           "cross-encoder/ms-marco-MiniLM-L-12-v2 (reranker)"],
-        "models_not_loaded": ["Ollama", "NLI", "HHEM", "BAAI/bge-reranker-large (oráculo independiente; no está en disco)"],
-        "configs": {"lexico": BASELINE_LEXICAL.name, "denso": BASELINE_SEMANTIC.name, "hibrido": PROPOSED_HYBRID.name},
+        "models_not_loaded": ["Ollama", "NLI", "HHEM",
+                              "BAAI/bge-reranker-large (oráculo independiente; se usa aparte, con --grade)"],
+        "pipeline_configs": {"lexico": BASELINE_LEXICAL.name, "denso": BASELINE_SEMANTIC.name,
+                             "hibrido": PROPOSED_HYBRID.name},
         "retrieval_top_k": PROPOSED_HYBRID.retrieval_top_k, "final_top_k": final_k,
         "num_queries": len(rows), "elapsed_s": round(time.perf_counter() - started, 1),
+        "manifest": _manifest(),
+        "configs": exp11_style_configs(rows),
         "results": rows,
     }
     if args.max_queries is None:
-        OUT_DIR.mkdir(parents=True, exist_ok=True)
-        (OUT_DIR / "results.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n",
-                                              encoding="utf-8", newline="\n")
+        _write_once(OUT_DIR / "results.json", json.dumps(payload, ensure_ascii=False, indent=1) + "\n")
         print(f"[exp20] guardado en {OUT_DIR / 'results.json'}")
     else:
         print(f"[exp20] prueba de humo con {len(rows)} consultas: no se guarda nada")

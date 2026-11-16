@@ -151,6 +151,40 @@ def test_fair_hybrid_arm_fuses_the_filtered_pools_and_reorders_by_reranker_score
     assert exp20.fair_hybrid_top5(row, why.rrf_fuse, depth=50, k=3) == ["d", "b", "c"]
 
 
+# ------------------------------------------------------------ modo firmado de exp20
+def test_signed_results_use_the_exp11_schema_so_the_metric_script_can_read_them():
+    rows = [{"query_id": "q1", "question": "pregunta", "arms": {arm: [f"{arm}-{i}" for i in range(5)]
+                                                              for arm in exp20.ARM_CONFIG_NAMES}}]
+    configs = exp20.exp11_style_configs(rows)
+    assert set(configs) == set(exp20.ARM_CONFIG_NAMES.values())
+    assert {"RAG Lexico (BM25)", "RAG Semantico (Dense)", "RAG Hibrido Propuesto",
+            "RAG Hibrido (pre-rerank RRF)"} <= set(configs)          # los cuatro nombres firmados de exp11
+    block = configs["RAG Semantico (Dense) + reranker"]
+    assert block["total_queries"] == 1 and block["errors"] == 0
+    assert block["results"][0]["retrieved_ids"] == [f"denso_rerank-{i}" for i in range(5)]
+    assert block["results"][0]["query_id"] == "q1" and block["results"][0]["question"] == "pregunta"
+
+
+def test_signed_mode_writes_each_evidence_file_once_and_refuses_to_overwrite(tmp_path, monkeypatch):
+    import src.utils.signed_evidence as signed_evidence
+    monkeypatch.setattr(signed_evidence, "RESULTS", tmp_path)
+    monkeypatch.setattr(exp20, "SIGNED", True)
+    target = tmp_path / "exp99_prueba" / "results.json"
+    exp20._write_once(target, "primera")
+    assert target.read_text(encoding="utf-8") == "primera"
+    with pytest.raises(SystemExit):
+        exp20._write_once(target, "segunda")
+    assert target.read_text(encoding="utf-8") == "primera"
+
+
+def test_audit_mode_may_rewrite_its_own_outputs(tmp_path, monkeypatch):
+    monkeypatch.setattr(exp20, "SIGNED", False)
+    target = tmp_path / "analysis.md"
+    exp20._write_once(target, "a")
+    exp20._write_once(target, "b")
+    assert target.read_text(encoding="utf-8") == "b"
+
+
 # --------------------------------------------------------------- recorrido real
 @pytest.mark.slow
 @pytest.mark.skipif(not probes.EXP20.exists() or not (probes.MODELS / "nli-deberta-v3-small" / "tokenizer.json").exists(),
