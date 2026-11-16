@@ -69,7 +69,7 @@ comportamiento incorrecto en el camino desplegado; MEDIO y BAJO = el resto.
 | H-03 | MEDIO | B3 | `src/evaluation/benchmark_runner.py:258-324` | `_run_single_query` ignora `response.error`: una falla del pipeline queda como fila válida y su texto de error se puntúa como si fuera la respuesta | exp3, brazos lineales: q042 y q049 sin fragmentos recuperados en los 3 brazos, con `errors: 0` | Propuesto (B3); decide Enzo |
 | H-04 | ALTO | B4 | `src/retrieval/coverage_balancer.py:86-88` | Los nombres de servicio genéricos del índice (`virtual machines`, `virtual network`, `vpc`, `iam`) añaden un proveedor que la pregunta no compara y le asignan cuota en `SURVEY_DEPLOY` | «Compare virtual machines on AWS and GCP» resuelve `aws, azure, gcp` con el índice real | Propuesto (B4); decide Enzo |
 | H-05 | ALTO | B5 | `src/retrieval/query_processor.py:140-148` | La detección de proveedor es por subcadena: `laws` y `flaws` contienen `aws` y activan el filtro `single_provider` | «What data residency laws apply to object storage?» queda filtrada a AWS | Propuesto (B5); decide Enzo |
-| H-06 | MEDIO | B6 | `src/evaluation/latency_metrics.py:46-51` | Se descartan los valores a más de 3 desviaciones antes de calcular p95, p99 y máximo: se recorta justo la cola que esas cifras deben describir | exp8b denso: p95 41 541 ms recortado frente a 45 630 ms sin recortar | Abierto |
+| H-06 | MEDIO | B6 | `src/evaluation/latency_metrics.py:46-51` | Se descartan los valores a más de 3 desviaciones antes de calcular p95, p99 y máximo: se recorta justo la cola que esas cifras deben describir | exp8b denso: p95 41 541 ms recortado frente a 45 630 ms sin recortar | Propuesto (B6); decide Enzo |
 | H-07 | MEDIO (latente) | B7 | `src/evaluation/benchmark_runner.py:140` | La caché de índices usa `estrategia_tamaño` e ignora el modelo de embeddings: dos configuraciones con modelos distintos comparten el primer índice cargado | Traza de código; afecta a `exp2`, que no es evidencia firmada | Abierto |
 | H-08 | MEDIO | B8 | `src/generation/llm_manager.py:304-311` | `generate()` guarda en caché una respuesta vacía y la sirve para siempre; `generate_stream()` sí la descarta | exp12 tiene 399 respuestas vacías de 3104 (N6.4 documenta 177 de qwen sin RAG) | Abierto |
 | H-09 | BAJO | A | `src/generation/llm_manager.py:180-197`, `:319-328` | La caché se escribe sin atomicidad y una caché ilegible se descarta en silencio; el log dice «retrying» en el último intento | Traza de código y 3 tests en rojo antes del arreglo | Corregido (A1) |
@@ -258,3 +258,29 @@ apuntan a un corpus borrado. F2 sigue pendiente de tu decisión y este parche no
    camino desplegado y a cualquier consulta libre.
 4. **Corrida nueva:** ninguna. `QueryProcessor` alimenta el `query_type` de `run_generation_matrix.py`;
    como no cambia en ninguna de las 194, una re-corrida de exp11 o exp12 no se vería alterada.
+
+### B6 (H-06, MEDIO): las latencias se recortan antes de calcular p95, p99 y máximo
+
+**Defecto.** Con más de 10 valores, `compute_latency_stats` elimina los que están a más de 3
+desviaciones de la media y calcula todo sobre el resto. Las consultas más lentas son justo lo que p95,
+p99 y `max` deben describir.
+
+| Experimento, sistema | n | conservados | p95 recortado | p95 real | máx. recortado | máx. real |
+|---|---|---|---|---|---|---|
+| exp8, léxico | 200 | 197 | 54 365 ms | 57 004 ms | 67 215 ms | 79 174 ms |
+| exp8, denso | 200 | 197 | 71 834 ms | 72 766 ms | 96 359 ms | 133 988 ms |
+| exp8, híbrido | 200 | 199 | 190 621 ms | 192 480 ms | 248 585 ms | 257 052 ms |
+| exp8b, léxico | 200 | 196 | 42 098 ms | 43 820 ms | 48 764 ms | 68 592 ms |
+| exp8b, denso | 200 | 197 | 41 541 ms | 45 630 ms | 57 061 ms | 70 472 ms |
+| exp8b, híbrido | 200 | 199 | 81 282 ms | 86 290 ms | 109 005 ms | 127 166 ms |
+| exp9, sin RAG | 200 | 199 | 65 024 ms | 65 943 ms | 79 926 ms | 87 880 ms |
+
+1. **Test:** `tests/test_fable_metrics.py::test_tail_latencies_are_not_trimmed_before_computing_the_tail_statistics`.
+2. **Parche:** [B6.diff](fable-rag-2026-11/patches/B6.diff). Quita el recorte.
+3. **Impacto:** afecta a los campos `lat_*` de los `aggregated_metrics.json` de exp3 a exp9 y a
+   `fig_latency_breakdown`. No afecta a la tabla de latencias citable de Nota 3
+   (`output/tables/nota3/latency__exp12_matrix`), que la produce `scripts/_latency_p50p95.py` sin recorte
+   (`docs/TRACEABILITY_nota3.md`). No encontré ninguna cifra de latencia de exp8 citada en
+   `docs/reports/results-summary.md` ni en `docs/TRACEABILITY_nota3.md`; no revisé la prosa del paper.
+4. **Corrida nueva:** ninguna. Si alguna cifra heredada de latencia se cita, se recalcula offline a un
+   archivo `_vN`.
