@@ -65,7 +65,7 @@ comportamiento incorrecto en el camino desplegado; MEDIO y BAJO = el resto.
 | ID | Sev. | Clase | Ubicación | Hallazgo | Evidencia | Estado |
 |---|---|---|---|---|---|---|
 | H-01 | CRÍTICO (riesgo) | B1 | `src/evaluation/benchmark_runner.py:199-215`, `:533-568`, `:703-707` | `BenchmarkRunner` escribe `results.json`, `aggregated_metrics.json` y los checkpoints sin pasar por `guard_write`. Relanzar un experimento firmado con todo ya completado reescribe sus artefactos sin cargar ningún modelo | Traza: `run_experiment` siempre termina en `_save_experiment_results`; `scripts/run_benchmark.py:164` y `scripts/run_llm_only_benchmark.py:138` usan el directorio de evidencia por defecto | Propuesto (B1); decide Enzo |
-| H-02 | MEDIO (latente) | B2 | `src/evaluation/statistical_analysis.py:197-217`, `:297-307` | Dos sistemas con puntajes idénticos dan `p=NaN`; un solo NaN vuelve NaN todos los `p_bh` y `p_holm` de la familia | Reproducido con scipy 1.17.1. La evidencia firmada no contiene ningún `p` NaN | Abierto |
+| H-02 | MEDIO (latente) | B2 | `src/evaluation/statistical_analysis.py:197-217`, `:297-307` | Dos sistemas con puntajes idénticos dan `p=NaN`; un solo NaN vuelve NaN todos los `p_bh` y `p_holm` de la familia | Reproducido con scipy 1.17.1. La evidencia firmada no contiene ningún `p` NaN | Propuesto (B2); decide Enzo |
 | H-03 | MEDIO | B3 | `src/evaluation/benchmark_runner.py:258-324` | `_run_single_query` ignora `response.error`: una falla del pipeline queda como fila válida y su texto de error se puntúa como si fuera la respuesta | exp3, brazos lineales: q042 y q049 sin fragmentos recuperados en los 3 brazos, con `errors: 0` | Abierto |
 | H-04 | ALTO | B4 | `src/retrieval/coverage_balancer.py:86-88` | Los nombres de servicio genéricos del índice (`virtual machines`, `virtual network`, `vpc`, `iam`) añaden un proveedor que la pregunta no compara y le asignan cuota en `SURVEY_DEPLOY` | «Compare virtual machines on AWS and GCP» resuelve `aws, azure, gcp` con el índice real | Abierto |
 | H-05 | ALTO | B5 | `src/retrieval/query_processor.py:140-148` | La detección de proveedor es por subcadena: `laws` y `flaws` contienen `aws` y activan el filtro `single_provider` | «What data residency laws apply to object storage?» queda filtrada a AWS | Abierto |
@@ -154,3 +154,24 @@ el punto es otro: un relanzamiento inocente los pisaría en silencio. Hoy la ún
 
 Recomendación: aplicar. Es la única propuesta que protege la evidencia en lugar de cambiar un cálculo.
 Se dejó como clase B porque altera qué hace un comando que hoy «funciona».
+
+### B2 (H-02, MEDIO latente): `p=NaN` con puntajes idénticos contamina la familia BH/Holm
+
+**Defecto.** Si dos sistemas tienen exactamente los mismos puntajes en una métrica, `paired_comparison`
+devuelve `p_value = NaN`: Shapiro sobre diferencias constantes da «normal», y la t pareada con varianza
+cero da NaN (con scipy 1.17.1 la rama de Wilcoxon también puede dar NaN). El `except ValueError` que
+debía cubrir «todas las diferencias son cero» ya no se alcanza con esta versión de scipy. Después,
+`multipletests` propaga ese NaN a todos los `p_bh` y `p_holm` de la familia, y deja `sig_bh` incoherente
+(`True` junto a `p_bh = NaN`).
+
+1. **Tests:** `tests/test_fable_metrics.py::test_identical_scores_give_p_one_not_nan` y
+   `::test_one_tied_comparison_does_not_turn_the_whole_family_into_nan`.
+2. **Parche:** [B2.diff](fable-rag-2026-11/patches/B2.diff). Si todas las diferencias son cero,
+   `paired_comparison` devuelve `p = 1.0`, `test_name = "all_pairs_tied"` y no llama a scipy.
+3. **Impacto:** ninguna cifra firmada cambia. Dos comprobaciones: (a) no hay ningún `p_value`, `p_raw`,
+   `p_bh` ni `p_holm` igual a NaN en `experiments/results/**` ni en `paper/audit_outputs/`; (b) con el
+   parche aplicado, `verify_summer_offline.py` (que importa `paired_comparison`) y
+   `verify_v4_offline.py` dan el mismo SHA-256 normalizado que la línea base. Lo único que cambia es la
+   etiqueta `test_name` en un par totalmente empatado.
+4. **Corrida nueva:** ninguna. Protege cualquier análisis futuro (`exp20+`) en el que dos brazos
+   coincidan en una métrica, cosa probable en métricas binarias con pocos casos.
