@@ -67,7 +67,7 @@ comportamiento incorrecto en el camino desplegado; MEDIO y BAJO = el resto.
 | H-01 | CRÍTICO (riesgo) | B1 | `src/evaluation/benchmark_runner.py:199-215`, `:533-568`, `:703-707` | `BenchmarkRunner` escribe `results.json`, `aggregated_metrics.json` y los checkpoints sin pasar por `guard_write`. Relanzar un experimento firmado con todo ya completado reescribe sus artefactos sin cargar ningún modelo | Traza: `run_experiment` siempre termina en `_save_experiment_results`; `scripts/run_benchmark.py:164` y `scripts/run_llm_only_benchmark.py:138` usan el directorio de evidencia por defecto | Propuesto (B1); decide Enzo |
 | H-02 | MEDIO (latente) | B2 | `src/evaluation/statistical_analysis.py:197-217`, `:297-307` | Dos sistemas con puntajes idénticos dan `p=NaN`; un solo NaN vuelve NaN todos los `p_bh` y `p_holm` de la familia | Reproducido con scipy 1.17.1. La evidencia firmada no contiene ningún `p` NaN | Propuesto (B2); decide Enzo |
 | H-03 | MEDIO | B3 | `src/evaluation/benchmark_runner.py:258-324` | `_run_single_query` ignora `response.error`: una falla del pipeline queda como fila válida y su texto de error se puntúa como si fuera la respuesta | exp3, brazos lineales: q042 y q049 sin fragmentos recuperados en los 3 brazos, con `errors: 0` | Propuesto (B3); decide Enzo |
-| H-04 | ALTO | B4 | `src/retrieval/coverage_balancer.py:86-88` | Los nombres de servicio genéricos del índice (`virtual machines`, `virtual network`, `vpc`, `iam`) añaden un proveedor que la pregunta no compara y le asignan cuota en `SURVEY_DEPLOY` | «Compare virtual machines on AWS and GCP» resuelve `aws, azure, gcp` con el índice real | Abierto |
+| H-04 | ALTO | B4 | `src/retrieval/coverage_balancer.py:86-88` | Los nombres de servicio genéricos del índice (`virtual machines`, `virtual network`, `vpc`, `iam`) añaden un proveedor que la pregunta no compara y le asignan cuota en `SURVEY_DEPLOY` | «Compare virtual machines on AWS and GCP» resuelve `aws, azure, gcp` con el índice real | Propuesto (B4); decide Enzo |
 | H-05 | ALTO | B5 | `src/retrieval/query_processor.py:140-148` | La detección de proveedor es por subcadena: `laws` y `flaws` contienen `aws` y activan el filtro `single_provider` | «What data residency laws apply to object storage?» queda filtrada a AWS | Abierto |
 | H-06 | MEDIO | B6 | `src/evaluation/latency_metrics.py:46-51` | Se descartan los valores a más de 3 desviaciones antes de calcular p95, p99 y máximo: se recorta justo la cola que esas cifras deben describir | exp8b denso: p95 41 541 ms recortado frente a 45 630 ms sin recortar | Abierto |
 | H-07 | MEDIO (latente) | B7 | `src/evaluation/benchmark_runner.py:140` | La caché de índices usa `estrategia_tamaño` e ignora el modelo de embeddings: dos configuraciones con modelos distintos comparten el primer índice cargado | Traza de código; afecta a `exp2`, que no es evidencia firmada | Abierto |
@@ -204,3 +204,36 @@ Punto que debes decidir: una consulta sin fragmentos recuperados, ¿es un error 
 recuperación? El parche la trata como error, igual que hoy se tratan las excepciones, y por tanto queda
 fuera de las medias de recuperación. Si prefieres contarla como cero, hace falta además separar en
 `_save_aggregated_metrics` las filas válidas para recuperación de las válidas para generación.
+
+### B4 (H-04, ALTO): nombres de servicio genéricos añaden un proveedor no pedido
+
+**Defecto.** `resolve_wanted_providers` suma el proveedor de cualquier nombre de servicio del índice que
+aparezca como palabra completa en la pregunta. El índice tiene 22 servicios; cuatro de sus nombres son
+también el término genérico que usan los tres proveedores: `virtual machines` y `virtual network`
+(Azure), `vpc` e `iam` (AWS). Con el índice real:
+
+| Pregunta | Proveedores que compara | Resuelve hoy |
+|---|---|---|
+| Compare virtual machines on AWS and GCP | aws, gcp | aws, **azure**, gcp |
+| How does a GCP VPC differ from an Azure virtual network? | azure, gcp | **aws**, azure, gcp |
+| Compare IAM in Azure and GCP | azure, gcp | **aws**, azure, gcp |
+
+Con tres proveedores la cuota es `ceil(5/3) = 2`, así que el proveedor que nadie pidió puede ocupar
+hasta 2 de los 5 fragmentos que ve el modelo. Solo ocurre en `SURVEY_DEPLOY`
+(`balance_cross_cloud_providers=True`) y en consultas tipadas `cross_cloud`.
+
+1. **Test:** `tests/test_fable_providers.py::test_generic_service_names_do_not_add_an_unrequested_provider` (3 casos).
+2. **Parche:** [B4.diff](fable-rag-2026-11/patches/B4.diff). Una lista corta, `_GENERIC_SERVICE_NAMES`,
+   deja fuera esos cuatro nombres al buscar servicios. El proveedor sigue detectándose por su palabra
+   clave o alias.
+3. **Impacto:** ninguno sobre la evidencia. De las 194 consultas, 51 se tipan `cross_cloud`; en las 51 el
+   conjunto resuelto es idéntico con y sin el parche. Con el parche, la aceptación de
+   `tests/test_coverage_balancer.py` sigue reproduciendo los `balanced_ids` de exp17 en 25/25. Cambia
+   solo el comportamiento ante preguntas libres de los participantes.
+4. **Corrida nueva:** ninguna obligatoria. Si quieres medirlo antes de desplegar, un `exp20` de cobertura
+   (sin generación) sobre un conjunto de preguntas comparativas que usen términos genéricos. Llevarlo a
+   la web exige otra Fase B.
+
+Alternativa al parche: derivar la ambigüedad del propio corpus (un nombre es ambiguo si aparece con
+frecuencia en el texto de fragmentos de otros proveedores). Evita la lista escrita a mano, que es la
+clase de lista que el módulo quería evitar, pero cuesta un pase sobre los 24 481 fragmentos al arrancar.
