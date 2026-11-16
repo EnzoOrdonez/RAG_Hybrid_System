@@ -472,6 +472,11 @@ Se anotan porque una auditoría que solo reporta lo que confirma no es una audit
 Textos propuestos. La prosa del paper y del A.3 solo cambia con tu OK frase por frase. exp20 está
 firmada desde el 2026-11-16 (§2.5): sus cifras se citan como `exp20_rerank_arms`.
 
+**Actualización del 2026-11-16.** La propuesta frase por frase, cotejada con el camera-ready, está
+en [fable-rag-afirmacion-principal-2026-11.md](fable-rag-afirmacion-principal-2026-11.md). Corrige
+esta tabla en un punto: el paper publicado ya atribuye la ganancia al reranker, así que la fila
+«Afirmación principal» no sustituye una frase errónea, sino que afina frases que se sostienen.
+
 | Tema | Lo que los datos sostienen |
 |---|---|
 | Afirmación principal | «El pipeline completo (fusión RRF y reranker cross-encoder) supera a la recuperación densa y a la léxica sin reranker. Un control con el mismo reranker sobre el top-50 denso alcanza un NDCG@5 de 0,699 frente a 0,714 del pipeline completo; la diferencia atribuible a la fusión, +0,016 (IC 95 %: −0,004 a +0,035), no es significativa. La mejora procede sobre todo del reranker.» |
@@ -489,8 +494,13 @@ firmada desde el 2026-11-16 (§2.5): sus cifras se citan como `exp20_rerank_arms
 1. **¿Se firma exp20?** Resuelto: la firmaste el 2026-11-16 (§2.5). Queda una acción tuya o de
    quien integre la rama: pegar la entrada de §10 en `paper/summer_ablation_log.md`. No hizo falta
    tocar `src/utils/signed_evidence.py`.
-2. **¿Se cambia la afirmación principal del paper y del A.3?** Texto propuesto en §5. Es la
-   consecuencia más seria de esta ronda.
+2. **¿Se cambia la afirmación principal del paper y del A.3?** Texto propuesto en §5 y, frase por
+   frase, en [fable-rag-afirmacion-principal-2026-11.md](fable-rag-afirmacion-principal-2026-11.md).
+   **Corrección mía (2026-11-16):** aquí decía «es la consecuencia más seria de esta ronda». Lo
+   escribí sin cotejar el camera-ready. Cotejado, el paper ya dice que la ganancia procede del
+   reranking y no de la fusión; exp20 lo confirma con un control directo y solo pide afinar seis
+   frases y añadir límites. La misma revisión encontró un error de hecho ajeno a exp20: el paper
+   dice «42 multi-cloud queries» y son 25.
 3. **¿Se valida el juez?** Una muestra de juicios humanos de relevancia (por ejemplo, 200 pares
    estratificados por acuerdo entre los dos jueces) resuelve C2 y da por primera vez una medida
    absoluta. Encaja con la fase humana ya prevista.
