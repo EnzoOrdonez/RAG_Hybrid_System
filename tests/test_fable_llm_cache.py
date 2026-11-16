@@ -106,3 +106,45 @@ def test_the_last_failed_attempt_does_not_announce_a_retry(manager, monkeypatch,
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert sum("retrying in" in w for w in warnings) == 1
     assert "no retries left" in warnings[-1]
+
+
+def _counting_ollama(monkeypatch, content):
+    """Doble de Ollama que devuelve siempre `content` y cuenta las llamadas."""
+    fake = types.ModuleType("ollama")
+    calls = []
+
+    def chat(**kwargs):
+        calls.append(kwargs)
+        return {"message": {"content": content}, "prompt_eval_count": 7, "eval_count": 0}
+
+    fake.chat = chat
+    monkeypatch.setitem(sys.modules, "ollama", fake)
+    return calls
+
+
+def test_a_non_empty_answer_is_generated_once_and_then_served_from_cache(manager, monkeypatch):
+    """Caracterización: la caché es lo que hace reproducible una corrida ya generada."""
+    calls = _counting_ollama(monkeypatch, "S3 stores objects in buckets.")
+
+    first = manager.generate("p", system_prompt="s", config_name="cfg")
+    second = manager.generate("p", system_prompt="s", config_name="cfg")
+
+    assert len(calls) == 1
+    assert (first.from_cache, second.from_cache) == (False, True)
+    assert second.text == first.text and second.latency_ms == 0.0
+
+
+@pytest.mark.xfail(strict=True, reason="FABLE-B8: pendiente de decisión de Enzo")
+def test_an_empty_answer_is_not_frozen_into_the_cache(manager, monkeypatch):
+    """H-08: `generate()` cachea hoy una respuesta vacía y no vuelve a preguntar al modelo.
+
+    `generate_stream()` ya la descarta (`if self.cache_enabled and text`).
+    """
+    calls = _counting_ollama(monkeypatch, "")
+
+    first = manager.generate("p", system_prompt="s", config_name="cfg")
+    second = manager.generate("p", system_prompt="s", config_name="cfg")
+
+    assert first.text == "" and first.error is None
+    assert len(calls) == 2, "la segunda llamada debe volver al modelo, no a la caché"
+    assert second.from_cache is False
