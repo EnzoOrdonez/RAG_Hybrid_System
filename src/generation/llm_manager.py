@@ -8,7 +8,9 @@ Supports:
 
 Features:
   - Retry with exponential backoff (3 attempts, delay 2^n seconds)
-  - Timeout of 60 seconds per request
+  - Timeout of 60 seconds per request for OpenAI, and for Ollama only when the manager
+    is built with enforce_timeout=True (the deployment path). The default Ollama path,
+    used by every benchmark, calls ollama.chat with no client timeout.
   - Logging of each call: model, tokens in/out, latency, success/error
   - Disk cache: data/llm_cache/{model}_cache.json
   - Graceful handling if Ollama is not running or API keys missing
@@ -182,19 +184,35 @@ class LLMManager:
         if self.cache_path.exists():
             try:
                 return json.loads(self.cache_path.read_text(encoding="utf-8"))
-            except (json.JSONDecodeError, OSError):
-                pass
+            except (json.JSONDecodeError, OSError) as e:
+                # Same fallback as before (start empty); it is no longer silent, because the
+                # next successful save replaces the unreadable file with this smaller cache.
+                logger.warning(
+                    "LLM cache %s is unreadable (%s); continuing with an empty cache",
+                    self.cache_path.name, e,
+                )
         return {}
 
     def _save_cache(self):
-        """Save cache to disk."""
+        """Save cache to disk.
+
+        Written to a sibling temporary file and moved into place with `os.replace`, so a
+        failure in the middle of the write leaves the previous cache file intact instead
+        of a truncated JSON. The bytes written are the same as before.
+        """
+        tmp_path = self.cache_path.with_name(f"{self.cache_path.name}.{os.getpid()}.tmp")
         try:
-            self.cache_path.write_text(
+            tmp_path.write_text(
                 json.dumps(self._cache, indent=2, ensure_ascii=False),
                 encoding="utf-8",
             )
+            os.replace(tmp_path, self.cache_path)
         except OSError as e:
             logger.warning("Failed to save cache: %s", e)
+            try:
+                tmp_path.unlink(missing_ok=True)
+            except OSError:
+                pass
 
     @staticmethod
     def _cache_key(
@@ -317,15 +335,22 @@ class LLMManager:
             except Exception as e:
                 last_error = e
                 wait = 2 ** (attempt + 1)
-                logger.warning(
-                    "LLM call failed (attempt %d/%d), retrying in %ds: %s",
-                    attempt + 1,
-                    self.max_retries,
-                    wait,
-                    e,
-                )
                 if attempt < self.max_retries - 1:
+                    logger.warning(
+                        "LLM call failed (attempt %d/%d), retrying in %ds: %s",
+                        attempt + 1,
+                        self.max_retries,
+                        wait,
+                        e,
+                    )
                     time.sleep(wait)
+                else:
+                    logger.warning(
+                        "LLM call failed (attempt %d/%d), no retries left: %s",
+                        attempt + 1,
+                        self.max_retries,
+                        e,
+                    )
 
         # All retries exhausted
         error_msg = f"All {self.max_retries} retries failed: {last_error}"
