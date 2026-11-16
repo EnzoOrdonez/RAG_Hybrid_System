@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-15 21:51 | rama `fable/rag-auditoria` @ `93c0d52` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
-Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2377 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
-Cambios: 21 commits sobre `1574d22` más el de este informe; B1, B2 y B6 aplicadas por decisión de Enzo (§12) | Sin verificar: ningún modelo se ejecutó (D1); `init.sh` completo no se repitió tras el commit que solo toca este informe; ver §10 y §12
+[Fable 5.2] | 2026-11-15 22:18 | rama `fable/rag-auditoria` @ `65f32e5` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
+Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2389 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
+Cambios: 23 commits sobre `1574d22` más el de documentación de esta ronda; B1, B2 y B6 aplicadas (§12); análisis del porqué (§13) | Sin verificar: ningún modelo se ejecutó (D1); `init.sh` completo corrió sobre `65f32e5`, antes del commit que solo añade documentación (capas 1 y 3 repetidas después); ver §10 y §13
 
 # Auditoría y endurecimiento del código RAG (noviembre de 2026)
 
@@ -626,3 +626,59 @@ Lo que esta sección no cubre:
   de `src/` y `tests/` anterior a la decisión, sin estos parches aplicados. Los tres parches suman 29
   líneas añadidas y 7 quitadas en `src/`.
 - Sigue sin ejecutarse ningún modelo (D1) y nada se publicó (D3).
+
+## 13. Ronda de verificación exhaustiva y análisis del porqué (2026-11-15)
+
+Enzo pidió todas las verificaciones posibles y que cada explicación de resultados salga de código.
+D1 sigue vigente: no se ejecutó ningún modelo. Lo que exige modelos queda listado como corrida
+`exp20+` pendiente de autorización.
+
+**Huecos de §12 cerrados.**
+
+| Comprobación | Resultado |
+|---|---|
+| `bash init.sh` completo sobre `6483c8c` (el commit de §12) | exit 0 en tres capas; 2377 pasan, 0 fallan, 6 omitidas, 8 `xfail` |
+| `bash init.sh` completo sobre `65f32e5` (análisis nuevo y sus tests) | exit 0 en tres capas; 2389 pasan, 0 fallan, 6 omitidas, 8 `xfail` |
+| Verificadores offline en ambas corridas | SHA-256 normalizado igual al de §2 |
+| `git diff --stat 1574d22..HEAD -- experiments paper config src/ui scripts/study_operator .harness` | vacío |
+| Revisión independiente de los commits de B1, B2 y B6 | aprobada: 0 críticos, 0 altos, 1 medio, 3 bajos |
+
+**Hallazgos de la revisión de B1, B2 y B6.** Ninguno se corrigió en código; se registran aquí.
+
+- Medio: con B1, reanudar una corrida propia bajo `experiments/results/` se rechaza mientras el
+  experimento no esté declarado vivo. Es el flujo descrito en §12; conviene añadirlo a
+  `docs/guides/reproduce.md` cuando se integre la rama.
+- Bajo: `run_all_experiments` sale en el primer experimento protegido que ya tenga artefactos, después
+  de haber ejecutado los anteriores del bucle.
+- Bajo: `src/ui/views/experiments_page.py` captura `Exception`, y la salida de la guarda es
+  `SystemExit`, así que la página no mostraría un error legible. Está fuera de alcance y no se tocó.
+- Bajo: `_checkpoint_path` crea el directorio del experimento antes de que la guarda rechace. Solo
+  afecta a identificadores que aún no tienen directorio.
+- Nota: con B2, la rama `except ValueError` de `paired_comparison` queda sin alcance. No se borró.
+
+**Verificaciones nuevas, sin modelos.** Las hace `scripts/audit/fable_why_analysis.py` y falla con
+exit 1 si alguna deja de cumplirse.
+
+- Integridad de índices: FAISS, BM25 y mapa con los mismos 24 481 identificadores, vectores
+  normalizados y auto-recuperación de 512 de 512 vectores de muestra.
+- Prueba de extremo a extremo de la pierna léxica con el índice real: el top-5 recalculado coincide
+  con el firmado en exp11 en 194 de 194 consultas.
+- Las listas fusionadas firmadas cumplen la aritmética de RRF: 0 violaciones.
+- Las 24 celdas de la tabla citable v4 de exp12 se reproducen con n exacto.
+- 12 tests rápidos nuevos y 1 marcado `slow` en `tests/test_fable_why_analysis.py`.
+
+**Explicaciones por código.** Están en
+[fable-rag-porque-2026-11.md](fable-rag-porque-2026-11.md). En una línea cada una:
+
+- Con `k = 60` y 50 candidatos por pierna, RRF coloca todo fragmento presente en las dos listas por
+  encima de todo fragmento de una sola. Por eso la fusión expulsa el primer resultado denso en 82 de
+  194 consultas y no supera al denso antes del reranker.
+- En fidelidad, ningún contraste entre escenarios alcanza el mínimo efecto detectable con su número
+  de pares.
+- Gemma puntúa más porque emite unas 4 afirmaciones por respuesta frente a 14 a 18 de Granite; apoya
+  menos en términos absolutos.
+- La mitad de cada brecha entre modelos viene de qué consultas contesta cada uno.
+
+**Lo que sigue sin verificar.** La búsqueda densa, el reranker, la generación y los verificadores
+NLI y HHEM no se ejecutaron. No hay prueba de extremo a extremo con modelos reales. Las seis
+preguntas que eso deja abiertas, con la corrida mínima de cada una, están en §5 del informe enlazado.
