@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-15 21:24 | rama `fable/rag-auditoria` @ `2df11c3` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
-Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2373 pasan, 0 fallan, 6 omitidas, 12 xfail estrictos) | 3 docs=exit 0
-Cambios: 17 commits sobre `1574d22` más el de cierre, que solo toca este informe (§11) | Sin verificar: ningún modelo se ejecutó (D1); `init.sh` completo no se repitió tras el commit de cierre; ver §10 y §11
+[Fable 5.2] | 2026-11-15 21:51 | rama `fable/rag-auditoria` @ `93c0d52` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
+Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2377 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
+Cambios: 21 commits sobre `1574d22` más el de este informe; B1, B2 y B6 aplicadas por decisión de Enzo (§12) | Sin verificar: ningún modelo se ejecutó (D1); `init.sh` completo no se repitió tras el commit que solo toca este informe; ver §10 y §12
 
 # Auditoría y endurecimiento del código RAG (noviembre de 2026)
 
@@ -64,12 +64,12 @@ comportamiento incorrecto en el camino desplegado; MEDIO y BAJO = el resto.
 
 | ID | Sev. | Clase | Ubicación | Hallazgo | Evidencia | Estado |
 |---|---|---|---|---|---|---|
-| H-01 | CRÍTICO (riesgo) | B1 | `src/evaluation/benchmark_runner.py:199-215`, `:533-568`, `:703-707` | `BenchmarkRunner` escribe `results.json`, `aggregated_metrics.json` y los checkpoints sin pasar por `guard_write`. Relanzar un experimento firmado con todo ya completado reescribe sus artefactos sin cargar ningún modelo | Traza: `run_experiment` siempre termina en `_save_experiment_results`; `scripts/run_benchmark.py:164` y `scripts/run_llm_only_benchmark.py:138` usan el directorio de evidencia por defecto | Propuesto (B1); decide Enzo |
-| H-02 | MEDIO (latente) | B2 | `src/evaluation/statistical_analysis.py:197-217`, `:297-307` | Dos sistemas con puntajes idénticos dan `p=NaN`; un solo NaN vuelve NaN todos los `p_bh` y `p_holm` de la familia | Reproducido con scipy 1.17.1. La evidencia firmada no contiene ningún `p` NaN | Propuesto (B2); decide Enzo |
+| H-01 | CRÍTICO (riesgo) | B1 | `src/evaluation/benchmark_runner.py:199-215`, `:533-568`, `:703-707` | `BenchmarkRunner` escribe `results.json`, `aggregated_metrics.json` y los checkpoints sin pasar por `guard_write`. Relanzar un experimento firmado con todo ya completado reescribe sus artefactos sin cargar ningún modelo | Traza: `run_experiment` siempre termina en `_save_experiment_results`; `scripts/run_benchmark.py:164` y `scripts/run_llm_only_benchmark.py:138` usan el directorio de evidencia por defecto | Corregido: B1 aplicada (`c453967`, §12) |
+| H-02 | MEDIO (latente) | B2 | `src/evaluation/statistical_analysis.py:197-217`, `:297-307` | Dos sistemas con puntajes idénticos dan `p=NaN`; un solo NaN vuelve NaN todos los `p_bh` y `p_holm` de la familia | Reproducido con scipy 1.17.1. La evidencia firmada no contiene ningún `p` NaN | Corregido: B2 aplicada (`e4ece1c`, §12) |
 | H-03 | MEDIO | B3 | `src/evaluation/benchmark_runner.py:258-324` | `_run_single_query` ignora `response.error`: una falla del pipeline queda como fila válida y su texto de error se puntúa como si fuera la respuesta | exp3, brazos lineales: q042 y q049 sin fragmentos recuperados en los 3 brazos, con `errors: 0` | Propuesto (B3); decide Enzo |
 | H-04 | ALTO | B4 | `src/retrieval/coverage_balancer.py:86-88` | Los nombres de servicio genéricos del índice (`virtual machines`, `virtual network`, `vpc`, `iam`) añaden un proveedor que la pregunta no compara y le asignan cuota en `SURVEY_DEPLOY` | «Compare virtual machines on AWS and GCP» resuelve `aws, azure, gcp` con el índice real | Propuesto (B4); decide Enzo |
 | H-05 | ALTO | B5 | `src/retrieval/query_processor.py:140-148` | La detección de proveedor es por subcadena: `laws` y `flaws` contienen `aws` y activan el filtro `single_provider` | «What data residency laws apply to object storage?» queda filtrada a AWS | Propuesto (B5); decide Enzo |
-| H-06 | MEDIO | B6 | `src/evaluation/latency_metrics.py:46-51` | Se descartan los valores a más de 3 desviaciones antes de calcular p95, p99 y máximo: se recorta justo la cola que esas cifras deben describir | exp8b denso: p95 41 541 ms recortado frente a 45 630 ms sin recortar | Propuesto (B6); decide Enzo |
+| H-06 | MEDIO | B6 | `src/evaluation/latency_metrics.py:46-51` | Se descartan los valores a más de 3 desviaciones antes de calcular p95, p99 y máximo: se recorta justo la cola que esas cifras deben describir | exp8b denso: p95 41 541 ms recortado frente a 45 630 ms sin recortar | Corregido: B6 aplicada (`93c0d52`, §12) |
 | H-07 | MEDIO (latente) | B7 | `src/evaluation/benchmark_runner.py:140` | La caché de índices usa `estrategia_tamaño` e ignora el modelo de embeddings: dos configuraciones con modelos distintos comparten el primer índice cargado | Traza de código; afecta a `exp2`, que no es evidencia firmada | Propuesto (B7); decide Enzo |
 | H-08 | MEDIO | B8 | `src/generation/llm_manager.py:304-311` | `generate()` guarda en caché una respuesta vacía y la sirve para siempre; `generate_stream()` sí la descarta | exp12 tiene 399 respuestas vacías de 3104 (N6.4 documenta 177 de qwen sin RAG) | Propuesto (B8); decide Enzo |
 | H-09 | BAJO | A | `src/generation/llm_manager.py:180-197`, `:319-328` | La caché se escribe sin atomicidad y una caché ilegible se descarta en silencio; el log dice «retrying» en el último intento | Traza de código y 3 tests en rojo antes del arreglo | Corregido (A1) |
@@ -103,7 +103,9 @@ Notas de A1:
 
 ## 5. Propuestas de clase B
 
-Ninguna está aplicada. Cada una trae: el test que muestra el defecto (ya en la rama, marcado
+B1, B2 y B6 se aplicaron el 2026-11-15 por decisión de Enzo (§12) y su test ya no lleva la marca
+`xfail`. B3, B4, B5, B7 y B8 siguen sin aplicar. El texto de cada propuesta se conserva como se
+escribió antes de la decisión. Cada una trae: el test que muestra el defecto (ya en la rama, marcado
 `@pytest.mark.xfail(strict=True, reason="FABLE-B<n>: pendiente de decisión de Enzo")`), el parche listo en
 `docs/reports/fable-rag-2026-11/patches/`, el impacto estimado releyendo las salidas firmadas y la corrida
 nueva que haría falta.
@@ -447,16 +449,17 @@ Dos comportamientos que estos tests fijan y conviene tener presentes, sin ser ha
 
 ## 8. Decisiones que te tocan y preguntas abiertas
 
-Una decisión por propuesta. La recomendación es mía y no está aplicada.
+Una decisión por propuesta. Enzo decidió B1, B2 y B6 el 2026-11-15: aplicadas (§12). Quedan cinco;
+en ellas la recomendación es mía y no está aplicada.
 
 | Propuesta | Decisión | Recomendación |
 |---|---|---|
-| B1 | ¿`BenchmarkRunner` debe negarse a reescribir artefactos de un experimento protegido? | Aplicar. No cambia ningún resultado y cierra el único camino que hoy pisa evidencia sin aviso |
-| B2 | ¿Un par totalmente empatado debe dar `p = 1` en vez de NaN? | Aplicar. Los verificadores dan el mismo SHA-256 con el parche puesto |
+| B1 | ¿`BenchmarkRunner` debe negarse a reescribir artefactos de un experimento protegido? | **Decidida el 2026-11-15: aplicada (`c453967`).** Aplicar. No cambia ningún resultado y cierra el único camino que hoy pisa evidencia sin aviso |
+| B2 | ¿Un par totalmente empatado debe dar `p = 1` en vez de NaN? | **Decidida el 2026-11-15: aplicada (`e4ece1c`).** Aplicar. Los verificadores dan el mismo SHA-256 con el parche puesto |
 | B3 | ¿Un fallo del pipeline es una fila de error? Y antes: ¿una consulta sin fragmentos es un error o un cero de recuperación? | Decidir primero la segunda pregunta. Si es error, aplicar tal cual |
 | B4 | ¿Se excluyen los cuatro nombres de servicio genéricos del balanceo? | Aplicar antes de construir la próxima imagen de despliegue, o registrar el caso como limitación del estudio |
 | B5 | ¿La detección de proveedor pasa a palabra completa? | Igual que B4. Conviene decidirla junto con F2 (`k8s`, `google`), que toca la misma función |
-| B6 | ¿Se quita el recorte de 3 desviaciones en las latencias? | Aplicar. Solo afecta a agregados heredados que hoy no se citan |
+| B6 | ¿Se quita el recorte de 3 desviaciones en las latencias? | **Decidida el 2026-11-15: aplicada (`93c0d52`).** Aplicar. Solo afecta a agregados heredados que hoy no se citan |
 | B7 | ¿La caché de índices distingue el modelo de embeddings? | Aplicar o dejar: hoy no tiene efecto práctico |
 | B8 | ¿`generate()` deja de cachear respuestas vacías? | Aplicar para corridas futuras. Aparte, decidir si un `exp20` regenera las 399 vacías de exp12 |
 
@@ -491,7 +494,7 @@ Ninguno de los dos archivos de destino se editó (límite 5).
   del runner sin timeout, docstring de `balance()`) y los tests `tests/test_fable_*.py`. Las ocho
   propuestas de clase B se deciden una por una; cada una aceptada se aplica desde su parche en
   `docs/reports/fable-rag-2026-11/patches/` y se le quita la marca `xfail` a su test. Decisiones tomadas:
-  B1 <aceptada o rechazada>, B2 <…>, B3 <…>, B4 <…>, B5 <…>, B6 <…>, B7 <…>, B8 <…>.
+  B1 aceptada, B2 aceptada, B3 <aceptada o rechazada>, B4 <…>, B5 <…>, B6 aceptada, B7 <…>, B8 <…>.
 - **Consecuencias:** los tests de caracterización fijan el texto de los prompts, la fusión y el camino de
   `RAGPipeline.query`; un cambio en cualquiera de ellos ahora rompe un test y obliga a declararlo. Un
   parche de clase B aceptado que toque el camino desplegado no llega a la web sin una Fase B nueva.
@@ -504,11 +507,12 @@ Ninguno de los dos archivos de destino se editó (límite 5).
 {
   "id": "F-0NN",
   "category": "quality",
-  "description": "Auditoría y endurecimiento del código RAG (rama fable/rag-auditoria, base 1574d22). Tres arreglos de clase A aplicados y ocho propuestas de clase B con test xfail estricto y parche sin aplicar. Informe: docs/reports/fable-rag-auditoria-2026-11.md.",
+  "description": "Auditoría y endurecimiento del código RAG (rama fable/rag-auditoria, base 1574d22). Tres arreglos de clase A aplicados; de ocho propuestas de clase B, tres aplicadas por decisión de Enzo (B1, B2, B6) y cinco con test xfail estricto y parche sin aplicar. Informe: docs/reports/fable-rag-auditoria-2026-11.md.",
   "steps": [
     "Hecho 2026-11-15: línea base (init.sh en 0 y SHA-256 de los dos verificadores offline), auditoría de P1, P2 y P4, y lectura parcial de P3.",
     "Hecho 2026-11-15: arreglos A1 (llm_manager), A2 (benchmark_runner) y A3 (coverage_balancer) con TDD; 82 casos de test nuevos en tests/test_fable_*.py.",
-    "Pendiente de Enzo: una decisión por propuesta B1 a B8 (informe, sección 8).",
+    "Hecho 2026-11-15: Enzo aceptó B1, B2 y B6; aplicadas con init.sh en 0 y los dos verificadores con el mismo SHA-256.",
+    "Pendiente de Enzo: una decisión por propuesta B3, B4, B5, B7 y B8 (informe, sección 8).",
     "Por cada B aceptada: git apply del parche, quitar la marca xfail, bash init.sh y los dos verificadores con el mismo SHA-256.",
     "Pendiente de Enzo: integrar la rama (sin push hasta su OK, ADR-0013) y registrar el ADR.",
     "No toca experiments/results, paper, config, src/ui ni scripts/study_operator."
@@ -575,3 +579,50 @@ Lo que este cierre no cubre:
 - Nada se publicó: sin push, sin merge y sin PR (D3). La rama solo existe en este equipo.
 
 Para revisar: `git log --oneline 1574d22..fable/rag-auditoria`.
+
+## 12. Decisión de Enzo del 2026-11-15: B1, B2 y B6 aplicadas
+
+A la pregunta de cierre («¿Qué propuestas B aplico en la rama?») Enzo respondió «B1, B2 y B6». Cada
+parche se aplicó con `git apply`, se quitó la marca `xfail` de su test y se hizo un commit por propuesta.
+B3, B4, B5, B7 y B8 siguen como en §5: test `xfail` estricto y parche sin aplicar.
+
+| Propuesta | Commit | Archivo de `src/` | Tests que pasan a ser de regresión |
+|---|---|---|---|
+| B1 | `c453967` | `src/evaluation/benchmark_runner.py` | `test_rerunning_a_completed_protected_experiment_does_not_rewrite_its_artifacts` |
+| B2 | `e4ece1c` | `src/evaluation/statistical_analysis.py` | `test_identical_scores_give_p_one_not_nan` y `test_one_tied_comparison_does_not_turn_the_whole_family_into_nan` |
+| B6 | `93c0d52` | `src/evaluation/latency_metrics.py` | `test_tail_latencies_are_not_trimmed_before_computing_the_tail_statistics` |
+
+Verificación sobre `93c0d52`:
+
+| Comprobación | Resultado |
+|---|---|
+| `bash init.sh` | exit 0 en las tres capas |
+| Capa 2, conteo por los puntos de progreso | 2377 pasan, 0 fallan, 6 omitidas, 8 `xfail` estrictos, 0 `xpass` |
+| Diferencia con §11 (2373 pasan, 12 `xfail`) | los 4 tests de B1, B2 y B6 dejan de ser `xfail` y pasan |
+| `scripts/verify_v4_offline.py` | exit 0, SHA-256 normalizado igual al de §2 |
+| `scripts/verify_summer_offline.py` | exit 0, SHA-256 normalizado igual al de §2 |
+| `git diff --stat 1574d22..HEAD -- experiments paper config src/ui scripts/study_operator .harness` | vacío |
+| `src/utils/signed_evidence.py` | sin cambios respecto de `1574d22`; el registro de experimentos vivos sigue vacío |
+
+Qué cambia a partir de ahora:
+
+- **B1.** `run_experiment` sale con `SystemExit` antes de trabajar si el directorio del experimento está
+  protegido y ya contiene `results.json`, `aggregated_metrics.json` o un checkpoint. Reanudar una corrida
+  nueva (`exp20+`) bajo `experiments/results/` exige declararla viva en `src/utils/signed_evidence.py`.
+  Esa edición no está hecha: es una decisión tuya en el momento de abrir la corrida.
+- **B2.** Un par con todas las diferencias en cero devuelve `p_value = 1.0` y
+  `test_name = "all_pairs_tied"`. Ninguna cifra firmada tenía ese caso.
+- **B6.** Una agregación nueva calcula `lat_*` con todas las latencias. Los `aggregated_metrics.json`
+  firmados de exp3 a exp9 conservan los valores recortados: no se tocaron y, con B1, relanzar el runner
+  ya no los reescribe. Si se cita una latencia heredada, se recalcula offline a un archivo `_vN`.
+- Los archivos `B1.diff`, `B2.diff` y `B6.diff` quedan en `docs/reports/fable-rag-2026-11/patches/` como
+  registro. Ya no aplican sobre la rama porque su contenido está dentro.
+
+Lo que esta sección no cubre:
+
+- `init.sh` completo no se repitió después del commit que solo edita este informe. Sobre el árbol final
+  sí corrieron la capa 1 y la capa 3.
+- Los tres commits no pasaron por una segunda revisión independiente. La pasada de §11 revisó el diff
+  de `src/` y `tests/` anterior a la decisión, sin estos parches aplicados. Los tres parches suman 29
+  líneas añadidas y 7 quitadas en `src/`.
+- Sigue sin ejecutarse ningún modelo (D1) y nada se publicó (D3).
