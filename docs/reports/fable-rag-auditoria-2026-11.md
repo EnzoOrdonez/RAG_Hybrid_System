@@ -333,6 +333,72 @@ comprobar que se excluyan igual. La causa de que el modelo devuelva vacío no la
    transitorio o una propiedad del modelo con ese prompt, hace falta un `exp20` que regenere solo esas
    consultas con qwen y gemma, sin caché. Sin esa corrida no se puede afirmar ninguna de las dos cosas.
 
+## 6. Lo que se examinó y no es hallazgo
+
+### 6.1 Ya registrado en los ledgers
+
+| Tema | Dónde está registrado | Nota de esta auditoría |
+|---|---|---|
+| El detector de proveedores devuelve `k8s` y `cncf`, cuyo corpus se borró, y no reconoce `google` a secas | `paper/summer_ablation_log.md`, entrada 16, F2 (decisión tuya pendiente) | Sigue vigente en el camino desplegado: «What is a Kubernetes Pod?» se tipa `single_provider` con filtro `['k8s']`, se queda sin fragmentos y el pipeline responde «No relevant documentation found for this query.» |
+| `RAGPipeline.query` solo enruta el prompt con `prompt_routing=True` | entrada 16, F1; ADR-0008 | Fijado por `tests/test_fable_pipeline.py` en las dos configuraciones |
+| `multidimensional_scoring`, `terminology_normalization` y `reranker_top_k` no tienen efecto | N9; `docs/architecture/system-design.md` §8 | Sin cambios |
+| La fidelidad sin RAG es 0 por construcción y las declinaciones generan afirmaciones | N3 y N5 | Fijado por tests |
+| Artefactos de formato fuera del denominador y filas vacuas | N8 (H1) y N9 (P0) | Fijado por tests |
+| `pure_decline` mide un prefijo, no un rechazo | ledger de verano, entrada 22, defecto #7 | Sin cambios |
+| `NLI_TIMEOUT` se declara y nadie lo usa | `paper/audit_findings.md` | Mismo patrón que H-10 |
+| p = 0,0 ficticio en la rama Anderson-Darling | `paper/audit_findings.md`, Flag 112 | Sin cambios |
+| Boilerplate «Stay organized with collections» en el 33 % del corpus | N8 (H6) y N9 | Sin cambios |
+| 177 respuestas vacías de qwen sin RAG | N6.4 | Ver B8 para las otras 222 |
+
+### 6.2 Examinado y descartado
+
+- **Patrones de declinación y apóstrofo tipográfico.** Seis de los 14 patrones llevan apóstrofo recto. En
+  las 4 646 respuestas de exp8, exp9, exp12, exp13, exp17 y exp18, aceptar también el apóstrofo curvo no
+  cambia la clasificación de ninguna. Sin propuesta.
+- **`SKIP_PATTERNS` y `^the.*context`.** El patrón descarta cualquier oración que empiece por «the» y
+  contenga «context». En esas mismas respuestas coincide con 1 272 oraciones; una heurística marcó 35
+  como posibles afirmaciones genuinas, y las 12 que leí son también comentarios sobre el contexto
+  recuperado. No hay evidencia de que se pierdan afirmaciones reales. Sin propuesta.
+- **Empates en la fusión lineal.** `_linear_fusion` recorre un `set`, así que el orden entre empates
+  depende de `PYTHONHASHSEED`. El entorno obligatorio ya lo fija en 42 y la fusión RRF, que es la de la
+  evidencia principal y la del despliegue, usa un diccionario con orden de inserción. Sin propuesta.
+- **Empates en BM25.** `argsort()[::-1]` no es estable, pero es determinista para una misma versión de
+  numpy. Sin propuesta.
+- **Búsqueda densa.** 24 481 vectores, por debajo del umbral de 50 000: `IndexFlatIP` exacto, como ya
+  confirma N6.3.
+- **`balance()` con más proveedores pedidos que cuota.** Con 4 proveedores y k = 5 uno podría quedarse
+  sin fragmento. No es alcanzable: el corpus tiene 3 proveedores.
+- **Fragmentos sin proveedor.** Un `cloud_provider` nulo rompería `_build_sources` y el contexto agrupado.
+  En el índice real los 24 481 fragmentos tienen proveedor (`aws`, `azure`, `gcp`) y servicio. No se toca.
+- **`study_statistics.py` y `study_analysis.py`.** Leídos completos. Sin hallazgos.
+- **`signed_evidence.py`, `local_models.py` y `reproducibility.py`.** Leídos completos y sin cambios. Dos
+  notas: `local_models.resolve` identifica el modelo por el último segmento del ID y no comprueba el
+  manifiesto, de modo que dos IDs de organizaciones distintas con el mismo nombre colisionarían;
+  `ensure_hashseed_at_startup` usa `os.execv`, que en Windows no entrecomilla argumentos con espacios (la
+  ruta del repositorio no los tiene).
+
+### 6.3 Cadena de construcción del índice (P3): observaciones sin parche
+
+Lectura parcial: `adaptive_chunker.py`, `text_cleaner.py` y `embedding_manager.py` completos. Todo cambio
+aquí es de clase B, obliga a reconstruir el índice e invalida la comparabilidad con exp10 a exp19b, así
+que no preparé parches ni tests. Quedan como observaciones con su traza:
+
+- `adaptive_chunker.py:356-391`: cuando una sección pequeña se fusiona con la siguiente, el resultado
+  conserva el `heading_path` de la primera. El texto de la segunda sección queda etiquetado con el
+  encabezado de la anterior, y ese encabezado es el que el modelo cita en `[Source: …]`.
+- `adaptive_chunker.py:244-248`: si el modelo de embeddings del chunker no carga, `_semantic_split` pasa a
+  partir por tokens dentro de un `except Exception` sin log. Los límites de los fragmentos dependen en
+  silencio de que ese modelo esté disponible al construir.
+- `text_cleaner.py:25`: `View.*?on GitHub` no exige límite de palabra, así que borra desde el «view» de
+  «Overview» o «Review» hasta «on GitHub» dentro de la misma línea. Los patrones de `Feedback` (línea 22) y
+  de cookies (línea 37) también pueden borrar prosa legítima.
+- `text_cleaner.py:115-131` colapsa los espacios repetidos fuera de bloques cercados, incluida la
+  indentación; `:139-156` elimina párrafos repetidos de 20 caracteres o más aunque estén dentro de código.
+
+No leídos: `deduplicator.py`, `terminology_normalizer.py`, `metadata_extractor.py`, `doc_parser.py`, los
+crawlers, `ingestion_pipeline.py`, los otros cuatro chunkers y `test_queries.py`. De `results_exporter.py`
+solo revisé dónde calcula estadísticos.
+
 ## 7. Huecos de tests cubiertos (F4)
 
 Antes de esta auditoría no había ningún test de comportamiento para `benchmark_runner`,
@@ -361,5 +427,78 @@ Dos comportamientos que estos tests fijan y conviene tener presentes, sin ser ha
   respuesta. `f1_token` trabaja sobre conjuntos, así que las repeticiones cuentan una vez (no es el F1
   de SQuAD). Las cifras citables de Nota 3 no usan estas dos métricas.
 - Una respuesta vacía da fidelidad 0,0 en `compute_hallucination_metrics` y una de solo espacios da 1,0
-  en el detector. Ambas quedan con `method="none"` y fuera de las medias. En la evidencia firmada no hay
-  ninguna respuesta de solo espacios.
+  en el detector. Ambas quedan con `method="none"` y fuera de las medias. En exp8, exp9, exp12, exp13,
+  exp17 y exp18 no hay ninguna respuesta de solo espacios.
+
+## 8. Decisiones que te tocan y preguntas abiertas
+
+Una decisión por propuesta. La recomendación es mía y no está aplicada.
+
+| Propuesta | Decisión | Recomendación |
+|---|---|---|
+| B1 | ¿`BenchmarkRunner` debe negarse a reescribir artefactos de un experimento protegido? | Aplicar. No cambia ningún resultado y cierra el único camino que hoy pisa evidencia sin aviso |
+| B2 | ¿Un par totalmente empatado debe dar `p = 1` en vez de NaN? | Aplicar. Los verificadores dan el mismo SHA-256 con el parche puesto |
+| B3 | ¿Un fallo del pipeline es una fila de error? Y antes: ¿una consulta sin fragmentos es un error o un cero de recuperación? | Decidir primero la segunda pregunta. Si es error, aplicar tal cual |
+| B4 | ¿Se excluyen los cuatro nombres de servicio genéricos del balanceo? | Aplicar antes de construir la próxima imagen de despliegue, o registrar el caso como limitación del estudio |
+| B5 | ¿La detección de proveedor pasa a palabra completa? | Igual que B4. Conviene decidirla junto con F2 (`k8s`, `google`), que toca la misma función |
+| B6 | ¿Se quita el recorte de 3 desviaciones en las latencias? | Aplicar. Solo afecta a agregados heredados que hoy no se citan |
+| B7 | ¿La caché de índices distingue el modelo de embeddings? | Aplicar o dejar: hoy no tiene efecto práctico |
+| B8 | ¿`generate()` deja de cachear respuestas vacías? | Aplicar para corridas futuras. Aparte, decidir si un `exp20` regenera las 399 vacías de exp12 |
+
+Preguntas que no dependen de una propuesta:
+
+1. **B7 como clase A.** Ninguna configuración firmada ni desplegada cambia de índice con el parche. Lo
+   dejé en clase B porque `exp2`, tal como está escrito, sí cambiaría de comportamiento. ¿Lo reclasificas?
+2. **Las 222 respuestas vacías no registradas** (168 de qwen con RAG y 54 de gemma en exp12). ¿Se anotan
+   en el ledger junto a N6.4?
+3. **Reportes diarios de los verificadores.** Los dos de hoy (`output/audit/*_offline_check_2026-11-15.md`)
+   están en el segundo commit de la rama, como en sesiones anteriores. Si no los quieres, basta quitarlos al
+   integrar.
+4. **Cabecera de telemetría.** Pide `tarea F-NNN` y no podía editar `.harness/feature_list.json`. Usé
+   «F-propuesta (sin número)»; el texto de la entrada está en §9.
+5. **D1 alternativa.** No la escribiste, así que no cargué ningún encoder. Toda equivalencia de clase A
+   está probada con dobles y con los verificadores offline, no con recuperación real.
+
+## 9. Textos propuestos (sin número)
+
+Ninguno de los dos archivos de destino se editó (límite 5).
+
+### 9.1 ADR
+
+```markdown
+## ADR-XXXX: Auditoría del código RAG de noviembre de 2026
+
+- **Estado:** Propuesto. **Fecha:** 2026-11-15.
+- **Contexto:** con la lógica RAG congelada (ADR-0004) y el despliegue I7 en fase humana, se auditó `src/`
+  en una rama aislada (`fable/rag-auditoria`, base `1574d22`) sin ejecutar modelos. La auditoría separó
+  los cambios que no alteran ningún resultado (clase A) de los que sí (clase B).
+- **Decisión:** se integran los tres arreglos de clase A (caché LLM atómica y con aviso, docstring veraz
+  del runner sin timeout, docstring de `balance()`) y los tests `tests/test_fable_*.py`. Las ocho
+  propuestas de clase B se deciden una por una; cada una aceptada se aplica desde su parche en
+  `docs/reports/fable-rag-2026-11/patches/` y se le quita la marca `xfail` a su test. Decisiones tomadas:
+  B1 <aceptada o rechazada>, B2 <…>, B3 <…>, B4 <…>, B5 <…>, B6 <…>, B7 <…>, B8 <…>.
+- **Consecuencias:** los tests de caracterización fijan el texto de los prompts, la fusión y el camino de
+  `RAGPipeline.query`; un cambio en cualquiera de ellos ahora rompe un test y obliga a declararlo. Un
+  parche de clase B aceptado que toque el camino desplegado no llega a la web sin una Fase B nueva.
+- **Fuentes:** `docs/reports/fable-rag-auditoria-2026-11.md`, `docs/PROMPT_FABLE_RAG_2026-11-16.md`.
+```
+
+### 9.2 Entrada de `.harness/feature_list.json`
+
+```json
+{
+  "id": "F-0NN",
+  "category": "quality",
+  "description": "Auditoría y endurecimiento del código RAG (rama fable/rag-auditoria, base 1574d22). Tres arreglos de clase A aplicados y ocho propuestas de clase B con test xfail estricto y parche sin aplicar. Informe: docs/reports/fable-rag-auditoria-2026-11.md.",
+  "steps": [
+    "Hecho 2026-11-15: línea base (init.sh en 0 y SHA-256 de los dos verificadores offline), auditoría de P1, P2 y P4, y lectura parcial de P3.",
+    "Hecho 2026-11-15: arreglos A1 (llm_manager), A2 (benchmark_runner) y A3 (coverage_balancer) con TDD; 82 casos de test nuevos en tests/test_fable_*.py.",
+    "Pendiente de Enzo: una decisión por propuesta B1 a B8 (informe, sección 8).",
+    "Por cada B aceptada: git apply del parche, quitar la marca xfail, bash init.sh y los dos verificadores con el mismo SHA-256.",
+    "Pendiente de Enzo: integrar la rama (sin push hasta su OK, ADR-0013) y registrar el ADR.",
+    "No toca experiments/results, paper, config, src/ui ni scripts/study_operator."
+  ],
+  "status": "active",
+  "passes": false
+}
+```
