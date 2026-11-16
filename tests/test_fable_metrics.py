@@ -2,7 +2,8 @@
 
   - Caracterización de `generation_metrics`, `latency_metrics` y de la corrección BH/Holm de
     `statistical_analysis`: fija los valores actuales con casos calculados a mano.
-  - H-02 / FABLE-B2 y H-06 / FABLE-B6 (clase B): `xfail(strict=True)` a la espera de Enzo.
+  - H-02 / FABLE-B2 y H-06 / FABLE-B6 (clase B): aplicadas el 2026-11-15 por decisión de Enzo;
+    sus tests quedan como regresión.
 
 Solo numpy, scipy y statsmodels. Ningún modelo.
 """
@@ -128,9 +129,8 @@ def test_one_tied_comparison_does_not_turn_the_whole_family_into_nan():
     assert by_metric["recall"].p_bh == 1.0 and by_metric["recall"].sig_bh is False
 
 
-@pytest.mark.xfail(strict=True, reason="FABLE-B6: pendiente de decisión de Enzo")
 def test_tail_latencies_are_not_trimmed_before_computing_the_tail_statistics():
-    """H-06: hoy la consulta de 10 s desaparece antes de calcular p95, p99 y el máximo."""
+    """H-06 (B6 aplicada el 2026-11-15): la consulta de 10 s cuenta en p95, p99 y el máximo."""
     stats = compute_latency_stats([100.0] * 20 + [10_000.0])
     assert stats["count"] == 21
     assert stats["max"] == 10_000.0

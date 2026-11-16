@@ -3,7 +3,8 @@
 Tres bloques:
   1. Caracterización: fija lo que el runner hace hoy (ejecución de una consulta y agregación).
   2. H-10 (clase A): el módulo no debe anunciar un timeout por consulta que no aplica.
-  3. Propuestas de clase B, como `xfail(strict=True)`: muestran el defecto y quedan a la espera
+  3. Propuestas de clase B: B1 está aplicada (su test es regresión); B3 y B7 siguen como
+     `xfail(strict=True)`: muestran el defecto y quedan a la espera
      de la decisión de Enzo. Si alguien aplica el parche, el test pasa y `strict` obliga a
      quitar la marca.
 
