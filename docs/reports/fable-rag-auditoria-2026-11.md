@@ -64,7 +64,7 @@ comportamiento incorrecto en el camino desplegado; MEDIO y BAJO = el resto.
 
 | ID | Sev. | Clase | Ubicación | Hallazgo | Evidencia | Estado |
 |---|---|---|---|---|---|---|
-| H-01 | CRÍTICO (riesgo) | B1 | `src/evaluation/benchmark_runner.py:199-215`, `:533-568`, `:703-707` | `BenchmarkRunner` escribe `results.json`, `aggregated_metrics.json` y los checkpoints sin pasar por `guard_write`. Relanzar un experimento firmado con todo ya completado reescribe sus artefactos sin cargar ningún modelo | Traza: `run_experiment` siempre termina en `_save_experiment_results`; `scripts/run_benchmark.py:164` y `scripts/run_llm_only_benchmark.py:138` usan el directorio de evidencia por defecto | Abierto |
+| H-01 | CRÍTICO (riesgo) | B1 | `src/evaluation/benchmark_runner.py:199-215`, `:533-568`, `:703-707` | `BenchmarkRunner` escribe `results.json`, `aggregated_metrics.json` y los checkpoints sin pasar por `guard_write`. Relanzar un experimento firmado con todo ya completado reescribe sus artefactos sin cargar ningún modelo | Traza: `run_experiment` siempre termina en `_save_experiment_results`; `scripts/run_benchmark.py:164` y `scripts/run_llm_only_benchmark.py:138` usan el directorio de evidencia por defecto | Propuesto (B1); decide Enzo |
 | H-02 | MEDIO (latente) | B2 | `src/evaluation/statistical_analysis.py:197-217`, `:297-307` | Dos sistemas con puntajes idénticos dan `p=NaN`; un solo NaN vuelve NaN todos los `p_bh` y `p_holm` de la familia | Reproducido con scipy 1.17.1. La evidencia firmada no contiene ningún `p` NaN | Abierto |
 | H-03 | MEDIO | B3 | `src/evaluation/benchmark_runner.py:258-324` | `_run_single_query` ignora `response.error`: una falla del pipeline queda como fila válida y su texto de error se puntúa como si fuera la respuesta | exp3, brazos lineales: q042 y q049 sin fragmentos recuperados en los 3 brazos, con `errors: 0` | Abierto |
 | H-04 | ALTO | B4 | `src/retrieval/coverage_balancer.py:86-88` | Los nombres de servicio genéricos del índice (`virtual machines`, `virtual network`, `vpc`, `iam`) añaden un proveedor que la pregunta no compara y le asignan cuota en `SURVEY_DEPLOY` | «Compare virtual machines on AWS and GCP» resuelve `aws, azure, gcp` con el índice real | Abierto |
@@ -95,3 +95,62 @@ Notas de A1:
 - El docstring del módulo ahora dice la verdad sobre el timeout: 60 s para OpenAI, y para Ollama solo con
   `enforce_timeout=True`. El camino por defecto de los benchmarks llama a `ollama.chat` sin timeout de
   cliente. El comportamiento no se tocó.
+
+## 5. Propuestas de clase B
+
+Ninguna está aplicada. Cada una trae: el test que muestra el defecto (ya en la rama, marcado
+`@pytest.mark.xfail(strict=True, reason="FABLE-B<n>: pendiente de decisión de Enzo")`), el parche listo en
+`docs/reports/fable-rag-2026-11/patches/`, el impacto estimado releyendo las salidas firmadas y la corrida
+nueva que haría falta.
+
+Cómo se verificó cada parche: se aplicó de forma temporal, se corrió su test con `--runxfail` (pasa), se
+corrió el resto de tests del módulo (pasan), se guardó el `git diff` y se revirtió. Con los ocho parches
+aplicados a la vez, los 94 tests de `tests/test_fable_*.py`, `test_coverage_balancer.py`,
+`test_signed_evidence_guard.py`, `test_benchmark_parity.py` y `test_retrieval_contracts.py` pasan con
+`--runxfail`, y los dos verificadores offline dan el mismo SHA-256 normalizado que la línea base. Es
+decir: ninguno de los ocho parches cambia una cifra que los verificadores rederivan.
+
+Para aplicar uno: `git apply docs/reports/fable-rag-2026-11/patches/B<n>.diff` y quitar la marca `xfail`
+de su test (con `strict=True`, el test falla como XPASS si se olvida).
+
+### B1 (H-01, CRÍTICO por riesgo): `BenchmarkRunner` puede reescribir evidencia firmada
+
+**Defecto.** `run_experiment` termina siempre en `_save_experiment_results`, que escribe `results.json`
+y `aggregated_metrics.json` con `write_text`, sin `guard_write`. `scripts/run_benchmark.py` y
+`scripts/run_llm_only_benchmark.py` construyen el runner con el directorio de evidencia por defecto.
+Con los checkpoints completos, `python scripts/run_benchmark.py --experiment exp8` no carga ningún
+modelo («All queries already completed») y aun así reescribe los dos archivos. ADR-0009 declara como
+limitación que los runners de verano no llaman a `guard_write`; este runner, que es el de exp3 a exp9,
+no estaba en esa lista. El botón de la UI sí se protegió en N9.
+
+**Cuánto cambiaría.** Simulado en memoria y en un directorio temporal, sin tocar la evidencia: se
+cargaron las filas de cada `results.json` firmado y se re-agregaron con el código actual.
+
+| Experimento | Campos de `aggregated_metrics.json` que cambiarían | Ejemplo |
+|---|---|---|
+| exp3 | 24 | aparecen los campos `hall_n_*` |
+| exp4 | 16 | ídem |
+| exp5 | 60 | `hall_faithfulness_mean` de `llm_llama3.1`: 0,3442 pasa a 0,3024 |
+| exp6 | 100 | `hall_faithfulness_mean` de un brazo de ablación: 0,3708 pasa a 0,3234 |
+| exp7 | 36 | aparecen `hall_faithfulness_n` y los conteos de claims |
+| exp8 | 60 | `hall_faithfulness_mean` del híbrido: 0,3687 pasa a 0,3248 |
+| exp8b | 60 | `hall_faithfulness_mean` del híbrido: 0,5141 pasa a 0,4249 |
+| exp9 | 0 | ya está agregado con el código actual |
+
+La diferencia es legítima (los archivos firmados son anteriores al filtro de los Flags 137 y 140), pero
+el punto es otro: un relanzamiento inocente los pisaría en silencio. Hoy la única red es `git status`.
+
+1. **Test:** `tests/test_fable_benchmark_runner.py::test_rerunning_a_completed_protected_experiment_does_not_rewrite_its_artifacts`.
+2. **Parche:** [B1.diff](fable-rag-2026-11/patches/B1.diff). Al empezar `run_experiment` se pasa por
+   `guard_write` cada archivo que la corrida reescribiría (`results.json`, `aggregated_metrics.json` y un
+   checkpoint por configuración). Si el directorio está protegido y el archivo existe, sale con
+   `SystemExit` antes de hacer nada.
+3. **Impacto:** ningún resultado, ranking ni métrica cambia. Cambia el flujo en un caso: reanudar un
+   experimento nuevo (`exp20+`) escrito bajo `experiments/results/` exige declararlo vivo en
+   `src/utils/signed_evidence.py`, que es el flujo que ese módulo ya documenta. Los tests y los scripts
+   de `scripts/audit/` usan directorios temporales y no se ven afectados. Con el parche,
+   `tests/test_signed_evidence_guard.py` sigue verde.
+4. **Corrida nueva:** ninguna.
+
+Recomendación: aplicar. Es la única propuesta que protege la evidencia en lugar de cambiar un cálculo.
+Se dejó como clase B porque altera qué hace un comando que hoy «funciona».
