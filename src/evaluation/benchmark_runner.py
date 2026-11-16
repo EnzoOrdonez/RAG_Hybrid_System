@@ -4,7 +4,8 @@ Benchmark Runner for thesis evaluation.
 Features:
   - Runs experiments with configurable pipeline configs
   - Checkpoint every 10 queries (resume support)
-  - 120-second timeout per query
+  - No per-query timeout: `query_timeout` is accepted and stored for callers that pass it,
+    but it is not enforced anywhere. A hung pipeline call blocks the run.
   - Error recovery (skip failed queries, log errors)
   - Per-query result tracking with full metrics
   - Supports retrieval-only mode (no LLM needed)
@@ -35,12 +36,7 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 RESULTS_DIR = PROJECT_ROOT / "experiments" / "results"
 CHECKPOINT_INTERVAL = 10  # Save checkpoint every N queries
-QUERY_TIMEOUT = 120  # Seconds per query
-
-
-class TimeoutError(Exception):
-    """Query timeout."""
-    pass
+QUERY_TIMEOUT = 120  # Seconds per query; stored on the runner, not enforced (see module docstring)
 
 
 class QueryResult:

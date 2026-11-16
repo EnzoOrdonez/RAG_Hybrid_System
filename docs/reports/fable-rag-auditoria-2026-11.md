@@ -73,7 +73,7 @@ comportamiento incorrecto en el camino desplegado; MEDIO y BAJO = el resto.
 | H-07 | MEDIO (latente) | B7 | `src/evaluation/benchmark_runner.py:140` | La caché de índices usa `estrategia_tamaño` e ignora el modelo de embeddings: dos configuraciones con modelos distintos comparten el primer índice cargado | Traza de código; afecta a `exp2`, que no es evidencia firmada | Abierto |
 | H-08 | MEDIO | B8 | `src/generation/llm_manager.py:304-311` | `generate()` guarda en caché una respuesta vacía y la sirve para siempre; `generate_stream()` sí la descarta | exp12 tiene 399 respuestas vacías de 3104 (N6.4 documenta 177 de qwen sin RAG) | Abierto |
 | H-09 | BAJO | A | `src/generation/llm_manager.py:180-197`, `:319-328` | La caché se escribe sin atomicidad y una caché ilegible se descarta en silencio; el log dice «retrying» en el último intento | Traza de código y 3 tests en rojo antes del arreglo | Corregido (A1) |
-| H-10 | BAJO | A | `src/evaluation/benchmark_runner.py:7,38,41-43` | El docstring promete un timeout de 120 s por consulta que no existe; `TimeoutError` tapa el builtin y nadie lo usa | Traza de código | Abierto |
+| H-10 | BAJO | A | `src/evaluation/benchmark_runner.py:7,38,41-43` | El docstring promete un timeout de 120 s por consulta que no existe; `TimeoutError` tapa el builtin y nadie lo usa | Traza de código; `grep` da 0 usos y 0 `import *` | Corregido (A2) |
 | H-11 | BAJO | A | `src/retrieval/coverage_balancer.py:99-102` | El docstring afirma que el orden de relevancia se conserva «dentro y entre» selecciones; el relleno puede dejar un fragmento mejor rankeado detrás | `A1,A2,A3,A4,B1` con cuota 3 da `A1,A2,A3,B1,A4` | Abierto |
 
 ## 4. Commits de clase A
@@ -84,6 +84,7 @@ equivalencia dice por qué ningún resultado cambia.
 | ID | Commit (asunto) | Hallazgo | Rojo antes | Prueba de equivalencia |
 |---|---|---|---|---|
 | A1 | `fix: caché LLM atómica, aviso si es ilegible y log veraz del último intento` | H-09 | 3 de 5 tests de `tests/test_fable_llm_cache.py` fallaban: caché truncada tras un corte de escritura, caché ilegible sin aviso y «retrying in 4s» en el último intento | `test_saved_bytes_are_identical_to_the_legacy_serialisation` compara byte a byte con la serialización anterior; `tests/test_benchmark_parity.py` (clave de caché congelada y llamada a Ollama idéntica) sigue verde; 108 tests de los 8 módulos que usan `LLMManager` pasan. No cambian la clave, el contenido de la caché, los reintentos ni sus esperas (`sleeps == [2]`) |
+| A2 | `fix: el runner deja de anunciar un timeout por consulta que no aplica` | H-10 | `test_the_module_does_not_advertise_a_timeout_it_does_not_apply` fallaba: el docstring decía «120-second timeout per query» y existía la clase `TimeoutError` | Solo cambian el docstring, un comentario y se borra una clase sin uso (0 referencias en `src`, `scripts` y `tests`; 0 `import *`). `test_query_timeout_is_accepted_but_never_enforced` fija que el parámetro se sigue aceptando y sigue sin aplicarse. `scripts/audit/smoke_hall_n_effective.py` pasa. Verificadores offline: SHA-256 normalizado igual a la línea base |
 
 Notas de A1:
 
