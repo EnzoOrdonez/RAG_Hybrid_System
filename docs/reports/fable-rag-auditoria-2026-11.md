@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-15 20:55 | rama `fable/rag-auditoria` @ `692d6bd` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
-Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2303 pasan, 0 fallan, 6 omitidas) | 3 docs=exit 0
-Cambios: solo este informe y la copia del prompt | Sin verificar: ningún modelo se ejecutó (D1); ver §10
+[Fable 5.2] | 2026-11-15 21:24 | rama `fable/rag-auditoria` @ `2df11c3` | tarea F-propuesta (sin número, ver §9) | modo: ejecución
+Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2373 pasan, 0 fallan, 6 omitidas, 12 xfail estrictos) | 3 docs=exit 0
+Cambios: 17 commits sobre `1574d22` más el de cierre, que solo toca este informe (§11) | Sin verificar: ningún modelo se ejecutó (D1); `init.sh` completo no se repitió tras el commit de cierre; ver §10 y §11
 
 # Auditoría y endurecimiento del código RAG (noviembre de 2026)
 
@@ -539,3 +539,39 @@ Ninguno de los dos archivos de destino se editó (límite 5).
   con todos puestos. No corrí `init.sh` completo con los parches aplicados.
 - **Simulación de B1:** la tabla de campos que cambiarían sale de re-agregar en memoria las filas de cada
   `results.json` firmado. No ejecuté `scripts/run_benchmark.py` sobre la evidencia.
+
+## 11. Cierre (F5)
+
+Verificación final sobre `2df11c3`, el último commit que toca código o tests. El commit de cierre solo
+edita este informe.
+
+| Comprobación | Resultado |
+|---|---|
+| `bash init.sh` | exit 0 en las tres capas |
+| Capa 2, conteo por los puntos de progreso | 2373 pasan, 0 fallan, 6 omitidas, 12 `xfail` estrictos, 0 `xpass` |
+| Diferencia con la línea base (2303 pasan) | 70 casos nuevos que pasan y 12 `xfail`, todos en `tests/test_fable_*.py` |
+| `scripts/verify_v4_offline.py` | exit 0, SHA-256 normalizado igual al de §2 |
+| `scripts/verify_summer_offline.py` | exit 0, SHA-256 normalizado igual al de §2 |
+| `git diff --stat 1574d22..HEAD -- experiments paper config src/ui scripts/study_operator .harness` | vacío |
+| `scripts/scan_secrets.py --baseline secrets_baseline.json` | exit 0 (capa 1) |
+| Árbol tras correr los verificadores | limpio: los dos reportes diarios se reescriben idénticos |
+
+Revisión independiente del diff de `src/` y `tests/` (una pasada, agente revisor de código): 0 hallazgos
+críticos y 0 altos. Uno medio y dos bajos:
+
+- Medio, corregido en `2df11c3`: el test de la guarda de `PYTHONHASHSEED` dejaba la variable centinela
+  `_CLOUDRAG_HASHSEED_REEXEC=1` en el entorno del proceso de tests. Ahora se fija y se borra con
+  `monkeypatch`, que la restaura al terminar.
+- Bajo, corregido en `2df11c3`: el margen temporal del test de `query_timeout` pasó de 50 ms a 40 ms,
+  porque `sleep(0.05)` puede volver antes en Windows.
+- Bajo, documentado en §4 (notas de A1): `os.replace` añade modos de fallo en Windows si otro proceso
+  tiene abierto el archivo de caché. El fallo se registra con un aviso y la corrida sigue, igual que antes.
+
+Lo que este cierre no cubre:
+
+- `init.sh` completo no se repitió después del commit de cierre. Sobre el árbol final sí corrieron la
+  capa 1 y la capa 3, que son las que un cambio de documentación puede romper.
+- Una corrida anterior de `init.sh`, sobre `848dfff`, dio los mismos conteos (2373, 0, 6, 12).
+- Nada se publicó: sin push, sin merge y sin PR (D3). La rama solo existe en este equipo.
+
+Para revisar: `git log --oneline 1574d22..fable/rag-auditoria`.
