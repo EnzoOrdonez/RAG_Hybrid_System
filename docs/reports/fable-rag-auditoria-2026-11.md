@@ -71,7 +71,7 @@ comportamiento incorrecto en el camino desplegado; MEDIO y BAJO = el resto.
 | H-05 | ALTO | B5 | `src/retrieval/query_processor.py:140-148` | La detección de proveedor es por subcadena: `laws` y `flaws` contienen `aws` y activan el filtro `single_provider` | «What data residency laws apply to object storage?» queda filtrada a AWS | Propuesto (B5); decide Enzo |
 | H-06 | MEDIO | B6 | `src/evaluation/latency_metrics.py:46-51` | Se descartan los valores a más de 3 desviaciones antes de calcular p95, p99 y máximo: se recorta justo la cola que esas cifras deben describir | exp8b denso: p95 41 541 ms recortado frente a 45 630 ms sin recortar | Propuesto (B6); decide Enzo |
 | H-07 | MEDIO (latente) | B7 | `src/evaluation/benchmark_runner.py:140` | La caché de índices usa `estrategia_tamaño` e ignora el modelo de embeddings: dos configuraciones con modelos distintos comparten el primer índice cargado | Traza de código; afecta a `exp2`, que no es evidencia firmada | Propuesto (B7); decide Enzo |
-| H-08 | MEDIO | B8 | `src/generation/llm_manager.py:304-311` | `generate()` guarda en caché una respuesta vacía y la sirve para siempre; `generate_stream()` sí la descarta | exp12 tiene 399 respuestas vacías de 3104 (N6.4 documenta 177 de qwen sin RAG) | Abierto |
+| H-08 | MEDIO | B8 | `src/generation/llm_manager.py:304-311` | `generate()` guarda en caché una respuesta vacía y la sirve para siempre; `generate_stream()` sí la descarta | exp12 tiene 399 respuestas vacías de 3104 (N6.4 documenta 177 de qwen sin RAG) | Propuesto (B8); decide Enzo |
 | H-09 | BAJO | A | `src/generation/llm_manager.py:180-197`, `:319-328` | La caché se escribe sin atomicidad y una caché ilegible se descarta en silencio; el log dice «retrying» en el último intento | Traza de código y 3 tests en rojo antes del arreglo | Corregido (A1) |
 | H-10 | BAJO | A | `src/evaluation/benchmark_runner.py:7,38,41-43` | El docstring promete un timeout de 120 s por consulta que no existe; `TimeoutError` tapa el builtin y nadie lo usa | Traza de código; `grep` da 0 usos y 0 `import *` | Corregido (A2) |
 | H-11 | BAJO | A | `src/retrieval/coverage_balancer.py:99-102` | El docstring afirma que el orden de relevancia se conserva «dentro y entre» selecciones; el relleno puede dejar un fragmento mejor rankeado detrás | `A1,A2,A3,A4,B1` con cuota 3 da `A1,A2,A3,B1,A4` | Corregido (A3) |
@@ -303,3 +303,32 @@ configuraciones fallarían al cargar y se saltarían con un log de error.
    además exige construir los índices.
 
 Ver la pregunta 1 de §8: este es el único parche B que, a mi juicio, podría pasar a clase A.
+
+### B8 (H-08, MEDIO): `generate()` congela en la caché las respuestas vacías
+
+**Defecto.** `generate()` guarda la respuesta si no hubo error, aunque el texto esté vacío. A partir de
+ahí la misma clave devuelve siempre la cadena vacía sin volver al modelo. `generate_stream()` ya evita
+el caso (`if self.cache_enabled and text`).
+
+**Rastro en la evidencia.** exp12 tiene 399 respuestas vacías de 3104, y las cachés versionadas tienen
+exactamente 399 entradas vacías:
+
+| Modelo | Respuestas vacías en exp12 | Entradas vacías en su caché |
+|---|---|---|
+| qwen3.5:9b | 345 (sin RAG 177, léxico 64, denso 52, híbrido 52) | 345 de 776 |
+| gemma4:e4b | 54 (léxico 16, denso 19, híbrido 19) | 54 de 776 |
+| granite4.1:8b, mistral:7b | 0 | 0 |
+
+N6.4 documenta las 177 de qwen sin RAG y dice que una respuesta vacía queda con `method="none"`, fuera
+de las medias. No encontré registradas las otras 222 (168 de qwen con RAG y 54 de gemma) y no volví a
+comprobar que se excluyan igual. La causa de que el modelo devuelva vacío no la investigué (D1).
+
+1. **Test:** `tests/test_fable_llm_cache.py::test_an_empty_answer_is_not_frozen_into_the_cache`.
+2. **Parche:** [B8.diff](fable-rag-2026-11/patches/B8.diff). No se escribe en caché una respuesta sin
+   texto.
+3. **Impacto:** ninguna cifra firmada cambia y la reproducción desde caché de exp12 se conserva: el
+   parche solo afecta a la escritura, y las 399 entradas vacías ya versionadas se siguen sirviendo. Cambia
+   el futuro: una respuesta vacía nueva se vuelve a pedir al modelo en la siguiente llamada.
+4. **Corrida nueva:** ninguna obligatoria. Si quieres saber si esas 399 respuestas vacías eran un fallo
+   transitorio o una propiedad del modelo con ese prompt, hace falta un `exp20` que regenere solo esas
+   consultas con qwen y gemma, sin caché. Sin esa corrida no se puede afirmar ninguna de las dos cosas.
