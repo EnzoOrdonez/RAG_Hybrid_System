@@ -21,19 +21,19 @@ secciones de los intentos anteriores están en el historial de git de este archi
 - **Paso E de F-020 cumplido.** F-020 sigue `active`: faltan F (ensayo P998) y G (sesiones).
 - **Informe de las sesiones sintéticas:** [i7-gate-sesiones-sinteticas-i15.md](../docs/reports/i7-gate-sesiones-sinteticas-i15.md).
 - **Bitácora privada:** `C:\CloudRAG\i15b-preparacion-20261115\BITACORA_I15.md` (estado en `ESTADO.json`), indexada en `C:\CloudRAG\LEEME_CLOUDRAG.md`.
-- **GCP tras el close:** sin VMs encendidas ni reservas. Quedan, con costo de almacenamiento:
-  - dos VMs GPU detenidas con su disco de arranque de 180 GB: la del intento 15, que usará la fase humana, y una anterior;
-  - seis snapshots limpios de intentos del 13 al 15/11, el último del intento 15;
+- **GCP tras el close y el retiro del 16/11** (borrados con OK de Enzo: la VM y el disco del intento 14 y los snapshots limpios de los intentos 10 a 14; log privado en la carpeta de preparación). No hay VMs encendidas ni reservas. Quedan, con unos USD 37 al mes de almacenamiento:
+  - la VM GPU detenida del intento 15, con su disco de 180 GB, que usará la fase humana;
+  - el snapshot limpio del intento 15;
   - los tres snapshots base (`i6-cierre`, `i5-final03`, `original-i2-i3`), que no se borran;
   - la IP estática RESERVED sin usuarios.
-- **Sesiones sintéticas de los gates de los intentos 14 y 15** (códigos P9000xx, no son personas): sin purgar en el disco GPU y el bucket del período.
+- **Sesiones sintéticas** (códigos P9000xx, no son personas):
+  - del gate del intento 15: sin purgar en su disco GPU y en el bucket del período;
+  - del intento 14: solo en el bucket, porque su disco se borró.
 - **Rama aparte `chore/f009-ruff-scanner`** (sin PR): Ruff en 9 scripts, medición de F-016 y F-021.
 
 ## Qué sigue
 
-1. **Enzo decide sobre los recursos retenidos y las sesiones sintéticas:**
-   - borrar la VM, el disco y los snapshots de intentos anteriores (no la VM ni el snapshot del intento 15, ni los tres snapshots base);
-   - purgar las sesiones con `technical-cycle` (un boot pagado; cotizar antes).
+1. **Enzo decide sobre las sesiones sintéticas:** purgarlas con `technical-cycle` (un boot pagado; cotizar antes).
 2. **Paso F:** aprobación ética escrita, `human-phase-open`, ensayo P998 con Enzo y calendario de sesiones dentro del tope de USD 100.
 3. **Paso G:** invitaciones y sesiones, con respaldo verificado por hash entre sesiones.
 4. Integrar `fix/interview-readiness` en `main` mediante PR, con CI verde. Antes, decidir desde qué checkout corre la fase humana (abajo).
