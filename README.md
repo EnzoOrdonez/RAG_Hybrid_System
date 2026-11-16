@@ -32,7 +32,7 @@ IEEE Xplore-compatible certified PDF: `docs/2026305869.pdf`. See `CITATION.cff`.
 
 A hybrid Retrieval-Augmented Generation system that answers questions about cloud documentation from **AWS, Azure, and GCP** (the experimental corpus; the crawler also supports Kubernetes/CNCF sources, which are excluded from the Nota 3 evidence). It combines lexical search (BM25) with semantic search (dense embeddings) using Reciprocal Rank Fusion, cross-encoder re-ranking, and local LLMs via Ollama.
 
-**Why hybrid?** Pure keyword search misses semantically related content. Pure embedding search misses exact technical terms. CloudRAG fuses both to get the best of each approach — then re-ranks with a cross-encoder for precision.
+**Why hybrid?** Pure keyword search misses semantically related content; pure embedding search can miss exact technical terms. CloudRAG fuses both and then re-ranks with a cross-encoder. In our own evaluation the measurable gain comes from the re-ranker: fusion clearly helps over lexical-only retrieval, but with the same re-ranker it is not significantly better than dense-only retrieval (exp20).
 
 ---
 
@@ -45,7 +45,7 @@ A hybrid Retrieval-Augmented Generation system that answers questions about clou
 - **Hallucination detection**: NLI-based faithfulness scoring with DeBERTa v3
 - **Local LLMs**: Runs with Ollama (UI default: Granite 4.1; evaluated set: Granite 4.1, Gemma 4, Mistral 7B, Qwen 3.5 — see docs/architecture/models.md)
 - **Streamlit UI**: invitation-only participant evaluation; five views in private development mode
-- **Benchmarking suite**: 19 logical experiments (exp3-exp19b + exp8b), stored in 20 result directories because exp15 is split in two, with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
+- **Benchmarking suite**: 20 logical experiments (exp3-exp20 + exp8b), stored in 21 result directories because exp15 is split in two, with paired statistics (Wilcoxon, Cohen's d_z, Bootstrap CI, BH/Holm)
 
 ---
 
@@ -68,6 +68,11 @@ Hybrid(post) > Dense is significant under the independent oracle (d_z = +0.45,
 p_BH < 0.001); the advantage comes from the **reranking stage**, not the RRF fusion
 (pre-rerank ≈ Dense, n.s.). Under the circular oracle the hybrid scores NDCG@5 = 0.995
 by construction — reported only as a circularity reference (ledger N2).
+
+A same-reranker control (`exp20_rerank_arms`, seven-system pool) puts dense + reranker at
+0.699 against 0.714 for the full pipeline (Δ = +0.016, p = 0.075, n.s.). NDCG here is
+relative to the pool of compared systems, so 0.714 in that pool corresponds to 0.740 in
+the table above.
 
 Generation faithfulness (4 LLMs × 4 scenarios × 194, NLI verifier): RAG ≫ no-RAG for
 every testable model — a difference in evidence-supported claims, with no-RAG structurally at zero (not a direct proof of factual accuracy) — but the **retrieval method does not significantly move generation
@@ -313,12 +318,13 @@ cloudrag/
 
 ## Experiments
 
-19 versioned experiments (exp3-exp19b + exp8b) covering retrieval strategies, re-ranking,
+20 versioned experiments (exp3-exp20 + exp8b) covering retrieval strategies, re-ranking,
 LLM comparison, ablation, and cross-cloud evaluation. exp3-8/8b ran on the pre-rebuild
 corpus/oracle and are kept as history; the paper's evidence is the final round (exp10-13
 on the curated 194-query set + exp9 control on the pre-curation 200-query set); exp14-19b are
 post-paper audit and validation experiments (runtime-noise floor, verifier ablations, evidence
-ceiling, anchored selection), complemented by the claim-level pilot human reference (v4):
+ceiling, anchored selection) and exp20 is a post-paper retrieval-only control (the
+single-retriever arms get the same reranker as the hybrid), complemented by the claim-level pilot human reference (v4):
 
 | Experiment | What it tests | Key finding |
 |------------|--------------|-------------|
@@ -332,6 +338,7 @@ ceiling, anchored selection), complemented by the claim-level pilot human refere
 | exp17 | Cross-cloud balanced arm | Provider-coverage probe (descriptive): strict coverage 8% baseline vs 80% balanced, 0/125 foreign-provider chunks |
 | exp18 | Evidence ceiling + unsupported-claim taxonomy | 759 unsupported claims taxonomized; stratified sample with Horvitz-Thompson weights, Kish n_eff = 27.4 |
 | exp19b | Anchored evidence selector, paired + replay-gated | HHEM Δ=+0.0451 (CI95 [0.0076; 0.0817], p=0.018), TOST within ±0.081; verdict: verifier-aligned local improvement, not verifier-independent |
+| exp20 | Same-reranker control arms (retrieval only, independent oracle) | Dense + reranker does not differ significantly from hybrid + reranker (Δ NDCG@5 +0.016, p = 0.075); the reranker adds +0.095 over dense; hybrid + reranker beats BM25 + reranker by +0.068 |
 | pilot reference v4 | Claim-level human validation (150 claims, 200 claim-condition judgments, blinded LLM judges) | Best verifier κ=0.30 (weighted, CI crosses 0) vs pilot human reference; LLM judges κ₂=0.754 between them but 0.17-0.20 vs human; labels = pilot reference, not ground truth |
 
 Paired stats throughout: Wilcoxon signed-rank + Cohen's d_z + bootstrap CI, BH/Holm

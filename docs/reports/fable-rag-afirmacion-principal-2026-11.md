@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-16 11:07 | rama `fable/rag-auditoria` @ `0ea4d04` | tarea F-propuesta (sin número, ver §9 del informe de auditoría) | modo: sondeo
-Capas: 1 secretos=exit 0 | 2 tests=no repetida (este cambio solo añade documentación; última corrida completa: 2406 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
-Cambios: este documento y dos notas de corrección en el informe de conceptos | Sin verificar: no tengo el A.3 (vive fuera del repo); no comprobé si el paper ya está en IEEE Xplore; del PDF certificado solo cotejé la página 3
+[Fable 5.2] | 2026-11-16 11:18 | rama `fable/rag-auditoria` @ `0204806` | tarea F-propuesta (sin número, ver §9 del informe de auditoría) | modo: ejecución
+Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2406 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
+Cambios: este documento, dos notas de corrección en el informe de conceptos y R1 a R4 en el README | Sin verificar: no tengo el A.3 (vive fuera del repo); no comprobé si el paper ya está en IEEE Xplore; del PDF certificado solo cotejé la página 3
 
 # Afirmación principal sobre el híbrido: propuesta frase por frase
 
@@ -210,7 +210,8 @@ se cotejó a la vista y coincide con el `.tex` en S6, S7, S8 y S11.
 
 ## 4. README del repo
 
-El README no es prosa del paper, pero es público y repite la afirmación. No lo edité.
+El README no es prosa del paper, pero es público y repite la afirmación. Estado: aplicado (ver la
+nota al final de esta sección).
 
 | ID | Línea | Actual (extracto) | Propuesta |
 |---|---|---|---|
@@ -220,6 +221,20 @@ El README no es prosa del paper, pero es público y repite la afirmación. No lo
 | R4 | 48 | «19 logical experiments (exp3-exp19b + exp8b), stored in 20 result directories» | Con exp20 firmada son 20 experimentos lógicos y 21 directorios (contados en `experiments/results/`) |
 
 R4 no es de redacción: el conteo queda desfasado en cuanto esta rama se integre.
+
+**Aplicado el 2026-11-16 con el OK de Enzo («Sí, aplica R1–R4»).** Las líneas de la tabla son las
+del README anterior al cambio. Tres añadidos respecto del texto de la tabla, todos para no dejar
+el README incoherente:
+
+- R2 lleva una frase más: el NDCG es relativo al pool, y el 0,714 de exp20 corresponde al 0,740 de
+  la tabla del README (regla 1 de §2). Sin ella, las dos cifras parecerían contradecirse.
+- R3: la fila nueva añade que el híbrido con reranker supera a BM25 con reranker en +0,068
+  (regla 3 de §2), y el párrafo que precede a la tabla menciona exp20.
+- R4: el mismo conteo aparecía también en la sección «Experiments» («19 versioned experiments»);
+  se actualizó a 20 en los dos sitios.
+
+No se tocó la frase «The raw outputs (`experiments/results/exp9..19b`) are versioned» de la sección
+de reproducción de Nota 3: sigue siendo cierta y habla de ese informe, no de exp20.
 
 ## 5. Textos en español para el A.3 y la defensa
 
@@ -265,8 +280,8 @@ añada hasta 0,035 de NDCG@5.»
 2. Para S6: si se anota en `paper/correction_log.md` y si quieres una nota de erratas pública.
 3. Para el A.3: los párrafos actuales, si quieres la correspondencia exacta.
 
-Con tu OK aplico en esta rama solo lo del README (R1 a R4), en un commit. No edito `paper/**` ni
-el `.tex` del camera-ready.
+R1 a R4 ya están aplicados en esta rama (§4). Siguen pendientes de tu respuesta las filas S y el
+punto 2. No edito `paper/**` ni el `.tex` del camera-ready.
 
 ## 7. Verificaciones de este documento
 
