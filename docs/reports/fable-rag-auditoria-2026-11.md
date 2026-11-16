@@ -332,3 +332,34 @@ comprobar que se excluyan igual. La causa de que el modelo devuelva vacío no la
 4. **Corrida nueva:** ninguna obligatoria. Si quieres saber si esas 399 respuestas vacías eran un fallo
    transitorio o una propiedad del modelo con ese prompt, hace falta un `exp20` que regenere solo esas
    consultas con qwen y gemma, sin caché. Sin esa corrida no se puede afirmar ninguna de las dos cosas.
+
+## 7. Huecos de tests cubiertos (F4)
+
+Antes de esta auditoría no había ningún test de comportamiento para `benchmark_runner`,
+`generation_metrics`, `latency_metrics`, `hallucination_metrics`, `prompt_templates`, `hybrid_retriever`,
+`reproducibility`, ni para `RAGPipeline.query` de punta a punta. `multidimensional_scorer` sigue sin tests
+a propósito: N9 ya registra que nunca tuvo un punto de llamada.
+
+Todos los tests nuevos corren en CPU con dobles (índice, reranker, LLM y modelo NLI falsos). Ninguno carga
+un modelo ni lee `data/indices`. Son tests de caracterización: fijan lo que el código hace hoy, incluido
+lo discutible, para que un cambio se note.
+
+| Archivo | Tests | Qué fija |
+|---|---|---|
+| `tests/test_fable_pipeline.py` | 26 | SHA-256 de los seis textos de prompt; contexto estándar y agrupado por proveedor; RRF (suma de rangos recíprocos, empates a favor de BM25, independencia de los puntajes crudos); fusión lineal; ruteo de la consulta cruda y expandida a cada pierna; filtro `single_provider`; niveles de confianza y citas del formateador; `RAGPipeline.query` completo en la configuración heredada, en la desplegada (ruteo de prompt, balanceo, pool de 50 para el reranker), sin candidatos, con fallo del LLM, con excepción y sin RAG |
+| `tests/test_fable_detector.py` | 15 | estados por afirmación y denominador sin artefactos; `vb_agree` con un solo chunk; fila vacua (N9); `method="none"`; camino sin evidencia (N3); caída del NLI a palabras clave (`mixed`); extracción de listas con viñetas; envoltorio `compute_hallucination_metrics`; `set_all_seeds` y la guarda de `PYTHONHASHSEED` |
+| `tests/test_fable_metrics.py` | 14 | `exact_match` (solape del 80 %), `f1_token` sobre conjuntos, ROUGE-L, estadísticos de latencia, BH y Holm calculados a mano, convención `b - a` del tamaño de efecto, bootstrap con semilla fija; más los `xfail` de B2 y B6 |
+| `tests/test_fable_benchmark_runner.py` | 8 | ejecución de una consulta, fila de error por excepción, agregación con exclusión de `none` y `error` (Flags 137 y 140), H-10; más los `xfail` de B1, B3 y B7 |
+| `tests/test_fable_providers.py` | 5 funciones, 12 casos | orden del relleno de `balance()` (H-11), clasificación de consultas; más los `xfail` de B4 y B5 |
+| `tests/test_fable_llm_cache.py` | 7 | H-09 y la reutilización de caché; más el `xfail` de B8 |
+
+Cobertura: no medida. `pytest-cov` no está instalado y el límite 2 prohíbe instalarlo.
+
+Dos comportamientos que estos tests fijan y conviene tener presentes, sin ser hallazgos nuevos:
+
+- `exact_match` no es igualdad de cadenas: devuelve 1,0 si el 80 % de los tokens del gold aparece en la
+  respuesta. `f1_token` trabaja sobre conjuntos, así que las repeticiones cuentan una vez (no es el F1
+  de SQuAD). Las cifras citables de Nota 3 no usan estas dos métricas.
+- Una respuesta vacía da fidelidad 0,0 en `compute_hallucination_metrics` y una de solo espacios da 1,0
+  en el detector. Ambas quedan con `method="none"` y fuera de las medias. En la evidencia firmada no hay
+  ninguna respuesta de solo espacios.
