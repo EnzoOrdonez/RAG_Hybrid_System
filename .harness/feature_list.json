@@ -276,7 +276,7 @@
         "Hecho 2026-11-16: exp20_rerank_arms firmada (Enzo: «Sí, firma exp20»); réplica bit a bit de la corrida de auditoría. Con el mismo reranker, híbrido − denso = +0,016 de NDCG@5 (p = 0,075, n.s.).",
         "Hecho 2026-11-17 (ADR-0037, delegación de Enzo): B3, B4, B5, B7 y B8 sin aplicar, con xfail estricto y declaradas como límites hasta exp21+ o una imagen nueva; exp20 conserva su nombre.",
         "Hecho 2026-11-17 (OK de Enzo): entrada 36 de paper/summer_ablation_log.md, fe de erratas S6 en paper/correction_log.md y nota de erratas en el README; ocho frases aceptadas para el A.3 y la defensa (S1, S5, S7c, S11a, S11c, S13, S6, S12).",
-        "Pendiente de Enzo: aplicar las ocho frases en el A.3; decidir las 222 respuestas vacías de exp12 (con recuento previo), el aviso del Flag 33, la validación humana del oráculo (C2) y si se avisa a LACCI o IEEE de la fe de erratas.",
+        "Hecho 2026-11-17 (delegación de Enzo): A.3 V2.21 fuera del repo con S1, S5, S7c, S11c, S12, S13 y el aviso del Flag 33 (S6 ya era correcto; S11a no aplica); 399 respuestas vacías de exp12 recontadas y registradas en paper/correction_log.md; C2 y C5 quedan como límites y trabajo futuro; el aviso a LACCI o IEEE queda documentado fuera del repo para Enzo.",
         "Pendiente de Enzo: fusionar el PR de esta rama después del de fix/interview-readiness."
       ],
       "status": "active",
