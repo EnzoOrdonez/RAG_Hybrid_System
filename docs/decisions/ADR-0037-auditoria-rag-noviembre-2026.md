@@ -54,16 +54,21 @@ separar el aporte de la fusión del aporte del reranker. Informes:
   del reranker; con el mismo reranker, el híbrido supera al denso en +0,016 de NDCG@5, sin
   significación (p = 0,075).
 
-## Pendiente de Enzo
+## Decisiones menores del 2026-11-17
 
-[DECLARADO]
-- Si se anotan en el ledger las 222 respuestas vacías de exp12 que N6.4 no registra (168 de qwen
-  con RAG y 54 de gemma). Antes hay que verificar el recuento.
-- Si se añade al A.3 el aviso del Flag 33: su propio umbral (más del 10 % de fragmentos truncados
-  a 512 tokens) está superado.
-- Si se validan los juicios del oráculo con una muestra humana (C2) y si se corre una
-  verificación de fidelidad con ventanas en lugar de truncado (C5, corrida `exp21+`).
-- Si corresponde avisar a la organización de LACCI o a IEEE de la fe de erratas S6.
+[DECLARADO] Por delegación de Enzo («las decisiones menores … con las opciones recomendadas»):
+- **Respuestas vacías de exp12:** recontadas (399 de 3 104; 177 de qwen sin RAG, 168 de qwen con
+  RAG y 54 de gemma con RAG) y registradas en `paper/correction_log.md` como complemento de N6.4.
+- **Aviso del Flag 33:** añadido a las limitaciones del A.3 V2.21, con OK de Enzo a la frase.
+- **Validación humana del oráculo (C2):** no se hace ahora. Queda como límite declarado (S12) y
+  como trabajo futuro, que el A.3 ya lista.
+- **Fidelidad con ventanas en lugar de truncado (C5):** no se corre ahora; sería una corrida
+  `exp21+` con modelos. El aviso del Flag 33 declara el truncado medido.
+- **Aviso a LACCI o a IEEE de la fe de erratas S6:** documentado fuera del repositorio para que
+  decida Enzo.
+- **A.3:** la V2.21 aplica S1, S5, S7c, S11c, S12 y S13 y el aviso del Flag 33. S6 no cambia porque
+  el A.3 ya decía 25 consultas multiproveedor, y S11a no aplica porque el A.3 no tiene la cifra del
+  +67 %. Los archivos viven fuera del repositorio, junto a la V2.20, que no se sobrescribe.
 
 ## Verificación
 
