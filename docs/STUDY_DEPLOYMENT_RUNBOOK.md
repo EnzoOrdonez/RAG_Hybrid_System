@@ -143,6 +143,9 @@ no configura la modalidad D2 ni autoriza exposición de red.
    Observado en el ensayo sintético P998 del 17/11/2026; la causa está reproducida en
    local y falta leer el evento de preparación de la VM. Corregirlo en código (aviso de
    espera, botón desactivado o manejo del bloqueo) exige imagen y gate nuevos.
+   El código de `main` ya lo corrige desde F-023 (aviso de espera y mensaje de
+   preparación en curso), pero la imagen desplegada b5e54f1 no lo incluye: esta nota
+   sigue vigente para la fase humana sobre la raíz del GO.
 
 ## Moderación y secuencia
 

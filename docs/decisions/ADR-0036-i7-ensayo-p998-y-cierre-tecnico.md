@@ -80,3 +80,17 @@ recomendadas?"). Este ADR no cambia código.
   `RESERVATION_DELETED_VERIFIED`.
 - Lectura de GCP tras el cierre: VM detenida y 0 reservas.
 - `init.sh` con exit 0 en las tres capas sobre el árbol con la nota del runbook.
+
+## Actualización del 2026-11-17: F-023
+
+[DECLARADO] Con OK de Enzo («haz la 1,2,4 …») y su elección de aplazar el identificador del proyecto:
+- **Aviso de espera en «Preparar sesión» (decisión 2):** corregido en el código de `main` (tarea
+  F-023). La página muestra un aviso mientras prepara; si otra ejecución ya prepara o el bloqueo
+  de inferencia está tomado, muestra «La preparación de la sesión está en curso…» con el botón
+  «Comprobar preparación», en vez del error genérico. Tests en
+  `tests/test_study_prepare_feedback.py`. La imagen desplegada b5e54f1 no lo incluye, así que la
+  nota del runbook sigue vigente para la fase humana.
+- **Identificador del proyecto (decisión 5):** sigue aplazado al cierre del estudio. Aparece en 25
+  sitios del operador, entre ellos el guardián de alcance de `cloud_client` y scripts que corren
+  dentro de la VM. Esos caminos solo se prueban de verdad en la nube, y el identificador ya es
+  público en el historial.
