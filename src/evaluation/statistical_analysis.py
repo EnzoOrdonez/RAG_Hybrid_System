@@ -196,6 +196,21 @@ def paired_comparison(
 
     # Check normality of differences
     diff = b - a
+    if not np.any(diff):
+        # Every pair is tied, so there is nothing to test. scipy returns NaN here (a t-test
+        # on a zero-variance difference, or a Wilcoxon test once every zero is discarded),
+        # and one NaN turns every BH/Holm-adjusted p-value of the family into NaN.
+        is_normal_a, _ = shapiro_wilk_test(a.tolist(), alpha)
+        is_normal_b, _ = shapiro_wilk_test(b.tolist(), alpha)
+        return {
+            "test_name": "all_pairs_tied",
+            "statistic": 0.0,
+            "p_value": 1.0,
+            "is_significant": False,
+            "is_normal_a": is_normal_a,
+            "is_normal_b": is_normal_b,
+            "n": len(a),
+        }
     is_normal_diff, _ = shapiro_wilk_test(diff.tolist(), alpha)
 
     # Also check normality of each distribution

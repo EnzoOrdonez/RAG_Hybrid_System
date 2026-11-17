@@ -1,0 +1,17 @@
+diff --git a/src/generation/llm_manager.py b/src/generation/llm_manager.py
+index 91f9e2c..7c9283d 100644
+--- a/src/generation/llm_manager.py
++++ b/src/generation/llm_manager.py
+@@ -318,8 +318,10 @@ class LLMManager:
+                     attempt + 1,
+                 )
+ 
+-                # Cache the response
+-                if self.cache_enabled and not response.error:
++                # Cache the response. An empty answer is not cached (same rule as
++                # generate_stream): freezing it would serve the empty text forever instead of
++                # asking the model again.
++                if self.cache_enabled and not response.error and response.text.strip():
+                     key = self._cache_key(prompt, system_prompt, temperature, config_name, self.seed, max_tokens)
+                     self._cache[key] = {
+                         "text": response.text,

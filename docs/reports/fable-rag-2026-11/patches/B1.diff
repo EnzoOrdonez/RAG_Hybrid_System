@@ -1,0 +1,23 @@
+diff --git a/src/evaluation/benchmark_runner.py b/src/evaluation/benchmark_runner.py
+index 9832163..f7c39b3 100644
+--- a/src/evaluation/benchmark_runner.py
++++ b/src/evaluation/benchmark_runner.py
+@@ -357,6 +357,18 @@ class BenchmarkRunner:
+         max_q = max_queries or experiment_config.max_queries
+         queries = queries[:max_q]
+ 
++        # Refuse to touch committed evidence BEFORE doing any work (ADR-0009). Every file
++        # this run would rewrite is checked up front, so a protected experiment directory
++        # (anything under experiments/results that signed_evidence does not declare live) that already
++        # holds one of them stops here with SystemExit, not after the first checkpoint.
++        # Directories outside experiments/results (tests, probes) are never guarded.
++        from src.utils.signed_evidence import guard_write
++        exp_dir = self.results_dir / exp_id
++        guard_write(exp_dir / "results.json")
++        guard_write(exp_dir / "aggregated_metrics.json")
++        for guarded_config in experiment_config.pipeline_configs:
++            guard_write(self._checkpoint_path(exp_id, guarded_config.name))
++
+         # Audit §20.1 Flag 152: re-seed at the start of every experiment
+         # so that running multiple experiments in one process does not
+         # let RNG state drift between them.

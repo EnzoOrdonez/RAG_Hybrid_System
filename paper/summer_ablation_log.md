@@ -2438,3 +2438,54 @@ creó versión V9 nueva por no existir correcciones que aplicar.
   datos ni evidencia.
 
 *Fin de la entrada 35 — [Kimi Work] 2026-09-03.*
+
+---
+
+## 2026-11-16 (36) — exp20_rerank_arms firmado: control con el mismo reranker y oráculo independiente [Fable 5.2]
+
+- **Autorización:** Enzo, el 2026-11-15 («si lanza el exp20», encoders locales, sin Ollama) y el
+  2026-11-16 («Sí, firma exp20»). Solo recuperación y reranking. No se cargó Ollama, NLI ni HHEM y
+  no se descargó nada.
+- **Qué responde:** exp11 compara «híbrido + reranker» con «denso sin reranker» y «léxico sin
+  reranker», así que no separa el aporte de la fusión del aporte del reranker. exp20 añade los
+  brazos `denso_rerank`, `lexico_rerank` y `union_rerank` sobre las mismas 194 consultas, con los
+  mismos objetos que `scripts/run_retrieval_only.py`, y califica el top-5 de los siete brazos con
+  el oráculo independiente `BAAI/bge-reranker-large`.
+- **Dónde:** `experiments/results/exp20_rerank_arms/` (`results.json`,
+  `oracle_scores__bge-reranker-indep.json`, `analysis.md`, `analysis.json`). Escritura única a
+  través de `guard_write`; el registro de experimentos vivos de `src/utils/signed_evidence.py`
+  sigue vacío. Script: `scripts/audit/exp20_rerank_arms.py --signed`.
+- **Procedencia:** commit `0b37c7c`, árbol sin cambios; SHA-256 del script `275b62fa…120dd2609`;
+  pesos `bge-large-en-v1.5` `45e19549…`, `ms-marco-MiniLM-L-12-v2` `1ed84b90…`,
+  `bge-reranker-large` `c5ae4e26…` (igual al manifiesto de julio); Python 3.14.3, torch 2.10.0+cpu,
+  sentence-transformers 5.2.3; CPU; seed 42; modo offline.
+- **Instrumento:** reproduce el top-5 firmado de exp11 en 194 de 194 consultas para `lexico`,
+  `denso` e `hibrido_rerank` (193 de 194 en orden y 194 en conjunto para `hibrido_pre`) y el
+  NDCG@5 independiente firmado con el pool de cuatro sistemas (desviación máxima 1,9 × 10⁻⁷).
+- **Réplica:** coincide bit a bit con la corrida de auditoría previa
+  (`output/audit/exp20_rerank_arms_2026-11-15/`): 1 358 de 1 358 listas top-5, 582 de 582 pools,
+  diferencia máxima 0 en los puntajes del reranker y en los 2 957 puntajes del oráculo.
+- **Resultado (NDCG@5, oráculo independiente, pool común de siete brazos):** `lexico` 0,4276;
+  `hibrido_pre` 0,5817; `denso` 0,6035; `lexico_rerank` 0,6461; `denso_rerank` 0,6985;
+  `union_rerank` 0,7062; `hibrido_rerank` 0,7142.
+- **Contrastes pareados (n = 194; p de Wilcoxon y p agrupando por plantilla):**
+  `hibrido_rerank − denso_rerank` +0,0157 (d_z 0,11; p 0,075; 0,16; IC 95 % −0,004 a +0,035);
+  `denso_rerank − denso` +0,0951 (p 2 × 10⁻⁶); `hibrido_rerank − hibrido_pre` +0,1325
+  (p 9 × 10⁻¹¹); `hibrido_pre − denso` −0,0217 (p 0,19); `union_rerank − hibrido_rerank` −0,0080
+  (p 0,25).
+- **Lectura:** con el mismo reranker, la ventaja del híbrido sobre el denso no es significativa. La
+  mejora firmada del pipeline completo sobre el denso procede sobre todo del reranker. La fusión
+  RRF sola no mejora al denso. Darle al reranker la unión de los pools no mejora el resultado.
+- **Límites:** el NDCG es relativo al pool y el juez es un modelo de la misma familia que el
+  recuperador denso; no hay juicios humanos. El contraste de la fusión no tiene potencia para
+  efectos con d_z < 0,20. El análisis por subgrupo (con y sin filtro de proveedor) es exploratorio.
+- **No cambia:** ninguna cifra firmada de exp3 a exp19b. No se tocó el paper, el A.3, `src/` ni la
+  configuración. La redacción de la afirmación principal queda como decisión de Enzo, frase por
+  frase (propuesta en `docs/reports/fable-rag-conceptos-2026-11.md`, §5).
+- **Nota de identificador:** «exp20» figuraba como nombre tentativo de un selector de diversidad
+  (comentario en `src/retrieval/coverage_balancer.py` y `docs/CLOUD_EXPERIMENT_DESIGN.md`). Esa
+  idea no se corrió; si se retoma, usa `exp21` o posterior.
+
+- **Integración:** pegada el 2026-11-17 al integrar `fable/rag-auditoria`, con OK de Enzo («Las tres (Recomendado)»).
+
+*Fin de la entrada 36 — [Fable 5.2] 2026-11-16.*
