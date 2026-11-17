@@ -335,3 +335,10 @@ Ver [ADR-0035](ADR-0035-i7-intento-15-gate-go.md).
 - **Gate GO:** 120 válidas, 0 fallos e inválidas. p95 hybrid 34,88 s y no_rag 27,64 s, frente al límite de 60 s. Close CLOSED; gasto USD 9,46.
 - **Pendiente:** `purge-study` falló en `maintenance` por transporte IAP; las sesiones sintéticas de los intentos 14 y 15 siguen sin purgar (decide Enzo).
 - **Regla:** sin cambios de código. Los comandos `i7` de la fase humana corren desde un checkout cuyo diff contra b5e54f1 solo toque `docs/` y `output/audit/`. Informe descriptivo en [i7-gate-sesiones-sinteticas-i15.md](../reports/i7-gate-sesiones-sinteticas-i15.md).
+
+## ADR-0036: Ensayo P998 de la fase humana y decisiones de cierre técnico
+
+Ver [ADR-0036](ADR-0036-i7-ensayo-p998-y-cierre-tecnico.md).
+- **Ensayo P998 completo el 17/11:** reserva en la ronda 2, READY 03:08Z, invitación registrada sin persistir el token y recorrido sintético hasta la pantalla de cierre. `stop` y `guard` verificados. Gasto del operador USD 13,06.
+- **Hallazgo:** un segundo clic durante los ~52 s de «Preparar sesión» crea otra ejecución de Streamlit (`fastReruns`), que choca con `FileLock(timeout=0)` y muestra un error genérico. Mitigación en el runbook, sin cambio de código.
+- **Decisiones delegadas por Enzo:** purga de sintéticas aplazada al cierre del estudio; recursos GCP conservados (unos USD 37 al mes); el identificador del proyecto se queda hasta el cierre del estudio, sin reescribir historial.

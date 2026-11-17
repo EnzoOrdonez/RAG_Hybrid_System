@@ -131,6 +131,19 @@ no configura la modalidad D2 ni autoriza exposición de red.
    de cada consulta; una preparación de otro participante no es válida. Si caduca,
    volver a preparar antes de continuar y documentar incidencia operativa.
 
+   **Un solo clic.** La preparación tarda alrededor de un minuto (unos 52 s en las
+   preparaciones sintéticas del 15/11/2026) y la página no muestra aviso de progreso.
+   No volver a pulsar ni interactuar con la página hasta que aparezca «Prueba de
+   familiarización». Un segundo clic abre otra ejecución de Streamlit
+   (`runner.fastReruns`), que choca con el bloqueo `_inference.lock` (`FileLock`,
+   `timeout=0`) y muestra «No se pudo continuar. Contacta al coordinador antes de
+   reintentar.». La primera preparación sigue en curso y termina. Si aparece ese
+   mensaje: esperar un minuto, recargar la página (F5) y volver a entrar con la misma
+   invitación. Si vuelve a aparecer «Preparar sesión», pulsarlo una sola vez.
+   Observado en el ensayo sintético P998 del 17/11/2026; la causa está reproducida en
+   local y falta leer el evento de preparación de la VM. Corregirlo en código (aviso de
+   espera, botón desactivado o manejo del bloqueo) exige imagen y gate nuevos.
+
 ## Moderación y secuencia
 
 - Presentación neutral: «Usarás dos sistemas. Sigue las indicaciones de cada bloque.
