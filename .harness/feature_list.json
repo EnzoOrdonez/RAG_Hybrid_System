@@ -264,6 +264,23 @@
       ],
       "status": "active",
       "passes": false
+    },
+    {
+      "id": "F-022",
+      "category": "quality",
+      "description": "Auditoría y endurecimiento del código RAG y control exp20 (rama fable/rag-auditoria, base 1574d22; Fable 5.2, 15-16/11). Tres arreglos de clase A; de ocho propuestas de clase B, tres aplicadas (B1, B2, B6) y cinco sin aplicar con test xfail (B3, B4, B5, B7, B8). exp20_rerank_arms firmada. ADR-0037. Informes: docs/reports/fable-rag-auditoria-2026-11.md, fable-rag-conceptos-2026-11.md y fable-rag-afirmacion-principal-2026-11.md.",
+      "steps": [
+        "Hecho 2026-11-15: línea base (init.sh en 0 y SHA-256 de los dos verificadores offline), auditoría de P1, P2 y P4, y lectura parcial de P3.",
+        "Hecho 2026-11-15: arreglos de clase A (llm_manager, benchmark_runner, coverage_balancer) con TDD y tests tests/test_fable_*.py.",
+        "Hecho 2026-11-15: Enzo aceptó B1, B2 y B6; aplicadas con init.sh en 0 y los dos verificadores con el mismo SHA-256.",
+        "Hecho 2026-11-16: exp20_rerank_arms firmada (Enzo: «Sí, firma exp20»); réplica bit a bit de la corrida de auditoría. Con el mismo reranker, híbrido − denso = +0,016 de NDCG@5 (p = 0,075, n.s.).",
+        "Hecho 2026-11-17 (ADR-0037, delegación de Enzo): B3, B4, B5, B7 y B8 sin aplicar, con xfail estricto y declaradas como límites hasta exp21+ o una imagen nueva; exp20 conserva su nombre.",
+        "Hecho 2026-11-17 (OK de Enzo): entrada 36 de paper/summer_ablation_log.md, fe de erratas S6 en paper/correction_log.md y nota de erratas en el README; ocho frases aceptadas para el A.3 y la defensa (S1, S5, S7c, S11a, S11c, S13, S6, S12).",
+        "Pendiente de Enzo: aplicar las ocho frases en el A.3; decidir las 222 respuestas vacías de exp12 (con recuento previo), el aviso del Flag 33, la validación humana del oráculo (C2) y si se avisa a LACCI o IEEE de la fe de erratas.",
+        "Pendiente de Enzo: fusionar el PR de esta rama después del de fix/interview-readiness."
+      ],
+      "status": "active",
+      "passes": false
     }
   ]
 }
