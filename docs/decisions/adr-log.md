@@ -342,3 +342,10 @@ Ver [ADR-0036](ADR-0036-i7-ensayo-p998-y-cierre-tecnico.md).
 - **Ensayo P998 completo el 17/11:** reserva en la ronda 2, READY 03:08Z, invitación registrada sin persistir el token y recorrido sintético hasta la pantalla de cierre. `stop` y `guard` verificados. Gasto del operador USD 13,06.
 - **Hallazgo:** un segundo clic durante los ~52 s de «Preparar sesión» crea otra ejecución de Streamlit (`fastReruns`), que choca con `FileLock(timeout=0)` y muestra un error genérico. Mitigación en el runbook, sin cambio de código.
 - **Decisiones delegadas por Enzo:** purga de sintéticas aplazada al cierre del estudio; recursos GCP conservados (unos USD 37 al mes); el identificador del proyecto se queda hasta el cierre del estudio, sin reescribir historial.
+
+## ADR-0037: Auditoría del código RAG de noviembre de 2026 y exp20
+
+Ver [ADR-0037](ADR-0037-auditoria-rag-noviembre-2026.md).
+- **Integrado:** tres arreglos de clase A y B1, B2 y B6 (decididas el 15/11). B3, B4, B5, B7 y B8 quedan sin aplicar, con test xfail y declaradas como límites hasta una corrida `exp21+` o una imagen nueva.
+- **exp20_rerank_arms** conserva su nombre (firmada el 16/11): con el mismo reranker, el híbrido supera al denso en +0,016 de NDCG@5 (p = 0,075, n.s.); la ganancia procede del reranker.
+- **Con OK de Enzo del 17/11:** entrada 36 del ledger de verano, fe de erratas S6 («42 multi-cloud queries» son 25) en `correction_log.md` y en el README, y ocho frases aceptadas para el A.3 y la defensa. El camera-ready certificado no se toca.

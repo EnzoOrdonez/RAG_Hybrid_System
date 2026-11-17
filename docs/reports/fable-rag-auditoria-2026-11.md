@@ -720,3 +720,20 @@ en todo el código y los planteamientos, del tipo de la circularidad del orácul
 Código nuevo: `scripts/audit/exp20_rerank_arms.py`, `scripts/audit/fable_concept_probes.py` y
 `tests/test_fable_concept_probes.py` (17 tests rápidos y 1 `slow`). Ningún archivo de `src/`
 cambió en esta ronda.
+
+## 15. Decisiones del 2026-11-17 al integrar la rama
+
+Registradas en [ADR-0037](../decisions/ADR-0037-auditoria-rag-noviembre-2026.md), por delegación de
+Enzo («las opciones más recomendadas»):
+
+| Propuesta | Decisión |
+|---|---|
+| B3 | Sin aplicar. Primero hay que decidir si una consulta sin fragmentos es un error o un cero de recuperación |
+| B4, B5 | Sin aplicar. Tocan el camino desplegado: aplicarlas exige otra Fase B. Límite declarado del estudio |
+| B7 | Sin aplicar y sin reclasificar como clase A |
+| B8 | Sin aplicar. No se regeneran las respuestas vacías de exp12 |
+
+Las cinco conservan su test `xfail` estricto y se reconsideran antes de cualquier corrida `exp21+`
+o de una imagen nueva. Preguntas de §8: los reportes diarios de los verificadores se conservan; la
+tarea de esta auditoría es F-022; las 222 respuestas vacías de exp12 quedan pendientes de Enzo,
+con recuento previo.

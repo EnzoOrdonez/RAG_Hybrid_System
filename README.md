@@ -26,6 +26,11 @@ and Hybrid Pipelines Against an LLM-Only Baseline"** (E. Ordonez Flores, W. L. F
 Lima, Peru, November 3-6, 2026). Camera-ready source: `docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex`;
 IEEE Xplore-compatible certified PDF: `docs/2026305869.pdf`. See `CITATION.cff`.
 
+**Erratum (camera-ready, Section IV, Experimental Setup).** The paper states that provider counts overlap "for the 42
+multi-cloud queries". The correct figure is 25 queries that name more than one provider (8 name two
+and 17 name all three); 42 is the number of extra provider tags (236 tags over 194 queries). No
+metric or conclusion is affected. Details: `paper/correction_log.md`.
+
 ---
 
 ## What is CloudRAG?

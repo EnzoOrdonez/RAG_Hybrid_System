@@ -361,3 +361,12 @@ metric or conclusion is affected.
 
 La sección sale del `.tex`: la línea 84 está bajo `\section{Experimental Setup}`, la cuarta
 sección. Lo que no comprobé es si el paper ya está publicado en IEEE Xplore; la nota no lo afirma.
+
+## 9. Decisión de Enzo del 2026-11-17
+
+Enzo aceptó, frase por frase, las ocho propuestas: S1, S5, S7c, S11a, S11c, S13, S6 y S12. Se
+aplican en el A.3, en la defensa y en cualquier versión posterior del texto; el `.tex` y el PDF
+certificado del camera-ready no se tocan. R1 a R4 ya estaban aplicadas en el README. Para S6 se
+pegó la entrada de §8.1 en `paper/correction_log.md` y se publicó la nota de §8.2 en la sección
+«Publication» del README. Sigue pendiente si se avisa a la organización de LACCI o a IEEE.
+Registro: [ADR-0037](../decisions/ADR-0037-auditoria-rag-noviembre-2026.md).
