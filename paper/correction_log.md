@@ -495,3 +495,30 @@ ninguna métrica, ningún contraste ni ninguna conclusión.
 **Decisión de Enzo (2026-11-17):** se publica la nota de erratas en el README (sección
 «Publication») y se acepta la frase corregida para el A.3 y la defensa. Pendiente: si
 corresponde avisar a la organización de LACCI o a IEEE.
+
+---
+
+## Respuestas vacías de exp12 no registradas en N6.4 (2026-11-17)
+
+Complemento de N6.4 (`paper/audit_findings_cc_addenda.md`). Lo señaló la auditoría RAG de noviembre
+(`docs/reports/fable-rag-auditoria-2026-11.md`, H-08 y §6.1) y lo registra Claude por decisión
+delegada de Enzo del 2026-11-17 («las opciones más recomendadas»).
+
+- **Dato** (`experiments/results/exp12_matrix/checkpoint__*.json`, recontado el 2026-11-17): 399
+  respuestas vacías de 3 104.
+  - qwen3.5-9b sin RAG: 177 de 194. Es la única cifra que N6.4 documenta.
+  - qwen3.5-9b con RAG: 168 (léxico 64, denso 52, híbrido 52).
+  - gemma4-e4b con RAG: 54 (léxico 16, denso 19, híbrido 19).
+  - granite4.1-8b y mistral-7b-instruct: ninguna.
+- **Causa declarada:** los modelos con modo de razonamiento agotan el tope de 1 024 tokens antes de
+  escribir la respuesta (A.3, Sección 5.8).
+- **Efecto:** una respuesta vacía queda con `method="none"` y fuera de las medias de fidelidad, como
+  describe N6.4; los denominadores de la métrica v2 ya la tratan así. No cambia ninguna cifra
+  firmada ni publicada. El A.3 V2.20 ya menciona estas respuestas vacías con recuperación, sin el
+  recuento.
+- **Qué no se hace:** no se regeneran (B8 queda sin aplicar, ADR-0037). Repetir esas celdas sin modo
+  de razonamiento o con un tope mayor sería una corrida `exp21+`, ya listada como trabajo futuro en
+  el A.3.
+
+**Verificación:** recuento con `.venv-app` sobre los 16 checkpoints de exp12 (194 filas cada uno).
+Sin corrida de modelos y sin cambios en evidencia firmada.
