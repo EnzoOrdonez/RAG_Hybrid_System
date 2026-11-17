@@ -1,6 +1,6 @@
-[Fable 5.2] | 2026-11-16 11:18 | rama `fable/rag-auditoria` @ `0204806` | tarea F-propuesta (sin número, ver §9 del informe de auditoría) | modo: ejecución
+[Fable 5.2] | 2026-11-16 21:40 | rama `fable/rag-auditoria` @ `ea37b79` | tarea F-propuesta (sin número, ver §9 del informe de auditoría) | modo: ejecución
 Capas: 1 secretos=exit 0 | 2 tests=exit 0 (2406 pasan, 0 fallan, 6 omitidas, 8 xfail estrictos) | 3 docs=exit 0
-Cambios: este documento, dos notas de corrección en el informe de conceptos y R1 a R4 en el README | Sin verificar: no tengo el A.3 (vive fuera del repo); no comprobé si el paper ya está en IEEE Xplore; del PDF certificado solo cotejé la página 3
+Cambios: este documento, dos notas de corrección en el informe de conceptos, R1 a R4 en el README y el texto propuesto de ledger para S6 (§8) | Sin verificar: no tengo el A.3 (vive fuera del repo); no comprobé si el paper ya está en IEEE Xplore; del PDF certificado solo cotejé la página 3
 
 # Afirmación principal sobre el híbrido: propuesta frase por frase
 
@@ -184,7 +184,8 @@ se cotejó a la vista y coincide con el `.tex` en S6, S7, S8 y S11.
 - Propuesta: «…provider counts overlap because 25 queries name more than one provider (8 name two
   and 17 name all three)…»
 - Como la cifra ya está entregada, la decisión es tuya: anotarlo en `paper/correction_log.md`,
-  corregirlo en el A.3 y decidir si merece una nota de erratas en el README.
+  corregirlo en el A.3 y decidir si merece una nota de erratas en el README. El texto propuesto
+  de la entrada de ledger y de la nota está en §8.
 
 ### 3.4 Límites que faltan
 
@@ -277,7 +278,8 @@ añada hasta 0,035 de NDCG@5.»
 ## 6. Qué necesito de ti
 
 1. El OK o el rechazo de cada fila: S1, S5, S7c, S11a, S11c, S13, S6, S12 y R1 a R4.
-2. Para S6: si se anota en `paper/correction_log.md` y si quieres una nota de erratas pública.
+2. Para S6: si se pega en `paper/correction_log.md` la entrada de §8.1 y si quieres la nota de
+   erratas pública de §8.2.
 3. Para el A.3: los párrafos actuales, si quieres la correspondencia exacta.
 
 R1 a R4 ya están aplicados en esta rama (§4). Siguen pendientes de tu respuesta las filas S y el
@@ -290,6 +292,72 @@ punto 2. No edito `paper/**` ni el `.tex` del camera-ready.
 | Cifras de §2 frente a `analysis.json` firmado | Leídas del archivo; el intervalo se recalculó desde la media y el d_z |
 | Frases de §3 frente al `.tex` del camera-ready | Copiadas de las líneas indicadas |
 | Página 3 del PDF certificado | Coincide con el `.tex` en S6, S7, S8 y S11 |
-| Conteo de S6 | 169, 8 y 17 consultas con uno, dos y tres proveedores; etiquetas 100, 82 y 54 |
+| Conteo de S6 | 169, 8 y 17 consultas con uno, dos y tres proveedores; etiquetas 100, 82 y 54. Recontado el 2026-11-16 para §8 |
+| Las 25 de S6 frente a `cross_cloud_subset.json` | Los 25 `query_id` coinciden uno a uno |
+| El 42 en el resto del camera-ready | No aparece en ninguna otra línea del `.tex` |
 | Conteo de R4 | 21 directorios `exp*` en `experiments/results/` |
 | Capas 1 y 3 | exit 0 |
+
+## 8. Texto propuesto para S6: entrada de ledger y nota de erratas
+
+Enzo pidió el 2026-11-16 redactar el error de S6 como texto propuesto («Sí, redáctalo»). Nada de
+esto está aplicado: `paper/correction_log.md` es un ledger append-only que esta rama no edita, y la
+sesión de despliegue trabaja en paralelo. El texto se pega al integrar la rama, igual que la
+entrada de exp20 (§10 del [informe de conceptos](fable-rag-conceptos-2026-11.md)).
+
+### 8.1 Entrada para `paper/correction_log.md` (se añade al final)
+
+No lleva número N: los N1 a N9 son de `paper/audit_findings_cc_addenda.md`. Si quieres numerarla,
+el número lo pones tú al pegarla.
+
+```markdown
+---
+
+## Fe de erratas del camera-ready v9: «42 multi-cloud queries» (2026-11-16)
+
+Hallada en la auditoría RAG de noviembre (rama `fable/rag-auditoria`), al cotejar el camera-ready
+frase por frase con el conjunto de consultas. Es un error en la descripción del conjunto. No toca
+ninguna métrica, ningún contraste ni ninguna conclusión.
+
+- **Frase entregada** (`docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex`, línea 84; página 3 del PDF
+  certificado `docs/2026305869.pdf`): «The benchmark has 194 queries tagged for AWS (100), Azure
+  (82), and GCP (54), provider counts overlapping for the 42 multi-cloud queries […]».
+- **Dato** (`data/evaluation/test_queries.json`, campo `cloud_providers`; sha256
+  `cf39ae1c5c2395e1d34b66a68af953ac3ba954dca6aeff5d46c0ea30eaf81e4a`): 169 consultas nombran un
+  proveedor, 8 nombran dos (las 8, AWS y Azure) y 17 nombran los tres. Las consultas con más de un
+  proveedor son **25**, no 42. Sus 25 `query_id` coinciden uno a uno con
+  `data/evaluation/cross_cloud_subset.json`.
+- **De dónde sale el 42:** es el exceso de etiquetas sobre consultas. 100 + 82 + 54 = 236 y
+  236 − 194 = 42, que es 8 × 1 + 17 × 2. La frase entró el 2026-08-30 («Recomendables adoptados»,
+  `paper/summer_ablation_log.md`) para explicar por qué los conteos suman 236, y tomó ese exceso
+  por un número de consultas.
+- **Lo que sí es correcto en la misma frase:** las 194 consultas, las etiquetas por proveedor
+  (100, 82 y 54) y los tipos (63 factual, 65 procedural y 66 comparative).
+- **Texto corregido:** «[…] provider counts overlap because 25 queries name more than one provider
+  (8 name two and 17 name all three) […]».
+- **Alcance:** el 42 no aparece en ninguna otra línea del camera-ready ni entra en ningún cálculo.
+  Las cifras de recuperación, fidelidad y latencia quedan como están.
+- **Qué no se toca:** el `.tex` y el PDF del camera-ready. Son el registro de lo entregado. La
+  corrección va al A.3, a la defensa y a cualquier versión posterior del texto.
+
+**Verificación:** recuento con `.venv-app` sobre `test_queries.json` el 2026-11-16 (194 consultas;
+169, 8 y 17; 236 etiquetas). Sin corrida de modelos y sin cambios en evidencia firmada.
+
+**Pendiente de Enzo:** decidir si se publica una nota de erratas en el README y si corresponde
+avisar a la organización de LACCI o a IEEE.
+```
+
+### 8.2 Nota de erratas para el README (opcional, sin aplicar)
+
+Iría debajo de la tabla de resultados de la sección de rendimiento, o en una sección «Errata»
+nueva. El README no tiene hoy ninguna sección de erratas.
+
+```markdown
+**Erratum (camera-ready, Section IV, Experimental Setup).** The paper states that provider counts overlap "for the 42
+multi-cloud queries". The correct figure is 25 queries that name more than one provider (8 name two
+and 17 name all three); 42 is the number of extra provider tags (236 tags over 194 queries). No
+metric or conclusion is affected.
+```
+
+La sección sale del `.tex`: la línea 84 está bajo `\section{Experimental Setup}`, la cuarta
+sección. Lo que no comprobé es si el paper ya está publicado en IEEE Xplore; la nota no lo afirma.
