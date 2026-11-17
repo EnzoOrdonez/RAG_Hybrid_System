@@ -1,7 +1,15 @@
 """Participant-only presentation. Instrument text comes from the frozen configuration."""
 import streamlit as st
+from filelock import Timeout as LockTimeout
 
 from src.ui.components import study_runtime as runtime, study_service as service
+
+# Preparation takes about a minute. Without feedback a second click starts another Streamlit
+# run (fastReruns) that collides with the inference lock (F-023, ADR-0036).
+PREPARING_KEY = 'study_preparing'
+PREPARING_TEXT = 'Preparando la sesión. Puede tardar alrededor de un minuto; no vuelvas a pulsar.'
+IN_PROGRESS_TEXT = ('La preparación de la sesión está en curso. Espera alrededor de un minuto '
+                    'y pulsa «Comprobar preparación».')
 
 
 def response(payload):
@@ -45,6 +53,30 @@ def render():
         st.error('No se pudo continuar. Contacta al coordinador antes de reintentar.')
 
 
+def _in_progress():
+    st.info(IN_PROGRESS_TEXT)
+    st.button('Comprobar preparación')  # a click reruns the page and re-reads readiness
+
+
+def _preparation_controls(session):
+    """One preparation per browser session; a concurrent run sees progress, not an error."""
+    if st.session_state.get(PREPARING_KEY):
+        _in_progress()
+        return
+    if not st.button('Preparar sesión'):
+        return
+    st.session_state[PREPARING_KEY] = True
+    try:
+        with st.spinner(PREPARING_TEXT):
+            runtime.prepare(session)
+    except LockTimeout:
+        _in_progress()
+        return
+    finally:
+        st.session_state[PREPARING_KEY] = False
+    st.rerun()
+
+
 def _flow(session, view):
     stage = session.data['stage']
     config = session.store.protocol['config']
@@ -61,9 +93,7 @@ def _flow(session, view):
         prep = runtime.preparation(str(session.store.root))
         if not prep.ready(session.session_id):
             st.info('El coordinador debe preparar la sesión antes de continuar.')
-            if st.button('Preparar sesión'):
-                runtime.prepare(session)
-                st.rerun()
+            _preparation_controls(session)
             return
         def factory(condition):
             return prep.pipeline(condition, session.session_id)
