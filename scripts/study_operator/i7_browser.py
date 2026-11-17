@@ -3,14 +3,21 @@ import base64
 import hashlib
 import importlib.metadata
 import json
+import re
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from scripts.study_operator.stimulus_host_evidence import sha
 
 PIN=Path(__file__).resolve().parents[2]/'config/i7-browser-pin.json'
+DUMP_TIMEOUT_MS=5000
+BUTTON_WAIT_S=90   # A normal button appears within one rerun; 'Probar consulta' passes 900 s explicitly.
+TEXT_FIELDS='input:not([type=radio]):not([type=checkbox]):not([type=button]):not([type=submit]), textarea'
+# ARIA snapshots print field values, password included: redact the value and any child lines.
+VALUE_ROLE=re.compile(r'''^(\s*- '?(?:textbox|searchbox|combobox|spinbutton|slider)(?: "(?:[^"\\]|\\.)*")?(?: \[[^\]]*\])*'?)(?::.*)?$''')
 
 
 def runtime_identity(playwright):
@@ -68,7 +75,7 @@ class StreamlitSync:
     def idle(self):
         return self.page.locator('[data-testid=stApp][data-test-script-state=notRunning][data-test-connection-state=CONNECTED]').count()==1
 
-    def until(self,predicate,timeout_s=None):
+    def until(self,predicate,timeout_s=None,code='STREAMLIT_RERUN_NOT_ACKNOWLEDGED'):
         end=time.monotonic()+(self.timeout_s if timeout_s is None else timeout_s)
         while time.monotonic()<end:
             if self.error:
@@ -76,7 +83,7 @@ class StreamlitSync:
             if predicate():
                 return
             self.page.wait_for_timeout(20)
-        raise ValueError('STREAMLIT_RERUN_NOT_ACKNOWLEDGED')
+        raise ValueError(code)
 
     def settled(self):
         self.until(lambda:self.completed>0 and self.idle())
@@ -107,7 +114,95 @@ class StreamlitSync:
             raise ValueError('APP_VALUE_NOT_REGISTERED')
 
 
-def run(url, token, protocol, identity, observe, *, local_test=False, user_agent=None, ip=None):
+def visible(page,sync,label,timeout_s=None):
+    """Exact-name button, polled so a closed Streamlit socket fails now, not at the click budget."""
+    button=page.get_by_role('button',name=label,exact=True)
+    wait=min(sync.timeout_s,BUTTON_WAIT_S) if timeout_s is None else timeout_s
+    sync.until(button.is_visible,wait,'BUTTON_NOT_VISIBLE')
+    return button
+
+
+def redact_aria(text):
+    lines,depth=[],None
+    for line in text.splitlines():
+        indent=len(line)-len(line.lstrip())
+        if depth is not None and indent>depth:
+            lines.append(' '*indent+'- <redacted>')
+            continue
+        match=VALUE_ROLE.match(line)
+        depth=indent if match else None
+        lines.append(match.group(1)+': <redacted>' if match else line)
+    return '\n'.join(lines)
+
+
+def scrub(value,secrets):
+    if isinstance(value,str):
+        for secret in secrets:
+            value=value.replace(secret,'<redacted>')
+        return value
+    if isinstance(value,dict):
+        return {k:scrub(v,secrets) for k,v in value.items()}
+    if isinstance(value,(list,tuple)):
+        return [scrub(v,secrets) for v in value]
+    return value
+
+
+NETWORK_LOG_LIMIT=50
+
+
+def network_log(network,now=None):
+    """Bounded snapshot of failed and pending requests; never blocks on the page."""
+    now=time.monotonic() if now is None else now
+    pending=sorted(network['pending'].values(),key=lambda entry:entry[2])
+    return {'failed':network['failed'][-NETWORK_LOG_LIMIT:],
+            'pending':[{'method':method,'path':path,'age_s':round(now-started,3)}
+                       for method,path,started in pending[:NETWORK_LOG_LIMIT]],
+            'pending_total':len(pending),'failed_total':len(network['failed'])}
+
+
+def dump_failure(page,root,private,events,error,diagnostics=None):
+    """Owner-only diagnostics. Token, canary IP/UA and field values are redacted; dump errors never escape."""
+    try:
+        folder=Path(root)/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+        folder.parent.mkdir(parents=True,exist_ok=True)
+        folder.mkdir(exist_ok=False)
+        page.set_default_timeout(DUMP_TIMEOUT_MS)
+    except Exception:
+        return None
+    failed,secrets=[],set(private)
+    try:
+        fields=page.locator(TEXT_FIELDS).all()
+        for value in (field.input_value() for field in fields):
+            secrets|={value,' '.join(value.split())} if value else set()
+    except Exception:
+        fields=[]
+        failed.append('input_values')
+    secrets=sorted(filter(None,secrets),key=len,reverse=True)
+    def save(name,value):
+        (folder/name).write_text(value if isinstance(value,str) else
+            json.dumps(scrub(value,secrets),ensure_ascii=False,indent=1),encoding='utf-8')
+    def controls():
+        return {'path':urlsplit(page.url).path,
+            'buttons':[{'text':b.inner_text(),'disabled':b.is_disabled()} for b in page.get_by_role('button').all() if b.is_visible()],
+            'labels':page.locator('label').all_inner_texts(),
+            'inputs':[{'type':f.get_attribute('type'),'aria_label':f.get_attribute('aria-label'),
+                       'disabled':f.is_disabled()} for f in fields]}
+    for name,produce in (('screenshot.png',lambda:page.screenshot(path=str(folder/'screenshot.png'),full_page=True)),
+            ('aria.yaml',lambda:save('aria.yaml',scrub(redact_aria(page.locator('body').aria_snapshot()),secrets))),
+            ('controls.json',lambda:save('controls.json',controls())),
+            ('console.json',lambda:save('console.json',dict(events,sync_error=error))),
+            *((('diagnostics.json',lambda:save('diagnostics.json',diagnostics)),) if diagnostics else ())):
+        try:
+            produce()
+        except Exception:
+            failed.append(name)
+    if failed:
+        save('dump-errors.json',{'failed':failed})
+    return folder
+
+
+def run(url, token, protocol, identity, observe, *, local_test=False, user_agent=None, ip=None,
+        participant='P999', failure_dir=None):
     from playwright.sync_api import sync_playwright
     parsed=urlsplit(url)
     if parsed.scheme!='https' or (local_test and parsed.hostname not in ('localhost','127.0.0.1')):
@@ -117,6 +212,9 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
     with sync_playwright() as pw:
         version=runtime_identity(pw)
         browser=pw.chromium.launch(headless=True,executable_path=pw.chromium.executable_path)
+        page=sync=None
+        events={'console':[],'pageerror':[],'websockets':[],'websocket_closed':[]}
+        network={'pending':{},'failed':[]}
         try:
             headers={'X-Forwarded-For':ip,'X-Real-IP':ip,'Forwarded':'for='+ip} if ip else {}
             # Browser WebSocket APIs do not forward arbitrary HTTP headers.
@@ -124,6 +222,22 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
             wire_ua=(user_agent+' CloudRAG-IP/'+ip) if user_agent and ip else user_agent
             context=browser.new_context(ignore_https_errors=local_test,user_agent=wire_ua,extra_http_headers=headers)
             page=context.new_page()
+            page.on('console',lambda message:events['console'].append({'type':message.type,'text':message.text}))
+            page.on('pageerror',lambda error:events['pageerror'].append(str(error)))
+            def watch(ws):
+                events['websockets'].append(ws.url)
+                ws.on('close',lambda *_:events['websocket_closed'].append(ws.url))
+            page.on('websocket',watch)
+            # I8-09: failed and still-pending requests (path only), read at dump time without waiting.
+            page.on('request',lambda request:network['pending'].__setitem__(id(request),
+                    (request.method,urlsplit(request.url).path,time.monotonic())))
+            page.on('requestfinished',lambda request:network['pending'].pop(id(request),None))
+            def failed_request(request):
+                entry=network['pending'].pop(id(request),None)
+                network['failed'].append({'method':request.method,'path':urlsplit(request.url).path,
+                                          'failure':request.failure,'pending_s':None if entry is None
+                                          else round(time.monotonic()-entry[2],3)})
+            page.on('requestfailed',failed_request)
             sync=StreamlitSync(page,25 if local_test else 600)
             transport={'browser_context':bool(user_agent and ip),'websocket_ip':False,'websocket_user_agent':False}
             if user_agent and ip:
@@ -135,7 +249,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                     transport['websocket_ip'] |= ip in values.get('user-agent','')
                     transport['websocket_user_agent'] |= values.get('user-agent')==wire_ua
                 cdp.on('Network.webSocketWillSendHandshakeRequest',handshake)
-            page.set_default_timeout(20000 if local_test else 600000)
+            page.set_default_timeout(20000 if local_test else 60000)
             sockets=[]
             page.on('websocket',lambda ws:sockets.append(ws.url))
             def snapshot():
@@ -165,8 +279,8 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                 confirmations.append(sha(expected))
             def click(label):
                 timeout=900000 if label=='Probar consulta' and not local_test else None
-                sync.action(lambda:page.get_by_role('button',name=label,exact=True).click(timeout=timeout),
-                            timeout_s=900 if timeout else None)
+                budget=900 if timeout else None
+                sync.action(lambda:visible(page,sync,label,budget).click(timeout=timeout),timeout_s=budget)
             def text(label,value):
                 sync.text(label,value)
             snapshot()
@@ -176,7 +290,7 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
             click('Entrar')
             first=wait(lambda d:d['stage']=='familiarization')['data']
             session_id=first['session_id']
-            confirm(first['assignment']['participant_id'],'P999')
+            confirm(first['assignment']['participant_id'],participant)
             click('Preparar sesión')
             for block in (0,1):
                 click('Probar consulta')
@@ -193,13 +307,13 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                         qid=config['tasks'][task_set][task]
                         question=protocol['queries'][qid]['question']
                     click('Consultar')
-                    page.get_by_role('button',name='Continuar',exact=True).wait_for(state='visible')
+                    visible(page,sync,'Continuar')
                     attempt=wait(lambda d:len(d['attempts'])==block*4+task+1)['data']['attempts'][-1]
                     confirm(attempt['question'],question)
                     confirm(attempt['status'],'success')
                     click('Continuar')
                     wait(lambda d: d['attempts'][-1]['status']=='acknowledged')
-                page.get_by_role('button',name='Guardar respuestas del bloque',exact=True).wait_for(state='visible')
+                visible(page,sync,'Guardar respuestas del bloque')
                 sus=[1+i%5 for i in range(10)]
                 ueq=[1+i%7 for i in range(8)]
                 likert={item['id']:1+i%5 for i,item in enumerate(config['likert'])}
@@ -254,5 +368,22 @@ def run(url, token, protocol, identity, observe, *, local_test=False, user_agent
                 'canary_transport':transport,'ui_sync':{'requests':sync.requests,'completed':sync.completed,
                     'form_text_entries':sync.form_text_entries},
                 'objects':final['backup']['objects']}
+        except Exception:
+            if failure_dir and page is not None:
+                # F-020: requests vs completed separates 'click not sent', 'rerun not finished' and
+                # 'admit() refused server-side' (rerun completed, no checkpoint in observe()).
+                try:
+                    state=observe()
+                    state={'identity_matches':state.get('identity')==identity,'data':state.get('data')}
+                except Exception as observe_error:
+                    state={'observe_error':type(observe_error).__name__}
+                diagnostics={'sync':{name:getattr(sync,name,None) for name in
+                                     ('requests','completed','form_text_entries','error')},'observe':state}
+                diagnostics['network']=network_log(network)
+                # The VM hostname is <public IP>.sslip.io (deployment.py:34): never write that IP.
+                host=parsed.hostname or ''
+                dump_failure(page,failure_dir,(token,ip,user_agent,wire_ua,host,host.removesuffix('.sslip.io')),
+                             events,getattr(sync,'error',None),diagnostics)
+            raise
         finally:
             browser.close()

@@ -1,0 +1,50 @@
+diff --git a/src/evaluation/benchmark_runner.py b/src/evaluation/benchmark_runner.py
+index 9832163..78f2f3d 100644
+--- a/src/evaluation/benchmark_runner.py
++++ b/src/evaluation/benchmark_runner.py
+@@ -252,6 +252,10 @@ class BenchmarkRunner:
+         try:
+             # Run pipeline query
+             response = pipeline.query(query.question)
++            # The pipeline reports its own failures (LLM error, no chunks retrieved, internal
++            # exception) through response.error and puts a canned message in response.answer.
++            # That message is not an answer: it must not be scored, and the row is an error.
++            pipeline_error = getattr(response, "error", None)
+ 
+             # Extract retrieved IDs
+             retrieved_ids = []
+@@ -271,7 +275,7 @@ class BenchmarkRunner:
+ 
+             # Compute generation metrics (if ground truth available)
+             gen_metrics = {}
+-            if compute_generation and query.answer and response.answer:
++            if compute_generation and query.answer and response.answer and not pipeline_error:
+                 gen_metrics = compute_all_generation_metrics(
+                     predicted=response.answer,
+                     ground_truth=query.answer,
+@@ -285,7 +289,7 @@ class BenchmarkRunner:
+             # queries through its _no_evidence_report path
+             # (method="no_evidence", faithfulness=0.0).
+             hall_metrics = {}
+-            if compute_hallucination and response.answer:
++            if compute_hallucination and response.answer and not pipeline_error:
+                 detector = self._get_hallucination_detector()
+                 hall_metrics = compute_hallucination_metrics(
+                     response_text=response.answer,
+@@ -295,7 +299,7 @@ class BenchmarkRunner:
+ 
+             # Surface HONEST_DECLINE flag from ResponseFormatter so
+             # honest_decline_rate is aggregable across all systems.
+-            if hall_metrics is not None:
++            if hall_metrics is not None and not pipeline_error:
+                 hall_metrics["is_honest_decline"] = bool(
+                     getattr(response, "confidence", "") == "HONEST_DECLINE"
+                 )
+@@ -317,6 +321,7 @@ class BenchmarkRunner:
+                 generation_metrics=gen_metrics,
+                 hallucination_metrics=hall_metrics,
+                 latency=latency_dict,
++                error=pipeline_error,
+             )
+ 
+         except Exception as e:

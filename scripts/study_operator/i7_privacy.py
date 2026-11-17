@@ -1,6 +1,10 @@
 """Streaming canary census and allowlisted clean-disk import, without cloud writes."""
+import errno
 import hashlib
+import os
+import re
 import shutil
+import stat
 import tarfile
 import urllib.request
 from datetime import date, datetime, timezone
@@ -9,6 +13,21 @@ from pathlib import Path
 from scripts.study_operator.i7_preparation import file_sha
 
 DOMAINS = ('caddy','app','runner','journald','serial','backups','bucket')
+# File-type probes, replaceable in tests so special files can be simulated on any platform.
+_lstat = os.lstat
+_readlink = os.readlink
+_FIXED_CODE = re.compile(r'[A-Z][A-Z0-9_]{2,80}')
+
+
+def error_code(error):
+    """A fixed, non-private code for an incomplete domain: our own error code or the errno name,
+    never exception text or paths (ADR-0029)."""
+    if isinstance(error, OSError) and error.errno in errno.errorcode:
+        return errno.errorcode[error.errno]
+    if (isinstance(error, (ValueError, TypeError)) and len(error.args) == 1
+            and isinstance(error.args[0], str) and _FIXED_CODE.fullmatch(error.args[0])):
+        return error.args[0]
+    return 'UNCLASSIFIED'
 
 
 def scan(sources, canaries, *, exclusions=()):
@@ -48,7 +67,7 @@ def scan(sources, canaries, *, exclusions=()):
         except Exception as error:  # noqa: BLE001 - fail closed without private exception text
             failed = True
             result['domains'][domain] = {'complete':False,'files':count,'hits':hits,
-                                         'error_type':type(error).__name__}
+                                         'error_type':type(error).__name__,'error_code':error_code(error)}
         result['hits'] += hits
     if len(result['exclusions']) != len(excluded):
         failed = True
@@ -61,30 +80,51 @@ def chunks(stream):
 
 
 def tree_sources(root):
-    """No ignored files; unreadable directories, symlinks and archives fail closed."""
+    """No ignored files (ADR-0029). Regular files and tar members are read. A symlink is scanned as
+    its link text and never followed. Sockets, FIFOs and overlay whiteouts store no bytes and are
+    counted empty. Any other special file, a missing or symlinked root, an unreadable directory and
+    a linked archive member fail closed."""
     root = Path(root)
-    if root.is_symlink() or not root.is_dir():
+    try:
+        mode = _lstat(root).st_mode
+    except FileNotFoundError:
+        raise ValueError('SCAN_ROOT_REQUIRED') from None
+    if stat.S_ISLNK(mode) or not stat.S_ISDIR(mode):
         raise ValueError('SCAN_ROOT_REQUIRED')
-    import os
     def error(exc):
         raise exc
     for directory, folders, files in os.walk(root,onerror=error,followlinks=False):
-        for name in folders+files:
-            if (Path(directory)/name).is_symlink():
-                raise ValueError('SCAN_SYMLINK_REQUIRES_REVIEW')
-        for name in sorted(files):
+        for name in sorted(folders):
             path = Path(directory)/name
-            if name.endswith(('.tar','.tar.gz','.tgz')):
-                with tarfile.open(path) as archive:
-                    for member in archive:
-                        if member.isfile():
-                            with archive.extractfile(member) as stream:
-                                yield str(path)+'!'+member.name,chunks(stream)
-                        elif not member.isdir():
-                            raise ValueError('ARCHIVE_LINK_REQUIRES_REVIEW')
-            else:
-                with path.open('rb') as stream:
-                    yield str(path),chunks(stream)
+            if stat.S_ISLNK(_lstat(path).st_mode):
+                yield str(path)+'@symlink',[os.fsencode(_readlink(path))]
+        for name in sorted(files):
+            yield from file_source(Path(directory)/name)
+
+
+def file_source(path):
+    info = _lstat(path)
+    if stat.S_ISLNK(info.st_mode):
+        yield str(path)+'@symlink',[os.fsencode(_readlink(path))]
+    elif stat.S_ISSOCK(info.st_mode):
+        yield str(path)+'#socket',[]
+    elif stat.S_ISFIFO(info.st_mode):
+        yield str(path)+'#fifo',[]
+    elif stat.S_ISCHR(info.st_mode) and info.st_rdev == 0:
+        yield str(path)+'#whiteout',[]
+    elif not stat.S_ISREG(info.st_mode):
+        raise ValueError('SCAN_SPECIAL_FILE_REQUIRES_REVIEW')
+    elif path.name.endswith(('.tar','.tar.gz','.tgz')):
+        with tarfile.open(path) as archive:
+            for member in archive:
+                if member.isfile():
+                    with archive.extractfile(member) as stream:
+                        yield str(path)+'!'+member.name,chunks(stream)
+                elif not member.isdir():
+                    raise ValueError('ARCHIVE_LINK_REQUIRES_REVIEW')
+    else:
+        with path.open('rb') as stream:
+            yield str(path),chunks(stream)
 
 
 def inject(hostname, ip, user_agent, *, open_url=urllib.request.urlopen):
@@ -182,6 +222,18 @@ def host_sources(active, *, invoke=None):
         if result.returncode:
             raise ValueError('PRIVACY_SOURCE_COMMAND_FAILED')
         return result.stdout
+    def writable_layer(inspected):
+        upper = ((inspected.get('GraphDriver') or {}).get('Data') or {}).get('UpperDir')
+        if upper:
+            return upper
+        # Docker 29 containerd image store: GraphDriver is null and the container's overlayfs
+        # snapshot key is its id; exited containers have no containerd container (ADR-0029).
+        text = command(['ctr','-n','moby','snapshots','--snapshotter','overlayfs','mounts',
+                        '/nonexistent',inspected['Id']]).decode()
+        found = re.findall(r'upperdir=([^,\s]+)',text)
+        if len(found) != 1:
+            raise ValueError('CONTAINER_WRITABLE_LAYER_UNRESOLVED')
+        return found[0]
     def containers(domain):
         names = command(['docker','ps','-a','--format','{{.Names}}']).decode().splitlines()
         prefixes = {'caddy':('cloudrag-i4-caddy-',),'app':('cloudrag-i4-app-', 'cloudrag-i4-maintenance-'),
@@ -191,10 +243,7 @@ def host_sources(active, *, invoke=None):
                 continue
             inspected = json.loads(command(['docker','inspect',name]))[0]
             roots = [m['Source'] for m in inspected['Mounts'] if m.get('RW')]
-            upper = inspected.get('GraphDriver',{}).get('Data',{}).get('UpperDir')
-            if not upper:
-                raise ValueError('CONTAINER_WRITABLE_LAYER_UNRESOLVED')
-            roots.append(upper)
+            roots.append(writable_layer(inspected))
             log = inspected.get('LogPath')
             for root in sorted(set(roots)):
                 yield from tree_sources(root)

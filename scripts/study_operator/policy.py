@@ -14,6 +14,19 @@ class ReadyPending(OperatorError):
     """Only the explicit, bounded guest bootstrap state is retryable."""
 
 
+class CapacityRejected(OperatorError):
+    """The provider stated a capacity refusal. Callers still verify absence (ADR-0026)."""
+    def __init__(self, message, *, code):
+        super().__init__(message)
+        self.code = code
+
+
+class TransportUnavailable(OperatorError):
+    """The SSH/IAP transport failed before a verified answer (timeout, rejected channel, ssh exit 255).
+
+    Only read-only polls may retry it, a bounded number of times (ADR-0029)."""
+
+
 def purpose_allowed(purpose, operator_root, *, today=None):
     if purpose not in {'study', 'technical', 'smoke', 'rehearsal', 'pilot'}:
         raise OperatorError('Propósito inválido. Usa study, technical, smoke, rehearsal o pilot.')
@@ -32,10 +45,19 @@ def purpose_allowed(purpose, operator_root, *, today=None):
             raise ValueError('hash')
         if hashlib.sha256((root / 'ethics_approval.pdf').read_bytes()).hexdigest() != value['pdf_sha256']:
             raise ValueError('PDF identity')
-    except (OSError, ValueError, TypeError, AttributeError):
+        from src.ui.components.study_protocol import verify_draw
+        installation = json.loads((root.parent / 'installation.json').read_text(encoding='utf-8'))
+        reviewed = Path(installation['local_reviewed_config']).resolve()
+        protocol = verify_draw(reviewed)
+        if protocol['fingerprint'] != installation['fingerprint']:
+            raise ValueError('Executed study configuration changed')
+        if value['approved_b4_version'] != f"{reviewed.name}@{protocol['fingerprint']}":
+            raise ValueError('Approval does not cover the executed sealed configuration')
+    except (OSError, ValueError, TypeError, AttributeError, KeyError):
         raise OperatorError('study bloqueado: Enzo debe guardar la aprobación ética y su PDF en ethics; revisa el runbook.') from None
     return {'purpose': purpose, 'ethics_verified': True,
-            'approval_record_sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+            'approval_record_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+            'sealed_configuration_id': reviewed.name, 'protocol_fingerprint': protocol['fingerprint']}
 
 
 def session_margin(guest_deadline, native_deadline, *, now=None):

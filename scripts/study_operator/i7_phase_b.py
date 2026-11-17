@@ -18,7 +18,7 @@ def profile(kind):
             'native_stop_s':10800}
 
 
-def validate_steps(evidence=None, *, root=None,november_authorized=False,step='cpu-build'):
+def validate_steps(evidence=None, *, root=None,november_authorized=False,step='cpu-build',sdk=None):
     for module in ('i7','i7_gate_host','i7_restore','i7_privacy','cpu_build','build_context',
                    'i7_service_disk','i7_cpu_pipeline','i7_smoke','i7_admission','i7_technical','i7_reconcile','i7_costs'):
         if importlib.util.find_spec('scripts.study_operator.'+module) is None:
@@ -37,6 +37,13 @@ def validate_steps(evidence=None, *, root=None,november_authorized=False,step='c
     except ValueError as error:
         result['status']='LOCAL_RUNBOOK_PARTIAL'
         result['blockers'].append({'owner':'code','code':str(error)})
+    if step not in ('close','reconcile','technical-cycle'):
+        from scripts.study_operator.i7_sdk_preflight import verify_beta
+        try:
+            result['sdk'] = verify_beta(sdk)
+        except ValueError as error:
+            result['status']='LOCAL_RUNBOOK_PARTIAL'
+            result['blockers'].append({'owner':'code','code':str(error)})
     return result
 
 
@@ -87,11 +94,16 @@ def _gate_after_prerequisites(operator,publication):
             contexts[key]=row['contexts']
     reference=json.loads(Path(operator.config['i3_context_reference_path']).read_bytes())['rag']['contexts']
     compare_contexts(contexts,reference)
+    # ADR-0026: a recorded attempt is never replayed or paid for again; the single attempt is
+    # recorded once reservation 2 is held, so a released capacity refusal does not consume it.
     attempt=operator.root/'gate-cohort-intent.json'
+    if attempt.exists():
+        raise ValueError('GATE_ATTEMPT_EXISTS_NO_REPLAY')
+    if not operator.state.get('reservation') or operator.state['reservation'].get('deleted_verified'):
+        from scripts.study_operator.i7 import PHASE_B_GATE_RESERVATION_H
+        operator.reserve(PHASE_B_GATE_RESERVATION_H)
     with attempt.open('x',encoding='utf-8') as stream:
         json.dump({'started_utc':operator.now().isoformat(),'replay_allowed':False},stream)
-    if not operator.state.get('reservation') or operator.state['reservation'].get('deleted_verified'):
-        operator.reserve(5)
     from scripts.study_operator.i7_workflows import wait_ready
     try:
         # The preregistered full smoke follows the twelve complete cold trials.
@@ -144,6 +156,7 @@ def _gate_after_prerequisites(operator,publication):
 def tls(operator):
     from scripts.study_operator.i7_workflows import check_tls_sequence, wait_ready
     attempts = []
+    operator.stop()  # 'ready' leaves the VM RUNNING; start() requires TERMINATED.
     for _ in range(3):
         record = {'start_requested_utc':operator.now().isoformat(),'status':'FAILED'}
         try:
@@ -161,7 +174,8 @@ def withdraw_purge(operator):
     if operator.state.get('purpose') != 'smoke':
         raise ValueError('SYNTHETIC_SMOKE_PERIOD_REQUIRED')
     records = []
-    for operation, code in (('withdraw','P999'),('purge-study',None)):
+    from scripts.study_operator.i7_smoke import smoke_participant
+    for operation, code in (('withdraw',smoke_participant(operator.config)),('purge-study',None)):
         operator.delete_sessions(operation,code=code,dry_run=True)
         result = operator.delete_sessions(operation,code=code,dry_run=False)
         if not all(result[k] for k in ('remote_versions_empty','zero_retention_policy_verified',
@@ -177,7 +191,8 @@ def restore_latest(operator):
         raise ValueError('GENERATION_VERIFIED_SMOKE_BACKUP_REQUIRED')
     smoke=json.loads(rows[-1].read_bytes())
     objects=smoke['objects']
-    result=operator.restore('P999',smoke['session_id'],
+    from scripts.study_operator.i7_smoke import smoke_participant
+    result=operator.restore(smoke_participant(operator.config),smoke['session_id'],
         full_generation=objects['full_session.json']['generation'],
         manifest_generation=objects['export_manifest.json']['generation'])
     if (result.get('status')!='RESTORED_VERIFIED' or result.get('export_sha256')!=smoke['export_sha256']
@@ -229,14 +244,20 @@ def dispatch(operator, step, spec):
     if step == 'privacy':
         from scripts.study_operator.i7_workflows import wait_ready, privacy
         operator.stop()
-        operator.start('smoke')
-        wait_ready(operator)
-        return privacy(operator)
+        try:
+            operator.start('smoke')
+            wait_ready(operator)
+            return privacy(operator)
+        except BaseException:
+            # Success keeps the VM RUNNING for withdraw-purge maintenance.
+            operator.stop()
+            raise
     if step == 'smoke':
         from scripts.study_operator.i7_smoke import run
         return run(operator)
     if step == 'stimulus':
-        from scripts.study_operator.i7_workflows import series
+        from scripts.study_operator.i7_workflows import require_no_unfinished_stimulus, series
+        require_no_unfinished_stimulus(operator)  # before any STOP (ADR-0029)
         switch_profile(operator,'stimulus')
         return series(operator)
     from scripts.study_operator.i7_workflows import dispatch as workflow
@@ -253,14 +274,15 @@ def main(argv=None):
     parser.add_argument('--evidence',type=Path)
     parser.add_argument('step',nargs='?',choices=STEPS)
     args = parser.parse_args(argv)
+    from scripts.study_operator.i7 import PAID_NOT_BEFORE_UTC
     if args.check:
         print(json.dumps(validate_steps(args.evidence,root=args.root,
-            november_authorized=args.live and datetime.now(timezone.utc)>=datetime(2026,11,1,tzinfo=timezone.utc),
-            step=args.step or 'cpu-build')))
+            november_authorized=args.live and datetime.now(timezone.utc)>=PAID_NOT_BEFORE_UTC,
+            step=args.step or 'cpu-build',sdk=args.sdk)))
         return 0
     if (not args.live or not args.root or not args.sdk or not args.step
-            or datetime.now(timezone.utc) < datetime(2026,11,1,tzinfo=timezone.utc)):
-        parser.error('Explicit --live, root, SDK and November authorization required')
+            or datetime.now(timezone.utc) < PAID_NOT_BEFORE_UTC):
+        parser.error('Explicit --live, root, SDK and date >= 2026-10-28 UTC required')
     from scripts.study_operator.i7_browser_preflight import verify
     try:
         verify()
@@ -269,6 +291,9 @@ def main(argv=None):
             verify_before_cpu()
         elif args.step not in ('gpu-restore','close','reconcile','technical-cycle'):
             verify_streamlit(args.root)
+        if args.step not in ('gpu-restore','close','reconcile','technical-cycle'):
+            from scripts.study_operator.i7_sdk_preflight import verify_beta
+            verify_beta(args.sdk)
         # gpu-restore checks the real image inside its admission so a mismatch
         # can still issue the owned CPU STOP. Cleanup never needs matching versions.
     except ValueError as error:
@@ -286,6 +311,11 @@ def main(argv=None):
         if args.step=='gpu-restore':
             from scripts.study_operator.i7_cpu_pipeline import verify_image_or_stop_cpu
             verify_image_or_stop_cpu(operator)
+            from scripts.study_operator.i7_sdk_preflight import verify_beta
+            try:
+                verify_beta(args.sdk)
+            except ValueError as error:
+                parser.error(str(error))
             from scripts.study_operator.i7_readiness import evaluate
             if any(row['owner']=='code' for row in evaluate(args.evidence,november_authorized=True)['blockers']):
                 parser.error('Current source-bound Windows/Linux/I7 verification receipt required')

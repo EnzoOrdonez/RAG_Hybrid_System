@@ -11,7 +11,7 @@ import time
 
 from scripts.study_gate_environment import LinuxSampler
 from scripts.study_operator.deployment import app_command, assert_isolation
-from scripts.study_operator.host_runtime import ROOT, metadata_unreachable
+from scripts.study_operator.host_runtime import ROOT, await_owner_ack, metadata_unreachable
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.stimulus_host_evidence import admission_receipt, reasons, sha
 from scripts.study_operator.stimulus_pipe import PrivatePipe
@@ -222,6 +222,11 @@ class HostCollection:
                     save_state(Path(self.active['boot_root'])/'stop-request.json',dict(stop=True,boot_id=self.active['boot_id']))
 
 
+def await_download_ack(job_root, *, bound, clock=time.monotonic, sleep=time.sleep):
+    """The owner's bounded window to download, verify and acknowledge the private proof."""
+    return await_owner_ack(Path(job_root)/'download-ack.json',bound=bound,clock=clock,sleep=sleep)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--boot-index',required=True,type=int,choices=range(1,13))
@@ -233,12 +238,11 @@ def main(argv=None):
         raise ValueError('ACTIVE_BOOT_DIFFERS')
     job_root = Path(active['boot_root'])/'stimulus'
     try:
-        HostCollection(active,args.boot_index,job_root).run()
-        # Give the owner one bounded minute to download, verify and acknowledge
-        # the private proof. The native unit then shuts down independently.
-        deadline = time.monotonic()+60
-        while time.monotonic() < deadline and not (job_root/'download-ack.json').is_file():
-            time.sleep(1)
+        collection = HostCollection(active,args.boot_index,job_root)
+        collection.run()
+        # The owner gets a bounded window inside the 7200-s job bound (ADR-0031);
+        # the native unit then shuts down independently.
+        await_download_ack(job_root,bound=collection.deadline)
     finally:
         save_state(Path(active['boot_root'])/'stop-request.json',dict(stop=True,boot_id=active['boot_id']))
 

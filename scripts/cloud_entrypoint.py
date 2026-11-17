@@ -40,6 +40,7 @@ def configure(deployment):
         CLOUDRAG_DEMO_GPU=deployment.get("device_gpu", "0"),
         CLOUDRAG_BACKUP_BUCKET=deployment["bucket"],
         CLOUDRAG_BACKUP_PREFIX=deployment["backup_prefix"],
+        CLOUDRAG_SMOKE_PARTICIPANT=deployment.get("smoke_participant", "P999"),
     )
     if deployment.get('service_mode'):
         os.environ['CLOUDRAG_ISOLATED_APP'] = '1'

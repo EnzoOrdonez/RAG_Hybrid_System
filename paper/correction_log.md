@@ -459,3 +459,66 @@ v3 definitivo. **GATE de push:** pendiente de confirmación explícita (nada pus
 - **compute_faithfulness_metrics.py**: metadata generated hardcodeada (2026-06-11) y etiqueta
   de ledger errónea en v3_small (decía N5); corregido junto con el flag --exclude-vacuous (N9).
 - Detalle completo de la ronda: paper/audit_findings_cc_addenda.md entrada N9.
+
+---
+
+## Fe de erratas del camera-ready v9: «42 multi-cloud queries» (2026-11-16)
+
+Hallada en la auditoría RAG de noviembre (rama `fable/rag-auditoria`), al cotejar el camera-ready
+frase por frase con el conjunto de consultas. Es un error en la descripción del conjunto. No toca
+ninguna métrica, ningún contraste ni ninguna conclusión.
+
+- **Frase entregada** (`docs/Paper_IEEE_RAG_Hibrido_LACCI_v9.tex`, línea 84; página 3 del PDF
+  certificado `docs/2026305869.pdf`): «The benchmark has 194 queries tagged for AWS (100), Azure
+  (82), and GCP (54), provider counts overlapping for the 42 multi-cloud queries […]».
+- **Dato** (`data/evaluation/test_queries.json`, campo `cloud_providers`; sha256
+  `cf39ae1c5c2395e1d34b66a68af953ac3ba954dca6aeff5d46c0ea30eaf81e4a`): 169 consultas nombran un
+  proveedor, 8 nombran dos (las 8, AWS y Azure) y 17 nombran los tres. Las consultas con más de un
+  proveedor son **25**, no 42. Sus 25 `query_id` coinciden uno a uno con
+  `data/evaluation/cross_cloud_subset.json`.
+- **De dónde sale el 42:** es el exceso de etiquetas sobre consultas. 100 + 82 + 54 = 236 y
+  236 − 194 = 42, que es 8 × 1 + 17 × 2. La frase entró el 2026-08-30 («Recomendables adoptados»,
+  `paper/summer_ablation_log.md`) para explicar por qué los conteos suman 236, y tomó ese exceso
+  por un número de consultas.
+- **Lo que sí es correcto en la misma frase:** las 194 consultas, las etiquetas por proveedor
+  (100, 82 y 54) y los tipos (63 factual, 65 procedural y 66 comparative).
+- **Texto corregido:** «[…] provider counts overlap because 25 queries name more than one provider
+  (8 name two and 17 name all three) […]».
+- **Alcance:** el 42 no aparece en ninguna otra línea del camera-ready ni entra en ningún cálculo.
+  Las cifras de recuperación, fidelidad y latencia quedan como están.
+- **Qué no se toca:** el `.tex` y el PDF del camera-ready. Son el registro de lo entregado. La
+  corrección va al A.3, a la defensa y a cualquier versión posterior del texto.
+
+**Verificación:** recuento con `.venv-app` sobre `test_queries.json` el 2026-11-16 (194 consultas;
+169, 8 y 17; 236 etiquetas). Sin corrida de modelos y sin cambios en evidencia firmada.
+
+**Decisión de Enzo (2026-11-17):** se publica la nota de erratas en el README (sección
+«Publication») y se acepta la frase corregida para el A.3 y la defensa. Pendiente: si
+corresponde avisar a la organización de LACCI o a IEEE.
+
+---
+
+## Respuestas vacías de exp12 no registradas en N6.4 (2026-11-17)
+
+Complemento de N6.4 (`paper/audit_findings_cc_addenda.md`). Lo señaló la auditoría RAG de noviembre
+(`docs/reports/fable-rag-auditoria-2026-11.md`, H-08 y §6.1) y lo registra Claude por decisión
+delegada de Enzo del 2026-11-17 («las opciones más recomendadas»).
+
+- **Dato** (`experiments/results/exp12_matrix/checkpoint__*.json`, recontado el 2026-11-17): 399
+  respuestas vacías de 3 104.
+  - qwen3.5-9b sin RAG: 177 de 194. Es la única cifra que N6.4 documenta.
+  - qwen3.5-9b con RAG: 168 (léxico 64, denso 52, híbrido 52).
+  - gemma4-e4b con RAG: 54 (léxico 16, denso 19, híbrido 19).
+  - granite4.1-8b y mistral-7b-instruct: ninguna.
+- **Causa declarada:** los modelos con modo de razonamiento agotan el tope de 1 024 tokens antes de
+  escribir la respuesta (A.3, Sección 5.8).
+- **Efecto:** una respuesta vacía queda con `method="none"` y fuera de las medias de fidelidad, como
+  describe N6.4; los denominadores de la métrica v2 ya la tratan así. No cambia ninguna cifra
+  firmada ni publicada. El A.3 V2.20 ya menciona estas respuestas vacías con recuperación, sin el
+  recuento.
+- **Qué no se hace:** no se regeneran (B8 queda sin aplicar, ADR-0037). Repetir esas celdas sin modo
+  de razonamiento o con un tope mayor sería una corrida `exp21+`, ya listada como trabajo futuro en
+  el A.3.
+
+**Verificación:** recuento con `.venv-app` sobre los 16 checkpoints de exp12 (194 filas cada uno).
+Sin corrida de modelos y sin cambios en evidencia firmada.

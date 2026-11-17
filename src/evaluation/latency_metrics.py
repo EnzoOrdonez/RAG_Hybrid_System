@@ -41,14 +41,9 @@ def compute_latency_stats(latencies: List[float]) -> Dict[str, float]:
             "count": 0,
         }
 
+    # No outlier trimming: p95, p99 and max exist to describe the slow tail, so removing the
+    # values beyond 3 standard deviations first understates exactly those statistics.
     arr = np.array(valid)
-
-    # Filter outliers (>3 std dev from mean)
-    if len(arr) > 10:
-        mean, std = arr.mean(), arr.std()
-        if std > 0:
-            mask = np.abs(arr - mean) <= 3 * std
-            arr = arr[mask]
 
     return {
         "p50": float(np.percentile(arr, 50)),

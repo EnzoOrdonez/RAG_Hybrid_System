@@ -3,8 +3,19 @@ import ipaddress
 import re
 from pathlib import PurePosixPath
 
-from scripts.study_operator.policy import OperatorError
+from scripts.study_operator.policy import OperatorError, participant_code
 from scripts.study_operator.region_scope import US_L4_ZONES
+
+
+def checked_smoke_participant(code):
+    # Synthetic codes are P900+; deletion refuses any lower code (session_data).
+    if int(participant_code(code)[1:]) < 900:
+        raise OperatorError('Código de smoke no sintético. Usa P900 o superior.')
+    return code
+
+
+def smoke_participant(config):
+    return checked_smoke_participant(config.get('smoke_participant','P999'))
 
 
 def checked_config(value):
@@ -30,6 +41,8 @@ def checked_config(value):
         if (not path.is_absolute() or '..' in path.parts
                 or not re.fullmatch(r'/srv/cloudrag/[A-Za-z0-9_./-]+',str(path))):
             raise OperatorError('Ruta de despliegue no gestionada. Conserva los datos y revisa la instalación.')
+    if 'smoke_participant' in value:
+        checked_smoke_participant(value['smoke_participant'])
     return value
 
 

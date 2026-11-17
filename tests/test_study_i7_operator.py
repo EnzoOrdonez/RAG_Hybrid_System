@@ -24,6 +24,9 @@ def setup(tmp_path):
         'specificReservation': {'count': '1','instanceProperties': {'machineType': 'g2-standard-4',
                 'guestAccelerators': [{'acceleratorType': 'nvidia-l4','acceleratorCount': 1}]}}}
     class Cloud:
+        def require_beta(self):
+            return {'status': 'GCLOUD_BETA_INSTALLED', 'beta_version': 'fixture'}
+
         def __init__(self):
             self.calls=[]
             self.error=None
@@ -46,7 +49,10 @@ def setup(tmp_path):
             raise AssertionError(argv)
     cloud = Cloud()
     op = Operator(tmp_path,cloud,now=lambda:datetime(2026,11,1,tzinfo=timezone.utc))
-    op.state['reservation'] = dict(reservation,created_utc='2026-11-01T00:00:00+00:00')
+    op.state['reservation'] = dict(reservation,created_utc='2026-11-01T00:00:00+00:00',
+        cost_basis={'hours':12,'compute_usd_h':cfg['rates']['compute_usd_h'],
+                    'exposure_usd':12*cfg['rates']['compute_usd_h']+.25,
+                    'price_receipt_sha256':cfg['rates']['price_receipt_sha256']})
     return op,cloud,reservation
 
 
@@ -69,10 +75,10 @@ def test_guard_never_reports_deleted_on_failed_api_or_replacement(tmp_path,failu
     assert not op.state['reservation'].get('deleted_verified')
 
 
-def test_no_paid_effect_in_october_and_budget_reserves_closure(tmp_path):
+def test_no_paid_effect_before_floor_and_budget_reserves_closure(tmp_path):
     op,cloud,_ = setup(tmp_path)
     op.now=lambda:datetime(2026,10,16,tzinfo=timezone.utc)
-    with pytest.raises(ValueError,match='NOVEMBER'):
+    with pytest.raises(ValueError,match='^NO_PAID_EFFECT_BEFORE_2026_10_28$'):
         op.admit_paid(1)
     assert not cloud.calls
     op.now=lambda:datetime(2026,11,1,tzinfo=timezone.utc)
@@ -158,3 +164,16 @@ def test_successful_delete_with_failed_readback_can_be_reconciled_by_read_only(t
     assert result['status']=='RESERVATION_ABSENT_RECONCILED'
     assert op.state['reservation']['deleted_verified']
     assert all(c[:3]==['compute','reservations','list'] for c in cloud.calls[before:])
+
+
+def test_paid_floor_is_owner_dated_2026_10_28_adr_0016(tmp_path):
+    from scripts.study_operator.i7 import PAID_NOT_BEFORE_UTC
+    assert PAID_NOT_BEFORE_UTC == datetime(2026,10,28,tzinfo=timezone.utc)
+    op,cloud,_ = setup(tmp_path)
+    op.config['rates']['verified_utc'] = op.config['cost_plan']['verified_utc'] = '2026-10-27T00:00:00+00:00'
+    op.now=lambda:datetime(2026,10,27,23,59,tzinfo=timezone.utc)
+    with pytest.raises(ValueError,match='^NO_PAID_EFFECT_BEFORE_2026_10_28$'):
+        op.admit_paid(.1)
+    op.now=lambda:PAID_NOT_BEFORE_UTC
+    op.admit_paid(.1)
+    assert not cloud.calls

@@ -11,7 +11,29 @@ from datetime import timedelta
 from pathlib import Path
 
 from scripts.study_operator.i7_preparation import file_sha
+from scripts.study_operator.policy import ReadyPending
 from scripts.study_operator.service_gateway import save_state
+
+GUEST_BOOT_WAIT_S = 300
+# A 180 GiB snapshot upload took 646-773 s (cpu-build, 2026-11-10); a tool call cut off at 600 s leaves the
+# creation intent UNKNOWN and the root unusable (no replay), so snapshot/disk creation waits up to 30 min.
+CLOUD_CREATE_TIMEOUT_S = 1800
+GUEST_BOOTED = ('running','degraded')
+
+
+def cpu_label(config):
+    """CPU VM/disk/firewall names and ownership marker belong to one I7 period (cpu-build-02)."""
+    return 'i7cpu-'+config['period_id'][:8]
+
+
+def build_period(config):
+    """Period in which the CPU was built and named. start(purpose) later switches period_id (close-08)."""
+    return {'period_id':config.get('period_ids',{}).get('technical',config['period_id'])}
+
+
+def build_scope(config):
+    """Technical-object prefix of one period; a remnant of another attempt is never reread."""
+    return 'i7-'+config['period_id'][:12]
 
 
 def build(operator, spec):
@@ -28,7 +50,10 @@ def build(operator, spec):
     head = subprocess.check_output(['git','-C',str(original),'rev-parse','HEAD'],text=True).strip()
     remote = subprocess.check_output(['git','-C',str(original),'ls-remote','origin',
                                       'refs/heads/fix/interview-readiness'],text=True).split()[0]
-    if head != operator.config['commit'] or remote != head:
+    local = subprocess.run(['git','-C',str(original),'rev-parse','--verify','--quiet',
+                            'refs/heads/fix/interview-readiness'],capture_output=True,text=True).stdout.strip()
+    # Line 90 clones the LOCAL branch by name after admit_paid: a missing or stale branch fails late.
+    if head != operator.config['commit'] or remote != head or local != head:
         raise ValueError('PUBLISHED_I7_SOURCE_REQUIRED')
     if root.exists():
         raise ValueError('CPU_ATTEMPT_EXISTS_RECONCILE_WITHOUT_REPLAY')
@@ -60,7 +85,7 @@ def build(operator, spec):
     # the new host source is extracted and qualified from the newly built image.
     source['host_infrastructure_sha256'] = {}
     cloud = Cloud(operator.cloud.sdk,operator.cloud.project,root/'runs')
-    controller = Controller(root,cloud,label='i7cpu01')
+    controller = Controller(root,cloud,label=cpu_label(operator.config))
     inventory = {'resources':{'snapshots':cloud.command(['compute','snapshots','list'])}}
     source_snapshots=[s for s in inventory['resources']['snapshots']
                       if s['name']=='cloudrag-i6-cierre-disco-20261016']
@@ -85,7 +110,7 @@ def build(operator, spec):
     verify_recipe(root/'build-context-finali7/repository')
     if context['requirements_lock_sha256'] != preflight['files']['requirements-lock.txt']:
         raise ValueError('I7_BUILD_CONTEXT_LOCK_CHANGED')
-    builder = Build(root,cloud,cpu_label='i7cpu01')
+    builder = Build(root,cloud,cpu_label=cpu_label(operator.config),scope=build_scope(operator.config))
     builder.launch('finali7',context,Path(__file__).with_name('linux_build.py').read_bytes())
     deadline = time.monotonic()+7200
     while time.monotonic() < deadline:
@@ -108,6 +133,26 @@ def build(operator, spec):
     return operator.receipt('cpu-build',receipt)
 
 
+def wait_guest_booted(rpc, *, clock=time.monotonic, sleep=time.sleep, timeout=GUEST_BOOT_WAIT_S):
+    """instances start returns at RUNNING, before the guest boots (cpu-build-06, ADR-0024).
+
+    Guest-attribute host keys survive stop/start, so they do not prove a new boot; ask systemd
+    through the same pinned private RPC as the mount (no unpinned SSH)."""
+    deadline = clock()+timeout
+    while True:
+        remaining = int(deadline-clock())
+        if remaining < 1:
+            raise ValueError('GUEST_BOOT_WAIT_TIMEOUT')
+        try:
+            status = rpc({'operation':'boot-status','wait_s':remaining},timeout=remaining+120)
+        except ReadyPending:
+            sleep(15)
+            continue
+        if status.get('state') in GUEST_BOOTED:
+            return
+        raise ValueError('GUEST_BOOT_WAIT_TIMEOUT')
+
+
 def clean_snapshot(operator, cloud, resources, build_proof):
     """An offline secondary clone; originals and the CPU source remain untouched."""
     vm, disk = resources['vm'],resources['disk']
@@ -123,30 +168,35 @@ def clean_snapshot(operator, cloud, resources, build_proof):
                'stage':stage,'target':target,'snapshot':final,'marker':marker})
     stage_intent=record_intent(operator,'snapshots',stage)
     cloud.command(['compute','snapshots','create',stage,'--source-disk='+disk['name'],
-        '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],timeout=600)
+        '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],
+        timeout=CLOUD_CREATE_TIMEOUT_S)
     stage_receipt=cloud.command(['compute','snapshots','describe',stage])
     observed(operator,stage_intent,stage_receipt)
     disk_intent=record_intent(operator,'disks',target,zone,source_snapshot_id=str(stage_receipt['id']))
     cloud.command(['compute','disks','create',target,'--source-snapshot='+stage,'--zone='+zone,
-        '--type=pd-balanced','--description='+marker],timeout=600)
+        '--type=pd-balanced','--description='+marker],timeout=CLOUD_CREATE_TIMEOUT_S)
     target_receipt = cloud.command(['compute','disks','describe',target,'--zone='+zone])
     observed(operator,disk_intent,target_receipt)
     stage_receipt = cloud.command(['compute','snapshots','describe',stage])
     if (stage_receipt.get('storageLocations')!=['us-central1'] or target_receipt['description'] != marker or
             str(target_receipt['sourceSnapshotId']) != str(stage_receipt['id'])):
         raise ValueError('OWN_SERVICE_CLONE_IDENTITY_CHANGED')
-    cloud.command(['compute','instances','attach-disk',vm['name'],'--zone='+zone,
-                   '--disk='+target,'--device-name='+target,'--mode=rw'])
-    cloud.command(['compute','instances','start',vm['name'],'--zone='+zone],timeout=300)
     script = operator.config['host_code']+'/scripts/study_operator/i7_service_disk.py'
-    def rpc(request):
+    def rpc(request, timeout=1800):
         payload = cloud.command(['compute','ssh',vm['name'],'--zone='+zone,'--tunnel-through-iap',
             '--ssh-key-expire-after=10m','--command=sudo -n python3 -B '+shlex.quote(script)],
-            input_data=json.dumps(request).encode(),json_output=False,private_output=True,timeout=1800)
+            input_data=json.dumps(request).encode(),json_output=False,private_output=True,timeout=timeout)
         return json.loads(payload)
     job = {'cpu_id':str(vm['id']),'disk_name':target,
            'legacy_archive':'/srv/cloudrag/iteration7-legacy-'+suffix+'.tar'}
     try:
+        # Boot only the source disk: a clone present at boot shares PARTUUID/UUID/LABEL and
+        # may be mounted as / or /boot (cpu-build-04, ADR-0023). start returns before the guest
+        # boots, so attach only once systemd reports the boot finished (cpu-build-06, ADR-0024).
+        cloud.command(['compute','instances','start',vm['name'],'--zone='+zone],timeout=300)
+        wait_guest_booted(lambda request,timeout:rpc(dict(job,**request),timeout=timeout))
+        cloud.command(['compute','instances','attach-disk',vm['name'],'--zone='+zone,
+                       '--disk='+target,'--device-name='+target,'--mode=rw'])
         rpc(dict(job,operation='mount'))
         archived = rpc(dict(job,operation='archive'))
         data = base64.b64decode(archived.pop('content_base64'),validate=True)
@@ -170,7 +220,8 @@ def clean_snapshot(operator, cloud, resources, build_proof):
             raise ValueError('CPU_CLEANING_STOP_NOT_VERIFIED')
         final_intent=record_intent(operator,'snapshots',final)
         cloud.command(['compute','snapshots','create',final,'--source-disk='+target,
-            '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],timeout=600)
+            '--source-disk-zone='+zone,'--storage-location=us-central1','--description='+marker],
+            timeout=CLOUD_CREATE_TIMEOUT_S)
         snapshot = cloud.command(['compute','snapshots','describe',final])
         observed(operator,final_intent,snapshot)
         if (snapshot['status'] != 'READY' or snapshot['description'] != marker
@@ -195,7 +246,7 @@ def verify_image_or_stop_cpu(operator):
         result = verify(operator.root)
     except ValueError as error:
         from scripts.study_operator.cpu_build import Build
-        builder = Build(operator.root/'cpu',operator.cloud,cpu_label='i7cpu01')
+        builder = Build(operator.root/'cpu',operator.cloud,cpu_label=cpu_label(operator.config))
         try:
             cpu = builder.stopped(builder.resource())
         except Exception as stop_error:
@@ -213,6 +264,7 @@ def gpu_restore(operator):
     verify_image_or_stop_cpu(operator)
     from scripts.study_operator.startup import write_startup
     from scripts.study_operator.i7_reconcile import observed,record_intent
+    from scripts.study_operator.i7 import PHASE_B_RESERVATION_1_H
     if any(row['status']=='UNKNOWN' for row in operator.state.get('creation_intents',[])):
         raise ValueError('UNKNOWN_CREATION_RECONCILE_BEFORE_CAPACITY')
     snapshot = operator.state['qualified_service_snapshot']
@@ -224,14 +276,15 @@ def gpu_restore(operator):
     instances = operator.cloud.command(['compute','instances','list'])
     if any(v.get('guestAccelerators') and v['status'] != 'TERMINATED' for v in instances):
         raise ValueError('ANOTHER_GPU_ACTIVE')
-    operator.reserve(12)
+    operator.reserve(PHASE_B_RESERVATION_1_H)
     reservation = operator.state['reservation']
     zone = operator.config['zone']
     name = 'cloudrag-i7-vm-'+operator.config['period_id'][:12]
     disk = name+'-boot'
     disk_intent=record_intent(operator,'disks',disk,zone,source_snapshot_id=str(snapshot['id']))
     operator.cloud.command(['compute','disks','create',disk,'--zone='+zone,'--type=pd-balanced',
-        '--source-snapshot='+snapshot['name'],'--description='+operator.config['resource_marker']],timeout=600)
+        '--source-snapshot='+snapshot['name'],'--description='+operator.config['resource_marker']],
+        timeout=CLOUD_CREATE_TIMEOUT_S)
     restored_disk = operator.cloud.command(['compute','disks','describe',disk,'--zone='+zone])
     observed(operator,disk_intent,restored_disk)
     if (str(restored_disk['sourceSnapshotId']) != str(snapshot['id'])
@@ -277,7 +330,7 @@ def cleanup_cpu(operator):
     zone = 'us-central1-a'
     current = operator.cloud.command(['compute','instances','describe',vm['name'],'--zone='+zone])
     if (str(current['id']) != str(vm['id']) or current['description'] != vm['description']
-            or not vm['name'].startswith('cloudrag-i5-restore-i7cpu')):
+            or vm['name'] != 'cloudrag-i5-restore-'+cpu_label(build_period(operator.config))):
         raise ValueError('CPU_CLEANUP_IDENTITY_CHANGED')
     if current['status'] != 'TERMINATED':
         raise ValueError('CPU_CLEANUP_REQUIRES_STOPPED_VM')

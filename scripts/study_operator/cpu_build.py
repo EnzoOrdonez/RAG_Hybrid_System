@@ -60,10 +60,14 @@ def stage_payload(job,archive,source):
 
 
 class Build:
-    def __init__(self,root,cloud,*,cpu_label='bootstrap01',now=None):
+    def __init__(self,root,cloud,*,cpu_label='bootstrap01',now=None,scope=None):
         if not re.fullmatch('[a-z][a-z0-9-]{0,15}',cpu_label):
             raise ValueError('Safe explicit restored CPU label required')
+        if scope is not None and not re.fullmatch('[a-z0-9][a-z0-9-]{0,31}',scope):
+            raise ValueError('Safe build scope required')
         self.root,self.cloud = Path(root),cloud
+        # Technical-object namespace: I5 keeps the package name, I7 passes its period.
+        self.scope = self.root.name if scope is None else scope
         self.state = Controller(root,cloud)
         self.cpu_label = cpu_label
         self.now = now or (lambda: datetime.now(timezone.utc))
@@ -153,7 +157,7 @@ class Build:
                    cpu_label=self.cpu_label,cpu_restoration_proof_sha256=proof_sha,
                    commit=inventory['commit'],context_sha256=inventory['sha256'],
                    context='/srv/cloudrag/iteration5/builds/'+label+'/context',bucket=TECHNICAL,
-                   prefix='iteration4/iteration5/'+self.root.name+'/'+label,
+                   prefix='iteration4/iteration5/'+self.scope+'/'+label,
                    guest_source_sha256=hashlib.sha256(source).hexdigest())
         atomic_json(self.root/('cpu-build-'+label+'-job-input.json'),job)
         def attempted(state):

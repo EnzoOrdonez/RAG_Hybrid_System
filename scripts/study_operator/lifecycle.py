@@ -14,7 +14,29 @@ import uuid
 
 from scripts.study_operator.cloud_client import checked_vm, no_other_gpu, readiness
 from scripts.study_operator.deployment import checked_config
-from scripts.study_operator.policy import OperatorError, ReadyPending, participant_code, purpose_allowed, session_margin
+from scripts.study_operator.policy import (OperatorError, ReadyPending, TransportUnavailable, participant_code,
+                                           purpose_allowed, session_margin)
+
+# The technical cleanup reads the session stores under maintenance before it deletes anything;
+# the guest re-checks that the inventory still equals the plan, so a repeated read changes nothing
+# (ADR-0034). The calls with effects (maintenance, close, restore, clean-disk) keep one try.
+MAINTENANCE_READ_OPERATIONS = frozenset({'inventory', 'download-disk'})
+# A transport failure is retried twice, after 15 s and 45 s, only for read-only guest polls
+# (ADR-0029), for the idempotent collection steps: the guest re-reads the same proof or
+# rewrites the same acknowledgement after checking its hash (ADR-0030), and for the maintenance
+# reads above.
+RETRYABLE_BRIDGE_OPERATIONS = frozenset(
+    {'stimulus-status', 'gate-status', 'i7-smoke-observe', 'preflight', 'i7-preparation-check',
+     'stimulus-evidence', 'stimulus-ack', 'gate-evidence', 'gate-ack', 'gate-terminal-evidence',
+     'gate-finalized'} | MAINTENANCE_READ_OPERATIONS)
+TRANSPORT_RETRY_DELAYS_S = (15, 45)
+# The long status polls of the stimulus and the gate only read while the guest job keeps running
+# (ADR-0033). Their schedule starts with the short one, so every outage the short schedule survived
+# behaves the same; it then keeps trying every 60 s, so the owner sees the end of an outage quickly
+# and can still collect inside the 600 s acknowledgement window that starts when the job completes
+# (ADR-0031). preflight keeps the short schedule so READY stays within 900 s.
+LONG_POLL_OPERATIONS = frozenset({'stimulus-status', 'gate-status'})
+LONG_POLL_TRANSPORT_RETRY_DELAYS_S = (15, 45, 60, 60, 60, 60, 60)
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.region_scope import region
 
@@ -48,9 +70,21 @@ class Operator:
     def bridge(self, request, *, private=False, timeout=180):
         selected = self.selected()
         fixed = self.config['host_code']+'/scripts/study_operator/guest_bridge.py'
-        content = self.cloud.command(['compute','ssh',selected['name'],'--zone='+selected['zone'],
-            '--tunnel-through-iap','--ssh-key-expire-after=10m','--command=sudo -n python3 -B '+shlex.quote(fixed)],
-            input_data=json.dumps(request).encode(),json_output=False,private_output=private,timeout=timeout)
+        # Only read-only polls retry a transport failure, a bounded number of times (ADR-0029);
+        # operations with effects keep the single attempt and its UNKNOWN handling.
+        operation = request.get('operation')
+        delays = (LONG_POLL_TRANSPORT_RETRY_DELAYS_S if operation in LONG_POLL_OPERATIONS
+                  else TRANSPORT_RETRY_DELAYS_S if operation in RETRYABLE_BRIDGE_OPERATIONS else ())
+        for delay in (*delays, None):
+            try:
+                content = self.cloud.command(['compute','ssh',selected['name'],'--zone='+selected['zone'],
+                    '--tunnel-through-iap','--ssh-key-expire-after=10m','--command=sudo -n python3 -B '+shlex.quote(fixed)],
+                    input_data=json.dumps(request).encode(),json_output=False,private_output=private,timeout=timeout)
+                break
+            except TransportUnavailable:
+                if delay is None:
+                    raise
+                self.sleep(delay)
         try:
             result = json.loads(content)
             if result.get('status') == 'WAITING' and request.get('operation') == 'preflight':
@@ -108,6 +142,8 @@ class Operator:
                     next_action='Revisa el primer comando con exit_code distinto de cero; corrige su causa y ejecuta stop antes de otro start.')
 
     def reserve_cost(self, operation, amount):
+        if self.config.get('iteration') == 7:
+            raise ValueError('I7_LEGACY_PAID_OPERATION_FORBIDDEN')
         from scripts.study_operator.run_checkpoint import admit
 
         admit(self.config,self.state,amount,now=self.now())
@@ -266,6 +302,8 @@ class Operator:
         return token
 
     def ip_reserve(self):
+        if self.config.get('iteration') == 7:
+            raise ValueError('I7_LEGACY_PAID_OPERATION_FORBIDDEN')
         name = self.config['ip_name']
         ip_region = region(self.config['zone'])
         if self.state.get('reserved_address_region') not in (None, ip_region):

@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 
 import pytest
 
+pytestmark = pytest.mark.usefixtures('installed_beta')
+
 
 def test_missing_pinned_browser_is_named_in_phase_b_check_before_cloud(tmp_path,monkeypatch,capsys):
     from scripts.study_operator import cloud_client, i7_phase_b

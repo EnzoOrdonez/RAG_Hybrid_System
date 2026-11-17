@@ -66,8 +66,10 @@ def disk_dispatch(active, request):
     if operation == 'i7-privacy' and set(request) == {'operation','ip','user_agent'}:
         from scripts.study_operator.i7_privacy import host_sources, scan
 
-        if active['config'].get('iteration') != 7 or active['config']['purpose'] != 'technical':
-            raise ValueError('I7_TECHNICAL_PRIVACY_ONLY')
+        # Phase B runs privacy in the synthetic smoke period (i7_phase_b: start('smoke')); human
+        # periods (study, pilot, rehearsal) never accept canaries (privacy-08).
+        if active['config'].get('iteration') != 7 or active['config']['purpose'] not in {'technical','smoke'}:
+            raise ValueError('I7_SYNTHETIC_PRIVACY_ONLY')
         return scan(host_sources(active),(request['ip'].encode(),request['user_agent'].encode()))
     roots = stores(active)
     if operation == 'restore':

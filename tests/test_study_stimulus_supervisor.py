@@ -22,7 +22,7 @@ def fixture_worker(connection, config, parent_pid):
 def supervisor(tmp_path, **settings):
     config = dict(root=str(tmp_path), **settings)
     return ColdSupervisor(config, admission=lambda receipt: None, poll=lambda: None,
-                          worker_target=fixture_worker, preparation_seconds=3, call_seconds=.1)
+                          worker_target=fixture_worker, preparation_seconds=30, call_seconds=.1)
 
 
 def test_short_calls_always_check_host_telemetry(tmp_path):

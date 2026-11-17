@@ -97,9 +97,12 @@ def balance(reranked_ids: Sequence[str],
     """Pick k ids covering each wanted provider, taken in reranked order.
 
     quota = ceil(k/|wanted|) per provider; any shortfall is filled from the best
-    remaining ids of any provider. Relevance order is preserved within and across
-    picks, so the only thing that changes versus `reranked_ids[:k]` is WHICH evidence
-    is admitted -- never how it is arranged (Tier A showed arrangement is inert).
+    remaining ids of any provider. The quota picks come out in reranked order, within
+    and across providers. The fill is APPENDED after them, so a filled id can rank above
+    a quota pick it follows: [a1, a2, a3, a4, b1] with wanted (a, b) and k=5 gives
+    [a1, a2, a3, b1, a4]. The rule therefore decides WHICH evidence is admitted and,
+    when the fill is used, also moves the filled ids to the end (Tier A showed
+    arrangement is inert). This is the order exp17 was measured with.
 
     A provider absent from the pool simply cannot be covered; the caller is expected to
     measure coverage against the providers actually present in the pool rather than

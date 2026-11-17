@@ -1,0 +1,32 @@
+diff --git a/src/evaluation/benchmark_runner.py b/src/evaluation/benchmark_runner.py
+index 9832163..610eb1d 100644
+--- a/src/evaluation/benchmark_runner.py
++++ b/src/evaluation/benchmark_runner.py
+@@ -133,18 +133,19 @@ class BenchmarkRunner:
+ 
+     def _get_hybrid_index(self, chunking_strategy: str, chunk_size: int, embedding_model: str = None):
+         """Get or load a hybrid index (cached)."""
+-        key = f"{chunking_strategy}_{chunk_size}"
++        model = "bge-large"  # Default
++        if embedding_model:
++            if "bge-base" in embedding_model:
++                model = "bge-base"
++            elif "MiniLM" in embedding_model:
++                model = "all-MiniLM-L6"
++        # The embedding model is part of the key: two configs that differ only in the
++        # embedding model must not share the first index that happened to be loaded.
++        key = f"{model}_{chunking_strategy}_{chunk_size}"
+         if key not in self._hybrid_indices:
+             try:
+                 from src.pipeline.rag_pipeline import load_hybrid_index
+ 
+-                model = "bge-large"  # Default
+-                if embedding_model:
+-                    if "bge-base" in embedding_model:
+-                        model = "bge-base"
+-                    elif "MiniLM" in embedding_model:
+-                        model = "all-MiniLM-L6"
+-
+                 self._hybrid_indices[key] = load_hybrid_index(
+                     embedding_model=model,
+                     chunking_strategy=chunking_strategy,

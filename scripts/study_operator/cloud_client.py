@@ -8,9 +8,24 @@ from pathlib import Path
 import subprocess
 import time
 
-from scripts.study_operator.policy import OperatorError, ReadyPending
+from scripts.study_operator.policy import CapacityRejected, OperatorError, ReadyPending, TransportUnavailable
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.region_scope import US_L4_ZONES
+
+
+def capacity_refusal(stderr):
+    """The provider's capacity code, or None. The message itself stays private."""
+    match = re.search(rb'\b(ZONE_RESOURCE_POOL_EXHAUSTED(?:_WITH_DETAILS)?)\b', stderr)
+    if match:
+        return match[0].decode('ascii')
+    return 'NOT_ENOUGH_RESOURCES' if b'does not have enough resources' in stderr else None
+
+
+def capacity_operation(arguments):
+    """Creates whose capacity refusal is receipted (ADR-0026 adds GPU reservations)."""
+    return ((len(arguments) > 2 and arguments[:2] == ['compute', 'instances']
+             and arguments[2] in {'start', 'create'})
+            or arguments[:4] == ['beta', 'compute', 'reservations', 'create'])
 
 
 def error_categories(stderr):
@@ -35,6 +50,10 @@ class Cloud:
         self.root.mkdir(parents=True, exist_ok=True)
         self.sequence = max((int(p.name.split('-')[0]) for p in self.root.glob('*-intent.json')
                              if p.name.split('-')[0].isdigit()), default=0)
+
+    def require_beta(self):
+        from scripts.study_operator.i7_sdk_preflight import verify_beta
+        return verify_beta(self.sdk, invoke=self.invoke)
 
     def command(self, arguments, *, private_output=True, input_data=None, timeout=180, json_output=True):
         self.sequence += 1
@@ -108,7 +127,9 @@ class Cloud:
             save_state(str(stem) + '-receipt.json', dict(command=argv, exit_code=124, started_utc=before,
                 ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began,
                 partial_output_policy='PRIVATE_NOT_PERSISTED' if private_output else 'PUBLIC_PRESERVED'))
-            raise OperatorError('Venció el límite de la herramienta. Conserva el recibo y verifica status antes de reintentar.') from None
+            # An SSH timeout is a transport failure; read-only polls may retry it (ADR-0029).
+            failure = TransportUnavailable if arguments[:2] == ['compute', 'ssh'] else OperatorError
+            raise failure('Venció el límite de la herramienta. Conserva el recibo y verifica status antes de reintentar.') from None
         except ReadyPending:
             save_state(str(stem) + '-receipt.json', dict(command=argv, exit_code=1, started_utc=before,
                 ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began,
@@ -119,7 +140,7 @@ class Cloud:
                 ended_utc=datetime.now(timezone.utc).isoformat(), duration_s=time.monotonic()-began,
                 transport=transport, reason='SSH_TRANSPORT_REJECTED'))
             if private_rpc:
-                raise OperatorError('El transporte SSH no pudo verificarse. Conserva runs, revisa la clave del host y status; no repitas start ni aceptes una clave cambiada.') from None
+                raise TransportUnavailable('El transporte SSH no pudo verificarse. Conserva runs, revisa la clave del host y status; no repitas start ni aceptes una clave cambiada.') from None
             raise OperatorError('No se pudo ejecutar Google Cloud. Conserva runs y verifica la instalación del SDK antes de repetir; no crees recursos a ciegas.') from None
         stdout, stderr = result.stdout, result.stderr
         if isinstance(stdout, str):
@@ -135,11 +156,10 @@ class Cloud:
             private_output_not_persisted=private_output, transport=transport)
         if result.returncode:
             receipt.update(error_categories(stderr))
-        if (result.returncode and len(arguments) > 2 and arguments[:2] == ['compute', 'instances']
-                and arguments[2] in {'start', 'create'}):
-            match = re.search(rb'\b(ZONE_RESOURCE_POOL_EXHAUSTED(?:_WITH_DETAILS)?)\b', stderr)
-            if match:
-                receipt['cloud_error_code'] = match[0].decode('ascii')
+        capacity_code = capacity_refusal(stderr) if result.returncode else None
+        if capacity_code and capacity_operation(arguments):
+            receipt['cloud_error_code'] = capacity_code
+            if capacity_code.startswith('ZONE_RESOURCE_POOL_EXHAUSTED'):
                 # Capacity errors are technical evidence, but an SDK footer
                 # containing identity/credentials must still remain in memory.
                 if (re.fullmatch(rb'[\t\r\n\x20-\x7e]*', stderr)
@@ -153,9 +173,12 @@ class Cloud:
                     and b'Guest Attribute' in stderr):
                 raise ReadyPending('Aún faltan claves públicas del invitado. Espera y repite preflight dentro de 15 minutos; no aceptes una clave desconocida.')
             # Capacity is a resource error, not a measured gate failure.
-            if b'ZONE_RESOURCE_POOL_EXHAUSTED' in stderr or b'does not have enough resources' in stderr:
-                raise OperatorError('ZONE_RESOURCE_POOL_EXHAUSTED: respeta las rondas de us-central1 y el orden de regiones medido; usa el runbook de contingencia, identidad y smoke antes de una sesión.')
-            raise OperatorError('Google Cloud rechazó la operación. Revisa su recibo, verifica status y corrige la causa antes de repetir.')
+            if capacity_code:
+                raise CapacityRejected(code=capacity_code, message='ZONE_RESOURCE_POOL_EXHAUSTED: respeta las rondas de us-central1 y el orden de regiones medido; usa el runbook de contingencia, identidad y smoke antes de una sesión.')
+            # OpenSSH exits 255 when the connection or the IAP tunnel fails, before the remote command.
+            failure = (TransportUnavailable if arguments[:2] == ['compute', 'ssh'] and result.returncode == 255
+                       else OperatorError)
+            raise failure('Google Cloud rechazó la operación. Revisa su recibo, verifica status y corrige la causa antes de repetir.')
         if json_output:
             try:
                 return json.loads(stdout.decode('utf-8-sig')) if stdout.strip() else None

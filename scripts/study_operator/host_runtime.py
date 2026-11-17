@@ -13,11 +13,31 @@ import sys
 import time
 import urllib.request
 
-from scripts.study_operator.deployment import app_command, assert_isolation, bind, caddyfile, checked_config
+from scripts.study_operator.deployment import app_command, assert_isolation, bind, caddyfile, checked_config, smoke_participant
 from scripts.study_operator.service_gateway import save_state
 
 
 ROOT = Path('/srv/cloudrag/iteration5')
+# After a cold-boot job, the owner downloads, verifies and acknowledges the private proof
+# through several gcloud calls before the native unit's ExecStopPost shuts the VM down.
+# One minute was too short for the stimulus (ADR-0031); stimulus and gate share ten minutes,
+# and the host lingers briefly after the acknowledgement so the bridge reply leaves first.
+OWNER_ACK_WINDOW_S = 600
+POST_ACK_GRACE_S = 30
+
+
+def await_owner_ack(ack_path, *, bound, clock=time.monotonic, sleep=time.sleep):
+    """Wait for the owner's acknowledgement, never past the job's independent bound."""
+    ack = Path(ack_path)
+    deadline = min(bound, clock()+OWNER_ACK_WINDOW_S)
+    while clock() < deadline and not ack.is_file():
+        sleep(1)
+    if not ack.is_file():
+        return False
+    grace = min(POST_ACK_GRACE_S, bound-clock())
+    if grace > 0:
+        sleep(grace)
+    return True
 
 
 def ready_elapsed(requested, now=None):
@@ -61,6 +81,21 @@ print(json.dumps(result))
     if result.returncode or json.loads(result.stdout) != {'169.254.169.254':False,'metadata.google.internal':False}:
         raise ValueError('METADATA_ISOLATION_NOT_VERIFIED')
     return {'metadata_unreachable':True, 'targets_checked':2}
+
+
+def deployment_seed(config, boot, *, artifacts_sha256, policy_sha256):
+    return dict(cloud=True,build_id=config['commit'],model_digest=config['model_digest'],
+        ollama_version=config['ollama_version'],artifact_manifest='/deployment/deployment-artifacts.json',
+        artifact_manifest_sha256=artifacts_sha256,
+        config_dir='/reviewed',session_root='/sessions',purpose=config['purpose'],device_gpu='1',
+        bucket=config['sessions_bucket'],backup_prefix='periods/'+config['period_id'],
+        backup_socket='/service/backup.sock',fingerprint=config['fingerprint'],
+        runtime_image_receipt='/deployment/image-receipt.json',vendor_manifest='/opt/cloudrag/vendor-manifest.json',
+        host_runtime_receipt='/deployment/host-runtime.json',zone=config['zone'],machine_type='g2-standard-4',
+        instance_id=str(config['instance_id']),service_mode='fresh_runner',service_boot_id=boot,
+        service_policy_receipt='/deployment/service-policy.json',service_policy_sha256=policy_sha256,
+        service_state_path='/service/service-state.json',hostname=config['hostname'],
+        preregistration='/deployment/preregistration.md',smoke_participant=smoke_participant(config))
 
 
 class Host:
@@ -181,18 +216,8 @@ class Host:
         if hashlib.sha256(preregistration.read_bytes()).hexdigest() != self.config['preregistration_sha256']:
             raise ValueError('PREREGISTRATION_ANCHOR_CHANGED')
         shutil.copyfile(preregistration,self.root/'meta'/'preregistration.md')
-        seed = dict(cloud=True,build_id=self.config['commit'],model_digest=self.config['model_digest'],
-            ollama_version=self.config['ollama_version'],artifact_manifest='/deployment/deployment-artifacts.json',
-            artifact_manifest_sha256=hashlib.sha256((self.root/'meta'/'deployment-artifacts.json').read_bytes()).hexdigest(),
-            config_dir='/reviewed',session_root='/sessions',purpose=self.config['purpose'],device_gpu='1',
-            bucket=self.config['sessions_bucket'],backup_prefix='periods/'+self.config['period_id'],
-            backup_socket='/service/backup.sock',fingerprint=self.config['fingerprint'],
-            runtime_image_receipt='/deployment/image-receipt.json',vendor_manifest='/opt/cloudrag/vendor-manifest.json',
-            host_runtime_receipt='/deployment/host-runtime.json',zone=self.config['zone'],machine_type='g2-standard-4',
-            instance_id=str(self.config['instance_id']),service_mode='fresh_runner',service_boot_id=self.boot,
-            service_policy_receipt='/deployment/service-policy.json',service_policy_sha256=policy_sha,
-            service_state_path='/service/service-state.json',hostname=self.config['hostname'],
-            preregistration='/deployment/preregistration.md')
+        seed = deployment_seed(self.config,self.boot,policy_sha256=policy_sha,
+            artifacts_sha256=hashlib.sha256((self.root/'meta'/'deployment-artifacts.json').read_bytes()).hexdigest())
         save_state(self.root/'meta'/'deployment-seed.json',seed)
         for path in (self.root/'meta').iterdir():
             os.chmod(path,0o640)

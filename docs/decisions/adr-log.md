@@ -21,6 +21,11 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
 | [ADR-0012](#adr-0012) | 2026-08-21 | Regla de veredicto de tres ramas para el suelo de ruido | Aceptado |
 | [ADR-0013](#adr-0013) | sin fecha de origen | Compuerta humana antes de `git push` | Aceptado |
 | [ADR-0014](#adr-0014) | 2026-10-25 | Estandarización documental: Diátaxis, `.harness/` y `CLAUDE.md` índice | Aceptado |
+| [ADR-0015](#adr-0015) | 2026-10-27 | Topes de gasto del estudio: Fase B USD 20 + 3 de cierre, total USD 100 | Aceptado |
+| [ADR-0016](#adr-0016) | 2026-10-27 | Fecha mínima de pago de la Fase B I7 adelantada al 2026-10-28 UTC, con respaldo al 2026-11-01 | Aceptado |
+| [ADR-0017](#adr-0017) | 2026-10-27 | Decisiones de arranque de F-020: ruta humana en nube, cohorte NLI, config sellada vigente | Aceptado |
+| [ADR-0018](#adr-0018) | 2026-10-27 | Fase humana sobre la imagen I7: GO verificado, ledger propio de USD 70 y firewall restringido | Aceptado |
+| [ADR-0019](ADR-0019-i7-ledger-corrections.md) | 2026-10-27 | Correcciones del ledger y la admisión humana I7; preparación offline | Aceptado |
 
 ---
 
@@ -162,3 +167,185 @@ nuevo con estado «Sustituye a ADR-XXXX» y el anterior pasa a «Sustituido por 
   - Reescribir el log como ADRs: se perderían matices. Se conserva literal y aquí solo se formalizan las decisiones.
 - **Consecuencias:** el arranque en frío lee unas 100 líneas en lugar de 543. `scripts/check_docs.py` verifica que ninguna línea del `CLAUDE.md` anterior se pierda y que los enlaces resuelvan. Los documentos fechados y los ledgers conservan rutas antiguas a propósito.
 - **Fuentes:** `docs/archive/README.md`, commits de `chore/docs-harness`.
+
+<a id="adr-0015"></a>
+## ADR-0015: Topes de gasto del estudio con usuarios
+
+- **Estado:** Aceptado. **Fecha:** 2026-10-27 (directiva de Enzo en la tarea F-020).
+- **Contexto:** el tope de la Fase B I7 existía solo en el código y en el runbook; el tope del estudio completo no estaba escrito. [DECLARADO] `scripts/study_operator/i7_config.py:26` fija `budget_usd=20` y `closure_reserve_usd=3`; `i7.py:57-59` rechaza otra configuración; `i7_costs.py:102-103` devuelve `ADMIT` solo si el total previsto con cierre es de USD 20 o menos; `i7_costs.py:129-130` corta a las 24 h de retención.
+- **Decisión:**
+  1. Fase B I7: USD 20 de exposición prevista a precio de lista, incluidos USD 3 de cierre. Los precios de lista no son factura.
+  2. Estudio completo (Fase B, ensayo, sesiones y retención): USD 100 a precio de lista, Fase B incluida.
+  3. El gasto posterior a la Fase B se pide a Enzo por bloques, cada uno con su costo máximo, dentro del saldo de USD 100.
+  4. No se amplía ningún tope para obtener un resultado.
+- **Consecuencias:** una tarifa nueva o una retención mayor de 24 h pueden bloquear la Fase B aunque la factura real sea menor. Ese bloqueo es aceptado.
+- **Fuentes:** [STUDY_I7_RUNBOOK_FASE_B.md](../STUDY_I7_RUNBOOK_FASE_B.md) (sección «Costos y regla de corte»); `.harness/feature_list.json` (F-020).
+
+<a id="adr-0016"></a>
+## ADR-0016: Fecha mínima de pago de la Fase B I7
+
+- **Estado:** Aceptado. **Fecha:** 2026-10-27. Enzo delegó la decisión en Claude, con preferencia por adelantar.
+- **Contexto:** el código impide todo efecto pagado antes de 2026-11-01T00:00Z: `i7.py:76-77` (`NO_PAID_EFFECT_BEFORE_NOVEMBER`), `i7.py:374-375`, `i7_phase_b.py:258` y `:261-263`, y el bloqueo con dueño Enzo de `i7_readiness.py:41-42`. [VERIFICADO por lectura] La fecha no figura en ningún preregistro ni en `stimulus_calendar.py`; la introdujo el commit `f26395c` (2026-10-15) como guarda de pago, y ningún documento da su motivo. Clase (b): decisión del dueño, no restricción técnica ni calendario preregistrado.
+- **Decisión:**
+  1. El piso pasa a 2026-10-28T00:00Z, en una constante única, con cambio por TDD en `fix/interview-readiness`. Los códigos de error no cambian.
+  2. El cambio exige regenerar el recibo de preparación local: suites de Windows, Linux e I7 y `verify_local` (19 módulos y 3 documentos).
+  3. Respaldo: si una suite falla por una causa distinta de F-016, se revierte con un commit nuevo y rige el 2026-11-01T00:00Z (31/10, 19:00 en Lima).
+  4. La autorización de gasto sigue siendo explícita: el piso de fecha no la reemplaza.
+- **Consecuencias:** la Fase B pagada puede empezar unos tres días antes y terminar antes de la ausencia de Enzo del 3 al 6/11. Cuesta un cambio de fuente y evidencia local nueva antes del build.
+- **Fuentes:** [STUDY_I7_RUNBOOK_FASE_B.md](../STUDY_I7_RUNBOOK_FASE_B.md) (líneas 22-23); `tests/test_study_i7_operator.py:72-78`.
+
+<a id="adr-0017"></a>
+## ADR-0017: Decisiones de arranque de F-020
+
+- **Estado:** Aceptado. **Fecha:** 2026-10-27 (respuestas de Enzo en la sesión de planificación de F-020).
+- **Contexto:** el checklist local del 1/10 ([STUDY_HUMAN_CHECKLIST.md](../STUDY_HUMAN_CHECKLIST.md)) y el runbook I7 describen flujos distintos, y el código no desempata tres puntos.
+- **Decisión:**
+  1. Ruta de las sesiones humanas: nube con el navegador propio del participante por HTTPS (enmienda del 2026-10-02). La forma de operarla sobre la imagen I7 se investiga en la fase B de F-020, porque `i7.py:136-138` solo admite propósitos técnicos.
+  2. La cohorte NLI no es precondición: la enmienda del 2026-10-02 la exige solo para el remedio R2 y la app está congelada en `per_claim` (`scripts/study_operator/rag_freeze.py:71`).
+  3. Config sellada vigente: `study-config-reviewed-v2` (protocolo v2 con UEQ-S, misma asignación). [VERIFICADO] El sello del 1/10 falla con el código vigente; no hace falta un sorteo ni un sello nuevos.
+  4. Tablero: una entrada F-020 con las fases A a G como pasos (los ids deben cumplir `F-NNN`, `scripts/check_docs.py:114`); F-017 es una entrada propia.
+- **Consecuencias:** los pasos del checklist que dependen de Zoom y de un servidor local quedan superados para el estudio; P998 se ensaya en la nube.
+- **Fuentes:** [STUDY_GATE_PREREGISTRATION_AMENDMENT_2026-10-02.md](../STUDY_GATE_PREREGISTRATION_AMENDMENT_2026-10-02.md); `.harness/feature_list.json` (F-020).
+
+<a id="adr-0018"></a>
+## ADR-0018: Fase humana sobre la imagen I7
+
+- **Estado:** Aceptado. **Fecha:** 2026-10-27 (respuestas de Enzo en la fase B de F-020).
+- **Contexto:** [VERIFICADO por lectura] el operador I7 solo admitía los propósitos `technical` y `smoke` (`scripts/study_operator/i7.py`), y la CLI de la iteración 5 no puede operar la imagen I7 sin varios cambios. Los topes de la Fase B (USD 20, 17 h de reserva y 24 h de retención) hacen fallar por diseño cualquier boot posterior a la compuerta. Como `verify_tool_source` amarra el commit del operador al de la imagen, un cambio de código posterior a `cpu-build` obligaría a repetir la Fase B.
+- **Decisión:**
+  1. El código de la fase humana entra en `fix/interview-readiness` antes de `cpu-build`, de modo que la imagen y la compuerta lo cubran.
+  2. `rehearsal`, `pilot` y `study` solo arrancan con la fase humana abierta. Para abrirla hacen falta recibos de compuerta descargados y verificados, todos con veredicto GO, y la reserva de la Fase B cerrada y verificada.
+  3. El propósito `study` exige además los archivos de aprobación ética (`policy.purpose_allowed`). Los boots humanos usan el perfil `standard`.
+  4. Ledger propio de USD 70 a precio de lista, dentro del total de USD 100 (ADR-0015):
+     - cada boot lleva una reserva de 4 h como máximo;
+     - desde la apertura se cuentan las horas retenidas de disco (540 GiB), snapshots (552 GiB) e IP, con un mínimo de 24 h, más un día proyectado;
+     - se reservan USD 3 de cierre, igual que en la Fase B;
+     - los precios de cómputo y de almacenamiento deben tener 7 días o menos; `refresh-prices` rechaza archivos más antiguos que los vigentes;
+     - el GO debe estar ligado a su prueba privada, a la imagen y al commit, y no puede cambiar después de abrir la fase.
+  5. Las reglas `default-allow-ssh` y `default-allow-rdp` quedan restringidas al rango de IAP; no se borran. [VERIFICADO] con una lectura posterior al cambio.
+- **Consecuencias:** [ESTIMADO, lista del 27/10] la retención cuesta unos USD 2,87 por día y cada boot humano unos USD 3,08. Con 2 sesiones por boot (10 boots), el tope alcanza para unos 12 días de fase humana; con 1 sesión por boot, no alcanza para 20 sesiones. Al llegar al tope solo se bloquean nuevas admisiones: la retención de recursos la decide Enzo. El calendario de sesiones debe ajustarse a esto, o Enzo decide otro tope con un ADR nuevo.
+- **Fuentes:** `tests/test_study_i7_human.py`; [ADR-0015](#adr-0015); `.harness/feature_list.json` (F-020).
+
+## ADR-0020: Ajustes finales y pendientes de I7
+
+Ver [ADR-0020](ADR-0020-i7-final-freeze.md): H3, H9, positivo integrado de study,
+fe de erratas de los conteos de mutación de ADR-0019 y backlog sin corregir.
+
+## ADR-0021: Incidente gpu-restore-01
+
+Ver [ADR-0021](ADR-0021-i7-gpu-restore-01.md): beta local obligatorio, precisión
+del TTL de reservas, hashes de la corrección de estado y publicación histórica.
+
+## ADR-0022: Incidente cpu-build-02 y nombres por período
+
+Ver [ADR-0022](ADR-0022-i7-cpu-build-02.md): prefijo técnico del build y recursos
+CPU con período, limpieza por nombre exacto y cierre verificado del intento 2.
+
+## ADR-0023: Incidente cpu-build-04 y clon conectado en caliente
+
+Ver [ADR-0023](ADR-0023-i7-cpu-build-04.md): el clon del disco de arranque ya no
+se conecta antes del arranque. Se agrega una guarda `ROOT_ON_SERVICE_CLONE` antes
+y después del mount, y una espera acotada al `by-id`.
+
+## ADR-0024: Incidente cpu-build-06 y espera del arranque del invitado
+
+Ver [ADR-0024](ADR-0024-i7-cpu-build-06.md): `instances start` responde antes de
+que arranque el invitado, así que el attach debe esperar a `systemctl
+is-system-running` (vía `rpc` fijado, máximo 300 s). Las claves del guest
+attribute se rechazan como señal porque sobreviven a stop/start.
+
+## ADR-0025: Horas de reserva frente a la regla de TTL por arranque
+
+Ver [ADR-0025](ADR-0025-i7-reserva-ttl.md): cada arranque exige 3 h 01 min de
+reserva restante, así que la reserva inicial pasa de 12 h a 13,5 h y la del gate
+queda en 5 h. Total 18,5 h, USD 19,75 con cierre, menor que 20.
+
+## ADR-0026: Rechazo de capacidad al crear la reserva de GPU
+
+Ver [ADR-0026](ADR-0026-i7-rechazo-capacidad-reserva.md). Un rechazo de capacidad
+del proveedor libera la admisión de la reserva solo si un listado posterior no
+muestra ninguna reserva propia. Así `gpu-restore` se puede reintentar sin cargar
+horas ni dinero. Cualquier otro error sigue UNKNOWN. El intento único del gate
+se registra después de retener la reserva de 5 h, y nunca se repite.
+
+## ADR-0027: Privacy y cierre después de un arranque smoke
+
+Ver [ADR-0027](ADR-0027-i7-privacy-y-cierre-tras-smoke.md). El paso privacy
+arranca en el período smoke, así que el invitado acepta `i7-privacy` en los
+períodos sintéticos technical y smoke, nunca en los humanos. El cierre reconoce
+la VM CPU por el período technical del build, no por el período actual.
+
+## ADR-0028: Resultado del intento 9 de la Fase B y defectos nuevos
+
+Ver [ADR-0028](ADR-0028-i7-intento-9-resultado.md).
+- **Llegó al paso 7:** el intento 9 completó del paso 1 al 7, con smoke y restore en exit 0.
+- **Privacy quedó INCOMPLETE:** el escáner del invitado no completó 4 de 7 dominios (privacy-09).
+- **El estímulo programado (8a) falló en el boot 1:** `series` arranca sin detener la VM que deja withdraw-purge, y guard borró la reserva (stimulus-09).
+- **Cierre:** el gate no corrió y `close` dio CLOSED. Gasto ≤ USD 10.
+- **Pendiente:** las correcciones esperan el OK de Enzo y un intento 10.
+
+## ADR-0029: Correcciones tras el intento 9
+
+Ver [ADR-0029](ADR-0029-i7-correcciones-tras-intento-9.md).
+- **privacy-09:** el escáner resuelve la capa escribible de los contenedores con containerd (Docker 29 no da `UpperDir`). Escanea el texto de los enlaces sin seguirlos y cuenta vacíos los sockets, FIFOs y whiteouts. Quedó validado sobre un clon del disco real.
+- **stimulus-09:** la serie programada detiene la VM y aplica el perfil antes del primer boot, y rechaza antes un boot a medias.
+- **Transporte:** `bridge` reintenta dos veces solo los sondeos de lectura.
+
+## ADR-0030: Resultado del intento 10 y reintento de la recolección idempotente
+
+Ver [ADR-0030](ADR-0030-i7-intento-10-y-recoleccion-idempotente.md).
+- **Llegó al paso 8a:** pasos 1 a 7 en exit 0, con privacy **PASS** (0 aciertos, todos los dominios completos).
+- **El estímulo falló en el boot 2 (stimulus-10):** un solo corte del túnel IAP (OpenSSH 255) en `stimulus-ack`, después de descargar y verificar la prueba. Guard borró la reserva; sin gate; close CLOSED. Gasto USD 6,17.
+- **Corrección:** `bridge` también reintenta la recolección idempotente (`*-evidence`, `*-ack`, `gate-terminal-evidence` y `gate-finalized`). Los arranques siguen con un único intento. Sigue el intento 11.
+
+## ADR-0031: Resultado del intento 11 y ventana de acuse del host
+
+Ver [ADR-0031](ADR-0031-i7-intento-11-y-ventana-de-acuse-del-host.md).
+- **Llegó al paso 8a:** pasos 1 a 7 en exit 0, con privacy **PASS** (0 aciertos, los siete dominios completos).
+- **El estímulo falló en el boot 5:** boots 1 a 4 COMPLETE. En el boot 5 se perdió el acuse aun con los reintentos de ADR-0030. Guard borró la reserva; sin gate; close CLOSED. Gasto USD 6,91.
+- **Causa en código:** el host de estímulo daba al dueño 60 s antes de `shutdown -h now`, y la recolección del dueño ronda los 60-75 s. Corrige el diagnóstico de ADR-0030.
+- **Corrección:** `host_runtime.await_owner_ack`, con una ventana de 600 s compartida por el estímulo y el gate, y 30 s de gracia tras el acuse. Sigue el intento 12.
+
+## ADR-0032: Resultado del intento 12 y nombre de reserva ligado a la VM
+
+Ver [ADR-0032](ADR-0032-i7-intento-12-y-nombre-de-reserva-ligado-a-la-vm.md).
+- **Llegó al gate:** pasos 1 a 7 en exit 0, privacy **PASS** y estímulo **ACCEPTED 12/12**, el primero de la Fase B.
+- **El gate falló sin medir:** cinco rechazos de capacidad liberados y reserva 2 a las 14:37Z. `start('smoke')` lanzó `SPECIFIC_RESERVATION_NOT_BOUND` con el intento ya escrito. Guard borró la reserva; close CLOSED. Gasto USD 7,95.
+- **Causa en código:** la VM queda ligada por nombre a la reserva 1 y `reserve()` daba otro nombre a la reserva 2. Google Cloud no re-liga una VM a otra reserva específica.
+- **Corrección:** con la VM ya creada, `reserve()` reutiliza el nombre que la VM consume y lo verifica antes de cualquier efecto pagado o intento del gate. Sigue el intento 13.
+
+## ADR-0033: Resultado del intento 13 y sondeos largos tolerantes a cortes de transporte
+
+Ver [ADR-0033](ADR-0033-i7-intento-13-y-sondeos-largos-tolerantes.md).
+- **Hasta el estímulo:** pasos 1 a 7 en exit 0, L4 en la 1.ª ronda y privacy **PASS** con siete dominios completos y 0 aciertos.
+- **El estímulo falló en el boot 3:** el SSH por IAP a la VM se cortó unos 5,5 min mientras la API respondía. `stimulus-status` se rindió tras 15 s y 45 s, y el boot quedó INTENT sin COMPLETE. Sin gate; close CLOSED; gasto USD 6,31.
+- **Corrección:** solo `stimulus-status` y `gate-status` reintentan con (15, 45, 60, 60, 60, 60, 60) s. Siguen acotados por el límite del trabajo del invitado y por la ventana de acuse de 600 s. `preflight` y la recolección conservan (15, 45). Sigue el intento 14.
+
+## ADR-0034: Resultado del intento 14, reloj de los tramos archivados del gate y lecturas de mantenimiento
+
+Ver [ADR-0034](ADR-0034-i7-intento-14-reloj-de-tramos-archivados.md).
+- **Hasta el estímulo:** pasos 1 a 7 en exit 0, L4 en la 1.ª ronda, privacy **PASS** y estímulo **ACCEPTED** 12/12.
+- **El gate corrió por primera vez:** tras 5 rechazos de capacidad liberados, 140/140 llamadas. Después `verify` lo dejó terminal: juzgaba los tramos de admisión y de ventanas con el reloj de cierre y el lease de Ollama (~30 min) parecía vencido. Sin GO ni NO-GO; close CLOSED; gasto USD 9,39.
+- **Corrección:** cada tramo archivado se evalúa con el reloj de su propia última muestra; `inventory` y `download-disk` reintentan (15, 45) s. Sigue el intento 15.
+
+## ADR-0035: Resultado del intento 15: gate GO y limpieza técnica incompleta
+
+Ver [ADR-0035](ADR-0035-i7-intento-15-gate-go.md).
+- **Fase B completa:** pasos 1 a 7 en exit 0 tras 5 rechazos de capacidad liberados, privacy **PASS**, estímulo **ACCEPTED** 12/12 y reserva 2 al primer intento.
+- **Gate GO:** 120 válidas, 0 fallos e inválidas. p95 hybrid 34,88 s y no_rag 27,64 s, frente al límite de 60 s. Close CLOSED; gasto USD 9,46.
+- **Pendiente:** `purge-study` falló en `maintenance` por transporte IAP; las sesiones sintéticas de los intentos 14 y 15 siguen sin purgar (decide Enzo).
+- **Regla:** sin cambios de código. Los comandos `i7` de la fase humana corren desde un checkout cuyo diff contra b5e54f1 solo toque `docs/` y `output/audit/`. Informe descriptivo en [i7-gate-sesiones-sinteticas-i15.md](../reports/i7-gate-sesiones-sinteticas-i15.md).
+
+## ADR-0036: Ensayo P998 de la fase humana y decisiones de cierre técnico
+
+Ver [ADR-0036](ADR-0036-i7-ensayo-p998-y-cierre-tecnico.md).
+- **Ensayo P998 completo el 17/11:** reserva en la ronda 2, READY 03:08Z, invitación registrada sin persistir el token y recorrido sintético hasta la pantalla de cierre. `stop` y `guard` verificados. Gasto del operador USD 13,06.
+- **Hallazgo:** un segundo clic durante los ~52 s de «Preparar sesión» crea otra ejecución de Streamlit (`fastReruns`), que choca con `FileLock(timeout=0)` y muestra un error genérico. Mitigación en el runbook, sin cambio de código.
+- **Decisiones delegadas por Enzo:** purga de sintéticas aplazada al cierre del estudio; recursos GCP conservados (unos USD 37 al mes); el identificador del proyecto se queda hasta el cierre del estudio, sin reescribir historial.
+
+## ADR-0037: Auditoría del código RAG de noviembre de 2026 y exp20
+
+Ver [ADR-0037](ADR-0037-auditoria-rag-noviembre-2026.md).
+- **Integrado:** tres arreglos de clase A y B1, B2 y B6 (decididas el 15/11). B3, B4, B5, B7 y B8 quedan sin aplicar, con test xfail y declaradas como límites hasta una corrida `exp21+` o una imagen nueva.
+- **exp20_rerank_arms** conserva su nombre (firmada el 16/11): con el mismo reranker, el híbrido supera al denso en +0,016 de NDCG@5 (p = 0,075, n.s.); la ganancia procede del reranker.
+- **Con OK de Enzo del 17/11:** entrada 36 del ledger de verano, fe de erratas S6 («42 multi-cloud queries» son 25) en `correction_log.md` y en el README, y ocho frases aceptadas para el A.3 y la defensa. El camera-ready certificado no se toca.

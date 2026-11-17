@@ -1,0 +1,28 @@
+diff --git a/src/retrieval/coverage_balancer.py b/src/retrieval/coverage_balancer.py
+index 2685c30..76d5a68 100644
+--- a/src/retrieval/coverage_balancer.py
++++ b/src/retrieval/coverage_balancer.py
+@@ -41,6 +41,14 @@ _PROVIDER_ALIASES = {
+ }
+ 
+ 
++# Service names that are also the generic term every provider uses. In the index each one
++# belongs to a single provider ("Virtual Machines" and "Virtual Network" are Azure products,
++# "VPC" and "IAM" are AWS services), so matching them as whole words adds that provider to
++# questions that never asked about it ("Compare virtual machines on AWS and GCP" -> azure).
++# A provider named this way is still picked up by its own keyword or alias.
++_GENERIC_SERVICE_NAMES = frozenset({"iam", "virtual machines", "virtual network", "vpc"})
++
++
+ def build_service_index(chunk_map: Mapping[str, dict]) -> Dict[str, str]:
+     """{service_name_lower: provider} straight from the corpus that is actually indexed.
+ 
+@@ -84,6 +92,8 @@ def resolve_wanted_providers(question: str,
+         if prov in present and any(re.search(rf"\b{re.escape(a)}\b", q) for a in aliases):
+             found.add(prov)
+     for svc, prov in service_index.items():
++        if svc in _GENERIC_SERVICE_NAMES:
++            continue
+         if prov in present and re.search(rf"\b{re.escape(svc)}\b", q):
+             found.add(prov)
+     # deterministic order (quota assignment must not depend on set iteration order)

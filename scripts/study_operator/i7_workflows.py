@@ -65,6 +65,19 @@ def wait_ready(operator):
     raise TimeoutError('OWNER_READY_900S')
 
 
+def require_no_unfinished_stimulus(operator):
+    """A boot left as INTENT without COMPLETE is terminal. Refuse before stopping the VM or
+    switching profile, so a resumed series never kills a boot in flight (ADR-0029)."""
+    journal = operator.root/'attempts'
+    for record in sorted(journal.glob('stimulus-*.json')) if journal.is_dir() else []:
+        if record.name.endswith('.complete.json'):
+            continue
+        completion = record.with_suffix('.complete.json')
+        existing = json.loads(completion.read_bytes()) if completion.exists() else {}
+        if existing.get('status') != 'COMPLETE':
+            raise ValueError('TERMINAL_STIMULUS_REQUIRES_HUMAN_REVIEW')
+
+
 def series(operator):
     """Only complete cold boots permit continuation; terminal attempts cannot replay."""
     from scripts.study_operator.stimulus_evidence import analyze_directory
@@ -178,6 +191,11 @@ def schedule(operator, *, invoke=subprocess.run):
 
 def dispatch(operator, operation):
     if operation == 'series':
+        # The scheduled series must start like the foreground step: VM stopped and stimulus
+        # profile applied. withdraw-purge leaves the VM RUNNING (stimulus-09, ADR-0029).
+        from scripts.study_operator.i7_phase_b import switch_profile
+        require_no_unfinished_stimulus(operator)
+        switch_profile(operator,'stimulus')
         return series(operator)
     if operation == 'schedule':
         return schedule(operator)

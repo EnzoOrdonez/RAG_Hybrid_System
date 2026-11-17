@@ -4,7 +4,8 @@ Benchmark Runner for thesis evaluation.
 Features:
   - Runs experiments with configurable pipeline configs
   - Checkpoint every 10 queries (resume support)
-  - 120-second timeout per query
+  - No per-query timeout: `query_timeout` is accepted and stored for callers that pass it,
+    but it is not enforced anywhere. A hung pipeline call blocks the run.
   - Error recovery (skip failed queries, log errors)
   - Per-query result tracking with full metrics
   - Supports retrieval-only mode (no LLM needed)
@@ -35,12 +36,7 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 RESULTS_DIR = PROJECT_ROOT / "experiments" / "results"
 CHECKPOINT_INTERVAL = 10  # Save checkpoint every N queries
-QUERY_TIMEOUT = 120  # Seconds per query
-
-
-class TimeoutError(Exception):
-    """Query timeout."""
-    pass
+QUERY_TIMEOUT = 120  # Seconds per query; stored on the runner, not enforced (see module docstring)
 
 
 class QueryResult:
@@ -360,6 +356,18 @@ class BenchmarkRunner:
         exp_id = experiment_config.experiment_id
         max_q = max_queries or experiment_config.max_queries
         queries = queries[:max_q]
+
+        # Refuse to touch committed evidence BEFORE doing any work (ADR-0009). Every file
+        # this run would rewrite is checked up front, so a protected experiment directory
+        # (anything under experiments/results that signed_evidence does not declare live) that already
+        # holds one of them stops here with SystemExit, not after the first checkpoint.
+        # Directories outside experiments/results (tests, probes) are never guarded.
+        from src.utils.signed_evidence import guard_write
+        exp_dir = self.results_dir / exp_id
+        guard_write(exp_dir / "results.json")
+        guard_write(exp_dir / "aggregated_metrics.json")
+        for guarded_config in experiment_config.pipeline_configs:
+            guard_write(self._checkpoint_path(exp_id, guarded_config.name))
 
         # Audit §20.1 Flag 152: re-seed at the start of every experiment
         # so that running multiple experiments in one process does not

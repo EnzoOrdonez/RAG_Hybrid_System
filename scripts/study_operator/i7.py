@@ -1,5 +1,6 @@
 """I7 owner operator. Paid actions are date/budget guarded; defaults are local."""
 import argparse
+import copy
 import hashlib
 import json
 import math
@@ -13,8 +14,25 @@ from filelock import FileLock
 
 from scripts.study_operator.deployment import checked_config
 from scripts.study_operator.lifecycle import Operator as LegacyOperator
+from scripts.study_operator.policy import CapacityRejected, participant_code, purpose_allowed
 from scripts.study_operator.service_gateway import save_state
 from scripts.study_operator.stimulus_host_evidence import sha
+
+# Owner date floor for paid effects (ADR-0016); budget authorization stays separate.
+PAID_NOT_BEFORE_UTC = datetime(2026,10,28,tzinfo=timezone.utc)
+# Human phase after a verified gate GO (ADR-0018): its own list-price ledger, separate from
+# Phase B (USD 20 + 3), with every retained disk, snapshot and IP hour counted from opening.
+HUMAN_PURPOSES = frozenset({'rehearsal','pilot','study'})
+HUMAN_BUDGET_USD = 70
+HUMAN_RESERVATION_MAX_H = 4
+HUMAN_RETAINED_UNITS = {'pd_gib_h':540,'snapshot_gib_h':552,'ip_unused_h':1}
+HUMAN_CLOSURE_RESERVE_USD = 3
+HUMAN_PROJECTED_RETENTION_H = 24
+# Phase B GPU reservations (h). Reservation 1 keeps native_stop_s+60 s for the 12th
+# stimulus boot; both fit the USD 20 list-price cut with closure (ADR-0025).
+PHASE_B_RESERVATION_1_H = 13.5
+PHASE_B_GATE_RESERVATION_H = 5
+PHASE_B_RESERVATION_TOTAL_H = PHASE_B_RESERVATION_1_H + PHASE_B_GATE_RESERVATION_H
 
 
 def reservation_charge(reservations, running, rate):
@@ -47,6 +65,39 @@ def reservation_identity(resource):
     return {k:resource[k] for k in ('name','id','zone','description','specificReservation')}
 
 
+def reservation_intent_exposure(intent):
+    """An unknown result retains its admitted hours and quote, never a guessed TTL."""
+    try:
+        hours, rate, amount = (intent[k] for k in ('hours','compute_usd_h','exposure_usd'))
+        if (any(type(v) not in (int,float) or not math.isfinite(v) or v < 0
+                for v in (hours,rate,amount)) or not 0 < hours <= PHASE_B_RESERVATION_1_H or rate == 0
+                or not math.isclose(amount,hours*rate+.25,rel_tol=1e-12,abs_tol=1e-9)):
+            raise ValueError('basis')
+    except (KeyError,TypeError,ValueError) as error:
+        raise ValueError('RESERVATION_COST_BASIS_REQUIRED') from error
+    return amount
+
+
+def reservation_rate(reservation):
+    basis = reservation.get('cost_basis',{})
+    reservation_intent_exposure(basis)
+    return basis['compute_usd_h']
+
+
+def reservation_deadline_matches(expected, observed):
+    """Compare instants at the SDK's transmitted precision, including old intents."""
+    def instant(value):
+        parsed = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        if parsed.utcoffset() is None:
+            raise ValueError('AWARE_RESERVATION_CLOCK_REQUIRED')
+        return parsed.astimezone(timezone.utc)
+    expected = instant(expected)
+    # SDK %3f rounds half-up, keeping 999 on overflow; legacy also permits truncation.
+    truncated = expected.replace(microsecond=expected.microsecond // 1000 * 1000)
+    rounded = expected.replace(microsecond=min(999, (expected.microsecond + 500) // 1000) * 1000)
+    return instant(observed) in (truncated, rounded)
+
+
 class Operator(LegacyOperator):
     def __init__(self, root, cloud, *, now=None, sleep=time.sleep):
         super().__init__(root,cloud,now=now,sleep=sleep)
@@ -71,12 +122,16 @@ class Operator(LegacyOperator):
             json.dump(value,stream,ensure_ascii=False,sort_keys=True)
         return value
 
-    def admit_paid(self, exposure):
+    def admit_paid(self, exposure, *, additional_reservations=0):
         now = self.now()
-        if now < datetime(2026,11,1,tzinfo=timezone.utc):
-            raise ValueError('NO_PAID_EFFECT_BEFORE_NOVEMBER')
-        from scripts.study_operator.i7_costs import admit
-        admit(self)
+        if now < PAID_NOT_BEFORE_UTC:
+            raise ValueError('NO_PAID_EFFECT_BEFORE_2026_10_28')
+        human = self.state.get('human_phase')
+        if human:
+            committed = self.human_committed_usd(now, additional_reservations=additional_reservations)
+        else:
+            from scripts.study_operator.i7_costs import admit
+            admit(self)
         rates = self.config['rates']
         money = (exposure,self.state.get('spent_usd',0),self.state.get('open_exposure_usd',0),rates['compute_usd_h'])
         if any(type(v) not in (int,float) or not math.isfinite(v) or v < 0 for v in money) or money[-1] == 0:
@@ -87,44 +142,215 @@ class Operator(LegacyOperator):
             raise ValueError('FRESH_USD_PRICE_RECEIPT_REQUIRED')
         if not math.isfinite(exposure) or exposure < 0:
             raise ValueError('FINITE_COST_EXPOSURE_REQUIRED')
+        if human:
+            if not committed+exposure+HUMAN_CLOSURE_RESERVE_USD <= HUMAN_BUDGET_USD+1e-9:
+                raise ValueError('I7_HUMAN_BUDGET_STOP')
+            return
         current = self.state.get('spent_usd',0)+self.state.get('open_exposure_usd',0)
         if current+exposure+self.config['closure_reserve_usd'] > self.config['budget_usd']+1e-9:
             raise ValueError('I7_BUDGET_STOP')
 
+    def human_committed_usd(self, now, *, additional_reservations=0):
+        """Continuous retention plus complete non-compute bounds per reservation."""
+        from scripts.study_operator.i7_costs import KEYS, default_quantities
+        human = self.state['human_phase']
+        plan = self.config.get('cost_plan',{})
+        rates = plan.get('rates',{})
+        if (plan.get('status') != 'PRICED_LIST' or set(rates) != set(KEYS)
+                or any(type(rates[key].get('usd')) not in (int,float) or not math.isfinite(rates[key]['usd'])
+                       or rates[key]['usd'] < 0 for key in KEYS)):
+            raise ValueError('I7_HUMAN_ALL_SKU_PRICES_REQUIRED')
+        verified = datetime.fromisoformat(plan['verified_utc'])
+        if verified.tzinfo is None or not 0 <= (now-verified).total_seconds() <= 7*86400:
+            raise ValueError('FRESH_ALL_SKU_LIST_PRICES_REQUIRED')
+        # Retained resources keep billing after STOP: count elapsed hours (one day minimum)
+        # plus one projected day, so admission never consumes the cost of closing down.
+        elapsed = (now-datetime.fromisoformat(human['opened_utc'])).total_seconds()/3600
+        hours = max(24,elapsed)+HUMAN_PROJECTED_RETENTION_H
+        blocks = human.get('reservation_blocks')
+        if (type(blocks) is not int or blocks < 0 or type(additional_reservations) is not int
+                or additional_reservations < 0):
+            raise ValueError('HUMAN_RESERVATION_LEDGER_REQUIRED')
+        blocks += additional_reservations
+        # The runbook bound is for the whole technical run. Human admissions
+        # conservatively retain that complete non-compute bound per reservation.
+        quantities = default_quantities(24)
+        compute = {'g2_vcpu','g2_ram','l4','e2_vcpu','e2_ram'}
+        quantities = {key:0 if key in compute else value*blocks for key,value in quantities.items()}
+        for key, units in HUMAN_RETAINED_UNITS.items():
+            quantities[key] = max(quantities[key], hours*units)
+        noncompute = sum(quantities[key]*rates[key]['usd'] for key in KEYS)
+        extra = self.state.get('extra_exposure_usd',0)
+        if type(extra) not in (int,float) or not math.isfinite(extra) or extra < 0:
+            raise ValueError('FINITE_EXTRA_EXPOSURE_REQUIRED')
+        spent = self.state.get('spent_usd',0)-human['phase_b_spent_usd']
+        return noncompute+extra+spent+self.state.get('open_exposure_usd',0)
+
+    def verified_gate_go(self):
+        """Every gate receipt is a GO whose private proof still matches it and this image/commit."""
+        try:
+            rows = [json.loads(p.read_bytes()) for p in sorted((self.root/'receipts'/'gate').glob('*.json'))]
+            if not rows:
+                raise ValueError('none')
+            for row in rows:
+                if (row['status'] != 'DOWNLOAD_VERIFIED' or row['verified']['decision'] != 'GO'
+                        or not re.fullmatch('[a-f0-9-]{36}',row['boot_id'])):
+                    raise ValueError('decision')
+                path = self.root/'private'/'gate'/'coded-P999'/(row['boot_id']+'.json')
+                proof = json.loads(path.read_bytes())
+                if (hashlib.sha256(path.read_bytes()).hexdigest() != row['file_sha256']
+                        or sha(proof) != row['proof_sha256']
+                        or proof['inventory']['image']['image_id'] != self.config['image_id']
+                        or proof['inventory']['source']['commit'] != self.config['commit']):
+                    raise ValueError('proof')
+        except (OSError,ValueError,KeyError,TypeError,AttributeError) as error:
+            raise ValueError('VERIFIED_GATE_GO_REQUIRED') from error
+        return sha(rows)
+
+    def human_phase_open(self):
+        if self.state.get('human_phase'):
+            raise ValueError('HUMAN_PHASE_ALREADY_OPEN')
+        go = self.verified_gate_go()
+        if not self.state.get('reservation',{}).get('deleted_verified'):
+            raise ValueError('PHASE_B_RESERVATION_CLOSE_REQUIRED')
+        if self.state.get('reservation_intent') or self.state.get('open_exposure_usd',0):
+            raise ValueError('PHASE_B_OPEN_EXPOSURE_REQUIRES_RECONCILE')
+        self.state['human_phase'] = {'opened_utc':self.now().isoformat(),'gate_receipt_sha256':go,
+                                     'phase_b_spent_usd':self.state.get('spent_usd',0),
+                                     'reservation_blocks':0}
+        self.persist()
+        return self.receipt('human-phase',{'status':'HUMAN_PHASE_OPEN','budget_usd':HUMAN_BUDGET_USD,
+                                           'gate_receipt_sha256':go})
+
+    def human_start_profile(self, purpose):
+        if purpose not in HUMAN_PURPOSES:
+            raise ValueError('I7_PHASE_B_SYNTHETIC_TECHNICAL_ONLY')
+        if not self.state.get('human_phase'):
+            raise ValueError('I7_HUMAN_PHASE_NOT_OPEN')
+        if self.verified_gate_go() != self.state['human_phase']['gate_receipt_sha256']:
+            raise ValueError('GATE_EVIDENCE_CHANGED_SINCE_OPEN')
+        purpose_allowed(purpose,self.root)
+        return {'i7_profile':'standard'}
+
+    def refresh_prices(self, compute, storage):
+        from scripts.study_operator import i7_costs, pricing
+        plan = i7_costs.list_prices(compute,storage)
+        if plan.get('status') != 'PRICED_LIST':
+            raise ValueError('PRICED_LIST_REQUIRED')
+        quote = pricing.quote_archive(compute,'g2-standard-4','us-central1')
+        receipt = json.loads((Path(compute)/'receipt.json').read_bytes())
+        if (datetime.fromisoformat(receipt['at']) <= datetime.fromisoformat(self.config['rates']['verified_utc'])
+                or datetime.fromisoformat(plan['verified_utc'])
+                <= datetime.fromisoformat(self.config['cost_plan']['verified_utc'])):
+            raise ValueError('OLDER_PRICE_ARCHIVE_REJECTED')
+        self.config['rates'] = {'compute_usd_h':float(quote['usd_per_hour']),'verified_utc':receipt['at'],
+                                'price_receipt_sha256':quote['catalog_receipt_sha256']}
+        self.config['cost_plan'] = plan
+        self.persist()
+        return self.receipt('prices',{'status':'LIST_PRICES_REFRESHED','rates':self.config['rates']})
+
+    def revoke(self, code):
+        """Revocation must work in the last minutes of a boot: no session-margin preflight."""
+        participant_code(code)
+        if self.observed()['status'] != 'RUNNING':
+            raise ValueError('REVOKE_REQUIRES_RUNNING_OWN_VM')
+        return self.bridge({'operation':'revoke','participant_id':code},private=True)
+
     def reserve(self, hours):
         if self.state.get('reservation_intent'):
             raise ValueError('UNKNOWN_RESERVATION_RECONCILE_FIRST')
-        if not 0 < hours <= 12:
-            raise ValueError('RESERVATION_TTL_REQUIRED')
-        self.admit_paid(hours*self.config['rates']['compute_usd_h']+.25)
+        human = self.state.get('human_phase')
+        if not 0 < hours <= (HUMAN_RESERVATION_MAX_H if human else PHASE_B_RESERVATION_1_H):
+            raise ValueError('HUMAN_RESERVATION_TTL_REQUIRED' if human else 'RESERVATION_TTL_REQUIRED')
+        self.cloud.require_beta()
+        rate = self.config['rates']['compute_usd_h']
+        exposure = hours*rate+.25
+        self.admit_paid(exposure, additional_reservations=1 if human else 0)
         if self.state.get('reservation') and not self.state['reservation'].get('deleted_verified'):
             raise ValueError('PRIOR_RESERVATION_NOT_CLOSED')
         allocated=self.state.get('reservation_gpu_hours_used',0)+hours
-        if allocated>17:
+        if allocated>PHASE_B_RESERVATION_TOTAL_H and not human:
             raise ValueError('I7_CUMULATIVE_RESERVATION_HOURS_EXCEED_COST_PLAN')
+        name = self._consumable_reservation_name()
+        admitted = {key:self.state.get(key,0) for key in ('reservation_gpu_hours_used','open_exposure_usd')}
         self.state['reservation_gpu_hours_used']=allocated
-        name = 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]
         zone = self.selected()['zone']
-        until = self.now()+timedelta(hours=hours)
-        intent = {'name':name,'zone':zone,'delete_at_utc':until.isoformat(),'status':'UNKNOWN'}
+        requested = self.now()
+        until = (requested+timedelta(hours=hours)).astimezone(timezone.utc).replace(microsecond=0)
+        delete_at = until.isoformat(timespec='seconds')
+        intent = {'name':name,'zone':zone,'delete_at_utc':delete_at,'status':'UNKNOWN',
+                  'requested_utc':requested.isoformat(),'hours':hours,'compute_usd_h':rate,
+                  'price_receipt_sha256':self.config['rates']['price_receipt_sha256'],
+                  'exposure_usd':exposure}
         self.state['reservation_intent'] = intent
+        self.state['open_exposure_usd'] = exposure
+        if human:
+            human['reservation_blocks'] += 1
         self.persist()
         # SDK beta exposes native reservation auto-delete. No unbounded fallback.
-        self.cloud.command(['beta','compute','reservations','create',name,'--zone='+zone,
-            '--machine-type=g2-standard-4','--vm-count=1','--accelerator=type=nvidia-l4,count=1',
-            '--require-specific-reservation','--description='+self.config['resource_marker'],
-            '--delete-at-time='+until.isoformat()],timeout=300)
+        try:
+            self.cloud.command(['beta','compute','reservations','create',name,'--zone='+zone,
+                '--machine-type=g2-standard-4','--vm-count=1','--accelerator=type=nvidia-l4,count=1',
+                '--require-specific-reservation','--description='+self.config['resource_marker'],
+                '--delete-at-time='+delete_at],timeout=300)
+        except CapacityRejected as refusal:
+            self._release_refused_reservation(intent, admitted, refusal.code)
+            raise
         resource = self.cloud.command(['compute','reservations','describe',name,'--zone='+zone])
         reservation_identity(resource)
         if (resource['description'] != self.config['resource_marker']
-                or datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != until):
+                or not reservation_deadline_matches(delete_at, resource['deleteAtTime'])):
             raise ValueError('RESERVATION_NATIVE_DELETION_NOT_VERIFIED')
-        self.state['reservation'] = dict(resource,created_utc=self.now().isoformat())
-        self.state['open_exposure_usd'] = hours*self.config['rates']['compute_usd_h']+.25
+        self.state['reservation'] = dict(resource,created_utc=resource['creationTimestamp'],
+                                        cost_basis=dict(intent))
+        self.state['open_exposure_usd'] = exposure
         self.state.pop('reservation_intent')
         self.persist()
         return self.receipt('reservation',{'status':'SPECIFIC_RESERVATION_HELD',
-            'id':str(resource['id']),'name':name,'delete_at_utc':until.isoformat()})
+            'id':str(resource['id']),'name':name,'delete_at_utc':delete_at})
+
+    def _consumable_reservation_name(self):
+        """ADR-0032: Compute Engine binds a VM to one SPECIFIC reservation by name when the VM is
+        created and cannot rebind it to another specific reservation (only ANY or NONE). Once the
+        GPU VM exists, every new reservation reuses the name the VM consumes, and that binding is
+        read back before any paid effect or recorded gate attempt."""
+        selected = self.selected()
+        if str(selected['id']) == '0':
+            return 'cloudrag-i7-'+self.now().strftime('%m%d%H%M%S')+'-'+self.config['period_id'][:8]
+        bound = (self.state.get('reservation') or {}).get('name')
+        vm = self.cloud.command(['compute','instances','describe',selected['name'],'--zone='+selected['zone']])
+        affinity = vm.get('reservationAffinity') or {}
+        if (not bound or str(vm.get('id')) != str(selected['id'])
+                or affinity.get('consumeReservationType') != 'SPECIFIC_RESERVATION'
+                or affinity.get('values') != [bound]):
+            raise ValueError('SPECIFIC_RESERVATION_NOT_BOUND')
+        return bound
+
+    def _release_refused_reservation(self, intent, admitted, code):
+        """A stated capacity refusal releases its admission only after a successful list
+        shows neither its name nor any reservation carrying this installation's marker.
+        Otherwise the intent stays UNKNOWN for reconcile() (ADR-0026)."""
+        listed = self.cloud.command(['compute','reservations','list'])
+        if not isinstance(listed,list):
+            raise TypeError('RESERVATION_LIST_NOT_SUCCESSFUL')
+        marker = self.config['resource_marker']
+        evidence = {'name':intent['name'],'zone':intent['zone'],'hours':intent['hours'],
+                    'requested_utc':intent['requested_utc'],'cloud_error_code':code}
+        if any(row.get('name') == intent['name'] or row.get('description') == marker for row in listed):
+            self.receipt('reservation',dict(evidence,status='RESERVATION_CAPACITY_REJECTED_PRESENT_KEPT_UNKNOWN'))
+            return
+        previous = copy.deepcopy(self.state)
+        self.state.pop('reservation_intent')
+        self.state.update(admitted)
+        human = self.state.get('human_phase')
+        if human:
+            human['reservation_blocks'] -= 1
+        try:
+            self.persist()
+        except BaseException:
+            self.state = previous   # Memory never runs ahead of the durable UNKNOWN intent.
+            raise
+        self.receipt('reservation',dict(evidence,status='RESERVATION_CAPACITY_REJECTED_ABSENT'))
 
     def observed(self):
         from scripts.study_operator.cloud_client import checked_vm
@@ -134,7 +360,8 @@ class Operator(LegacyOperator):
                           native_limit_s=self.config['native_stop_s'])
 
     def start(self, purpose='technical'):
-        if purpose not in {'technical','smoke'}:
+        profile = self.human_start_profile(purpose) if purpose in HUMAN_PURPOSES else {}
+        if not profile and purpose not in {'technical','smoke'}:
             raise ValueError('I7_PHASE_B_SYNTHETIC_TECHNICAL_ONLY')
         self.admit_paid(0)
         vm = self.observed()
@@ -158,7 +385,7 @@ class Operator(LegacyOperator):
         periods = self.config.setdefault('period_ids',{})
         periods.setdefault(self.config['purpose'],self.config['period_id'])
         periods.setdefault(purpose,uuid.uuid4().hex)
-        self.config.update(purpose=purpose,period_id=periods[purpose])
+        self.config.update(purpose=purpose,period_id=periods[purpose],**profile)
         config = dict(self.config,instance_id=str(vm['id']),purpose=purpose,
             start_requested_utc=now.isoformat(),
             native_deadline_utc=(now+timedelta(seconds=self.config['native_stop_s'])).isoformat())
@@ -215,6 +442,7 @@ class Operator(LegacyOperator):
         reservation = self.state['reservation']
         if reservation.get('deleted_verified'):
             raise ValueError('RESERVATION_ALREADY_CLOSED')
+        rate = reservation_rate(reservation)
         vm = self.cloud.command(['compute','instances','describe',self.selected()['name'],
                                  '--zone='+self.selected()['zone']])
         if str(vm['id']) != str(self.selected()['id']) or vm['status'] != 'TERMINATED':
@@ -236,7 +464,7 @@ class Operator(LegacyOperator):
         reservation.update(deleted_verified=True,deleted_utc=self.now().isoformat())
         if reservation.get('created_utc'):
             interval = (self.now()-datetime.fromisoformat(reservation['created_utc'])).total_seconds()
-            self.state['spent_usd'] = self.state.get('spent_usd',0)+max(0,interval)/3600*self.config['rates']['compute_usd_h']
+            self.state['spent_usd'] = self.state.get('spent_usd',0)+max(0,interval)/3600*rate
         self.state['open_exposure_usd'] = 0
         self.persist()
         return self.receipt('reservation',{'status':'RESERVATION_DELETED_VERIFIED',
@@ -259,34 +487,41 @@ class Operator(LegacyOperator):
                 reservation['deleteAtTime'].replace('Z','+00:00'))
             if not reservation.get('delete_api_success') and not expired:
                 raise ValueError('DELETE_OUTCOME_UNKNOWN_UNTIL_NATIVE_DEADLINE')
+            rate = reservation_rate(reservation)
             reservation.update(deleted_verified=True,deleted_utc=self.now().isoformat(),
                                closure_method='SUCCESSFUL_LIST_AFTER_DELETE_OR_NATIVE_TTL')
             if reservation.get('created_utc'):
-                seconds=max(0,(self.now()-datetime.fromisoformat(reservation['created_utc'])).total_seconds())
-                self.state['spent_usd']=self.state.get('spent_usd',0)+seconds/3600*self.config['rates']['compute_usd_h']
+                until=self.now()
+                if reservation.get('deleteAtTime'):
+                    until=min(until,datetime.fromisoformat(reservation['deleteAtTime'].replace('Z','+00:00')))
+                seconds=max(0,(until-datetime.fromisoformat(reservation['created_utc'])).total_seconds())
+                self.state['spent_usd']=self.state.get('spent_usd',0)+seconds/3600*rate
             self.state['open_exposure_usd']=0
             self.persist()
             return self.receipt('reservation',{'status':'RESERVATION_ABSENT_RECONCILED',
                                               'id':reservation['id']})
         intent=self.state.get('reservation_intent')
         if intent:
+            exposure = reservation_intent_exposure(intent)
             found=[r for r in listed if r['name']==intent['name'] and r['zone'].split('/')[-1]==intent['zone']]
             if found:
                 if len(found)!=1 or found[0]['description']!=self.config['resource_marker']:
                     raise ValueError('UNKNOWN_RESERVATION_IDENTITY_CHANGED')
                 resource=found[0]
                 reservation_identity(resource)
-                if datetime.fromisoformat(resource['deleteAtTime'].replace('Z','+00:00')) != datetime.fromisoformat(intent['delete_at_utc']):
+                if not reservation_deadline_matches(intent['delete_at_utc'], resource['deleteAtTime']):
                     raise ValueError('UNKNOWN_RESERVATION_NATIVE_TTL_CHANGED')
-                self.state['reservation']=dict(resource,created_utc=resource['creationTimestamp'])
-                self.state['open_exposure_usd']=12*self.config['rates']['compute_usd_h']+.25
+                self.state['reservation']=dict(resource,created_utc=resource['creationTimestamp'],
+                                               cost_basis=dict(intent))
+                self.state['open_exposure_usd']=exposure
                 self.state.pop('reservation_intent')
                 self.persist()
                 return {'status':'RESERVATION_FOUND_RECONCILED'}
             if self.now() < datetime.fromisoformat(intent['delete_at_utc']):
                 raise ValueError('UNKNOWN_CREATE_OUTCOME_PRESERVE_INTENT')
             self.state.pop('reservation_intent')
-            self.state['spent_usd']=self.state.get('spent_usd',0)+12*self.config['rates']['compute_usd_h']+.25
+            self.state['spent_usd']=self.state.get('spent_usd',0)+exposure
+            self.state['open_exposure_usd']=0
             self.persist()
             return self.receipt('reservation',{'status':'UNKNOWN_CREATE_EXPIRED_AND_ABSENT',
                                               'estimated_at_full_upper_bound':True})
@@ -350,12 +585,19 @@ def main(argv=None):
     parser.add_argument('--sdk')
     parser.add_argument('--live',action='store_true')
     parser.add_argument('operation',choices=('init','status','reserve','reconcile','reconcile-all','technical-cycle','start','preflight','stop','guard','collect',
-        'gate-start','stimulus-start','tls-check','restore-check','privacy','series','schedule','close'))
+        'gate-start','stimulus-start','tls-check','restore-check','privacy','series','schedule','close',
+        'human-phase-open','refresh-prices','invite','revoke'))
     parser.add_argument('--config',type=Path)
     parser.add_argument('--request',type=Path)
     parser.add_argument('--boot-index',type=int,choices=range(1,13))
     parser.add_argument('--kind',choices=('stimulus','gate'))
     parser.add_argument('--hours',type=float,default=12)
+    parser.add_argument('--purpose',choices=('technical','smoke',*sorted(HUMAN_PURPOSES)),default='technical')
+    parser.add_argument('--code')
+    parser.add_argument('--cell',type=int,choices=range(1,5))
+    parser.add_argument('--profile',choices=('with_experience','without_experience'))
+    parser.add_argument('--compute',type=Path)
+    parser.add_argument('--storage',type=Path)
     args = parser.parse_args(argv)
     if args.operation == 'init':
         config = json.loads(args.config.read_bytes())
@@ -371,11 +613,18 @@ def main(argv=None):
         result = check_tls_sequence([json.loads(p.read_bytes()) for p in
                                      (args.root/'receipts'/'boot-attempt').glob('*.json')])
     else:
-        if not args.live or datetime.now(timezone.utc) < datetime(2026,11,1,tzinfo=timezone.utc):
-            parser.error('Live I7 operations require --live and November authorization')
+        if not args.live or datetime.now(timezone.utc) < PAID_NOT_BEFORE_UTC:
+            parser.error('Live I7 operations require --live and date >= 2026-10-28 UTC')
         from scripts.study_operator.cloud_client import Cloud
         if not args.sdk:
             parser.error('--sdk required')
+        if args.operation in ('reserve','start','gate-start','stimulus-start','privacy','series',
+                              'schedule','restore-check','invite'):
+            from scripts.study_operator.i7_sdk_preflight import verify_beta
+            try:
+                verify_beta(args.sdk)
+            except ValueError as error:
+                parser.error(str(error))
         cloud = Cloud(args.sdk,'pure-loop-474323-a8',args.root/'runs')
         with FileLock(str(args.root/'i7.lock'),timeout=1):
             operator = Operator(args.root,cloud)
@@ -392,7 +641,23 @@ def main(argv=None):
             elif args.operation=='gate-start':
                 from scripts.study_operator.i7_phase_b import gate
                 result=gate(operator)
-            elif args.operation in {'start','preflight','stop','guard','status','reconcile'}:
+            elif args.operation == 'start':
+                result = operator.start(args.purpose)
+            elif args.operation == 'human-phase-open':
+                result = operator.human_phase_open()
+            elif args.operation == 'refresh-prices':
+                result = operator.refresh_prices(args.compute,args.storage)
+            elif args.operation == 'invite':
+                if not sys.stdout.isatty():
+                    parser.error('invite requires an interactive console; the token is shown once and never saved')
+                token = operator.invite(args.code,cell=args.cell,profile=args.profile)
+                print('Token (se muestra una sola vez): '+token,flush=True)
+                operator.receipt('invitation',{'status':'INVITATION_HASH_REGISTERED','code':args.code,
+                                               'ttl_hours':24,'token_not_persisted':True})
+                return 0
+            elif args.operation == 'revoke':
+                result = operator.revoke(args.code)
+            elif args.operation in {'preflight','stop','guard','status','reconcile'}:
                 result = getattr(operator,args.operation)()
             elif args.operation == 'collect':
                 result = operator.collect(args.kind)
